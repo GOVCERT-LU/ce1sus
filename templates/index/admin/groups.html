@@ -1,0 +1,100 @@
+<%namespace name="inputBoxes" file="/components/inputBoxes.mako"/>
+<%namespace name="modals" file="/components/modals.mako"/>
+<%inherit file="/layout/baselayout.html"/>
+
+<ul class="nav nav-tabs">
+	<li><a href="/admin/users">Users</a></li>
+	<li class="active"><a href="/admin/groups">Groups</a></li>
+	<li><a href="/admin/objects">Objects</a></li>
+	<li><a href="/admin/attributes">Attributes</a></li>
+</ul>
+<div class="row-fluid">
+	<div class="span4">
+		<div class="btn-group">
+			<a href="#addGroupModal" role="button" class="btn"
+				data-toggle="modal">Add new Group</a>
+
+			<form action="/admin/addGroup" method="post">
+				%if errors and addGroup: 
+				    ${modals.groupModal(id='addGroupModal',label='Addgroup',group=groupDetails,hide=errors)} 
+				%else:
+					${modals.groupModal(id='addGroupModal',label='Addgroup',group=None,hide=False)} 
+				% endif
+			</form>
+		</div>
+		<br />
+		<!--list of groups -->
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+			style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+			% for group in groups:
+			 <li><a tabindex="-1" href="/admin/groups/${group.identifier}">${group.name}</a></li>
+			% endfor
+		</ul>
+
+	</div>
+
+	<div class="span8">
+		<!-- group details -->
+		<h3>Group details:</h3>
+		${inputBoxes.groupForm(groupDetails, False)} 
+		% if not groupDetails is None:
+			<div class="btn-group">
+				<a href="#editGroupModal" role="button" class="btn"
+					data-toggle="modal">Edit</a>
+				<button class="btn"
+					onclick="location.href='/admin/RemoveGroup/${groupDetails.identifier}'">Delete</button>
+			</div>
+			<form action="/admin/editGroup" method="post">
+				%if errors and not addGroup: 
+				  ${modals.groupModal(id='editGroupModal',label='Editgroup',group=groupDetails,hide=True)} 
+				%else:
+					${modals.groupModal(id='editGroupModal',label='Editgroup',group=groupDetails,hide=False)} 
+				%endif
+			</form>
+		% else:
+			<div class="btn-group">
+				<button class="btn">Edit</button>
+				<button class="btn">Delete</button>
+			</div>
+		%endif
+
+		<h4>Users in this group:</h4>
+		<form action="/admin/editUserGroups" method="post">
+			<input type="hidden" name="groupID"
+				value="${groupDetails.identifier}">
+			<table border="0" cellpadding="5">
+				<tr>
+					<td>Not in this group:<BR /> <select name="remainingUsers"
+						size="10" multiple="multiple" tabindex="1"> 
+						% for user in remainingUsers:
+							<option value="${user.identifier}">${user.username}</option> 
+						% endfor
+					</select>
+					</td>
+					<td>
+					% if not groupDetails is None:
+						<button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+						<BR />
+						<button name="operation" class="btn" type="submit" value="add">&gt;</button>
+					% else:
+						<div class="btn-group">
+							<button class="btn">&lt;</button>
+							<button class="btn">&gt;</button>
+						</div>
+					%endif
+					</td>
+					<td>In this group:<BR /> <select name="groupUsers" size="10"
+						multiple> 
+						% for user in groupUsers:
+							<option value="${user.identifier}">${user.username}</option> 
+						% endfor
+					</select>
+					</td>
+				</tr>
+			</table>
+
+		</form>
+
+	</div>
+
+</div>

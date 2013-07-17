@@ -1,0 +1,27 @@
+[SessionManager]
+protocol=mysql+mysqlconnector
+username=
+password=
+host=127.0.0.1
+db=
+port=3306
+debug=no
+
+[WebPage]
+url=http://localhost
+
+[ErrorHandler]
+debug=no
+
+[Logger]
+log=Yes
+logfile=log/logger.txt
+logConsole = Yes
+level=DEBUG
+size=10000000
+backups=1000
+
+[Mako]
+templateRoot=templates
+collectionsize=200
+outputencoding=utf-8

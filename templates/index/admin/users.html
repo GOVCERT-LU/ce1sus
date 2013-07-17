@@ -1,0 +1,104 @@
+<%namespace name="inputBoxes" file="/components/inputBoxes.mako"/>
+<%namespace name="modals" file="/components/modals.mako"/>
+<%inherit file="/layout/baselayout.html"/>
+
+
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#">Users</a></li>
+	<li><a href="/admin/groups">Groups</a></li>
+	<li><a href="/admin/objects">Objects</a></li>
+	<li><a href="/admin/attributes">Attributes</a></li>
+</ul>
+<div class="row-fluid">
+	<div class="span4">
+		<div class="btn-group">
+			<a href="#addUserModal" role="button" class="btn" data-toggle="modal">Add
+				new User</a>
+
+			<form action="/admin/addUser" method="post">
+				%if errors and addUser: 
+				    ${modals.userModal(id='addUserModal',label='Adduser',user=userDetails,hide=errors)} 
+				% else:
+				    ${modals.userModal(id='addUserModal',label='Adduser',user=None,hide=False)} 
+				% endif
+			</form>
+		</div>
+		<br />
+		<!--list of users -->
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+			style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+			% for user in users:
+			<li><a tabindex="-1" href="/admin/users/${user.identifier}">${user.username}</a></li> 
+			% endfor
+		</ul>
+
+	</div>
+
+	<div class="span8">
+		<!-- user details -->
+		<h3>User details:</h3>
+		${inputBoxes.userForm(userDetails, False)} 
+		% if not userDetails is None:
+		<div class="btn-group">
+			<a href="#editUserModal" role="button" class="btn"
+				data-toggle="modal">Edit</a>
+			<button class="btn"
+				onclick="location.href='/admin/RemoveUser/${user.identifier}'">Delete</button>
+
+
+		</div>
+		<form action="/admin/editUser" method="post">
+			%if errors and not addUser: 
+			    ${modals.userModal(id='editUserModal',label='Edituser',user=userDetails,hide=True)} 
+			% else:
+				${modals.userModal(id='editUserModal',label='Edituser',user=userDetails,hide=False)} 
+			% endif
+		</form>
+		% else:
+			<div class="btn-group">
+				<button class="btn">Edit</button>
+				<button class="btn">Delete</button>
+			</div>
+		%endif
+	
+        <h4>Groups of this user:</h4>
+        <form action="/admin/editGroupsUser" method="post">
+            <input type="hidden" name="groupID"
+                value="${userDetails.identifier}">
+            <table border="0" cellpadding="5">
+                <tr>
+                    <td>Not part of groups:<BR /> <select name="remainingGroups"
+                        size="10" multiple="multiple" tabindex="1"> 
+                        % for group in remainingGroups:
+                            <option value="${group.identifier}">${group.name}</option> 
+                        % endfor
+                    </select>
+                    </td>
+                    <td>
+                    % if not userDetails is None:
+                        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+                        <BR />
+                        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+                    % else:
+                        <div class="btn-group">
+                            <button class="btn">&lt;</button>
+                            <button class="btn">&gt;</button>
+                        </div>
+                    %endif
+                    </td>
+                    <td>Part of groups:<BR /> <select name="userGroups" size="10"
+                        multiple> 
+                        % for group in userGroups:
+                            <option value="${group.identifier}">${group.name}</option> 
+                        % endfor
+                    </select>
+                    </td>
+                </tr>
+            </table>
+
+        </form>
+        
+
+	</div>
+
+</div>
