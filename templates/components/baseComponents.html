@@ -1,0 +1,85 @@
+<%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None, placeholder=None)">
+    <div class="row-fluid">
+         <div class="span3">
+            <div style="padding: 5px;">
+                <div>
+                    <label> ${label}</label>
+                </div>
+            </div>
+         </div>
+         <div class="span9">
+            ${editBox(name, value, enabled, validationMsg, placeholder)}
+         </div>
+    </div>
+</%def>
+
+<%def name="labeledTextBox(label, name, message, enabled=True, validationMsg=None)">
+    <div class="row-fluid">
+         <div class="span2">
+            <div style="padding: 5px;">
+                <div>
+                    <label> ${label}</label>
+                </div>
+            </div>
+         </div>
+         <div class="span10">
+            ${textBox(name, message, 40, 5, enabled, validationMsg)}
+         </div>
+    </div>
+</%def>
+
+<%def name="textBox(name, message, cols=40, rows=5 ,enabled=True, validationMsg=None)">
+    <%
+    if (enabled):
+        enabledStr = ''
+    else:
+        enabledStr =  ' disabled ' 
+
+    if hasattr(value,'error'):
+        validationMsg = getattr(value,'error')
+        
+    %>
+
+    <div class="row-fluid">
+        <div class="span12">
+        <textarea name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+        % if (not (validationMsg is None)) and enabled:
+            ${error(validationMsg)}
+        % endif
+        </div>
+    </div>
+</%def>
+
+<%def name="editBox(name, value, enabled=True, validationMsg=None, placeholder=None)">
+    <%
+    if (enabled):
+        enabledStr = ''
+    else:
+        enabledStr =  ' disabled ' 
+    
+    if (placeholder is None):
+        placeHStr = ''
+    else:
+        placeHStr = ' placeholder="'+placeholder+'" '
+        
+    if hasattr(value,'error'):
+        validationMsg = getattr(value,'error')
+        
+    %>
+
+        <input name="${name}" type="text" ${placeHStr} value="${value}" ${enabledStr}/>
+        % if (not (validationMsg is None)) and enabled:
+            ${error(validationMsg)}
+        % endif
+
+</%def>
+
+<%def name="error(message)">
+    <div class="alert alert-error">${message}</div>
+
+</%def>
+
+
+
+
+

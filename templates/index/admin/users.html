@@ -14,22 +14,20 @@
 		<div class="btn-group">
 			<a href="#addUserModal" role="button" class="btn" data-toggle="modal">Add
 				new User</a>
-
-			<form action="/admin/addUser" method="post">
-				%if errors and addUser: 
-				    ${modals.userModal(id='addUserModal',label='Adduser',user=userDetails,hide=errors)} 
-				% else:
-				    ${modals.userModal(id='addUserModal',label='Adduser',user=None,hide=False)} 
-				% endif
+			<form action="/admin/modifyUser" method="post">
+			    <input type="hidden" name="action" value="insert">
+				${modals.userModal(id='addUserModal',title='Add User',user=None)} 
 			</form>
 		</div>
 		<br />
 		<!--list of users -->
 		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
 			style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
-			% for user in users:
-			<li><a tabindex="-1" href="/admin/users/${user.identifier}">${user.username}</a></li> 
-			% endfor
+		    %if not users is None:
+			  % for user in users:
+			     <li><a tabindex="-1" href="/admin/users/${user.identifier}">${user.username}</a></li> 
+			  % endfor
+			%endif
 		</ul>
 
 	</div>
@@ -47,12 +45,14 @@
 
 
 		</div>
-		<form action="/admin/editUser" method="post">
-			%if errors and not addUser: 
-			    ${modals.userModal(id='editUserModal',label='Edituser',user=userDetails,hide=True)} 
-			% else:
-				${modals.userModal(id='editUserModal',label='Edituser',user=userDetails,hide=False)} 
-			% endif
+		<form action="/admin/modifyUser" method="post">
+			%if action=='insert':
+			  <input type="hidden" name="action" value="insert">
+			  ${modals.userModal(id='editUserModal',title='Add User',user=userDetails,show=errors)} 
+			%else:
+			  <input type="hidden" name="action" value="update">
+	          ${modals.userModal(id='editUserModal',title='Edit User',user=userDetails,show=errors)} 
+			%endif
 		</form>
 		% else:
 			<div class="btn-group">
@@ -63,15 +63,19 @@
 	
         <h4>Groups of this user:</h4>
         <form action="/admin/editGroupsUser" method="post">
-            <input type="hidden" name="groupID"
+            % if not userDetails is None:
+            <input type="hidden" name="userID"
                 value="${userDetails.identifier}">
+            %endif
             <table border="0" cellpadding="5">
                 <tr>
                     <td>Not part of groups:<BR /> <select name="remainingGroups"
                         size="10" multiple="multiple" tabindex="1"> 
-                        % for group in remainingGroups:
-                            <option value="${group.identifier}">${group.name}</option> 
-                        % endfor
+                        %if not remainingGroups is None:
+	                        % for group in remainingGroups:
+	                            <option value="${group.identifier}">${group.name}</option> 
+	                        % endfor
+	                    %endif
                     </select>
                     </td>
                     <td>
@@ -81,16 +85,18 @@
                         <button name="operation" class="btn" type="submit" value="add">&gt;</button>
                     % else:
                         <div class="btn-group">
-                            <button class="btn">&lt;</button>
+                            <button class="btn">&lt;</button><BR/>
                             <button class="btn">&gt;</button>
                         </div>
                     %endif
                     </td>
                     <td>Part of groups:<BR /> <select name="userGroups" size="10"
                         multiple> 
-                        % for group in userGroups:
-                            <option value="${group.identifier}">${group.name}</option> 
-                        % endfor
+                        %if not userGroups is None:
+	                        % for group in userGroups:
+	                            <option value="${group.identifier}">${group.name}</option> 
+	                        % endfor
+                        %endif
                     </select>
                     </td>
                 </tr>
