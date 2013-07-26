@@ -14,10 +14,10 @@ __license__ = 'GPL v3+'
 def compareObjects(object1, object2):
   """
   Compares recursively if the two input objects are equal on their attribute basis
-  
+
   :param object1: First object
   :param object2: Second object
-  
+
   :returns: Boolean
   """
   result = True
@@ -92,7 +92,7 @@ def compareObjects(object1, object2):
         result = False
     else:
       if not ((isinstance(object1, types.NoneType) and isinstance(object2, types.NoneType))):
-        for name, value in vars(object1).iteritems():
+        for name in vars(object1).iterkeys():
           # only compare public attributes/functions
           value1 = None
           if not name.startswith('_'):
@@ -101,7 +101,7 @@ def compareObjects(object1, object2):
             if hasattr(object1, name) and hasattr(object2, name):
               value1 = getattr(object1, name)
               value2 = getattr(object2, name)
-    
+
               # functions/methods will not be compared
               if (not isfunction(value1) and not isinstance(value1, types.FunctionType)
                 and not ismethod(value1)) and (not isfunction(value2) and not isinstance(value2, types.FunctionType)
@@ -109,13 +109,13 @@ def compareObjects(object1, object2):
                 attrName = name
                 attrValue1 = value1
                 attrValue2 = value2
-    
+
                 if not compareObjects(value1, value2):
                   result = False
                 else:
                   # do nothing if it's a function
                   pass
-    
+
             else:
               result = False
 
@@ -135,7 +135,7 @@ def compareObjects(object1, object2):
 def printObject(obj, indent=0, maxRecLVL=3):
   """
   Compares recursively if the two input objects are equal on their attribute basis
-  
+
   :param obj: object to print
   :type obj: instance of object
   :param indent: level of indentation to start it should be 0
@@ -145,9 +145,8 @@ def printObject(obj, indent=0, maxRecLVL=3):
   :returns: Boolean
   """
   # generate indentation
-  indentStr = ''
-  for i in range(0, indent):
-    indentStr += '\t'
+  indentStr = '\t' * indent
+
   if (indent == 0):
     print '{indentation}{variableName}'.format(indentation=indentStr,
                                                                             variableName=type(obj))
@@ -155,7 +154,7 @@ def printObject(obj, indent=0, maxRecLVL=3):
   if (indent > maxRecLVL):
     print '{indentation}...'.format(indentation=indentStr)
     return
-  for name, fqname in vars(type(obj)).iteritems():
+  for name in vars(type(obj)).iterkeys():
     # Not interested in private or protected attributes
     if not name.startswith('_'):
       value = None
@@ -197,7 +196,7 @@ def printObject(obj, indent=0, maxRecLVL=3):
 def dictionaryToString(dictionary):
   """
   Prints a dictionary
-  
+
   :param dictionary: the dictionary to output
   :type obj: Dictonary
   """

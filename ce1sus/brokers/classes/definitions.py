@@ -9,14 +9,14 @@ __license__ = 'GPL v3+'
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from ce1sus.db.session import Base
+import ce1sus.helpers.validator as validator
 
-__RelationDefinitionsAttributeObject = Table(
+
+RelationDefinitionsAttributeObject = Table(
     'DObj_has_DAttr', Base.metadata,
     Column('def_attribute_id', Integer, ForeignKey('DEF_Attributes.def_attribute_id')),
     Column('def_object_id', Integer, ForeignKey('DEF_Objects.def_object_id'))
     )
-
-
 
 class DEF_Attribute(Base):
 
@@ -40,7 +40,10 @@ class DEF_Attribute(Base):
 
   @property
   def className(self):
-    return self.findClassName(self.classIndex)
+    if not self.classIndex is None:
+      return self.findClassName(self.classIndex)
+    else:
+      return ''
 
   def findClassName(self, index):
     """returns the table name"""
@@ -62,6 +65,29 @@ class DEF_Attribute(Base):
         return index
     return None
 
+  @staticmethod
+  def getTableDefinitions():
+    result = dict()
+    for index, tableName in DEF_Attribute.__definitions.iteritems():
+      key = tableName.replace('Value', '')
+      value = index
+      result[key] = value
+    return result
+
+  def validate(self):
+    validator.validateAlNum(self, 'name')
+    validator.validateAlNum(self, 'description', True)
+    # validator.validateRegex(self, 'regex', "^.*$", "fail", False)
+    validator.validateAlpha(self, 'classIndex')
+    return validator.isObjectValid(self)
+
+  def addObject(self, obj):
+    self.objects.append(obj)
+
+  def removeObject(self, obj):
+    self.objects.remove(obj)
+
+
 class DEF_Object(Base):
   __tablename__ = "DEF_Objects"
 
@@ -73,3 +99,11 @@ class DEF_Object(Base):
 
   def addAttribute(self, attribute):
     self.attributes.append(attribute)
+
+  def removeAttribute(self, attribute):
+    self.attributes.remove(attribute)
+
+  def validate(self):
+    validator.validateAlNum(self, 'name')
+    validator.validateAlNum(self, 'description', True)
+    return validator.isObjectValid(self)

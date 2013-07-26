@@ -1,3 +1,18 @@
+class Type(object):
+  __definitions = {0 : 'Virus',
+                   1 : 'Trojan',
+                   2 : 'Expoit',
+                   3 : 'Dropper',
+                   4 : 'KeyLogger',
+                   5 : 'BackDoor',
+                   6 : 'Worm'}
+
+  @staticmethod
+  def getDefinitions():
+    result = dict()
+    for key, value in Status.__definitions.iteritems():
+      result[value] = key
+    return result
 
 class Status(object):
 
@@ -5,7 +20,15 @@ class Status(object):
                      1 : 'Confirmed',
                      2 : 'Expired',
                      3 : 'Deleted'}
-    
+
+
+  @staticmethod
+  def getDefinitions():
+    result = dict()
+    for key, value in Status.__definitions.iteritems():
+      result[value] = key
+    return result
+
   @staticmethod
   def getByID(identifier):
     try:
@@ -41,7 +64,18 @@ class TLP_Level(object):
   __tlp_colors = {0 : '#FF0000',
                 1 : '#FFBF00',
                 2 : '#66B032',
-                3 : '#F5F5F5'}
+                3 : '#FFFFFF'}
+
+  def __init__(self, identifier):
+    self.identifier = identifier
+
+  @property
+  def text(self):
+    return TLP_Level.getByID(self.identifier)
+
+  @property
+  def color(self):
+    return TLP_Level.getColorByID(self.identifier)
 
   @staticmethod
   def getByID(identifier):
@@ -51,9 +85,14 @@ class TLP_Level(object):
       if identifier >= 0 and identifier <= 3:
         return TLP_Level.__tlp_levels[identifier]
     except Exception:
-      pass
+      raise Exception('Invalid input "{0}"'.format(identifier))
 
-    raise Exception('Invalid input "{0}"'.format(identifier))
+  @staticmethod
+  def getDefinitions():
+    result = dict()
+    for key, value in TLP_Level.__tlp_levels.iteritems():
+      result[value] = key
+    return result
 
   @staticmethod
   def getByName(name):
@@ -67,7 +106,7 @@ class TLP_Level(object):
       pass
 
     raise Exception('Invalid input "{0}"'.format(name))
-  
+
   @staticmethod
   def getColorByID(identifier):
     try:

@@ -8,7 +8,7 @@ __license__ = 'GPL v3+'
 # Created on Jul 4, 2013
 
 from ce1sus.db.broker import BrokerBase
-from ce1sus.brokers.classes.permissions import Group, User, RelationUserGrups
+from ce1sus.brokers.classes.permissions import Group, User
 import sqlalchemy.orm.exc
 
 class GroupBroker(BrokerBase):
@@ -22,9 +22,9 @@ class GroupBroker(BrokerBase):
   def getUsersByGroup(self, identifier, belongIn=True):
     try:
       if belongIn:
-        result = self.session.query(User).join(RelationUserGrups, Group).filter(Group.identifier == identifier).all()
+        result = self.session.query(User).join(Group.users).filter(Group.identifier == identifier).all()
       else:
-        result = self.session.query(User).outerjoin(RelationUserGrups, Group).filter(or_(Group.identifier != identifier, Group.identifier == None)).all()
+        result = self.session.query(User).outerjoin(Group.users).filter(Group.identifier != identifier).all()
     except sqlalchemy.orm.exc.NoResultFound:
       result = list()
     return result
@@ -58,12 +58,15 @@ class UserBroker(BrokerBase):
 
   def getGroupsByUser(self, identifier, belongIn=True):
     try:
-      result = self.session.query(Group).join(RelationUserGrups, User).filter(User.identifier == identifier).all()
+      groups = self.session.query(Group).join(User.groups).filter(User.identifier == identifier).all()
       if not belongIn:
-        result = self.session.query(Group).filter(~Group.identifier.in_(result))
+        groupIDs = list()
+        for group in groups:
+          groupIDs.append(group.identifier)
+        groups = self.session.query(Group).filter(~Group.identifier.in_(groupIDs))
     except sqlalchemy.orm.exc.NoResultFound:
-      result = list()
-    return result
+      groups = list()
+    return groups
 
   def addUserToGroup(self, userID, groupID):
     try:

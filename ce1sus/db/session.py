@@ -2,11 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.interfaces import PoolListener
 from ce1sus.db.broker import BrokerBase
-import ConfigParser
-import os
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from ce1sus.helpers.config import Configuration
+import os
+import socket
 
 
 __author__ = 'Weber Jean-Paul'
@@ -15,6 +15,11 @@ __copyright__ = 'Copyright 2013, Weber Jean-Paul'
 __license__ = 'GPL v3+'
 
 Base = declarative_base()
+
+class SessenManagerException(Exception):
+
+  def __init__(self, message):
+    Exception.__init__(self, message)
 
 class BrokerInstantiationException(Exception):
 
@@ -39,7 +44,7 @@ class SessionManager:
 
     # load __config foo!!
 
-    self.__config = Configuration(configFile,'SessionManager')
+    self.__config = Configuration(configFile, 'SessionManager')
 
 
     # setup connection string and engine
@@ -53,13 +58,24 @@ class SessionManager:
       # setup the engine
       self.engine = create_engine(connetionString, listeners=[ForeignKeysListener()], echo=debug)
     else:
+      hostname = self.__config.get('host')
+      port = self.__config.get('port')
+      # check if host is available
+      response = os.system("ping -c 1 " + hostname)
+      if response != 0:
+        raise SessenManagerException('Host "{hostname}" not available'.format(hostname=hostname))
+
+      # check if socket available
+      if not SessionManager.isServiceExisting(hostname, port):
+        raise SessenManagerException('Service on "{hostname}:{port}" not available'.format(hostname=hostname, port=port))
+
       connetionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
         prot=protocol,
         user=self.__config.get('username'),
         password=self.__config.get('password'),
-        host=self.__config.get('host'),
+        host=hostname,
         db=self.__config.get('db'),
-        port=self.__config.get('port')
+        port=port
       )
       self.engine = create_engine(connetionString, echo=debug)
 
@@ -75,6 +91,28 @@ class SessionManager:
     # self.Base = declarative_base(bind=self.engine)
     # self.session = self.Session()
 
+  @staticmethod
+  def isServiceExisting(host, port):
+    captive_dns_addr = ""
+    host_addr = ""
+
+    try:
+        host_addr = socket.gethostbyname(host)
+
+        if (captive_dns_addr == host_addr):
+            return False
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        s.connect((host, port))
+        s.close()
+    except:
+        return False
+
+    return True
+
+
+
   def getEngine(self):
     return self.session
 
@@ -82,10 +120,10 @@ class SessionManager:
   def brokerFactory(self, clazz):
     """
     Creates and initializes a broker
-    
+
     :param clazz: broker class
     :type clazz: extension of BrokerBase
-    
+
     :returns: instance of a Broker
     """
     # Instantiate broker

@@ -26,18 +26,18 @@ class BrokerBase(object):
   def getBrokerClass(self):
     """
     Returns the used class
-    
+
     :returns: Class
     """
     return
 
   def __objectToDictionary(self, obj):
     """
-    Transforms the public/protected 
+    Transforms the public/protected
     attributes of an object to a dictionary
-    
-    :param object: the object to be converted 
-    
+
+    :param object: the object to be converted
+
     :returns: Dictionary
     """
     dictionary = dict()
@@ -60,12 +60,12 @@ class BrokerBase(object):
   def getByID(self, identifier):
     """
     Returns the getBrokerClass() instance with the given identifier
-    
+
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
-    
+
     :param identifier: the id of the requested user object
     :type identifier: integer
-    
+
     :returns: getBrokerClass()
     """
     try:
@@ -73,7 +73,7 @@ class BrokerBase(object):
       result = self.session.query(self.getBrokerClass()).filter(self.getBrokerClass().identifier == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No attribute found with ID :{0}'.format(identifier))
+      raise NothingFoundException('Nothing found with ID :{0}'.format(identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
 
@@ -82,9 +82,9 @@ class BrokerBase(object):
   def getAll(self):
     """
     Returns all getBrokerClass() instances
-    
+
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
-    
+
     :returns: list of instances
     """
     try:
@@ -96,7 +96,7 @@ class BrokerBase(object):
   def removeByID(self, identifier):
     """
     Removes the <<getBrokerClass()>> with the given identifier
-    
+
     :param identifier:  the id of the requested user object
     :type identifier: integer
     """
@@ -106,11 +106,11 @@ class BrokerBase(object):
   def insert(self, instance):
     """
     Insert a <<getBrokerClass()>>
-    
+
     :param instance: The getBrokerClass() to be inserted
     :type instance: extension of Base
-    
-    Note: handles the commit and the identifier of the user is taken 
+
+    Note: handles the commit and the identifier of the user is taken
            into account if set
     """
     self.session.add(instance)
@@ -119,10 +119,10 @@ class BrokerBase(object):
   def update(self, instance):
     """
     updates an <<getBrokerClass()>>
-    
+
     :param instance: The getBrokerClass() to be updated
     :type instance: extension of Base
-    
+
     """
     dictionary = self.__objectToDictionary(instance)
     # an elo den update

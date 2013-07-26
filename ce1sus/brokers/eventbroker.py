@@ -1,4 +1,4 @@
-from twisted.test.test_hook import BaseClass
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, Weber Jean-Paul'
@@ -33,7 +33,7 @@ class ObjectBroker(BrokerBase):
 class ValueBroker(BrokerBase):
   """
   This broker is used internally to serparate the values to their corresponding tables
-  
+
   Note: Only used by the AttributeBroker
   """
   def __init__(self, session):
@@ -57,7 +57,7 @@ class ValueBroker(BrokerBase):
   def __setClassByAttribute(self, attribute):
     """
     sets class for the attribute
-    
+
     :param attribute: the attribute incontext
     :type attribute: Attribute
     """
@@ -67,14 +67,15 @@ class ValueBroker(BrokerBase):
   def __convertAttriuteValueToValue(self, attribute):
     """
     converts an Attribute to a XXXXXValue object
-    
+
     :param attribute: the attribute incontext
     :type attribute: Attribute
-    
+
     :returns: XXXXXValue
     """
     valueInstance = self.__clazz()
     valueInstance.value = attribute.value
+    valueInstance.identifier = attribute.value_id
     valueInstance.attribute_id = attribute.identifier
 
     return valueInstance
@@ -82,10 +83,10 @@ class ValueBroker(BrokerBase):
   def getByAttribute(self, attribute):
     """
     fetches one XXXXXValue instance with the information of the given attribute
-    
+
     :param attribute: the attribute incontext
     :type attribute: Attribute
-    
+
     :returns : XXXXXValue
     """
 
@@ -105,10 +106,10 @@ class ValueBroker(BrokerBase):
   def inserByAttribute(self, attribute):
     """
     Inserts one XXXXXValue instance with the information of the given attribute
-    
+
     :param attribute: the attribute incontext
     :type attribute: Attribute
-    
+
     :returns : XXXXXValue
     """
     self.__setClassByAttribute(attribute)
@@ -118,10 +119,10 @@ class ValueBroker(BrokerBase):
   def updateByAttribute(self, attribute):
     """
     updates one XXXXXValue instance with the information of the given attribute
-    
+
     :param attribute: the attribute incontext
     :type attribute: Attribute
-    
+
     :returns : XXXXXValue
     """
     self.__setClassByAttribute(attribute)
@@ -151,6 +152,7 @@ class AttributeBroker(BrokerBase):
       value = self.valueBroker.getByAttribute(attribute)
       # value is an object i.e. StringValue and the value of the attribute is the value of the value object
       attribute.value = value.value
+      attribute.value_id = value.identifier
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No value found for attribute :{0}'.format(attribute.definition.name))
     except sqlalchemy.orm.exc.MultipleResultsFound:
@@ -162,7 +164,8 @@ class AttributeBroker(BrokerBase):
     overrides BrokerBase.getByID
     """
     attribute = BrokerBase.getByID(self, identifier)
-    return self.getSetValues(attribute)
+    self.getSetValues(attribute)
+    return attribute
 
   def insert(self, instance):
     """
@@ -176,9 +179,14 @@ class AttributeBroker(BrokerBase):
     """
     overrides BrokerBase.update
     """
-    BrokerBase.update(self, instance)
-    # updates the value of the value table
-    self.valueBroker.updateByAttribute(instance)
+    try:
+      BrokerBase.update(self, instance)
+      # updates the value of the value table
+
+      self.valueBroker.updateByAttribute(instance)
+      self.session.commit()
+    except Exception:
+      self.session.rollback()
 
 
 
@@ -205,8 +213,8 @@ class EventBroker(BrokerBase):
     overrides BrokerBase.getByID
     """
     event = BrokerBase.getByID(self, identifier)
-    for object in event.objects:
-      for attribute in object.attributes:
+    for obj in event.objects:
+      for attribute in obj.attributes:
         self.attributeBroker.getSetValues(attribute)
     return event
 
@@ -216,8 +224,8 @@ class EventBroker(BrokerBase):
     """
     BrokerBase.insert(self, instance)
     # insert value for value table
-    for object in instance.objects:
-      for attribute in object.attributes:
+    for obj in instance.objects:
+      for attribute in obj.attributes:
         self.attributeBroker.insert(attribute)
 
   def update(self, instance):
@@ -226,12 +234,23 @@ class EventBroker(BrokerBase):
     """
     BrokerBase.update(self, instance)
     # insert value for value table
-    for object in instance.objects:
-      for attribute in object.attributes:
+    for obj in instance.objects:
+      for attribute in obj.attributes:
         self.valueBroker.updateByAttribute(attribute)
 
   def getBrokerClass(self):
     return Event
+
+  def getAll(self, limit=None, offset=None):
+    if (limit is None and offset is None):
+      return BrokerBase.getAll(self);
+    else:
+      try:
+        result = self.session.query(self.getBrokerClass()).limit(limit).offset(offset).all()
+      except sqlalchemy.orm.exc.NoResultFound:
+        raise NothingFoundException('Nothing found')
+      return result
+
 
 
 

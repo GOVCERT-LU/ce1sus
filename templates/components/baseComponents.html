@@ -1,85 +1,295 @@
-<%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None, placeholder=None)">
-    <div class="row-fluid">
-         <div class="span3">
-            <div style="padding: 5px;">
-                <div>
-                    <label> ${label}</label>
-                </div>
-            </div>
-         </div>
-         <div class="span9">
-            ${editBox(name, value, enabled, validationMsg, placeholder)}
-         </div>
-    </div>
+<%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None)">
+<!-- BEGIN labeledEditBox -->
+<%call expr="genericLabeler(label)">
+  <%call expr="editBox(name, value, enabled, validationMsg)"/>
+</%call>
+<!-- END labeledEditBox -->
 </%def>
 
+<%def name="labeledPasswordBox(label, name, value, enabled=True, validationMsg=None)">
+<!-- BEGIN labeledPasswordBox -->
+<%call expr="genericLabeler(label)">
+  <%call expr="passowdBox(name, value, enabled, validationMsg)"/>
+</%call>
+<!-- END labeledPasswordBox -->
+</%def>
+
+
+
 <%def name="labeledTextBox(label, name, message, enabled=True, validationMsg=None)">
-    <div class="row-fluid">
-         <div class="span2">
-            <div style="padding: 5px;">
-                <div>
-                    <label> ${label}</label>
-                </div>
-            </div>
-         </div>
-         <div class="span10">
-            ${textBox(name, message, 40, 5, enabled, validationMsg)}
-         </div>
+<!-- BEGIN labeledTextBox -->
+<%call expr="genericLabeler(label)">
+  <%call expr="textBox(name, message, 40, 5, enabled, validationMsg)"/>
+</%call>
+<!-- END labeledTextBox -->
+</%def>
+
+<%def name="labeledComboBox(label, name, values, enabled=True, validationMsg=None, selected=None, hasEmpty=False)">
+<!-- BEGIN labeledComboBox -->
+<%call expr="genericLabeler(label)">
+  <%call expr="comboBox(name, values, enabled, selected, validationMsg, hasEmpty)"/>
+</%call>
+<!-- END labeledComboBox -->
+</%def>
+
+<%def name="genericLabeler(label)">
+<!-- BEGIN labeledComboBox -->
+<div class="row-fluid">
+  <div class="span3">
+    <div style="padding: 5px;">
+      <label> ${label}</label>
     </div>
+  </div>
+  <div class="span9">
+    ${caller.body()}
+  </div>
+</div>
+<!-- END labeledComboBox -->
 </%def>
 
 <%def name="textBox(name, message, cols=40, rows=5 ,enabled=True, validationMsg=None)">
-    <%
-    if (enabled):
-        enabledStr = ''
-    else:
-        enabledStr =  ' disabled ' 
+<!-- BEGIN textBox --><%
+if message is None:
+  message = ''
+  
+if (enabled):
+  enabledStr = ''
+else:
+  enabledStr =  ' disabled ' 
 
-    if hasattr(value,'error'):
-        validationMsg = getattr(value,'error')
-        
-    %>
-
-    <div class="row-fluid">
-        <div class="span12">
-        <textarea name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
-        % if (not (validationMsg is None)) and enabled:
-            ${error(validationMsg)}
-        % endif
-        </div>
-    </div>
+if hasattr(message,'error'):
+  validationMsg = getattr(message,'error')
+%>
+<textarea name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+% if (not (validationMsg is None)):
+  <%call expr="error(validationMsg)"/>
+% endif
+<!-- END textBox -->
 </%def>
 
-<%def name="editBox(name, value, enabled=True, validationMsg=None, placeholder=None)">
-    <%
-    if (enabled):
-        enabledStr = ''
-    else:
-        enabledStr =  ' disabled ' 
-    
-    if (placeholder is None):
-        placeHStr = ''
-    else:
-        placeHStr = ' placeholder="'+placeholder+'" '
-        
-    if hasattr(value,'error'):
-        validationMsg = getattr(value,'error')
-        
-    %>
+<%def name="passowdBox(name, value, enabled=True, validationMsg=None)">
+<!-- BEGIN passowdBox --><%
+if (enabled):
+  enabledStr = ''
+else:
+  enabledStr =  ' disabled ' 
 
-        <input name="${name}" type="text" ${placeHStr} value="${value}" ${enabledStr}/>
-        % if (not (validationMsg is None)) and enabled:
-            ${error(validationMsg)}
-        % endif
+if hasattr(value,'error'):
+  validationMsg = getattr(value,'error')
 
+if value is None:
+  value = ''
+%>
+<input name="${name}" type="password" value="${value}" ${enabledStr}/>
+% if (not (validationMsg is None)) and enabled:
+  <%call expr="error(validationMsg)"/>
+% endif
+<!-- END passowdBox -->
 </%def>
+
+
+<%def name="editBox(name, value, enabled=True, validationMsg=None)">
+<!-- BEGIN editBox --><%
+if (enabled):
+  enabledStr = ''
+else:
+  enabledStr =  ' disabled ' 
+
+if hasattr(value,'error'):
+  validationMsg = getattr(value,'error')
+
+if value is None:
+  value = ''
+%>
+<input name="${name}" type="text" value="${value}" ${enabledStr}/>
+% if (not (validationMsg is None)) and enabled:
+  <%call expr="error(validationMsg)"/>
+% endif
+<!-- END editBox -->
+</%def>
+
+
+<%def name="comboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False)">
+<!-- BEGIN comboBox --><%
+if (enabled):
+  enabledStr = ''
+else:
+  enabledStr =  ' disabled ' 
+
+if not selected is None and hasattr(selected,'error'):
+  validationMsg = getattr(selected,'error')
+
+ %><select name="${name}" ${enabledStr}>
+  %if not values is None:
+    %if hasEmpty:
+        <option value="" selected></option>
+    %endif
+    %for key, value in values.iteritems():
+        %if not selected is None and value == selected:
+          <option value="${value}" selected>${key}</option>
+        %else:
+          <option value="${value}">${key}</option>
+        %endif
+    %endfor
+  %endif 
+</select> 
+% if (not (validationMsg is None)) and enabled:
+  <%call expr="error(validationMsg)"/>
+% endif
+<!-- END comboBox -->
+</%def>
+
 
 <%def name="error(message)">
-    <div class="alert alert-error">${message}</div>
+<!-- BEGIN ErrorMsg -->
+<div class="alert alert-error">${message}</div>
+<!-- END ErrorMsgs -->
+</%def>
 
+<%def name="pagination(identifier, paginator,hasSearch=True)">
+<!-- BEGIN pagination -->
+<div>
+  <table class="table table-striped table-bordered table-hover table-condensed" id="${identifier}">
+  <thead>
+    <tr>
+      % for column in paginator.lables:
+        % for value in column.itervalues():
+            <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting">${value}</th>
+        %endfor
+      %endfor
+      %if paginator.showOptions:
+        <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting">Options</th>
+      %endif
+    </tr>
+  </thead>
+  <tbody>
+    
+       % for item in paginator.list:
+       <tr>
+         % for column in paginator.lables:
+           % for key in column.iterkeys():
+<%
+
+
+if hasattr(item,key):
+  value = getattr(item,key)
+  if hasattr(value,'color'):
+    style = 'style="background-color: {hex}"'.format(hex=getattr(value,'color'))
+    value = getattr(value,'text')
+  else:
+    style = ''
+else:
+  
+  if '.' in key:
+    keys = key.split('.')
+   
+    if hasattr(item,keys[0]):
+      subItem = getattr(item,keys[0])
+      if hasattr(subItem,keys[1]):
+        value = getattr(subItem,keys[1])
+
+  else:
+    value ='NotSet'
+  
+  style = ''
+
+
+
+if hasattr(item,'identifier'):
+  primaryKey = getattr(item,'identifier')
+else:
+  primaryKey = 0
+%>                <td ${style}>${value}</td>
+           %endfor
+
+         %endfor
+         %if paginator.showOptions:
+           <td >
+              %if paginator.showView:
+                <a href="${paginator.baseUrl}Paginator/view/${primaryKey}"><i class="icon-eye-open" title="View"></i></a>
+              %endif
+              %if paginator.showEdit:
+                <a href="${paginator.baseUrl}Paginator/edit/${primaryKey}"><i class="icon-pencil" title="Edit"/></i></a>
+              %endif
+              %if paginator.showDelete:
+                <a href="${paginator.baseUrl}Paginator?/remove/${primaryKey}"><i class="icon-remove" title="Delete"/></i></a>
+              %endif
+           </td>
+         %endif
+         </tr>
+       %endfor
+
+  </tbody>
+  </table>
+  
+</div>
+<script>
+jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+    return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+};
+ 
+jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+    return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+};
+
+$(document).ready(function() {
+    $('#${identifier}').dataTable( {
+      "aaSorting": [  [0,'asc'] ],
+      %if not hasSearch:
+    	"sDom": '<"H">t<"F"ip>',
+      %endif;
+    	"iDisplayLength": ${paginator.itemsPerPage},
+      "aoColumns": [
+      % for column in paginator.lables:
+                    { "sType": 'string-case' },
+      %endfor
+      %if paginator.showOptions:
+          null
+      %endif
+        ]
+     });
+} );
+</script>
+<br/>
+<!-- END pagination -->
+</%def>
+
+<%def name="labeledDateTimePicker(label, name, value, enabled=True)">
+<!-- BEGIN labeledDateTimePicker -->
+<%call expr="genericLabeler(label)">
+  <%call expr="dateTimePicker(name, value, enabled)"/>
+</%call>
+<!-- END labeledDateTimePicker -->
 </%def>
 
 
+<%def name="dateTimePicker(name, value, enabled=True)">
+<!-- BEGIN dateTimePicker --><%
+    dateTime = '' 
+    if value:
+      dateTime = value.strftime("%d/%m/%Y - %H:%M")
+%>
 
+<div class="input-append date form_datetime" data-date="21/02/2013T15:25:00Z">
+<input size="16" type="text" value="${dateTime}" readonly style="width:152px" >
+ <span class="add-on "><i class="icon-remove" ></i></span>
+<span class="add-on"><i class="icon-th"></i></span>
+</div>
+
+%if enabled:
+<script type="text/javascript">
+    $(".form_datetime").datetimepicker({
+    	 format: "dd/mm/yyyy - hh:ii",
+    	 autoclose: true,
+    	 todayBtn: true,
+    	 minuteStep: 10,
+    	 % if dateTime:
+    		  startDate: "${dateTime}",
+        %endif
+    	});
+</script> 
+%endif
+<!-- END dateTimePicker -->
+</%def>
 
 

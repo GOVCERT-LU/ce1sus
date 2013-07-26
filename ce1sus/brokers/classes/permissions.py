@@ -9,14 +9,12 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 from ce1sus.db.session import Base
-import re
-from ce1sus.helpers.validator import FailedValidation
 import ce1sus.helpers.validator as validator
 
 # Relation table for user and groups
 
 # ass net agebonnen mai ouni geet et net!?
-RelationUserGrups = Table(
+__RelationUserGrups = Table(
     'User_has_Groups', Base.metadata,
     Column('user_id', Integer, ForeignKey('Users.user_id')),
     Column('group_id', Integer, ForeignKey('Groups.group_id'))
