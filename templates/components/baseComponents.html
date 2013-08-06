@@ -1,3 +1,6 @@
+<%namespace name="ce1sus" module="ce1sus.web.helpers.string"/>
+
+
 <%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None)">
 <!-- BEGIN labeledEditBox -->
 <%call expr="genericLabeler(label)">
@@ -36,8 +39,8 @@
 <!-- BEGIN labeledComboBox -->
 <div class="row-fluid">
   <div class="span3">
-    <div style="padding: 5px;">
-      <label> ${label}</label>
+    <div style="padding: 5px; text-align:right">
+      <label> ${label}:</label>
     </div>
   </div>
   <div class="span9">
@@ -60,7 +63,14 @@ else:
 if hasattr(message,'error'):
   validationMsg = getattr(message,'error')
 %>
-<textarea name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+%if enabled or message is None:
+    <textarea name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+%else:
+    <div style="padding: 5px;overflow:auto; height:${rows*25}px">
+      ${ce1sus.plaintext2html(text=message)}
+    </div>
+%endif
+
 % if (not (validationMsg is None)):
   <%call expr="error(validationMsg)"/>
 % endif
@@ -80,7 +90,17 @@ if hasattr(value,'error'):
 if value is None:
   value = ''
 %>
-<input name="${name}" type="password" value="${value}" ${enabledStr}/>
+%if enabled or value is None:
+    <input name="${name}" type="password" value="${value}" ${enabledStr}/>
+%else:
+    <div style="padding: 5px;">
+      %if value == 'EXTERNALAUTH':
+      ${value}
+      %else:
+      7h15P455\/\/0rd15S3cr3t
+      %endif
+    </div>
+%endif
 % if (not (validationMsg is None)) and enabled:
   <%call expr="error(validationMsg)"/>
 % endif
@@ -101,10 +121,20 @@ if hasattr(value,'error'):
 if value is None:
   value = ''
 %>
-<input name="${name}" type="text" value="${value}" ${enabledStr}/>
+
+%if enabled or value is None:
+    <input name="${name}" type="text" value="${value}" ${enabledStr}/>
+%else:
+    <div style="padding: 5px;">
+      ${value}
+    </div>
+%endif
 % if (not (validationMsg is None)) and enabled:
   <%call expr="error(validationMsg)"/>
 % endif
+
+
+
 <!-- END editBox -->
 </%def>
 
@@ -119,20 +149,33 @@ else:
 if not selected is None and hasattr(selected,'error'):
   validationMsg = getattr(selected,'error')
 
- %><select name="${name}" ${enabledStr}>
+ %>
+%if enabled or selected is None:
+ <select name="${name}" ${enabledStr}>
   %if not values is None:
     %if hasEmpty:
         <option value="" selected></option>
     %endif
-    %for key, value in values.iteritems():
-        %if not selected is None and value == selected:
-          <option value="${value}" selected>${key}</option>
-        %else:
-          <option value="${value}">${key}</option>
-        %endif
-    %endfor
+    %if not values is None:
+	    %for key, value in values.iteritems():
+	        %if not selected is None and value == selected:
+	          <option value="${value}" selected>${key}</option>
+	        %else:
+	          <option value="${value}">${key}</option>
+	        %endif
+	    %endfor
+    %endif
   %endif 
 </select> 
+%else:
+    <div style="padding: 5px">
+	    %for key, value in values.iteritems():
+	        %if not selected is None and value == selected:
+	          ${key}
+	        %endif
+	    %endfor
+    </div>
+%endif
 % if (not (validationMsg is None)) and enabled:
   <%call expr="error(validationMsg)"/>
 % endif
@@ -212,7 +255,7 @@ else:
                 <a href="${paginator.baseUrl}Paginator/edit/${primaryKey}"><i class="icon-pencil" title="Edit"/></i></a>
               %endif
               %if paginator.showDelete:
-                <a href="${paginator.baseUrl}Paginator?/remove/${primaryKey}"><i class="icon-remove" title="Delete"/></i></a>
+                <a href="${paginator.baseUrl}Paginator/remove/${primaryKey}" onclick="return confirm('Are you sure you want to delete?')"><i class="icon-remove" title="Delete"/></i></a>
               %endif
            </td>
          %endif
@@ -268,13 +311,26 @@ $(document).ready(function() {
     dateTime = '' 
     if value:
       dateTime = value.strftime("%d/%m/%Y - %H:%M")
+    nameTag = ''
+    if enabled:
+      nameTag='name="{0}"'.format(name)
 %>
 
+
+%if enabled or dateTime is None:
 <div class="input-append date form_datetime" data-date="21/02/2013T15:25:00Z">
-<input size="16" type="text" value="${dateTime}" readonly style="width:152px" >
- <span class="add-on "><i class="icon-remove" ></i></span>
-<span class="add-on"><i class="icon-th"></i></span>
+	<input size="16" type="text" value="${dateTime}" readonly style="width:152px" ${nameTag}>
+	%if enabled:
+	<span class="add-on "><i class="icon-remove" ></i></span>
+	<span class="add-on"><i class="icon-th"></i></span>
+	%endif
 </div>
+%else:
+<div style="padding: 5px">
+    ${dateTime}
+</div>
+%endif
+
 
 %if enabled:
 <script type="text/javascript">

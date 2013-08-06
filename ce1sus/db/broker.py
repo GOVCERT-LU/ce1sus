@@ -1,3 +1,4 @@
+"""The base module for brokers"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -5,22 +6,57 @@ __copyright__ = 'Copyright 2013, Weber Jean-Paul'
 __license__ = 'GPL v3+'
 
 
+import sqlalchemy.orm.exc
+from abc import ABCMeta, abstractmethod
+from ce1sus.helpers.debug import Logger
+
+class BrokerException(Exception):
+  """Broker Exception"""
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
+class IntegrityException(BrokerException):
+  """Broker Exception"""
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
+class InstantiationException(BrokerException):
+  """Instantiation Exception"""
+
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
+class NothingFoundException(BrokerException):
+  """NothingFound Exception"""
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
+class TooManyResultsFoundException(BrokerException):
+  """Too many results found Exception"""
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
+class ValidationException(BrokerException):
+  """Invalid Exception"""
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
+class OperationException(BrokerException):
+  """Operation Exception"""
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
+
 
 # Created on Jul 4, 2013
 
-
-import sqlalchemy.orm.exc
-from ce1sus.db.dbexceptions import NothingFoundException, TooManyResultsFoundException
-from abc import ABCMeta, abstractmethod
-
-
 class BrokerBase(object):
-
+  """The base class for brokers providing the general methods"""
   __metaclass__ = ABCMeta
 
   def __init__(self, session):
     self.session = session
     self.clazz = None
+    self.identifier = None
 
   @abstractmethod
   def getBrokerClass(self):
@@ -29,9 +65,10 @@ class BrokerBase(object):
 
     :returns: Class
     """
-    return
+    return self.__class__
 
-  def __objectToDictionary(self, obj):
+  @staticmethod
+  def __objectToDictionary(obj):
     """
     Transforms the public/protected
     attributes of an object to a dictionary
@@ -52,7 +89,8 @@ class BrokerBase(object):
             for column in columns:
               columnName = column.name
               # getRealValue
-              if (hasattr(obj, name)):
+              # Primary keys cannot be updated!!
+              if (hasattr(obj, name)) and not column.primary_key:
                 instanceValue = getattr(obj, name)
                 dictionary.update({columnName:instanceValue})
     return dictionary
@@ -70,12 +108,15 @@ class BrokerBase(object):
     """
     try:
 
-      result = self.session.query(self.getBrokerClass()).filter(self.getBrokerClass().identifier == identifier).one()
+      result = self.session.query(self.getBrokerClass()).filter(
+                        self.getBrokerClass().identifier == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(identifier))
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+      raise TooManyResultsFoundException(
+                    'Too many results found for ID :{0}'.format(identifier))
 
     return result
 
@@ -93,17 +134,47 @@ class BrokerBase(object):
       raise NothingFoundException('Nothing found')
     return result
 
-  def removeByID(self, identifier):
+  def removeByID(self, identifier, commit=True):
     """
     Removes the <<getBrokerClass()>> with the given identifier
 
     :param identifier:  the id of the requested user object
     :type identifier: integer
     """
-    self.session.query(self.getBrokerClass()).filter(self.getBrokerClass().identifier == identifier).delete(synchronize_session='fetch')
-    self.session.commit()
+    try:
+      self.session.query(self.getBrokerClass()).filter(
+                      self.getBrokerClass().identifier == identifier
+                      ).delete(synchronize_session='fetch')
 
-  def insert(self, instance):
+    except sqlalchemy.exc.OperationalError as e:
+      self.session.rollback()
+      raise OperationException(e)
+
+    self.doCommit(commit)
+
+
+  def doCommit(self, commit=True):
+    """
+    General commit, or rollback in case of an esception
+
+    :param commit: If set a commit is done else a flush
+    :type commit: Boolean
+    """
+    try:
+      if commit:
+        self.session.commit()
+      else:
+        self.session.flush()
+    except sqlalchemy.exc.IntegrityError as e:
+      self.session.rollback()
+      self.getLogger().critical(e)
+      raise IntegrityException(e)
+    except sqlalchemy.exc.DatabaseError as e:
+      self.session.rollback()
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+  def insert(self, instance, commit=True):
     """
     Insert a <<getBrokerClass()>>
 
@@ -113,10 +184,23 @@ class BrokerBase(object):
     Note: handles the commit and the identifier of the user is taken
            into account if set
     """
-    self.session.add(instance)
-    self.session.commit()
+    errors = not instance.validate()
+    if errors:
+      raise ValidationException('Instance to be inserted is invalid')
+    try:
+      self.session.add(instance)
+    except sqlalchemy.exc.IntegrityError as e:
+      self.getLogger().critical(e)
+      raise IntegrityException(e)
 
-  def update(self, instance):
+
+    except sqlalchemy.exc.DatabaseError as e:
+      self.getLogger().error(e)
+      self.session.rollback()
+
+    self.doCommit(commit)
+
+  def update(self, instance, commit=True):
     """
     updates an <<getBrokerClass()>>
 
@@ -124,12 +208,32 @@ class BrokerBase(object):
     :type instance: extension of Base
 
     """
+    errors = not instance.validate()
+    if errors:
+      raise ValidationException('Instance to be inserted is invalid')
     dictionary = self.__objectToDictionary(instance)
     # an elo den update
     try:
-      self.session.query(self.getBrokerClass()).filter(self.getBrokerClass().identifier == instance.identifier).update(dictionary);
-      self.session.commit()
-    except:
+      self.session.query(self.getBrokerClass()).filter(
+                      self.getBrokerClass().identifier == instance.identifier
+                      ).update(dictionary)
+    except sqlalchemy.exc.IntegrityError as e:
+      self.getLogger().critical(e)
+      raise IntegrityException(e)
+
+    except sqlalchemy.exc.DatabaseError as e:
+      self.getLogger().error(e)
       self.session.rollback()
+
+    self.doCommit(commit)
+
+  def getLogger(self):
+    """
+    Returns the logger
+
+    :returns: Logger
+    """
+    return Logger.getLogger(self.__class__.__name__)
+
 
 

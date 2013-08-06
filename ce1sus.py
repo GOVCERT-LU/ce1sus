@@ -1,4 +1,4 @@
-
+"""main file for launching ce1sus"""
 
 import cherrypy
 import os
@@ -7,8 +7,12 @@ from ce1sus.helpers.debug import Logger
 from ce1sus.web.helpers.templates import MakoHandler
 from ce1sus.web.controllers.index import IndexController
 from ce1sus.web.controllers.admin import AdminController
-from ce1sus.web.helpers.webexceptions import ErrorHandler
 from ce1sus.web.controllers.event import EventController
+from ce1sus.web.helpers.protection import Protector
+from ce1sus.helpers.ldaphandling import LDAPHandler
+from ce1sus.helpers.rt import RTHelper
+from ce1sus.web.helpers.config import WebConfig
+
 
 
 class InstantiationException(Exception):
@@ -70,16 +74,28 @@ def bootstap():
   # ErrorHandler(ce1susConfigFile)
   Logger(ce1susConfigFile)
   MakoHandler(ce1susConfigFile)
+  Protector(ce1susConfigFile)
+  RTHelper(ce1susConfigFile)
+  WebConfig(ce1susConfigFile)
+  LDAPHandler(ce1susConfigFile)
+
+
+
+
   config = {'/':
                   {
                    'tools.staticdir.on': True,
                    'tools.staticdir.root': os.path.join(os.path.abspath("."), u"htdocs"),
                    'tools.staticdir.dir': "",
+                   'tools.sessions.on': True,
+                   'tools.sessions.storage_type': 'file',
+                   'tools.sessions.storage_path' : 'sessions',
+                   'tools.sessions.timeout': 60,
+                   'tools.auth.on': True
 
                   }
             }
   cherrypy.tree.mount(IndexController(), '/', config=config)
-  cherrypy.tree.mount(IndexController(), '/index', config=config)
   cherrypy.tree.mount(AdminController(), '/admin', config=config)
   cherrypy.tree.mount(EventController(), '/events', config=config)
 

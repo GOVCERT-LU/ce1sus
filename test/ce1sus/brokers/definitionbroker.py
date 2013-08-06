@@ -5,8 +5,8 @@ Created on Jul 4, 2013
 '''
 import unittest
 from ce1sus.db.session import SessionManager
-from ce1sus.brokers.definitionbroker import DEF_AttributeBroker, DEF_ObjectBroker
-from ce1sus.brokers.classes.definitions import DEF_Attribute, DEF_Object
+from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker
+from ce1sus.brokers.classes.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus import helpers
 
 class TestDefinitionBrokers(unittest.TestCase):
@@ -18,20 +18,20 @@ class TestDefinitionBrokers(unittest.TestCase):
   def setUp(self):
 
     self.sessionManager = SessionManager('../ce1sus.cfg')
-    self.attributebroker = self.sessionManager.brokerFactory(DEF_AttributeBroker)
+    self.attributebroker = self.sessionManager.brokerFactory(AttributeDefinitionBroker)
 
 
 
-    self.attribute = DEF_Attribute()
+    self.attribute = AttributeDefinition()
     self.attribute.description = 'Description'
     self.attribute.identifier = 1
     self.attribute.name = 'Name'
     self.attribute.regex = 'Regex'
     self.attribute.valuetable = 1
 
-    self.objectbroker = self.sessionManager.brokerFactory(DEF_ObjectBroker)
+    self.objectbroker = self.sessionManager.brokerFactory(ObjectDefinitionBroker)
 
-    self.object = DEF_Object()
+    self.object = ObjectDefinition()
     self.object.name = 'Name'
     self.object.identifier = 1
     self.object.description = 'A description'

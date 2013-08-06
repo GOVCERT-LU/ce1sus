@@ -11,9 +11,9 @@ from ce1sus.brokers.classes.event import Event, Object, Attribute
 from datetime import datetime
 from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker
 from ce1sus.brokers.classes.permissions import Group, User
-from ce1sus.brokers.classes.definitions import DEF_Object, DEF_Attribute
-from ce1sus.brokers.definitionbroker import DEF_AttributeBroker, \
-  DEF_ObjectBroker
+from ce1sus.brokers.classes.definitions import ObjectDefinition, AttributeDefinition
+from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
+  ObjectDefinitionBroker
 from ce1sus.helpers.objects import printObject
 
 class TestEventBrokers(unittest.TestCase):
@@ -58,7 +58,7 @@ class TestEventBrokers(unittest.TestCase):
     self.event.description = 'Description'
     self.event.identifier = 1
     self.event.created = self.timeStamp
-    self.event.label = 'label'
+    self.event.title = 'label'
     self.event.first_seen = self.timeStamp
     self.event.last_seen = self.timeStamp
     self.event.modified = self.timeStamp
@@ -66,14 +66,14 @@ class TestEventBrokers(unittest.TestCase):
     self.event.status_id = 1
     self.event.published = 1
 
-    self.defObjectBroker = self.sessionManager.brokerFactory(DEF_ObjectBroker)
-    self.defObj = DEF_Object()
+    self.defObjectBroker = self.sessionManager.brokerFactory(ObjectDefinitionBroker)
+    self.defObj = ObjectDefinition()
     self.defObj.identifier = 1
     self.defObj.description = 'Description'
     self.defObj.name = 'Name'
 
-    self.defAttributeBroker = self.sessionManager.brokerFactory(DEF_AttributeBroker)
-    self.defattribute = DEF_Attribute()
+    self.defAttributeBroker = self.sessionManager.brokerFactory(AttributeDefinitionBroker)
+    self.defattribute = AttributeDefinition()
     self.defattribute.identifier = 1
     self.defattribute.description = 'Description'
     self.defattribute.name = 'name'
@@ -184,5 +184,5 @@ class TestEventBrokers(unittest.TestCase):
     self.defObjectBroker.removeByID(self.defObj.identifier)
 
 if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+  # import sys;sys.argv = ['', 'Test.testName']
+  unittest.main()

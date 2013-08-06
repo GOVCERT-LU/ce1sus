@@ -3,7 +3,14 @@
 <div class="span7 offset3">
 	<div class="login-form">
 		<h2>Login</h2>
-		<form action="index/doLogin" method="post">
+		%if not errorMsg is None:
+           <div class="alert alert-block alert-error fade in">
+               <button type="button" class="close" data-dismiss="alert">x</button>
+               <h4 class="alert-heading">An expected Error occurred!</h4>
+               <p>${errorMsg}</p>
+           </div>
+        %endif
+		<form action="/doLogin" method="post">
 			<fieldset>
 				<div class="clearfix">
 					<input type="text" name="username" placeholder="Username">

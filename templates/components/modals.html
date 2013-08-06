@@ -1,9 +1,14 @@
 <%namespace name="inputBoxes" file="/components/baseComponents.html"/>
 <%namespace name="forms" file="/components/forms.html"/>
 
-<%def name="genericModal(id, title, showButtons=False, refreshUrl=None, show=False)">
-<!-- BEGIN GenericModal -->
-<div id="${id}" class="modal hide fade" tabidnex="-1" role="dialog" aria-labelledby="${id}AriaLabel" aria-hidden="true">
+<%def name="genericModal(id, title, showButtons=False, refreshUrl=None, show=False, big=False)">
+<%
+if big:
+  style='style="width: 80%;margin-left:-40%;"'
+else:
+  style=''
+%><!-- BEGIN GenericModal -->
+<div id="${id}" class="modal hide fade" ${style} tabidnex="-1" role="dialog" aria-labelledby="${id}AriaLabel" aria-hidden="true">
   <div class="modal-header">
   %if not refreshUrl is None:
     <button type="button" class="close" onclick="window.location.href = window.location.protocol +'//'+ window.location.host + '/${refreshUrl}'">x</button>
@@ -33,17 +38,17 @@
 </%def>
 
 
-<%def name="userModal(id,title,user,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='admin/users')">
+<%def name="userModal(id,title,user,cbValues,showButtons=True,enabled=True, show=False)">
+<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/users')">
   <!-- BEGIN userModal -->
-  ${forms.userForm(user, enabled)}
+  ${forms.userForm(user, enabled,cbValues)}
   <!-- END userModal -->
 </%call>
 </%def>
 
 
 <%def name="groupModal(id,title,group,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='admin/groups')">
+<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/groups')">
   <!-- BEGIN groupModal -->
   ${forms.groupForm(group, enabled)}
   <!-- END groupModal -->
@@ -51,7 +56,7 @@
 </%def>
 
 <%def name="def_objectModal(id,title,object,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='admin/objects')">
+<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/objects')">
   <!-- BEGIN objectModal -->
   ${forms.objectForm(object, enabled)}
   <!-- END objectModal -->
@@ -59,7 +64,7 @@
 </%def>
 
 <%def name="def_attributeModal(id,title,attribute,cbValues,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='admin/attributes')">
+<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/attributes')">
   <!-- BEGIN attributeModal -->
   ${forms.attributeForm(attribute, enabled,cbValues)}
   <!-- END attributeModal -->
@@ -97,5 +102,13 @@
 	</%call>
 %endif
 
+</%def>
+
+<%def name="commentModal(id,title,eventID,commentObj,showButtons=True,enabled=True, show=False)">
+<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/event/{0}'.format(eventID))">
+  <!-- BEGIN commentModal -->
+  ${forms.commentForm(eventID,commentObj, enabled)}
+  <!-- END commentModal -->
+</%call>
 </%def>
 

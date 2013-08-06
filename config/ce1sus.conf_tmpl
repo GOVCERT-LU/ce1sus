@@ -7,8 +7,8 @@ db=
 port=3306
 debug=no
 
-[WebPage]
-url=http://localhost
+[ce1sus]
+rturl=
 
 [ErrorHandler]
 debug=no
@@ -25,3 +25,23 @@ backups=1000
 templateRoot=templates
 collectionsize=200
 outputencoding=utf-8
+
+[Mako]
+templateRoot=templates
+collectionsize=200
+outputencoding=utf-8
+
+[RTHelper]
+username=
+password=
+url=
+
+[Protector]
+loginurl=/index
+firstpage=/events
+
+[LDAP]
+server=
+usetls=True
+users_dn=
+
