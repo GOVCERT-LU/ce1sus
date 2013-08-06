@@ -12,5 +12,5 @@
 config/ce1sus.conf
 
 
-log/*
-sessions/*
+!.gitignore
+
