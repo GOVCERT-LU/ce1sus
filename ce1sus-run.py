@@ -62,12 +62,10 @@ def application(environ, start_response):
 
 def bootstap():
   # want parent of parent directory aka ../../
-  basePath = os.path.abspath(os.getcwd())
+  basePath = os.path.dirname(os.path.abspath(__file__))
   # s
 
   loadCerryPyConfig(basePath + '/config/cherrypy.conf')
-
-
 
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   SessionManager(ce1susConfigFile)
@@ -78,18 +76,15 @@ def bootstap():
   RTHelper(ce1susConfigFile)
   WebConfig(ce1susConfigFile)
   LDAPHandler(ce1susConfigFile)
-
-
-
-
+  
   config = {'/':
                   {
                    'tools.staticdir.on': True,
-                   'tools.staticdir.root': os.path.join(os.path.abspath("."), u"htdocs"),
+                   'tools.staticdir.root': basePath + "/htdocs",
                    'tools.staticdir.dir': "",
                    'tools.sessions.on': True,
                    'tools.sessions.storage_type': 'file',
-                   'tools.sessions.storage_path' : 'sessions',
+                   'tools.sessions.storage_path' : basePath + '/sessions',
                    'tools.sessions.timeout': 60,
                    'tools.auth.on': True
 

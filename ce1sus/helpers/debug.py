@@ -1,6 +1,6 @@
 """Debugging module"""
 
-
+import os
 import logging
 from ce1sus.helpers.config import Configuration
 from ce1sus.helpers.string import isNotNull
