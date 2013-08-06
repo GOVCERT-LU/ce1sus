@@ -1,0 +1,16 @@
+# OS generated files #
+######################
+*.pyc
+*~
+*.swp
+
+# EclipseGenerated #
+####################
+.project
+.settings
+.pydevproject
+config/ce1sus.conf
+
+
+log/*
+sessions/*
