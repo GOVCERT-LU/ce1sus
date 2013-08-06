@@ -1,0 +1,25 @@
+<%namespace name="baseComponents"
+file="/components/baseComponents.html"/> <%namespace name="forms"
+file="/components/forms.html"/> <%inherit
+file="/layout/baselayout.html"/>
+
+<ul class="nav nav-tabs">
+	<li><a href="/events">Recent Events</a></li>
+	<li><a href="">Search Events</a></li>
+	<li class="active"><a href="#">Add Event</a></li>
+</ul>
+<h2>Add an Event</h2>
+<form action="/events/modifyEvent" method="post">
+    <input type="hidden" name="action" value="insert">
+    
+	${forms.eventForm(event=event,enabled=True,cbPublishedValues=cbPublishedValues,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}	
+	<div class="row-fluid">
+	    <div class="span3" style="text-align:right">
+			<div class="btn-group">
+				<button class="btn" type="submit">Create</button>
+				<a href="/events/addEvent" role="button" class="btn"
+					data-toggle="modal">Cancel</a>
+			</div>
+		</div>
+	</div>
+</form>

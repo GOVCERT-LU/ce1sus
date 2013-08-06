@@ -1,0 +1,113 @@
+<%namespace name="baseComponents" file="/components/baseComponents.html"/>
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+<%inherit file="/layout/baselayout.html"/>
+<%namespace name="ce1sus" module="ce1sus.web.helpers.string"/>
+
+
+
+
+<h2>Event #${event.identifier}</h2>
+<ul class="nav nav-tabs">
+    <li class="active"  ><a href="#">Overview</a></li>
+    <li><a href="/events/eventObjects/${event.identifier}">Objects</a></li>
+    <li><a href="/events/eventTickets/${event.identifier}">Tickets</a></li>
+    <li><a href="/events/eventGroups/${event.identifier}">Groups</a></li>
+</ul>
+<div class="row-fluid">
+  <div class="span4">
+    <legend>Details</legend>
+    ${forms.eventForm(event=event,enabled=False,cbPublishedValues=cbPublishedValues,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+    <div class="row-fluid">
+	    <div class="span3" style="text-align:right">
+		    <div class="btn-group">
+		       <a href="#editEventModal" role="button" class="btn" data-toggle="modal">Edit</a>
+		       <button class="btn btn-danger" onclick="if (confirm('Are you sure you want to delete?')) {location.href='/events/modifyEvent?identifier=${event.identifier}&action=remove'}">Delete</button>
+		       <a href="/events/event/${event.identifier}" role="button" class="btn"
+		            data-toggle="modal">Cancel</a>
+		    </div>
+	    </div>
+    </div>
+    
+  </div>
+  <div class="span8">
+    <legend>Related objects</legend>
+<%call expr="baseComponents.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
+
+
+    <legend>Related Tickets</legend>
+<%call expr="baseComponents.pagination('ticketsTable',ticketPaginator,hasSearch=False)"/> 
+
+    <legend>Related Events</legend>
+<%call expr="baseComponents.pagination('eventsTable',eventPaginator,hasSearch=False)"/> 
+    <legend>Accessible for groups</legend>
+    %if not event.groups is None:
+      %for group in event.groups:
+        [${group.name}]
+      %endfor
+    %else:
+    None
+    %endif 
+  </div>
+</div>
+
+<legend>Comments</legend>
+<table class="table table-striped table-hover table-condensed">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Comment</th>
+      <th>Date</th>
+      <th>User</th>
+      <th width="150px">Options</th>
+    </tr>
+  </thead>
+  <tbody>
+    %if comments is None:
+    <tr>
+      <td></td>
+      <td></td>
+      <td><div style="text-align:center">No data available in table</div></td>
+      <td></td>
+    </tr>
+    %else:
+      %for comment in comments:
+	    <tr>
+	      <td>${comment.identifier}</td>
+	      <td>${ce1sus.plaintext2html(text=comment.comment)}</td>
+	      <td>${comment.created}</td>
+	      <td>${comment.creator.username}</td>
+	      <td>
+	       <a href="/events/modifyEventCommnet?identifier=${event.identifier}&commentIdentifier=${comment.identifier}&action=viewedit" ><i class="icon-pencil" title="Edit"/></i></a>
+	       <a href="/events/modifyEventCommnet?identifier=${event.identifier}&commentIdentifier=${comment.identifier}&action=remove" onclick="return confirm('Are you sure you want to delete?')"><i class="icon-remove" title="Delete"></i></a>
+	      </td>
+	    </tr>
+      %endfor
+    %endif
+  </tbody>
+</table>
+<div class="btn-group">
+<a href="#addCommentModal" role="button" class="btn" data-toggle="modal">Add
+                new Comment</a>
+</div>
+<form action="/events/modifyEventCommnet" method="post">
+  <input type="hidden" name="action" value="insert">
+  <%call expr="modals.commentModal(id='addCommentModal',title='Add Comment',eventID=event.identifier,commentObj=None,show=False)"/>
+</form>
+
+<form action="/events/modifyEventCommnet" method="post">
+  %if action == 'insert':
+    <input type="hidden" name="action" value="insert">
+    <%call expr="modals.commentModal(id='editCommentModal',title='Add Comment',eventID=event.identifier,commentObj=commentObj,show=commentErrors)"/>
+  %else:
+    <input type="hidden" name="action" value="update">
+    <%call expr="modals.commentModal(id='editCommentModal',title='Edit Comment',eventID=event.identifier,commentObj=commentObj,show=commentErrors)"/>
+  %endif
+</form>
+
+<form action="/events/modifyEvent" method="post">
+  <input type="hidden" name="action" value="update">
+  <%call expr="modals.eventModal(id='editEventModal',event=editEvent,title='Edit Event',cbPublishedValues=cbPublishedValues,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,show=errors)"/> 
+</form>
+
+

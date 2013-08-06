@@ -1,0 +1,118 @@
+<%namespace name="baseComponents" file="/components/baseComponents.html"/>
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+<%inherit file="/layout/baselayout.html"/>
+
+
+
+
+<h2>Event #${event.identifier}</h2>
+<ul class="nav nav-tabs">
+    <li><a href="/events/event/${event.identifier}">Overview</a></li>
+    <li class="active" ><a href="#">Objects</a></li>
+    <li><a href="/events/eventTickets/${event.identifier}">Tickets</a></li>
+    <li><a href="/events/eventGroups/${event.identifier}">Groups</a></li>
+</ul>
+<div class="row-fluid">
+    <div class="span3">
+        <div class="btn-group">
+            <a href="#addObjectModal" role="button" class="btn" data-toggle="modal">Add new Object</a>
+            <a href="#addExistingObjectModal" role="button" class="btn" data-toggle="modal">Reference Object</a>
+            <form action="/events/insertEventObject" method="post">
+                <%call expr="modals.objectModal(id='addObjectModal',eventID=event.identifier,object=None,title='Add new Object',cbDefinitions=cbObjDefinitions)"/> 
+            </form>
+        </div>
+        <br />
+        <div class="row-fluid">
+	        <div class="span12">
+		        <legend>Objects</legend>
+		        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+		            style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+		            %if not event.objects is None:
+			            %for object in event.objects:
+				            <li><a tabindex="-1" href="/events/eventObjects/${event.identifier}/${object.identifier}">${object.definition.name}</a></li>
+			            %endfor
+			        %endif
+		        </ul>
+	        </div>
+        </div>
+    </div>
+    <div class="span9">
+        <h2>Object Details</h2>
+        %for object in objectList:
+            %if len(objectList)>1:
+               <legend>Object #${object.identifier}</legend>
+            %endif
+        
+            <%call expr="forms.eventObjectForm(event.identifier,object, False,cbObjDefinitions)"/>
+            <div class="row-fluid">
+	            <div class="span3" style="text-align:right">
+		            <div class="btn-group">
+		              %if not object is None:
+		              <button class="btn btn-danger" 
+		                onclick="if (confirm('Are you sure you want to delete?')) {location.href='/events/removeObject?identifier=${event.identifier}&objIdentifier=${object.identifier}'}">Delete</button>
+		              %endif
+		            </div>
+	            </div>
+            </div>
+            <legend>Referenced by</legend>
+            %if not object is None:
+	            %for refObject in object.objects:
+	                Object<br/>
+	            %endfor
+            %endif
+            <br/>
+            <legend>Attributes</legend>
+            <%
+            if not object is None: 
+                paginator.list = object.attributes
+                objID = object.identifier
+            else:
+                paginator.list = list()
+                objID = ''
+            %>
+            <%call expr="baseComponents.pagination('attributesTable'+str(objID),paginator,hasSearch=False)"/>
+            <div class="btn-group">
+	            %if not object is None:
+	                <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal">Add an Attribute</a>
+	                <form action="/events/modifyObjectAttribute" method="post">
+                        <input type="hidden" name="action" value="insert">
+                        <%
+                        try:
+                         cbValues = cbAttributeDefintiionsDict[object.definition.identifier]
+                        except:
+                          cbValues = None
+                        %>
+                        <%call expr="modals.objectAttributeModal(id='addAbjectAttributeModal{0}'.format(object.identifier),eventID=event.identifier,objectID=object.identifier,attribute=None,title='Add New Attribute',cbDefinitions=cbValues,enabled = True)"/> 
+                    </form>
+	            %endif
+            </div>
+            
+            <br/>
+            
+        %endfor
+    </div>
+    
+    <form action="/events/modifyObjectAttribute" method="post">
+            <% 
+            objID = 0
+            if not attribute is None:
+                objID = attribute.object.identifier
+            try:
+              cbValues = cbAttributeDefintiionsDict[object.definition.identifier]
+            except:
+              cbValues = None
+            %>
+            %if action=='insert':
+              <input type="hidden" name="action" value="insert">
+              <%call expr="modals.objectAttributeModal(id='insertAttribute',eventID=event.identifier,objectID=object.identifier,attribute=failedAttr,title='Add New Attribute',cbDefinitions=cbValues,enabled = True,show=showAttribute)"/> 
+            %else:
+              %if action=='update':
+              <input type="hidden" name="action" value="update">
+              <%call expr="modals.objectAttributeModal(id='objectAttributeModal',objectID=objID,eventID=event.identifier,attribute=attribute,title='Edit Attribute Details',cbDefinitions=cbValues,enabled = attributeEnable, show=showAttribute, showButtons=attributeEnable)"/>
+              %else:
+              <%call expr="modals.objectAttributeModal(id='objectAttributeModal',objectID=objID,eventID=event.identifier,attribute=attribute,title='Attribute Details',cbDefinitions=cbValues,enabled = attributeEnable, show=showAttribute, showButtons=attributeEnable)"/>
+              %endif
+            %endif
+    </form>
+</div>
