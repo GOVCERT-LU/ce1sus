@@ -12,7 +12,27 @@ __license__ = 'GPL v3+'
 
 # Created on Jul 5, 2013
 
-def compareObjects(object1, object2):
+class CompareException(Exception):
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
+class TypeMismatchException(CompareException):
+  def __init__(self, message):
+    CompareException.__init__(self, message)
+
+class ArrayMismatchException(CompareException):
+  def __init__(self, message):
+    CompareException.__init__(self, message)
+
+class ValueMismatchException(CompareException):
+  def __init__(self, message):
+    CompareException.__init__(self, message)
+
+class AttributeMismatchException(CompareException):
+  def __init__(self, message):
+    CompareException.__init__(self, message)
+
+def compareObjects(object1, object2, raiseExceptions=True):
   """
   Compares recursively if the two input objects are equal on their attribute basis
 
@@ -54,14 +74,12 @@ def compareObjects(object1, object2):
                       isinstance(object2, types.DictionaryType)):
           for key, item1 in object1.iteritems():
             if object2.has_key(key):
+              # This is just to know what was the problem
               attrName = 'Value not matching for key ' + key
               attrValue1 = item1
               item2 = object2[key]
               attrValue2 = item2
-              if not compareObjects(item1, item2):
-                result = False
-              else:
-                result = False
+              result = compareObjects(item1, item2)
 
         else:
           for i in range(0, len(object1)):
@@ -120,7 +138,7 @@ def compareObjects(object1, object2):
                 attrValue1 = value1
                 attrValue2 = value2
 
-                if not compareObjects(value1, value2):
+                if not compareObjects(value1, value2, raiseExceptions):
                   result = False
                 else:
                   # do nothing if it's a function
@@ -130,15 +148,24 @@ def compareObjects(object1, object2):
               result = False
 
   if not result:
-    if (typeIssue):
-      print 'Types differ, got {0} expected {1}'.format(attrValue1, attrValue2)
-    elif (listIssue):
-      print 'Arrays differ, got {0} expected {1}'.format(attrValue1, attrValue2)
-    elif (inputIssue):
-      print 'Got {0} expected {1}'.format(attrValue1, attrValue2)
-    else:
-      print 'Attribute {0} is not equal, got {1} expected {2}'.format(attrName,
-                                                        attrValue1, attrValue2)
+    if raiseExceptions:
+      if (typeIssue):
+        raise TypeMismatchException(
+                      'Types differ, got {0} expected {1}'.format(attrValue1,
+                                                                  attrValue2))
+      elif (listIssue):
+        raise ArrayMismatchException(
+                      'Arrays differ, got {0} expected {1}'.format(attrValue1,
+                                                                   attrValue2))
+      elif (inputIssue):
+        raise ValueMismatchException('Got {0} expected {1}'.format(attrValue1,
+                                                                   attrValue2))
+      else:
+        raise AttributeMismatchException(
+                      'Attribute {0} is not equal, got {1} expected {2}'.format(
+                                                                    attrName,
+                                                                    attrValue1,
+                                                                    attrValue2))
   # if this is reached they have to be equal.
   return result
 

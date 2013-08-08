@@ -14,7 +14,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from ce1sus.helpers.config import Configuration
 import os
 import socket
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 
 
 BASE = declarative_base()
@@ -118,8 +118,8 @@ class SessionManager:
       s.settimeout(1)
       s.connect((host, port))
       s.close()
-    except Exception as e:
-      Logger.getLogger("SessionManager").info(e)
+    except socket.error as e:
+      Log.getLogger("SessionManager").info(e)
       return False
 
     return True
@@ -180,4 +180,4 @@ class SessionManager:
 
     :returns: Logger
     """
-    return Logger.getLogger(self.__class__.__name__)
+    return Log.getLogger(self.__class__.__name__)

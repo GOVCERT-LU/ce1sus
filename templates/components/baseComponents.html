@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 <%namespace name="ce1sus" module="ce1sus.web.helpers.string"/>
 
 
@@ -242,7 +244,7 @@ if hasattr(item,'identifier'):
   primaryKey = getattr(item,'identifier')
 else:
   primaryKey = 0
-%>                <td ${style}>${value}</td>
+%>                <td ${style}>${value}</td> 
            %endfor
 
          %endfor

@@ -65,7 +65,7 @@ class Status(object):
 
     :returns: Integer
     """
-    formattedInput = str(name).title()
+    formattedInput = unicode(name).title()
     result = None
     for key, value in Status.__definitions.items():
       if formattedInput == value:
@@ -138,7 +138,7 @@ class TLPLevel(object):
     :returns: Integer
     """
 
-    formatedName = str(name).title()
+    formatedName = unicode(name).title()
 
 
     result = None

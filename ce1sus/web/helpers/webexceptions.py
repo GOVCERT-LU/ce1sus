@@ -4,7 +4,7 @@ import cherrypy
 import traceback
 from ce1sus.helpers.config import Configuration
 import ce1sus.helpers.string as stringHelper
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 from ce1sus.web.helpers.templates import MakoHandler
 import re
 
@@ -88,7 +88,7 @@ class ErrorHandler(object):
     # this error handling works different than the others
     cherrypy.response.status = 500
     # Default
-    Logger.getLogger(__name__).critical('Default error: '
+    Log.getLogger(__name__).critical('Default error: '
                                         + traceback.format_exc())
     cherrypy.response.body = ErrorHandler.show(title='500',
                                                error='2^255*8-2^1024<br/>'
@@ -103,7 +103,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Bad Request
-    Logger.getLogger(__name__).error(message)
+    Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='400', error=message + '<br/>?SYNTAX ERROR.'
                              + '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
@@ -114,7 +114,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Unauthorized
-    Logger.getLogger(__name__).error(message)
+    Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='401', error=message + '<br/>?SYNTAX ERROR.' +
                              '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
@@ -125,7 +125,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Forbiden
-    Logger.getLogger(__name__).error(message)
+    Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='403', error=message + '<br/>?SYNTAX ERROR.'
                              + '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
@@ -136,7 +136,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Not Found
-    Logger.getLogger(__name__).error(message)
+    Log.getLogger(__name__).error(message)
 
     matchObj = re.match(r".*'(.*)'.*", message, re.M | re.I)
     fileName = matchObj.group(1)
@@ -151,7 +151,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Internal Error
-    Logger.getLogger(__name__).error(message)
+    Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='500', error=message + '<br/>FORMULA TOO '
                              + 'COMPLEX<br/>', text=stringHelper.plaintext2html(
                                                                     traceback))

@@ -8,7 +8,7 @@ __license__ = 'GPL v3+'
 
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 
 class BrokerException(Exception):
   """Broker Exception"""
@@ -109,7 +109,8 @@ class BrokerBase(object):
     try:
 
       result = self.session.query(self.getBrokerClass()).filter(
-                        self.getBrokerClass().identifier == identifier).one()
+                        getattr(self.getBrokerClass(),
+                                'identifier') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
@@ -117,6 +118,9 @@ class BrokerBase(object):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
 
     return result
 
@@ -132,6 +136,10 @@ class BrokerBase(object):
       result = self.session.query(self.getBrokerClass()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
     return result
 
   def removeByID(self, identifier, commit=True):
@@ -143,12 +151,17 @@ class BrokerBase(object):
     """
     try:
       self.session.query(self.getBrokerClass()).filter(
-                      self.getBrokerClass().identifier == identifier
+                      getattr(self.getBrokerClass(),
+                                'identifier') == identifier
                       ).delete(synchronize_session='fetch')
 
     except sqlalchemy.exc.OperationalError as e:
       self.session.rollback()
       raise OperationException(e)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
     self.doCommit(commit)
 
@@ -173,7 +186,10 @@ class BrokerBase(object):
       self.session.rollback()
       self.getLogger().fatal(e)
       raise BrokerException(e)
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
   def insert(self, instance, commit=True):
     """
     Insert a <<getBrokerClass()>>
@@ -197,6 +213,12 @@ class BrokerBase(object):
     except sqlalchemy.exc.DatabaseError as e:
       self.getLogger().error(e)
       self.session.rollback()
+      raise BrokerException(e)
+
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
     self.doCommit(commit)
 
@@ -215,7 +237,8 @@ class BrokerBase(object):
     # an elo den update
     try:
       self.session.query(self.getBrokerClass()).filter(
-                      self.getBrokerClass().identifier == instance.identifier
+                      getattr(self.getBrokerClass(),
+                                'identifier') == instance.identifier
                       ).update(dictionary)
     except sqlalchemy.exc.IntegrityError as e:
       self.getLogger().critical(e)
@@ -224,6 +247,12 @@ class BrokerBase(object):
     except sqlalchemy.exc.DatabaseError as e:
       self.getLogger().error(e)
       self.session.rollback()
+      raise BrokerException(e)
+
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
     self.doCommit(commit)
 
@@ -233,7 +262,7 @@ class BrokerBase(object):
 
     :returns: Logger
     """
-    return Logger.getLogger(self.__class__.__name__)
+    return Log.getLogger(self.__class__.__name__)
 
 
 

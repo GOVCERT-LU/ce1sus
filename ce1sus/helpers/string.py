@@ -3,6 +3,10 @@ import re
 import cgi
 from datetime import datetime
 
+class InputException(Exception):
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
 def plaintext2html(text, tabstop=4):
   """
   returns the given text in HTML Code
@@ -48,13 +52,38 @@ def plaintext2html(text, tabstop=4):
         if last in ['\n', '\r', '\r\n']:
           last = '<br>'
         return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
-  if text and len(text) > 0:
-    return re.sub(re_string, replacements, text)
+
+  # convert to text to be compliant
+  stringText = unicode(text)
+  if len(stringText) > 0:
+    return re.sub(re_string, replacements, stringText)
   else:
     return ''
 
 def stringToDateTime(string):
-  return datetime.strptime(string, "%d/%m/%Y - %H:%M")
+  """
+  Converts a string to a DateTime if the format is known
+  """
+  dateFormats = ['%Y-%m-%d',
+             '%Y-%m-%d %H:%M',
+             '%Y-%m-%d %H:%M:%S',
+             '%Y-%m-%d - %H:%M:%S',
+             '%Y-%m-%d - %H:%M',
+             '%d/%m/%Y',
+             '%d/%m/%Y - %H:%M',
+             '%d/%m/%Y - %H:%M:%S',
+             '%d/%m/%Y %H:%M',
+             '%d/%m/%Y %H:%M:%S'
+             ]
+  # loops over the different formats and if the loop ends raise an exception
+  # as no format is applicable
+  dateString = unicode(string)
+  for dateFormat in dateFormats:
+    try:
+      return datetime.strptime(dateString, dateFormat)
+    except ValueError:
+      pass
+  raise InputException('Format of Date "{0}" is unknown'.format(string))
 
 def isNotNull(value):
   """
@@ -62,4 +91,8 @@ def isNotNull(value):
 
   :returns: Boolean
   """
-  return value is not None and len(value) > 0
+  if value is None:
+    return False
+  string = unicode(value)
+  return string and string != ''
+

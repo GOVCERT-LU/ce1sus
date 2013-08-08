@@ -13,12 +13,12 @@ __license__ = 'GPL v3+'
 from ce1sus.db.broker import BrokerBase, NothingFoundException, \
 ValidationException, TooManyResultsFoundException
 import sqlalchemy.orm.exc
-import hashlib
+import ce1sus.helpers.hash as hasher
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 from ce1sus.db.session import BASE
-import ce1sus.helpers.validator as validator
+from ce1sus.helpers.validator import ObjectValidator
 import re
 
 # Relation table for user and groups
@@ -32,6 +32,9 @@ __REL_USER_GROUPS = Table(
 
 class User(BASE):
   """This is a container class for the USERS table."""
+  def __init__(self):
+    pass
+
   __tablename__ = 'Users'
 
   identifier = Column('user_id', Integer, primary_key=True)
@@ -54,7 +57,9 @@ class User(BASE):
     errors = not group.validate()
     if errors:
       raise ValidationException('Group to be added is invalid')
-    self.groups.append(group)
+    function = getattr(self.groups, 'append')
+    function(group)
+
 
   def removeGroup(self, group):
     """
@@ -66,7 +71,9 @@ class User(BASE):
     errors = not group.validate()
     if errors:
       raise ValidationException('Group to be removed is invalid')
-    self.groups.remove(group)
+    function = getattr(self.groups, 'remove')
+    function(group)
+
 
   def validate(self):
     """
@@ -74,15 +81,21 @@ class User(BASE):
 
     :returns: Boolean
     """
-    validator.validateAlNum(self, 'username')
+    ObjectValidator.validateAlNum(self, 'username')
     # TODO: find a way to validate password earlier!
-    # validator.validateRegex(self, 'password', "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$", 'Password has to be set and contain Upper/Lower cases, symbols and numbers and have at least a length of 8')
-    validator.validateRegex(self, 'privileged', "^[01]+$", 'Privileged has to be set.')
-    validator.validateEmailAddress(self, 'email')
-    return validator.isObjectValid(self)
+    # validator.validateRegex(self, 'password', "(?=^.{8,}$)(?=.*[a-z])
+    # (?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$", 'Password has to be
+    # set and contain Upper/Lower cases, symbols and numbers and have at least
+    # a length of 8')
+    ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
+    ObjectValidator.validateEmailAddress(self, 'email')
+    return ObjectValidator.isObjectValid(self)
 
 class Group(BASE):
   """This is a container class for the GRUOPS table."""
+  def __init__(self):
+    pass
+
   __tablename__ = 'Groups'
 
   identifier = Column('group_id', Integer, primary_key=True)
@@ -94,7 +107,7 @@ class Group(BASE):
 
 
   def __str__(self):
-    return str(self.__dict__)
+    return unicode(self.__dict__)
 
   def addUser(self, user):
     """
@@ -106,7 +119,9 @@ class Group(BASE):
     errors = not user.validate()
     if errors:
       raise ValidationException('User to be added is invalid')
-    self.users.append(user)
+    function = getattr(self.users, 'append')
+    function(user)
+
 
   def removeUser(self, user):
     """
@@ -118,7 +133,9 @@ class Group(BASE):
     errors = not user.validate()
     if errors:
       raise ValidationException('User to be removed is invalid')
-    self.users.remove(user)
+    function = getattr(self.users, 'remove')
+    function(user)
+
 
   def validate(self):
     """
@@ -126,9 +143,14 @@ class Group(BASE):
 
     :returns: Boolean
     """
-    validator.validateAlNum(self, 'name')
-    validator.validateDigits(self, 'shareTLP')
-    return validator.isObjectValid(self)
+    ObjectValidator.validateAlNum(self, 'name')
+    ObjectValidator.validateDigits(self, 'shareTLP')
+    ObjectValidator.validateAlNum(self,
+                                  'description',
+                                  withNonPrintableCharacters=True,
+                                  withSpaces=True,
+                                  minLength=3)
+    return ObjectValidator.isObjectValid(self)
 
 
 class GroupBroker(BrokerBase):
@@ -213,28 +235,14 @@ class UserBroker(BrokerBase):
   """This is the interface between python an the database"""
 
 
-  @staticmethod
-  def __hashPassword(password, salt):
-    """
-    Returns hashed password
-    """
-    if not password or password is None:
-      return ''
 
-    if password == 'EXTERNALAUTH':
-      return password
-
-
-    hashedPwd = hashlib.sha1()
-    hashedPwd.update(password + salt)
-    return hashedPwd.hexdigest()
 
 
   def insert(self, instance, commit=True):
     """
     overrides BrokerBase.insert
     """
-    instance.password = self.__hashPassword(instance.password,
+    instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
 
     errors = not instance.validate()
@@ -248,7 +256,7 @@ class UserBroker(BrokerBase):
     """
     # Don't update if the password is already a hash
     if re.match('^[0-9a-f]{40}$', instance.password) is None:
-      instance.password = self.__hashPassword(instance.password,
+      instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
 
     errors = not instance.validate()
@@ -306,7 +314,7 @@ class UserBroker(BrokerBase):
 
     :returns: User
     """
-    passwd = self.__hashPassword(password, username)
+    passwd = hasher.hashSHA1(password, username)
     try:
       user = self.session.query(User).filter(User.username == username,
                                              User.password == passwd).one()

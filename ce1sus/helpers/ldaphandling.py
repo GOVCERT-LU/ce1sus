@@ -1,7 +1,7 @@
 """module containing interfaces classes related to LDAP"""
 
 from ce1sus.helpers.config import Configuration
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 import ldap
 import types
 
@@ -60,8 +60,8 @@ class LDAPHandler(object):
       if self.__tls:
         self.__connection.start_tls_s()
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: ' + str(e))
+      Log.getLogger(self.__class__.__name__).fatal(e)
+      raise ServerErrorException('LDAP error: ' + unicode(e))
 
 
   def isUserValid(self, uid, password):
@@ -95,16 +95,17 @@ class LDAPHandler(object):
         if not (uid is None or password is None):
           self.__connection.simple_bind_s(self.__getUserDN(uid), password)
       except ldap.INVALID_CREDENTIALS:
-        Logger.getLogger(self.__class__.__name__
+        Log.getLogger(self.__class__.__name__
                         ).info('Username or password is invalid for {0}'.format(
                                                                           uid))
         raise InvalidCredentialsException('Username or password is invalid.')
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
+      Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
 
-  def __mapUser(self, user):
+  @staticmethod
+  def __mapUser(user):
     for attributes in user:
       if isinstance(attributes, types.DictType):
         user = LDAPUser()
@@ -135,12 +136,12 @@ class LDAPHandler(object):
       # dierft nemmen 1 sinn
       userList = list()
       for user in result:
-        user = self.__mapUser(user)
+        user = LDAPHandler.__mapUser(user)
         userList.append(user)
       if len(userList) < 1:
         raise NothingFoundException('No  users were found')
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
+      Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
     return userList
 
@@ -164,10 +165,10 @@ class LDAPHandler(object):
                                filter_, attributes)
       # dierft nemmen 1 sinn
       for user in result:
-        user = self.__mapUser(user)
+        user = LDAPHandler.__mapUser(user)
 
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
+      Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
     return user
 
@@ -190,7 +191,7 @@ class LDAPHandler(object):
       result = self.__connection.search_s(userdn, ldap.SCOPE_SUBTREE,
                                filter_, [attributeName])
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
+      Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
     attribute = None
     # dierft nemmen 1 sinn
@@ -218,7 +219,7 @@ class LDAPHandler(object):
     try:
       self.__connection.unbind_s()
     except ldap.LDAPError as e:
-      Logger.getLogger(self.__class__.__name__).fatal(e)
+      Log.getLogger(self.__class__.__name__).fatal(e)
 
   @staticmethod
   def getInstance():

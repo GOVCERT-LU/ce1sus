@@ -65,7 +65,8 @@ class Protector(object):
     conditions that the user must fulfill"""
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
-      username = cherrypy.session.get(SESSION_KEY)
+      attribute = getattr(cherrypy, 'session')
+      username = attribute.get(SESSION_KEY)
       if username:
         cherrypy.request.login = username
         for condition in conditions:
@@ -85,8 +86,9 @@ class Protector(object):
     :param username: the username of the logged in user
     :type username: String
     """
-    cherrypy.session.regenerate()
-    cherrypy.session[SESSION_KEY] = cherrypy.request.login = username
+    attribute = getattr(cherrypy, 'session')
+    attribute.regenerate()
+    attribute[SESSION_KEY] = cherrypy.request.login = username
 
   @staticmethod
   def getUserName():
@@ -141,7 +143,8 @@ class Protector(object):
     Clears the session
     """
     username = Protector.getUserName()
-    cherrypy.session[SESSION_KEY] = None
+    attribute = getattr(cherrypy, 'session')
+    attribute[SESSION_KEY] = None
     if username:
       cherrypy.request.login = None
 

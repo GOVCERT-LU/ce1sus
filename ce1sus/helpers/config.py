@@ -1,8 +1,10 @@
 """configuration module"""
 
-from ConfigParser import ConfigParser
+from ConfigParser import ConfigParser, Error
 from os.path import isfile
 from os import getcwd
+
+
 
 
 class ConfigException(Exception):
@@ -30,14 +32,16 @@ class Configuration(object):
       for option in options:
         try:
           string = config.get(section, option)
-          if string.upper() in ['YES', 'NO', 'TRUE', 'FALSE']:
+          function = getattr(string, 'upper')
+          if function() in ['YES', 'NO', 'TRUE', 'FALSE']:
             self.configDict[option] = config.getboolean(section, option)
           else:
-            if string.isdigit():
+            function = getattr(string, 'isdigit')
+            if function():
               self.configDict[option] = config.getint(section, option)
             else:
               self.configDict[option] = string
-        except Exception as e:
+        except Error as e:
           self.getLogger().error(e)
           self.configDict[option] = None
     else:
@@ -62,4 +66,6 @@ class Configuration(object):
 
     :returns: Logger
     """
-    return Logger.getLogger(self.__class__.__name__)
+    loggerClass = globals()['Log']
+    function = getattr(loggerClass, 'getLogger')
+    return function(self.__class__.__name__)

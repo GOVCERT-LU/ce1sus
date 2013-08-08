@@ -1,7 +1,6 @@
 """This module provides container classes and interfaces
 for inserting data into the database.
 """
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, Weber Jean-Paul'
@@ -9,27 +8,26 @@ __license__ = 'GPL v3+'
 
 # Created on Jul 9, 2013
 
-
 from ce1sus.db.broker import BrokerBase, ValidationException, \
-NothingFoundException, TooManyResultsFoundException, OperationException
+NothingFoundException, TooManyResultsFoundException, OperationException, \
+BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, not_
 from sqlalchemy.orm import relationship
 from ce1sus.db.session import BASE
 from sqlalchemy.types import DateTime
 from ce1sus.brokers.permissionbroker import User, Group
-import ce1sus.helpers.validator as validator
+from ce1sus.helpers.validator import ObjectValidator
 from ce1sus.brokers.definitionbroker import AttributeDefinition, \
     ObjectDefinition, AttributeDefinitionBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel
 from sqlalchemy.sql.expression import or_, and_
 
-
-
-
-
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "Attributes"
 
   identifier = Column('attribute_id', Integer, primary_key=True)
@@ -58,7 +56,8 @@ class Attribute(BASE):
 
     :returns: String
     """
-    return self.definition.name
+    return getattr(self.definition, 'name')
+
 
   @property
   def value(self):
@@ -85,10 +84,10 @@ class Attribute(BASE):
 
     :returns: Boolean
     """
-
-    validator.validateDigits(self, 'def_attribute_id')
-    return validator.isObjectValid(self)
-
+    ObjectValidator.validateDigits(self, 'def_attribute_id')
+    ObjectValidator.validateDigits(self, 'object_id')
+    ObjectValidator.validateDigits(self, 'user_id')
+    return ObjectValidator.isObjectValid(self)
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -106,10 +105,11 @@ _REL_TICKET_EVENTS = Table('Events_has_Tickets', BASE.metadata,
     Column('ticked_id', Integer, ForeignKey('Tickets.ticked_id'))
 )
 
-
-
 class Event(BASE):
   """This is a container class for the EVENTS table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "Events"
 
   identifier = Column('event_id', Integer, primary_key=True)
@@ -134,8 +134,6 @@ class Event(BASE):
   tickets = relationship("Ticket", secondary=_REL_TICKET_EVENTS,
                               backref="events")
 
-
-
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
 
 
@@ -153,7 +151,9 @@ class Event(BASE):
     errors = not obj.validate()
     if errors:
       raise ValidationException('Object to be added is invalid')
-    self.objects.append(obj)
+
+    function = getattr(self.objects, 'append')
+    function(obj)
 
   @property
   def stauts(self):
@@ -185,7 +185,9 @@ class Event(BASE):
     errors = not group.validate()
     if errors:
       raise ValidationException('Group to be added is invalid')
-    self.groups.append(group)
+    function = getattr(self.groups, 'append')
+    function(group)
+
 
   def removeGroup(self, group):
     """
@@ -197,7 +199,9 @@ class Event(BASE):
     errors = not group.validate()
     if errors:
       raise ValidationException('Group to be removed is invalid')
-    self.groups.remove(group)
+    function = getattr(self.groups, 'remove')
+    function(group)
+
 
   def addTicket(self, ticket):
     """
@@ -209,7 +213,9 @@ class Event(BASE):
     errors = not ticket.validate()
     if errors:
       raise ValidationException('Ticket to be added is invalid')
-    self.tickets.append(ticket)
+    function = getattr(self.tickets, 'append')
+    function(ticket)
+
 
   def removeTicket(self, ticket):
     """
@@ -221,7 +227,9 @@ class Event(BASE):
     errors = not ticket.validate()
     if errors:
       raise ValidationException('Ticket to be removed is invalid')
-    self.tickets.remove(ticket)
+    function = getattr(self.tickets, 'remove')
+    function(ticket)
+
 
   def validate(self):
     """
@@ -229,15 +237,29 @@ class Event(BASE):
 
     :returns: Boolean
     """
-    validator.validateAlNum(self, 'title')
-    validator.validateAlNum(self, 'description', True)
-    validator.validateDigits(self, 'tlp_level_id')
-    validator.validateDigits(self, 'status_id')
-    validator.validateDigits(self, 'published')
-    return validator.isObjectValid(self)
+    ObjectValidator.validateAlNum(self, 'title', withSpaces=True, minLength=3)
+    ObjectValidator.validateAlNum(self,
+                                  'description',
+                                  withNonPrintableCharacters=True,
+                                  withSpaces=True,
+                                  minLength=3)
+    ObjectValidator.validateDigits(self, 'tlp_level_id')
+    ObjectValidator.validateDigits(self, 'status_id')
+    ObjectValidator.validateDigits(self, 'published')
+    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDateTime(self, 'created')
+    ObjectValidator.validateDateTime(self, 'modified')
+    if not self.first_seen is None:
+      ObjectValidator.validateDateTime(self, 'first_seen')
+    if not self.last_seen is None:
+      ObjectValidator.validateDateTime(self, 'last_seen')
+    return ObjectValidator.isObjectValid(self)
 
 class Ticket(BASE):
   """This is a container class for the TICKETS table."""
+  def __init__(self):
+    pass
+
   # TODO: Finalize Ticket
   __tablename__ = "Tickets"
 
@@ -255,12 +277,16 @@ class Ticket(BASE):
 
     :returns: Boolean
     """
-    # TODO validation of tickets
-    return validator.isObjectValid(self)
+    ObjectValidator.validateDigits(self, 'ticket')
+    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDateTime(self, 'created')
+    return ObjectValidator.isObjectValid(self)
 
 
 class Comment(BASE):
   """This is a container class for the COMMENTS table."""
+  def __init__(self):
+    pass
 
   # TODO: Finalize comments
   __tablename__ = "Comments"
@@ -282,11 +308,15 @@ class Comment(BASE):
 
     :returns: Boolean
     """
-    validator.validateDigits(self, 'user_id')
-    validator.validateDigits(self, 'event_id')
-    # TODO find way to validate this!
-    # validator.validateAlNum(self, 'comment', True, True)
-    return validator.isObjectValid(self)
+    ObjectValidator.validateDateTime(self, 'created')
+    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'event_id')
+    ObjectValidator.validateAlNum(self,
+                                  'comment',
+                                  minLength=5,
+                                  withSpaces=True,
+                                  withNonPrintableCharacters=True)
+    return ObjectValidator.isObjectValid(self)
 
 _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
@@ -295,6 +325,9 @@ _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
 
 class Object(BASE):
   """This is a container class for the OBJECTS table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "Objects"
 
   identifier = Column('object_id', Integer, primary_key=True)
@@ -305,7 +338,6 @@ class Object(BASE):
   creator = relationship("User", uselist=False,
                          primaryjoin='User.identifier==Object.user_id',
                          innerjoin=True)
-
 
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
@@ -335,7 +367,9 @@ class Object(BASE):
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be added is invalid')
-    self.attributes.append(attribute)
+
+    function = getattr(self.attributes, 'append')
+    function(attribute)
 
   def validate(self):
     """
@@ -343,13 +377,28 @@ class Object(BASE):
 
     :returns: Boolean
     """
-    validator.validateDigits(self, 'user_id')
-    validator.validateDigits(self, 'def_object_id')
-    validator.validateDigits(self, 'event_id')
-    return validator.isObjectValid(self)
+
+    for attribute in self.attributes:
+      result = attribute.validate()
+      if not result:
+        return False
+
+    function = getattr(self.definition, 'validate')
+
+    if not function():
+      return False
+
+    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'def_object_id')
+    ObjectValidator.validateDigits(self, 'event_id')
+    ObjectValidator.validateDateTime(self, 'created')
+    return ObjectValidator.isObjectValid(self)
 
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "StringValues"
 
   identifier = Column('StringValue_id', Integer, primary_key=True)
@@ -363,12 +412,16 @@ class StringValue(BASE):
 
     :returns: Boolean
     """
-    # validator.validateAlNum(self, 'value', True)
-    return validator.isObjectValid(self)
-
+    return ObjectValidator.validateAlNum(self,
+                                         'value',
+                                         minLength=1,
+                                         withSpaces=True)
 
 class DateValue(BASE):
   """This is a container class for the DATEVALES table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "DateValues"
 
   identifier = Column('DateValue_id', Integer, primary_key=True)
@@ -382,12 +435,13 @@ class DateValue(BASE):
 
     :returns: Boolean
     """
-    # TODO: Validator for dates
-    return True
-
+    return ObjectValidator.validateAlNum(self, 'value')
 
 class TextValue(BASE):
   """This is a container class for the TEXTVALUES table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "TextValues"
 
   identifier = Column('TextValue_id', Integer, primary_key=True)
@@ -401,12 +455,17 @@ class TextValue(BASE):
 
     :returns: Boolean
     """
-    # validator.validateAlNum(self, 'value', True)
-    return validator.isObjectValid(self)
-
+    return ObjectValidator.validateAlNum(self,
+                                         'value',
+                                         minLength=1,
+                                         withNonPrintableCharacters=True,
+                                         withSpaces=True)
 
 class NumberValue(BASE):
   """This is a container class for the NUMBERVALUES table."""
+  def __init__(self):
+    pass
+
   __tablename__ = "NumberValues"
   identifier = Column('NumberValue_id', Integer, primary_key=True)
   value = Column('value', String)
@@ -419,9 +478,7 @@ class NumberValue(BASE):
 
     :returns: Boolean
     """
-    # validator.validateDigits(self, 'value')
-    return validator.isObjectValid(self)
-
+    return ObjectValidator.validateDigits(self, 'value')
 
 class CommentBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -443,10 +500,10 @@ class CommentBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with event ID :{0}'.format(
                                                                   eventID))
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     return result
-
-
 
   def getBrokerClass(self):
     """
@@ -473,17 +530,11 @@ class ObjectBroker(BrokerBase):
     """
     obj = self.getByID(identifier)
     # remove attributes
-    try:
-      self.attributeBroker.removeAttributeList(obj.attributes, False)
-      self.session.flush()
-      BrokerBase.removeByID(self, obj.identifier, False)
-      if commit:
-        self.session.commit()
-      else:
-        self.session.flush()
-    except Exception as e:
-      self.getLogger().info(e)
-      self.session.rollback()
+
+    self.attributeBroker.removeAttributeList(obj.attributes, False)
+    self.session.flush()
+    BrokerBase.removeByID(self, obj.identifier, False)
+    self.doCommit(commit)
 
 class ValueBroker(BrokerBase):
   """
@@ -567,6 +618,9 @@ class ValueBroker(BrokerBase):
       raise TooManyResultsFoundException(
           'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
            self.getBrokerClass()))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
 
     return result
 
@@ -599,7 +653,6 @@ class ValueBroker(BrokerBase):
 
     :returns : XXXXXValue
     """
-
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be updated is invalid')
@@ -623,13 +676,15 @@ class ValueBroker(BrokerBase):
       self.session.query(self.getBrokerClass()).filter(
                       self.getBrokerClass().attribute_id == attribute.identifier
                       ).delete(synchronize_session='fetch')
+      self.doCommit(commit)
     except sqlalchemy.exc.OperationalError as e:
+      self.getLogger().error(e)
+      self.session.rollback()
       raise OperationException(e)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
 class AttributeBroker(BrokerBase):
   """
@@ -663,6 +718,9 @@ class AttributeBroker(BrokerBase):
       raise TooManyResultsFoundException(
             'Too many results found for attribute :{0}'.format(
                                     attribute.definition.name))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
 
   def getByID(self, identifier):
     """
@@ -679,10 +737,16 @@ class AttributeBroker(BrokerBase):
     # validation of the value of the attribute first
 
     # getdefinition
-    definition = self.attributeDefinitionBroker.getByID(instance.def_attribute_id)
+    definition = self.attributeDefinitionBroker.getByID(
+                                                    instance.def_attribute_id)
 
 
-    validator.validateRegex(instance, 'value', definition.regex, 'The value does not match {0}'.format(definition.regex) , False)
+    ObjectValidator.validateRegex(instance,
+                                  'value',
+                                  definition.regex,
+                                  'The value does not match {0}'.format(
+                                                            definition.regex),
+                                  False)
 
     errors = not instance.validate()
     if errors:
@@ -696,56 +760,45 @@ class AttributeBroker(BrokerBase):
         self.session.commit()
       else:
         self.session.flush()
-    except Exception as e:
-      self.getLogger().info(e)
+    except BrokerException as e:
+      self.getLogger().fatal(e)
       self.session.rollback()
 
   def update(self, instance, commit=True):
     """
     overrides BrokerBase.update
     """
+
     # validation of the value of the attribute first
+    definition = self.attributeDefinitionBroker.getByID(
+                                                    instance.def_attribute_id)
 
-    # getdefinition
-    definition = self.attributeDefinitionBroker.getByID(instance.def_attribute_id)
-
-
-    validator.validateRegex(instance, 'value', definition.regex, 'The value does not match {0}'.format(definition.regex) , False)
+    ObjectValidator.validateRegex(instance,
+                                  'value',
+                                  definition.regex,
+                                  'The value does not match {0}'.format(
+                                                              definition.regex),
+                                  False)
 
     errors = not instance.validate()
     if errors:
       raise ValidationException('Attribute to be updated is invalid')
 
-    try:
-      BrokerBase.update(self, instance, False)
-      # updates the value of the value table
-      self.session.flush()
-      self.valueBroker.updateByAttribute(instance, False)
-      if commit:
-        self.session.commit()
-      else:
-        self.session.flush()
-    except Exception as e:
-      self.getLogger().info(e)
-      self.session.rollback()
+    BrokerBase.update(self, instance, False)
+    # updates the value of the value table
+    self.session.flush()
+    self.valueBroker.updateByAttribute(instance, False)
+    self.doCommit(commit)
 
   def removeByID(self, identifier, commit=True):
     attribute = self.getByID(identifier)
-    try:
-      self.valueBroker.removeByAttribute(attribute, False)
+
+    self.valueBroker.removeByAttribute(attribute, False)
       # first remove values
-      self.session.flush()
+    self.session.flush()
       # remove attribute
-      BrokerBase.removeByID(self, identifier=attribute.identifier, commit=False)
-      if commit:
-        self.session.commit()
-      else:
-        self.session.flush()
-    except Exception as e:
-      self.getLogger().info(e)
-      self.session.rollback()
-
-
+    BrokerBase.removeByID(self, identifier=attribute.identifier, commit=False)
+    self.doCommit(commit)
 
   def removeAttributeList(self, attributes, commit=True):
     """
@@ -754,20 +807,11 @@ class AttributeBroker(BrokerBase):
       :param attributes: List of attributes
       :type attributes: List of Attributes
     """
-    try:
-
-      for attribute in attributes:
-        # remove attributes
-        self.removeByID(attribute.identifier, False)
-        self.session.flush()
-      if commit:
-        self.session.commit()
-      else:
-        self.session.flush()
-    except Exception as e:
-      self.getLogger().info(e)
-      self.session.rollback()
-
+    for attribute in attributes:
+      # remove attributes
+      self.removeByID(attribute.identifier, False)
+      self.session.flush()
+    self.doCommit(commit)
 
 class TicketBroker(BrokerBase):
   """
@@ -797,22 +841,23 @@ class EventBroker(BrokerBase):
         self.attributeBroker.getSetValues(attribute)
     return event
 
-  def insert(self, instance):
+  def insert(self, instance, commit=True):
     """
     overrides BrokerBase.insert
     """
-
     errors = not instance.validate()
     if errors:
       raise ValidationException('Event to be inserted is invalid')
 
-    BrokerBase.insert(self, instance)
+    BrokerBase.insert(self, instance, commit)
     # insert value for value table
     for obj in instance.objects:
       for attribute in obj.attributes:
-        self.attributeBroker.insert(attribute)
+        self.attributeBroker.insert(attribute, commit)
 
-  def update(self, instance):
+    self.doCommit(commit)
+
+  def update(self, instance, commit=True):
     """
     overrides BrokerBase.update
     """
@@ -820,10 +865,13 @@ class EventBroker(BrokerBase):
     if errors:
       raise ValidationException('Event to be inserted is invalid')
 
-    BrokerBase.update(self, instance)
+    BrokerBase.update(self, instance, commit)
     # insert value for value table
-    # TODO: check this ..... and also validation
+    for obj in instance.objects:
+      for attribute in obj.attributes:
+        self.attributeBroker.update(attribute, commit)
 
+    self.doCommit(commit)
 
   def getGroupsByEvent(self, identifier, belongIn=True):
     """
@@ -851,7 +899,12 @@ class EventBroker(BrokerBase):
         groups = self.session.query(Group).filter(not_(Group.identifier.in_(
                                                                     groupIDs)))
     except sqlalchemy.orm.exc.NoResultFound:
-      groups = list()
+      raise NothingFoundException('Nothing found for ID: {0}',
+                                  format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
     return groups
 
   def getBrokerClass(self):
@@ -868,11 +921,14 @@ class EventBroker(BrokerBase):
                         Event.created.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
     return result
 
   def getAllForUser(self, user, limit=None, offset=None):
     """Returns all the tickets belonging to the groups"""
-
     if user.privileged:
       if limit is None or offset is None:
         limit = 200
@@ -903,8 +959,10 @@ class EventBroker(BrokerBase):
                         Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found')
+      except sqlalchemy.exc.SQLAlchemyError as e:
+        self.getLogger().fatal(e)
+        raise BrokerException(e)
       return result
-
 
   def addGroupToEvent(self, eventID, groupID, commit=True):
     """
@@ -922,11 +980,14 @@ class EventBroker(BrokerBase):
                                                eventID).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or event not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
     event.addGroup(group)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    # TODO: Check if there is really no insert needed
+
+    self.doCommit(commit)
 
   def removeGroupFromEvent(self, eventID, groupID, commit=True):
     """
@@ -944,11 +1005,9 @@ class EventBroker(BrokerBase):
                                                eventID).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     event.removeGroup(group)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
-
-
-
+    # TODO: Check if there is really no remove needed
+    self.doCommit(commit)

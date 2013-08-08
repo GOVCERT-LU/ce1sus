@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 <%namespace name="baseComponents" file="/components/baseComponents.html"/>
 <%namespace name="modals" file="/components/modals.html"/>
 <%namespace name="forms" file="/components/forms.html"/>
@@ -71,7 +73,7 @@
                 paginator.list = list()
                 objID = ''
             %>
-            <%call expr="baseComponents.pagination('attributesTable'+str(objID),paginator,hasSearch=False)"/>
+            <%call expr="baseComponents.pagination('attributesTable'+unicode(objID),paginator,hasSearch=False)"/>
             <div class="btn-group">
 	            %if not object is None:
 	                <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal">Add an Attribute</a>

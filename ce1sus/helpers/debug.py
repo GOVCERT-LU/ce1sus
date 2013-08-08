@@ -1,16 +1,12 @@
 """Debugging module"""
 
-import os
 import logging
 from ce1sus.helpers.config import Configuration
 from ce1sus.helpers.string import isNotNull
 from logging.handlers import RotatingFileHandler
 
-
-
-
-class Logger(object):
-  """Logger class"""
+class Log(object):
+  """Log class"""
   def __init__(self, configFile=None):
 
     if configFile:
@@ -52,7 +48,7 @@ class Logger(object):
 
       self.setLogFile(self.__logger)
 
-    Logger.instance = self
+    Log.instance = self
 
   def setConsoleHandler(self, logger):
     """
@@ -91,15 +87,14 @@ class Logger(object):
 
     :returns: Logger
     """
-    if hasattr(Logger, 'instance'):
+    if hasattr(Log, 'instance'):
       logger = logging.getLogger(className)
-      logger.setLevel(Logger.instance.logLvl)
-      Logger.instance.setConsoleHandler(logger)
-      Logger.instance.setLogFile(logger)
+      logger.setLevel(Log.instance.logLvl)
+      Log.instance.setConsoleHandler(logger)
+      Log.instance.setLogFile(logger)
       return logger
     else:
-      Logger()
-      Logger.instance.getLogger('root').error('No configuration loaded')
-      return Logger.instance.getLogger(className)
+      Log.instance.getLogger('root').error('No configuration loaded')
+      return Log.instance.getLogger(className)
 
 

@@ -3,7 +3,7 @@
 import cherrypy
 import os
 from ce1sus.db.session import SessionManager
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 from ce1sus.web.helpers.templates import MakoHandler
 from ce1sus.web.controllers.index import IndexController
 from ce1sus.web.controllers.admin import AdminController
@@ -63,20 +63,19 @@ def application(environ, start_response):
 def bootstap():
   # want parent of parent directory aka ../../
   basePath = os.path.dirname(os.path.abspath(__file__))
-  # s
 
   loadCerryPyConfig(basePath + '/config/cherrypy.conf')
 
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   SessionManager(ce1susConfigFile)
   # ErrorHandler(ce1susConfigFile)
-  Logger(ce1susConfigFile)
+  Log(ce1susConfigFile)
   MakoHandler(ce1susConfigFile)
   Protector(ce1susConfigFile)
   RTHelper(ce1susConfigFile)
   WebConfig(ce1susConfigFile)
   LDAPHandler(ce1susConfigFile)
-  
+
   config = {'/':
                   {
                    'tools.staticdir.on': True,

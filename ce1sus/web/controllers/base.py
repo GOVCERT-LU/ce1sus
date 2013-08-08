@@ -3,7 +3,7 @@ for controllers.
 """
 
 from ce1sus.web.helpers.templates import MakoHandler
-from ce1sus.helpers.debug import Logger
+from ce1sus.helpers.debug import Log
 from ce1sus.db.session import SessionManager
 from ce1sus.web.helpers.protection import Protector
 from ce1sus.web.helpers.config import WebConfig
@@ -15,7 +15,7 @@ class BaseController:
   class"""
   def __init__(self):
     self.mako = MakoHandler.getInstance()
-    self.logger = Logger.getLogger(self.__class__.__name__)
+    self.logger = Log.getLogger(self.__class__.__name__)
     self.__sessionHandler = SessionManager.getInstance()
     self.config = WebConfig.getInstance()
 
@@ -101,4 +101,4 @@ class BaseController:
 
     :returns: Logger
     """
-    return Logger.getLogger(self.__class__.__name__)
+    return Log.getLogger(self.__class__.__name__)

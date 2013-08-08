@@ -2,14 +2,51 @@
 
 import re
 
-ALNUM = '^[\\d\\w]*$'
-ALNUM_WS = '^[\\d\\w ]*$'
-ALPHA = '^[\\w]*$'
-ALPHA_WS = '^[\\w ]*$'
-DATE = ''
-DIGITS = '^[\\d]*$'
-EMAILADDRESS = '^.+@.+\\..{2,3}$'
-IP = '[\\d]\\.[\\d]\\.[\\d]\\.[\\d]'
+ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'
+ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
+DATE = [r'^[\d]{4}-[\d]{2}-[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}:[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}$',
+        r'^[\d]{2}/[\d]{2}/[\d]{4}$',
+        r'^[\d]{2}/[\d]{2}/[\d]{4} - [\d]{2}:[\d]{2}$',
+        r'^[\d]{2}/[\d]{2}/[\d]{4} - [\d]{2}:[\d]{2}:[\d]{2}$',
+        r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}$',
+        r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}:[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{6}$'
+       ]
+DIGITS = r'^[\d.]+$'
+EMAILADDRESS = r'^.+@.+\..{2,3}$'
+IP = r'^[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}$'
+
+def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
+  """
+    Validates the attribute attributeName of the object obj against the regex.
+
+    Note: The actual object is changed internally
+
+    :param obj: Object
+    :type obj: object
+    :param attributeName: attribute name of the object
+    :type attributeName: String
+    :param errorMsg: Error message to be shown is case of a failed validation
+    :type errorMsg: String
+    :param changeAttribute: If set the given attribute will be changed to a
+                            type of FailedValidation
+    :type changeAttribute: Boolean
+  """
+  if hasattr(obj, attributeName):
+    value = unicode(getattr(obj, attributeName))
+    result = re.match(regex, value, re.UNICODE) is not None
+    if not result and changeAttribute:
+      setattr(obj, attributeName, FailedValidation(value, errorMsg))
+
+    return result
+  else:
+    raise ValidationException('The given object has no attribute ' +
+                               attributeName)
+
 
 class ValidationException(Exception):
   """Validation Exception"""
@@ -30,133 +67,456 @@ class FailedValidation(object):
   def __str__(self, *args, **kwargs):
     return self.value
 
-def validateAlNum(obj, attributeName, withSpaces=False, withLineBreaks=False):
+class Container(object):
   """
-    Validates if the attribute is of an alphanumeric kind.
+  Container class
 
-    Note: The actual object is changed internally
-
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-    :param withSpaces: If set the attribute can contain spaces
-    :type withSpaces: Boolean
+  Note:
+    Should only be used by the ValueValidator
   """
-  if withSpaces:
-      return validateRegex(obj, attributeName, ALNUM_WS,
-                         'The value has to be alpha-numerical')
-  else:
-      return validateRegex(obj, attributeName, ALNUM,
-                         'The value has to be alpha-numerical')
+  def __init__(self, value):
+    self.value = value
 
-def validateAlpha(obj, attributeName, withSpaces=False):
+class ValueValidator:
   """
-    Validates if the attribute is of an alphabetical kind.
-
-    Note: The actual object is changed internally
-
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-    :param withSpaces: If set the attribute can contain spaces
-    :type withSpaces: Boolean
+  Utility Class for validating base types
   """
-  if withSpaces:
-    return validateRegex(obj, attributeName, ALPHA_WS,
-                       'The value has to be alphabetical')
-  else:
-    return validateRegex(obj, attributeName, ALPHA,
-                       'The value has to be alphabetical')
+  def __init__(self):
+    pass
 
-def validateDigits(obj, attributeName):
+  @staticmethod
+  def validateAlNum(string,
+                    minLength=0,
+                    maxLength=0,
+                    withSpaces=False,
+                    withNonPrintableCharacters=False):
+    """
+      Validates if the string is of an alphanumeric kind.
+
+      :param string: The string to be validated
+      :type string: String
+      :param minLength: The minimal length of the string
+      :type minLength: Integer
+      :param maxLength: The maximal length of the string
+      :type maxLength: Integer
+      :param withSpaces: If set the string can contain spaces
+      :type withSpaces: Boolean
+      :param withNonPrintableCharacters: If set the string can contain non
+                                         printable characters as tab newlines etc.
+      :type withNonPrintableCharacters: Boolean
+
+      :return Boolean
+    """
+
+    obj = Container(string)
+    return ObjectValidator.validateAlNum(obj,
+                                    'value',
+                                    minLength,
+                                    maxLength,
+                                    withSpaces,
+                                    withNonPrintableCharacters,
+                                    changeAttribute=False)
+
+  @staticmethod
+  def validateAlpha(string,
+                    minLength=0,
+                    maxLength=0,
+                    withSpaces=False,
+                    withNonPrintableCharacters=False):
+    """
+      Validates if the string is of an alphabetical kind.
+
+      :param string: The string to be validated
+      :type string: String
+      :param minLength: The minimal length of the string
+      :type minLength: Integer
+      :param maxLength: The maximal length of the string
+      :type maxLength: Integer
+      :param withSpaces: If set the string can contain spaces
+      :type withSpaces: Boolean
+      :param withNonPrintableCharacters: If set the string can contain non
+                                         printable characters as tab newlines etc.
+      :type withNonPrintableCharacters: Boolean
+
+      :return Boolean
+    """
+
+    obj = Container(string)
+    return ObjectValidator.validateAlpha(obj,
+                                    'value',
+                                    minLength,
+                                    maxLength,
+                                    withSpaces,
+                                    withNonPrintableCharacters,
+                                    changeAttribute=False)
+
+
+  @staticmethod
+  def validateDigits(string,
+                     minimal=None,
+                     maximal=None):
+    """
+      Validates if the attribute is of an numerical kind.
+
+      Note: The actual object is changed internally
+
+      :param string: The string to be validated
+      :type string: String
+      :param minimal: the minimal value the number
+      :type minimal: Number
+      :param maximal: the maximal value the number
+      :type maximal: Number
+
+      :return Boolean
+    """
+
+    obj = Container(string)
+    return ObjectValidator.validateDigits(obj,
+                                    'value',
+                                    minimal,
+                                    maximal,
+                                    changeAttribute=False)
+
+  @staticmethod
+  def validateEmailAddress(string):
+    """
+      Validates if the attribute is an email.
+
+      Note: The actual object is changed internally
+
+      :param string: Text to be analyzed
+      :type string: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+
+    obj = Container(string)
+    return ObjectValidator.validateEmailAddress(obj,
+                                                  'value',
+                                                  changeAttribute=False)
+
+
+  @staticmethod
+  def validateIP(string):
+    """
+      Validates if the attribute is an IP address.
+
+      Note: The actual object is changed internally
+
+      :param string: Text to be analyzed
+      :type string: String
+
+      :return Boolean
+    """
+    obj = Container(string)
+    return ObjectValidator.validateIP(obj, 'value', changeAttribute=False)
+
+  @staticmethod
+  def validateDateTime(string):
+    """
+      Validates if the attribute is a date or date time under the
+      specified formats address.
+
+      Note: The actual object is changed internally
+
+      :param string: Text to be analyzed
+      :type string: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+    obj = Container(string)
+    return ObjectValidator.validateDateTime(obj, 'value', changeAttribute=False)
+
+  @staticmethod
+  def validateRegex(string, regex, errorMsg, changeAttribute=True):
+    """
+    wrapper for validateRegex
+    """
+    obj = Container(string)
+    return validateRegex(obj, 'value', regex, errorMsg, changeAttribute)
+
+
+class ObjectValidator:
+
   """
-    Validates if the attribute is of an numerical kind.
-
-    Note: The actual object is changed internally
-
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-    :param withSpaces: If set the attribute can contain spaces
-    :type withSpaces: Boolean
+  Utility Class for validating object attributes types
   """
-  return validateRegex(obj, attributeName, DIGITS,
-                       'The value has to be numerical')
+  def __init__(self):
+    pass
 
-def validateEmailAddress(obj, attributeName):
-  """
-    Validates if the attribute is an email.
+  @staticmethod
+  def __replacePlaceHolders(baseRegex, minLength=0,
+                            maxLength=0,
+                            withSpaces=False,
+                            withNonPrintableCharacters=False):
+    """
+    Replaces the place holders of the regexes
+    """
+    placeHolder = ''
+    if withNonPrintableCharacters:
+      placeHolder = r'\s'
+    if withSpaces and not withNonPrintableCharacters:
+      placeHolder = ' '
 
-    Note: The actual object is changed internally
+    quantifier = ''
+    if minLength != 0 and maxLength != 0:
+      quantifier = ' {{{0},{1}}}'.format(minLength, maxLength)
+    if minLength != 0 and maxLength == 0:
+      quantifier = ' {{{0},}}'.format(minLength)
+    if minLength == 0 and maxLength != 0:
+      quantifier = ' {{{0}}}'.format(maxLength)
+    if minLength == 0 and maxLength == 0:
+      quantifier = '*'.format(minLength, maxLength)
 
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-  """
-  return validateRegex(obj, attributeName, EMAILADDRESS,
-                       'The email has to be under the form (.*)@(.*).(.*){2,3}')
+    return baseRegex.format(PlaceHolder=placeHolder, quantifier=quantifier)
 
-def validateIP(obj, attributeName):
-  """
-    Validates if the attribute is an IP address.
+  @staticmethod
+  def isObjectValid(obj):
+    """
+      Checks if an object is valid. This means that the object has
+      no attribute of type FailedValidation
 
-    Note: The actual object is changed internally
+      :param obj: The object instance to be tested
+      :type obj: object
 
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-  """
-  return validateRegex(obj, attributeName, IP,
-                       'The IP address has to be under the form of X.X.X.X')
+      :returns: Boolean
+    """
+    for value in vars(obj).itervalues():
+      if type(value) == FailedValidation:
+        return False
+    return True
 
-def validateRegex(obj, attributeName, regex, errorMsg, notEmpty=True):
-  """
-    Validates the attribute attributeName of the object obj against the regex.
+  @staticmethod
+  def validateAlNum(obj,
+                    attributeName,
+                    minLength=0,
+                    maxLength=0,
+                    withSpaces=False,
+                    withNonPrintableCharacters=False,
+                    changeAttribute=True):
+    """
+      Validates if the attribute is of an alphanumeric kind.
 
-    Note: The actual object is changed internally
+      Note: The actual object is changed internally
 
-    :param obj: Object
-    :type obj: object
-    :param attributeName: attribute name of the object
-    :type attributeName: String
-    :param errorMsg: Error message to be shown is case of a failed validation
-    :type errorMsg: String
-    :param notEmpty: If set the attribute cannot be empty
-    :type notEmpty: Boolean
-  """
-  if hasattr(obj, attributeName):
-    value = str(getattr(obj, attributeName))
-    result = True
-    if notEmpty:
-      if value:
-        result = re.match('^.+$', value) is not None
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param minLength: The minimal length of the string
+      :type minLength: Integer
+      :param maxLength: The maximal length of the string
+      :type maxLength: Integer
+      :param withSpaces: If set the attribute can contain spaces
+      :type withSpaces: Boolean
+      :param withNonPrintableCharacters: If set the attribute can contain non
+                                         printable characters as tab newlines etc.
+      :type withNonPrintableCharacters: Boolean
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
 
-      else:
-        result = False
-      if not result:
-        setattr(obj, attributeName, FailedValidation(value,
-                                                     'The value is empty'))
+      :return Boolean
+    """
+    errorMsg = 'The value has to be alpha-numerical.'
+    if minLength > 0:
+      errorMsg += 'A minimal length of {0}.'.format(minLength)
+    if maxLength > 0:
+      errorMsg += 'A maximal length of {0}'.format(maxLength)
+
+    regex = ObjectValidator.__replacePlaceHolders(ALNUM_BASE,
+                                                  minLength,
+                                                  maxLength,
+                                                  withSpaces,
+                                                  withNonPrintableCharacters)
+    return validateRegex(obj, attributeName, regex, errorMsg, changeAttribute)
+
+  @staticmethod
+  def validateAlpha(obj,
+                    attributeName,
+                    minLength=0,
+                    maxLength=0,
+                    withSpaces=False,
+                    withNonPrintableCharacters=False,
+                    changeAttribute=True):
+    """
+      Validates if the attribute is of an alphabetical kind.
+
+      Note: The actual object is changed internally
+
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param minLength: The minimal length of the string
+      :type minLength: Integer
+      :param maxLength: The maximal length of the string
+      :type maxLength: Integer
+      :param withSpaces: If set the attribute can contain spaces
+      :type withSpaces: Boolean
+      :param withNonPrintableCharacters: If set the attribute can contain non
+                                         printable characters as tab newlines etc.
+      :type withNonPrintableCharacters: Boolean
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+
+    errorMsg = 'The value has to be alphabetical.'
+    if minLength > 0:
+      errorMsg += 'A minimal length of {0}.'.format(minLength)
+    if maxLength > 0:
+      errorMsg += 'A maximal length of {0}'.format(maxLength)
+
+    regex = ObjectValidator.__replacePlaceHolders(ALPHA_BASE,
+                                                  minLength,
+                                                  maxLength,
+                                                  withSpaces,
+                                                  withNonPrintableCharacters)
+    return validateRegex(obj, attributeName, regex, errorMsg, changeAttribute)
+  @staticmethod
+  def validateDigits(obj,
+                     attributeName,
+                     minimal=None,
+                     maximal=None,
+                     changeAttribute=True):
+    """
+      Validates if the attribute is of an numerical kind.
+
+      Note: The actual object is changed internally
+
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param minimal: the minimal value the number
+      :type minimal: Number
+      :param maximal: the maximal value the number
+      :type maximal: Number
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+
+    errorMsg = 'The value has to be numerical.'
+    if minimal > 0:
+      errorMsg += 'Smaller or equal than {0}.'.format(minimal)
+    if maximal > 0:
+      errorMsg += 'Bigger or equal than {0}'.format(maximal)
+
+    result = validateRegex(obj,
+                           attributeName,
+                           DIGITS,
+                           errorMsg,
+                           changeAttribute)
     if result:
-      result = re.match(regex, value) is not None
+      # if this is reached the object is valid
+      try:
+        value = float(getattr(obj, attributeName))
+      except ValueError:
+        return False
+
+      result = True
+      if not minimal is None and result:
+        result = value >= minimal
+      if not maximal is None and result:
+        result = value <= maximal
       if not result:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
-  else:
-    raise ValidationException('The given object has no attribute ' +
-                               attributeName)
+      return result
 
-def isObjectValid(obj):
-  """
-    Checks if an object is valid. This means that no attribute is of type
-    FailedValidation
+  @staticmethod
+  def validateEmailAddress(obj, attributeName, changeAttribute=True):
+    """
+      Validates if the attribute is an email.
 
-    :returns: Boolean
-  """
-  for value in vars(obj).itervalues():
-    if type(value) == FailedValidation:
-      return False
-  return True
+      Note: The actual object is changed internally
+
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+    return validateRegex(obj,
+                  attributeName,
+                  EMAILADDRESS,
+                  'The email has to be under the form (.*)@(.*).(.*){2,3}',
+                  changeAttribute)
+  @staticmethod
+  def validateIP(obj, attributeName, changeAttribute=True):
+    """
+      Validates if the attribute is an IP address.
+
+      Note: The actual object is changed internally
+
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+    return validateRegex(obj,
+                  attributeName,
+                  IP,
+                  'The IP address has to be under the form of X.X.X.X',
+                  changeAttribute)
+
+  @staticmethod
+  def validateDateTime(obj, attributeName, changeAttribute=True):
+    """
+      Validates if the attribute is a date or date time under the
+      specified formats address.
+
+      Note: The actual object is changed internally
+
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+
+    for dateFormat in DATE:
+      result = validateRegex(obj,
+                attributeName,
+                dateFormat,
+                ('The date is not under the right form as i.e. ' +
+                 '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional'),
+                changeAttribute)
+      if result:
+        break
+
+    return result
+
+  @staticmethod
+  def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=True):
+    """
+    wrapper for validateRegex
+    """
+    return validateRegex(obj, attributeName, regex, errorMsg, changeAttribute)
+
+
+

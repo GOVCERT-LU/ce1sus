@@ -16,8 +16,7 @@ import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from ce1sus.db.session import BASE
-import ce1sus.helpers.validator as validator
-
+from ce1sus.helpers.validator import ObjectValidator
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -29,7 +28,8 @@ _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
 
 class AttributeDefinition(BASE):
   """This is a container class for the DEF_ATTRIBUTES table."""
-
+  def __init__(self):
+    pass
 
   __definitions = {0 : 'TextValue',
                  1 : 'StringValue',
@@ -111,12 +111,15 @@ class AttributeDefinition(BASE):
 
     :returns: Boolean
     """
-    validator.validateAlNum(self, 'name')
-    # TODO:Validate non-printable-characters
-    validator.validateAlNum(self, 'description', True)
-    # validator.validateRegex(self, 'regex', "^.*$", "fail", False)
-    validator.validateAlpha(self, 'classIndex')
-    return validator.isObjectValid(self)
+    ObjectValidator.validateAlNum(self, 'name')
+    ObjectValidator.validateAlNum(self,
+                                  'description',
+                                  withNonPrintableCharacters=True,
+                                  withSpaces=True,
+                                  minLength=3)
+    # TODO: Find a way to validate regexes
+    ObjectValidator.validateAlpha(self, 'classIndex')
+    return ObjectValidator.isObjectValid(self)
 
   def addObject(self, obj):
     """
@@ -125,7 +128,8 @@ class AttributeDefinition(BASE):
     :param obj: Object to be added
     :type obj: Object
     """
-    self.objects.append(obj)
+    function = getattr(self.objects, 'append')
+    function(obj)
 
   def removeObject(self, obj):
     """
@@ -134,11 +138,15 @@ class AttributeDefinition(BASE):
     :param obj: Object to be removed
     :type obj: Object
     """
-    self.objects.remove(obj)
+    function = getattr(self.objects, 'remove')
+    function(obj)
+
 
 
 class ObjectDefinition(BASE):
   """This is a container class for the DEF_Objects table."""
+  def __init__(self):
+    pass
 
   __tablename__ = "DEF_Objects"
   # table class mapping
@@ -159,7 +167,9 @@ class ObjectDefinition(BASE):
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be added is invalid')
-    self.attributes.append(attribute)
+    function = getattr(self.attributes, 'append')
+    function(attribute)
+
 
   def removeAttribute(self, attribute):
     """
@@ -171,7 +181,8 @@ class ObjectDefinition(BASE):
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be removed is invalid')
-    self.attributes.remove(attribute)
+    function = getattr(self.attributes, 'remove')
+    function(attribute)
 
   def validate(self):
     """
@@ -179,10 +190,13 @@ class ObjectDefinition(BASE):
 
     :returns: Boolean
     """
-    validator.validateAlNum(self, 'name', True)
-    # TODO:Validate non-printable-characters
-    validator.validateAlNum(self, 'description', True)
-    return validator.isObjectValid(self)
+    ObjectValidator.validateAlNum(self, 'name', True)
+    ObjectValidator.validateAlNum(self,
+                                  'description',
+                                  withNonPrintableCharacters=True,
+                                  withSpaces=True,
+                                  minLength=3)
+    return ObjectValidator.isObjectValid(self)
 
 
 
@@ -223,7 +237,12 @@ class AttributeDefinitionBroker(BrokerBase):
         objects = self.session.query(ObjectDefinition).filter(
  ~ObjectDefinition.identifier.in_(objIDs))
     except sqlalchemy.orm.exc.NoResultFound:
-      objects = list()
+      raise NothingFoundException('Nothing found for ID: {0}',
+                                  format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
     return objects
 
   def getCBValues(self, objIdentifier):
@@ -242,8 +261,9 @@ class AttributeDefinitionBroker(BrokerBase):
                                               ).filter(
                                         ObjectDefinition.identifier ==
                                         objIdentifier).all()
-    except BrokerException as e:
+    except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().debug(e)
+
     result = dict()
     for definition in definitions:
       result[definition.name] = definition.identifier
@@ -263,13 +283,16 @@ class AttributeDefinitionBroker(BrokerBase):
                                 ObjectDefinition.identifier == objID).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
-    except sqlalchemy.orm.exc.NoResultFound:
+    except sqlalchemy.orm.exc.NoResultFound as e:
+      self.getLogger().error(e)
       raise NothingFoundException('Attribute or Object not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     attribute.addObject(obj)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    # TODO: no insert needed?
+    self.doCommit(commit)
+
 
   def removeObjectFromAttribute(self, objID, attrID, commit=True):
     """
@@ -287,11 +310,12 @@ class AttributeDefinitionBroker(BrokerBase):
                                 AttributeDefinition.identifier == attrID).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     attribute.removeObject(obj)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    # TODO: no remove needed?
+    self.doCommit(commit)
 
 
 class ObjectDefinitionBroker(BrokerBase):
@@ -330,7 +354,11 @@ class ObjectDefinitionBroker(BrokerBase):
         attributes = self.session.query(AttributeDefinition).filter(
  ~AttributeDefinition.identifier.in_(attributeIDs))
     except sqlalchemy.orm.exc.NoResultFound:
-      attributes = list()
+      raise NothingFoundException('Nothing found for ID: {0}',
+                                  format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     return attributes
 
 
@@ -364,11 +392,12 @@ class ObjectDefinitionBroker(BrokerBase):
                                 AttributeDefinition.identifier == attrID).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
     obj.addAttribute(attribute)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    # TODO: no insert needed?
+    self.doCommit(commit)
 
   def removeAttributeFromObject(self, attrID, objID, commit=True):
     """
@@ -387,9 +416,7 @@ class ObjectDefinitionBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
     obj.removeAttribute(attribute)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    # TODO: no remove needed?
+    self.doCommit(commit)
 
 

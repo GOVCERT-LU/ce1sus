@@ -330,7 +330,6 @@ class EventController(BaseController):
     """
     List all objects of a given event
     """
-    # TODO: re-check this f***king function
     template = self.mako.getTemplate('/events/objects.html')
     event = self.eventBroker.getByID(identifier)
 
@@ -687,7 +686,6 @@ class EventController(BaseController):
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
 
-    # TODO: Re-check this function
     obj = self.objectBroker.getByID(objIdentifier)
 
     attribute = Attribute()
