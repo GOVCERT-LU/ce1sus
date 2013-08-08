@@ -111,7 +111,7 @@ class LDAPHandler(object):
         user = LDAPUser()
         for key, value in attributes.iteritems():
           if hasattr(user, key):
-            setattr(user, key, value[0])
+            setattr(user, key, unicode(value[0]))
 
     return user
 
