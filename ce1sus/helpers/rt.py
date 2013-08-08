@@ -52,8 +52,8 @@ class RTHelper(object):
         for textList in response.parsed:
           for ticketID, ticketTitle in textList:
             ticket = RTTicket(ticketID)
-            ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + ticketID
-            ticket.title = ticketTitle
+            ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + unicode(ticketID, 'utf-8', errors='replace')
+            ticket.title = unicode(ticketTitle, 'utf-8', errors='replace')
             ticketList.append(ticket)
         return ticketList
       else:
@@ -70,22 +70,22 @@ class RTHelper(object):
 
         for r in response.parsed:
           for t in r:
-            rsp_dict[t[0]] = unicode(t[1], 'utf-8')
+            rsp_dict[t[0]] = unicode(t[1], 'utf-8', errors='replace')
 
 
         ticket = RTTicket(identifier)
         ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + identifier
-        ticket.title = rsp_dict['Subject']
-        ticket.queue = rsp_dict['Queue']
-        ticket.owner = rsp_dict['Owner']
-        ticket.creator = rsp_dict['Creator']
-        ticket.status = rsp_dict['Status']
-        ticket.requestors = rsp_dict['Requestors']
-        ticket.created = rsp_dict['Created']
-        ticket.lastUpdated = rsp_dict['LastUpdated']
+        ticket.title = unicode(rsp_dict['Subject'], 'utf-8', errors='replace')
+        ticket.queue = unicode(rsp_dict['Queue'], 'utf-8', errors='replace')
+        ticket.owner = unicode(rsp_dict['Owner'], 'utf-8', errors='replace')
+        ticket.creator = unicode(rsp_dict['Creator'], 'utf-8', errors='replace')
+        ticket.status = unicode(rsp_dict['Status'], 'utf-8', errors='replace')
+        ticket.requestors = unicode(rsp_dict['Requestors'], 'utf-8', errors='replace')
+        ticket.created = unicode(rsp_dict['Created'], 'utf-8', errors='replace')
+        ticket.lastUpdated = unicode(rsp_dict['LastUpdated'], 'utf-8', errors='replace')
         # froen mech waat daat mecht?
         if 'Resolved' in rsp_dict:
-          ticket.resolved = rsp_dict['Resolved']
+          ticket.resolved = unicode(rsp_dict['Resolved'], 'utf-8', errors='replace')
       else:
         raise NoResponse('Nothing found!')
     except RTResourceError as e:
