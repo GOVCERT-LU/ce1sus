@@ -111,7 +111,11 @@ class LDAPHandler(object):
         user = LDAPUser()
         for key, value in attributes.iteritems():
           if hasattr(user, key):
-            setattr(user, key, unicode(value[0]))
+            # Foo to prevent ascii errors as ldap module returns strings!
+            try:
+              setattr(user, key, unicode(value[0]))
+            except UnicodeDecodeError:
+              setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
 
     return user
 
