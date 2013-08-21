@@ -77,16 +77,6 @@
             <div class="btn-group">
 	            %if not object is None:
 	                <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal">Add an Attribute</a>
-	                <form action="/events/modifyObjectAttribute" method="post">
-                        <input type="hidden" name="action" value="insert">
-                        <%
-                        try:
-                         cbValues = cbAttributeDefintiionsDict[object.definition.identifier]
-                        except:
-                          cbValues = None
-                        %>
-                        <%call expr="modals.objectAttributeModal(id='addAbjectAttributeModal{0}'.format(object.identifier),eventID=event.identifier,objectID=object.identifier,attribute=None,title='Add New Attribute',cbDefinitions=cbValues,enabled = True)"/> 
-                    </form>
 	            %endif
             </div>
             
@@ -118,3 +108,17 @@
             %endif
     </form>
 </div>
+
+%if not object is None: 
+<form action="/events/modifyObjectAttribute" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="action" value="insert">
+<%
+try:
+  cbValues = cbAttributeDefintiionsDict[object.definition.identifier]
+except:
+  cbValues = None
+%>
+<%call expr="modals.objectAttributeModal(id='addAbjectAttributeModal{0}'.format(object.identifier),eventID=event.identifier,objectID=object.identifier,attribute=None,title='Add New Attribute',cbDefinitions=cbValues,enabled = True)"/> 
+</form>
+%endif
+                

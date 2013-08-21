@@ -4,19 +4,19 @@ for inserting data into the database.
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
-__copyright__ = 'Copyright 2013, Weber Jean-Paul'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 # Created on Jul 5, 2013
 
 
-from ce1sus.db.broker import BrokerBase, ValidationException, \
+from framework.db.broker import BrokerBase, ValidationException, \
  NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from ce1sus.db.session import BASE
-from ce1sus.helpers.validator import ObjectValidator
+from framework.db.session import BASE
+from framework.helpers.validator import ObjectValidator
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -34,7 +34,8 @@ class AttributeDefinition(BASE):
   __definitions = {0 : 'TextValue',
                  1 : 'StringValue',
                  2 : 'DateValue',
-                 3 : 'NumberValue'}
+                 3 : 'NumberValue',
+                 4 : 'FileValue'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
@@ -111,14 +112,16 @@ class AttributeDefinition(BASE):
 
     :returns: Boolean
     """
-    ObjectValidator.validateAlNum(self, 'name')
+    ObjectValidator.validateAlNum(self, 'name', withSpaces=True,
+                                  withSymbols=True)
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
                                   withSpaces=True,
-                                  minLength=3)
+                                  minLength=3,
+                                  withSymbols=True)
     # TODO: Find a way to validate regexes
-    ObjectValidator.validateAlpha(self, 'classIndex')
+    ObjectValidator.validateDigits(self, 'classIndex')
     return ObjectValidator.isObjectValid(self)
 
   def addObject(self, obj):
@@ -190,12 +193,16 @@ class ObjectDefinition(BASE):
 
     :returns: Boolean
     """
-    ObjectValidator.validateAlNum(self, 'name', True)
+    ObjectValidator.validateAlNum(self,
+                                  'name',
+                                  withSpaces=True,
+                                  withSymbols=True)
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
                                   withSpaces=True,
-                                  minLength=3)
+                                  minLength=3,
+                                  withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
 
@@ -260,13 +267,14 @@ class AttributeDefinitionBroker(BrokerBase):
                                               AttributeDefinition.objects
                                               ).filter(
                                         ObjectDefinition.identifier ==
-                                        objIdentifier).all()
+                                        objIdentifier).order_by(
+                                        AttributeDefinition.name).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().debug(e)
 
     result = dict()
     for definition in definitions:
-      result[definition.name] = definition.identifier
+      result[definition.name] = (definition.identifier, definition.description)
     return result
 
   def addObjectToAttribute(self, objID, attrID, commit=True):
@@ -290,7 +298,7 @@ class AttributeDefinitionBroker(BrokerBase):
       self.getLogger().fatal(e)
       raise BrokerException(e)
     attribute.addObject(obj)
-    # TODO: no insert needed?
+
     self.doCommit(commit)
 
 
@@ -314,7 +322,7 @@ class AttributeDefinitionBroker(BrokerBase):
       self.getLogger().fatal(e)
       raise BrokerException(e)
     attribute.removeObject(obj)
-    # TODO: no remove needed?
+
     self.doCommit(commit)
 
 
@@ -372,7 +380,7 @@ class ObjectDefinitionBroker(BrokerBase):
     definitions = self.getAll()
     result = dict()
     for definition in definitions:
-      result[definition.name] = definition.identifier
+      result[definition.name] = (definition.identifier, definition.description)
     return result
 
 
@@ -392,11 +400,11 @@ class ObjectDefinitionBroker(BrokerBase):
                                 AttributeDefinition.identifier == attrID).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+    # except sqlalchemy.exc.SQLAlchemyError as e:
+    #  self.getLogger().fatal(e)
+
     obj.addAttribute(attribute)
-    # TODO: no insert needed?
+
     self.doCommit(commit)
 
   def removeAttributeFromObject(self, attrID, objID, commit=True):
@@ -416,7 +424,7 @@ class ObjectDefinitionBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
     obj.removeAttribute(attribute)
-    # TODO: no remove needed?
+
     self.doCommit(commit)
 
 

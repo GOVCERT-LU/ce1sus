@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="baseComponents"
-file="/components/baseComponents.html"/> <%namespace name="forms"
-file="/components/forms.html"/> <%inherit
-file="/layout/baselayout.html"/>
 
-<ul class="nav nav-tabs">
-	<li><a href="/events">Recent Events</a></li>
-	<li><a href="">Search Events</a></li>
-	<li class="active"><a href="#">Add Event</a></li>
-</ul>
+<%namespace name="forms" file="/components/forms.html"/> 
+
 <h2>Add an Event</h2>
-<form action="/events/modifyEvent" method="post">
+
+<%call expr="forms.genericForm(id='editGroupsForm', url='/events/event/modifyEvent',refreshUrl='/events/recent',refreshContainer='eventsTabTabContent')">
     <input type="hidden" name="action" value="insert">
     
-	${forms.eventForm(event=event,enabled=True,cbPublishedValues=cbPublishedValues,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}	
+	${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}	
 	<div class="row-fluid">
 	    <div class="span3" style="text-align:right">
 			<div class="btn-group">
@@ -24,4 +18,4 @@ file="/layout/baselayout.html"/>
 			</div>
 		</div>
 	</div>
-</form>
+</%call>

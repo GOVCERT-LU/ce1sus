@@ -5,10 +5,9 @@ Created on Jul 4, 2013
 '''
 import unittest
 import os
-from ce1sus.db.session import SessionManager
-from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker
-from ce1sus.brokers.classes.permissions import Group, User
-from ce1sus.helpers.objects import compareObjects
+from framework.db.session import SessionManager
+from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
+from framework.helpers.objects import compareObjects
 from datetime import datetime
 
 class TestPermissionBrokers(unittest.TestCase):
@@ -83,7 +82,7 @@ class TestPermissionBrokers(unittest.TestCase):
 
   def test_E_DeleteUser(self):
 
-      #self.userBroker.removeByID(self.user.identifier)
+      # self.userBroker.removeByID(self.user.identifier)
       # Check if group is still existing
       group = self.groupbroker.getByID(self.group.identifier)
 
@@ -95,7 +94,7 @@ class TestPermissionBrokers(unittest.TestCase):
 
 
   def test_F_DeleteGroup(self):
-    #self.groupbroker.removeByID(self.group.identifier)
+    # self.groupbroker.removeByID(self.group.identifier)
     pass
 
 

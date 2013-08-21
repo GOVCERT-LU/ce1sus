@@ -2,71 +2,46 @@
 
 import cherrypy
 import os
-from ce1sus.db.session import SessionManager
-from ce1sus.helpers.debug import Log
-from ce1sus.web.helpers.templates import MakoHandler
+from framework.db.session import SessionManager
+from framework.helpers.debug import Log
+from framework.web.helpers.templates import MakoHandler
 from ce1sus.web.controllers.index import IndexController
-from ce1sus.web.controllers.admin import AdminController
-from ce1sus.web.controllers.event import EventController
+from ce1sus.web.controllers.admin.index import AdminController
+from ce1sus.web.controllers.events.events import EventsController
+from ce1sus.web.controllers.admin.user import UserController
+from ce1sus.web.controllers.admin.groups import GroupController
+from ce1sus.web.controllers.admin.objects import ObjectController
 from ce1sus.web.helpers.protection import Protector
-from ce1sus.helpers.ldaphandling import LDAPHandler
-from ce1sus.helpers.rt import RTHelper
-from ce1sus.web.helpers.config import WebConfig
-
-
-
-class InstantiationException(Exception):
-
-  def __init__(self, message):
-    Exception.__init__(self, message)
-
-class ConfigException(Exception):
-
-  def __init__(self, message):
-    Exception.__init__(self, message)
-
-def loadCerryPyConfig(configFile):
-
-  def parseAndSet(line):
-    splitedLine = line.split('=')
-    if len(splitedLine) == 2:
-      key = splitedLine[0].strip()
-      value = splitedLine[1].strip()
-
-      # Keeping booleanValues
-      if (value.upper() in ['YES', 'TRUE']):
-        value = True
-      else:
-        if (value.upper() in [ 'NO', 'FALSE']):
-          value = False
-
-      cherrypy.config[key] = value
-
-    else:
-      raise InstantiationException('Error in config for line :' + line);
-
-  # check if file exists
-  if os.path.isfile(configFile):
-    # read lines
-    for line in open(configFile, 'r'):
-      parseAndSet(line)
-
-  else:
-    raise ConfigException('Could not find config file ' + configFile)
+from framework.web.helpers.webexceptions import ErrorHandler
+from framework.helpers.ldaphandling import LDAPHandler
+from framework.helpers.rt import RTHelper
+from framework.web.helpers.config import WebConfig
+from framework.web.helpers.cherrypyhandling import CherryPyHandler
+from ce1sus.web.controllers.admin.attributes import AttributeController
+from ce1sus.web.controllers.event.event import EventController
+from ce1sus.web.controllers.event.objects import ObjectsController
+from ce1sus.web.controllers.event.tickets import TicketsController
+from ce1sus.web.controllers.event.groups import GroupsController
+from ce1sus.web.controllers.events.search import SearchController
+from ce1sus.web.controllers.event.attributes import AttributesController
+from ce1sus.web.controllers.event.comments import CommentsController
 
 def application(environ, start_response):
-  bootstap()
-  return cherrypy.tree(environ, start_response)
+  bootstrap()
+  return CherryPyHandler.application(environ, start_response)
 
 
 
-def bootstap():
+def bootstrap():
   # want parent of parent directory aka ../../
   basePath = os.path.dirname(os.path.abspath(__file__))
 
-  loadCerryPyConfig(basePath + '/config/cherrypy.conf')
+  # setup cherrypy
+  CherryPyHandler(basePath + '/config/cherrypy.conf')
 
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
+
+  # Load 'Modules'
   SessionManager(ce1susConfigFile)
   # ErrorHandler(ce1susConfigFile)
   Log(ce1susConfigFile)
@@ -76,31 +51,28 @@ def bootstap():
   WebConfig(ce1susConfigFile)
   LDAPHandler(ce1susConfigFile)
 
-  config = {'/':
-                  {
-                   'tools.staticdir.on': True,
-                   'tools.staticdir.root': basePath + "/htdocs",
-                   'tools.staticdir.dir': "",
-                   'tools.sessions.on': True,
-                   'tools.sessions.storage_type': 'file',
-                   'tools.sessions.storage_path' : basePath + '/sessions',
-                   'tools.sessions.timeout': 60,
-                   'tools.auth.on': True
 
-                  }
-            }
-  cherrypy.tree.mount(IndexController(), '/', config=config)
-  cherrypy.tree.mount(AdminController(), '/admin', config=config)
-  cherrypy.tree.mount(EventController(), '/events', config=config)
+  # add controllers
+  CherryPyHandler.addController(IndexController(), '/')
+  CherryPyHandler.addController(AdminController(), '/admin')
+  CherryPyHandler.addController(UserController(), '/admin/users')
+  CherryPyHandler.addController(GroupController(), '/admin/groups')
+  CherryPyHandler.addController(ObjectController(), '/admin/objects')
+  CherryPyHandler.addController(AttributeController(), '/admin/attributes')
+  CherryPyHandler.addController(EventsController(), '/events')
+  CherryPyHandler.addController(EventController(), '/events/event')
+  CherryPyHandler.addController(SearchController(), '/events/search')
+  CherryPyHandler.addController(ObjectsController(), '/events/event/objects')
+  CherryPyHandler.addController(TicketsController(), '/events/event/tickets')
+  CherryPyHandler.addController(GroupsController(), '/events/event/groups')
+  CherryPyHandler.addController(AttributesController(), '/events/event/attribute')
+  CherryPyHandler.addController(CommentsController(), '/events/event/comment')
+
+
 
 
 if __name__ == '__main__':
 
-  bootstap()
-  try:
-      # this is the way it should be done in cherrypy 3.X
-      cherrypy.engine.start()
-      cherrypy.engine.block()
-  except Exception as e:
-    print e
+  bootstrap()
+  CherryPyHandler.localRun()
 

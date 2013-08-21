@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+
+
+
+
+<%def name="error(message=None)">
+	<!-- BEGIN ErrorMsg -->
+	%if not message is None:
+	    <div class="alert alert-error">${message}</div>
+	%endif
+	<!-- END ErrorMsgs -->
+</%def>
+
+<%def name="errorDialog(message=None)">
+	%if not errorMsg is None:
+	<div class="alert alert-block alert-error fade in">
+		<button type="button" class="close" data-dismiss="alert">x</button>
+		<h4 class="alert-heading">An expected Error occurred!</h4>
+		<p>${errorMsg}</p>
+	</div>
+	%endif
+</%def>
+
+
+
+
+<%def name="objectToHTML(object)">
+	<!-- BEGIN objectToHTML -->
+	<%
+	  classname = type(object).__name__
+	%>
+	  %if "FileValue" in classname:
+	    <!-- BEGIN FileValue -->
+	        <div class="row-fluid">
+	            <div class="span3">Filename</div>
+	            <div class="span9">${object.name}</div>
+	        </div>
+	        <div class="row-fluid">
+	            <div class="span3">MD5</div>
+	            <div class="span9">${object.md5}</div>
+	        </div>
+	        <div class="row-fluid">
+	            <div class="span3">SHA1</div>
+	            <div class="span9">${object.sha1}</div>
+	        </div>
+	        <div class="row-fluid">
+	            <div class="span3">SHA256</div>
+	            <div class="span9">${object.sha256}</div>
+	        </div>
+	    <!-- END FileValue -->
+	  %else:
+	    ${object}
+	  %endif
+	<!-- END objectToHTML -->
+</%def>

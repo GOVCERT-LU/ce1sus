@@ -1,13 +1,18 @@
 """module providing authentication"""
 
-import cherrypy
-from ce1sus.db.session import SessionManager
-from ce1sus.brokers.permissionbroker import UserBroker
-from ce1sus.helpers.config import Configuration
-from datetime import datetime
-from ce1sus.db.broker import NothingFoundException, BrokerException
-from ce1sus.helpers.ldaphandling import LDAPHandler
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
 
+import cherrypy
+from framework.db.session import SessionManager
+from ce1sus.brokers.permissionbroker import UserBroker
+from framework.helpers.config import Configuration
+from datetime import datetime
+from framework.db.broker import NothingFoundException, BrokerException
+from framework.helpers.ldaphandling import LDAPHandler
+import re
 
 SESSION_KEY = '_cp_username'
 
@@ -175,6 +180,25 @@ def privileged():
       Checks if the user has the privileged right
     """
     return Protector.userBroker.isUserPrivileged(Protector.getUserName())
+  return check
+
+def requireReferer(redirect, allowedReferers):
+  """
+  Condition that verifies if the user has the privileged right set
+
+  Note: Should only be used as condition for the require decorator
+  """
+  def check():
+    """
+      Checks if the user has the privileged right
+    """
+    referer = cherrypy.request.headers.elements('Referer')
+    referer = referer[0].value
+    referer = '/' + re.search(r'^http[s]?://[\w\d:]+/(.*)$', referer).group(1)
+    if referer in allowedReferers:
+      return True
+    else:
+      return False
   return check
 
 def isAuthenticated(context):

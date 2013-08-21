@@ -4,10 +4,9 @@ Created on Jul 4, 2013
 @author: jhemp
 '''
 import unittest
-from ce1sus.db.session import SessionManager
-from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker
-from ce1sus.brokers.classes.definitions import AttributeDefinition, ObjectDefinition
-from ce1sus import helpers
+from framework.db.session import SessionManager
+from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker, AttributeDefinition, ObjectDefinition
+
 
 class TestDefinitionBrokers(unittest.TestCase):
 

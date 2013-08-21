@@ -1,102 +1,143 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="baseComponents" file="/components/baseComponents.html"/>
+
+<%namespace name="labeledInput" file="/components/labeledInput.html"/>
+
+<%def name="genericForm(id, url, refreshUrl=None,refreshContainer=None)">
+<div id="${id}Errors"></div>
+<form id="${id}Form">
+    ${caller.body()}
+</form>
+<script type="text/javascript">
+$("#${id}Form").submit(function(event){
+	<%
+	if not (refreshUrl is None and refreshContainer is None):
+		refresh = 'true'
+	else:
+		refresh = 'false'	
+	%>
+	formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
+});
+</script>
+</%def>
+
+<%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
+<form id="${modalID}Form">
+    ${caller.body()}
+</form>
+<script type="text/javascript">
+$("#${modalID}Form").submit(function(event){
+    <%
+    if not (refreshUrl is None and refreshContainer is None):
+        refresh = 'true'
+    else:
+        refresh = 'false'   
+    %>
+	formSubmit(this,event,'${modalID}' , '${url}','${refresh}','${refreshContainer}','${refreshUrl}')
+});
+</script>
+</%def>
 
 <%def name="groupForm(group,enabled)">
 % if group is None:
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='groupID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='groupID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},enabled=enabled)"/>
 % else:
 <input type="hidden" name="identifier" value="${group.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='groupID',value=group.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value=group.name,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message=group.description,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},selected=group.shareTLP,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='groupID',value=group.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=group.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=group.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},selected=group.shareTLP,enabled=enabled)"/>
 % endif
 </%def>
 
 <%def name="objectForm(object,enabled)">
 % if object is None:
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='objectID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value='', enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='objectID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='', enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
 % else:
   <input type="hidden" name="identifier" value="${object.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='objectID',value=object.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value=object.name,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message=object.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='objectID',value=object.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=object.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=object.description,enabled=enabled)"/>
 % endif
 </%def>
 
-<%def name="userForm(user,enabled,cbValues)">
+<%def name="userForm(user,enabled)">
 % if user is None:
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='userID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Username',name='username',value='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledPasswordBox(label='Password',name='password',value='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Email',name='email',value='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Priviledged',name='privileged',values=cbValues,enabled=enabled,hasEmpty=True)"/>
-  <%call expr="baseComponents.labeledEditBox(label='last logged in',name='last_login',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='userID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Username',name='username',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledPasswordBox(label='Password',name='password',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='privileged',enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledEditBox(label='last logged in',name='last_login',value='',enabled=False)"/>
   
 % else:
+%if not user.identifier is None:
   <input type="hidden" name="identifier" value="${user.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='userID',value=user.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Username',name='username',value=user.username,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledPasswordBox(label='Password',name='password',value=user.password,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Email',name='email',value=user.email,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Priviledged',name='privileged',values=cbValues,enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
+%endif
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='userID',value=user.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Username',name='username',value=user.username,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledPasswordBox(label='Password',name='password',value=user.password,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value=user.email,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='privileged',enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
 % endif
 </%def>
 
 <%def name="attributeForm(attribute,enabled,cbValues)">
+
 % if attribute is None:
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='AttrID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value='', enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Regular expression',name='regex',value='',enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=True)"/>
+  
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='AttrID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='', enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=True)"/>
 
 % else:
   <input type="hidden" name="identifier" value="${attribute.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='AttrID',value=attribute.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Name',name='name',value=attribute.name,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='AttrID',value=attribute.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=attribute.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=True)"/>
 % endif
+
 </%def>
 
-<%def name="eventForm(event,enabled,cbPublishedValues,cbStatusValues,cbTLPValues,today=None)">
+<%def name="eventForm(event,enabled,cbStatusValues,cbTLPValues,today=None)">
 % if event is None:
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='EVentID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Title',name='name',value='', enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value='', enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Published',name='published',enabled=enabled,hasEmpty=True)"/>
   
-  <%call expr="baseComponents.labeledComboBox(label='Published',name='published',values=cbPublishedValues,enabled=enabled,hasEmpty=True)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Status',name='status',values=cbStatusValues,enabled=enabled,hasEmpty=True)"/>
-  <%call expr="baseComponents.labeledComboBox(label='TLP',name='tlp_index',values=cbTLPValues,enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Status',name='status',values=cbStatusValues,enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlp_index',values=cbTLPValues,enabled=enabled,hasEmpty=True)"/>
   
   
-  <%call expr="baseComponents.labeledDateTimePicker(label='Created',name='created',value=today,enabled=False)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='First seen',name='first_seen',value=today,enabled=True)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='Last seen',name='last_seen',value=today,enabled=True)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value=today,enabled=False)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='First seen',name='first_seen',value=today,enabled=True)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Last seen',name='last_seen',value=today,enabled=True)"/>
   
 
 % else:
   <input type="hidden" name="identifier" value="${event.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='EVentID',value=event.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Title',name='name',value=event.title, enabled=enabled)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Description',name='description',message=event.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value=event.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value=event.title, enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=event.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Published',name='published',enabled=enabled,hasEmpty=True,selected=event.published)"/>
   
-  <%call expr="baseComponents.labeledComboBox(label='Published',name='published',values=cbPublishedValues,enabled=enabled,hasEmpty=True,selected=event.published)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Status',name='status',values=cbStatusValues,enabled=enabled,hasEmpty=True,selected=event.status_id)"/>
-  <%call expr="baseComponents.labeledComboBox(label='TLP',name='tlp_index',values=cbTLPValues,enabled=enabled,hasEmpty=True,selected=event.tlp_level_id)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Status',name='status',values=cbStatusValues,enabled=enabled,hasEmpty=True,selected=event.status_id)"/>
+  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlp_index',values=cbTLPValues,enabled=enabled,hasEmpty=True,selected=event.tlp_level_id)"/>
   
-  <%call expr="baseComponents.labeledDateTimePicker(label='Created',name='created',value=event.created,enabled=False)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='First seen',name='first_seen',value=event.first_seen,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='Last seen',name='last_seen',value=event.last_seen,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value=event.created,enabled=False)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='First seen',name='first_seen',value=event.first_seen,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Last seen',name='last_seen',value=event.last_seen,enabled=enabled)"/>
   
   
 % endif
@@ -104,51 +145,62 @@
 
 <%def name="eventObjectForm(eventID,object,enabled,cbDefinitions)">
 % if object is None:
-  <input type="hidden" name="identifier" value="${eventID}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='EVentID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
+  <input type="hidden" name="eventID" value="${eventID}">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
 
 % else:
-  <input type="hidden" name="identifier" value="${eventID}">
+  <input type="hidden" name="eventID" value="${eventID}">
   <input type="hidden" name="objIdentifier" value="${object.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='objID',value=object.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True,selected=object.def_object_id)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Creator',name='userID',value=object.creator.username,enabled=False)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='Created',name='created',value=object.created,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='objID',value=object.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True,selected=object.def_object_id)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Creator',name='userID',value=object.creator.username,enabled=False)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value=object.created,enabled=False)"/>
   
 % endif
 
 </%def>
 
 <%def name="eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)">
+<div id="attributeFormDefinition">
 % if attribute is None:
-  <input type="hidden" name="identifier" value="${eventID}">
-  <input type="hidden" name="objIdentifier" value="${objectID}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='attID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
+  <input type="hidden" name="eventID" value="${eventID}">
+  <input type="hidden" name="objectID" value="${objectID}">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value='',enabled=False)"/>
+ 
+  <%call expr="labeledInput.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
+   <div id="editBox">
+  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
+  </div>
 %else:
-  <input type="hidden" name="identifier" value="${eventID}">
-  <input type="hidden" name="objIdentifier" value="${objectID}">
-  <input type="hidden" name="attrIdentifier" value="${attribute.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='attID',value=attribute.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True,selected=attribute.definition.identifier)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
-  <%call expr="baseComponents.labeledEditBox(label='Creator',name='userID',value=attribute.creator.username,enabled=False)"/>
-  <%call expr="baseComponents.labeledDateTimePicker(label='Created',name='created',value='',enabled=False)"/>
+  <input type="hidden" name="eventID" value="${eventID}">
+  <input type="hidden" name="objectID" value="${objectID}">
+  <input type="hidden" name="attributeID" value="${attribute.identifier}">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value=attribute.identifier,enabled=False)"/>
+  <%
+  enableCB = attribute is None
+  %>
+  <%call expr="labeledInput.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enableCB,hasEmpty=True,selected=attribute.definition.identifier)"/>
+  <div id="editBox">
+  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
+  </div>
+  <%call expr="labeledInput.labeledEditBox(label='Creator',name='userID',value=attribute.creator.username,enabled=False)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value='',enabled=False)"/>
   
   %endif
+</div>
 </%def>
 
 <%def name="commentForm(eventID,commentObj,enabled)">
 % if commentObj is None:
-  <input type="hidden" name="identifier" value="${eventID}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='attID',value='',enabled=False)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Comment',name='commentText',message='',enabled=enabled)"/>
+  <input type="hidden" name="eventID" value="${eventID}">
+  <input type="hidden" name="commentID" value="">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value='',enabled=False)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Comment',name='commentText',message='',enabled=enabled)"/>
 %else:
-  <input type="hidden" name="identifier" value="${eventID}">
-  <input type="hidden" name="commentIdentifier" value="${commentObj.identifier}">
-  <%call expr="baseComponents.labeledEditBox(label='Identifier',name='attID',value=commentObj.identifier,enabled=False)"/>
-  <%call expr="baseComponents.labeledTextBox(label='Comment',name='commentText',message=commentObj.comment,enabled=enabled)"/>
+  <input type="hidden" name="eventID" value="${eventID}">
+  <input type="hidden" name="commentID" value="${commentObj.identifier}">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value=commentObj.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Comment',name='commentText',message=commentObj.comment,enabled=enabled)"/>
 %endif
 </%def>

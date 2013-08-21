@@ -7,8 +7,10 @@ import unittest
 from test.ce1sus.brokers.definitionbroker import TestDefinitionBrokers
 from test.ce1sus.brokers.eventbroker import TestEventBrokers
 from test.ce1sus.brokers.permissionbroker import TestPermissionBrokers
-from test.ce1sus.db.session import TestSession
-from test.ce1sus.helpers.objects import TestObjectHelper
+from test.framework.db.session import TestSession
+from test.framework.helpers.objects import TestObjectHelper
+from test.framework.helpers.string import TestString
+from test.framework.helpers.validator import TestValidator
 
 def suite(self):
   suite = unittest.TestSuite()
@@ -17,6 +19,9 @@ def suite(self):
   suite.addTest(TestPermissionBrokers())
   suite.addTest(TestSession())
   suite.addTest(TestObjectHelper())
+  suite.addTest(TestValidator())
+  suite.addTest(TestString())
+
   return suite
 
 

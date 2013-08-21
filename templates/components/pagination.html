@@ -1,0 +1,161 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="messagesAndText" file="/components/messagesAndText.html"/>
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+
+<%def name="pagination(identifier, paginator,hasSearch=True)">
+<% 
+isModal=False
+%>
+    <!-- BEGIN pagination -->
+    <div>
+      <table class="table table-striped table-bordered table-hover table-condensed" id="${identifier}">
+      <thead>
+        <tr>
+          % for column in paginator.lables:
+            % for value in column.itervalues():
+                <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting">${value}</th>
+            %endfor
+          %endfor
+          %if paginator.options.isSet:
+            <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" sytle="width: 60px">Options</th>
+          %endif
+        </tr>
+      </thead>
+      <tbody>
+        
+           % for item in paginator.list:
+           <tr>
+             % for column in paginator.lables:
+               % for key in column.iterkeys():
+    <%
+    
+    
+    if hasattr(item,key):
+      value = getattr(item,key)
+      if hasattr(value,'color'):
+        style = 'style="background-color: {hex}"'.format(hex=getattr(value,'color'))
+        value = getattr(value,'text')
+      else:
+        style = ''
+    else:
+      
+      if '.' in key:
+        keys = key.split('.')
+       
+        if hasattr(item,keys[0]):
+          subItem = getattr(item,keys[0])
+          if hasattr(subItem,keys[1]):
+            value = getattr(subItem,keys[1])
+    
+      else:
+        value ='NotSet'
+      
+      style = ''
+    
+    
+    
+    if hasattr(item,'identifier'):
+      primaryKey = getattr(item,'identifier')
+    else:
+      primaryKey = 0
+    %>                
+             <td ${style}><%call expr="messagesAndText.objectToHTML(value)"/></td>
+           %endfor
+    
+             %endfor
+             %if paginator.options.isSet:
+               <td style="width: 60px;">
+                  % for option in paginator.options.options:
+                    %if option.mode =='DIALOG':
+                        <a href="#" onclick="if (confirm('${option.message}')) {
+                        //call function
+                        $.get('${option.url}${primaryKey}', function(data) {
+                        	if (data.match(/^--OK--/gi)) {
+                        		%if option.refresh:
+                                    loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
+                                %endif
+                        	} else {
+                        		alert('An unexpected error occured.');
+                        	}
+                        	
+						}).fail(function() { alert('Could not perform action: '); });
+                        
+                       
+                        }"><i class="${option.icon}" title="${option.title}"></i></a>
+                    %elif option.mode =='MODAL':
+                        <% 
+                        isModal=True
+                        %>
+                        <a href="#" onclick="showPaginatorModal('${option.modalTitle}','${option.url}/${primaryKey}','${option.postUrl}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reloadUrl}');">
+        
+                        <i class="${option.icon}" title="${option.title}"></i></a>
+                    %elif option.mode == 'LINK':
+                        <a href="${option.url}/${primaryKey}"><i class="${option.icon}" title="${option.title}"></i></a>
+                    %elif option.mode == 'CONTENT':
+                        <% 
+                        isContent=True
+                        %>
+                        <a href="#" onclick="loadContent('${paginator.options.contentid}','${option.url}/${primaryKey}');">
+                        %if option.refresh:
+                            loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
+                        %endif  
+                        <i class="${option.icon}" title="${option.title}"></i></a>
+                    %elif option.mode == 'NEWTAB':
+                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}');">
+                        <i class="${option.icon}" title="${option.title}"></i></a>
+                    %elif option.mode == 'TAB':
+                        <a href="#" onclick="loadTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}','${option.tabid}');">
+                        <i class="${option.icon}" title="${option.title}"></i></a>
+                    %endif
+                    
+                    
+                    
+                  %endfor
+               </td>
+             %endif
+             </tr>
+           %endfor
+    
+      </tbody>
+      </table>
+      
+    </div>
+    <script>
+    jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+    };
+     
+    jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+        return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+    };
+    
+    $(document).ready(function() {
+        $('#${identifier}').dataTable( {
+          "aaSorting": [  [0,'asc'] ],
+          %if not hasSearch:
+            "sDom": '<"H">t<"F"ip>',
+          %endif;
+            "iDisplayLength": ${paginator.itemsPerPage},
+          "aoColumns": [
+          % for column in paginator.lables:
+                        { "sType": 'string-case' },
+          %endfor
+          %if paginator.options.isSet:
+              null
+          %endif
+            ]
+         });
+    } );
+    
+    </script>
+
+    <!-- END pagination -->
+% if isModal:
+<form id="paginatorModalForm">
+    <%call expr="modals.genericModal(id='paginatorModal',title='No Title',contentUrl=None)"/>
+</form>
+%endif
+<br/>
+</%def>

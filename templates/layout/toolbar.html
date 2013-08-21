@@ -1,30 +1,17 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="ce1sus" module="ce1sus.web.helpers.protection"/>
-
+<%namespace name="ce1sus"" module="ce1sus.web.helpers.protection"/>
+<%namespace name="toolbars" file="/components/toolbars.html"/>
 <!-- NavBar -->
-<div class="navbar navbar-inverse">
-	<div class="navbar-inner">
-		<div class="container">
-			<a class="btn btn-navbar" data-toggle="collapse"
-				data-target=".navbar-inverse-collapse"> <span class="icon-bar"></span>
-				<span class="icon-bar"></span> <span class="icon-bar"></span>
-			</a>
-			<div class="nav-collapse collapse navbar-inverse-collapse">
-				<div class="nav-collapse collapse">
-					<ul class="nav">
-                        % if ce1sus.isAuthenticated():
-						<li class=""><a href="/events/index">Events</a></li>
-						<li class=""><a href="">Recent entries</a></li>
-						<li class=""><a href="/admin/index">Administration</a></li>
-						<li class=""><a href="/events/logout">Logout</a></li>
-						%else:
-						<li class="/index"><a href="">Login</a></li>
-                        %endif
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+<%call expr="toolbars.menu(id='menuBar',contentid='mainContent',loadSelected=ce1sus.isAuthenticated())"> 
+    %if ce1sus.isAuthenticated():
+    <%call expr="toolbars.menuitem(id='eventsMenu',url='/events',name='Events',contentid='mainContent' ,active=True)"/> 
+    <%call expr="toolbars.menuitem(id='recentEntriesMenu',url='/events', name='Recent entries',contentid='mainContent')"/> 
+    <%call expr="toolbars.menuitem(id='adminMenu',url='/admin', name='Administration',contentid='mainContent')"/> 
+    <%call expr="toolbars.menuitem(id='logout',url='/logout', name='Logout',contentid='mainContent')"/> 
+    %else:
+    <%call expr="toolbars.menuitem(id='login',url='/login',name='Login' ,active=True,contentid='mainContent')"/> 
+    %endif
+</%call>
+
 <!-- NavBar -->

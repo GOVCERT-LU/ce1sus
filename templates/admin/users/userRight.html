@@ -1,0 +1,82 @@
+# -*- coding: utf-8 -*- 
+
+<%namespace name="messagesAndText" file="/components/messagesAndText.html"/> 
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+
+
+<div id="deleteAnswer" style="display: none;">
+</div>
+<script type="text/javascript">
+function deleteUser(userID){
+	$("#deleteAnswer").load("/admin/users/modifyUser?identifier="+userID+"&action=remove", "", 
+			   function (responseText, textStatus, XMLHttpRequest) {
+			      if(textStatus == 'error') {
+			    	  alert('Delete Failed:'+responseText);
+			      }
+			      if (responseText.match(/^--OK--/gi)) {
+			    	  loadContent('userLeft','/admin/users/leftContent');
+			      } else {
+			    	  alert('Delete Failed:'+responseText);
+			      }
+			});
+}
+</script>
+
+<!-- user details -->
+<h3>User details:</h3>
+<%call expr="forms.userForm(userDetails, False)"/>
+<div class="row-fluid">
+	<div class="span3" style="text-align: right">
+		% if not userDetails is None:
+		<div class="btn-group">
+			<a href="#editUserModal" role="button" class="btn"
+				data-toggle="modal">Edit</a>
+			<button class="btn btn-danger"
+				onclick="if (confirm('Are you sure you want to delete?')) {deleteUser(${userDetails.identifier})}">Delete</button>
+		</div>
+		%endif
+	</div>
+</div>
+<br/>
+<h4>Groupmanagment of this user:</h4>
+% if not userDetails is None:
+<%call expr="forms.genericForm(id='editUserGroups',url='/admin/users/editUserGroups',refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),refreshContainer='userRight')">
+	<input type="hidden" name="userID"	value="${userDetails.identifier}"> 
+	<table border="0" cellpadding="5">
+		<tr>
+			<td>User is not part of these groups:<BR /> <select
+				name="remainingGroups" size="10" multiple="multiple">
+					%if not remainingGroups is None: 
+					   % for group in remainingGroups:
+					   <option value="${group.identifier}" data-toggle="tooltip"
+						title="${group.description}">${group.name}</option> 
+						% endfor
+					%endif
+			</select>
+			</td>
+			<td>
+			    <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+				<BR />
+				<button name="operation" class="btn" type="submit" value="add">&gt;</button>
+			</td>
+			<td>User is part of these groups:<BR /> <select
+				name="userGroups" size="10" multiple> 
+				%if not userGroups is None: 
+				    % for group in userGroups:
+					<option value="${group.identifier}" data-toggle="tooltip"
+						title="${group.description}">${group.name}</option> 
+					% endfor
+				%endif
+			</select>
+			</td>
+		</tr>
+	</table>
+</%call>
+%endif
+%if not userDetails is None:
+	<%call expr="forms.genericModalForm(modalID='editUserModal',url='/admin/users/modifyUser',refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),refreshContainer='userRight')">
+	<input type="hidden" name="action" value="update">
+	<%call expr="modals.userModal(id='editUserModal',title='Edit User',contentUrl='/admin/users/editUser/{0}'.format(userDetails.identifier))"/>
+	</%call>
+%endif

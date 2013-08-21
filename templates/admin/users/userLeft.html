@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+
+
+<div class="btn-group">
+	<a href="#addUserModal" role="button" class="btn" data-toggle="modal">Add
+		new User</a> <a href="#addLDAPUserModal" role="button" class="btn"
+		data-toggle="modal">Add LDAP User</a>
+</div>
+<br />
+<% 
+foundUser=False 
+fistUserID=0
+%>
+<br/>
+<!--list of users -->
+<script type="text/javascript">
+function loadUser(userID){
+    $("#userRight").load("/admin/users/rightContent?userid="+userID, "", 
+		   function (responseText, textStatus, XMLHttpRequest) {
+		      if(textStatus == 'error') {
+		          $('#userRight').html('<div class="alert alert-error">There was an error making the AJAX request</div>'+responseText);
+		      }
+		});
+}
+</script>
+
+
+<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+	%if not users is None: 
+		% for user in users:
+		  <%
+		  if not foundUser:
+		      fistUserID = user.identifier
+		      foundUser=True
+		  %>
+		   <li><a tabindex="-1" href="#" onclick="loadUser(${user.identifier})">${user.username}</a></li>
+		% endfor 
+	%endif
+	
+</ul>
+
+<!-- AddUserForm -->
+<%call expr="forms.genericModalForm(modalID='addUserModal',url='/admin/users/modifyUser')">
+<input type="hidden" name="action" value="insert">
+<%call expr="modals.userModal(id='addUserModal',title='Add User',contentUrl='/admin/users/addUser')"/>
+</%call>
+
+<!-- LdapUserTable -->
+<%call expr="forms.genericModalForm(modalID='addLDAPUserModal',url='/admin/users/modifyUser')">
+<%call expr="modals.genericModal('addLDAPUserModal', 'Add LDAP User', '/admin/users/ldapUsersTable', big=True)">
+<input class="btn btn-primary" type="submit" value="Save changes"/>
+</%call>
+</%call>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	loadUser(${fistUserID})
+});
+</script>

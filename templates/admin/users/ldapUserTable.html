@@ -1,0 +1,10 @@
+<%namespace name="pagination" file="/components/pagination.html"/>
+<%
+    # add radiobutton to list
+    for user in ldapPaginator.list:
+      setattr(user, 'radio',
+              '<input type="radio" name="identifier" value="{0}"/>'.format(
+                                                                    user.uid))
+%>
+<input type="hidden" name="action" value="insertLDAP">
+<%call expr="pagination.pagination('ldapUsersTable',ldapPaginator,hasSearch=True)"/> 

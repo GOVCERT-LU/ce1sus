@@ -1,0 +1,12 @@
+<%namespace name="pagination" file="/components/pagination.html"/>
+
+<%call expr="pagination.pagination('eventsTable',paginator)"/>
+
+<script>
+
+$('#eventsTab').find("li").each(function() {
+    $(this).attr('class', '');
+});
+$('#recentEventsLI').attr('class','active');
+</script>
+ 

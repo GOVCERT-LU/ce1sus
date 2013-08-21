@@ -1,116 +1,136 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="inputBoxes" file="/components/baseComponents.html"/>
 <%namespace name="forms" file="/components/forms.html"/>
 
-<%def name="genericModal(id, title, showButtons=False, refreshUrl=None, show=False, big=False)">
+<%def name="genericModal(id, title, contentUrl, big=False)">
 <%
 if big:
   style='style="width: 80%;margin-left:-40%;"'
 else:
   style=''
 %><!-- BEGIN GenericModal -->
-<div id="${id}" class="modal hide fade" ${style} tabidnex="-1" role="dialog" aria-labelledby="${id}AriaLabel" aria-hidden="true">
+<div id="${id}" class="modal hide fade" ${style}>
   <div class="modal-header">
-  %if not refreshUrl is None:
-    <button type="button" class="close" onclick="window.location.href = window.location.protocol +'//'+ window.location.host + '/${refreshUrl}'">x</button>
-  %else:
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-  %endif
+  <button type="button" class="close" data-dismiss="modal">×</button>
   <h3 id="${id}Label">${title}</h3>
   </div>
-  <div class="modal-body">
+  <div id="${id}body" class="modal-body">
+    <img src="/img/ajax-loader.gif" alt="loading"/> 
+  </div>
+  <div id="${id}Footer" class="modal-footer">
     ${caller.body()}
-  </div>
-  <div class="modal-footer">
-  % if showButtons:
-    %if not refreshUrl is None:
-      <button type="button" class="btn" onclick="window.location.href = window.location.protocol +'//'+ window.location.host + '/${refreshUrl}'">Close</button>
-    %else:
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    %endif
-    <button class="btn btn-primary" type="submit">Save changes</button>
-  % endif
-  </div>
+    <button class="btn" data-dismiss="modal">Close</button>
+   </div>
 </div>
+<script type="text/javascript">
+
+%if not contentUrl is None:
+	$("#${id}").on("shown", function() { // wire up modal when shown
+		$("#${id}body").html('<img src="/img/ajax-loader.gif" alt="loading"/> ');
+		loadContent('${id}body','${contentUrl}')
+	});
+%endif
+
+$("#${id}").on("hide", function() { // wire up modal when shown
+    $("#${id}body").empty();
+});
+</script>
+
+
 % if show:
   <script>$('#${id}').modal('show');</script>
 % endif
+
+
 <!-- END GenericModal -->
 </%def>
 
 
-<%def name="userModal(id,title,user,cbValues,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/users')">
-  <!-- BEGIN userModal -->
-  ${forms.userForm(user, enabled,cbValues)}
-  <!-- END userModal -->
-</%call>
+<%def name="userModal(id,title,contentUrl,enabled=True)">
+	<%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
+	  %if enabled:
+	   <input class="btn btn-primary" type="submit" value="Save changes"/>
+	  %endif
+	</%call>
 </%def>
 
 
-<%def name="groupModal(id,title,group,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/groups')">
-  <!-- BEGIN groupModal -->
-  ${forms.groupForm(group, enabled)}
-  <!-- END groupModal -->
-</%call>
+<%def name="groupModal(id,title,contentUrl,enabled=True)">
+    <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
+      %if enabled:
+       <input class="btn btn-primary" type="submit" value="Save changes"/>
+      %endif
+    </%call>
 </%def>
 
 <%def name="def_objectModal(id,title,object,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/objects')">
+
   <!-- BEGIN objectModal -->
   ${forms.objectForm(object, enabled)}
   <!-- END objectModal -->
-</%call>
+
 </%def>
 
 <%def name="def_attributeModal(id,title,attribute,cbValues,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/admin/attributes')">
+
   <!-- BEGIN attributeModal -->
   ${forms.attributeForm(attribute, enabled,cbValues)}
   <!-- END attributeModal -->
-</%call>
 </%def>
 
 <%def name="eventModal(id,title,event,cbPublishedValues,cbStatusValues,cbTLPValues,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/event/{0}'.format(event.identifier))">
+
   <!-- BEGIN eventModal -->
   ${forms.eventForm(event=event,enabled=True,cbPublishedValues=cbPublishedValues,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
   <!-- END eventModal -->
-</%call>
+
 </%def>
 
-<%def name="objectModal(id,title,eventID,object,cbDefinitions,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/eventObjects/{0}'.format(eventID))">
-  <!-- BEGIN objectModal -->
-  ${forms.eventObjectForm(eventID,object, enabled,cbDefinitions)}
-  <!-- END objectModal -->
-</%call>
+<%def name="objectModal(id,title,contentUrl,enabled=True)">
+    <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
+      %if enabled:
+       <input class="btn btn-primary" type="submit" value="Save changes"/>
+      %endif
+    </%call>
 </%def>
 
 <%def name="objectAttributeModal(id,title,eventID,objectID,attribute,cbDefinitions,showButtons=True,enabled=True, show=False)">
 %if attribute is None:
-    <%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/eventObjects/{0}'.format(eventID))">
+    
       <!-- BEGIN objectModal -->
 	  ${forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)}
 	  <!-- END objectModal -->
-	</%call>
+	
 %else:
-    <%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/eventObjects/{0}/{1}'.format(eventID,attribute.object.identifier))">
+    
       <!-- BEGIN objectModal -->
 	  ${forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)}
 	  <!-- END objectModal -->
-	</%call>
+
+%endif
+
+%if enabled:
+  <script type="text/javascript">
+    //Add Listener to the combobox in the beginning
+    $(document).ready(function () { 
+    	
+    	
+        combobox = $('#${id} #attributeFormDefinition #definitionID');
+        setCBChange(combobox,'${id}');
+     });
+    //change the value input to a file input
+    
+    
+  </script>
 %endif
 
 </%def>
 
-<%def name="commentModal(id,title,eventID,commentObj,showButtons=True,enabled=True, show=False)">
-<%call expr="genericModal(id=id,title=title,show=show,showButtons=showButtons,refreshUrl='/events/event/{0}'.format(eventID))">
-  <!-- BEGIN commentModal -->
-  ${forms.commentForm(eventID,commentObj, enabled)}
-  <!-- END commentModal -->
-</%call>
+<%def name="commentModal(id,title,contentUrl,enabled=True)">
+    <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
+      %if enabled:
+       <input class="btn btn-primary" type="submit" value="Save changes"/>
+      %endif
+    </%call>
 </%def>
 

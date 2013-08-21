@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+
+
+<%namespace name="tabulator" file="/components/tabs.html"/>
+
+<%call expr="tabulator.tabulator(id='adminTabs')"> 
+    <%call expr="tabulator.tab(id='adminUsers',url='/admin/users',name='Users' ,active=True)"/> 
+    <%call expr="tabulator.tab(id='adminGroups',url='/admin/groups', name='Groups')"/> 
+    <%call expr="tabulator.tab(id='adminObjects',url='/admin/objects', name='Objects')"/> 
+    <%call expr="tabulator.tab(id='adminAttribute',url='/admin/attributes', name='Attributes')"/> 
+</%call>

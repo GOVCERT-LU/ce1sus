@@ -1,11 +1,17 @@
 """module holding all controllers needed for the index handling"""
 
-from ce1sus.web.controllers.base import BaseController
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
+from framework.web.controllers.base import BaseController
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.helpers.protection import Protector
 from ce1sus.brokers.permissionbroker import UserBroker
 import datetime
+from ce1sus.web.helpers.protection import require
 
 class IndexController(BaseController):
   """index controller handling all actions in the index section"""
@@ -24,7 +30,11 @@ class IndexController(BaseController):
 
     :returns: generated HTML
     """
-    template = self.getTemplate('/index/index.html')
+    return self.login(errorMsg)
+
+  @cherrypy.expose
+  def login(self, errorMsg=None):
+    template = self.getTemplate('/index/login.html')
     return template.render(errorMsg=errorMsg)
 
 
@@ -52,11 +62,18 @@ class IndexController(BaseController):
       user.last_login = datetime.datetime.now()
       self.userBroker.update(user)
       Protector.setSession(username)
-      raise HTTPRedirect('/events')
+      raise HTTPRedirect('/internal')
 
-    @cherrypy.expose
-    def doLogout(self):
-      return self.index(errorMsg='You logged out')
+  @cherrypy.expose
+  def logout(self):
+    self.clearSession()
+    raise HTTPRedirect('/')
+
+  @require()
+  @cherrypy.expose
+  def internal(self):
+    template = self.getTemplate('/index/basePage.html')
+    return template.render()
 
 
 

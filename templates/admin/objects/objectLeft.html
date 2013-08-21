@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+
+<div class="btn-Object">
+	<a href="#addObjectModal" role="button" class="btn" data-toggle="modal">Add
+		new object</a>
+</div>
+<br />
+<% 
+foundObject=False 
+fistObjectID=0
+%>
+<!--list of objects -->
+<script type="text/javascript">
+function loadObject(objectID){
+    $("#objectRight").load("/admin/objects/rightContent?objectid="+objectID, "", 
+		   function (responseText, textStatus, XMLHttpRequest) {
+		      if(textStatus == 'error') {
+		          $('#objectRight').html('<div class="alert alert-error">There was an error making the AJAX request</div>'+responseText);
+		      }
+		});
+}
+</script>
+
+<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+	%if not objects is None: 
+		% for object in objects:
+		  <%
+		  if not foundObject:
+		      fistObjectID = object.identifier
+		      foundObject=True
+		  %>
+		   <li><a tabindex="-1" href="#" onclick="loadObject(${object.identifier})">${object.name}</a></li>
+		% endfor 
+	%endif
+	
+</ul>
+
+<!-- AddObjectForm -->
+<%call expr="forms.genericModalForm(modalID='addObjectModal',url='/admin/objects/modifyObject')">
+<input type="hidden" name="action" value="insert">
+<%call expr="modals.groupModal(id='addObjectModal',title='Add object',contentUrl='/admin/objects/addObject')"/>
+</%call>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	loadObject(${fistObjectID});
+});
+</script>

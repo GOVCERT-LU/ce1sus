@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="javaScript" file="/components/javaScript.html"/>
+
+<%def name="menu(id, contentid, loadSelected=True)">
+
+<div class="navbar navbar-inverse">
+	<div class="navbar-inner">
+		<div class="container">
+			<ul id="${id}" class="nav">
+					    ${caller.body()}
+			</ul>
+		</div>
+	</div>
+</div>
+
+%if loadSelected:
+<script>
+$(document).ready(function () { 
+    $('#${id}').find("li").each(function() {
+        var className = $(this).attr('class');
+        if (className == 'active') {
+            $(this).find("a").each(function() {
+                var script = $(this).attr("onclick");
+                //extract url from function
+                var url = script.match(/getContent\('(.*)',this\.id.*/);
+                $.get(url[1], function (data) {
+                	if (data.match(/.*<HTML>.+<\/HTML>/gi)) {
+                		$("#main").html(data);
+                    } else {
+                    	$("#${contentid}").html(data);
+                    }
+                })
+                .fail(function(data) { 
+                	$("#${contentid}").html('<div class="alert alert-error">There was an error making the AJAX request</div>'+data); 
+                });
+            })
+        }
+    })
+});
+</script>
+%endif
+</%def>
+
+
+<%def name="menuitem(id,url,name,contentid,active=False)">
+<%
+if active:
+  activeString=' class="active"'
+else:
+  activeString =''
+%>
+<li ${activeString} id="${id}LI"><a href="#" onclick="getContent('${url}',this.id,'${contentid}')" id="${id}">${name}</a></li>
+</%def>

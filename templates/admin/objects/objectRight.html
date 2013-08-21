@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*- 
+
+<%namespace name="messagesAndText" file="/components/messagesAndText.html"/> 
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+
+
+<div id="deleteAnswer" style="display: none;">
+</div>
+<script type="text/javascript">
+function deleteObject(objectid){
+	$("#deleteAnswer").load("/admin/groups/modifyObject?identifier="+objectid+"&action=remove", "", 
+			   function (responseText, textStatus, XMLHttpRequest) {
+			      if(textStatus == 'error') {
+			    	  alert('Delete Failed:'+responseText);
+			      }
+			      if (responseText.match(/^--OK--/gi)) {
+			    	  loadContent('groupLeft','/admin/groups/leftContent');
+			      } else {
+			    	  alert('Delete Failed:'+responseText);
+			      }
+			});
+}
+</script>
+
+<!-- group details -->
+<h3>Object details:</h3>
+<%call expr="forms.objectForm(objectDetails, False)"/>
+<div class="row-fluid">
+	<div class="span3" style="text-align: right">
+		% if not objectDetails is None:
+		<div class="btn-group">
+			<a href="#editObjectModal" role="button" class="btn"
+				data-toggle="modal">Edit</a>
+			<button class="btn btn-danger"
+				onclick="if (confirm('Are you sure you want to delete?')) {deleteObject(${objectDetails.identifier})}">Delete</button>
+		</div>
+		%endif
+	</div>
+</div>
+<br/>
+<h4>Attributemanagment of this object:</h4>
+% if not objectDetails is None:
+<%call expr="forms.genericForm(id='editObjectAttriutes',url='/admin/objects/editObjectAttributes',refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),refreshContainer='objectRight')">
+<input type="hidden" name="objectid" value="${objectDetails.identifier}">
+<table border="0" cellpadding="5">
+<tr>
+    <td>Attributes not part of this object:<BR /> <select name="remainingAttributes"
+        size="10" multiple="multiple" tabindex="1"> 
+        %if not remainingAttributes is None:
+            % for attribute in remainingAttributes:
+        <option value="${attribute.identifier}">${attribute.name}</option> 
+            % endfor
+        %endif
+    </select>
+    </td>
+    <td>
+        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+        <BR />
+        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+    </td>
+    <td>Attributes part of this object:<BR /> <select name="objectAttributes" size="10"
+        multiple> 
+        %if not objectAttributes is None:
+            % for attribute in objectAttributes:
+                <option value="${attribute.identifier}">${attribute.name}</option> 
+            % endfor
+        %endif
+    </select>
+    </td>
+</tr>
+</table>
+</%call>
+%endif
+%if not objectDetails is None:
+	<%call expr="forms.genericModalForm(modalID='editObjectModal',url='/admin/objects/modifyObject',refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),refreshContainer='objectRight')">
+	<input type="hidden" name="action" value="update">
+	<%call expr="modals.userModal(id='editObjectModal',title='Edit Object',contentUrl='/admin/objects/editObject/{0}'.format(objectDetails.identifier))"/>
+	</%call>
+%endif

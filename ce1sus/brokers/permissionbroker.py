@@ -4,21 +4,21 @@ for inserting data into the database.
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
-__copyright__ = 'Copyright 2013, Weber Jean-Paul'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 # Created on Jul 4, 2013
 
 
-from ce1sus.db.broker import BrokerBase, NothingFoundException, \
+from framework.db.broker import BrokerBase, NothingFoundException, \
 ValidationException, TooManyResultsFoundException
 import sqlalchemy.orm.exc
-import ce1sus.helpers.hash as hasher
+import framework.helpers.hash as hasher
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
-from ce1sus.db.session import BASE
-from ce1sus.helpers.validator import ObjectValidator
+from framework.db.session import BASE
+from framework.helpers.validator import ObjectValidator
 import re
 
 # Relation table for user and groups
@@ -81,7 +81,7 @@ class User(BASE):
 
     :returns: Boolean
     """
-    ObjectValidator.validateAlNum(self, 'username')
+    ObjectValidator.validateAlNum(self, 'username', minLength=3)
     # TODO: find a way to validate password earlier!
     # validator.validateRegex(self, 'password', "(?=^.{8,}$)(?=.*[a-z])
     # (?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$", 'Password has to be
@@ -143,13 +143,15 @@ class Group(BASE):
 
     :returns: Boolean
     """
-    ObjectValidator.validateAlNum(self, 'name')
+    ObjectValidator.validateAlNum(self, 'name',
+                                  withSymbols=True)
     ObjectValidator.validateDigits(self, 'shareTLP')
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
                                   withSpaces=True,
-                                  minLength=3)
+                                  minLength=3,
+                                  withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
 

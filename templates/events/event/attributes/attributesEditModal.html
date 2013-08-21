@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="forms" file="/components/forms.html"/>
+<%namespace name="messagesAndText" file="/components/messagesAndText.html"/>
+
+<%call expr="messagesAndText.error(errorMsg)"/>
+<input type="hidden" name="action" value="update">
+<%call expr="forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)"/>

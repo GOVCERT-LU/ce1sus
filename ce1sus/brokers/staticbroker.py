@@ -1,5 +1,10 @@
 """This module provides container classes of static data"""
 
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 class Type(object):
   """Static class defining the types of an object"""
   __definitions = {0 : 'Virus',

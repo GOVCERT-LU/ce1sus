@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="pagination" file="/components/pagination.html"/>
+<%namespace name="modals" file="/components/modals.html"/>
+<%namespace name="forms" file="/components/forms.html"/>
+<%
+
+
+for ticket in ticketPaginator.list:
+  url = '<a href="{0}" target="_blank">{1}</a>'.format(rtUrl+ ticket.ticket,ticket.ticket)
+  setattr(ticket, 'idLink', url)
+
+found = False
+for x in range(len(ticketPaginator.lables)):
+  for key,value in ticketPaginator.lables[x].iteritems():
+    if key == 'ticket':
+      hash = dict()
+      hash['idLink'] = value
+      ticketPaginator.lables[x] =hash
+      found = True
+      break
+  if found:
+    break
+  
+
+    
+
+%>
+<div class="btn-group">
+  <a href="#addRTModal" role="button" class="btn" data-toggle="modal">Reference Ticket</a>
+</div>
+<br/><br/>
+<%call expr="pagination.pagination('ticketsTable',ticketPaginator,hasSearch=True)"/> 
+
+<!-- RTTickets -->
+<%call expr="forms.genericModalForm(modalID='addRTModal',url='/events/event/tickets/modifyTicket',refreshUrl='/events/event/tickets/tickets/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+<input type="hidden" name="eventID" value="${eventID}">
+<%call expr="modals.genericModal('addRTModal', 'Add RT Ticket', '/events/event/tickets/getRTTable', big=True)">
+<input class="btn btn-primary" type="submit" value="Save changes"/>
+</%call>
+</%call>

@@ -4,17 +4,14 @@ Created on Jul 5, 2013
 @author: jhemp
 '''
 import unittest
-from ce1sus.db.session import SessionManager
+from framework.db.session import SessionManager
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-  AttributeBroker
-from ce1sus.brokers.classes.event import Event, Object, Attribute
+  AttributeBroker, Event, Object, Attribute
 from datetime import datetime
-from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker
-from ce1sus.brokers.classes.permissions import Group, User
-from ce1sus.brokers.classes.definitions import ObjectDefinition, AttributeDefinition
+from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
-  ObjectDefinitionBroker
-from ce1sus.helpers.objects import printObject
+  ObjectDefinitionBroker, ObjectDefinition, AttributeDefinition
+from framework.helpers.objects import printObject
 
 class TestEventBrokers(unittest.TestCase):
 
