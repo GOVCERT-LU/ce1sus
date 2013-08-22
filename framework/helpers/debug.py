@@ -18,7 +18,7 @@ class Log(object):
       self.__config = Configuration(configFile, 'Logger')
       self.__doLog = self.__config.get('log')
 
-      self.logLvl = getattr(logging, self.__config.get('level').upper())
+      self.logLvl = 'DEBUG'#getattr(logging, self.__config.get('level').upper())
     else:
       self.__doLog = True
       self.logLvl = logging.INFO
@@ -34,7 +34,7 @@ class Log(object):
         self.logFileSize = self.__config.get('size')
         self.nbrOfBackups = self.__config.get('backups')
         self.logToConsole = self.__config.get('logconsole')
-        self.logfile = self.__config.get('logfile')
+        self.logfile = '/var/www/software/ce1sus/log/logger.txt'
       else:
         self.logFileSize = 100000
         self.nbrOfBackups = 2

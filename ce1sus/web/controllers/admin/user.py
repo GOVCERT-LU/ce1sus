@@ -30,7 +30,7 @@ class UserController(BaseController):
     return template.render()
 
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def leftContent(self):
 
@@ -39,7 +39,7 @@ class UserController(BaseController):
     users = self.userBroker.getAll()
     return template.render(users=users)
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def rightContent(self, userid=0, user=None):
     template = self.getTemplate('/admin/users/userRight.html')
@@ -61,13 +61,13 @@ class UserController(BaseController):
                            remainingGroups=remainingGroups)
 
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def addUser(self):
     template = self.getTemplate('/admin/users/userModal.html')
     return template.render(user=None, errorMsg=None)
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def ldapUsersTable(self):
     template = self.getTemplate('/admin/users/ldapUserTable.html')
@@ -87,7 +87,7 @@ class UserController(BaseController):
     lh.close()
     return template.render(ldapPaginator=ldapPaginator, errorMsg=None)
 
-  @require(privileged(), requireReferer('/internal', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
                  privileged=None, email=None, action='insert',
@@ -168,7 +168,7 @@ class UserController(BaseController):
       return template.render(user=user, errorMsg=errorMsg)
 
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged())
   @cherrypy.expose
   def editUser(self, userid):
     template = self.getTemplate('/admin/users/userModal.html')

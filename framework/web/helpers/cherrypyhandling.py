@@ -6,6 +6,8 @@ __license__ = 'GPL v3+'
 
 import os
 import cherrypy
+from framework.helpers.debug import Log
+
 
 class CherryPyException(Exception):
 
@@ -22,6 +24,7 @@ class CherryPyHandler(object):
 
   def __init__(self, configFile):
       # check if file exists
+    #Log.getLogger(self.__class__.__name__).debug("init Handler")
     try:
       if os.path.isfile(configFile):
         cherrypy.config.update(configFile)
@@ -40,6 +43,7 @@ class CherryPyHandler(object):
 
   @staticmethod
   def application(environ, start_response):
+    #Log.getLogger(self.__class__.__name__).debug("Run application method")
     cherrypy.tree(environ, start_response)
 
   @staticmethod
