@@ -26,12 +26,6 @@ from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
 from ce1sus.web.controllers.event.cves import CVEsController
 
-def application(environ, start_response):
-  bootstrap()
-  # return CherryPyHandler.application(environ, start_response)
-  return cherrypy.tree(environ, start_response)
-
-
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -103,8 +97,6 @@ def bootstrap():
   Log.getLogger("run").debug("Adding events event cve")
   cherrypy.tree.mount(CVEsController(), '/events/event/cves')
 
-
-
 if __name__ == '__main__':
 
   bootstrap()
@@ -114,5 +106,7 @@ if __name__ == '__main__':
     cherrypy.engine.block()
   except cherrypy._cperror as e:
     raise ConfigException(e)
-
-
+else: 
+  bootstrap()
+  cherrypy.engine.start()
+  application = cherrypy.tree
