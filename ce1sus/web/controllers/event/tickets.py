@@ -5,36 +5,21 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import copy
 from framework.web.controllers.base import BaseController
 import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, Object, Attribute, Comment, \
-                  CommentBroker, Ticket, TicketBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-                  AttributeDefinitionBroker, AttributeDefinition
+from ce1sus.brokers.eventbroker import EventBroker, Ticket, TicketBroker
 from ce1sus.web.helpers.protection import require
-from cherrypy._cperror import HTTPRedirect
 from framework.helpers.rt import RTHelper
 import types
-from framework.db.broker import NothingFoundException, ValidationException, \
-BrokerException
-from framework.helpers.converters import ObjectConverter
-from ce1sus.web.helpers.protection import privileged
+from framework.db.broker import BrokerException
 class TicketsController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
     BaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
-    self.objectBroker = self.brokerFactory(ObjectBroker)
-    self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.attributeBroker = self.brokerFactory(AttributeBroker)
-    self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
-    self.commentBroker = self.brokerFactory(CommentBroker)
     self.ticketBroker = self.brokerFactory(TicketBroker)
 
 
@@ -43,6 +28,8 @@ class TicketsController(BaseController):
   def tickets(self, eventID):
     """
     Lists all event tickets and tickets
+
+    :returns: generated HTML
     """
     template = self.mako.getTemplate('/events/event/tickets/tickets.html')
     event = self.eventBroker.getByID(eventID)
@@ -57,8 +44,18 @@ class TicketsController(BaseController):
               {'creator.username':'Created by'},
               {'created':'CreatedOn'}]
 
-    paginatorOptions = PaginatorOptions('/events/event/tickets/tickets/{0}'.format(eventID), 'eventTabs{0}TabContent'.format(eventID))
-    paginatorOptions.addOption('DIALOG', 'REMOVE', '/events/event/tickets/modifyTicket?action=remove&eventID={0}&ticketID='.format(eventID), contentid='', refresh=True)
+    paginatorOptions = PaginatorOptions(('/events/event/'
+                                         + 'tickets/tickets/{0}').format(
+                                                                      eventID),
+                                        'eventTabs{0}TabContent'.format(
+                                                                      eventID))
+    paginatorOptions.addOption('DIALOG',
+                               'REMOVE',
+                               ('/events/event/tickets/modifyTicket'
+                                + '?action=remove&eventID={0}&'
+                                + 'ticketID=').format(eventID),
+                               contentid='',
+                               refresh=True)
 
 
 
@@ -75,9 +72,14 @@ class TicketsController(BaseController):
   @cherrypy.expose
   @require()
   def getRTTable(self):
+    """
+    renders the file for displaying the tickets out of RT
+
+    :returns: generated HTML
+    """
     template = self.mako.getTemplate('/events/event/tickets/RTTable.html')
 
-    # the labels etc is handeled by the RTTable.html
+    # the labels etc is handled by the RTTable.html
     rtPaginator = Paginator(items=RTHelper.getInstance().getAllTickets(),
                           labelsAndProperty=None)
     return template.render(rtPaginator=rtPaginator,
@@ -111,7 +113,9 @@ class TicketsController(BaseController):
             ticket.ticket = tickets
             ticket.creator = self.getUser()
             ticket.user_id = ticket.creator.identifier
-            ticket.events.append(event)
+            events = getattr(ticket, 'events')
+            function = getattr(events, 'append')
+            function(event)
             self.ticketBroker.insert(ticket)
           else:
             for ticketID in tickets:
@@ -122,21 +126,23 @@ class TicketsController(BaseController):
               ticket.ticket = ticketID
               ticket.creator = self.getUser()
               ticket.user_id = ticket.creator.identifier
-              ticket.events.append(event)
+              events = getattr(ticket, 'events')
+              function = getattr(events, 'append')
+              function(event)
               self.ticketBroker.insert(ticket, False)
             # commit when all are set up
             self.ticketBroker.session.commit()
       if action == 'remove':
-        ticket = self.ticketBroker.getByID(ticketID);
+        ticket = self.ticketBroker.getByID(ticketID)
         event.removeTicket(ticket)
-
+          # update last_seen
+          # TODO update event
+          # self.updateEvent(event)
       return self.returnAjaxOK()
     except BrokerException as e:
       self.getLogger().critical(e)
 
-          # update last_seen
-    # TODO update event
-    # self.updateEvent(event)
+
 
 
 

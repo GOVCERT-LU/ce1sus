@@ -9,7 +9,6 @@ import cherrypy
 from framework.db.session import SessionManager
 from ce1sus.brokers.permissionbroker import UserBroker
 from framework.helpers.config import Configuration
-from datetime import datetime
 from framework.db.broker import NothingFoundException, BrokerException
 from framework.helpers.ldaphandling import LDAPHandler
 import re

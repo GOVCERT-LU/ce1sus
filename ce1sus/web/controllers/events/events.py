@@ -5,24 +5,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import copy
 from framework.web.controllers.base import BaseController
 import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, Object, Attribute, Comment, \
-                  CommentBroker, Ticket, TicketBroker
+from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-                  AttributeDefinitionBroker, AttributeDefinition
 from ce1sus.web.helpers.protection import require
-from cherrypy._cperror import HTTPRedirect
-from framework.helpers.rt import RTHelper
-import types
-from framework.db.broker import NothingFoundException, ValidationException, \
-BrokerException
-from framework.helpers.converters import ObjectConverter
 from ce1sus.web.helpers.protection import privileged
 class EventsController(BaseController):
   """event controller handling all actions in the event section"""
@@ -30,12 +19,7 @@ class EventsController(BaseController):
   def __init__(self):
     BaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
-    self.objectBroker = self.brokerFactory(ObjectBroker)
-    self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.attributeBroker = self.brokerFactory(AttributeBroker)
-    self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
-    self.commentBroker = self.brokerFactory(CommentBroker)
-    self.ticketBroker = self.brokerFactory(TicketBroker)
+
 
   @require(privileged())
   @cherrypy.expose
@@ -95,7 +79,10 @@ class EventsController(BaseController):
 
 
     paginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
-    paginatorOptions.addOption('NEWTAB', 'VIEW', '/events/event/view/', contentid='')
+    paginatorOptions.addOption('NEWTAB',
+                               'VIEW',
+                               '/events/event/view/',
+                               contentid='')
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)

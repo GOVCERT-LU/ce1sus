@@ -11,6 +11,7 @@ from mako.lookup import TemplateLookup
 
 class MakoHandler(object):
   """Helper class for MAKO templates"""
+  instance = None
   def __init__(self, configFile):
 
     config = Configuration(configFile, 'Mako')
@@ -47,13 +48,13 @@ class MakoHandler(object):
     mytemplate = self.__mylookup.get_template(templatename)
     return mytemplate.render_unicode(**kwargs)
 
-  @staticmethod
-  def getInstance():
+  @classmethod
+  def getInstance(cls):
     """
     Returns the instance of the template handler.
 
     :returns: MakoHandler
     """
-    if MakoHandler.instance == None:
+    if MakoHandler.instance is None:
       raise IndentationError('No MakoHandler present')
     return MakoHandler.instance

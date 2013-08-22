@@ -8,6 +8,7 @@ from framework.helpers.config import Configuration
 
 class WebConfig(object):
 
+  instance = None
   def __init__(self, configFile):
     WebConfig.instance = self
     self.__config = Configuration(configFile, 'ce1sus')
@@ -16,8 +17,8 @@ class WebConfig(object):
     return self.__config.get(identifier)
 
 
-  @staticmethod
-  def getInstance():
-    if WebConfig.instance == None:
+  @classmethod
+  def getInstance(cls):
+    if WebConfig.instance is None:
       raise IndentationError('No SessionManager present')
     return WebConfig.instance

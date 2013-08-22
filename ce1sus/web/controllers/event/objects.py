@@ -5,24 +5,16 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import copy
 from framework.web.controllers.base import BaseController
 import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, Object, Attribute, Comment, \
-                  CommentBroker, Ticket, TicketBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel
+from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, Object
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-                  AttributeDefinitionBroker, AttributeDefinition
+                  AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
-from cherrypy._cperror import HTTPRedirect
-from framework.helpers.rt import RTHelper
-import types
-from framework.db.broker import NothingFoundException, ValidationException, \
+from framework.db.broker import ValidationException, \
 BrokerException
-from framework.helpers.converters import ObjectConverter
 from ce1sus.web.helpers.protection import privileged
 class ObjectsController(BaseController):
   """event controller handling all actions in the event section"""
@@ -32,14 +24,20 @@ class ObjectsController(BaseController):
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
-    self.commentBroker = self.brokerFactory(CommentBroker)
-    self.ticketBroker = self.brokerFactory(TicketBroker)
 
   @cherrypy.expose
   @require()
   def objects(self, eventID, objectID=None):
+    """
+     renders the file with the base layout of the main object page
+
+    :param objectID: the identifier of the object (only set if the details
+                     should be displayed of this object)
+    :type objectID: Integer
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/objects/objectsBase.html')
     return template.render(eventID=eventID,
                            objectID=objectID)
@@ -47,10 +45,14 @@ class ObjectsController(BaseController):
   @cherrypy.expose
   @require()
   def all(self, eventID):
+    """
+     renders the file with the all the objects belonging to an event
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/objects/allObjects.html')
     event = self.eventBroker.getByID(eventID)
 
-    # TODO imporve -> objectBroker get objects by event id
     return template.render(eventID=eventID,
                            objectList=event.objects,
                            cbObjDefinitions=self.def_objectBroker.getCBValues()
@@ -59,6 +61,12 @@ class ObjectsController(BaseController):
   @cherrypy.expose
   @require()
   def detail(self, eventID, objectID):
+    """
+     renders the file with the details (attributes, object attributes) of the
+     requested object
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/objects/details.html')
 
     labels = [{'identifier':'#'},
@@ -67,10 +75,30 @@ class ObjectsController(BaseController):
               {'creator.username':'Creator'},
               {'created':'CreatedOn'}]
 
-    paginatorOptions = PaginatorOptions('/events/event/objects/detail/{0}/{1}'.format(eventID, objectID), 'objectRight')
-    paginatorOptions.addOption('MODAL', 'VIEW', '/events/event/attribute/view/{0}/{1}/'.format(eventID, objectID), modalTitle='View Attribute')
-    paginatorOptions.addOption('MODAL', 'EDIT', '/events/event/attribute/edit/{0}/{1}/'.format(eventID, objectID), modalTitle='Edit Attribute', postUrl='/events/event/attribute/modifyAttribute', refresh=True)
-    paginatorOptions.addOption('DIALOG', 'REMOVE', '/events/event/attribute/modifyAttribute?action=remove&eventID={0}&objectID={1}&attributeID='.format(eventID, objectID), refresh=True)
+    paginatorOptions = PaginatorOptions(('/events/event/objects/'
+                                         + 'detail/{0}/{1}').format(eventID,
+                                                                    objectID),
+                                        'objectRight')
+    paginatorOptions.addOption('MODAL',
+                               'VIEW',
+                               ('/events/event/attribute/'
+                                + 'view/{0}/{1}/').format(eventID,
+                                                         objectID),
+                               modalTitle='View Attribute')
+    paginatorOptions.addOption('MODAL',
+                               'EDIT',
+                               ('/events/event/attribute/edit/'
+                               + '{0}/{1}/').format(eventID, objectID),
+                               modalTitle='Edit Attribute',
+                               postUrl=('/events/event/attribute/'
+                                        + 'modifyAttribute'),
+                               refresh=True)
+    paginatorOptions.addOption('DIALOG',
+                               'REMOVE',
+                               ('/events/event/attribute/modifyAttribute?'
+                                + 'action=remove&eventID={0}&objectID={1}'
+                                + '&attributeID=').format(eventID, objectID),
+                               refresh=True)
 
 
     # will be associated in the view!!! only to keep it simple!
@@ -85,7 +113,7 @@ class ObjectsController(BaseController):
       obj = self.objectBroker.getByID(objectID)
       cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
                                                       obj.definition.identifier)
-    except Exception:
+    except BrokerException:
       obj = None
       cbAttributeDefintiionsDict = dict()
 
@@ -97,15 +125,20 @@ class ObjectsController(BaseController):
     cbObjDefinitions = self.def_objectBroker.getCBValues()
 
     return template.render(eventID=eventID,
-                           cbObjDefinitions=cbObjDefinitions,
-                           cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
-                           paginator=paginator,
-                           object=obj)
+                          cbObjDefinitions=cbObjDefinitions,
+                          cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
+                          paginator=paginator,
+                          object=obj)
 
 
   @require(privileged())
   @cherrypy.expose
   def addObject(self, eventID):
+    """
+     renders the file for displaying the add an attribute form
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
     return template.render(cbObjDefinitions=cbObjDefinitions,

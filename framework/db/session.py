@@ -44,6 +44,7 @@ class SessionManager:
   """
   sessionClazz manager for the session handling
   """
+  instance = None
 
   def __init__(self, configFile):
     SessionManager.instance = self
@@ -162,15 +163,15 @@ class SessionManager:
     """
     pass
 
-  @staticmethod
-  def getInstance():
+  @classmethod
+  def getInstance(cls):
     """
     Returns the instance (Singleton pattern)
 
 
     :returns: SessionManager
     """
-    if SessionManager.instance == None:
+    if SessionManager.instance is None:
       raise IndentationError('No SessionManager present')
     return SessionManager.instance
 

@@ -46,6 +46,8 @@ class LDAPHandler(object):
   "LDAP Handler"
 
 
+
+  instance = None
   def __init__(self, configFile):
     self.__config = Configuration(configFile, 'LDAP')
 
@@ -230,14 +232,15 @@ class LDAPHandler(object):
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
 
-  @staticmethod
-  def getInstance():
+  @classmethod
+  def getInstance(cls):
     """
       Returns an instance
 
       :returns: LDAPHandler
     """
-    if hasattr(LDAPHandler, 'instance'):
-      return LDAPHandler.instance
-    else:
+    if LDAPHandler.instance == None:
       raise NotInitializedException('LDAPHandler has not been initialized')
+    else:
+      return LDAPHandler.instance
+

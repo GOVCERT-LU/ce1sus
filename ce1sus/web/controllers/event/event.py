@@ -11,19 +11,15 @@ import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, Object, Attribute, Comment, \
-                  CommentBroker, Ticket, TicketBroker
+                  AttributeBroker, Event, CommentBroker, TicketBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-                  AttributeDefinitionBroker, AttributeDefinition
+                  AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
-from cherrypy._cperror import HTTPRedirect
 from framework.helpers.rt import RTHelper
-import types
-from framework.db.broker import NothingFoundException, ValidationException, \
-BrokerException
+from framework.db.broker import ValidationException, BrokerException
 from framework.helpers.converters import ObjectConverter
-from ce1sus.web.helpers.protection import privileged
+
 class EventController(BaseController):
   """event controller handling all actions in the event section"""
 
@@ -40,6 +36,11 @@ class EventController(BaseController):
   @require()
   @cherrypy.expose
   def view(self, eventID):
+    """
+    renders the base page for displaying events
+
+    :returns: generated HTML
+    """
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return template.render(eventID=eventID)
 
@@ -47,12 +48,18 @@ class EventController(BaseController):
   @require()
   @cherrypy.expose
   def event(self, eventID):
+    """
+    renders the event page for displaying a single event
+
+    :returns: generated HTML
+    """
     template = self.mako.getTemplate('/events/event/view.html')
 
     event = self.eventBroker.getByID(eventID)
 
     # right checks
-    self.checkIfViewable(event.groups, self.getUser().identifier == event.creator.identifier)
+    self.checkIfViewable(event.groups,
+                         self.getUser().identifier == event.creator.identifier)
 
 
     cbStatusValues = Status.getDefinitions()
@@ -66,8 +73,13 @@ class EventController(BaseController):
 
 
 
-    paginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
-    paginatorOptions.addOption('TAB', 'VIEW', '/events/event/objects/objects/{0}/'.format(eventID), contentid='', tabid='eventObjects{0}'.format(eventID))
+    paginatorOptions = PaginatorOptions('/events/recent',
+                                        'eventsTabTabContent')
+    paginatorOptions.addOption('TAB',
+                          'VIEW',
+                          '/events/event/objects/objects/{0}/'.format(eventID),
+                          contentid='',
+                          tabid='eventObjects{0}'.format(eventID))
     objectPaginator = Paginator(items=event.objects,
                           labelsAndProperty=objectLabels,
                           paginatorOptions=paginatorOptions)
@@ -88,8 +100,12 @@ class EventController(BaseController):
               {'title':'Name'},
               {'creator.username':'Created by'},
               {'created':'CreatedOn'}]
-    eventPaginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
-    eventPaginatorOptions.addOption('NEWTAB', 'VIEW', '/events/event/view/', contentid='')
+    eventPaginatorOptions = PaginatorOptions('/events/recent',
+                                             'eventsTabTabContent')
+    eventPaginatorOptions.addOption('NEWTAB',
+                                    'VIEW',
+                                    '/events/event/view/',
+                                    contentid='')
     eventPaginator = Paginator(items=event.events,
                           labelsAndProperty=eventLabels,
                           paginatorOptions=eventPaginatorOptions)
@@ -113,6 +129,11 @@ class EventController(BaseController):
   @require()
   @cherrypy.expose
   def editEvent(self, eventID):
+    """
+    renders the base page for editing a single event
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
     cbStatusValues = Status.getDefinitions()
@@ -149,9 +170,13 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
+    event_orig = self.eventBroker.getByID(identifier)
+    # right checks only if there is a change!!!!
+    self.checkIfViewable(
+                    event_orig.groups, self.getUser().identifier ==
+                    event_orig.creator.identifier)
 
     errors = False
-    errorMsg = None
     template = self.getTemplate('/events/event/eventModal.html')
 
     cbStatusValues = Status.getDefinitions()
@@ -159,14 +184,8 @@ class EventController(BaseController):
     # fill in the values
     event = Event()
     if not action == 'insert':
-      event_orig = self.eventBroker.getByID(identifier)
       # dont want to change the original in case the user cancel!
       event = copy.copy(event_orig)
-
-      # right checks only if there is a change!!!!
-      self.checkIfViewable(
-                    event.groups, self.getUser().identifier ==
-                    event.creator.identifier)
     if not action == 'remove':
       event.title = name
       event.description = description
@@ -177,46 +196,25 @@ class EventController(BaseController):
       ObjectConverter.setDate(event, 'first_seen', first_seen)
       ObjectConverter.setDate(event, 'last_seen', last_seen)
 
-
-
-    if action == 'insert':
-      event.created = datetime.now()
-      event.creator = self.getUser()
-      event.user_id = event.creator.identifier
-      try:
+    try:
+      if action == 'insert':
+        event.created = datetime.now()
+        event.creator = self.getUser()
+        event.user_id = event.creator.identifier
         self.eventBroker.insert(event)
-        identifier = event.identifier
-        event = None
-        action = None
-      except ValidationException:
-        self.getLogger().debug('Event is invalid')
-        errors = True
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-        event = None
-
-    if action == 'update':
-      # get original event
-      try:
+      if action == 'update':
+        # get original event
         self.eventBroker.update(event)
-        event = None
-        action = None
-      except ValidationException:
-        self.getLogger().debug('Event is invalid')
-        errors = True
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-        event = None
-
-    if action == 'remove':
-      try:
+      if action == 'remove':
         self.eventBroker.removeByID(event.identifier)
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-      action = None
-      event = None
+
+    except ValidationException:
+      self.getLogger().debug('Event is invalid')
+      errors = True
+    except BrokerException as e:
+      errorMsg = 'An unexpected error occurred: {0}'.format(e)
+      self.getLogger().debug('An unexpected error occurred: {0}'.format(e))
+      errors = True
 
     if errors:
       return template.render(errorMsg=errorMsg,

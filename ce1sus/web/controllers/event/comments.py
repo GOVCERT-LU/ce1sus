@@ -36,9 +36,6 @@ class CommentsController(BaseController):
                            comment=None,
                            errorMsg=None)
 
-
-    return self.__class__.__name__ + ' is not implemented'
-
   @cherrypy.expose
   @require()
   def modifyComment(self, eventID=None, commentID=None,
@@ -73,7 +70,6 @@ class CommentsController(BaseController):
       except BrokerException as e:
         errorMsg = 'An unexpected error occurred: {0}'.format(e)
 
-
     if action == 'update':
       comment.comment = commentText
 
@@ -104,6 +100,11 @@ class CommentsController(BaseController):
   @cherrypy.expose
   @require()
   def viewComment(self, eventID=None, commentID=None):
+    """
+     renders the file with the requested comment
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/comments/commentModal.html')
 
     try:
@@ -113,9 +114,3 @@ class CommentsController(BaseController):
     return template.render(eventID=eventID,
                            comment=comment,
                            errorMsg=None)
-    return 'view'
-
-  @cherrypy.expose
-  @require()
-  def blank(self):
-    return self.__class__.__name__

@@ -10,11 +10,21 @@ from rtkit.resource import RTResource
 from rtkit.authenticators import CookieAuthenticator
 from rtkit.errors import RTResourceError
 
-class NoResponse(Exception):
+class RTException(Exception):
   def __init__(self, message):
     Exception.__init__(self, message)
 
+class NoResponseException(RTException):
+  def __init__(self, message):
+    RTException.__init__(self, message)
+
+class NoInstanceFoundException(RTException):
+  def __init__(self, message):
+    RTException.__init__(self, message)
+
+
 class RTTicket(object):
+
   def __init__(self, identifier):
     self.identifier = identifier
     self.title = None
@@ -32,6 +42,8 @@ class RTTicket(object):
 
 
 class RTHelper(object):
+
+  instance = None
 
 
   def __init__(self, configFile):
@@ -57,9 +69,9 @@ class RTHelper(object):
             ticketList.append(ticket)
         return ticketList
       else:
-        raise NoResponse('Nothing found!')
+        raise NoResponseException('Nothing found!')
     except RTResourceError as e:
-      raise NoResponse(e)
+      raise NoResponseException(e)
 
   def getTicketByID(self, identifier):
     try:
@@ -87,18 +99,20 @@ class RTHelper(object):
         if 'Resolved' in rsp_dict:
           ticket.resolved = rsp_dict['Resolved']
       else:
-        raise NoResponse('Nothing found!')
+        raise NoResponseException('Nothing found!')
     except RTResourceError as e:
-      raise NoResponse(e)
+      raise NoResponseException(e)
 
 
   def getTicketUrl(self):
     return self.__rtUrl + '/Ticket/Display.html?id='
 
-  @staticmethod
-  def getInstance():
+  @classmethod
+  def getInstance(cls):
     """
     Returns the instance if there is one
     """
-    if hasattr(RTHelper, 'instance'):
+    if RTHelper.instance is None:
+      raise NoInstanceFoundException('No instance found to provide')
+    else:
       return RTHelper.instance

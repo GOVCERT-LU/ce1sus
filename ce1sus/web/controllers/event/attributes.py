@@ -9,12 +9,10 @@ from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, Object, Attribute, Comment, \
-                  CommentBroker, Ticket, TicketBroker
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-                  AttributeDefinitionBroker, AttributeDefinition
+                  AttributeBroker, Attribute
+from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import privileged
-from framework.db.broker import NothingFoundException, ValidationException, \
+from framework.db.broker import ValidationException, \
 BrokerException
 
 
@@ -42,9 +40,15 @@ class AttributesController(BaseController):
 
   @cherrypy.expose
   def addAttribute(self, eventID, objectID):
+    """
+     renders the file for adding attributes
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/attributes/attributesModal.html')
-    obj = self.objectBroker.getByID(objectID);
-    cbDefinitions = self.def_attributesBroker.getCBValues(obj.definition.identifier)
+    obj = self.objectBroker.getByID(objectID)
+    cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
     return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=None,
@@ -107,9 +111,10 @@ class AttributesController(BaseController):
         # self.updateEvent(event, False)
       except ValidationException as e:
         self.getLogger().info(e)
-        template = self.getTemplate('/events/event/attributes/attributesModal.html')
-        obj = self.objectBroker.getByID(objectID);
-        cbDefinitions = self.def_attributesBroker.getCBValues(obj.definition.identifier)
+        template = self.getTemplate('/events/event/attributes/'
+                                    + 'attributesModal.html')
+        cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
         return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
@@ -120,9 +125,11 @@ class AttributesController(BaseController):
 
 
     except BrokerException as e:
-      template = self.getTemplate('/events/event/attributes/attributesModal.html')
-      obj = self.objectBroker.getByID(objectID);
-      cbDefinitions = self.def_attributesBroker.getCBValues(obj.definition.identifier)
+      template = self.getTemplate('/events/event/attributes/'
+                                  + 'attributesModal.html')
+      obj = self.objectBroker.getByID(objectID)
+      cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
       return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
@@ -131,29 +138,32 @@ class AttributesController(BaseController):
 
   @cherrypy.expose
   @require()
-  def view(self, eventID, objectID, attributeID):
+  def view(self, eventID, objectID, attributeID, enabled=False):
+    """
+     renders the file with the requested attribute
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/attributes/attributesModal.html')
     obj = self.objectBroker.getByID(objectID);
-    cbDefinitions = self.def_attributesBroker.getCBValues(obj.definition.identifier)
+    cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
     attribute = self.attributeBroker.getByID(attributeID)
     return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
-                           enabled=False)
+                           enabled=enabled)
 
 
   @cherrypy.expose
   @require()
   def edit(self, eventID, objectID, attributeID):
-    template = self.getTemplate('/events/event/attributes/attributesEditModal.html')
-    obj = self.objectBroker.getByID(objectID);
-    cbDefinitions = self.def_attributesBroker.getCBValues(obj.definition.identifier)
-    attribute = self.attributeBroker.getByID(attributeID)
-    return template.render(eventID=eventID,
-                           objectID=objectID,
-                           attribute=attribute,
-                           cbDefinitions=cbDefinitions,
-                           errorMsg=None,
-                           enabled=True)
+    """
+     renders the file with the requested comment
+
+    :returns: generated HTML
+    """
+    # is the same just that some elements are enabled
+    return self.view(eventID, objectID, attributeID, True)

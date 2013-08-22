@@ -12,13 +12,15 @@ from logging.handlers import RotatingFileHandler
 
 class Log(object):
   """Log class"""
+  instance = None
+
   def __init__(self, configFile=None):
 
     if configFile:
       self.__config = Configuration(configFile, 'Logger')
       self.__doLog = self.__config.get('log')
 
-      self.logLvl = 'DEBUG'#getattr(logging, self.__config.get('level').upper())
+      self.logLvl = getattr(logging, self.__config.get('level').upper())
     else:
       self.__doLog = True
       self.logLvl = logging.INFO
@@ -34,7 +36,7 @@ class Log(object):
         self.logFileSize = self.__config.get('size')
         self.nbrOfBackups = self.__config.get('backups')
         self.logToConsole = self.__config.get('logconsole')
-        self.logfile = '/var/www/software/ce1sus/log/logger.txt'
+        self.logfile = self.__config.get('logfile')
       else:
         self.logFileSize = 100000
         self.nbrOfBackups = 2
@@ -85,6 +87,14 @@ class Log(object):
       fileRotater.setFormatter(self.__formatter)
       logger.addHandler(fileRotater)
 
+  @classmethod
+  def getInstance(cls):
+
+    if Log.instance is None:
+      Log.instance.getLogger('root').error('No configuration loaded')
+      Log.instance = Log()
+    return Log.instance
+
   @staticmethod
   def getLogger(className):
     """
@@ -92,14 +102,14 @@ class Log(object):
 
     :returns: Logger
     """
-    if hasattr(Log, 'instance'):
-      logger = logging.getLogger(className)
-      logger.setLevel(Log.instance.logLvl)
-      Log.instance.setConsoleHandler(logger)
-      Log.instance.setLogFile(logger)
-      return logger
+    if Log.instance is None:
+      return Log.getInstance().getLogger(className)
     else:
-      Log.instance.getLogger('root').error('No configuration loaded')
-      return Log.instance.getLogger(className)
+      logger = logging.getLogger(className)
+      logger.setLevel(Log.getInstance().logLvl)
+      Log.getInstance().setConsoleHandler(logger)
+      Log.getInstance().setLogFile(logger)
+      return logger
+
 
 

@@ -34,6 +34,11 @@ class IndexController(BaseController):
 
   @cherrypy.expose
   def login(self, errorMsg=None):
+    """
+    Renders the login Page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/index/login.html')
     return template.render(errorMsg=errorMsg)
 
@@ -66,12 +71,20 @@ class IndexController(BaseController):
 
   @cherrypy.expose
   def logout(self):
+    """
+    Log out method
+    """
     self.clearSession()
     raise HTTPRedirect('/')
 
   @require()
   @cherrypy.expose
   def internal(self):
+    """
+    Renders the base for the whole page in the internal section
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/index/basePage.html')
     return template.render()
 
