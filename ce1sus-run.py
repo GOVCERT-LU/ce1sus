@@ -24,6 +24,7 @@ from ce1sus.web.controllers.event.groups import GroupsController
 from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
+from ce1sus.web.controllers.event.cves import CVEsController
 
 def application(environ, start_response):
   bootstrap()
@@ -99,7 +100,8 @@ def bootstrap():
   cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
   Log.getLogger("run").debug("Adding events event comment")
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
-
+  Log.getLogger("run").debug("Adding events event cve")
+  cherrypy.tree.mount(CVEsController(), '/events/event/cves')
 
 
 

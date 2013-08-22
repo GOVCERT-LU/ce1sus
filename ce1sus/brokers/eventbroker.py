@@ -21,7 +21,7 @@ from ce1sus.brokers.permissionbroker import User, Group
 from framework.helpers.validator import ObjectValidator
 from ce1sus.brokers.definitionbroker import AttributeDefinition, \
     ObjectDefinition, AttributeDefinitionBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel
+from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker, FileValue
 
@@ -34,9 +34,8 @@ class Attribute(BASE):
 
   identifier = Column('attribute_id', Integer, primary_key=True)
 
-  user_id = Column(Integer, ForeignKey('Users.user_id'))
-  creator = relationship(User, uselist=False,
-              primaryjoin='User.identifier==Attribute.user_id', innerjoin=True)
+
+
 
   def_attribute_id = Column(Integer,
                             ForeignKey('DEF_Attributes.def_attribute_id'))
@@ -47,6 +46,18 @@ class Attribute(BASE):
   object_id = Column(Integer, ForeignKey('Objects.object_id'))
   object = relationship("Object",
                         primaryjoin='Object.identifier==Attribute.object_id')
+
+  created = Column('created', DateTime)
+  modified = Column('modified', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Attribute.creator_id==User.identifier")
+  modifier_id = Column('modifier_id', Integer,
+                            ForeignKey('Users.user_id'))
+  modifier = relationship(User,
+                          primaryjoin="Attribute.modifier_id==User.identifier")
+
   value_id = 0
 
   __value = None
@@ -88,7 +99,7 @@ class Attribute(BASE):
     """
     ObjectValidator.validateDigits(self, 'def_attribute_id')
     ObjectValidator.validateDigits(self, 'object_id')
-    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
     return ObjectValidator.isObjectValid(self)
 
 
@@ -103,8 +114,13 @@ _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
 # )
 class EventCrossReference(BASE):
   __tablename__ = 'Event_links_Event'
-  vunn = Column('event_id_to', Integer, ForeignKey('Events.event_id'), primary_key=True)
-  no = Column('event_id_from', Integer, ForeignKey('Events.event_id'), primary_key=True)
+  vunn = Column('event_id_to',
+                Integer,
+                ForeignKey('Events.event_id'),
+                primary_key=True)
+  no = Column('event_id_from', Integer,
+              ForeignKey('Events.event_id'),
+              primary_key=True)
 
 _REL_TICKET_EVENTS = Table('Events_has_Tickets', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -123,7 +139,7 @@ class Event(BASE):
   title = Column('title', String)
   description = Column('description', String)
 
-  created = Column('created', DateTime)
+
   first_seen = Column('first_seen', DateTime)
   last_seen = Column('last_seen', DateTime)
   modified = Column('modified', DateTime)
@@ -132,10 +148,10 @@ class Event(BASE):
   published = Column('published', Integer)
   status_id = Column('status_id', Integer)
 
-  comments = relationship("Comment", backref="Events")
+  risk_id = Column('risk_id', Integer)
+  analysis_status_id = Column('analysis_status_id', Integer)
 
-  user_id = Column(Integer, ForeignKey('Users.user_id'))
-  creator = relationship('User', innerjoin=True)
+  comments = relationship("Comment", backref="Events")
 
   tickets = relationship("Ticket", secondary=_REL_TICKET_EVENTS,
                               backref="events")
@@ -146,7 +162,27 @@ class Event(BASE):
   objects = relationship('Object', backref="Events")
 
 
-  events = relationship('Event', primaryjoin='Event.identifier==EventCrossReference.vunn', secondary='Event_links_Event', secondaryjoin='EventCrossReference.no==Event.identifier')
+  events = relationship('Event',
+                        primaryjoin=('Event.identifier=='
+                                     + 'EventCrossReference.vunn'),
+                        secondary='Event_links_Event',
+                        secondaryjoin=('EventCrossReference.no=='
+                                       + 'Event.identifier'))
+
+  created = Column('created', DateTime)
+  modified = Column('modified', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Event.creator_id==User.identifier")
+  modifier_id = Column('modifier_id', Integer,
+                            ForeignKey('Users.user_id'))
+  modifier = relationship(User,
+                          primaryjoin="Event.modifier_id==User.identifier")
+
+  cves = relationship('CVE', backref="event")
+
+
   __tlpObj = None
 
 
@@ -172,6 +208,24 @@ class Event(BASE):
     :returns: String
     """
     return Status.getByID(self.status_id)
+
+  @property
+  def risk(self):
+    """
+    returns the status
+
+    :returns: String
+    """
+    return Risk.getByID(self.status_id)
+
+  @property
+  def analysis(self):
+    """
+    returns the status
+
+    :returns: String
+    """
+    return Analysis.getByID(self.status_id)
 
   @property
   def tlp(self):
@@ -252,7 +306,7 @@ class Event(BASE):
     ObjectValidator.validateDigits(self, 'tlp_level_id')
     ObjectValidator.validateDigits(self, 'status_id')
     ObjectValidator.validateDigits(self, 'published')
-    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
     if not self.first_seen is None:
@@ -270,11 +324,13 @@ class Ticket(BASE):
   __tablename__ = "Tickets"
 
   identifier = Column('ticked_id', Integer, primary_key=True)
-  created = Column('created', DateTime)
   ticket = Column('ticket', String)
-  user_id = Column(Integer, ForeignKey('Users.user_id'))
-  creator = relationship(User, uselist=False,
-              primaryjoin='User.identifier==Ticket.user_id', innerjoin=True)
+
+  created = Column('created', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Ticket.creator_id==User.identifier")
 
 
   def validate(self):
@@ -284,7 +340,7 @@ class Ticket(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateDigits(self, 'ticket')
-    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
@@ -294,19 +350,27 @@ class Comment(BASE):
   def __init__(self):
     pass
 
-  # TODO: Finalize comments
   __tablename__ = "Comments"
 
   identifier = Column('comment_id', Integer, primary_key=True)
-  # Creator
-  user_id = Column(Integer, ForeignKey('Users.user_id'))
-  creator = relationship('User', innerjoin=True)
   # Event witch it belongs to
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event")
 
   comment = Column('comment', String)
+
   created = Column('created', DateTime)
+  modified = Column('modified', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Comment.creator_id==User.identifier")
+  modifier_id = Column('modifier_id', Integer,
+                            ForeignKey('Users.user_id'))
+  modifier = relationship(User,
+                          primaryjoin="Comment.modifier_id==User.identifier")
+
+
 
   def validate(self):
     """
@@ -315,7 +379,7 @@ class Comment(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateDateTime(self, 'created')
-    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateAlNum(self,
                                   'comment',
@@ -324,6 +388,34 @@ class Comment(BASE):
                                   withNonPrintableCharacters=True,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
+
+class CVE(BASE):
+  """This is a container class for the COMMENTS table."""
+  def __init__(self):
+    pass
+
+  __tablename__ = "CVEs"
+
+  identifier = Column('cve_id', Integer, primary_key=True)
+  # Event witch it belongs to
+  event_id = Column(Integer, ForeignKey('Events.event_id'))
+
+  cve_number = Column('cve_number', String)
+
+  created = Column('created', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User, primaryjoin="CVE.creator_id==User.identifier")
+
+
+
+  def validate(self):
+    """
+    Checks if the attributes of the class are valid
+
+    :returns: Boolean
+    """
+    return True
 
 _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
@@ -341,11 +433,6 @@ class Object(BASE):
 
   attributes = relationship(Attribute, backref="objects")
 
-  user_id = Column(Integer, ForeignKey('Users.user_id'))
-  creator = relationship("User", uselist=False,
-                         primaryjoin='User.identifier==Object.user_id',
-                         innerjoin=True)
-
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
@@ -358,12 +445,14 @@ class Object(BASE):
                          '==Object.identifier',
                          backref="children")
 
-  created = Column('created', DateTime, primary_key=True)
-
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
                        '==Object.event_id', innerjoin=True)
-
+  created = Column('created', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Object.creator_id==User.identifier")
   def addAttribute(self, attribute):
     """
     Add an attribute to this event
@@ -379,6 +468,13 @@ class Object(BASE):
     function(attribute)
 
   def removeAttribute(self, attribute):
+    """
+    remove this attribute
+
+    :param attribute: Attribute to be removed
+    :type attribute: Attribute
+    """
+
     function = getattr(self.attributes, 'remove')
     function(attribute)
 
@@ -399,7 +495,7 @@ class Object(BASE):
     if not function():
       return False
 
-    ObjectValidator.validateDigits(self, 'user_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDigits(self, 'def_object_id')
     ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateDateTime(self, 'created')
@@ -435,6 +531,37 @@ class CommentBroker(BrokerBase):
     overrides BrokerBase.getBrokerClass
     """
     return Comment
+
+class CVEBroker(BrokerBase):
+  """This is the interface between python an the database"""
+
+  def getAllByEventID(self, eventID):
+    """
+    Returns all the cves belonging to one event
+
+    :param eventID: identifier of the event
+    :type eventID: Integer
+
+    :returns: List of Comments
+    """
+    try:
+
+      result = self.session.query(CVE).filter(
+                        CVE.event_id == eventID).all()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with event ID :{0}'.format(
+                                                                  eventID))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+    return result
+
+  def getBrokerClass(self):
+    """
+    overrides BrokerBase.getBrokerClass
+    """
+    return CVE
 
 class ObjectBroker(BrokerBase):
   """This is the interface between python an the database"""

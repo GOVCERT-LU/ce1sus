@@ -10,7 +10,7 @@ import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel
+from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.web.helpers.protection import require
 from ce1sus.web.helpers.protection import privileged
 class EventsController(BaseController):
@@ -49,10 +49,13 @@ class EventsController(BaseController):
 
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
-
+    cbAnalysisValues = Analysis.getDefinitions()
+    cbRiskValues = Risk.getDefinitions()
     return template.render(event=None,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
+                           cbAnalysisValues=cbAnalysisValues,
+                           cbRiskValues=cbRiskValues,
                            today=datetime.now())
 
 
@@ -67,11 +70,13 @@ class EventsController(BaseController):
     template = self.mako.getTemplate('/events/recent.html')
 
     labels = [{'identifier':'#'},
-              {'label':'Title'},
+              {'title':'Title'},
+              {'analysis': 'Analysis'},
+              {'risk':'Risk'},
+              {'stauts': 'Status'},
+              {'tlp':'TLP'},
               {'modified':'Last modification'},
-              {'last_seen':'Last seen'},
-              {'status': 'Status'},
-              {'tlp':'TLP'}]
+              {'last_seen':'Last seen'}]
 
     # get only the last 200 events to keep the page small
     user = self.getUser()

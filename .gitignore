@@ -9,8 +9,6 @@
 .project
 .settings
 .pydevproject
-config/ce1sus.conf
-
 
 !.gitignore
 

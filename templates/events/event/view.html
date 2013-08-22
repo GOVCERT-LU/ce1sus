@@ -8,24 +8,26 @@
 <%namespace name="tabulator" file="/components/tabs.html"/>
 <%
 
+def createLinks(paginator, keyAttribute, linkUrlBase):
+  for item in paginator.list:
+    value = getattr(item, keyAttribute)
+    url = '<a href="{0}" target="_blank">{1}</a>'.format(linkUrlBase+ value,value)
+    setattr(item, 'idLink', url)
 
-for ticket in ticketPaginator.list:
-  url = '<a href="{0}" target="_blank">{1}</a>'.format(rtUrl+ ticket.ticket,ticket.ticket)
-  setattr(ticket, 'idLink', url)
-
-found = False
-for x in range(len(ticketPaginator.lables)):
-  for key,value in ticketPaginator.lables[x].iteritems():
-    if key == 'ticket':
-      hash = dict()
-      hash['idLink'] = value
-      ticketPaginator.lables[x] =hash
-      found = True
+  found = False
+  for x in range(len(paginator.lables)):
+    for key,value in paginator.lables[x].iteritems():
+      if key == keyAttribute:
+        hash = dict()
+        hash['idLink'] = value
+        paginator.lables[x] =hash
+        found = True
+        break
+    if found:
       break
-  if found:
-    break
-  
 
+createLinks(cvePaginator, 'cve_number',cveUrl)
+createLinks(ticketPaginator, 'ticket',rtUrl)
     
 
 %>
@@ -84,15 +86,20 @@ function editComment(eventID,commentID) {
     
   </div>
   <div class="span8">
-    <legend>Related objects</legend>
+    <legend>Objects</legend>
 <%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
 
 
-    <legend>Related Tickets</legend>
+    <legend>Related RTickets</legend>
 <%call expr="pagination.pagination('ticketsTable',ticketPaginator,hasSearch=False)"/> 
 
     <legend>Related Events</legend>
 <%call expr="pagination.pagination('eventsTable',eventPaginator,hasSearch=False)"/> 
+
+   <legend>Related CVEs</legend>
+<%call expr="pagination.pagination('cveTable',cvePaginator,hasSearch=False)"/> 
+
+    
     <legend>Accessible for groups</legend>
     %if not event.groups is None:
       %for group in event.groups:
@@ -103,6 +110,8 @@ function editComment(eventID,commentID) {
     %endif 
   </div>
 </div>
+
+
 
 <legend>Comments</legend>
 <table class="table table-striped table-hover table-condensed">

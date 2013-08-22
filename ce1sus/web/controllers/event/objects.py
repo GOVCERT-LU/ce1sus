@@ -177,7 +177,7 @@ class ObjectsController(BaseController):
     obj.created = datetime.now()
     obj.event_id = eventID
     obj.event = event
-    obj.user_id = self.getUser().identifier
+    obj.creator_id = self.getUser().identifier
     errors = False
     errorMsg = None
     try:

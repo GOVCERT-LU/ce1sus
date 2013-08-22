@@ -14,7 +14,7 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import privileged
 from framework.db.broker import ValidationException, \
 BrokerException
-
+from datetime import datetime
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -89,9 +89,13 @@ class AttributesController(BaseController):
         attribute.definition = definition
 
         attribute.value = value
+        attribute.created = datetime.now()
         attribute.creator = self.getUser()
-        attribute.user_id = attribute.creator.identifier
+        attribute.creator_id = attribute.creator.identifier
 
+      attribute.modified = datetime.now()
+      attribute.modifier = self.getUser()
+      attribute.modifier_id = attribute.modifier.identifier
 
       try:
         if action == 'insert':

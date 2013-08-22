@@ -12,7 +12,7 @@ from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
                   AttributeBroker, Event, CommentBroker, TicketBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel
+from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
@@ -64,7 +64,8 @@ class EventController(BaseController):
 
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
-
+    cbAnalysisValues = Analysis.getDefinitions()
+    cbRiskValues = Risk.getDefinitions()
 
     objectLabels = [{'identifier':'#'},
               {'definition.name':'Type'},
@@ -112,10 +113,13 @@ class EventController(BaseController):
     eventPaginator.itemsPerPage = 3
 
 
-    comments = self.commentBroker.getAllByEventID(eventID)
-
-
-
+    cveLabels = [{'identifier':'#'},
+              {'cve_number':'Name'},
+              {'creator.username':'Created by'},
+              {'created':'CreatedOn'}]
+    cvePaginator = Paginator(items=event.cves,
+                          labelsAndProperty=cveLabels)
+    eventPaginator.itemsPerPage = 3
 
     return template.render(objectPaginator=objectPaginator,
                            eventPaginator=eventPaginator,
@@ -123,7 +127,11 @@ class EventController(BaseController):
                            event=event,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
-                           comments=comments,
+                           comments=event.comments,
+                           cbAnalysisValues=cbAnalysisValues,
+                           cbRiskValues=cbRiskValues,
+                           cvePaginator=cvePaginator,
+                           cveUrl=self.getConfigVariable('cveurl'),
                            rtUrl=RTHelper.getInstance().getTicketUrl())
 
   @require()
@@ -138,9 +146,13 @@ class EventController(BaseController):
     event = self.eventBroker.getByID(eventID)
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
+    cbAnalysisValues = Analysis.getDefinitions()
+    cbRiskValues = Risk.getDefinitions()
     return template.render(errorMsg=None,
                            event=event,
                            cbStatusValues=cbStatusValues,
+                           cbAnalysisValues=cbAnalysisValues,
+                           cbRiskValues=cbRiskValues,
                            cbTLPValues=cbTLPValues)
 
   @require()
@@ -148,7 +160,7 @@ class EventController(BaseController):
   def modifyEvent(self, identifier=None, action=None, status=None,
                   tlp_index=None, description=None,
                   name=None, published=None,
-                  first_seen=None, last_seen=None):
+                  first_seen=None, last_seen=None, risk=None, analysis=None):
     """
     modifies or inserts an event with the data of the post
 
@@ -170,22 +182,26 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
-    event_orig = self.eventBroker.getByID(identifier)
-    # right checks only if there is a change!!!!
-    self.checkIfViewable(
-                    event_orig.groups, self.getUser().identifier ==
-                    event_orig.creator.identifier)
+
 
     errors = False
     template = self.getTemplate('/events/event/eventModal.html')
 
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
+    cbAnalysisValues = Analysis.getDefinitions()
+    cbRiskValues = Risk.getDefinitions()
     # fill in the values
     event = Event()
     if not action == 'insert':
       # dont want to change the original in case the user cancel!
+      event_orig = self.eventBroker.getByID(identifier)
       event = copy.copy(event_orig)
+
+      # right checks only if there is a change!!!!
+      self.checkIfViewable(
+                    event_orig.groups, self.getUser().identifier ==
+                    event_orig.creator.identifier)
     if not action == 'remove':
       event.title = name
       event.description = description
@@ -193,14 +209,24 @@ class EventController(BaseController):
       ObjectConverter.setInteger(event, 'status_id', status)
       ObjectConverter.setInteger(event, 'published', published)
       event.modified = datetime.now()
-      ObjectConverter.setDate(event, 'first_seen', first_seen)
-      ObjectConverter.setDate(event, 'last_seen', last_seen)
+      event.modifier = self.getUser()
+      event.modifier_id = event.modifier.identifier
 
+      if first_seen:
+        ObjectConverter.setDate(event, 'first_seen', first_seen)
+      else:
+        event.first_seen = datetime.now()
+      if last_seen:
+        ObjectConverter.setDate(event, 'last_seen', last_seen)
+      else:
+        event.last_seen = datetime.now()
+      ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
+      ObjectConverter.setInteger(event, 'risk_id', risk)
     try:
       if action == 'insert':
         event.created = datetime.now()
         event.creator = self.getUser()
-        event.user_id = event.creator.identifier
+        event.creator_id = event.creator.identifier
         self.eventBroker.insert(event)
       if action == 'update':
         # get original event
@@ -220,6 +246,8 @@ class EventController(BaseController):
       return template.render(errorMsg=errorMsg,
                            event=event,
                            cbStatusValues=cbStatusValues,
+                           cbAnalysisValues=cbAnalysisValues,
+                           cbRiskValues=cbRiskValues,
                            cbTLPValues=cbTLPValues)
     else:
       return self.returnAjaxOK()

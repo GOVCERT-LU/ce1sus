@@ -118,7 +118,7 @@ class TestEventBrokers(unittest.TestCase):
 
   def test_C_InsertEvent(self):
     user = self.userBroker.getByID(self.user.identifier)
-    self.event.user_id = user.identifier
+    self.event.creator_id = user.identifier
     self.creator = user
     self.event.creator = user
 
@@ -127,7 +127,7 @@ class TestEventBrokers(unittest.TestCase):
 
     # generatte object
     self.obj.creator = user
-    self.obj.user_id = user.identifier
+    self.obj.creator_id = user.identifier
     self.obj.definition = self.defObjectBroker.getByID(self.defObj.identifier)
     self.obj.def_object_id = self.defObj.identifier
     self.obj.event_id = self.event.identifier
@@ -136,7 +136,7 @@ class TestEventBrokers(unittest.TestCase):
 
     # generate attribute
     self.attribute.creator = user
-    self.attribute.user_id = user.identifier
+    self.attribute.creator_id = user.identifier
     self.attribute.definition = self.defAttributeBroker.getByID(self.defattribute.identifier)
     self.attribute.def_attribute_id = self.defattribute.identifier
     self.attribute.object = self.obj

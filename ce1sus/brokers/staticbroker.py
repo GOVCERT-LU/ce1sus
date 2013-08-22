@@ -27,6 +27,39 @@ class Type(object):
       result[value] = key
     return result
 
+  @staticmethod
+  def getByName(name):
+    """
+    returns the index by the given name
+
+    :returns: Integer
+    """
+
+    formatedName = unicode(name).title()
+
+
+    result = None
+    for key, value in Type.__definitions.items():
+      if formatedName == value:
+        result = key
+        break
+    if result is None:
+      raise Exception('Invalid input "{0}"'.format(name))
+
+  @staticmethod
+  def getByID(identifier):
+    """
+    returns the status by the given id
+
+    :returns: String
+    """
+
+    identifier = int(identifier)
+
+    if identifier < 0 and identifier > len(Type.__definitions):
+      raise Exception('Invalid input "{0}"'.format(identifier))
+    return Type.__definitions[identifier]
+
 class Status(object):
   """Static class defining the status of an event"""
   __definitions = {0 : 'Draft',
@@ -61,6 +94,59 @@ class Status(object):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Status.__definitions[identifier]
 
+  @staticmethod
+  def getByName(name):
+    """
+    returns the index by the given name
+
+    :returns: Integer
+    """
+
+    formatedName = unicode(name).title()
+
+
+    result = None
+    for key, value in Status.__definitions.items():
+      if formatedName == value:
+        result = key
+        break
+    if result is None:
+      raise Exception('Invalid input "{0}"'.format(name))
+
+class Analysis(object):
+  """Static class defining the status the analysis of an event"""
+  __definitions = {0 : 'None',
+                     1 : 'Opened',
+                     2 : 'Stalled',
+                     3 : 'Completed'}
+
+
+  @staticmethod
+  def getDefinitions():
+    """
+    Returns all definitions where the key is the index and the value the key
+
+    :returns: Dictionary
+    """
+    result = dict()
+    for key, value in Analysis.__definitions.iteritems():
+      result[value] = key
+    return result
+
+  @staticmethod
+  def getByID(identifier):
+    """
+    returns the status by the given id
+
+    :returns: String
+    """
+
+    identifier = int(identifier)
+
+    if identifier < 0 and identifier > len(Analysis.__definitions):
+      raise Exception('Invalid input "{0}"'.format(identifier))
+    return Analysis.__definitions[identifier]
+
 
 
   @staticmethod
@@ -72,13 +158,66 @@ class Status(object):
     """
     formattedInput = unicode(name).title()
     result = None
-    for key, value in Status.__definitions.items():
+    for key, value in Analysis.__definitions.items():
       if formattedInput == value:
         result = key
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
 
+
+class Risk(object):
+  """Static class defining the risk of an event"""
+  __definitions = {0 : 'None',
+                     1 : 'Low',
+                     2 : 'Medium',
+                     3 : 'High'}
+
+
+  @staticmethod
+  def getDefinitions():
+    """
+    Returns all definitions where the key is the index and the value the key
+
+    :returns: Dictionary
+    """
+    result = dict()
+    for key, value in Risk.__definitions.iteritems():
+      result[value] = key
+    return result
+
+  @staticmethod
+  def getByID(identifier):
+    """
+    returns the status by the given id
+
+    :returns: String
+    """
+
+    identifier = int(identifier)
+
+    if identifier < 0 and identifier > len(Risk.__definitions):
+      raise Exception('Invalid input "{0}"'.format(identifier))
+    return Risk.__definitions[identifier]
+
+  @staticmethod
+  def getByName(name):
+    """
+    returns the index by the given name
+
+    :returns: Integer
+    """
+
+    formatedName = unicode(name).title()
+
+
+    result = None
+    for key, value in Risk.__definitions.items():
+      if formatedName == value:
+        result = key
+        break
+    if result is None:
+      raise Exception('Invalid input "{0}"'.format(name))
 
 class TLPLevel(object):
   """Static class defining the TLP levels of an event"""

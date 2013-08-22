@@ -49,16 +49,24 @@ class CommentsController(BaseController):
                          self.getUser().identifier == event.creator.identifier)
 
     comment = Comment()
+
+
     errorMsg = ''
+
+
     if not action == 'insert':
       comment_orig = self.commentBroker.getByID(commentID)
       # dont want to change the original in case the user cancel!
       comment = copy.copy(comment_orig)
 
+    comment.modified = datetime.now()
+    comment.modifier = self.getUser()
+    comment.modifier_id = comment.modifier.identifier
+
     if action == 'insert':
       comment.comment = commentText
       comment.creator = self.getUser()
-      comment.user_id = comment.creator.identifier
+      comment.creator_id = comment.creator.identifier
       comment.event = event
       comment.event_id = event.identifier
       comment.created = datetime.now()

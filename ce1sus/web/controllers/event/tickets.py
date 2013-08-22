@@ -112,7 +112,7 @@ class TicketsController(BaseController):
             ticket.created = datetime.now()
             ticket.ticket = tickets
             ticket.creator = self.getUser()
-            ticket.user_id = ticket.creator.identifier
+            ticket.creator_id = ticket.creator.identifier
             events = getattr(ticket, 'events')
             function = getattr(events, 'append')
             function(event)
@@ -125,7 +125,7 @@ class TicketsController(BaseController):
               ticket.created = datetime.now()
               ticket.ticket = ticketID
               ticket.creator = self.getUser()
-              ticket.user_id = ticket.creator.identifier
+              ticket.creator_id = ticket.creator.identifier
               events = getattr(ticket, 'events')
               function = getattr(events, 'append')
               function(event)

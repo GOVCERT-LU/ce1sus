@@ -111,3 +111,6 @@ class BaseController:
 
   def returnAjaxOK(self):
     return '--OK--' + self.__class__.__name__
+
+  def getConfigVariable(self, identifier):
+    return WebConfig.getInstance().get(identifier)
