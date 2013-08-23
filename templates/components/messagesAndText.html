@@ -47,6 +47,22 @@
 	            <div class="span3">SHA256</div>
 	            <div class="span9">${object.sha256}</div>
 	        </div>
+	        <div class="row-fluid">
+                <div class="span3">location</div>
+                <div class="span9">${object.location}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span3">URL</div>
+                <div class="span9"></div>
+            </div>
+            <div class="row-fluid">
+                <div class="span3">ContentType</div>
+                <div class="span9">${object.contentType}</div>
+            </div>
+            <div class="row-fluid">
+                <div class="span3">Size</div>
+                <div class="span9">${object.size} Bytes</div>
+            </div>
 	    <!-- END FileValue -->
 	  %else:
 	    ${object}

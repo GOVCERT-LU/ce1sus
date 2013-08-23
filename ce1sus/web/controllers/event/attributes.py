@@ -16,6 +16,7 @@ from framework.db.broker import ValidationException, \
 BrokerException
 from datetime import datetime
 import copy
+from os import link
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -57,6 +58,24 @@ class AttributesController(BaseController):
                            errorMsg=None,
                            enabled=True)
 
+  @cherrypy.expose
+  @require()
+  def addFile(self, value=None):
+    if value.file is None:
+      return 'No file selected. Try again.'
+    size = 0
+    fileObj = open('/tmp/' + value.filename, 'a')
+    while True:
+      data = value.file.read(8192)
+      if not data:
+        break
+      fileObj.write(data)
+      size += len(data)
+    fileObj.close()
+
+    filepath = '/tmp/' + value.filename
+    return self.returnAjaxOK() + '*{0}*'.format(filepath)
+
 
   @cherrypy.expose
   @require()
@@ -67,11 +86,11 @@ class AttributesController(BaseController):
     Modification on the attributes of objects
     """
     event = self.eventBroker.getByID(eventID)
-
+    errorMsg = ''
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
-
+    obj = self.objectBroker.getByID(objectID)
     try:
 
       attribute = Attribute()
@@ -93,6 +112,8 @@ class AttributesController(BaseController):
         attribute.value = value
 
       if action == 'insert':
+        attribute.object_id = obj.identifier
+        attribute.object = obj
         attribute.created = datetime.now()
         attribute.creator = self.getUser()
         attribute.creator_id = attribute.creator.identifier
@@ -108,7 +129,6 @@ class AttributesController(BaseController):
           attribute.identifier = attributeID
           self.attributeBroker.update(attribute)
         if action == 'remove':
-          obj = self.objectBroker.getByID(objectID)
           obj.removeAttribute(attribute_orig)
 
         return self.returnAjaxOK()
@@ -117,30 +137,26 @@ class AttributesController(BaseController):
         # self.updateEvent(event, False)
       except ValidationException as e:
         self.getLogger().info(e)
-        template = self.getTemplate('/events/event/attributes/'
-                                    + 'attributesModal.html')
-        cbDefinitions = self.def_attributesBroker.getCBValues(
-                                                    obj.definition.identifier)
-        return template.render(eventID=eventID,
-                           objectID=objectID,
-                           attribute=attribute,
-                           cbDefinitions=cbDefinitions,
-                           errorMsg=None)
+        errorMsg = e
 
 
 
 
     except BrokerException as e:
-      template = self.getTemplate('/events/event/attributes/'
+      errorMsg = e
+
+    if attribute.identifier is None:
+      attribute.identifier = ' '
+    template = self.getTemplate('/events/event/attributes/'
                                   + 'attributesModal.html')
-      obj = self.objectBroker.getByID(objectID)
-      cbDefinitions = self.def_attributesBroker.getCBValues(
+
+    cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
-      return template.render(eventID=eventID,
+    return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
                            cbDefinitions=cbDefinitions,
-                           errorMsg=e)
+                           errorMsg=errorMsg)
 
   @cherrypy.expose
   @require()

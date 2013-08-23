@@ -679,6 +679,8 @@ class AttributeBroker(BrokerBase):
     except BrokerException as e:
       self.getLogger().fatal(e)
       self.session.rollback()
+    except Exception as e:
+      self.session.rollback()
 
   def update(self, instance, commit=True):
     """

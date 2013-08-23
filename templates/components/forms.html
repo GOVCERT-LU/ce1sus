@@ -166,7 +166,6 @@ $("#${modalID}Form").submit(function(event){
 </%def>
 
 <%def name="eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)">
-<div id="attributeFormDefinition">
 % if attribute is None:
   <input type="hidden" name="eventID" value="${eventID}">
   <input type="hidden" name="objectID" value="${objectID}">
@@ -192,7 +191,23 @@ $("#${modalID}Form").submit(function(event){
   <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value='',enabled=False)"/>
   
   %endif
-</div>
+% if enabled:
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#definitionID").change(function(e){
+		text = $("#definitionID option:selected").text();
+		if (text.toUpperCase() == 'FILE') {
+			$("#editBox").html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="span9"><form id="fileuploadForm" enctype="multipart/form-data"><input class="btn-file" name="value" type="file"/><br/><input class="btn" id ="uploadButtonID" type="button" value="Upload" onclick="buttonClick()" /></form><div id="progress" class="progress" style="visibility: hidden"><div id ="bar" class="bar" style="visibility: hidden"></div ><div class="percent" style="visibility: hidden">0%</div ></div><div id="status"></div></div></div>');
+		} else {
+			$("#editBox").html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="span9"><input id="valueID" name="value" type="text" value=""/></div></div>');
+		}
+		
+		
+	});
+});
+
+</script>
+%endif
 </%def>
 
 <%def name="commentForm(eventID,commentObj,enabled)">

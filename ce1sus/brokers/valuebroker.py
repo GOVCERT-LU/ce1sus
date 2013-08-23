@@ -12,10 +12,14 @@ from framework.db.session import BASE
 from sqlalchemy.types import DateTime
 from framework.helpers.validator import ObjectValidator
 from os.path import isfile
-import os.path as path
 import framework.helpers.hash as hasher
-
-
+from os.path import basename, getsize, exists
+from os import rename, makedirs
+import urllib
+from mimetypes import MimeTypes
+from datetime import datetime
+from framework.web.helpers.config import WebConfig
+import shutil
 
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
@@ -61,6 +65,8 @@ class FileValue(BASE):
   sha384 = Column('sha384', String)
   sha512 = Column('sha512', String)
   name = Column('filename', String)
+  size = Column('size', String)
+  contentType = Column('content_type', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute", uselist=False, innerjoin=True)
 
@@ -68,18 +74,38 @@ class FileValue(BASE):
     """
     Sets the values required for a file
     """
-    if not isfile(baseFile):
-      # set attributes
-      function = getattr(path, 'filename')
-      self.name = function(path.basename(baseFile))
-      self.md5 = hasher.fileHashMD5(baseFile)
-      self.sha1 = hasher.fileHashSHA1(baseFile)
-      self.sha256 = hasher.fileHashSHA256(baseFile)
-      self.sha384 = hasher.fileHashSHA384(baseFile)
-      self.sha512 = hasher.fileHashSHA512(baseFile)
-      self.location = baseFile
-    else:
-      raise FileNotFoundException('Could not find file {0}'.format(baseFile))
+    filepath = baseFile.value
+    try:
+      if isfile(filepath):
+        # set attributes
+        self.name = basename(filepath)
+        self.md5 = hasher.fileHashMD5(filepath)
+        self.sha1 = hasher.fileHashSHA1(filepath)
+        self.sha256 = hasher.fileHashSHA256(filepath)
+        self.sha384 = hasher.fileHashSHA384(filepath)
+        self.sha512 = hasher.fileHashSHA512(filepath)
+
+        self.size = getsize(filepath)
+        mime = MimeTypes()
+        url = urllib.pathname2url(filepath)
+        self.contentType = unicode(mime.guess_type(url))
+        # move file to destination
+        destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.getInstance().get('files'),
+                                                   datetime.now().year,
+                                               datetime.now().month,
+                                               datetime.now().day)
+        # incase the directories doent exist
+        if not exists(destination):
+          makedirs(destination)
+        # add the name to the file
+        destination += self.sha1
+        shutil.move(filepath, destination)
+        self.location = destination
+
+      else:
+        raise FileNotFoundException('Could not find file {0}'.format(filepath))
+    except AttributeError:
+      raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
   def validate(self):
     """
@@ -224,8 +250,9 @@ class ValueBroker(BrokerBase):
       function(attribute)
     else:
       valueInstance.value = attribute.value
-      valueInstance.identifier = attribute.value_id
-      valueInstance.attribute_id = attribute.identifier
+
+    valueInstance.identifier = attribute.value_id
+    valueInstance.attribute_id = attribute.identifier
 
     return valueInstance
 
@@ -242,8 +269,9 @@ class ValueBroker(BrokerBase):
     self.__setClassByAttribute(attribute)
 
     try:
-      result = self.session.query(self.getBrokerClass()).filter(
-              self.getBrokerClass().attribute_id == attribute.identifier).one()
+      clazz = self.getBrokerClass()
+      result = self.session.query(clazz).filter(
+              clazz.attribute_id == attribute.identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No value found with ID :{0} in {1}'.format(
