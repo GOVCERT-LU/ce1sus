@@ -15,6 +15,7 @@ from ce1sus.web.helpers.protection import privileged
 from framework.db.broker import ValidationException, \
 BrokerException
 from datetime import datetime
+import copy
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -73,22 +74,25 @@ class AttributesController(BaseController):
 
     try:
 
-      obj = self.objectBroker.getByID(objectID)
-
       attribute = Attribute()
       if not action == 'insert':
         attribute.identifier = attributeID
+        # make copy
+        attribute_orig = self.attributeBroker.getByID(attributeID)
+        attribute = copy.copy(attribute_orig)
+
 
       if not action == 'remove':
-        attribute.object_id = obj.identifier
-        attribute.object = obj
 
         # get definition
-        definition = self.def_attributesBroker.getByID(definition)
-        attribute.def_attribute_id = definition.identifier
-        attribute.definition = definition
+        if definition:
+          definition = self.def_attributesBroker.getByID(definition)
+          attribute.def_attribute_id = definition.identifier
+          attribute.definition = definition
 
         attribute.value = value
+
+      if action == 'insert':
         attribute.created = datetime.now()
         attribute.creator = self.getUser()
         attribute.creator_id = attribute.creator.identifier
@@ -102,12 +106,10 @@ class AttributesController(BaseController):
           self.attributeBroker.insert(attribute)
         if action == 'update':
           attribute.identifier = attributeID
-          temp = self.attributeBroker.getByID(attributeID)
-          attribute.value_id = temp.value_id
           self.attributeBroker.update(attribute)
         if action == 'remove':
-          temp = self.attributeBroker.getByID(attributeID)
-          obj.removeAttribute(temp)
+          obj = self.objectBroker.getByID(objectID)
+          obj.removeAttribute(attribute_orig)
 
         return self.returnAjaxOK()
         # update last_seen
@@ -142,7 +144,7 @@ class AttributesController(BaseController):
 
   @cherrypy.expose
   @require()
-  def view(self, eventID, objectID, attributeID, enabled=False):
+  def view(self, eventID, objectID, attributeID):
     """
      renders the file with the requested attribute
 
@@ -158,7 +160,7 @@ class AttributesController(BaseController):
                            attribute=attribute,
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
-                           enabled=enabled)
+                           enabled=False)
 
 
   @cherrypy.expose
@@ -170,4 +172,14 @@ class AttributesController(BaseController):
     :returns: generated HTML
     """
     # is the same just that some elements are enabled
-    return self.view(eventID, objectID, attributeID, True)
+    template = self.getTemplate('/events/event/attributes/attributesEditModal.html')
+    obj = self.objectBroker.getByID(objectID);
+    cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
+    attribute = self.attributeBroker.getByID(attributeID)
+    return template.render(eventID=eventID,
+                           objectID=objectID,
+                           attribute=attribute,
+                           cbDefinitions=cbDefinitions,
+                           errorMsg=None,
+                           enabled=True)

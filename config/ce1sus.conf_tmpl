@@ -8,7 +8,7 @@ port=3306
 debug=no
 
 [ce1sus]
-rturl=
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
 
 [ErrorHandler]
 debug=no

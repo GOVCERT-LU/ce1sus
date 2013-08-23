@@ -109,21 +109,6 @@ $("#${id}").on("hide", function() { // wire up modal when shown
 
 %endif
 
-%if enabled:
-  <script type="text/javascript">
-    //Add Listener to the combobox in the beginning
-    $(document).ready(function () { 
-    	
-    	
-        combobox = $('#${id} #attributeFormDefinition #definitionID');
-        setCBChange(combobox,'${id}');
-     });
-    //change the value input to a file input
-    
-    
-  </script>
-%endif
-
 </%def>
 
 <%def name="commentModal(id,title,contentUrl,enabled=True)">
