@@ -9,6 +9,7 @@ debug=no
 
 [ce1sus]
 cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
+files=/files
 
 [ErrorHandler]
 debug=no

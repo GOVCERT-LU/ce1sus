@@ -165,9 +165,9 @@ class EventController(BaseController):
     :returns: generated HTML
     """
 
-
+    errorMsg = None
     errors = False
-    template = self.getTemplate('/events/event/eventModal.html')
+
 
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
@@ -176,6 +176,7 @@ class EventController(BaseController):
     # fill in the values
     event = Event()
     if not action == 'insert':
+      template = self.getTemplate('/events/event/eventModal.html')
       # dont want to change the original in case the user cancel!
       event_orig = self.eventBroker.getByID(identifier)
       event = copy.copy(event_orig)
@@ -206,6 +207,7 @@ class EventController(BaseController):
       ObjectConverter.setInteger(event, 'risk_id', risk)
     try:
       if action == 'insert':
+        template = self.getTemplate('/events/addEvent.html')
         event.created = datetime.now()
         event.creator = self.getUser()
         event.creator_id = event.creator.identifier

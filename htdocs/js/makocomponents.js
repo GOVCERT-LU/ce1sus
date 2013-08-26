@@ -39,7 +39,6 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     	if (responseText.match(/^--OK--/gi)) {
     		if (modalID) {
     			$("#"+modalID).modal("hide");
-    			
     		}
     		//refrehshPage & container if needed
     		if (doRefresh) {
@@ -49,7 +48,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     		if (modalID) {
     			$("#"+modalID+"body").html(responseText);
     		} else {
-    			$("#"+contentid+"Errors").html(responseText);
+    			$("#"+refreshContainer+"").html(responseText);
     		}
     	}
     });
@@ -57,9 +56,9 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
     	if (modalID) {
-    		$('#'+modalID+'body').html('<div class="alert alert-error">There was an error making the AJAX request</div>');
+    		$('#'+modalID+'body').html('<div class="alert alert-error">There was an error making the AJAX request<br/>'+responseText+'</div>');
     	} else {
-    		$('#'+contentid+'Errors').html('<div class="alert alert-error">There was an error making the AJAX request</div>');
+    		$('#'+contentid+'Errors').html('<div class="alert alert-error">There was an error making the AJAX request<br/>'+responseText+'</div>');
     	}
     });
     // callback handler that will be called regardless
@@ -159,13 +158,10 @@ function getPaging(url,id) {
 	  
 	  //activate tab
 	  $('#'+id+'LI').attr('class', 'active');
+	  
+	  
+	  loadContent(parentName+'TabContent',url);
 	  //load Content
-	  $('#'+parentName+'TabContent').load(url, "", 
-	          function (responseText, textStatus, XMLHttpRequest) {
-	      if(textStatus == 'error') {
-	    	  $('#'+parentName+'TabContent').html('<div class="alert alert-error">'+responseText+'</div>'+responseText);
-	      }
-	  });
 	}
 
 function getContent(url,id,contentID) {
@@ -178,15 +174,8 @@ function getContent(url,id,contentID) {
 	  //activate tab
 	  $('#'+id+'LI').attr('class', 'active');
 	  //load Content
-	  $("#"+contentID).load(url, "", 
-	          function (responseText, textStatus, XMLHttpRequest) {
-	      if(textStatus == 'error') {
-	            $("#"+contentID).html('<div class="alert alert-error">'+responseText+'</div>'+responseText);
-	      }
-	  });  
-	  if ($("#"+contentID).html().match(/.*<HTML>.+<\/HTML>/gi)){
-		  $("#main").html($("#"+contentID).html());
-	  }
+	  loadContent(contentID,url);
+	  
 	}
 
 function showPaginatorModal(title, contentUrl, postUrl, refresh, refreshContentID, refreshContentUrl ) {

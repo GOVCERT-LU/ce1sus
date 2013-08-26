@@ -7,6 +7,7 @@
 <div id="${id}Errors"></div>
 <form id="${id}Form">
     ${caller.body()}
+</div>
 </form>
 <script type="text/javascript">
 $("#${id}Form").submit(function(event){
@@ -18,7 +19,6 @@ $("#${id}Form").submit(function(event){
 	%>
 	formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
 });
-</script>
 </%def>
 
 <%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
