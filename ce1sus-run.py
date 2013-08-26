@@ -19,12 +19,12 @@ from framework.web.helpers.config import WebConfig
 from ce1sus.web.controllers.admin.attributes import AttributeController
 from ce1sus.web.controllers.event.event import EventController
 from ce1sus.web.controllers.event.objects import ObjectsController
-from ce1sus.web.controllers.event.tickets import TicketsController
+
 from ce1sus.web.controllers.event.groups import GroupsController
 from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
-from ce1sus.web.controllers.event.cves import CVEsController
+
 
 
 def bootstrap():
@@ -86,16 +86,13 @@ def bootstrap():
   cherrypy.tree.mount(SearchController(), '/events/search')
   Log.getLogger("run").debug("Adding events event object")
   cherrypy.tree.mount(ObjectsController(), '/events/event/objects')
-  Log.getLogger("run").debug("Adding events event ticket")
-  cherrypy.tree.mount(TicketsController(), '/events/event/tickets')
   Log.getLogger("run").debug("Adding events event groups")
   cherrypy.tree.mount(GroupsController(), '/events/event/groups')
   Log.getLogger("run").debug("Adding events event attribute")
   cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
   Log.getLogger("run").debug("Adding events event comment")
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
-  Log.getLogger("run").debug("Adding events event cve")
-  cherrypy.tree.mount(CVEsController(), '/events/event/cves')
+
 
 if __name__ == '__main__':
 
@@ -106,7 +103,7 @@ if __name__ == '__main__':
     cherrypy.engine.block()
   except cherrypy._cperror as e:
     raise ConfigException(e)
-else: 
+else:
   bootstrap()
   cherrypy.engine.start()
   application = cherrypy.tree

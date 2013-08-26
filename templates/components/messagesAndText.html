@@ -65,7 +65,11 @@
             </div>
 	    <!-- END FileValue -->
 	  %else:
-	    ${object}
+	    %if "Link" in classname:
+	       <a href="${object.url}"  target="_blank">${object.identifier}</a>
+	    %else:
+	       ${object}
+	    %endif
 	  %endif
 	<!-- END objectToHTML -->
 </%def>

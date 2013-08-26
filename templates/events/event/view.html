@@ -6,31 +6,7 @@
 <%namespace name="framework" module="framework.web.helpers.string"/>
 <%namespace name="pagination" file="/components/pagination.html"/>
 <%namespace name="tabulator" file="/components/tabs.html"/>
-<%
 
-def createLinks(paginator, keyAttribute, linkUrlBase):
-  for item in paginator.list:
-    value = getattr(item, keyAttribute)
-    url = '<a href="{0}" target="_blank">{1}</a>'.format(linkUrlBase+ value,value)
-    setattr(item, 'idLink', url)
-
-  found = False
-  for x in range(len(paginator.lables)):
-    for key,value in paginator.lables[x].iteritems():
-      if key == keyAttribute:
-        hash = dict()
-        hash['idLink'] = value
-        paginator.lables[x] =hash
-        found = True
-        break
-    if found:
-      break
-
-createLinks(cvePaginator, 'cve_number',cveUrl)
-createLinks(ticketPaginator, 'ticket',rtUrl)
-    
-
-%>
 <div id="deleteAnswer" style="display: none;">
 </div>
 <script type="text/javascript">
@@ -90,15 +66,8 @@ function editComment(eventID,commentID) {
 <%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
 
 
-    <legend>Related RTickets</legend>
-<%call expr="pagination.pagination('ticketsTable',ticketPaginator,hasSearch=False)"/> 
-
-    <legend>Related Events</legend>
+<legend>Related Events</legend>
 <%call expr="pagination.pagination('eventsTable',eventPaginator,hasSearch=False)"/> 
-
-   <legend>Related CVEs</legend>
-<%call expr="pagination.pagination('cveTable',cvePaginator,hasSearch=False)"/> 
-
     
     <legend>Accessible for groups</legend>
     %if not event.groups is None:

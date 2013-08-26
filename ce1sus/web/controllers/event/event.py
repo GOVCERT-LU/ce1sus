@@ -11,7 +11,7 @@ import cherrypy
 from framework.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, CommentBroker, TicketBroker
+                  AttributeBroker, Event, CommentBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
@@ -31,7 +31,6 @@ class EventController(BaseController):
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.commentBroker = self.brokerFactory(CommentBroker)
-    self.ticketBroker = self.brokerFactory(TicketBroker)
 
   @require()
   @cherrypy.expose
@@ -87,15 +86,7 @@ class EventController(BaseController):
 
     objectPaginator.itemsPerPage = 3
 
-    ticketLabels = [{'identifier':'#'},
-              {'ticket':'Ticket Number'},
-              {'creator.username':'Created by'},
-              {'created':'CreatedOn'}]
 
-    ticketPaginator = Paginator(items=event.tickets,
-                        labelsAndProperty=ticketLabels)
-    ticketPaginator.showDelete = True
-    ticketPaginator.itemsPerPage = 3
 
     eventLabels = [{'identifier':'#'},
               {'title':'Name'},
@@ -113,24 +104,15 @@ class EventController(BaseController):
     eventPaginator.itemsPerPage = 3
 
 
-    cveLabels = [{'identifier':'#'},
-              {'cve_number':'Name'},
-              {'creator.username':'Created by'},
-              {'created':'CreatedOn'}]
-    cvePaginator = Paginator(items=event.cves,
-                          labelsAndProperty=cveLabels)
-    eventPaginator.itemsPerPage = 3
 
     return template.render(objectPaginator=objectPaginator,
                            eventPaginator=eventPaginator,
-                           ticketPaginator=ticketPaginator,
                            event=event,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
                            comments=event.comments,
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
-                           cvePaginator=cvePaginator,
                            cveUrl=self.getConfigVariable('cveurl'),
                            rtUrl=RTHelper.getInstance().getTicketUrl())
 

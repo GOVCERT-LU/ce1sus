@@ -1,6 +1,7 @@
 """This module provides container classes and interfaces
 for inserting data into the database.
 """
+from dns.tokenizer import IDENTIFIER
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
@@ -24,6 +25,17 @@ from ce1sus.brokers.definitionbroker import AttributeDefinition, \
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker, FileValue
+from framework.helpers.rt import RTHelper
+from framework.web.helpers.config import WebConfig
+
+class Link(object):
+  def __init__(self, urlBase, identifier):
+    self.urlBase = urlBase
+    self.identifier = identifier
+
+  @property
+  def url(self):
+    return self.urlBase + self.identifier
 
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
@@ -122,11 +134,6 @@ class EventCrossReference(BASE):
               ForeignKey('Events.event_id'),
               primary_key=True)
 
-_REL_TICKET_EVENTS = Table('Events_has_Tickets', BASE.metadata,
-    Column('event_id', Integer, ForeignKey('Events.event_id')),
-    Column('ticked_id', Integer, ForeignKey('Tickets.ticked_id'))
-)
-
 class Event(BASE):
   """This is a container class for the EVENTS table."""
   def __init__(self):
@@ -153,8 +160,7 @@ class Event(BASE):
 
   comments = relationship("Comment", backref="Events")
 
-  tickets = relationship("Ticket", secondary=_REL_TICKET_EVENTS,
-                              backref="events")
+
 
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
 
@@ -180,7 +186,6 @@ class Event(BASE):
   modifier = relationship(User,
                           primaryjoin="Event.modifier_id==User.identifier")
 
-  cves = relationship('CVE', backref="event")
 
 
   __tlpObj = None
@@ -315,35 +320,6 @@ class Event(BASE):
       ObjectValidator.validateDateTime(self, 'last_seen')
     return ObjectValidator.isObjectValid(self)
 
-class Ticket(BASE):
-  """This is a container class for the TICKETS table."""
-  def __init__(self):
-    pass
-
-
-  __tablename__ = "Tickets"
-
-  identifier = Column('ticked_id', Integer, primary_key=True)
-  ticket = Column('ticket', String)
-
-  created = Column('created', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
-  creator = relationship(User,
-                         primaryjoin="Ticket.creator_id==User.identifier")
-
-
-  def validate(self):
-    """
-    Checks if the attributes of the class are valid
-
-    :returns: Boolean
-    """
-    ObjectValidator.validateDigits(self, 'ticket')
-    ObjectValidator.validateDigits(self, 'creator_id')
-    ObjectValidator.validateDateTime(self, 'created')
-    return ObjectValidator.isObjectValid(self)
-
 
 class Comment(BASE):
   """This is a container class for the COMMENTS table."""
@@ -389,33 +365,7 @@ class Comment(BASE):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-class CVE(BASE):
-  """This is a container class for the COMMENTS table."""
-  def __init__(self):
-    pass
 
-  __tablename__ = "CVEs"
-
-  identifier = Column('cve_id', Integer, primary_key=True)
-  # Event witch it belongs to
-  event_id = Column(Integer, ForeignKey('Events.event_id'))
-
-  cve_number = Column('cve_number', String)
-
-  created = Column('created', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
-  creator = relationship(User, primaryjoin="CVE.creator_id==User.identifier")
-
-
-
-  def validate(self):
-    """
-    Checks if the attributes of the class are valid
-
-    :returns: Boolean
-    """
-    return True
 
 _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
@@ -532,36 +482,9 @@ class CommentBroker(BrokerBase):
     """
     return Comment
 
-class CVEBroker(BrokerBase):
-  """This is the interface between python an the database"""
 
-  def getAllByEventID(self, eventID):
-    """
-    Returns all the cves belonging to one event
 
-    :param eventID: identifier of the event
-    :type eventID: Integer
 
-    :returns: List of Comments
-    """
-    try:
-
-      result = self.session.query(CVE).filter(
-                        CVE.event_id == eventID).all()
-
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with event ID :{0}'.format(
-                                                                  eventID))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
-    return result
-
-  def getBrokerClass(self):
-    """
-    overrides BrokerBase.getBrokerClass
-    """
-    return CVE
 
 class ObjectBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -624,7 +547,12 @@ class AttributeBroker(BrokerBase):
       if isinstance(value, FileValue):
         attribute.value = value
       else:
-        attribute.value = value.value
+        if attribute.key == 'RTTicket':
+          attribute.value = Link(RTHelper.getInstance().getTicketUrl(), value.value)
+        elif attribute.key == 'CVE':
+          attribute.value = Link(WebConfig.getInstance().get('cveurl'), value.value)
+        else:
+          attribute.value = value.value
 
       attribute.value_id = value.identifier
     except sqlalchemy.orm.exc.NoResultFound:
@@ -730,16 +658,6 @@ class AttributeBroker(BrokerBase):
       self.removeByID(attribute.identifier, False)
       self.session.flush()
     self.doCommit(commit)
-
-class TicketBroker(BrokerBase):
-  """
-  This broker handles all operations on ticket objects
-  """
-  def getBrokerClass(self):
-    """
-    overrides BrokerBase.getBrokerClass
-    """
-    return Ticket
 
 class EventBroker(BrokerBase):
   """

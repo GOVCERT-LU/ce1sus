@@ -56,7 +56,7 @@ class RTHelper(object):
 
   def getAllTickets(self):
     try:
-      query = "Queue='SOC'"
+      query = "Queue%3D'SOC'%20OR%20Queue%3D'Investigations'%20OR%20Queue%3D'Notifications'%20OR%20Queue%3D'Informations'%20OR%20Queue%3D'Sub-Incidents'"
       response = self.__resource.get(path='search/ticket?query=' + query)
       ticketList = list()
       if len(response.parsed) > 0:

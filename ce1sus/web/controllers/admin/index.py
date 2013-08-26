@@ -1,4 +1,4 @@
-"""module holding all controllers needed for the administration"""
+"""module holding all controllers needed for the administrative index pages"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

@@ -120,8 +120,6 @@ class AttributeController(BaseController):
       except BrokerException as e:
         self.getLogger().info('An unexpected error occurred: {0}'.format(e))
         errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-        attribute = None
     else:
       try:
         self.attributeBroker.removeByID(attribute.identifier)
@@ -129,14 +127,15 @@ class AttributeController(BaseController):
       except OperationException:
         errorMsg = ('Cannot delete this attribute.' +
                     ' The attribute is still referenced.')
-      action = None
 
 
     if action == None:
       # ok everything went right
       return self.returnAjaxOK()
     else:
-      return template.render(attributeDetails=attribute, errorMsg=errorMsg)
+      return template.render(attribute=attribute,
+                             errorMsg=errorMsg,
+                             cbValues=AttributeDefinition.getTableDefinitions())
 
 
   @cherrypy.expose

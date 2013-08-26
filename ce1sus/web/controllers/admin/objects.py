@@ -1,3 +1,10 @@
+"""module holding all controllers needed for the administrative index pages"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
@@ -86,7 +93,7 @@ class ObjectController(BaseController):
     """
     template = self.getTemplate('/admin/objects/objectModal.html')
 
-
+    errorMsg = None
     obj = ObjectDefinition()
     if not action == 'insert':
       obj.identifier = identifier
@@ -118,7 +125,7 @@ class ObjectController(BaseController):
       # ok everything went right
       return self.returnAjaxOK()
     else:
-      return template.render(objectDetails=obj, errorMsg=errorMsg)
+      return template.render(object=obj, errorMsg=errorMsg)
 
 
   @cherrypy.expose
@@ -163,7 +170,7 @@ class ObjectController(BaseController):
           else:
             for attribute in remainingAttributes:
               self.objectBroker.addAttributeToObject(attribute, objectid, False)
-            self.objectBroker.commit()
+            self.objectBroker.doCommit()
       else:
         #Note objectAttributes may be a string or an array!!!
         if not (objectAttributes is None):
@@ -173,7 +180,7 @@ class ObjectController(BaseController):
           else:
             for attribute in objectAttributes:
               self.objectBroker.removeAttributeFromObject(attribute, objectid)
-            self.objectBroker.commit()
+            self.objectBroker.doCommit()
       return self.returnAjaxOK()
     except BrokerException as e:
       return e
