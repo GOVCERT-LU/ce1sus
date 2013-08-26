@@ -1,7 +1,7 @@
 """This module provides container classes and interfaces
 for inserting data into the database.
 """
-from dns.tokenizer import IDENTIFIER
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
