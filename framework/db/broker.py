@@ -9,6 +9,7 @@ __license__ = 'GPL v3+'
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from framework.helpers.debug import Log
+import cherrypy
 
 class BrokerException(Exception):
   """Broker Exception"""
@@ -173,6 +174,7 @@ class BrokerBase(object):
     :param commit: If set a commit is done else a flush
     :type commit: Boolean
     """
+    cherrypy.request.db = None
     try:
       if commit:
         self.session.commit()
@@ -190,6 +192,9 @@ class BrokerBase(object):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+    finally:
+      self.session.remove()
+
   def insert(self, instance, commit=True):
     """
     Insert a <<getBrokerClass()>>

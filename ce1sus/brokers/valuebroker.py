@@ -177,7 +177,7 @@ class NumberValue(BASE):
 
   __tablename__ = "NumberValues"
   identifier = Column('NumberValue_id', Integer, primary_key=True)
-  value = Column('value', String)
+  value = Column('value', Integer)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute", uselist=False, innerjoin=True)
 

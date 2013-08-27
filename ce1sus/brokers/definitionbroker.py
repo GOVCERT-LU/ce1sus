@@ -9,7 +9,7 @@ __license__ = 'GPL v3+'
 
 # Created on Jul 5, 2013
 
-
+import re
 from framework.db.broker import BrokerBase, ValidationException, \
  NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
@@ -17,6 +17,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from framework.db.session import BASE
 from framework.helpers.validator import ObjectValidator
+
+
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -121,6 +123,11 @@ class AttributeDefinition(BASE):
                                   minLength=3,
                                   withSymbols=True)
     # TODO: Find a way to validate regexes
+    """
+    !!!!!!!!!!!!!!!!!!!!!!!!!
+    -> compile to validate to test regex!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!
+    """
     ObjectValidator.validateDigits(self, 'classIndex')
     return ObjectValidator.isObjectValid(self)
 
