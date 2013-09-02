@@ -7,18 +7,20 @@
 <div id="${id}Errors"></div>
 <form id="${id}Form">
     ${caller.body()}
-</div>
 </form>
 <script type="text/javascript">
-$("#${id}Form").submit(function(event){
-	<%
-	if not (refreshUrl is None and refreshContainer is None):
-		refresh = 'true'
-	else:
-		refresh = 'false'	
-	%>
-	formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
+$( document ).ready(function() {
+	$('#${id}Form').submit(function(event){
+		<%
+		if not (refreshUrl is None and refreshContainer is None):
+			refresh = 'true'
+		else:
+			refresh = 'false'	
+		%>
+		formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
+	});
 });
+</script>
 </%def>
 
 <%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
@@ -26,14 +28,16 @@ $("#${id}Form").submit(function(event){
     ${caller.body()}
 </form>
 <script type="text/javascript">
-$("#${modalID}Form").submit(function(event){
-    <%
-    if not (refreshUrl is None and refreshContainer is None):
-        refresh = 'true'
-    else:
-        refresh = 'false'   
-    %>
-	formSubmit(this,event,'${modalID}' , '${url}','${refresh}','${refreshContainer}','${refreshUrl}')
+$( document ).ready(function() {
+	$("#${modalID}Form").submit(function(event){
+	    <%
+	    if not (refreshUrl is None and refreshContainer is None):
+	        refresh = 'true'
+	    else:
+	        refresh = 'false'   
+	    %>
+		formSubmit(this,event,'${modalID}' , '${url}','${refresh}','${refreshContainer}','${refreshUrl}')
+	});
 });
 </script>
 </%def>
@@ -88,7 +92,7 @@ $("#${modalID}Form").submit(function(event){
 % endif
 </%def>
 
-<%def name="attributeForm(attribute,enabled,cbValues)">
+<%def name="attributeForm(attribute,enabled,cbValues, cbHandlerValues)">
 
 % if attribute is None:
   
@@ -97,6 +101,7 @@ $("#${modalID}Form").submit(function(event){
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=True)"/>
 
 % else:
   <input type="hidden" name="identifier" value="${attribute.identifier}">
@@ -105,6 +110,7 @@ $("#${modalID}Form").submit(function(event){
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
   <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=True,selected=attribute.handlerIndex)"/>
 % endif
 
 </%def>

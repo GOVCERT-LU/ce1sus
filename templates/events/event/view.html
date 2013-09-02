@@ -11,6 +11,22 @@
 </div>
 <script type="text/javascript">
 
+function deleteEvent(eventID){
+$("#deleteAnswer").load("/events/event/modifyEvent?identifier="+eventID+"&action=remove", "", 
+               function (responseText, textStatus, XMLHttpRequest) {
+                  if(textStatus == 'error') {
+                      alert('Delete Failed:'+responseText);
+                  }
+                  if (responseText.match(/^--OK--/gi)) {
+                     //close tab!
+                     closeTab('eventsTab', 'eventsTab'+eventID);
+                      //loadContent('eventsTabTabContent','/events/recent');
+                  } else {
+                      alert('Delete Failed:'+responseText);
+                  }
+            });
+}
+
 function deleteComment(eventID,commentID){
     $("#deleteAnswer").load("/events/event/comment/modifyComment?commentID="+commentID+"&eventID="+eventID+"&action=remove", "", 
                function (responseText, textStatus, XMLHttpRequest) {

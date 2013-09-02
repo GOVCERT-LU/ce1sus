@@ -13,3 +13,4 @@ tools.sessions.timeout=60
 tools.auth.on=True
 tools.caching.on=False
 tools.caching.delay=3600
+tools.db.on=True

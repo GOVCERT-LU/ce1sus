@@ -17,7 +17,7 @@ from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
 ObjectDefinition
 from ce1sus.web.helpers.protection import require, privileged
 from framework.db.broker import OperationException, BrokerException, \
-  ValidationException
+  ValidationException, NothingFoundException
 import types as types
 
 class ObjectController(BaseController):
@@ -65,10 +65,11 @@ class ObjectController(BaseController):
     """
     template = self.getTemplate('/admin/objects/objectRight.html')
     if obj is None:
-      if objectid is None or objectid == 0:
-        obj = None
-      else:
+      try:
         obj = self.objectBroker.getByID(objectid)
+      except NothingFoundException:
+        obj = None
+
     else:
       obj = obj
     remainingAttributes = None

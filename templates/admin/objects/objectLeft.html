@@ -43,7 +43,8 @@ function loadObject(objectID){
 </ul>
 
 <!-- AddObjectForm -->
-<%call expr="forms.genericModalForm(modalID='addObjectModal',url='/admin/objects/modifyObject')">
+<%call expr="forms.genericModalForm(modalID='addObjectModal',
+                                    url='/admin/objects/modifyObject')">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.groupModal(id='addObjectModal',title='Add object',contentUrl='/admin/objects/addObject')"/>
 </%call>

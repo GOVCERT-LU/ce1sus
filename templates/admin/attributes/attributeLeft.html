@@ -46,7 +46,9 @@ function loadAttribute(attributeID){
 
 <!-- AddAttributeForm -->
 <%call expr="forms.genericModalForm(modalID='addAttributeModal',
-                                    url='/admin/attributes/modifyAttribute')">
+                                    url='/admin/attributes/modifyAttribute',
+                                    refreshUrl='/admin/attributes', 
+                                    refreshContainer='adminTabsTabContent')">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.groupModal(id='addAttributeModal',title='Add attribute',
                                contentUrl='/admin/attributes/addAttribute')"/>

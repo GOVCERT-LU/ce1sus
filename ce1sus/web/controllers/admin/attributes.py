@@ -17,7 +17,7 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged
 from framework.db.broker import OperationException, BrokerException, \
-  ValidationException
+  ValidationException, NothingFoundException
 from framework.helpers.converters import ObjectConverter
 import types as types
 import framework.helpers.string as string
@@ -69,10 +69,11 @@ class AttributeController(BaseController):
     template = self.getTemplate('/admin/attributes/attributeRight.html')
 
     if attribute is None:
-      if attributeid is None or attributeid == 0:
-        attribute = None
-      else:
+      try:
         attribute = self.attributeBroker.getByID(attributeid)
+      except NothingFoundException:
+        attribute = None
+
     else:
       attribute = attribute
 
@@ -87,6 +88,7 @@ class AttributeController(BaseController):
     return template.render(attributeDetails=attribute,
                            remainingObjects=remainingObjects,
                            attributeObjects=attributeObjects,
+                           cbHandlerValues=AttributeDefinition.getHandlerDefinitions(),
                            cbValues=cbValues)
 
 
@@ -99,13 +101,17 @@ class AttributeController(BaseController):
     """
     template = self.getTemplate('/admin/attributes/attributeModal.html')
     cbValues = AttributeDefinition.getTableDefinitions()
-    return template.render(attribute=None, errorMsg=None, cbValues=cbValues)
+    cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
+    return template.render(attribute=None,
+                           errorMsg=None,
+                           cbValues=cbValues,
+                           cbHandlerValues=cbHandlerValues)
 
 
   @require(privileged())
   @cherrypy.expose
   def modifyAttribute(self, identifier=None, name=None, description='',
-                      regex='^.*$', classIndex=0, action='insert'):
+                      regex='^.*$', classIndex=0, action='insert', handlerIndex=0):
     """
     modifies or inserts an attribute with the data of the post
 
@@ -138,6 +144,7 @@ class AttributeController(BaseController):
       attribute.name = name
       attribute.description = description
       ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
+      ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
       if string.isNotNull(regex):
         regex = '^.*$'
       attribute.regex = regex
@@ -168,9 +175,10 @@ class AttributeController(BaseController):
     else:
       return template.render(attribute=attribute,
                              errorMsg=errorMsg,
-                             cbValues=AttributeDefinition.getTableDefinitions())
+                             cbValues=AttributeDefinition.getTableDefinitions(),
+                             cbHandlerValues=AttributeDefinition.getHandlerDefinitions())
 
-
+  @require(privileged())
   @cherrypy.expose
   def editAttribute(self, attributeid):
     """
@@ -190,9 +198,11 @@ class AttributeController(BaseController):
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
     cbValues = AttributeDefinition.getTableDefinitions()
+    cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
     return template.render(attribute=attribute,
                            errorMsg=errorMsg,
-                           cbValues=cbValues)
+                           cbValues=cbValues,
+                           cbHandlerValues=cbHandlerValues)
 
   @cherrypy.expose
   def editObjectAttributes(self, attributeid, operation, attributeObjects=None,

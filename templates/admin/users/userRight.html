@@ -41,7 +41,7 @@ function deleteUser(userID){
 <br/>
 <h4>Groupmanagment of this user:</h4>
 % if not userDetails is None:
-<%call expr="forms.genericForm(id='editUserGroups',url='/admin/users/editUserGroups',
+<%call expr="forms.genericForm(id='modifyUserGroups',url='/admin/users/editUserGroups',
                                refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),
                                refreshContainer='userRight')">
 	<input type="hidden" name="userID"	value="${userDetails.identifier}"> 

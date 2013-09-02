@@ -25,7 +25,7 @@ function deleteAttribute(attributeid){
 
 <!-- group details -->
 <h3>Attribute details:</h3>
-<%call expr="forms.attributeForm(attributeDetails, False, cbValues)"/>
+<%call expr="forms.attributeForm(attributeDetails, False, cbValues, cbHandlerValues)"/>
 <div class="row-fluid">
 	<div class="span3" style="text-align: right">
 		% if not attributeDetails is None:
@@ -78,12 +78,12 @@ function deleteAttribute(attributeid){
 %endif
 %if not attributeDetails is None:
 	<%call expr="forms.genericModalForm(modalID='editAttributeModal',
-	                                    url='/admin/objects/modifyAttribute',
-	                                    refreshUrl='/admin/objects/rightContent?objectid={0}'.format(attributeDetails.identifier),
+	                                    url='/admin/attributes/modifyAttribute',
+	                                    refreshUrl='/admin/attributes/rightContent?attributeid={0}'.format(attributeDetails.identifier),
 	                                    refreshContainer='attributeRight')">
 	<input type="hidden" name="action" value="update">
 	<%call expr="modals.userModal(id='editAttributeModal',
 	                              title='Edit attribute',
-	                              contentUrl='/admin/objects/editAttribute/{0}'.format(attributeDetails.identifier))"/>
+	                              contentUrl='/admin/attributes/editAttribute/{0}'.format(attributeDetails.identifier))"/>
 	</%call>
 %endif

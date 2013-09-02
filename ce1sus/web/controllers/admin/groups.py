@@ -16,7 +16,7 @@ import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, Group
 from ce1sus.web.helpers.protection import require, privileged
 from framework.db.broker import OperationException, BrokerException, \
-  ValidationException
+  ValidationException, NothingFoundException
 from framework.helpers.converters import ObjectConverter
 import types as types
 
@@ -67,10 +67,10 @@ class GroupController(BaseController):
     """
     template = self.getTemplate('/admin/groups/groupRight.html')
     if group is None:
-      if groupid is None or groupid == 0:
-        group = None
-      else:
+      try:
         group = self.groupBroker.getByID(groupid)
+      except NothingFoundException:
+        group = None
     else:
       group = group
     remUsers = None

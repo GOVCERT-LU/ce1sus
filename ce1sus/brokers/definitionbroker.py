@@ -34,8 +34,7 @@ class AttributeDefinition(BASE):
   __tableDefinitions = {0 : 'TextValue',
                  1 : 'StringValue',
                  2 : 'DateValue',
-                 3 : 'NumberValue',
-                 4 : 'FileValue'}
+                 3 : 'NumberValue'}
 
   __handlerDefinitions = {0 : 'generichandler.GenericHandler',
                           1: 'filehandler.FileHandler',
@@ -126,6 +125,23 @@ class AttributeDefinition(BASE):
     """
     result = dict()
     for index, tableName in AttributeDefinition.__tableDefinitions.iteritems():
+      key = tableName.replace('Value', '')
+      value = index
+      result[key] = value
+    return result
+
+  @staticmethod
+  def getHandlerDefinitions():
+    """ returns the table definitions where the key is the value and value the
+    index of the tables.
+
+    Note: Used for displaying the definitions of the tables in combo boxes
+
+    :returns: Dictionary
+    """
+    result = dict()
+    for index, tableName in (AttributeDefinition.
+                                        __handlerDefinitions.iteritems()):
       key = tableName.replace('Value', '')
       value = index
       result[key] = value

@@ -244,7 +244,7 @@ class UserBroker(BrokerBase):
       raise ValidationException('User to be inserted is invalid')
     try:
       BrokerBase.insert(self, instance, commit)
-      self.session.doCommit(commit)
+      self.doCommit(commit)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
