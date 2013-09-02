@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+module handing the attributes pages
+
+Created: Aug 26, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, User
@@ -8,19 +21,17 @@ from framework.db.broker import OperationException, BrokerException, \
   ValidationException
 import types as types
 
-
 class UserController(BaseController):
+  """Controller handling all the requests for users"""
 
   def __init__(self):
     BaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
 
-
   @require(privileged())
   @cherrypy.expose
   def index(self):
-
     """
     renders the user page
 
@@ -29,19 +40,32 @@ class UserController(BaseController):
     template = self.getTemplate('/admin/users/userBase.html')
     return template.render()
 
-
   @require(privileged())
   @cherrypy.expose
   def leftContent(self):
+    """
+    renders the left content of the user index page
 
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/users/userLeft.html')
-
     users = self.userBroker.getAll()
     return template.render(users=users)
 
   @require(privileged())
   @cherrypy.expose
   def rightContent(self, userid=0, user=None):
+    """
+    renders the right content of the user index page
+
+    :param userid: The user id of the desired displayed user
+    :type userid: Integer
+    :param user: Similar to the previous attribute but prevents
+                      additional loadings
+    :type user: User
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/users/userRight.html')
     if user is None:
       if userid is None or userid == 0:
@@ -64,12 +88,22 @@ class UserController(BaseController):
   @require(privileged())
   @cherrypy.expose
   def addUser(self):
+    """
+    renders the add a user page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/users/userModal.html')
     return template.render(user=None, errorMsg=None)
 
   @require(privileged())
   @cherrypy.expose
   def ldapUsersTable(self):
+    """
+    renders the table with the ldap users
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/users/ldapUserTable.html')
     labels = [{'radio':'#'},
               {'uid':'username'},
@@ -79,9 +113,6 @@ class UserController(BaseController):
 
     lh = LDAPHandler.getInstance()
     lh.open()
-
-
-
     ldapPaginator = Paginator(items=lh.getAllUsers(),
                           labelsAndProperty=labels)
     lh.close()
@@ -90,9 +121,8 @@ class UserController(BaseController):
   @require(privileged())
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
-                 privileged=None, email=None, action='insert',
+                 priv=None, email=None, action='insert',
                  ldapUsersTable_length=None):
-    template = self.getTemplate('/admin/users/userModal.html')
     """
     modifies or inserts a user with the data of the post
 
@@ -105,24 +135,24 @@ class UserController(BaseController):
     :type password: String
     :param email: The email of the user
     :type email: String
+    :param priv: Is the user privileged to access the administration section
+    :type priv: Integer
     :param action: action which is taken (i.e. edit, insert, remove)
     :type action: String
 
-
     :returns: generated HTML
     """
-
+    template = self.getTemplate('/admin/users/userModal.html')
+    del ldapUsersTable_length
     errorMsg = None
     user = User()
     if not action == 'insert':
       user.identifier = identifier
-
     if not action == 'remove':
       user.email = email
       user.password = password
       user.username = username
-      user.privileged = privileged
-
+      user.privileged = priv
       if action == 'insertLDAP':
         user.identifier = None
         # get LDAP user
@@ -140,7 +170,6 @@ class UserController(BaseController):
             self.getLogger().error(e)
         else:
           action = None
-
       try:
         if action == 'insert' or action == 'insertLDAP':
           self.userBroker.insert(user)
@@ -160,19 +189,24 @@ class UserController(BaseController):
         errorMsg = ('Cannot delete user. The user is referenced by elements.'
                     + ' Remove his groups instead.')
       action = None
-
     if action == None:
       # ok everything went right
       return self.returnAjaxOK()
     else:
       return template.render(user=user, errorMsg=errorMsg)
 
-
   @require(privileged())
   @cherrypy.expose
   def editUser(self, userid):
-    template = self.getTemplate('/admin/users/userModal.html')
+    """
+    renders the edit a user page
 
+    :param userid: The user id of the desired displayed user
+    :type userid: Integer
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/users/userModal.html')
     errorMsg = None
     try:
       user = self.userBroker.getByID(userid)

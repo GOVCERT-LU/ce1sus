@@ -1,4 +1,10 @@
-"""module providing the error handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module providing the error handling
+
+Created: Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -13,20 +19,15 @@ from framework.helpers.debug import Log
 from framework.web.helpers.templates import MakoHandler
 import re
 
-
 class ErrorHandler(object):
   """
     Generic ErrorHandler for cherrypy projects
 
     Note: Expects templates
   """
-
   def __init__(self, configFile):
-
     config = Configuration(configFile, 'ErrorHandler')
-
     ErrorHandler.__debug = config.get('debug')
-
     cherrypy.config.update({'error_page.400': ErrorHandler.error_page_400})
     cherrypy.config.update({'error_page.401': ErrorHandler.error_page_401})
     cherrypy.config.update({'error_page.403': ErrorHandler.error_page_403})
@@ -34,7 +35,6 @@ class ErrorHandler(object):
     cherrypy.config.update({'error_page.500': ErrorHandler.error_page_500})
     cherrypy.config.update({'request.error_response':
                             ErrorHandler.handle_error})
-
 
   @staticmethod
   def blueScreen(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
@@ -101,7 +101,6 @@ class ErrorHandler(object):
                                                text=stringHelper.plaintext2html(
                                                         traceback.format_exc()))
 
-
   @staticmethod
   def error_page_400(status, message, traceback, version):
     """
@@ -148,7 +147,6 @@ class ErrorHandler(object):
     return  ErrorHandler.show(title='404', error='LOAD "' + fileName + '", 8'
                               + '<br/>LOADING<br/><br/>FILE NOT FOUND',
                               text=stringHelper.plaintext2html(traceback))
-
 
   @staticmethod
   def error_page_500(status, message, traceback, version):

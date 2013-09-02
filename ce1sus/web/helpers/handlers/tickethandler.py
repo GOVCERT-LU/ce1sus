@@ -1,14 +1,25 @@
+# -*- coding: utf-8 -*-
+
+"""
+module providing support for tickets handling
+
+Created: Aug, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-from ce1sus.brokers.eventbroker import Attribute
 import types
 from ce1sus.api.ticketsystem import TicketSystemBase
 from framework.web.helpers.config import WebConfig
 from framework.web.helpers.pagination import Link
 from ce1sus.web.helpers.handlers.base import HandlerException
-import copy
 
 class TicketHandler(GenericHandler):
-
+  """Handler for handling tickets"""
   def __init__(self):
     GenericHandler.__init__(self)
     self.url = TicketSystemBase.getInstance().getBaseTicketUrl()
@@ -17,21 +28,33 @@ class TicketHandler(GenericHandler):
     # check if params contains value
     if params.has_key('value'):
       attributes = list()
-      attribute = GenericHandler.populateAttributes(self, params, obj, definition, user)
+      attribute = GenericHandler.populateAttributes(self,
+                                                    params,
+                                                    obj,
+                                                    definition,
+                                                    user)
       attributes.append(attribute)
       return attributes
     else:
       if params.has_key('tickets'):
-        tickets = params.get('tickets');
+        tickets = params.get('tickets')
         attributes = list()
         if isinstance(tickets, types.StringTypes):
           params['value'] = tickets
-          attribute = GenericHandler.populateAttributes(self, params, obj, definition, user)
+          attribute = GenericHandler.populateAttributes(self,
+                                                        params,
+                                                        obj,
+                                                        definition,
+                                                        user)
           attributes.append(attribute)
         else:
           for ticket in tickets:
             params['value'] = ticket
-            attribute = GenericHandler.populateAttributes(self, params, obj, definition, user)
+            attribute = GenericHandler.populateAttributes(self,
+                                                          params,
+                                                          obj,
+                                                          definition,
+                                                          user)
             attributes.append(attribute)
         return attributes
       else:
@@ -50,7 +73,7 @@ class TicketHandler(GenericHandler):
     return link
 
 class CVEHandler(GenericHandler):
-
+  """Handler for handling cves"""
   def __init__(self):
     GenericHandler.__init__(self)
     self.url = WebConfig.getInstance().get('cveurl')

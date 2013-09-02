@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
 """This module provides container classes and interfaces
 for inserting data into the database.
+
+Created on Jul 5, 2013
 """
 
 __author__ = 'Weber Jean-Paul'
@@ -7,9 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-# Created on Jul 5, 2013
-
-import re
 from framework.db.broker import BrokerBase, ValidationException, \
  NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
@@ -18,15 +19,12 @@ from sqlalchemy.orm import relationship
 from framework.db.session import BASE
 from framework.helpers.validator import ObjectValidator
 
-
-
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
     Column('def_attribute_id', Integer, ForeignKey(
                                           'DEF_Attributes.def_attribute_id')),
     Column('def_object_id', Integer, ForeignKey('DEF_Objects.def_object_id'))
     )
-
 
 class AttributeDefinition(BASE):
   """This is a container class for the DEF_ATTRIBUTES table."""
@@ -44,7 +42,6 @@ class AttributeDefinition(BASE):
                           2: 'tickethandler.TicketHandler',
                           3: 'tickethandler.CVEHandler'}
 
-
   __tablename__ = "DEF_Attributes"
   # table class mapping
   identifier = Column('def_attribute_id', Integer, primary_key=True)
@@ -55,10 +52,8 @@ class AttributeDefinition(BASE):
   handlerIndex = Column(Integer)
 
   # note class relationTable attribute
-
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
                          back_populates='attributes', cascade='all')
-
 
   @property
   def className(self):
@@ -70,11 +65,11 @@ class AttributeDefinition(BASE):
 
   @property
   def handlerName(self):
+    """The name of the handler used"""
     if not self.handlerIndex is None:
       return self.findHandlerName(self.handlerIndex)
     else:
       return ''
-
 
   def findClassName(self, index):
     """
@@ -120,7 +115,6 @@ class AttributeDefinition(BASE):
         break
     return result
 
-
   @staticmethod
   def getTableDefinitions():
     """ returns the table definitions where the key is the value and value the
@@ -151,12 +145,7 @@ class AttributeDefinition(BASE):
                                   withSpaces=True,
                                   minLength=3,
                                   withSymbols=True)
-    # TODO: Find a way to validate regexes
-    """
-    !!!!!!!!!!!!!!!!!!!!!!!!!
-    -> compile to validate to test regex!!!!!
-    !!!!!!!!!!!!!!!!!!!!!!!!!!
-    """
+    ObjectValidator.validateRegularExpression(self, 'regex')
     ObjectValidator.validateDigits(self, 'classIndex')
     return ObjectValidator.isObjectValid(self)
 
@@ -180,8 +169,6 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'remove')
     function(obj)
 
-
-
 class ObjectDefinition(BASE):
   """This is a container class for the DEF_Objects table."""
   def __init__(self):
@@ -192,7 +179,6 @@ class ObjectDefinition(BASE):
   identifier = Column('def_object_id', Integer, primary_key=True)
   name = Column('name', String, nullable=False)
   description = Column('description', String)
-
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all')
 
@@ -208,7 +194,6 @@ class ObjectDefinition(BASE):
       raise ValidationException('Attribute to be added is invalid')
     function = getattr(self.attributes, 'append')
     function(attribute)
-
 
   def removeAttribute(self, attribute):
     """
@@ -240,8 +225,6 @@ class ObjectDefinition(BASE):
                                   minLength=3,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
-
-
 
 class AttributeDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -284,8 +267,8 @@ class AttributeDefinitionBroker(BrokerBase):
                                   format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
+      self.session.rollback()
       raise BrokerException(e)
-
     return objects
 
   def getCBValues(self, objIdentifier):
@@ -295,8 +278,6 @@ class AttributeDefinitionBroker(BrokerBase):
 
     :returns: Dictionary
     """
-
-
     definitions = list()
     try:
       definitions = self.session.query(AttributeDefinition).join(
@@ -307,6 +288,8 @@ class AttributeDefinitionBroker(BrokerBase):
                                         AttributeDefinition.name).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().debug(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
     result = dict()
     for definition in definitions:
@@ -327,16 +310,14 @@ class AttributeDefinitionBroker(BrokerBase):
                                 ObjectDefinition.identifier == objID).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
+      attribute.addObject(obj)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound as e:
-      self.getLogger().error(e)
       raise NothingFoundException('Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
+      self.session.rollback()
       raise BrokerException(e)
-    attribute.addObject(obj)
-
-    self.doCommit(commit)
-
 
   def removeObjectFromAttribute(self, objID, attrID, commit=True):
     """
@@ -352,16 +333,26 @@ class AttributeDefinitionBroker(BrokerBase):
                                 ObjectDefinition.identifier == objID).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
+      attribute.removeObject(obj)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
+      self.session.rollback()
       raise BrokerException(e)
-    attribute.removeObject(obj)
-
-    self.doCommit(commit)
 
   def getDefintionByName(self, name):
+    """
+    Returns the attribute definition object with the given name
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param identifier: the id of the requested user object
+    :type identifier: integer
+
+    :returns: Object
+    """
     try:
       attributeDefinition = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.name == name).one()
@@ -370,12 +361,11 @@ class AttributeDefinitionBroker(BrokerBase):
       raise NothingFoundException('Attribute definition not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
+      self.session.rollback()
       raise BrokerException(e)
-
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
-
   def getBrokerClass(self):
     """
     overrides BrokerBase.getBrokerClass
@@ -397,7 +387,6 @@ class ObjectDefinitionBroker(BrokerBase):
     :returns: list of AttributeDefinitions
     """
     try:
-
       attributes = self.session.query(AttributeDefinition).join(
                                           ObjectDefinition.attributes).filter(
                                           ObjectDefinition.identifier ==
@@ -413,9 +402,9 @@ class ObjectDefinitionBroker(BrokerBase):
                                   format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
+      self.session.rollback()
       raise BrokerException(e)
     return attributes
-
 
   def getCBValues(self):
     """
@@ -445,14 +434,14 @@ class ObjectDefinitionBroker(BrokerBase):
                                 ObjectDefinition.identifier == objID).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
+      obj.addAttribute(attribute)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
-    # except sqlalchemy.exc.SQLAlchemyError as e:
-    #  self.getLogger().fatal(e)
-
-    obj.addAttribute(attribute)
-
-    self.doCommit(commit)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
   def removeAttributeFromObject(self, attrID, objID, commit=True):
     """
@@ -468,10 +457,11 @@ class ObjectDefinitionBroker(BrokerBase):
                                 ObjectDefinition.identifier == objID).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
+      obj.removeAttribute(attribute)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
-    obj.removeAttribute(attribute)
-
-    self.doCommit(commit)
-
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)

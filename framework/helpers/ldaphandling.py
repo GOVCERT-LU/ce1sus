@@ -1,4 +1,10 @@
-"""module containing interfaces classes related to LDAP"""
+# -*- coding: utf-8 -*-
+
+"""
+module containing interfaces classes related to LDAP
+
+Created: Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -11,6 +17,7 @@ import ldap
 import types
 
 class LDAPUser(object):
+  """LDAP user container class"""
   def __init__(self):
     self.uid = None
     self.mail = None
@@ -45,23 +52,19 @@ class NotInitializedException(LDAPException):
 class LDAPHandler(object):
   "LDAP Handler"
 
-
-
   instance = None
+
   def __init__(self, configFile):
     self.__config = Configuration(configFile, 'LDAP')
-
     self.__connection = None
-
     self.__users_dn = self.__config.get('users_dn')
-
     self.__tls = self.__config.get('usetls')
-
-
-
     LDAPHandler.instance = self
 
   def open(self):
+    """
+    Open the connection to the LDAP server
+    """
     self.__connection = ldap.initialize(self.__config.get('server'))
     try:
       if self.__tls:
@@ -69,7 +72,6 @@ class LDAPHandler(object):
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: ' + unicode(e))
-
 
   def isUserValid(self, uid, password):
     """
@@ -110,9 +112,16 @@ class LDAPHandler(object):
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
-
   @staticmethod
   def __mapUser(user):
+    """
+    Maps the response from the LDAP server to userobject container
+
+    :param user: list of attributes of the ldap user
+    :type user: List
+
+    :returns:
+    """
     for attributes in user:
       if isinstance(attributes, types.DictType):
         user = LDAPUser()
@@ -138,9 +147,7 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid=*)'
-
     attributes = ["uid", "displayName", "mail"]
-
     try:
       result = self.__connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
                                filter_, attributes)
@@ -168,20 +175,21 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid=*)'
-
     attributes = ["uid", "displayName", "mail"]
-
     try:
-      result = self.__connection.search_s(self.__getUserDN(uid), ldap.SCOPE_SUBTREE,
-                               filter_, attributes)
+      user = None
+      result = self.__connection.search_s(self.__getUserDN(uid),
+                                          ldap.SCOPE_SUBTREE,
+                                          filter_,
+                                          attributes)
       # dierft nemmen 1 sinn
       for user in result:
         user = LDAPHandler.__mapUser(user)
-
+      return user
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
-    return user
+
 
 
 
@@ -206,8 +214,8 @@ class LDAPHandler(object):
       raise ServerErrorException('LDAP error: {0}'.format(e))
     attribute = None
     # dierft nemmen 1 sinn
-    for tuple in result:
-      for item in tuple:
+    for resultTuple in result:
+      for item in resultTuple:
         if isinstance(item, types.DictType):
           attribute = item[attributeName][0]
     return attribute

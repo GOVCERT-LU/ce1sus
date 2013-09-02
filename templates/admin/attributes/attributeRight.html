@@ -8,7 +8,8 @@
 </div>
 <script type="text/javascript">
 function deleteAttribute(attributeid){
-	$("#deleteAnswer").load("/admin/attributes/modifyAttribute?identifier="+attributeid+"&action=remove", "", 
+	$("#deleteAnswer").load("/admin/attributes/modifyAttribute?identifier="
+			                +attributeid+"&action=remove", "", 
 			   function (responseText, textStatus, XMLHttpRequest) {
 			      if(textStatus == 'error') {
 			    	  alert('Delete Failed:'+responseText);
@@ -32,7 +33,8 @@ function deleteAttribute(attributeid){
 			<a href="#editAttributeModal" role="button" class="btn"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
-				onclick="if (confirm('Are you sure you want to delete?')) {deleteAttribute(${attributeDetails.identifier})}">Delete</button>
+				onclick="if (confirm('Are you sure you want to delete?')) {deleteAttribute(${attributeDetails.identifier})}">Delete
+				</button>
 		</div>
 		%endif
 	</div>
@@ -40,7 +42,10 @@ function deleteAttribute(attributeid){
 <br/>
 <h4>Objectmanagment of this attribute:</h4>
 % if not attributeDetails is None:
-<%call expr="forms.genericForm(id='editObjectAttributes',url='/admin/attributes/editObjectAttributes',refreshUrl='/admin/attributes/rightContent?attributeid={0}'.format(attributeDetails.identifier),refreshContainer='attributeRight')">
+<%call expr="forms.genericForm(id='editObjectAttributes',
+                url='/admin/attributes/editObjectAttributes',
+                refreshUrl='/admin/attributes/rightContent?attributeid={0}'.format(attributeDetails.identifier),
+                refreshContainer='attributeRight')">
 <input type="hidden" name="attributeid" value="${attributeDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
@@ -72,8 +77,13 @@ function deleteAttribute(attributeid){
 </%call>
 %endif
 %if not attributeDetails is None:
-	<%call expr="forms.genericModalForm(modalID='editAttributeModal',url='/admin/objects/modifyAttribute',refreshUrl='/admin/objects/rightContent?objectid={0}'.format(attributeDetails.identifier),refreshContainer='attributeRight')">
+	<%call expr="forms.genericModalForm(modalID='editAttributeModal',
+	                                    url='/admin/objects/modifyAttribute',
+	                                    refreshUrl='/admin/objects/rightContent?objectid={0}'.format(attributeDetails.identifier),
+	                                    refreshContainer='attributeRight')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.userModal(id='editAttributeModal',title='Edit attribute',contentUrl='/admin/objects/editAttribute/{0}'.format(attributeDetails.identifier))"/>
+	<%call expr="modals.userModal(id='editAttributeModal',
+	                              title='Edit attribute',
+	                              contentUrl='/admin/objects/editAttribute/{0}'.format(attributeDetails.identifier))"/>
 	</%call>
 %endif

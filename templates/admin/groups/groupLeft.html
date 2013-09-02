@@ -21,7 +21,9 @@ function loadGroup(groupID){
     $("#groupRight").load("/admin/groups/rightContent?groupid="+groupID, "", 
 		   function (responseText, textStatus, XMLHttpRequest) {
 		      if(textStatus == 'error') {
-		          $('#groupRight').html('<div class="alert alert-error">There was an error making the AJAX request</div>'+responseText);
+		          $('#groupRight').html('<div class="alert alert-error">There '
+		        		  +'was an error making the AJAX request</div>'
+		        		  +responseText);
 		      }
 		});
 }

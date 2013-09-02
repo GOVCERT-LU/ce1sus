@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the event handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the group pages
+
+Created: Aug 21, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -9,7 +15,6 @@ from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.web.helpers.protection import require
-
 import types
 from framework.db.broker import BrokerException
 
@@ -20,7 +25,6 @@ class GroupsController(BaseController):
     BaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
-
   @cherrypy.expose
   @require()
   def groups(self, eventID):
@@ -29,12 +33,9 @@ class GroupsController(BaseController):
     """
     template = self.mako.getTemplate('/events/event/groups/groups.html')
     event = self.eventBroker.getByID(eventID)
-
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
-
-
     remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier, False)
     return template.render(eventID=event.identifier,
                            remainingGroups=remainingGroups,
@@ -79,4 +80,5 @@ class GroupsController(BaseController):
             self.eventBroker.session.commit()
       return self.returnAjaxOK()
     except BrokerException as e:
+      self.getLogger().fatal(e)
       return e

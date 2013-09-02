@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
+
 """This module provides container classes and interfaces
 for inserting data into the database.
+
+Created on Jul 4, 2013
 """
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-# Created on Jul 4, 2013
-
 
 from framework.db.broker import BrokerBase, NothingFoundException, \
 ValidationException, TooManyResultsFoundException
@@ -18,12 +19,11 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 from framework.db.session import BASE
+from framework.db.broker import BrokerException
 from framework.helpers.validator import ObjectValidator
 import re
 
-# Relation table for user and groups
-
-# ass net agebonnen mai ouni geet et net!?
+# Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
 __REL_USER_GROUPS = Table(
     'User_has_Groups', BASE.metadata,
     Column('user_id', Integer, ForeignKey('Users.user_id')),
@@ -36,14 +36,12 @@ class User(BASE):
     pass
 
   __tablename__ = 'Users'
-
   identifier = Column('user_id', Integer, primary_key=True)
   username = Column('username', String)
   password = Column('password', String)
   privileged = Column('privileged', Integer)
   last_login = Column('last_login', DateTime)
   email = Column('email', String)
-
   groups = relationship('Group', secondary='User_has_Groups',
                         back_populates='users', cascade='all')
 
@@ -60,7 +58,6 @@ class User(BASE):
     function = getattr(self.groups, 'append')
     function(group)
 
-
   def removeGroup(self, group):
     """
     Remove a group to this user
@@ -73,7 +70,6 @@ class User(BASE):
       raise ValidationException('Group to be removed is invalid')
     function = getattr(self.groups, 'remove')
     function(group)
-
 
   def validate(self):
     """
@@ -97,14 +93,12 @@ class Group(BASE):
     pass
 
   __tablename__ = 'Groups'
-
   identifier = Column('group_id', Integer, primary_key=True)
   name = Column('name', String)
   shareTLP = Column('auto_share_tlp', Integer)
   description = Column('description', String)
   users = relationship(User, secondary='User_has_Groups',
                        back_populates='groups', cascade='all')
-
 
   def __str__(self):
     return unicode(self.__dict__)
@@ -122,7 +116,6 @@ class Group(BASE):
     function = getattr(self.users, 'append')
     function(user)
 
-
   def removeUser(self, user):
     """
     Remove a user to this group
@@ -135,7 +128,6 @@ class Group(BASE):
       raise ValidationException('User to be removed is invalid')
     function = getattr(self.users, 'remove')
     function(user)
-
 
   def validate(self):
     """
@@ -153,7 +145,6 @@ class Group(BASE):
                                   minLength=3,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
-
 
 class GroupBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -185,9 +176,14 @@ class GroupBroker(BrokerBase):
           userIDs.append(user.identifier)
         users = self.session.query(User).filter(~User.identifier.in_(
                                                                     userIDs))
+      return users
     except sqlalchemy.orm.exc.NoResultFound:
       users = list()
-    return users
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
 
   def addGroupToUser(self, userID, groupID, commit=True):
     """
@@ -202,13 +198,14 @@ class GroupBroker(BrokerBase):
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
       user = self.session.query(User).filter(User.identifier == userID).one()
+      group.addUser(user)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
-    group.addUser(user)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
   def removeGroupFromUser(self, userID, groupID, commit=True):
     """
@@ -223,22 +220,17 @@ class GroupBroker(BrokerBase):
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
       user = self.session.query(User).filter(User.identifier == userID).one()
+      group.removeUser(user)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
-    group.removeUser(user)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
-
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
 class UserBroker(BrokerBase):
   """This is the interface between python an the database"""
-
-
-
-
 
   def insert(self, instance, commit=True):
     """
@@ -250,7 +242,13 @@ class UserBroker(BrokerBase):
     errors = not instance.validate()
     if errors:
       raise ValidationException('User to be inserted is invalid')
-    BrokerBase.insert(self, instance, commit)
+    try:
+      BrokerBase.insert(self, instance, commit)
+      self.session.doCommit(commit)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
   def update(self, instance, commit=True):
     """
@@ -264,7 +262,13 @@ class UserBroker(BrokerBase):
     errors = not instance.validate()
     if errors:
       raise ValidationException('User to be inserted is invalid')
-    BrokerBase.update(self, instance, commit)
+    try:
+      BrokerBase.update(self, instance, commit)
+      self.doCommit(commit)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
   def isUserPrivileged(self, username):
     """
@@ -295,12 +299,15 @@ class UserBroker(BrokerBase):
     """
     try:
       user = self.session.query(User).filter(User.username == username).one()
-
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(username))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for' +
                                          'ID :{0}'.format(username))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
     return user
 
   def getUserByUsernameAndPassword(self, username, password):
@@ -325,6 +332,10 @@ class UserBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for ID ' +
                                          ':{0}'.format(username))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
     return user
 
   def getGroupsByUser(self, identifier, belongIn=True):
@@ -354,6 +365,10 @@ class UserBroker(BrokerBase):
                                                                     groupIDs))
     except sqlalchemy.orm.exc.NoResultFound:
       groups = list()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
     return groups
 
   def addUserToGroup(self, userID, groupID, commit=True):
@@ -369,13 +384,14 @@ class UserBroker(BrokerBase):
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
       user = self.session.query(User).filter(User.identifier == userID).one()
+      user.addGroup(group)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
-    user.addGroup(group)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
 
   def removeUserFromGroup(self, userID, groupID, commit=True):
     """
@@ -390,12 +406,11 @@ class UserBroker(BrokerBase):
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
       user = self.session.query(User).filter(User.identifier == userID).one()
+      user.removeGroup(group)
+      self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
-    user.removeGroup(group)
-    if commit:
-      self.session.commit()
-    else:
-      self.session.flush()
-
-
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)

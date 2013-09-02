@@ -1,4 +1,10 @@
-"""validation module"""
+# -*- coding: utf-8 -*-
+
+"""
+validation module
+
+Created Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -6,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import re
+from sre_constants import error
 
 ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'
 ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
@@ -281,6 +288,23 @@ class ValueValidator:
                   'The entered hash is not a valid {0} hash'.format(typeUpper),
                   changeAttribute=False)
 
+  @staticmethod
+  def validateRegularExpression(regex):
+    """
+      Validates if the attribute is a valid regular expression.
+
+      Note: The actual object is changed internally
+
+      :param regex: regular expression to be validated
+      :type regex: String
+
+      :return Boolean
+    """
+    obj = Container(regex)
+    return ObjectValidator.validateRegularExpression(obj,
+                                                     'value',
+                                                     changeAttribute=False)
+
 class ObjectValidator:
 
   """
@@ -554,6 +578,7 @@ class ObjectValidator:
 
       :return Boolean
     """
+    #TODO: Validation of dates!!!
     return True
     for dateFormat in DATE:
       result = validateRegex(obj,
@@ -599,7 +624,7 @@ class ObjectValidator:
 
     typeUpper = getattr(hashType, 'upper')()
 
-    # get regex
+    # get regex of the hash
     regex = HASHES[typeUpper]
 
     return validateRegex(obj,
@@ -607,6 +632,41 @@ class ObjectValidator:
                   regex,
                   'The entered hash is not a valid {0} hash'.format(typeUpper),
                   changeAttribute)
+  @staticmethod
+  def validateRegularExpression(obj, attributeName, changeAttribute=True):
+    """
+      Validates if the attribute is a valid regular expression.
 
+      Note: The actual object is changed internally
 
+      :param obj: Object
+      :type obj: object
+      :param attributeName: attribute name of the object
+      :type attributeName: String
+      :param changeAttribute: If set the given attribute will be changed to a
+                              type of FailedValidation
+      :type changeAttribute: Boolean
+
+      :return Boolean
+    """
+    errorMsg = 'Unknown error'
+    if hasattr(obj, attributeName):
+      regex = unicode(getattr(obj, attributeName))
+      try:
+        h = re.compile(regex)
+        # remove the unneeded variable
+        del h
+        result = True
+      except error as e:
+        errorMsg = e
+        result = False
+      if not result and changeAttribute:
+        setattr(obj,
+                attributeName,
+                FailedValidation(regex,
+                                 ('The given regex is invalid '
+                                 + 'due to: {0}').format(errorMsg)))
+    else:
+      raise ValidationException('The given object has no attribute ' +
+                                 attributeName)
 

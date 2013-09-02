@@ -1,4 +1,8 @@
-"""object helper module"""
+"""
+object helper module
+
+Created on Jul 5, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -10,31 +14,38 @@ import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
 
-
-__author__ = 'Weber Jean-Paul'
-__email__ = 'jean-paul.weber@govcert.etat.lu'
-__copyright__ = 'Copyright 2013, Weber Jean-Paul'
-__license__ = 'GPL v3+'
-
-# Created on Jul 5, 2013
-
 class CompareException(Exception):
+  """
+  Base compare exception
+  """
   def __init__(self, message):
     Exception.__init__(self, message)
 
 class TypeMismatchException(CompareException):
+  """
+  Type mismatch exception
+  """
   def __init__(self, message):
     CompareException.__init__(self, message)
 
 class ArrayMismatchException(CompareException):
+  """
+  Array mismatch exception
+  """
   def __init__(self, message):
     CompareException.__init__(self, message)
 
 class ValueMismatchException(CompareException):
+  """
+  Value mismatch exception
+  """
   def __init__(self, message):
     CompareException.__init__(self, message)
 
 class AttributeMismatchException(CompareException):
+  """
+  Attribute mismatch exception
+  """
   def __init__(self, message):
     CompareException.__init__(self, message)
 
@@ -61,17 +72,14 @@ def compareObjects(object1, object2, raiseExceptions=True):
     attrValue1 = type(object1)
     attrValue2 = type(object2)
   else:
-
     # check if not a baseType
     if (isinstance(object1, Iterable) and not isinstance(object1,
                 types.StringTypes)) and (isinstance(object1, Iterable) and
                 not isinstance(object1, types.StringTypes)):
       listIssue = True
       inputIssue = True
-
       if (len(object1) != len(object2)):
         attrName = 'length of Array'
-
         attrValue1 = len(object1)
         attrValue2 = len(object2)
         result = False
@@ -86,19 +94,15 @@ def compareObjects(object1, object2, raiseExceptions=True):
               item2 = object2[key]
               attrValue2 = item2
               result = compareObjects(item1, item2)
-
         else:
           for i in range(0, len(object1)):
             item1 = object1[i]
             item2 = object2[i]
             if not compareObjects(item1, item2):
               result = False
-
-
               attrValue1 = object1[i]
               attrValue2 = object2[i]
               break
-
     elif ((isinstance(object1, types.StringTypes) or isinstance(object1,
                                                                 types.IntType)
                 or isinstance(object1, types.FloatType) or isinstance(object1,
@@ -114,7 +118,6 @@ def compareObjects(object1, object2, raiseExceptions=True):
         attrValue1 = object1
         attrValue2 = object2
         result = False
-
     elif  (isinstance(object1, datetime.datetime)) and (isinstance(object2,
                                                             datetime.datetime)):
       if object1.strftime('%Y%m%d_%H%M%S') != object2.strftime('%Y%m%d_%H%M%S'):
@@ -133,7 +136,6 @@ def compareObjects(object1, object2, raiseExceptions=True):
             if hasattr(object1, name) and hasattr(object2, name):
               value1 = getattr(object1, name)
               value2 = getattr(object2, name)
-
               # functions/methods will not be compared
               if (not isfunction(value1) and not isinstance(value1,
                                                             types.FunctionType)
@@ -143,16 +145,13 @@ def compareObjects(object1, object2, raiseExceptions=True):
                 attrName = name
                 attrValue1 = value1
                 attrValue2 = value2
-
                 if not compareObjects(value1, value2, raiseExceptions):
                   result = False
                 else:
                   # do nothing if it's a function
                   pass
-
             else:
               result = False
-
   if not result:
     if raiseExceptions:
       if (typeIssue):
@@ -175,7 +174,6 @@ def compareObjects(object1, object2, raiseExceptions=True):
   # if this is reached they have to be equal.
   return result
 
-
 def printObject(obj, indent=0, maxRecLVL=3):
   """
   Compares recursively if the two input objects are equal on their attribute
@@ -191,11 +189,9 @@ def printObject(obj, indent=0, maxRecLVL=3):
   """
   # generate indentation
   indentStr = '\t' * indent
-
   if (indent == 0):
     print '{indentation}{variableName}'.format(indentation=indentStr,
                                                  variableName=type(obj))
-
   if (indent > maxRecLVL):
     print '{indentation}...'.format(indentation=indentStr)
     return
@@ -215,7 +211,6 @@ def printObject(obj, indent=0, maxRecLVL=3):
         # If it is an list or array
         if isinstance(value, Iterable) and not isinstance(value,
                                                           types.StringTypes):
-
           if len(value) == 0:
             print '{indentation}{variableName}: Empty'.format(
                                                         indentation=indentStr,

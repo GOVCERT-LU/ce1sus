@@ -1,15 +1,24 @@
+# -*- coding: utf-8 -*-
+
+"""
+String helper module
+
+Created: Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-"""String helper module"""
 import re
 import cgi
 from datetime import datetime
 
 class InputException(Exception):
+  """
+  Base exception for input exceptions
+  """
   def __init__(self, message):
     Exception.__init__(self, message)
 
@@ -58,7 +67,6 @@ def plaintext2html(text, tabstop=4):
         if last in ['\n', '\r', '\r\n']:
           last = '<br>'
         return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
-
   # convert to text to be compliant
   stringText = unicode(text)
   if len(stringText) > 0:

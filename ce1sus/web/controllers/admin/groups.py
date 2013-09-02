@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+module handing the groups pages
+
+Created: Aug 19, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, Group
@@ -9,13 +22,12 @@ import types as types
 
 
 class GroupController(BaseController):
-
+  """Controller handling all the requests for groups"""
 
   def __init__(self):
     BaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
-
 
   @require(privileged())
   @cherrypy.expose
@@ -31,16 +43,29 @@ class GroupController(BaseController):
 
   @cherrypy.expose
   def leftContent(self):
+    """
+    renders the left content of the group index page
 
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/groups/groupLeft.html')
-
     groups = self.groupBroker.getAll()
     return template.render(groups=groups)
 
   @cherrypy.expose
   def rightContent(self, groupid=0, group=None):
-    template = self.getTemplate('/admin/groups/groupRight.html')
+    """
+    renders the right content of the group index page
 
+    :param groupid: The group id of the desired displayed group
+    :type groupid: Integer
+    :param group: Similar to the previous attribute but prevents
+                      additional loadings
+    :type group: Group
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/groups/groupRight.html')
     if group is None:
       if groupid is None or groupid == 0:
         group = None
@@ -48,7 +73,6 @@ class GroupController(BaseController):
         group = self.groupBroker.getByID(groupid)
     else:
       group = group
-
     remUsers = None
     users = None
     if not group is None:
@@ -61,6 +85,11 @@ class GroupController(BaseController):
   @require(privileged())
   @cherrypy.expose
   def addGroup(self):
+    """
+    renders the add a group page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/groups/groupModal.html')
     return template.render(group=None, errorMsg=None)
 
@@ -123,17 +152,23 @@ class GroupController(BaseController):
     else:
       return template.render(group=group, errorMsg=errorMsg)
 
-
   @cherrypy.expose
   def editGroup(self, groupid):
-    template = self.getTemplate('/admin/groups/groupModal.html')
+    """
+    renders the edit group page
 
+    :param groupid: The group id of the desired displayed group
+    :type groupid: Integer
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/groups/groupModal.html')
     errorMsg = None
     try:
       group = self.groupBroker.getByID(groupid)
     except BrokerException as e:
-        self.getLogger().error('An unexpected error occurred: {0}'.format(e))
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
+      self.getLogger().error('An unexpected error occurred: {0}'.format(e))
+      errorMsg = 'An unexpected error occurred: {0}'.format(e)
     return template.render(group=group, errorMsg=errorMsg)
 
   @require(privileged())

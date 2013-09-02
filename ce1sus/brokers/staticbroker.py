@@ -1,4 +1,10 @@
-"""This module provides container classes of static data"""
+# -*- coding: utf-8 -*-
+
+"""
+This module provides container classes of static data
+
+Created: Aug 28, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -34,10 +40,7 @@ class Type(object):
 
     :returns: Integer
     """
-
     formatedName = unicode(name).title()
-
-
     result = None
     for key, value in Type.__tableDefinitions.items():
       if formatedName == value:
@@ -53,9 +56,7 @@ class Type(object):
 
     :returns: String
     """
-
     identifier = int(identifier)
-
     if identifier < 0 and identifier > len(Type.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Type.__tableDefinitions[identifier]
@@ -66,7 +67,6 @@ class Status(object):
                      1 : 'Confirmed',
                      2 : 'Expired',
                      3 : 'Deleted'}
-
 
   @staticmethod
   def getDefinitions():
@@ -87,9 +87,7 @@ class Status(object):
 
     :returns: String
     """
-
     identifier = int(identifier)
-
     if identifier < 0 and identifier > len(Status.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Status.__tableDefinitions[identifier]
@@ -101,10 +99,7 @@ class Status(object):
 
     :returns: Integer
     """
-
     formatedName = unicode(name).title()
-
-
     result = None
     for key, value in Status.__tableDefinitions.items():
       if formatedName == value:
@@ -119,7 +114,6 @@ class Analysis(object):
                      1 : 'Opened',
                      2 : 'Stalled',
                      3 : 'Completed'}
-
 
   @staticmethod
   def getDefinitions():
@@ -140,14 +134,10 @@ class Analysis(object):
 
     :returns: String
     """
-
     identifier = int(identifier)
-
     if identifier < 0 and identifier > len(Analysis.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Analysis.__tableDefinitions[identifier]
-
-
 
   @staticmethod
   def getByName(name):
@@ -165,14 +155,12 @@ class Analysis(object):
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
 
-
 class Risk(object):
   """Static class defining the risk of an event"""
   __tableDefinitions = {0 : 'None',
                      1 : 'Low',
                      2 : 'Medium',
                      3 : 'High'}
-
 
   @staticmethod
   def getDefinitions():
@@ -193,9 +181,7 @@ class Risk(object):
 
     :returns: String
     """
-
     identifier = int(identifier)
-
     if identifier < 0 and identifier > len(Risk.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Risk.__tableDefinitions[identifier]
@@ -207,10 +193,7 @@ class Risk(object):
 
     :returns: Integer
     """
-
     formatedName = unicode(name).title()
-
-
     result = None
     for key, value in Risk.__tableDefinitions.items():
       if formatedName == value:
@@ -225,7 +208,6 @@ class TLPLevel(object):
                 1 : 'Amber',
                 2 : 'Green',
                 3 : 'White'}
-
   __tlp_colors = {0 : '#FF0000',
                 1 : '#FFBF00',
                 2 : '#66B032',
@@ -251,15 +233,10 @@ class TLPLevel(object):
 
     :returns: String
     """
-
     identifier = int(identifier)
-
     if identifier < 0 and identifier > 3:
       raise Exception('Invalid input "{0}"'.format(identifier))
-
     return TLPLevel.__tlp_levels[identifier]
-
-
 
   @staticmethod
   def getDefinitions():
@@ -273,7 +250,6 @@ class TLPLevel(object):
       result[value] = key
     return result
 
-
   @staticmethod
   def getByName(name):
     """
@@ -281,10 +257,7 @@ class TLPLevel(object):
 
     :returns: Integer
     """
-
     formatedName = unicode(name).title()
-
-
     result = None
     for key, value in TLPLevel.__tlp_levels.items():
       if formatedName == value:
@@ -301,8 +274,6 @@ class TLPLevel(object):
     :returns: String
     """
     identifier = int(identifier)
-
     if identifier < 0 and identifier > 3:
       raise Exception('Invalid input "{0}"'.format(identifier))
     return TLPLevel.__tlp_colors[identifier]
-

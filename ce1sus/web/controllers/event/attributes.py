@@ -1,5 +1,10 @@
-"""module holding all controllers needed for the event handling"""
-from cgitb import handler
+# -*- coding: utf-8 -*-
+
+"""
+module handing the attributes pages
+
+Created: Aug, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -15,10 +20,9 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import privileged
 from framework.db.broker import ValidationException, \
 BrokerException
-from ce1sus.web.helpers.handlers.base import HandlerException, HandlerBase
+from ce1sus.web.helpers.handlers.base import HandlerException
 import types
-from importlib import import_module
-from framework.web.helpers.pagination import Paginator, PaginatorOptions
+from framework.web.helpers.pagination import Paginator
 from ce1sus.api.ticketsystem import TicketSystemBase
 
 class AttributesController(BaseController):
@@ -34,13 +38,11 @@ class AttributesController(BaseController):
   @require(privileged())
   @cherrypy.expose
   def index(self):
-
     """
     renders the events page
 
     :returns: generated HTML
     """
-
     return self.__class__.__name__ + ' is not implemented'
 
   @cherrypy.expose
@@ -64,6 +66,9 @@ class AttributesController(BaseController):
   @cherrypy.expose
   @require()
   def addFile(self, value=None):
+    """
+    Uploads a file to the tmp dir
+    """
     if value.file is None:
       return 'No file selected. Try again.'
     size = 0
@@ -75,23 +80,10 @@ class AttributesController(BaseController):
       fileObj.write(data)
       size += len(data)
     fileObj.close()
-
+    if size == 0:
+      self.getLogger().fatal('Upload of the given file failed.')
     filepath = '/tmp/' + value.filename
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
-
-
-  def __getHandler(self, definition):
-
-    # GethandlerClass
-    temp = definition.handlerName.rsplit('.', 1)
-    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
-    clazz = getattr(module, temp[1])
-    # instantiate
-    handler = clazz()
-    # check if handler base is implemented
-    if not isinstance(handler, HandlerBase):
-       raise HandlerException('{0} does not implement HandlerBase'.format(definition.handlerName))
-    return handler
 
   @cherrypy.expose
   @require()
@@ -109,9 +101,11 @@ class AttributesController(BaseController):
     definition = params.get('definition', None)
     action = params.get('action', None)
     # remove unnecessary elements from the parameters
-    params = { k : v for k, v in params.iteritems() if k not in ['eventID', 'attributeID', 'objectID', 'definition', 'action'] }
-
-
+    params = { k : v for k, v in params.iteritems() if k not in ['eventID',
+                                                                 'attributeID',
+                                                                 'objectID',
+                                                                 'definition',
+                                                                 'action'] }
     errorMsg = ''
     attributes = list()
     # right checks
@@ -121,58 +115,51 @@ class AttributesController(BaseController):
     obj = self.objectBroker.getByID(objectID)
     try:
       if action != 'remove':
-
         definition = self.def_attributesBroker.getByID(definition)
-        handler = self.__getHandler(definition)
+        handler = AttributeBroker.getHandler(definition)
         # expect generated attributes back
-        attributes = handler.populateAttributes(params, obj, definition, self.getUser())  # from handler
+        attributes = handler.populateAttributes(params,
+                                                obj,
+                                                definition,
+                                                self.getUser())  # from handler
         if attributes is None:
-          raise HandlerException('{0}.getAttributes does not return attributes '.format(definition.handlerName))
-
-
+          raise HandlerException(('{0}.getAttributes '
+                                  + 'does not return attributes ').format(
+                                                        definition.handlerName))
         if not isinstance(attributes, types.StringTypes):
           if not isinstance(attributes, types.ListType):
             if isinstance(attributes, Attribute):
               temp = attributes
               attributes = list()
               attributes.append(temp)
-
       # doAction for all attributes
       if action == 'insert':
+        # TODO: update event
         for attribute in attributes:
           self.attributeBroker.insert(attribute, commit=False)
-        self.attributeBroker.doCommit(True)
       if action == 'remove':
         self.attributeBroker.removeByID(attributeID, commit=True)
-
-
+      self.attributeBroker.doCommit(True)
       return self.returnAjaxOK()
     except ValidationException as e:
       self.getLogger().info(e)
       errorMsg = e
-
     except BrokerException as e:
+      self.getLogger().fatal(e)
       errorMsg = e
-
     except HandlerException as e:
+      self.getLogger().fatal(e)
       errorMsg = e
-
-
     template = self.getTemplate('/events/event/attributes/'
                                   + 'attributesModal.html')
-
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
     if not (attributes is None):
-      if (len(attributes) > 1):
+      if (len(attributes) == 1):
+        attribute = attributes[0]
+      else:
         attribute = None
         errorMsg = '{0} Please try again'.format(errorMsg)
-      else:
-        if (len(attributes) == 1):
-          attribute = attributes[0]
-    else:
-      attribute = None
-
     return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
@@ -188,7 +175,7 @@ class AttributesController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/events/event/attributes/attributesModal.html')
-    obj = self.objectBroker.getByID(objectID);
+    obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
     attribute = self.attributeBroker.getByID(attributeID)
@@ -201,9 +188,21 @@ class AttributesController(BaseController):
 
   @cherrypy.expose
   def inputHandler(self, defattribID, enabled, attributeID=None):
+    """
+    renders the form or input of the requested handler
+
+    :param defattribID: ID of the selected definition
+    :type defattribID: Integer
+    :param enabled: Set to '1' if the inputs are enables
+    :type enabled: String
+    :param attributeID: the if of the desited displayed attribute
+    :type attributeID: Integer
+
+    :returns: generated HTML
+    """
     # get Definition
     definition = self.def_attributesBroker.getByID(defattribID)
-    handler = self.__getHandler(definition)
+    handler = AttributeBroker.getHandler(definition)
     attribute = None
     if not attributeID is None:
       attribute = self.attributeBroker.getByID(attributeID)
@@ -225,7 +224,9 @@ class AttributesController(BaseController):
               {'title':'Title'},
               {'selector':'Options'}]
     # the labels etc is handled by the RTTable.html
-    rtPaginator = Paginator(items=TicketSystemBase.getInstance().getAllTickets(),
-                          labelsAndProperty=labels)
+    rtPaginator = Paginator(items=TicketSystemBase.
+                            getInstance().getAllTickets(),
+                            labelsAndProperty=labels)
     return template.render(rtPaginator=rtPaginator,
-                           rtUrl=TicketSystemBase.getInstance().getBaseTicketUrl())
+                           rtUrl=TicketSystemBase.
+                           getInstance().getBaseTicketUrl())

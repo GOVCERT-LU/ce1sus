@@ -1,27 +1,26 @@
-"""module for session handling and brokers"""
+# -*- coding: utf-8 -*-
+
+"""
+module for session handling and brokers
+
+Created Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session
 from sqlalchemy.interfaces import PoolListener
 from framework.db.broker import BrokerBase
-from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from framework.helpers.config import Configuration
 import os
 import socket
 from framework.helpers.debug import Log
-from cherrypy.process import wspbus, plugins
-
+from cherrypy.process import plugins
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column
-from sqlalchemy.types import String, Integer
 import cherrypy
 
 BASE = declarative_base()
@@ -37,46 +36,55 @@ class BrokerInstantiationException(Exception):
     Exception.__init__(self, message)
 
 class SAEnginePlugin(plugins.SimplePlugin):
+  """The SAEnglinge
+  Original found under
+  http://www.defuze.org/archives/222-integrating-
+                                    sqlalchemy-into-a-cherrypy-application.html
+  """
 
-    def __init__(self, bus, connectionString, addListener=False, debug=False):
-        """
-        The plugin is registered to the CherryPy engine and therefore
-        is part of the bus (the engine *is* a bus) registery.
+  def __init__(self, bus, connectionString, addListener=False, debug=False):
+    """
+    The plugin is registered to the CherryPy engine and therefore
+    is part of the bus (the engine *is* a bus) registery.
 
-        We use this plugin to create the SA engine. At the same time,
-        when the plugin starts we create the tables into the database
-        using the mapped class of the global metadata.
+    We use this plugin to create the SA engine. At the same time,
+    when the plugin starts we create the tables into the database
+    using the mapped class of the global metadata.
 
-        Finally we create a new 'bind' channel that the SA tool
-        will use to map a session to the SA engine at request time.
-        """
-        plugins.SimplePlugin.__init__(self, bus)
-        self.sa_engine = None
-        self.bus.subscribe("bind", self.bind)
-        self.listener = addListener
-        self.debug = debug
-        self.connectionString = connectionString
+    Finally we create a new 'bind' channel that the SA tool
+    will use to map a session to the SA engine at request time.
+    """
+    plugins.SimplePlugin.__init__(self, bus)
+    self.sa_engine = None
+    self.bus.subscribe("bind", self.bind)
+    self.listener = addListener
+    self.debug = debug
+    self.connectionString = connectionString
 
-    def start(self):
-        if self.listener:
-          self.sa_engine = create_engine(self.connectionString,
-                                listeners=[ForeignKeysListener()],
-                                echo=self.debug)
-        else:
-          self.sa_engine = create_engine(self.connectionString,
-                                echo=self.debug)
+  def start(self):
+    """Start the engine"""
+    if self.listener:
+      self.sa_engine = create_engine(self.connectionString,
+                            listeners=[ForeignKeysListener()],
+                            echo=self.debug)
+    else:
+      self.sa_engine = create_engine(self.connectionString,
+                            echo=self.debug)
 
 
-    def stop(self):
-        if self.sa_engine:
-            self.sa_engine.dispose()
-            self.sa_engine = None
+  def stop(self):
+    """stops the engine"""
+    if self.sa_engine:
+      self.sa_engine.dispose()
+      self.sa_engine = None
 
-    def bind(self, session):
-        session.configure(bind=self.sa_engine)
+  def bind(self, session):
+    """binds the engine"""
+    session.configure(bind=self.sa_engine)
 
-    def getEngine(self):
-      return self.sa_engine
+  def getEngine(self):
+    """returns the engine"""
+    return self.sa_engine
 
 
 class ForeignKeysListener(PoolListener):
@@ -91,48 +99,58 @@ class ForeignKeysListener(PoolListener):
     db_cursor.close()
 
 class SATool(cherrypy.Tool):
-    def __init__(self):
-        """
-        The SA tool is responsible for associating a SA session
-        to the SA engine and attaching it to the current request.
-        Since we are running in a multithreaded application,
-        we use the scoped_session that will create a session
-        on a per thread basis so that you don't worry about
-        concurrency on the session object itself.
+  """The SATool
+  Original found under
+  http://www.defuze.org/archives/222-integrating-
+                                    sqlalchemy-into-a-cherrypy-application.html
+  """
+  def __init__(self):
+    """
+    The SA tool is responsible for associating a SA session
+    to the SA engine and attaching it to the current request.
+    Since we are running in a multithreaded application,
+    we use the scoped_session that will create a session
+    on a per thread basis so that you don't worry about
+    concurrency on the session object itself.
 
-        This tools binds a session to the engine each time
-        a requests starts and commits/rollbacks whenever
-        the request terminates.
-        """
-        cherrypy.Tool.__init__(self, 'on_start_resource',
-                               self.bind_session,
-                               priority=20)
+    This tools binds a session to the engine each time
+    a requests starts and commits/rollbacks whenever
+    the request terminates.
+    """
+    cherrypy.Tool.__init__(self, 'on_start_resource',
+                           self.bind_session,
+                           priority=20)
 
-        self.session = scoped_session(sessionmaker(autoflush=False,
-                                                  autocommit=False))
+    self.session = scoped_session(sessionmaker(autoflush=False,
+                                               autocommit=False))
 
-    def _setup(self):
-        cherrypy.Tool._setup(self)
-        cherrypy.request.hooks.attach('on_end_resource',
-                                      self.commit_transaction,
-                                      priority=80)
+  def _setup(self):
+    cherrypy.Tool._setup(self)
+    cherrypy.request.hooks.attach('on_end_resource',
+                                  self.commit_transaction,
+                                  priority=80)
 
-    def bind_session(self):
-        cherrypy.engine.publish('bind', self.session)
-        cherrypy.request.db = self.session
+  def bind_session(self):
+    """Binds the session"""
+    cherrypy.engine.publish('bind', self.session)
+    cherrypy.request.db = self.session
 
-    def commit_transaction(self):
-        cherrypy.request.db = None
-        try:
-            self.session.commit()
-        except:
-            self.session.rollback()
-            raise
-        finally:
-            self.session.remove()
+  def commit_transaction(self):
+    """Commit transaction"""
+    cherrypy.request.db = None
+    try:
+      function = getattr(self.session, 'commit')
+      function()
+    except:
+      function = getattr(self.session, 'rollback')
+      function()
+      raise
+    finally:
+      self.session.remove()
 
-    def getSession(self):
-      return self.session
+  def getSession(self):
+    """Returns the session"""
+    return self.session
 
 class SessionManager:
   """
@@ -142,22 +160,16 @@ class SessionManager:
 
   def __init__(self, configFile):
     SessionManager.instance = self
-
     # load __config foo!!
-
     self.__config = Configuration(configFile, 'SessionManager')
-
-
     # setup connection string and engine
     protocol = self.__config.get('protocol')
     debug = self.__config.get('debug')
-
     if debug == None:
       debug = False
     if (protocol == 'sqlite'):
       connetionString = '{prot}:///../../../{db}'.format(prot=protocol,
                                                   db=self.__config.get('db'))
-
       # setup the engine
       SAEnginePlugin(cherrypy.engine, connetionString, True, debug).subscribe()
     else:
@@ -168,13 +180,11 @@ class SessionManager:
       if response != 0:
         raise SessionManagerException('Host "{hostname}" not ' +
                                       'available'.format(hostname=hostname))
-
       # check if socket available
       if not SessionManager.isServiceExisting(hostname, port):
         raise SessionManagerException('Service on "{hostname}:{port}"' +
                                       ' not available'.format(hostname=hostname,
                                                                port=port))
-
       connetionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
         prot=protocol,
         user=self.__config.get('username'),
@@ -197,13 +207,10 @@ class SessionManager:
     """
     captive_dns_addr = ""
     host_addr = ""
-
     try:
       host_addr = socket.gethostbyname(host)
-
       if (captive_dns_addr == host_addr):
         return False
-
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       s.settimeout(1)
       s.connect((host, port))
@@ -211,7 +218,6 @@ class SessionManager:
     except socket.error as e:
       Log.getLogger("SessionManager").info(e)
       return False
-
     return True
 
   def getEngine(self):
@@ -222,28 +228,21 @@ class SessionManager:
     """
     return self.saTool.getSession()
 
-
   def brokerFactory(self, clazz):
-      """
-      Creates and initializes a broker
+    """
+    Creates and initializes a broker
 
-      :param clazz: broker class
-      :type clazz: extension of BrokerBase
+    :param clazz: broker class
+    :type clazz: extension of BrokerBase
 
-      :returns: instance of a Broker
-      """
-    # Instantiate broker
-    # try:
+    :returns: instance of a Broker
+    """
+    if not issubclass(clazz, BrokerBase):
+      raise BrokerInstantiationException('Class does not ' +
+                                         'implement BrokerBase')
 
-      if not issubclass(clazz, BrokerBase):
-        raise BrokerInstantiationException('Class does not ' +
-                                           'implement BrokerBase')
-
-      broker = clazz(self.getEngine())
-      return broker
-    # except Exception as e:
-    #  self.getLogger().critical(e)
-    #  raise IndentationError('Could not instantiate broker ' + clazz.__name__)
+    broker = clazz(self.getEngine())
+    return broker
 
   def close(self):
     """
@@ -255,7 +254,6 @@ class SessionManager:
   def getInstance(cls):
     """
     Returns the instance (Singleton pattern)
-
 
     :returns: SessionManager
     """

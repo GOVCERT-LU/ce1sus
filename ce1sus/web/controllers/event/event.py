@@ -1,9 +1,16 @@
-"""module holding all controllers needed for the event handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the event pages
+
+Created: Aug 28, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
-__license__ = 'GPL v3+'
+__license__ = 'GPL v3+'"""module holding all controllers needed for
+                        the event handling"""
 
 import copy
 from framework.web.controllers.base import BaseController
@@ -43,7 +50,6 @@ class EventController(BaseController):
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return template.render(eventID=eventID)
 
-
   @require()
   @cherrypy.expose
   def event(self, eventID):
@@ -53,26 +59,18 @@ class EventController(BaseController):
     :returns: generated HTML
     """
     template = self.mako.getTemplate('/events/event/view.html')
-
     event = self.eventBroker.getByID(eventID)
-
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
-
-
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
     cbRiskValues = Risk.getDefinitions()
-
     objectLabels = [{'identifier':'#'},
               {'definition.name':'Type'},
               {'creator.username':'Created by'},
               {'created':'CreatedOn'}]
-
-
-
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
@@ -83,30 +81,9 @@ class EventController(BaseController):
     objectPaginator = Paginator(items=event.objects,
                           labelsAndProperty=objectLabels,
                           paginatorOptions=paginatorOptions)
-
     objectPaginator.itemsPerPage = 3
 
-
-
-    eventLabels = [{'identifier':'#'},
-              {'title':'Name'},
-              {'creator.username':'Created by'},
-              {'created':'CreatedOn'}]
-    eventPaginatorOptions = PaginatorOptions('/events/recent',
-                                             'eventsTabTabContent')
-    eventPaginatorOptions.addOption('NEWTAB',
-                                    'VIEW',
-                                    '/events/event/view/',
-                                    contentid='')
-    eventPaginator = Paginator(items=event.events,
-                          labelsAndProperty=eventLabels,
-                          paginatorOptions=eventPaginatorOptions)
-    eventPaginator.itemsPerPage = 3
-
-
-
     return template.render(objectPaginator=objectPaginator,
-                           eventPaginator=eventPaginator,
                            event=event,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
@@ -114,7 +91,8 @@ class EventController(BaseController):
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
                            cveUrl=self.getConfigVariable('cveurl'),
-                           ticketUrl=TicketSystemBase.getInstance().getBaseTicketUrl())
+                           ticketUrl=TicketSystemBase.getInstance().
+                           getBaseTicketUrl())
 
   @require()
   @cherrypy.expose
@@ -126,23 +104,27 @@ class EventController(BaseController):
     """
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
+    return EventController.__populateTemplate(None, event, template)
+
+  @staticmethod
+  def __populateTemplate(errorMsg, event, template):
+    """
+    Fills the the template
+    """
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
     cbRiskValues = Risk.getDefinitions()
-    return template.render(errorMsg=None,
-                           event=event,
-                           cbStatusValues=cbStatusValues,
-                           cbAnalysisValues=cbAnalysisValues,
-                           cbRiskValues=cbRiskValues,
-                           cbTLPValues=cbTLPValues)
+    string = template.render(errorMsg=errorMsg, event=event,
+      cbStatusValues=cbStatusValues,
+      cbAnalysisValues=cbAnalysisValues,
+      cbRiskValues=cbRiskValues,
+      cbTLPValues=cbTLPValues)
+    return string
 
   @require()
   @cherrypy.expose
-  def modifyEvent(self, identifier=None, action=None, status=None,
-                  tlp_index=None, description=None,
-                  name=None, published=None,
-                  first_seen=None, last_seen=None, risk=None, analysis=None):
+  def modifyEvent(self, **kwargs):
     """
     modifies or inserts an event with the data of the post
 
@@ -160,19 +142,22 @@ class EventController(BaseController):
     :param email: The email of the user
     :type email: String
 
-
-
     :returns: generated HTML
     """
-
+    params = cherrypy.request.params
+    identifier = params.get('identifier', None)
+    action = params.get('action', None)
+    status = params.get('status', None)
+    tlp_index = params.get('tlp_index', None)
+    description = params.get('description', None)
+    name = params.get('name', None)
+    published = params.get('published', None)
+    first_seen = params.get('first_seen', None)
+    last_seen = params.get('last_seen', None)
+    risk = params.get('risk', None)
+    analysis = params.get('analysis', None)
     errorMsg = None
     errors = False
-
-
-    cbStatusValues = Status.getDefinitions()
-    cbTLPValues = TLPLevel.getDefinitions()
-    cbAnalysisValues = Analysis.getDefinitions()
-    cbRiskValues = Risk.getDefinitions()
     # fill in the values
     event = Event()
     if not action == 'insert':
@@ -180,7 +165,6 @@ class EventController(BaseController):
       # dont want to change the original in case the user cancel!
       event_orig = self.eventBroker.getByID(identifier)
       event = copy.copy(event_orig)
-
       # right checks only if there is a change!!!!
       self.checkIfViewable(
                     event_orig.groups, self.getUser().identifier ==
@@ -194,7 +178,6 @@ class EventController(BaseController):
       event.modified = datetime.now()
       event.modifier = self.getUser()
       event.modifier_id = event.modifier.identifier
-
       if first_seen:
         ObjectConverter.setDate(event, 'first_seen', first_seen)
       else:
@@ -217,7 +200,6 @@ class EventController(BaseController):
         self.eventBroker.update(event)
       if action == 'remove':
         self.eventBroker.removeByID(event.identifier)
-
     except ValidationException:
       self.getLogger().debug('Event is invalid')
       errors = True
@@ -225,16 +207,7 @@ class EventController(BaseController):
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
       self.getLogger().debug('An unexpected error occurred: {0}'.format(e))
       errors = True
-
     if errors:
-      return template.render(errorMsg=errorMsg,
-                           event=event,
-                           cbStatusValues=cbStatusValues,
-                           cbAnalysisValues=cbAnalysisValues,
-                           cbRiskValues=cbRiskValues,
-                           cbTLPValues=cbTLPValues)
+      return EventController.__populateTemplate(errorMsg, event, template)
     else:
       return self.returnAjaxOK()
-
-
-

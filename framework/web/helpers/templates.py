@@ -1,4 +1,10 @@
-"""module providing support for template handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module providing support for template handling
+
+Created: Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -15,7 +21,6 @@ class MakoHandler(object):
   def __init__(self, configFile):
 
     config = Configuration(configFile, 'Mako')
-
     templateRoot = config.get('templateroot')
     collectionSize = config.get('collectionsize')
     outputEncoding = config.get('outputencoding')
@@ -24,7 +29,6 @@ class MakoHandler(object):
                               collection_size=collectionSize,
                               output_encoding=outputEncoding,
                               encoding_errors='replace')
-
     MakoHandler.instance = self
 
 

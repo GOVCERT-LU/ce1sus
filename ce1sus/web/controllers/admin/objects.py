@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the administrative index pages"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the object pages
+
+Created: Aug 26, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -14,14 +20,12 @@ from framework.db.broker import OperationException, BrokerException, \
   ValidationException
 import types as types
 
-
 class ObjectController(BaseController):
-
+  """Controller handling all the requests for objects"""
 
   def __init__(self):
     BaseController.__init__(self)
     self.objectBroker = self.brokerFactory(ObjectDefinitionBroker)
-
 
   @require(privileged())
   @cherrypy.expose
@@ -37,16 +41,29 @@ class ObjectController(BaseController):
 
   @cherrypy.expose
   def leftContent(self):
+    """
+    renders the left content of the object index page
 
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/objects/objectLeft.html')
-
     objects = self.objectBroker.getAll()
     return template.render(objects=objects)
 
   @cherrypy.expose
   def rightContent(self, objectid=0, obj=None):
-    template = self.getTemplate('/admin/objects/objectRight.html')
+    """
+    renders the right content of the object index page
 
+    :param objectid: The object id of the desired displayed object
+    :type objectid: Integer
+    :param obj: Similar to the previous attribute but prevents
+                      additional loadings
+    :type obj: ObjectDefinition
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/objects/objectRight.html')
     if obj is None:
       if objectid is None or objectid == 0:
         obj = None
@@ -54,7 +71,6 @@ class ObjectController(BaseController):
         obj = self.objectBroker.getByID(objectid)
     else:
       obj = obj
-
     remainingAttributes = None
     attributes = None
     if not obj is None:
@@ -65,9 +81,13 @@ class ObjectController(BaseController):
                            remainingAttributes=remainingAttributes,
                            objectAttributes=attributes)
 
-
   @cherrypy.expose
   def addObject(self):
+    """
+    renders the add an object page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/objects/objectModal.html')
     return template.render(object=None, errorMsg=None)
 
@@ -119,8 +139,6 @@ class ObjectController(BaseController):
         obj = None
       except OperationException:
         errorMsg = 'Cannot delete this object. The object is still referenced.'
-
-
     if action == None:
       # ok everything went right
       return self.returnAjaxOK()
@@ -130,8 +148,15 @@ class ObjectController(BaseController):
 
   @cherrypy.expose
   def editObject(self, objectid):
-    template = self.getTemplate('/admin/objects/objectModal.html')
+    """
+    renders the edit an object page
 
+    :param objectid: The object id of the desired displayed object
+    :type objectid: Integer
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/objects/objectModal.html')
     errorMsg = None
     try:
       obj = self.objectBroker.getByID(objectid)

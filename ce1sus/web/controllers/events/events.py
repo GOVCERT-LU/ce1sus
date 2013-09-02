@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the event handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the events pages
+
+Created: Aug 22, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -20,11 +26,9 @@ class EventsController(BaseController):
     BaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
-
   @require(privileged())
   @cherrypy.expose
   def index(self):
-
     """
     renders the events page
 
@@ -32,7 +36,6 @@ class EventsController(BaseController):
     """
     template = self.getTemplate('/events/eventsBase.html')
     return template.render()
-
 
   @require()
   @cherrypy.expose
@@ -46,7 +49,6 @@ class EventsController(BaseController):
     :returns: generated HTML
     """
     template = self.mako.getTemplate('/events/addEvent.html')
-
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
@@ -57,7 +59,6 @@ class EventsController(BaseController):
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
                            today=datetime.now())
-
 
   @require()
   @cherrypy.expose
@@ -77,12 +78,9 @@ class EventsController(BaseController):
               {'tlp':'TLP'},
               {'modified':'Last modification'},
               {'last_seen':'Last seen'}]
-
     # get only the last 200 events to keep the page small
     user = self.getUser()
     lists = self.eventBroker.getAllForUser(user, 200, 0)
-
-
     paginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
     paginatorOptions.addOption('NEWTAB',
                                'VIEW',
@@ -92,6 +90,4 @@ class EventsController(BaseController):
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     paginator.itemsPerPage = 100
-
     return template.render(paginator=paginator)
-

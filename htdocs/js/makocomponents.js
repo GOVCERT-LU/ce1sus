@@ -56,9 +56,15 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
     	if (modalID) {
-    		$('#'+modalID+'body').html('<div class="alert alert-error">There was an error making the AJAX request<br/>'+responseText+'</div>');
+    		$('#'+modalID+'body').html('<div class="alert alert-error">There '
+    				+'was an error making the AJAX request<br/>'
+    				+responseText
+    				+'</div>');
     	} else {
-    		$('#'+contentid+'Errors').html('<div class="alert alert-error">There was an error making the AJAX request<br/>'+responseText+'</div>');
+    		$('#'+contentid+'Errors').html('<div class="alert alert-error">'
+    				+'There was an error making the AJAX request<br/>'
+    				+responseText
+    				+'</div>');
     	}
     });
     // callback handler that will be called regardless
@@ -82,9 +88,15 @@ function setCBChange(element, contentid) {
     	div = $('#'+id+' #attributeFormDefinition #editBox');
         if (text == 'File') {
         	div = $('#'+id+' #attributeFormDefinition #editBox');
-        	div.html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="span9"><input id="valueID" name="value" type="file" /></div></div>');
+        	div.html('<div class="row-fluid"><div class="span3"><div style="'
+        			+'padding: 5px; text-align:right"><label> Value:</label>'
+        			+'</div></div><div class="span9"><input id="valueID" name='
+        			+'"value" type="file" /></div></div>');
         } else {
-        	div.html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="span9"><input id="valueID" name="value" type="text" value="" /></div></div>');
+        	div.html('<div class="row-fluid"><div class="span3"><div style="'
+        			+'padding: 5px; text-align:right"><label> Value:</label>'
+        			+'</div></div><div class="span9"><input id="valueID" name='
+        			+'"value" type="text" value="" /></div></div>');
         }
     });
 }
@@ -96,7 +108,9 @@ function loadContent(contentid, url) {
 	$("#"+contentid).load(url, "", 
 	          function (responseText, textStatus, XMLHttpRequest) {
 	      if(textStatus == 'error') {
-	            $("#"+contentid).html('<div class="alert alert-error">'+responseText+'</div>'+responseText);
+	            $("#"+contentid).html('<div class="alert alert-error">'
+	            		+responseText
+	            		+'</div>'+responseText);
 	      }
 	  });
 	}
@@ -115,9 +129,14 @@ function loadNewTab(pk, id, url) {
 		$('#'+tabID+pk+'LI').attr('class', 'active');
 	} else {
     	//createTab
-    	$("#"+tabID).append($('<li class="active" id="'+tabID+pk+'LI"><a href="#" onclick="getPaging(\''+url+'\',this.id)" id="'+tabID+pk+'">' +
+    	$("#"+tabID).append($('<li class="active" id="'
+    			+tabID+pk
+    			+'LI"><a href="#" onclick="getPaging(\''
+    			+url+'\',this.id)" id="'+tabID+pk+'">' +
     			'Event '+pk+
-    		    '&nbsp;<button class="close" title="Remove this Tab" type="button" onclick="closeTab(\''+tabID+'\',\''+tabID+pk+'LI\');">×</button>' +
+    		    '&nbsp;<button class="close" title="Remove this Tab" '
+    			+'type="button" onclick="closeTab(\''+tabID+'\',\''
+    			+tabID+pk+'LI\');">×</button>' +
     		    '</a></li>'));
 	}
     //load Content
@@ -178,7 +197,8 @@ function getContent(url,id,contentID) {
 	  
 	}
 
-function showPaginatorModal(title, contentUrl, postUrl, refresh, refreshContentID, refreshContentUrl ) {
+function showPaginatorModal(title, contentUrl, postUrl, refresh, 
+							refreshContentID, refreshContentUrl ) {
 	$('#paginatorModal').modal('show');
 	loadContent('paginatorModalbody',contentUrl);
 	$('#paginatorModalLabel').html(title);
@@ -226,7 +246,8 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh, refreshContentI
 
 		    // callback handler that will be called on failure
 		    request.fail(function (responseText, textStatus, XMLHttpRequest){
-		    	$('#paginatorModalbody').html('<div class="alert alert-error">There was an error making the AJAX request</div>');
+		    	$('#paginatorModalbody').html('<div class="alert alert-error">'
+		    			+'There was an error making the AJAX request</div>');
 		    });
 		    // callback handler that will be called regardless
 		    // if the request failed or succeeded
@@ -237,8 +258,11 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh, refreshContentI
 		    // prevent default posting of form
 		    event.preventDefault();
 		});
-		$('#paginatorModalFooter').html('<input class="btn btn-primary" value="Save changes" type="submit"><button class="btn" data-dismiss="modal">Close</button>');
+		$('#paginatorModalFooter').html('<input class="btn btn-primary" value="'
+				+'Save changes" type="submit"><button class="btn" data-'
+				+'dismiss="modal">Close</button>');
 	} else {
-		$('#paginatorModalFooter').html('<button class="btn" data-dismiss="modal">Close</button>');
+		$('#paginatorModalFooter').html('<button class="btn" data-dismiss="'
+				+'modal">Close</button>');
 	}
 }

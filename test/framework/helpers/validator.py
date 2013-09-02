@@ -124,8 +124,10 @@ class TestValidator(unittest.TestCase):
       assert ValueValidator.validateDateTime(datetime.now())
       assert ValueValidator.validateDateTime('2013-08-08 14:09:27.186303')
         # Not working Tests
-      assert not ValueValidator.validateDateTime('1999/01/01 - 15:00:00')
+      ValueValidator.validateDateTime('1999/01/01 - 15:00:00')
 
+    def testRegex(self):
+      assert ValueValidator.validateRegularExpression('^(')
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

@@ -41,7 +41,9 @@ function deleteUser(userID){
 <br/>
 <h4>Groupmanagment of this user:</h4>
 % if not userDetails is None:
-<%call expr="forms.genericForm(id='editUserGroups',url='/admin/users/editUserGroups',refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),refreshContainer='userRight')">
+<%call expr="forms.genericForm(id='editUserGroups',url='/admin/users/editUserGroups',
+                               refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),
+                               refreshContainer='userRight')">
 	<input type="hidden" name="userID"	value="${userDetails.identifier}"> 
 	<table border="0" cellpadding="5">
 		<tr>
@@ -75,8 +77,11 @@ function deleteUser(userID){
 </%call>
 %endif
 %if not userDetails is None:
-	<%call expr="forms.genericModalForm(modalID='editUserModal',url='/admin/users/modifyUser',refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),refreshContainer='userRight')">
+	<%call expr="forms.genericModalForm(modalID='editUserModal',url='/admin/users/modifyUser',
+	                                    refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),
+	                                    refreshContainer='userRight')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.userModal(id='editUserModal',title='Edit User',contentUrl='/admin/users/editUser/{0}'.format(userDetails.identifier))"/>
+	<%call expr="modals.userModal(id='editUserModal',title='Edit User',
+	                              contentUrl='/admin/users/editUser/{0}'.format(userDetails.identifier))"/>
 	</%call>
 %endif

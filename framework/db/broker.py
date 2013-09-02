@@ -1,4 +1,10 @@
-"""The base module for brokers"""
+# -*- coding: utf-8 -*-
+
+"""
+The base module for brokers
+
+Created Jul, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -9,7 +15,6 @@ __license__ = 'GPL v3+'
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from framework.helpers.debug import Log
-import cherrypy
 
 class BrokerException(Exception):
   """Broker Exception"""
@@ -98,14 +103,14 @@ class BrokerBase(object):
 
   def getByID(self, identifier):
     """
-    Returns the getBrokerClass() instance with the given identifier
+    Returns the object by the given identifier
 
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
     :param identifier: the id of the requested user object
     :type identifier: integer
 
-    :returns: getBrokerClass()
+    :returns: Object
     """
     try:
 

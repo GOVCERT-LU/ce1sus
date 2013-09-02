@@ -1,4 +1,10 @@
-"""configuration module"""
+# -*- coding: utf-8 -*-
+
+"""
+configuration module
+
+Created: Jul, 2103
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -9,19 +15,13 @@ from ConfigParser import ConfigParser, Error
 from os.path import isfile
 from os import getcwd
 
-
-
-
 class ConfigException(Exception):
   """Configuration Exception"""
 
   def __init__(self, message):
     Exception.__init__(self, message)
 
-
-
 class Configuration(object):
-
   """Configuration class"""
 
   def __init__(self, configFile, section):
@@ -31,7 +31,6 @@ class Configuration(object):
       raise ConfigException('Could not find config file ' +
                             configFile + ' in ' + getcwd())
     config.read(configFile)
-
     if config.has_section(section):
       options = config.options(section)
       for option in options:

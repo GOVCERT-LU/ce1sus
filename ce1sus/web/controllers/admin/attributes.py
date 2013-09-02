@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+module handing the attributes pages
+
+Created: Aug, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from framework.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
@@ -10,12 +23,11 @@ import types as types
 import framework.helpers.string as string
 
 class AttributeController(BaseController):
-
+  """Controller handling all the requests for attributes"""
 
   def __init__(self):
     BaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeDefinitionBroker)
-
 
   @require(privileged())
   @cherrypy.expose
@@ -31,6 +43,11 @@ class AttributeController(BaseController):
 
   @cherrypy.expose
   def leftContent(self):
+    """
+    renders the left content of the attribute index page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/attributes/attributeLeft.html')
 
     attributes = self.attributeBroker.getAll()
@@ -38,6 +55,17 @@ class AttributeController(BaseController):
 
   @cherrypy.expose
   def rightContent(self, attributeid=0, attribute=None):
+    """
+    renders the right content of the attribute index page
+
+    :param attributeid: The attribute id of the desired displayed attribute
+    :type attributeid: Integer
+    :param attribute: Similar to the previous attribute but prevents
+                      additional loadings
+    :type attribute: AttributeDefinition
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/attributes/attributeRight.html')
 
     if attribute is None:
@@ -64,6 +92,11 @@ class AttributeController(BaseController):
 
   @cherrypy.expose
   def addAttribute(self):
+    """
+    renders the add an attribute page
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/admin/attributes/attributeModal.html')
     cbValues = AttributeDefinition.getTableDefinitions()
     return template.render(attribute=None, errorMsg=None, cbValues=cbValues)
@@ -140,8 +173,15 @@ class AttributeController(BaseController):
 
   @cherrypy.expose
   def editAttribute(self, attributeid):
-    template = self.getTemplate('/admin/attributes/attributeModal.html')
+    """
+    renders the edit an attribute page
 
+    :param attributeid: The attribute id of the desired displayed attribute
+    :type attributeid: Integer
+
+    :returns: generated HTML
+    """
+    template = self.getTemplate('/admin/attributes/attributeModal.html')
     errorMsg = None
     try:
       attribute = self.attributeBroker.getByID(attributeid)
@@ -149,7 +189,6 @@ class AttributeController(BaseController):
       attribute = None
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-
     cbValues = AttributeDefinition.getTableDefinitions()
     return template.render(attribute=attribute,
                            errorMsg=errorMsg,
@@ -178,10 +217,13 @@ class AttributeController(BaseController):
       if operation == 'add':
         if not (remainingObjects is None):
           if isinstance(remainingObjects, types.StringTypes):
-            self.attributeBroker.addObjectToAttribute(remainingObjects, attributeid)
+            self.attributeBroker.addObjectToAttribute(remainingObjects,
+                                                      attributeid)
           else:
             for obj in remainingObjects:
-              self.attributeBroker.addObjectToAttribute(obj, attributeid, False)
+              self.attributeBroker.addObjectToAttribute(obj,
+                                                        attributeid,
+                                                        False)
             self.attributeBroker.session.commit()
       else:
         if not (attributeObjects is None):
@@ -190,7 +232,9 @@ class AttributeController(BaseController):
                                                            attributeid)
           else:
             for obj in attributeObjects:
-              self.attributeBroker.removeObjectFromAttribute(obj, attributeid, False)
+              self.attributeBroker.removeObjectFromAttribute(obj,
+                                                             attributeid,
+                                                             False)
             self.attributeBroker.session.commit()
       return self.returnAjaxOK()
     except BrokerException as e:

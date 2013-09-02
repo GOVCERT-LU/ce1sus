@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the event handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the comment pages
+
+Created: Aug 22, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -27,7 +33,7 @@ class CommentsController(BaseController):
   @cherrypy.expose
   def addComment(self, eventID):
     """
-    renders the events page
+    renders the add a comment page
 
     :returns: generated HTML
     """
@@ -47,22 +53,15 @@ class CommentsController(BaseController):
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
-
     comment = Comment()
-
-
     errorMsg = ''
-
-
     if not action == 'insert':
       comment_orig = self.commentBroker.getByID(commentID)
       # dont want to change the original in case the user cancel!
       comment = copy.copy(comment_orig)
-
     comment.modified = datetime.now()
     comment.modifier = self.getUser()
     comment.modifier_id = comment.modifier.identifier
-
     if action == 'insert':
       comment.comment = commentText
       comment.creator = self.getUser()
@@ -70,32 +69,19 @@ class CommentsController(BaseController):
       comment.event = event
       comment.event_id = event.identifier
       comment.created = datetime.now()
-
-      try:
+    try:
+      if action == 'insert':
         self.commentBroker.insert(comment)
-      except ValidationException:
-        self.getLogger().debug('Event is invalid')
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-
-    if action == 'update':
-      comment.comment = commentText
-
-      try:
+      if action == 'update':
+        comment.comment = commentText
         self.commentBroker.update(comment)
-      except ValidationException:
-        self.getLogger().debug('Event is invalid')
-        errorMsg = 'Object Invalid'
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-
-    if action == 'remove':
-      try:
+      if action == 'remove':
         self.commentBroker.removeByID(comment.identifier)
-      except ValidationException:
-        self.getLogger().debug('Event is invalid')
-      except BrokerException as e:
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
+    except ValidationException:
+      self.getLogger().debug('Event is invalid')
+    except BrokerException as e:
+      self.getLogger().fatal(e)
+      errorMsg = 'An unexpected error occurred: {0}'.format(e)
 
     if errorMsg:
       template = self.getTemplate('/events/event/comments/commentModal.html')

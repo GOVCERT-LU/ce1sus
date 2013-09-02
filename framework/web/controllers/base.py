@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
 """This module provides the base classes and interfaces
 for controllers.
+
+Created: Jul, 2013
 """
 
 __author__ = 'Weber Jean-Paul'
@@ -12,8 +16,6 @@ from framework.helpers.debug import Log
 from framework.db.session import SessionManager
 from ce1sus.web.helpers.protection import Protector
 from framework.web.helpers.config import WebConfig
-
-
 
 class BaseController:
   """This is the base class for controlles all controllers should extend this
@@ -99,7 +101,6 @@ class BaseController:
     self.getLogger().debug("Cleared session")
     Protector.clearSession()
 
-
   def getLogger(self):
     """
     Returns the logger
@@ -108,9 +109,21 @@ class BaseController:
     """
     return Log.getLogger(self.__class__.__name__)
 
-
   def returnAjaxOK(self):
+    """
+    Returns the string of an ok for the javascript
+
+    :returns: String
+    """
     return '--OK--' + self.__class__.__name__
 
   def getConfigVariable(self, identifier):
-    return WebConfig.getInstance().get(identifier)
+    """
+    Returns the variable of the configuration file
+
+    :param identifier: The name of the desired configuration
+    :type identifier: String
+
+    :returns:
+    """
+    return self.config.get(identifier)

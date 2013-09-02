@@ -10,21 +10,6 @@
 <div id="deleteAnswer" style="display: none;">
 </div>
 <script type="text/javascript">
-function deleteEvent(eventID){
-    $("#deleteAnswer").load("/events/event/modifyEvent?identifier="+eventID+"&action=remove", "", 
-               function (responseText, textStatus, XMLHttpRequest) {
-                  if(textStatus == 'error') {
-                      alert('Delete Failed:'+responseText);
-                  }
-                  if (responseText.match(/^--OK--/gi)) {
-                	  //close tab!
-                	  closeTab('eventsTab', 'eventsTab'+eventID);
-                      //loadContent('eventsTabTabContent','/events/recent');
-                  } else {
-                      alert('Delete Failed:'+responseText);
-                  }
-            });
-}
 
 function deleteComment(eventID,commentID){
     $("#deleteAnswer").load("/events/event/comment/modifyComment?commentID="+commentID+"&eventID="+eventID+"&action=remove", "", 
@@ -64,22 +49,6 @@ function editComment(eventID,commentID) {
   <div class="span8">
     <legend>Objects</legend>
 <%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
-
-
-<legend>Related Events</legend>
-<%call expr="pagination.pagination('eventsTable',eventPaginator,hasSearch=False)"/> 
-    
-    <legend>Accessible for groups</legend>
-    %if not event.groups is None:
-      %for group in event.groups:
-      <div class="btn btn-mini disabled" data-toggle="tooltip" title="${group.description}">${group.name}</div>
-      %endfor
-    %else:
-    None
-    %endif 
-  </div>
-</div>
-
 
 
 <legend>Comments</legend>

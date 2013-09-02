@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the index handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the index pages
+
+Created: Aug, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -41,7 +47,6 @@ class IndexController(BaseController):
     """
     template = self.getTemplate('/index/login.html')
     return template.render(errorMsg=errorMsg)
-
 
   @cherrypy.expose
   def doLogin(self, username=None, password=None):
@@ -87,6 +92,3 @@ class IndexController(BaseController):
     """
     template = self.getTemplate('/index/basePage.html')
     return template.render()
-
-
-

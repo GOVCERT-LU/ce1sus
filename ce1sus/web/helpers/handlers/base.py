@@ -1,14 +1,33 @@
+# -*- coding: utf-8 -*-
+
+"""
+module providing support for the base handler
+
+Created: Aug, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
+
 from abc import abstractmethod
 from framework.web.helpers.templates import MakoHandler
 from framework.helpers.debug import Log
 from framework.db.session import SessionManager
 
 class HandlerException(Exception):
+  """
+  Exception base for handler exceptions
+  """
   def __init__(self, message):
     Exception.__init__(self, message)
 
 class HandlerBase(object):
-
+  """
+  Base class for handlers
+  """
   def __init__(self):
     self.mako = MakoHandler.getInstance()
     self.logger = Log.getLogger(self.__class__.__name__)
@@ -16,15 +35,61 @@ class HandlerBase(object):
 
   @abstractmethod
   def populateAttributes(self, params, obj, definition, user):
-    raise HandlerException('populateAttributes not defined for {0}'.format(self.__class__.__name__));
+    """
+    Creates the attributes
+
+    :param params: The parameters
+    :type params: Dictionary
+    :param obj: The object the attributes belongs to
+    :type obj: BASE object
+    :param definition: Attribute definition
+    :type definition: AttributeDefinition
+    :param user: The user creating the attribute
+    :type user: User
+
+    :returns: List of Attributes or a single Attribute
+    """
+    raise HandlerException(('populateAttributes '
+                            + 'not defined for {0} and parameters '
+                            + ' {1}, {2}, {3}, {4}').format(
+                                                    self.__class__.__name__,
+                                                    params,
+                                                    obj,
+                                                    definition,
+                                                    user
+                                                    ))
 
   @abstractmethod
   def render(self, enabled, attribute=None):
-    raise HandlerException('render not defined for {0}'.format(self.__class__.__name__));
+    """
+    Generates the HTML for displaying the attribute
+
+    :param enabled: If the view should be enabled
+    :type enabled: Boolean
+    :param attribute: The attribute to be displayed
+    :type attribute: Attribute
+
+    :returns: generated HTML
+    """
+    raise HandlerException(('render not defined'
+                            + ' for {0} with parameter {1} and{2}')
+                           .format(self.__class__.__name__,
+                                   enabled,
+                                   attribute))
 
   @abstractmethod
   def convertToAttributeValue(self, value):
-    raise HandlerException('convert not defined for {0}'.format(self.__class__.__name__));
+    """
+    Convert the attribute to a single value, to be used to form a generic
+    attribute
+
+    :param value:
+    :type value: Object
+    """
+    raise HandlerException(('convert not '
+                            + 'defined for {0} with parameter {1}').format(
+                                                    self.__class__.__name__,
+                                                    value))
 
   def getTemplate(self, name):
     """Returns the template

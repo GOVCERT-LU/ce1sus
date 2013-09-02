@@ -1,4 +1,10 @@
-"""module holding all controllers needed for the event handling"""
+# -*- coding: utf-8 -*-
+
+"""
+module handing the obejcts pages
+
+Created: Aug, 2013
+"""
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -68,13 +74,11 @@ class ObjectsController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/events/event/objects/details.html')
-
     labels = [{'identifier':'#'},
               {'key':'Type'},
               {'value':'Value'},
               {'creator.username':'Creator'},
               {'created':'CreatedOn'}]
-
     paginatorOptions = PaginatorOptions(('/events/event/objects/'
                                          + 'detail/{0}/{1}').format(eventID,
                                                                     objectID),
@@ -85,22 +89,17 @@ class ObjectsController(BaseController):
                                 + 'view/{0}/{1}/').format(eventID,
                                                          objectID),
                                modalTitle='View Attribute')
-
     paginatorOptions.addOption('DIALOG',
                                'REMOVE',
                                ('/events/event/attribute/modifyAttribute?'
                                 + 'action=remove&eventID={0}&objectID={1}'
                                 + '&attributeID=').format(eventID, objectID),
                                refresh=True)
-
-
     # will be associated in the view!!! only to keep it simple!
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
-
     # fill dictionary of attribute definitions but only the needed ones
-
     objectList = list()
     try:
       obj = self.objectBroker.getByID(objectID)
@@ -109,20 +108,13 @@ class ObjectsController(BaseController):
     except BrokerException:
       obj = None
       cbAttributeDefintiionsDict = dict()
-
     objectList.append(obj)
-
-
-
-
     cbObjDefinitions = self.def_objectBroker.getCBValues()
-
     return template.render(eventID=eventID,
                           cbObjDefinitions=cbObjDefinitions,
                           cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                           paginator=paginator,
                           object=obj)
-
 
   @require(privileged())
   @cherrypy.expose
@@ -152,17 +144,13 @@ class ObjectsController(BaseController):
 
     :returns: generated HTML
     """
-
     event = self.eventBroker.getByID(eventID)
-
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
-
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
-
     obj = Object()
     obj.identifier = None
     obj.def_object_id = definition
@@ -185,8 +173,6 @@ class ObjectsController(BaseController):
       self.getLogger().critical(e)
       errorMsg = 'An unexpected error occured: {0}'.format(e)
       errors = True
-
-
     if errors:
       template = self.getTemplate('/events/event/objects/objectModal.html')
       cbObjDefinitions = self.def_objectBroker.getCBValues()
@@ -205,11 +191,9 @@ class ObjectsController(BaseController):
     Removes an object
     """
     event = self.eventBroker.getByID(eventID)
-
     # right checks
     self.checkIfViewable(event.groups, self.getUser().identifier ==
                          event.creator.identifier)
-
     # remove object
     errors = False
     try:
@@ -217,7 +201,6 @@ class ObjectsController(BaseController):
     except BrokerException as e:
       self.getLogger().critical(e)
       errors = True
-
     if errors:
       return 'Et ass einfach net gangen'
     else:

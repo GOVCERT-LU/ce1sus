@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
+
 """
 module containing all informations about attribute values
+
+Created: Aug 25, 2013
 """
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
 
 from framework.db.broker import BrokerBase, ValidationException, \
 NothingFoundException, TooManyResultsFoundException, OperationException, \

@@ -41,7 +41,10 @@ function deleteObject(objectid){
 <br/>
 <h4>Attributemanagment of this object:</h4>
 % if not objectDetails is None:
-<%call expr="forms.genericForm(id='editObjectAttriutes',url='/admin/objects/editObjectAttributes',refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),refreshContainer='objectRight')">
+<%call expr="forms.genericForm(id='editObjectAttriutes',
+                               url='/admin/objects/editObjectAttributes',
+                               refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),
+                               refreshContainer='objectRight')">
 <input type="hidden" name="objectid" value="${objectDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
@@ -73,8 +76,13 @@ function deleteObject(objectid){
 </%call>
 %endif
 %if not objectDetails is None:
-	<%call expr="forms.genericModalForm(modalID='editObjectModal',url='/admin/objects/modifyObject',refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),refreshContainer='objectRight')">
+	<%call expr="forms.genericModalForm(modalID='editObjectModal',
+	                                    url='/admin/objects/modifyObject',
+	                                    refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),
+	                                    refreshContainer='objectRight')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.userModal(id='editObjectModal',title='Edit Object',contentUrl='/admin/objects/editObject/{0}'.format(objectDetails.identifier))"/>
+	<%call expr="modals.userModal(id='editObjectModal',
+	                              title='Edit Object',
+	                              contentUrl='/admin/objects/editObject/{0}'.format(objectDetails.identifier))"/>
 	</%call>
 %endif

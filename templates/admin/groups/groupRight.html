@@ -41,7 +41,9 @@ function deleteGroup(groupID){
 <br/>
 <h4>Groupmanagment of this user:</h4>
 % if not groupDetails is None:
-<%call expr="forms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupUser',refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),refreshContainer='groupRight')">
+<%call expr="forms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupUser',
+                               refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
+                               refreshContainer='groupRight')">
 <input type="hidden" name="groupID" value="${groupDetails.identifier}">
 <table border="0" cellpadding="5">
   <tr>
@@ -77,8 +79,13 @@ function deleteGroup(groupID){
 </%call>
 %endif
 %if not groupDetails is None:
-	<%call expr="forms.genericModalForm(modalID='editGroupModal',url='/admin/groups/modifyGroup',refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),refreshContainer='groupRight')">
+	<%call expr="forms.genericModalForm(modalID='editGroupModal',
+	                                    url='/admin/groups/modifyGroup',
+	                                    refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
+	                                    refreshContainer='groupRight')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.userModal(id='editGroupModal',title='Edit Group',contentUrl='/admin/groups/editGroup/{0}'.format(groupDetails.identifier))"/>
+	<%call expr="modals.userModal(id='editGroupModal',
+	                              title='Edit Group',
+	                              contentUrl='/admin/groups/editGroup/{0}'.format(groupDetails.identifier))"/>
 	</%call>
 %endif

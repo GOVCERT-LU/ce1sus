@@ -20,7 +20,8 @@ function loadObject(objectID){
     $("#objectRight").load("/admin/objects/rightContent?objectid="+objectID, "", 
 		   function (responseText, textStatus, XMLHttpRequest) {
 		      if(textStatus == 'error') {
-		          $('#objectRight').html('<div class="alert alert-error">There was an error making the AJAX request</div>'+responseText);
+		          $('#objectRight').html('<div class="alert alert-error">There '
+		        		  +'was an error making the AJAX request</div>'+responseText);
 		      }
 		});
 }

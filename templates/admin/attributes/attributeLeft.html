@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-
 <%namespace name="modals" file="/components/modals.html"/>
 <%namespace name="forms" file="/components/forms.html"/>
-
 
 <div class="btn-Object">
 	<a href="#addAttributeModal" role="button" class="btn" data-toggle="modal">Add
@@ -18,10 +15,13 @@ fistAttributeID=0
 <!--list of attributes -->
 <script type="text/javascript">
 function loadAttribute(attributeID){
-    $("#attributeRight").load("/admin/attributes/rightContent?attributeid="+attributeID, "", 
+    $("#attributeRight").load("/admin/attributes/rightContent?attributeid="
+    		+attributeID, "", 
 		   function (responseText, textStatus, XMLHttpRequest) {
 		      if(textStatus == 'error') {
-		          $('#attributeRight').html('<div class="alert alert-error">There was an error making the AJAX request</div>'+responseText);
+		          $('#attributeRight').html('<div class="alert alert-error">'
+		        		  +'There was an error making the AJAX request</div>'
+		        		  +responseText);
 		      }
 		});
 }
@@ -36,16 +36,20 @@ function loadAttribute(attributeID){
 		      fistAttributeID = attribute.identifier
 		      foundAttribute=True
 		  %>
-		   <li><a tabindex="-1" href="#" onclick="loadAttribute(${attribute.identifier})">${attribute.name}</a></li>
+		   <li><a tabindex="-1" href="#" 
+		   onclick="loadAttribute(${attribute.identifier})">${attribute.name}
+		   </a></li>
 		% endfor 
 	%endif
 	
 </ul>
 
 <!-- AddAttributeForm -->
-<%call expr="forms.genericModalForm(modalID='addAttributeModal',url='/admin/attributes/modifyAttribute')">
+<%call expr="forms.genericModalForm(modalID='addAttributeModal',
+                                    url='/admin/attributes/modifyAttribute')">
 <input type="hidden" name="action" value="insert">
-<%call expr="modals.groupModal(id='addAttributeModal',title='Add attribute',contentUrl='/admin/attributes/addAttribute')"/>
+<%call expr="modals.groupModal(id='addAttributeModal',title='Add attribute',
+                               contentUrl='/admin/attributes/addAttribute')"/>
 </%call>
 
 <script type="text/javascript">
