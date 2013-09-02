@@ -5,7 +5,14 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+class Link(object):
+  def __init__(self, urlBase, identifier):
+    self.urlBase = urlBase
+    self.identifier = identifier
 
+  @property
+  def url(self):
+    return self.urlBase + self.identifier
 
 class PaginatorOptions(object):
   # MODE = Enum(MODAL=0, LINK=1, DIALOG=2, CONTENT=3, NEWTAB=4,TAB=5)

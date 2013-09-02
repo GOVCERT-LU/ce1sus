@@ -1,0 +1,13 @@
+<%namespace name="labeledInput" file="/components/labeledInput.html"/>
+
+%if enabled:
+%if attribute is None:
+   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
+%else:
+  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
+%endif
+%else:
+  <%call expr="labeledInput.genericLabeler('Value')">
+    <a href="${attribute.value.url}"  target="_blank">${attribute.value.identifier}</a>
+  </%call>
+%endif

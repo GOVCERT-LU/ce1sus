@@ -85,14 +85,7 @@ class ObjectsController(BaseController):
                                 + 'view/{0}/{1}/').format(eventID,
                                                          objectID),
                                modalTitle='View Attribute')
-    paginatorOptions.addOption('MODAL',
-                               'EDIT',
-                               ('/events/event/attribute/edit/'
-                               + '{0}/{1}/').format(eventID, objectID),
-                               modalTitle='Edit Attribute',
-                               postUrl=('/events/event/attribute/'
-                                        + 'modifyAttribute'),
-                               refresh=True)
+
     paginatorOptions.addOption('DIALOG',
                                'REMOVE',
                                ('/events/event/attribute/modifyAttribute?'

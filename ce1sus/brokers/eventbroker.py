@@ -24,18 +24,9 @@ from ce1sus.brokers.definitionbroker import AttributeDefinition, \
     ObjectDefinition, AttributeDefinitionBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
-from ce1sus.brokers.valuebroker import ValueBroker, FileValue
-from framework.helpers.rt import RTHelper
-from framework.web.helpers.config import WebConfig
-
-class Link(object):
-  def __init__(self, urlBase, identifier):
-    self.urlBase = urlBase
-    self.identifier = identifier
-
-  @property
-  def url(self):
-    return self.urlBase + self.identifier
+from ce1sus.brokers.valuebroker import ValueBroker
+from importlib import import_module
+from ce1sus.web.helpers.handlers.base import HandlerException, HandlerBase
 
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
@@ -264,34 +255,9 @@ class Event(BASE):
     :param group: Group to be removes
     :type group: Group
     """
-    self.groups.remove(group);
-
-
-
-  def addTicket(self, ticket):
-    """
-    Add a Ticket to this event
-
-    :param ticket: Ticket to be added
-    :type ticket: Ticket
-    """
-    errors = not ticket.validate()
-    if errors:
-      raise ValidationException('Ticket to be added is invalid')
-    function = getattr(self.tickets, 'append')
-    function(ticket)
-
-
-  def removeTicket(self, ticket):
-    """
-    Remove a Ticket to this event
-
-    :param ticket: Ticket to be removes
-    :type ticket: Ticket
-    """
-
-    function = getattr(self.tickets, 'remove')
-    function(ticket)
+    function = getattr(self.groups, 'remove')
+    function(group)
+    # self.groups.remove(group);
 
 
   def validate(self):
@@ -507,7 +473,7 @@ class ObjectBroker(BrokerBase):
     # remove attributes
 
     self.attributeBroker.removeAttributeList(obj.attributes, False)
-    self.session.flush()
+    self.doCommit(False)
     BrokerBase.removeByID(self, obj.identifier, False)
     self.doCommit(commit)
 
@@ -521,6 +487,8 @@ class ObjectBroker(BrokerBase):
       self.attributeBroker.getSetValues(attribute)
     return obj
 
+
+
 class AttributeBroker(BrokerBase):
   """
   This broker handles all operations on attribute objects
@@ -529,6 +497,19 @@ class AttributeBroker(BrokerBase):
     BrokerBase.__init__(self, session)
     self.valueBroker = ValueBroker(session)
     self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
+
+  def __getHandler(self, definition):
+
+    # GethandlerClass
+    temp = definition.handlerName.rsplit('.', 1)
+    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
+    clazz = getattr(module, temp[1])
+    # instantiate
+    handler = clazz()
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+       raise HandlerException('{0} does not implement HandlerBase'.format(definition.handlerName))
+    return handler
 
   def getBrokerClass(self):
     """
@@ -544,15 +525,10 @@ class AttributeBroker(BrokerBase):
       value = self.valueBroker.getByAttribute(attribute)
       # value is an object i.e. StringValue and the value of the attribute is
       # the value of the value object
-      if isinstance(value, FileValue):
-        attribute.value = value
-      else:
-        if attribute.key == 'RTTicket':
-          attribute.value = Link(RTHelper.getInstance().getTicketUrl(), value.value)
-        elif attribute.key == 'CVE':
-          attribute.value = Link(WebConfig.getInstance().get('cveurl'), value.value)
-        else:
-          attribute.value = value.value
+      # get handler
+      handler = self.__getHandler(attribute.definition)
+      # convert the attribute with the helper to a single line value
+      attribute.value = handler.convertToAttributeValue(value)
 
       attribute.value_id = value.identifier
     except sqlalchemy.orm.exc.NoResultFound:
@@ -581,8 +557,7 @@ class AttributeBroker(BrokerBase):
     # validation of the value of the attribute first
 
     # getdefinition
-    definition = self.attributeDefinitionBroker.getByID(
-                                                    instance.def_attribute_id)
+    definition = instance.definition
 
 
     ObjectValidator.validateRegex(instance,
@@ -597,13 +572,11 @@ class AttributeBroker(BrokerBase):
       raise ValidationException('Attribute to be inserted is invalid')
     try:
       BrokerBase.insert(self, instance, False)
-      self.session.flush()
       # insert value for value table
       self.valueBroker.inserByAttribute(instance, False)
-      if commit:
-        self.session.commit()
-      else:
-        self.session.flush()
+
+      self.doCommit(commit)
+
     except BrokerException as e:
       self.getLogger().fatal(e)
       self.session.rollback()
@@ -616,8 +589,7 @@ class AttributeBroker(BrokerBase):
     """
 
     # validation of the value of the attribute first
-    definition = self.attributeDefinitionBroker.getByID(
-                                                    instance.def_attribute_id)
+    definition = instance.definiton
 
     ObjectValidator.validateRegex(instance,
                                   'value',
@@ -632,7 +604,7 @@ class AttributeBroker(BrokerBase):
 
     BrokerBase.update(self, instance, False)
     # updates the value of the value table
-    self.session.flush()
+    self.doCommit(False)
     self.valueBroker.updateByAttribute(instance, False)
     self.doCommit(commit)
 
@@ -641,7 +613,7 @@ class AttributeBroker(BrokerBase):
 
     self.valueBroker.removeByAttribute(attribute, False)
       # first remove values
-    self.session.flush()
+    self.doCommit(False)
       # remove attribute
     BrokerBase.removeByID(self, identifier=attribute.identifier, commit=False)
     self.doCommit(commit)
@@ -656,7 +628,7 @@ class AttributeBroker(BrokerBase):
     for attribute in attributes:
       # remove attributes
       self.removeByID(attribute.identifier, False)
-      self.session.flush()
+      self.doCommit(False)
     self.doCommit(commit)
 
 class EventBroker(BrokerBase):

@@ -1,4 +1,5 @@
 """module holding all controllers needed for the event handling"""
+from cgitb import handler
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -14,9 +15,11 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import privileged
 from framework.db.broker import ValidationException, \
 BrokerException
-from datetime import datetime
-import copy
-from os import link
+from ce1sus.web.helpers.handlers.base import HandlerException, HandlerBase
+import types
+from importlib import import_module
+from framework.web.helpers.pagination import Paginator, PaginatorOptions
+from ce1sus.api.ticketsystem import TicketSystemBase
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -77,81 +80,99 @@ class AttributesController(BaseController):
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
 
+  def __getHandler(self, definition):
+
+    # GethandlerClass
+    temp = definition.handlerName.rsplit('.', 1)
+    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
+    clazz = getattr(module, temp[1])
+    # instantiate
+    handler = clazz()
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+       raise HandlerException('{0} does not implement HandlerBase'.format(definition.handlerName))
+    return handler
+
   @cherrypy.expose
   @require()
-  def modifyAttribute(self, eventID=None, attributeID=None,
-                            objectID=None, definition=None, value=None,
-                            action=None):
+  def modifyAttribute(self, **kwargs):
+                      # eventID=None, attributeID=None,
+                      #      objectID=None, definition=None, value=None,
+                      #      action=None):
     """
     Modification on the attributes of objects
     """
-    event = self.eventBroker.getByID(eventID)
+    params = cherrypy.request.params
+    eventID = params.get('eventID', None)
+    attributeID = params.get('attributeID', None)
+    objectID = params.get('objectID', None)
+    definition = params.get('definition', None)
+    action = params.get('action', None)
+    # remove unnecessary elements from the parameters
+    params = { k : v for k, v in params.iteritems() if k not in ['eventID', 'attributeID', 'objectID', 'definition', 'action'] }
+
+
     errorMsg = ''
+    attributes = list()
     # right checks
+    event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier)
     obj = self.objectBroker.getByID(objectID)
     try:
+      if action != 'remove':
 
-      attribute = Attribute()
-      if not action == 'insert':
-        attribute.identifier = attributeID
-        # make copy
-        attribute_orig = self.attributeBroker.getByID(attributeID)
-        attribute = copy.copy(attribute_orig)
+        definition = self.def_attributesBroker.getByID(definition)
+        handler = self.__getHandler(definition)
+        # expect generated attributes back
+        attributes = handler.populateAttributes(params, obj, definition, self.getUser())  # from handler
+        if attributes is None:
+          raise HandlerException('{0}.getAttributes does not return attributes '.format(definition.handlerName))
 
 
-      if not action == 'remove':
+        if not isinstance(attributes, types.StringTypes):
+          if not isinstance(attributes, types.ListType):
+            if isinstance(attributes, Attribute):
+              temp = attributes
+              attributes = list()
+              attributes.append(temp)
 
-        # get definition
-        if definition:
-          definition = self.def_attributesBroker.getByID(definition)
-          attribute.def_attribute_id = definition.identifier
-          attribute.definition = definition
-
-        attribute.value = value
-
+      # doAction for all attributes
       if action == 'insert':
-        attribute.object_id = obj.identifier
-        attribute.object = obj
-        attribute.created = datetime.now()
-        attribute.creator = self.getUser()
-        attribute.creator_id = attribute.creator.identifier
-
-      attribute.modified = datetime.now()
-      attribute.modifier = self.getUser()
-      attribute.modifier_id = attribute.modifier.identifier
-
-      try:
-        if action == 'insert':
-          self.attributeBroker.insert(attribute)
-        if action == 'update':
-          attribute.identifier = attributeID
-          self.attributeBroker.update(attribute)
-        if action == 'remove':
-          obj.removeAttribute(attribute_orig)
-
-        return self.returnAjaxOK()
-        # update last_seen
-        # TODO: Update Event
-        # self.updateEvent(event, False)
-      except ValidationException as e:
-        self.getLogger().info(e)
-        errorMsg = e
+        for attribute in attributes:
+          self.attributeBroker.insert(attribute, commit=False)
+        self.attributeBroker.doCommit(True)
+      if action == 'remove':
+        self.attributeBroker.removeByID(attributeID, commit=True)
 
 
-
+      return self.returnAjaxOK()
+    except ValidationException as e:
+      self.getLogger().info(e)
+      errorMsg = e
 
     except BrokerException as e:
       errorMsg = e
 
-    if attribute.identifier is None:
-      attribute.identifier = ' '
+    except HandlerException as e:
+      errorMsg = e
+
+
     template = self.getTemplate('/events/event/attributes/'
                                   + 'attributesModal.html')
 
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
+    if not (attributes is None):
+      if (len(attributes) > 1):
+        attribute = None
+        errorMsg = '{0} Please try again'.format(errorMsg)
+      else:
+        if (len(attributes) == 1):
+          attribute = attributes[0]
+    else:
+      attribute = None
+
     return template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
@@ -178,24 +199,33 @@ class AttributesController(BaseController):
                            errorMsg=None,
                            enabled=False)
 
+  @cherrypy.expose
+  def inputHandler(self, defattribID, enabled, attributeID=None):
+    # get Definition
+    definition = self.def_attributesBroker.getByID(defattribID)
+    handler = self.__getHandler(definition)
+    attribute = None
+    if not attributeID is None:
+      attribute = self.attributeBroker.getByID(attributeID)
+    if enabled == '1':
+      enableView = True
+    else:
+      enableView = False
+    return handler.render(enableView, attribute)
 
   @cherrypy.expose
-  @require()
-  def edit(self, eventID, objectID, attributeID):
+  def getTickets(self):
     """
-     renders the file with the requested comment
+    renders the file for displaying the tickets out of RT
 
     :returns: generated HTML
     """
-    # is the same just that some elements are enabled
-    template = self.getTemplate('/events/event/attributes/attributesEditModal.html')
-    obj = self.objectBroker.getByID(objectID);
-    cbDefinitions = self.def_attributesBroker.getCBValues(
-                                                    obj.definition.identifier)
-    attribute = self.attributeBroker.getByID(attributeID)
-    return template.render(eventID=eventID,
-                           objectID=objectID,
-                           attribute=attribute,
-                           cbDefinitions=cbDefinitions,
-                           errorMsg=None,
-                           enabled=True)
+    template = self.mako.getTemplate('/events/event/attributes/tickets.html')
+    labels = [{'idLink':'#'},
+              {'title':'Title'},
+              {'selector':'Options'}]
+    # the labels etc is handled by the RTTable.html
+    rtPaginator = Paginator(items=TicketSystemBase.getInstance().getAllTickets(),
+                          labelsAndProperty=labels)
+    return template.render(rtPaginator=rtPaginator,
+                           rtUrl=TicketSystemBase.getInstance().getBaseTicketUrl())

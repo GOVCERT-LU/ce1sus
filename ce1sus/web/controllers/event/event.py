@@ -16,7 +16,7 @@ from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
-from framework.helpers.rt import RTHelper
+from ce1sus.api.ticketsystem import TicketSystemBase
 from framework.db.broker import ValidationException, BrokerException
 from framework.helpers.converters import ObjectConverter
 
@@ -114,7 +114,7 @@ class EventController(BaseController):
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
                            cveUrl=self.getConfigVariable('cveurl'),
-                           rtUrl=RTHelper.getInstance().getTicketUrl())
+                           ticketUrl=TicketSystemBase.getInstance().getBaseTicketUrl())
 
   @require()
   @cherrypy.expose

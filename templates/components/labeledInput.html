@@ -8,7 +8,11 @@
 	<div class="row-fluid">
 	  <div class="span3">
 	    <div style="padding: 5px; text-align:right">
-	      <label> ${label}:</label>
+	      <label>${label}
+	      %if label:
+	         :
+	      %endif
+	      </label>
 	    </div>
 	  </div>
 	  <div class="span9">
@@ -17,7 +21,6 @@
 	</div>
 	<!-- END genericLabeler -->
 </%def>
-
 
 <%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None)">
 	<!-- BEGIN labeledEditBox -->

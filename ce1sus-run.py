@@ -14,7 +14,7 @@ from ce1sus.web.controllers.admin.objects import ObjectController
 from ce1sus.web.helpers.protection import Protector
 from framework.web.helpers.webexceptions import ErrorHandler
 from framework.helpers.ldaphandling import LDAPHandler
-from framework.helpers.rt import RTHelper
+from framework.helpers.rt import RTTickets
 from framework.web.helpers.config import WebConfig
 from ce1sus.web.controllers.admin.attributes import AttributeController
 from ce1sus.web.controllers.event.event import EventController
@@ -57,7 +57,7 @@ def bootstrap():
   Log.getLogger("run").debug("Loading Protector")
   Protector(ce1susConfigFile)
   Log.getLogger("run").debug("Loading RT")
-  RTHelper(ce1susConfigFile)
+  RTTickets(ce1susConfigFile)
   Log.getLogger("run").debug("Loading WebCfg")
   WebConfig(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Ldap")

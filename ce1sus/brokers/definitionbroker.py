@@ -33,11 +33,17 @@ class AttributeDefinition(BASE):
   def __init__(self):
     pass
 
-  __definitions = {0 : 'TextValue',
+  __tableDefinitions = {0 : 'TextValue',
                  1 : 'StringValue',
                  2 : 'DateValue',
                  3 : 'NumberValue',
                  4 : 'FileValue'}
+
+  __handlerDefinitions = {0 : 'generichandler.GenericHandler',
+                          1: 'filehandler.FileHandler',
+                          2: 'tickethandler.TicketHandler',
+                          3: 'tickethandler.CVEHandler'}
+
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
@@ -46,6 +52,7 @@ class AttributeDefinition(BASE):
   description = Column('description', String)
   regex = Column('regex', String)
   classIndex = Column(Integer)
+  handlerIndex = Column(Integer)
 
   # note class relationTable attribute
 
@@ -61,6 +68,14 @@ class AttributeDefinition(BASE):
     else:
       return ''
 
+  @property
+  def handlerName(self):
+    if not self.handlerIndex is None:
+      return self.findHandlerName(self.handlerIndex)
+    else:
+      return ''
+
+
   def findClassName(self, index):
     """
     returns the table name
@@ -71,9 +86,23 @@ class AttributeDefinition(BASE):
     :returns: String
     """
     # Test if the index is
-    if index < 0 and index >= len(self.__definitions):
+    if index < 0 and index >= len(self.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(index))
-    return self.__definitions[index]
+    return self.__tableDefinitions[index]
+
+  def findHandlerName(self, index):
+    """
+    returns the handler name
+
+    :param index: index of the class name
+    :type index: Integer
+
+    :returns: String
+    """
+    # Test if the index is
+    if index < 0 and index >= len(self.__handlerDefinitions):
+      raise Exception('Invalid input "{0}"'.format(index))
+    return self.__handlerDefinitions[index]
 
   def findTableIndex(self, name):
     """
@@ -85,7 +114,7 @@ class AttributeDefinition(BASE):
     :returns: Integer
     """
     result = None
-    for index, tableName in self.__definitions.iteritems():
+    for index, tableName in self.__tableDefinitions.iteritems():
       if tableName == name:
         result = index
         break
@@ -102,7 +131,7 @@ class AttributeDefinition(BASE):
     :returns: Dictionary
     """
     result = dict()
-    for index, tableName in AttributeDefinition.__definitions.iteritems():
+    for index, tableName in AttributeDefinition.__tableDefinitions.iteritems():
       key = tableName.replace('Value', '')
       value = index
       result[key] = value
@@ -331,6 +360,17 @@ class AttributeDefinitionBroker(BrokerBase):
     attribute.removeObject(obj)
 
     self.doCommit(commit)
+
+  def getDefintionByName(self, name):
+    try:
+      attributeDefinition = self.session.query(AttributeDefinition).filter(
+                                AttributeDefinition.name == name).one()
+      return attributeDefinition
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Attribute definition not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
 
 
 class ObjectDefinitionBroker(BrokerBase):

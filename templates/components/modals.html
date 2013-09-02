@@ -94,22 +94,6 @@ $("#${id}").on("hide", function() { // wire up modal when shown
     </%call>
 </%def>
 
-<%def name="objectAttributeModal(id,title,eventID,objectID,attribute,cbDefinitions,showButtons=True,enabled=True, show=False)">
-%if attribute is None:
-    
-      <!-- BEGIN objectModal -->
-	  ${forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)}
-	  <!-- END objectModal -->
-	
-%else:
-    
-      <!-- BEGIN objectModal -->
-	  ${forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)}
-	  <!-- END objectModal -->
-
-%endif
-
-</%def>
 
 <%def name="commentModal(id,title,contentUrl,enabled=True)">
     <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">

@@ -147,10 +147,12 @@
 	           <%
                 if isinstance(value, tuple):
                    value = value[0]
+                    
                 %>
 	        
 	            %if not selected is None and value == selected:
 	              ${key}
+	              <input type="hidden" id="${name}ID" value="${value}"/>
 	            %endif
 	        %endfor
 	    </div>

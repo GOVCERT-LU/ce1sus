@@ -7,7 +7,7 @@ __license__ = 'GPL v3+'
 
 class Type(object):
   """Static class defining the types of an object"""
-  __definitions = {0 : 'Virus',
+  __tableDefinitions = {0 : 'Virus',
                    1 : 'Trojan',
                    2 : 'Expoit',
                    3 : 'Dropper',
@@ -23,7 +23,7 @@ class Type(object):
     :returns: Dictionary
     """
     result = dict()
-    for key, value in Type.__definitions.iteritems():
+    for key, value in Type.__tableDefinitions.iteritems():
       result[value] = key
     return result
 
@@ -39,7 +39,7 @@ class Type(object):
 
 
     result = None
-    for key, value in Type.__definitions.items():
+    for key, value in Type.__tableDefinitions.items():
       if formatedName == value:
         result = key
         break
@@ -56,13 +56,13 @@ class Type(object):
 
     identifier = int(identifier)
 
-    if identifier < 0 and identifier > len(Type.__definitions):
+    if identifier < 0 and identifier > len(Type.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
-    return Type.__definitions[identifier]
+    return Type.__tableDefinitions[identifier]
 
 class Status(object):
   """Static class defining the status of an event"""
-  __definitions = {0 : 'Draft',
+  __tableDefinitions = {0 : 'Draft',
                      1 : 'Confirmed',
                      2 : 'Expired',
                      3 : 'Deleted'}
@@ -76,7 +76,7 @@ class Status(object):
     :returns: Dictionary
     """
     result = dict()
-    for key, value in Status.__definitions.iteritems():
+    for key, value in Status.__tableDefinitions.iteritems():
       result[value] = key
     return result
 
@@ -90,9 +90,9 @@ class Status(object):
 
     identifier = int(identifier)
 
-    if identifier < 0 and identifier > len(Status.__definitions):
+    if identifier < 0 and identifier > len(Status.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
-    return Status.__definitions[identifier]
+    return Status.__tableDefinitions[identifier]
 
   @staticmethod
   def getByName(name):
@@ -106,7 +106,7 @@ class Status(object):
 
 
     result = None
-    for key, value in Status.__definitions.items():
+    for key, value in Status.__tableDefinitions.items():
       if formatedName == value:
         result = key
         break
@@ -115,7 +115,7 @@ class Status(object):
 
 class Analysis(object):
   """Static class defining the status the analysis of an event"""
-  __definitions = {0 : 'None',
+  __tableDefinitions = {0 : 'None',
                      1 : 'Opened',
                      2 : 'Stalled',
                      3 : 'Completed'}
@@ -129,7 +129,7 @@ class Analysis(object):
     :returns: Dictionary
     """
     result = dict()
-    for key, value in Analysis.__definitions.iteritems():
+    for key, value in Analysis.__tableDefinitions.iteritems():
       result[value] = key
     return result
 
@@ -143,9 +143,9 @@ class Analysis(object):
 
     identifier = int(identifier)
 
-    if identifier < 0 and identifier > len(Analysis.__definitions):
+    if identifier < 0 and identifier > len(Analysis.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
-    return Analysis.__definitions[identifier]
+    return Analysis.__tableDefinitions[identifier]
 
 
 
@@ -158,7 +158,7 @@ class Analysis(object):
     """
     formattedInput = unicode(name).title()
     result = None
-    for key, value in Analysis.__definitions.items():
+    for key, value in Analysis.__tableDefinitions.items():
       if formattedInput == value:
         result = key
         break
@@ -168,7 +168,7 @@ class Analysis(object):
 
 class Risk(object):
   """Static class defining the risk of an event"""
-  __definitions = {0 : 'None',
+  __tableDefinitions = {0 : 'None',
                      1 : 'Low',
                      2 : 'Medium',
                      3 : 'High'}
@@ -182,7 +182,7 @@ class Risk(object):
     :returns: Dictionary
     """
     result = dict()
-    for key, value in Risk.__definitions.iteritems():
+    for key, value in Risk.__tableDefinitions.iteritems():
       result[value] = key
     return result
 
@@ -196,9 +196,9 @@ class Risk(object):
 
     identifier = int(identifier)
 
-    if identifier < 0 and identifier > len(Risk.__definitions):
+    if identifier < 0 and identifier > len(Risk.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(identifier))
-    return Risk.__definitions[identifier]
+    return Risk.__tableDefinitions[identifier]
 
   @staticmethod
   def getByName(name):
@@ -212,7 +212,7 @@ class Risk(object):
 
 
     result = None
-    for key, value in Risk.__definitions.items():
+    for key, value in Risk.__tableDefinitions.items():
       if formatedName == value:
         result = key
         break

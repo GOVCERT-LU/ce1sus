@@ -10,49 +10,21 @@ from rtkit.resource import RTResource
 from rtkit.authenticators import CookieAuthenticator
 from rtkit.errors import RTResourceError
 
-class RTException(Exception):
-  def __init__(self, message):
-    Exception.__init__(self, message)
+from ce1sus.api.ticketsystem import TicketSystemBase, Ticket, \
+                                    NoResponseException
 
-class NoResponseException(RTException):
-  def __init__(self, message):
-    RTException.__init__(self, message)
-
-class NoInstanceFoundException(RTException):
-  def __init__(self, message):
-    RTException.__init__(self, message)
-
-
-class RTTicket(object):
-
-  def __init__(self, identifier):
-    self.identifier = identifier
-    self.title = None
-    self.url = None
-    self.queue = None
-    self.owner = None
-    self.creator = None
-    self.status = None
-    self.requestors = None
-    self.created = None
-    self.lastUpdated = None
-    self.resolved = 'Definitely not resolved'
-
-
-
-
-class RTHelper(object):
-
-  instance = None
-
+class RTTickets(TicketSystemBase):
 
   def __init__(self, configFile):
+    TicketSystemBase.__init__(self)
     self.__config = Configuration(configFile, 'RTHelper')
     self.__rtUser = self.__config.get('username')
     self.__rtPwd = self.__config.get('password')
     self.__rtUrl = self.__config.get('url')
-    self.__resource = RTResource(self.__rtUrl + 'REST/1.0/', self.__rtUser, self.__rtPwd, CookieAuthenticator)
-    RTHelper.instance = self
+    self.__resource = RTResource(self.__rtUrl + 'REST/1.0/',
+                                 self.__rtUser,
+                                 self.__rtPwd,
+                                 CookieAuthenticator)
 
   def getAllTickets(self):
     try:
@@ -63,7 +35,7 @@ class RTHelper(object):
 
         for textList in response.parsed:
           for ticketID, ticketTitle in textList:
-            ticket = RTTicket(ticketID)
+            ticket = Ticket(ticketID)
             ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + unicode(ticketID, 'utf-8', errors='replace')
             ticket.title = unicode(ticketTitle, 'utf-8', errors='replace')
             ticketList.append(ticket)
@@ -85,7 +57,7 @@ class RTHelper(object):
             rsp_dict[t[0]] = unicode(t[1], 'utf-8', errors='replace')
 
 
-        ticket = RTTicket(identifier)
+        ticket = Ticket(identifier)
         ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + identifier
         ticket.title = unicode(rsp_dict['Subject'], 'utf-8', errors='replace')
         ticket.queue = unicode(rsp_dict['Queue'], 'utf-8', errors='replace')
@@ -104,15 +76,7 @@ class RTHelper(object):
       raise NoResponseException(e)
 
 
-  def getTicketUrl(self):
+  def getBaseTicketUrl(self):
     return self.__rtUrl + '/Ticket/Display.html?id='
 
-  @classmethod
-  def getInstance(cls):
-    """
-    Returns the instance if there is one
-    """
-    if RTHelper.instance is None:
-      raise NoInstanceFoundException('No instance found to provide')
-    else:
-      return RTHelper.instance
+

@@ -174,7 +174,7 @@ class BrokerBase(object):
     :param commit: If set a commit is done else a flush
     :type commit: Boolean
     """
-    cherrypy.request.db = None
+
     try:
       if commit:
         self.session.commit()
@@ -193,7 +193,9 @@ class BrokerBase(object):
       self.session.rollback()
       raise BrokerException(e)
     finally:
-      self.session.remove()
+      if commit:
+        self.session.remove()
+
 
   def insert(self, instance, commit=True):
     """
@@ -210,6 +212,7 @@ class BrokerBase(object):
       raise ValidationException('Instance to be inserted is invalid')
     try:
       self.session.add(instance)
+      self.doCommit(commit)
     except sqlalchemy.exc.IntegrityError as e:
       self.getLogger().critical(e)
       raise IntegrityException(e)
@@ -225,7 +228,7 @@ class BrokerBase(object):
       self.session.rollback()
       raise BrokerException(e)
 
-    self.doCommit(commit)
+
 
   def update(self, instance, commit=True):
     """
