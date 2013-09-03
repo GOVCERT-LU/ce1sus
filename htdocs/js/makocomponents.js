@@ -8,8 +8,6 @@ function formSubmit(formElement,event, modalID, uri, doRefresh,refreshContainer,
 }
 
 function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh,refreshContainer,refreshUrl) {
-	
-	
 	// setup some local variables
     form = $(formElement);
     // let's select and cache all the fields
@@ -31,7 +29,8 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     request = $.ajax({
         url: uri,
         type: "post",
-        data: serializedData
+        data: serializedData,
+        timeout: 3000
     });
 
     // callback handler that will be called on success
@@ -80,39 +79,24 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     
 }
 
-
-function setCBChange(element, contentid) {
-	
-	element.change(function() {
-    	text = this.options[this.selectedIndex].text;
-    	div = $('#'+id+' #attributeFormDefinition #editBox');
-        if (text == 'File') {
-        	div = $('#'+id+' #attributeFormDefinition #editBox');
-        	div.html('<div class="row-fluid"><div class="span3"><div style="'
-        			+'padding: 5px; text-align:right"><label> Value:</label>'
-        			+'</div></div><div class="span9"><input id="valueID" name='
-        			+'"value" type="file" /></div></div>');
-        } else {
-        	div.html('<div class="row-fluid"><div class="span3"><div style="'
-        			+'padding: 5px; text-align:right"><label> Value:</label>'
-        			+'</div></div><div class="span9"><input id="valueID" name='
-        			+'"value" type="text" value="" /></div></div>');
-        }
-    });
-}
-
 function loadContent(contentid, url) {
 	if ((contentid) && (url)) {
 	$("#"+contentid).html('<img src="/img/ajax-loader.gif" alt="loading"/> ');
 	  //load Content
-	$("#"+contentid).load(url, "", 
-	          function (responseText, textStatus, XMLHttpRequest) {
-	      if(textStatus == 'error') {
-	            $("#"+contentid).html('<div class="alert alert-error">'
-	            		+responseText
-	            		+'</div>'+responseText);
-	      }
-	  });
+	$.ajax({
+	    url: url,
+	    error: function(){
+	    	$("#"+contentid).html('<div class="alert alert-error">An error occured during the AJAX call.</div>');
+	    },
+	    success: function(response){
+	    	if(response.match(/^(<HTML>)|(<html>)/)) {
+	    		$("#main").html(response);
+	    	} else {
+	    		$("#"+contentid).html(response);
+	    	}
+	    },
+	    timeout: 3000 // sets timeout to 3 seconds
+    });
 	}
 }
 
@@ -140,12 +124,13 @@ function loadNewTab(pk, id, url) {
     		    '</a></li>'));
 	}
     //load Content
-    
     loadContent(id, url);
 }
 
-function loadTab(pk, id, url, tabid) {
-	getPaging(url,tabid);
+function loadTabFromPaginator(pk, id, url, tabid) {
+	//Not done yet
+	//TODO: jojo do ass nach fill
+	loadTab(url,tabid);
 }
 
 function closeTab(tabulatorID,tabToCloseID) {
@@ -159,43 +144,48 @@ function closeTab(tabulatorID,tabToCloseID) {
 	
 	//goback to first tab
 	$('#'+tabulatorID).find("a").each(function() {
-            script = $(this).attr("onclick");
-            
-            //extract url from function
-            url = script.match(/getPaging\('(.*)',this\.id\)/);
-            getPaging(url[1],this.id);
+		    //loadfirst tab
+			loadTab(url, this.id);
             return false;
         });
 }
 
-function getPaging(url,id) {
+function activateLi(id){
 	  //deactivateActiveOne
-	  parentName = $('#'+id+'LI').parent().attr('id');
-	  $('#'+parentName).find("li").each(function() {
-	    $(this).attr('class', '');
-	  });
-	  
-	  //activate tab
-	  $('#'+id+'LI').attr('class', 'active');
-	  
-	  
-	  loadContent(parentName+'TabContent',url);
-	  //load Content
-	}
-
-function getContent(url,id,contentID) {
-	  //deactivateActiveOne
-	  
 	  $('#'+id+'LI').parent().find("li").each(function() {
 	    $(this).attr('class', '');
 	  });
-	  
 	  //activate tab
-	  $('#'+id+'LI').attr('class', 'active');
-	  //load Content
-	  loadContent(contentID,url);
-	  
-	}
+	  $('#'+id+'LI').attr('class', 'active');	
+}
+
+function loadTab(url, id) {
+	activateLi(id);
+	loadContent(parentName+'TabContent',url);
+}
+
+function findAndLoadActiveLi(id,contentID){
+	$('#'+id).find("li").each(function() {
+        var className = $(this).attr('class');
+        if (className == 'active') {
+            $(this).find("a").each(function() {
+            	url = $(this).attr('src');
+            	loadContent(contentID,url);
+            });
+        }
+    })
+}
+
+function loadToolbarLi(id,contentID, reload){
+	activateLi(id);
+	url = $('#'+id).attr('src');
+	loadContent(contentID,url);
+}
+
+function loadTabLi(id, reload){
+	parentName = $('#'+id+'LI').parent().attr('id');
+	loadToolbarLi(id,parentName+'TabContent');
+}
 
 function showPaginatorModal(title, contentUrl, postUrl, refresh, 
 							refreshContentID, refreshContentUrl ) {
@@ -265,4 +255,40 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		$('#paginatorModalFooter').html('<button class="btn" data-dismiss="'
 				+'modal">Close</button>');
 	}
+}
+
+function genericDialogCall(url, refreshContainer, refreshUrl, loadContent, closeTab, tabID, tabToClose){
+	$.ajax({
+	    url: url,
+	    error: function(){
+	    	alert('An error occured during the AJAX call.');
+	    },
+	    success: function(response){
+	    	if(response.match(/^(<HTML>)|(<html>)/)) {
+	    		$("#main").html(response);
+	    	} else {
+	    		if (response.match(/^--OK--/gi)) {
+	    			//do refresh
+	    			if (loadContent) {
+	    				loadContent(refreshContainer,refreshUrl);
+	    			} else {
+	    				if (closeTab) {
+	    					closeTab(tabID, tabToClose);
+	    				}
+	    			}
+	    		} else {
+	    			alert('An error occured:\n'+response);
+	    		}
+	    	}
+	    },
+	    timeout: 3000 // sets timeout to 3 seconds
+    });
+}
+
+function dialogCall(url, refreshContainer, refreshUrl){
+	genericDialogCall(url, refreshContainer, refreshUrl, true, false, '','');
+}
+
+function dialogCloseTabCall(url, tabID, tabToClose){
+	genericDialogCall(url, '', '', false, true, tabID, tabToClose);
 }

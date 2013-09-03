@@ -11,16 +11,16 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged
-from framework.db.broker import OperationException, BrokerException, \
+from c17Works.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
-from framework.helpers.converters import ObjectConverter
+from c17Works.helpers.converters import ObjectConverter
 import types as types
-import framework.helpers.string as string
+import c17Works.helpers.string as string
 
 class AttributeController(BaseController):
   """Controller handling all the requests for attributes"""
@@ -139,18 +139,22 @@ class AttributeController(BaseController):
     errorMsg = None
     attribute = AttributeDefinition()
     if not action == 'insert':
-      attribute.identifier = identifier
+      attribute = self.attributeBroker.getByID(identifier)
+      if attribute.deletable == 0:
+        raise BrokerException('Attribute cannot be edited or deleted')
     if not action == 'remove':
       attribute.name = name
       attribute.description = description
       ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
       ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+
       if string.isNotNull(regex):
         regex = '^.*$'
       attribute.regex = regex
 
       try:
         if action == 'insert':
+          attribute.deletable = 1
           self.attributeBroker.insert(attribute)
         if action == 'update':
           self.attributeBroker.update(attribute)
@@ -163,7 +167,7 @@ class AttributeController(BaseController):
     else:
       try:
         self.attributeBroker.removeByID(attribute.identifier)
-        attribute = None
+        action = None
       except OperationException:
         errorMsg = ('Cannot delete this attribute.' +
                     ' The attribute is still referenced.')

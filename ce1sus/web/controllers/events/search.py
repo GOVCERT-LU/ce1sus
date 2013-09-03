@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require
 from ce1sus.web.helpers.protection import privileged

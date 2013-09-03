@@ -6,11 +6,11 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import cherrypy
-from framework.db.session import SessionManager
+from c17Works.db.session import SessionManager
 from ce1sus.brokers.permissionbroker import UserBroker
-from framework.helpers.config import Configuration
-from framework.db.broker import NothingFoundException, BrokerException
-from framework.helpers.ldaphandling import LDAPHandler
+from c17Works.helpers.config import Configuration
+from c17Works.db.broker import NothingFoundException, BrokerException
+from c17Works.helpers.ldaphandling import LDAPHandler
 import re
 
 SESSION_KEY = '_cp_username'

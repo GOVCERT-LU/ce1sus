@@ -11,9 +11,9 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
-from framework.web.helpers.pagination import Paginator, PaginatorOptions
+from c17Works.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk

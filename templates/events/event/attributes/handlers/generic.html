@@ -1,8 +1,0 @@
-<%namespace name="labeledInput" file="/components/labeledInput.html"/>
-
-
-%if attribute is None:
-    <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
-%else:
-  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
-%endif

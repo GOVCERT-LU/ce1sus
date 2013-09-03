@@ -11,17 +11,18 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
-from framework.web.helpers.pagination import Paginator, PaginatorOptions
+from c17Works.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, Object
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
-from framework.db.broker import ValidationException, \
+from c17Works.db.broker import ValidationException, \
 BrokerException
 from ce1sus.web.helpers.protection import privileged
+
 class ObjectsController(BaseController):
   """event controller handling all actions in the event section"""
 

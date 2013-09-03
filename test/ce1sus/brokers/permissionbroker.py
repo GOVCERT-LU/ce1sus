@@ -5,9 +5,9 @@ Created on Jul 4, 2013
 '''
 import unittest
 import os
-from framework.db.session import SessionManager
+from c17Works.db.session import SessionManager
 from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
-from framework.helpers.objects import compareObjects
+from c17Works.helpers.objects import compareObjects
 from datetime import datetime
 
 class TestPermissionBrokers(unittest.TestCase):

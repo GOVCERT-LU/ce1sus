@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="layout" file="/c17Works/layout/base.html"/>
+
+<%call expr="layout.base()">
+    <script type="text/javascript" src="/js/ce1sus.js" charset="UTF-8"></script>
+	<div class="container-fluid">
+		<div class="row-fluid" style="margin: 0 auto;">
+			<div class="span12">
+				<%include file="/ce1sus/layout/header.html"/>
+				<%include file="/ce1sus/layout/toolbar.html"/>
+			</div>
+			<div class="row-fluid">
+				<div class="span12">
+				    <div id="mainContent">${next.body()}</div>
+				</div>
+			</div>
+			<div class="span10">
+			<%include file="/ce1sus/layout/footer.html"/>
+			</div>
+		</div>
+	</div>
+</%call>

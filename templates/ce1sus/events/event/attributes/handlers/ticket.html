@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeledInput" file="/c17Works/components/labeledInput.html"/>
+<%namespace name="modals" file="/c17Works/components/modals.html"/>
+
+%if enabled:
+%if attribute is None:
+    <div id="RTTable">
+   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
+   <%call expr="labeledInput.genericLabeler('')">
+   <div class="btn-group">
+    <a href="#" role="button" class="btn" onclick="loadContent('RTTable','/events/event/attribute/getTickets')">Reference Ticket</a>
+   </div>
+   </%call>
+   </div>
+  
+%else:
+  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
+%endif
+%else:
+  <%call expr="labeledInput.genericLabeler('Value')">
+    <a href="${attribute.value.url}"  target="_blank">${attribute.value.identifier}</a>
+  </%call>
+%endif

@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+
+<h2>Add an Event</h2>
+
+<%call expr="baseForms.genericForm(id='editGroupsForm', url='/events/event/modifyEvent',refreshUrl='/events/recent',refreshContainer='eventsTabTabContent')">
+    <input type="hidden" name="action" value="insert">
+    
+	${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}	
+	<div class="row-fluid">
+	    <div class="span3" style="text-align:right">
+			<div class="btn-group">
+				<button class="btn" type="submit">Create</button>
+				<a href="/events/addEvent" role="button" class="btn"
+					data-toggle="modal">Cancel</a>
+			</div>
+		</div>
+	</div>
+</%call>

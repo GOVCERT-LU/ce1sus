@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*- 
+
+<%namespace name="messagesAndText" file="/c17Works/components/messagesAndText.html"/> 
+<%namespace name="modals" file="/c17Works/components/modals.html"/>
+<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+
+</div>
+
+<!-- group details -->
+<h3>Group details:</h3>
+<%call expr="forms.groupForm(groupDetails, False)"/>
+<div class="row-fluid">
+	<div class="span3" style="text-align: right">
+		% if not groupDetails is None:
+		<div class="btn-group">
+			<a href="#editGroupModal" role="button" class="btn"
+				data-toggle="modal">Edit</a>
+			<button class="btn btn-danger"
+                onclick="if (confirm('Are you sure you want to delete?')) {
+                    dialogCall('/admin/groups/modifyGroup?identifier=${groupDetails.identifier}&action=remove',
+                               'groupLeft',
+                               '/admin/groups/leftContent')}">
+            Delete
+            </button>
+		</div>
+		%endif
+	</div>
+</div>
+<br/>
+<h4>Groupmanagment of this user:</h4>
+% if not groupDetails is None:
+<%call expr="baseForms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupUser',
+                               refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
+                               refreshContainer='groupRight')">
+<input type="hidden" name="groupID" value="${groupDetails.identifier}">
+<table border="0" cellpadding="5">
+  <tr>
+     <td>Users not in this groups:<BR /> 
+	     <select name="remainingUsers"
+	                  size="10" multiple="multiple"> 
+	     %if not remainingUsers is None:
+	       % for user in remainingUsers:
+	           <option value="${user.identifier}">${user.username}</option> 
+	       % endfor
+	     %endif
+	     </select>
+     </td>
+     <td>
+       <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+       <BR />
+       <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+
+     </td>
+     <td>
+       Users in this group:
+       <BR /> 
+       <select name="groupUsers" size="10" multiple> 
+       %if not groupUsers is None:
+         % for user in groupUsers:
+           <option value="${user.identifier}">${user.username}</option> 
+         % endfor
+       %endif
+       </select>
+     </td>
+  </tr>
+</table>
+</%call>
+%endif
+%if not groupDetails is None:
+	<%call expr="baseForms.genericModalForm(modalID='editGroupModal',
+	                                    url='/admin/groups/modifyGroup',
+	                                    refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
+	                                    refreshContainer='groupRight')">
+	<input type="hidden" name="action" value="update">
+	<%call expr="modals.saveButtonModal(id='editGroupModal',
+	                              title='Edit Group',
+	                              contentUrl='/admin/groups/editGroup/{0}'.format(groupDetails.identifier))"/>
+	</%call>
+%endif

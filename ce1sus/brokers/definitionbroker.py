@@ -11,13 +11,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.db.broker import BrokerBase, ValidationException, \
- NothingFoundException, BrokerException
+from c17Works.db.broker import BrokerBase, ValidationException, \
+ NothingFoundException, BrokerException, OperationException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from framework.db.session import BASE
-from framework.helpers.validator import ObjectValidator
+from c17Works.db.session import BASE
+from c17Works.helpers.validator import ObjectValidator
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -49,7 +49,7 @@ class AttributeDefinition(BASE):
   regex = Column('regex', String)
   classIndex = Column(Integer)
   handlerIndex = Column(Integer)
-
+  deletable = Column('deletable', Integer)
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
                          back_populates='attributes', cascade='all')
@@ -379,6 +379,29 @@ class AttributeDefinitionBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+  def removeByID(self, identifier, commit=True):
+    """
+    Removes the <<getBrokerClass()>> with the given identifier
+
+    :param identifier:  the id of the requested user object
+    :type identifier: integer
+    """
+    try:
+      self.session.query(AttributeDefinition).filter(AttributeDefinition.
+                                            identifier == identifier,
+                                            AttributeDefinition.deletable == 1
+                      ).delete(synchronize_session='fetch')
+
+    except sqlalchemy.exc.OperationalError as e:
+      self.session.rollback()
+      raise OperationException(e)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
+    self.doCommit(commit)
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""

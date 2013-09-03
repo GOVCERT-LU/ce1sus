@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="modals" file="/c17Works/components/modals.html"/>
+<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+
+<div class="btn-Object">
+	<a href="#addAttributeModal" role="button" class="btn" data-toggle="modal">Add
+		new attribute</a>
+</div>
+<br />
+<% 
+foundAttribute=False 
+fistAttributeID=0
+%>
+<!--list of attributes -->
+<script type="text/javascript">
+function loadAttribute(attributeID){
+	loadContent('attributeRight','/admin/attributes/rightContent?attributeid='+attributeID);
+}
+</script>
+
+<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+	%if not attributes is None: 
+		% for attribute in attributes:
+		  <%
+		  if not foundAttribute:
+		      fistAttributeID = attribute.identifier
+		      foundAttribute=True
+		  %>
+		   <li><a tabindex="-1" href="#" 
+		   onclick="loadAttribute(${attribute.identifier})">${attribute.name}
+		   </a></li>
+		% endfor 
+	%endif
+	
+</ul>
+
+<!-- AddAttributeForm -->
+<%call expr="baseForms.genericModalForm(modalID='addAttributeModal',
+                                    url='/admin/attributes/modifyAttribute',
+                                    refreshUrl='/admin/attributes', 
+                                    refreshContainer='adminTabsTabContent')">
+<input type="hidden" name="action" value="insert">
+<%call expr="modals.saveButtonModal(id='addAttributeModal',title='Add attribute',
+                               contentUrl='/admin/attributes/addAttribute')"/>
+</%call>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	loadAttribute(${fistAttributeID})
+});
+</script>

@@ -11,15 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.db.broker import BrokerBase, ValidationException, \
+from c17Works.db.broker import BrokerBase, ValidationException, \
 NothingFoundException, TooManyResultsFoundException, OperationException, \
 BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from framework.db.session import BASE
+from c17Works.db.session import BASE
 from sqlalchemy.types import DateTime
-from framework.helpers.validator import ObjectValidator
+from c17Works.helpers.validator import ObjectValidator
 
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""

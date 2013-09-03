@@ -1,0 +1,38 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="pagination" file="/c17Works/components/pagination.html"/>
+<%
+
+for ticket in rtPaginator.list:
+  selector =  '<label class="checkbox"><input id="ID{0}" type="checkbox" name="tickets" value="{0}" onclick="setValue(this)"></label>'.format(ticket.identifier)
+  setattr(ticket,'selector',selector)
+  idLink = '<a href="{0}" target="_blank">{1}</a> '.format(rtUrl, ticket.identifier)
+  setattr(ticket,'idLink',idLink)
+  
+rtLabels = [{'idLink':'#'},
+              {'title':'Title'},
+              {'selector':'Options'}]
+rtPaginator.lables = rtLabels
+%>
+<script type="text/javascript">
+function setValue(sender) {
+  text = $('#valueID').val();
+  id = $(sender).val();
+  //check if checked
+  checked = $(sender).is(':checked');
+  if (checked){
+	  //add to text
+	  if ($.trim(text)) {
+		 text += ','
+	  }
+	  text += id;
+  } else {
+	  //remove from text
+	  text = text.replace(','+id,'');
+	  text = text.replace(id+',','');
+	  text = text.replace(id,'');
+  }
+  $('#valueID').val(text);
+}
+</script>
+<%call expr="pagination.pagination('ticketTable',rtPaginator,hasSearch=True)"/> 

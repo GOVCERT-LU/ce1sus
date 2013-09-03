@@ -11,16 +11,16 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.db.broker import BrokerBase, ValidationException, \
+from c17Works.db.broker import BrokerBase, ValidationException, \
 NothingFoundException, TooManyResultsFoundException, \
 BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, not_
 from sqlalchemy.orm import relationship
-from framework.db.session import BASE
+from c17Works.db.session import BASE
 from sqlalchemy.types import DateTime
 from ce1sus.brokers.permissionbroker import User, Group
-from framework.helpers.validator import ObjectValidator
+from c17Works.helpers.validator import ObjectValidator
 from ce1sus.brokers.definitionbroker import AttributeDefinition, \
     ObjectDefinition, AttributeDefinitionBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk

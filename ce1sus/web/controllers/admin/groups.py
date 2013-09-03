@@ -11,13 +11,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, Group
 from ce1sus.web.helpers.protection import require, privileged
-from framework.db.broker import OperationException, BrokerException, \
+from c17Works.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
-from framework.helpers.converters import ObjectConverter
+from c17Works.helpers.converters import ObjectConverter
 import types as types
 
 

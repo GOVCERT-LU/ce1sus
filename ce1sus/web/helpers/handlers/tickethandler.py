@@ -14,8 +14,8 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 import types
 from ce1sus.api.ticketsystem import TicketSystemBase
-from framework.web.helpers.config import WebConfig
-from framework.web.helpers.pagination import Link
+from c17Works.web.helpers.config import WebConfig
+from c17Works.web.helpers.pagination import Link
 from ce1sus.web.helpers.handlers.base import HandlerException
 
 class TicketHandler(GenericHandler):

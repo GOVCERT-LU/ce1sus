@@ -1,0 +1,39 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="modals" file="/c17Works/components/modals.html"/>
+<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+
+<h4>Groupmanagment:</h4>
+<%call expr="baseForms.genericForm(id='addEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+            % if not userDetails is None:
+            <input type="hidden" name="eventID"
+                value="${eventID}">
+            %endif
+            <table border="0" cellpadding="5">
+                <tr>
+                    <td>Event is not part of these groups:<BR /> <select name="remainingGroups"
+                        size="10" multiple="multiple" tabindex="1"> 
+                        %if not remainingGroups is None:
+                            % for group in remainingGroups:
+                                <option value="${group.identifier}">${group.name}</option> 
+                            % endfor
+                        %endif
+                    </select>
+                    </td>
+                    <td>
+                        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+                        <BR />
+                        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+                    </td>
+                    <td>Event is part of these groups:<BR /> <select name="eventGroups" size="10"
+                        multiple> 
+                        %if not eventGroups is None:
+                            % for group in eventGroups:
+                                <option value="${group.identifier}">${group.name}</option> 
+                            % endfor
+                        %endif
+                    </select>
+                    </td>
+                </tr>
+            </table>
+</%call>

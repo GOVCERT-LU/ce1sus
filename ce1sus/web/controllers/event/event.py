@@ -13,9 +13,9 @@ __license__ = 'GPL v3+'"""module holding all controllers needed for
                         the event handling"""
 
 import copy
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
-from framework.web.helpers.pagination import Paginator, PaginatorOptions
+from c17Works.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
                   AttributeBroker, Event, CommentBroker
@@ -24,8 +24,8 @@ from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
 from ce1sus.api.ticketsystem import TicketSystemBase
-from framework.db.broker import ValidationException, BrokerException
-from framework.helpers.converters import ObjectConverter
+from c17Works.db.broker import ValidationException, BrokerException
+from c17Works.helpers.converters import ObjectConverter
 
 class EventController(BaseController):
   """event controller handling all actions in the event section"""

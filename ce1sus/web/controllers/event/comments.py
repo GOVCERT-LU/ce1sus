@@ -12,13 +12,13 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import copy
-from framework.web.controllers.base import BaseController
+from c17Works.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require
 from ce1sus.brokers.eventbroker import EventBroker, Comment, CommentBroker
 from ce1sus.web.helpers.protection import privileged
 from datetime import datetime
-from framework.db.broker import NothingFoundException, ValidationException, \
+from c17Works.db.broker import NothingFoundException, ValidationException, \
 BrokerException
 
 class CommentsController(BaseController):

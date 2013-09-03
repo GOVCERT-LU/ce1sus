@@ -4,7 +4,7 @@ Created on Jul 4, 2013
 @author: jhemp
 '''
 import unittest
-from framework.db.session import SessionManager
+from c17Works.db.session import SessionManager
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker, AttributeDefinition, ObjectDefinition
 
 

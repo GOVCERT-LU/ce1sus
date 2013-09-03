@@ -4,14 +4,14 @@ Created on Jul 5, 2013
 @author: jhemp
 '''
 import unittest
-from framework.db.session import SessionManager
+from c17Works.db.session import SessionManager
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
   AttributeBroker, Event, Object, Attribute
 from datetime import datetime
 from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
   ObjectDefinitionBroker, ObjectDefinition, AttributeDefinition
-from framework.helpers.objects import printObject
+from c17Works.helpers.objects import printObject
 
 class TestEventBrokers(unittest.TestCase):
 

@@ -13,9 +13,9 @@ __license__ = 'GPL v3+'
 
 
 from abc import abstractmethod
-from framework.web.helpers.templates import MakoHandler
-from framework.helpers.debug import Log
-from framework.db.session import SessionManager
+from c17Works.web.helpers.templates import MakoHandler
+from c17Works.helpers.debug import Log
+from c17Works.db.session import SessionManager
 
 class HandlerException(Exception):
   """
