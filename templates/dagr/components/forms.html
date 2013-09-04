@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+
+<%def name="genericForm(id, url, refreshUrl=None,refreshContainer=None)">
+<div id="${id}Errors"></div>
+<form id="${id}Form">
+    ${caller.body()}
+</form>
+<script type="text/javascript">
+$( document ).ready(function() {
+	$('#${id}Form').submit(function(event){
+		<%
+		if not (refreshUrl is None and refreshContainer is None):
+			refresh = 'true'
+		else:
+			refresh = 'false'	
+		%>
+		formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
+	});
+});
+</script>
+</%def>
+
+<%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
+<form id="${modalID}Form">
+    ${caller.body()}
+</form>
+<script type="text/javascript">
+$( document ).ready(function() {
+	$("#${modalID}Form").submit(function(event){
+	    <%
+	    if not (refreshUrl is None and refreshContainer is None):
+	        refresh = 'true'
+	    else:
+	        refresh = 'false'   
+	    %>
+		formSubmit(this,event,'${modalID}' , '${url}','${refresh}','${refreshContainer}','${refreshUrl}')
+	});
+});
+</script>
+</%def>

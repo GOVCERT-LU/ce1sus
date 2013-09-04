@@ -1,0 +1,74 @@
+# -*- coding: utf-8 -*-
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+    <title>${title}</title>
+    <style type="text/css">
+        body {
+                color:#A5A5FF;
+                font-weight: bold;
+                margin: 0;
+                font-size: 200%;
+                font-family: Impact, Charcoal, sans-serif;
+                background-color:#A5A5FF;
+                padding-top:5%;
+                padding-bottom:5%;
+                padding-right:5%;
+                padding-left:5%;
+            }
+        #innderBox {
+                     overflow:hidden;
+                     position: absolute;
+                     top:10%;
+                     bottom:15%;
+                     right:5%;
+                     left:5%;
+                     overflow:hidden; 
+                     margin: 0;
+                     height: 80%;
+                     background-color:blue;
+        }
+        #innerBoxTop {
+                     text-align: center;
+        }
+        #stackTrace {
+                    font-size: 50%;
+        }
+        
+        #blinktag {
+                    background-color:#A5A5FF;
+                    width:25px;
+        }
+    </style>
+    <body>
+       <div id="innderBox"> 
+            <div id ="innerBoxTop">
+                <p>
+                    *** COMMODORE 64 BASIC V2 ***
+                </p>
+                <p>
+                    64K RAM SYSTEM &nbsp;&nbsp;38911 BASIC BYTES FREE
+                </p>
+            </div>
+            <div>
+                READY.<BR/>
+                ${error}<BR/>
+                READY.<BR/>    
+                <div id="blinktag">
+                    &nbsp;
+                </div>
+                <script>
+                    var el = document.getElementById('blinktag');
+                    setInterval(function(){
+                        if ( el.style.backgroundColor ==  'rgb(165, 165, 255)' ) {
+                            el.style.backgroundColor = 'blue';
+                    } else {
+                            el.style.backgroundColor = '#A5A5FF';
+                    }
+                    }, 500);
+                </script>
+            </div>
+       </div>
+        
+    </body>
+</HTML>

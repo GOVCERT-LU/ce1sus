@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+
+
+<%def name="tabulator(id)">
+
+<ul class="nav nav-tabs" id="${id}">
+    ${caller.body()}
+</ul>
+<div id="${id}TabContent">
+<img src="/img/ajax-loader.gif" alt="loading"/> 
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () { 
+    findAndLoadActiveLi('${id}','${id}TabContent');
+});
+</script>
+</%def>
+
+
+<%def name="tab(id,url,name,active=False, reload=True)">
+<%
+if active:
+  activeString=' class="active"'
+else:
+  activeString =''
+  
+if reload:
+  reloadStr = 'true'
+else:
+  reloadStr = 'false'
+%>
+<li ${activeString} id="${id}LI"><a href="#" src="${url}" onclick="loadTabLi(this.id, ${reloadStr})" id="${id}">${name}</a></li>
+</%def>
