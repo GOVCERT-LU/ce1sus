@@ -20,6 +20,7 @@ from sqlalchemy.orm import relationship
 from c17Works.db.session import BASE
 from sqlalchemy.types import DateTime
 from c17Works.helpers.validator import ObjectValidator
+from importlib import import_module
 
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
@@ -154,7 +155,8 @@ class ValueBroker(BrokerBase):
     :type attribute: Attribute
     """
     className = attribute.definition.className
-    self.__clazz = globals()[className]
+    module = import_module('.valuebroker', 'ce1sus.brokers')
+    self.__clazz = getattr(module, className)
 
   def __convertAttriuteValueToValue(self, attribute):
     """
@@ -266,7 +268,7 @@ class ValueBroker(BrokerBase):
   def lookforValue(self, clazz, value):
     self.__clazz = clazz
     try:
-      self.session.query(self.getBrokerClass()).filter(
+      return self.session.query(self.getBrokerClass()).filter(
                       self.getBrokerClass().value == value
                       ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:

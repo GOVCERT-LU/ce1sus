@@ -26,7 +26,7 @@ from ce1sus.brokers.definitionbroker import AttributeDefinition, \
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.web.helpers.handlers.base import HandlerException, HandlerBase
+from ce1sus.web.helpers.handlers.base import HandlerBase
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -436,7 +436,7 @@ class AttributeBroker(BrokerBase):
       # value is an object i.e. StringValue and the value of the attribute is
       # the value of the value object
       # get handler
-      handler = AttributeBroker.getHandler(attribute.definition)
+      handler = HandlerBase.getHandler(attribute.definition)
       # convert the attribute with the helper to a single line value
       attribute.value = handler.convertToAttributeValue(value)
       attribute.value_id = value.identifier

@@ -39,7 +39,7 @@ class FileHandler(GenericHandler):
 
   @staticmethod
   def getAttributesNameList():
-    return ('filename', 'md5', 'sha1', 'sha256', 'sha512', 'size', 'mimeType', 'location')
+    return ('filename', 'md5', 'sha1', 'sha256', 'sha384', 'sha512', 'size', 'mimeType', 'location')
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
@@ -71,7 +71,7 @@ class FileHandler(GenericHandler):
                                                obj,
                                                'sha512',
                                                user))
-      attributes.append(self.__createAttribute('{0} Bytes'.
+      attributes.append(self.__createAttribute('{0}'.
                                                format(getsize(filepath)),
                                                obj,
                                                'size',

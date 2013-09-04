@@ -115,9 +115,9 @@ function loadNewTab(pk, id, url) {
     	//createTab
     	$("#"+tabID).append($('<li class="active" id="'
     			+tabID+pk
-    			+'LI"><a href="#" onclick="getPaging(\''
-    			+url+'\',this.id)" id="'+tabID+pk+'">' +
-    			'Event '+pk+
+    			+'LI">'
+    			+'<a href="#" src="'+url+'" onclick="loadTabLi(this.id, true)" id="'+tabID+pk+'">' 
+    			+ 'Event '+pk+
     		    '&nbsp;<button class="close" title="Remove this Tab" '
     			+'type="button" onclick="closeTab(\''+tabID+'\',\''
     			+tabID+pk+'LI\');">×</button>' +
@@ -145,6 +145,7 @@ function closeTab(tabulatorID,tabToCloseID) {
 	//goback to first tab
 	$('#'+tabulatorID).find("a").each(function() {
 		    //loadfirst tab
+			url = $(this).attr('src');
 			loadTab(url, this.id);
             return false;
         });
@@ -161,6 +162,7 @@ function activateLi(id){
 
 function loadTab(url, id) {
 	activateLi(id);
+	parentName = $('#'+id+'LI').parent().attr('id');
 	loadContent(parentName+'TabContent',url);
 }
 

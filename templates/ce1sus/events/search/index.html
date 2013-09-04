@@ -1,0 +1,15 @@
+<%namespace name="input" file="/c17Works/components/input.html"/>
+<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+
+
+<%call expr="baseForms.genericForm(id='searchForm', url='/events/search/searchResults', refreshContainer='serachResults')">
+<div class="row-fluid">
+    <div class="span12">
+		Search for:
+		<%call expr="input.comboBox(name='definitionID',values=cbDefinitions,enabled=True,hasEmpty=False)"/>
+		<%call expr="input.editBox(name='needle', value='', enabled=True, validationMsg=None)"/>
+		<input class="btn" type="submit" value="Search"/>
+    </div>
+</div>
+</%call>
+<div id="serachResults"></div>

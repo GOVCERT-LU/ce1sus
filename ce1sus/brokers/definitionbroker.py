@@ -288,6 +288,15 @@ class AttributeDefinitionBroker(BrokerBase):
       raise BrokerException(e)
     return objects
 
+  def getCBValuesForAll(self):
+    definitions = self.getAll()
+    result = dict()
+    for definition in definitions:
+      if definition.name != 'File':
+        result[definition.name] = (definition.identifier,
+                                   definition.description)
+    return result
+
   def getCBValues(self, objIdentifier):
     """
     returns the values for a combo box where the key is the name of the
