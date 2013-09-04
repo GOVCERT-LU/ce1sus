@@ -181,39 +181,28 @@
       if value is None:
         dateTime = ''
       else:
-        dateTime = ''
-    nameTag = ''
-    if enabled:
-      nameTag='name="{0}" id="{0}ID"'.format(name)
-
+        dateTime = unicode(value)
 %>
-%if enabled or dateTime is None:
-<div class="input-append date form_datetime" data-date="21/02/2013T15:25:00Z">
-    <input  size="16" type="text" value="${dateTime}" readonly style="width:152px" ${nameTag}>
-    %if enabled:
-    <span class="add-on "><i class="icon-remove" ></i></span>
-    <span class="add-on"><i class="icon-th"></i></span>
-    %endif
-</div>
-%else:
-<div style="padding: 5px">
-    ${dateTime}
-</div>
-%endif
-
-
 %if enabled:
+  <div id="${name}ID" class="input-append date">
+    <input data-format="yyyy-MM-dd hh:mm:ss" type="text" value="${value}"></input>
+    <span class="add-on">
+      <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+      </i>
+    </span>
+  </div>
 <script type="text/javascript">
-    $(".form_datetime").datetimepicker({
-         format: "dd/mm/yyyy - hh:ii",
-         autoclose: true,
-         todayBtn: true,
-         minuteStep: 10,
-         % if dateTime:
-              startDate: "${dateTime}",
-        %endif
-        });
-</script> 
+  $(function() {
+    $('#${name}ID').datetimepicker({
+      language: 'pt-BR',
+      pick12HourFormat: true
+    });
+  });
+</script>
+%else:
+<div style="padding: 5px;">
+  ${dateTime}
+</div>
 %endif
 % if (not (validationMsg is None)) and enabled:
   <%call expr="messagesAndText.error(validationMsg)"/>

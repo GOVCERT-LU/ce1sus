@@ -40,7 +40,7 @@ function loadGroup(groupID){
 </ul>
 
 <!-- AddGroupForm -->
-<%call expr="baseForms.genericModalForm(modalID='addGroupModal',url='/admin/groups/modifyGroup')">
+<%call expr="baseForms.genericModalForm(modalID='addGroupModal',url='/admin/groups/modifyGroup',refreshUrl='/admin/groups', refreshContainer='adminTabsTabContent')">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.saveButtonModal(id='addGroupModal',title='Add group',contentUrl='/admin/groups/addGroup')"/>
 </%call>

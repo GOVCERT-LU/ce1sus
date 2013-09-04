@@ -38,7 +38,7 @@ function loadObject(objectID){
 
 <!-- AddObjectForm -->
 <%call expr="baseForms.genericModalForm(modalID='addObjectModal',
-                                    url='/admin/objects/modifyObject')">
+                                    url='/admin/objects/modifyObject',refreshUrl='/admin/objects', refreshContainer='adminTabsTabContent')">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.saveButtonModal(id='addObjectModal',title='Add object',contentUrl='/admin/objects/addObject')"/>
 </%call>

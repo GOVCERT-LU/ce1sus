@@ -24,6 +24,7 @@ from ce1sus.web.helpers.handlers.base import HandlerException
 import types
 from c17Works.web.helpers.pagination import Paginator
 from ce1sus.api.ticketsystem import TicketSystemBase
+from ce1sus.web.helpers.handlers.base import HandlerBase
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -116,7 +117,7 @@ class AttributesController(BaseController):
     try:
       if action != 'remove':
         definition = self.def_attributesBroker.getByID(definition)
-        handler = AttributeBroker.getHandler(definition)
+        handler = HandlerBase.getHandler(definition)
         # expect generated attributes back
         attributes = handler.populateAttributes(params,
                                                 obj,
@@ -202,7 +203,7 @@ class AttributesController(BaseController):
     """
     # get Definition
     definition = self.def_attributesBroker.getByID(defattribID)
-    handler = AttributeBroker.getHandler(definition)
+    handler = HandlerBase.getHandler(definition)
     attribute = None
     if not attributeID is None:
       attribute = self.attributeBroker.getByID(attributeID)

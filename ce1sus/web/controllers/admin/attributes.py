@@ -22,6 +22,10 @@ from c17Works.helpers.converters import ObjectConverter
 import types as types
 import c17Works.helpers.string as string
 
+class DeletionException(Exception):
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
 class AttributeController(BaseController):
   """Controller handling all the requests for attributes"""
 
@@ -138,40 +142,42 @@ class AttributeController(BaseController):
 
     errorMsg = None
     attribute = AttributeDefinition()
-    if not action == 'insert':
-      attribute = self.attributeBroker.getByID(identifier)
-      if attribute.deletable == 0:
-        raise BrokerException('Attribute cannot be edited or deleted')
-    if not action == 'remove':
-      attribute.name = name
-      attribute.description = description
-      ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
-      ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+    try:
+      if not action == 'insert':
+        attribute = self.attributeBroker.getByID(identifier)
+        if attribute.deletable == 0:
+          raise DeletionException('Attribute cannot be edited or deleted')
+      if not action == 'remove':
+        attribute.name = name
+        attribute.description = description
+        ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
+        ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
 
-      if string.isNotNull(regex):
-        regex = '^.*$'
-      attribute.regex = regex
+        if not string.isNotNull(regex):
+          regex = '^.*$'
+        attribute.regex = regex
+        try:
+          if action == 'insert':
+            attribute.deletable = 1
+            self.attributeBroker.insert(attribute)
+          if action == 'update':
+            self.attributeBroker.update(attribute)
+          action = None
+        except ValidationException:
+          self.getLogger().info('Attribute is invalid')
+      else:
+        try:
+          self.attributeBroker.removeByID(attribute.identifier)
+          action = None
+        except OperationException:
+          errorMsg = ('Cannot delete this attribute.' +
+                      ' The attribute is still referenced.')
 
-      try:
-        if action == 'insert':
-          attribute.deletable = 1
-          self.attributeBroker.insert(attribute)
-        if action == 'update':
-          self.attributeBroker.update(attribute)
-        action = None
-      except ValidationException:
-        self.getLogger().info('Attribute is invalid')
-      except BrokerException as e:
-        self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    else:
-      try:
-        self.attributeBroker.removeByID(attribute.identifier)
-        action = None
-      except OperationException:
-        errorMsg = ('Cannot delete this attribute.' +
-                    ' The attribute is still referenced.')
-
+    except BrokerException as e:
+      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
+      return e
+    except DeletionException as e:
+      return e
 
     if action == None:
       # ok everything went right

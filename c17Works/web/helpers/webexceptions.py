@@ -49,8 +49,9 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return MakoHandler.getInstance().renderTemplate("/c17Works/errors/blueScreen.html",
-                                                    title=title, error=error)
+    return (MakoHandler.getInstance().
+                              renderTemplate("/c17Works/errors/blueScreen.html",
+                                                    title=title, error=error))
 
   @staticmethod
   def commodore(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
@@ -65,8 +66,9 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return MakoHandler.getInstance().renderTemplate("/c17Works/errors/errorC64.html",
-                                                    title=title, error=error)
+    return (MakoHandler.getInstance().
+                                renderTemplate("/c17Works/errors/errorC64.html",
+                                                    title=title, error=error))
 
   @staticmethod
   def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):

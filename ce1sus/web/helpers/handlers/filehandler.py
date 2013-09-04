@@ -37,6 +37,10 @@ class FileHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
 
+  @staticmethod
+  def getAttributesNameList():
+    return ('filename', 'md5', 'sha1', 'sha256', 'sha512', 'size', 'mimeType', 'location')
+
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
     if isfile(filepath):
@@ -58,10 +62,6 @@ class FileHandler(GenericHandler):
       attributes.append(self.__createAttribute(hasher.fileHashSHA256(filepath),
                                                obj,
                                                'sha256',
-                                               user))
-      attributes.append(self.__createAttribute(hasher.fileHashSHA384(filepath),
-                                               obj,
-                                               'sha384',
                                                user))
       attributes.append(self.__createAttribute(hasher.fileHashSHA384(filepath),
                                                obj,

@@ -19,8 +19,8 @@
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
                     dialogCall('/admin/groups/modifyGroup?identifier=${groupDetails.identifier}&action=remove',
-                               'groupLeft',
-                               '/admin/groups/leftContent')}">
+                               'adminTabsTabContent',
+                               '/admin/groups')}">
             Delete
             </button>
 		</div>

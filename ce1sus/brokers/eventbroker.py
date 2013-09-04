@@ -26,7 +26,6 @@ from ce1sus.brokers.definitionbroker import AttributeDefinition, \
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker
-from importlib import import_module
 from ce1sus.web.helpers.handlers.base import HandlerException, HandlerBase
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -422,28 +421,6 @@ class AttributeBroker(BrokerBase):
     BrokerBase.__init__(self, session)
     self.valueBroker = ValueBroker(session)
     self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
-
-  @staticmethod
-  def getHandler(definition):
-    """
-    Returns the handler instance of the given definition
-
-    :param definition: The definition
-    :type definition: AttributeDefinition
-
-    :returns: Instance extending HandlerBase
-    """
-    # GethandlerClass
-    temp = definition.handlerName.rsplit('.', 1)
-    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
-    clazz = getattr(module, temp[1])
-    # instantiate
-    handler = clazz()
-    # check if handler base is implemented
-    if not isinstance(handler, HandlerBase):
-      raise HandlerException(('{0} does not implement '
-                              + 'HandlerBase').format(definition.handlerName))
-    return handler
 
   def getBrokerClass(self):
     """

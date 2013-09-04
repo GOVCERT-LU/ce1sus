@@ -41,13 +41,13 @@ function loadUser(userID){
 </ul>
 
 <!-- AddUserForm -->
-<%call expr="baseForms.genericModalForm(modalID='addUserModal',url='/admin/users/modifyUser')">
+<%call expr="baseForms.genericModalForm(modalID='addUserModal',url='/admin/users/modifyUser',refreshUrl='/admin/users', refreshContainer='adminTabsTabContent')">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.saveButtonModal(id='addUserModal',title='Add User',contentUrl='/admin/users/addUser')"/>
 </%call>
 
 <!-- LdapUserTable -->
-<%call expr="baseForms.genericModalForm(modalID='addLDAPUserModal',url='/admin/users/modifyUser')">
+<%call expr="baseForms.genericModalForm(modalID='addLDAPUserModal',url='/admin/users/modifyUser',refreshUrl='/admin/users', refreshContainer='adminTabsTabContent')">
 <%call expr="modals.genericModal('addLDAPUserModal', 'Add LDAP User', '/admin/users/ldapUsersTable', big=True)">
 <input class="btn btn-primary" type="submit" value="Save changes"/>
 </%call>

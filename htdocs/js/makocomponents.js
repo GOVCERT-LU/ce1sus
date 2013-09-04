@@ -257,7 +257,7 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 	}
 }
 
-function genericDialogCall(url, refreshContainer, refreshUrl, loadContent, closeTab, tabID, tabToClose){
+function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, closeTab, tabID, tabToClose){
 	$.ajax({
 	    url: url,
 	    error: function(){
@@ -269,7 +269,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, loadContent, close
 	    	} else {
 	    		if (response.match(/^--OK--/gi)) {
 	    			//do refresh
-	    			if (loadContent) {
+	    			if (refreshContent) {
 	    				loadContent(refreshContainer,refreshUrl);
 	    			} else {
 	    				if (closeTab) {

@@ -19,8 +19,8 @@
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
                     dialogCall('/admin/users/modifyUser?identifier=${userDetails.identifier}&action=remove',
-                               'userLeft',
-                               '/admin/users/leftContent')}">
+                               'adminTabsTabContent',
+                               '/admin/users')}">
             Delete
             </button>
 		</div>

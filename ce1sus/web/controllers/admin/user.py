@@ -21,6 +21,10 @@ from c17Works.db.broker import OperationException, BrokerException, \
   ValidationException
 import types as types
 
+class DeletionException(Exception):
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
 class UserController(BaseController):
   """Controller handling all the requests for users"""
 
@@ -156,20 +160,19 @@ class UserController(BaseController):
       if action == 'insertLDAP':
         user.identifier = None
         # get LDAP user
-        if not identifier is None:
-          try:
-            lh = LDAPHandler.getInstance()
-            lh.open()
-            ldapUser = lh.getUser(identifier)
-            lh.close()
-            user.username = ldapUser.uid
-            user.password = ldapUser.password
-            user.email = ldapUser.mail
-            user.privileged = 0
-          except LDAPException as e:
-            self.getLogger().error(e)
-        else:
-          action = None
+        try:
+          lh = LDAPHandler.getInstance()
+          lh.open()
+          ldapUser = lh.getUser(identifier)
+          lh.close()
+          user.username = ldapUser.uid
+          user.password = ldapUser.password
+          user.email = ldapUser.mail
+          user.privileged = 0
+        except LDAPException as e:
+          self.getLogger().error(e)
+      else:
+        action = None
       try:
         if action == 'insert' or action == 'insertLDAP':
           self.userBroker.insert(user)
@@ -184,10 +187,14 @@ class UserController(BaseController):
         action = None
     else:
       try:
+        if (user.identifier == '1'):
+          raise DeletionException('First user cannot be removed.')
         self.userBroker.removeByID(user.identifier)
       except OperationException:
         errorMsg = ('Cannot delete user. The user is referenced by elements.'
                     + ' Remove his groups instead.')
+      except DeletionException as e:
+        return e
       action = None
     if action == None:
       # ok everything went right

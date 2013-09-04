@@ -37,6 +37,9 @@ class GenericHandler(HandlerBase):
     attribute.creator = user
     return attribute
 
+  def getAttributesNameList(self):
+    return list()
+
   def render(self, enabled, attribute=None):
     template = (self.
                   getTemplate('/events/event/attributes/handlers/generic.html'))

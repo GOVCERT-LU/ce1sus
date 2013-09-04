@@ -196,8 +196,3 @@ $(document).ready(function(){
   <%call expr="labeledInput.labeledTextBox(label='Comment',name='commentText',message=commentObj.comment,enabled=enabled)"/>
 %endif
 </%def>
-
-<%def name="eventCveForm(eventID)">
-  <input type="hidden" name="eventID" value="${eventID}">
-  <%call expr="labeledInput.labeledEditBox(label='CVE Number',name='cveNumber',value='',enabled=True)"/>
-</%def>

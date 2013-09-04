@@ -16,6 +16,7 @@ from abc import abstractmethod
 from c17Works.web.helpers.templates import MakoHandler
 from c17Works.helpers.debug import Log
 from c17Works.db.session import SessionManager
+from importlib import import_module
 
 class HandlerException(Exception):
   """
@@ -90,6 +91,14 @@ class HandlerBase(object):
                             + 'defined for {0} with parameter {1}').format(
                                                     self.__class__.__name__,
                                                     value))
+  @abstractmethod
+  def getAttributesNameList(self):
+    """
+    Returns a list of attributes required for the handling
+    """
+    return HandlerException('{0}.getAttributesNameList is not defined'.format(
+                                                    self.__class__.__name__))
+
 
   def getTemplate(self, name):
     """Returns the template
@@ -122,3 +131,25 @@ class HandlerBase(object):
     :returns: Logger
     """
     return Log.getLogger(self.__class__.__name__)
+
+  @staticmethod
+  def getHandler(definition):
+    """
+    Returns the handler instance of the given definition
+
+    :param definition: The definition
+    :type definition: AttributeDefinition
+
+    :returns: Instance extending HandlerBase
+    """
+    # GethandlerClass
+    temp = definition.handlerName.rsplit('.', 1)
+    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
+    clazz = getattr(module, temp[1])
+    # instantiate
+    handler = clazz()
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+      raise HandlerException(('{0} does not implement '
+                              + 'HandlerBase').format(definition.handlerName))
+    return handler

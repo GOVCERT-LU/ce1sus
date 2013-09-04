@@ -18,6 +18,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from c17Works.db.session import BASE
 from c17Works.helpers.validator import ObjectValidator
+from ce1sus.web.helpers.handlers.base import HandlerBase
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -327,6 +328,12 @@ class AttributeDefinitionBroker(BrokerBase):
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
       attribute.addObject(obj)
+      if not 'GenericHandler' in attribute.handlerName:
+        handler = HandlerBase.getHandler(attribute)
+        attributes = self.session.query(AttributeDefinition).filter(
+                AttributeDefinition.name.in_(handler.getAttributesNameList()))
+        for attribute in attributes:
+          attribute.addObject(obj)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound as e:
       raise NothingFoundException('Attribute or Object not found')
@@ -474,6 +481,12 @@ class ObjectDefinitionBroker(BrokerBase):
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
       obj.addAttribute(attribute)
+      if not 'GenericHandler' in attribute.handlerName:
+        handler = HandlerBase.getHandler(attribute)
+        attributes = self.session.query(AttributeDefinition).filter(
+                AttributeDefinition.name.in_(handler.getAttributesNameList()))
+        for attribute in attributes:
+          attribute.addObject(obj)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')

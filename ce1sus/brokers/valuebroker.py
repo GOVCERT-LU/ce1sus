@@ -263,3 +263,14 @@ class ValueBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
+  def lookforValue(self, clazz, value):
+    self.__clazz = clazz
+    try:
+      self.session.query(self.getBrokerClass()).filter(
+                      self.getBrokerClass().value == value
+                      ).all()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+

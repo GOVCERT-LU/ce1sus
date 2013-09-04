@@ -35,8 +35,8 @@ function deleteAttribute(attributeid){
 			<button class="btn btn-danger"
 				onclick="if (confirm('Are you sure you want to delete?')) {
 					dialogCall('/admin/attributes/modifyAttribute?identifier=${attributeDetails.identifier}&action=remove',
-				               'attributeLeft',
-				               '/admin/attributes/leftContent')}">
+				               'adminTabsTabContent',
+				               '/admin/attributes')}">
 			Delete
 			</button>
 		</div>
