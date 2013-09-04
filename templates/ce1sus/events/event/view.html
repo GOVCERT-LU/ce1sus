@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="input" file="/c17Works/components/input.html"/>
-<%namespace name="modals" file="/c17Works/components/modals.html"/>
-<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+<%namespace name="input" file="/dagr/components/input.html"/>
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
-<%namespace name="c17Works" module="c17Works.web.helpers.string"/>
-<%namespace name="pagination" file="/c17Works/components/pagination.html"/>
-<%namespace name="tabulator" file="/c17Works/components/tabs.html"/>
+<%namespace name="dagr" module="dagr.web.helpers.string"/>
+<%namespace name="pagination" file="/dagr/components/pagination.html"/>
+<%namespace name="tabulator" file="/dagr/components/tabs.html"/>
 
 <div id="deleteAnswer" style="display: none;">
 </div>
@@ -67,7 +67,7 @@ function editComment(eventID,commentID) {
       %for comment in comments:
 	    <tr>
 	      <td>${comment.identifier}</td>
-	      <td>${c17Works.plaintext2html(text=comment.comment)}</td>
+	      <td>${dagr.plaintext2html(text=comment.comment)}</td>
 	      <td>${comment.created}</td>
 	      <td>${comment.creator.username}</td>
 	      <td>

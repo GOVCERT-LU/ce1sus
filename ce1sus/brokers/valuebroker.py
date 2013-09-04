@@ -11,15 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from c17Works.db.broker import BrokerBase, ValidationException, \
+from dagr.db.broker import BrokerBase, ValidationException, \
 NothingFoundException, TooManyResultsFoundException, OperationException, \
 BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from c17Works.db.session import BASE
+from dagr.db.session import BASE
 from sqlalchemy.types import DateTime
-from c17Works.helpers.validator import ObjectValidator
+from dagr.helpers.validator import ObjectValidator
 from importlib import import_module
 
 class StringValue(BASE):

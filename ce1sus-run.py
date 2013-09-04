@@ -2,9 +2,9 @@
 
 import cherrypy
 import os
-from c17Works.db.session import SessionManager
-from c17Works.helpers.debug import Log
-from c17Works.web.helpers.templates import MakoHandler
+from dagr.db.session import SessionManager
+from dagr.helpers.debug import Log
+from dagr.web.helpers.templates import MakoHandler
 from ce1sus.web.controllers.index import IndexController
 from ce1sus.web.controllers.admin.index import AdminController
 from ce1sus.web.controllers.events.events import EventsController
@@ -12,10 +12,10 @@ from ce1sus.web.controllers.admin.user import UserController
 from ce1sus.web.controllers.admin.groups import GroupController
 from ce1sus.web.controllers.admin.objects import ObjectController
 from ce1sus.web.helpers.protection import Protector
-from c17Works.web.helpers.webexceptions import ErrorHandler
-from c17Works.helpers.ldaphandling import LDAPHandler
-from c17Works.helpers.rt import RTTickets
-from c17Works.web.helpers.config import WebConfig
+from dagr.web.helpers.webexceptions import ErrorHandler
+from dagr.helpers.ldaphandling import LDAPHandler
+from dagr.helpers.rt import RTTickets
+from dagr.web.helpers.config import WebConfig
 from ce1sus.web.controllers.admin.attributes import AttributeController
 from ce1sus.web.controllers.event.event import EventController
 from ce1sus.web.controllers.event.objects import ObjectsController

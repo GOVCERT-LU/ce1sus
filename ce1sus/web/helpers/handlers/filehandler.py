@@ -16,12 +16,12 @@ from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from ce1sus.brokers.eventbroker import Attribute
 from datetime import datetime
 from os.path import isfile, basename, getsize, exists
-import c17Works.helpers.hash as hasher
+import dagr.helpers.hash as hasher
 from urllib import pathname2url
 from mimetypes import MimeTypes
 from ce1sus.web.helpers.handlers.base import HandlerException
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
-from c17Works.web.helpers.config import WebConfig
+from dagr.web.helpers.config import WebConfig
 from shutil import move
 from os import makedirs
 

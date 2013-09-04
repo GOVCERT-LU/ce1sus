@@ -7,10 +7,10 @@ import unittest
 from test.ce1sus.brokers.definitionbroker import TestDefinitionBrokers
 from test.ce1sus.brokers.eventbroker import TestEventBrokers
 from test.ce1sus.brokers.permissionbroker import TestPermissionBrokers
-from test.c17Works.db.session import TestSession
-from test.c17Works.helpers.objects import TestObjectHelper
-from test.c17Works.helpers.string import TestString
-from test.c17Works.helpers.validator import TestValidator
+from test.dagr.db.session import TestSession
+from test.dagr.helpers.objects import TestObjectHelper
+from test.dagr.helpers.string import TestString
+from test.dagr.helpers.validator import TestValidator
 
 def suite(self):
   suite = unittest.TestSuite()

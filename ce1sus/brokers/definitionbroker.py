@@ -11,13 +11,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from c17Works.db.broker import BrokerBase, ValidationException, \
+from dagr.db.broker import BrokerBase, ValidationException, \
  NothingFoundException, BrokerException, OperationException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from c17Works.db.session import BASE
-from c17Works.helpers.validator import ObjectValidator
+from dagr.db.session import BASE
+from dagr.helpers.validator import ObjectValidator
 from ce1sus.web.helpers.handlers.base import HandlerBase
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(

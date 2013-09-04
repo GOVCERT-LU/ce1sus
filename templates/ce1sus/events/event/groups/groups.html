@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="modals" file="/c17Works/components/modals.html"/>
-<%namespace name="baseForms" file="/c17Works/components/forms.html"/> 
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 
 <h4>Groupmanagment:</h4>
 <%call expr="baseForms.genericForm(id='addEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">

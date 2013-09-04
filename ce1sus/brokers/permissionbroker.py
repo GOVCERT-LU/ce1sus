@@ -11,16 +11,16 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from c17Works.db.broker import BrokerBase, NothingFoundException, \
+from dagr.db.broker import BrokerBase, NothingFoundException, \
 ValidationException, TooManyResultsFoundException
 import sqlalchemy.orm.exc
-import c17Works.helpers.hash as hasher
+import dagr.helpers.hash as hasher
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
-from c17Works.db.session import BASE
-from c17Works.db.broker import BrokerException
-from c17Works.helpers.validator import ObjectValidator
+from dagr.db.session import BASE
+from dagr.db.broker import BrokerException
+from dagr.helpers.validator import ObjectValidator
 import re
 
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?

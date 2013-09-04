@@ -11,15 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from c17Works.web.controllers.base import BaseController
+from dagr.web.controllers.base import BaseController
 import cherrypy
-from c17Works.web.helpers.pagination import Paginator, PaginatorOptions
+from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, Object
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require
-from c17Works.db.broker import ValidationException, \
+from dagr.db.broker import ValidationException, \
 BrokerException
 from ce1sus.web.helpers.protection import privileged
 

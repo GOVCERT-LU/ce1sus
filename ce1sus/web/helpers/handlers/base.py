@@ -13,9 +13,9 @@ __license__ = 'GPL v3+'
 
 
 from abc import abstractmethod
-from c17Works.web.helpers.templates import MakoHandler
-from c17Works.helpers.debug import Log
-from c17Works.db.session import SessionManager
+from dagr.web.helpers.templates import MakoHandler
+from dagr.helpers.debug import Log
+from dagr.db.session import SessionManager
 from importlib import import_module
 
 class HandlerException(Exception):
