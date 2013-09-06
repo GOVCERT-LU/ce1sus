@@ -554,6 +554,7 @@ class AttributeBroker(BrokerBase):
 
       # add them to relation table
       for sameValue in sameSalues:
+        # one way
         relation = ObjectAttributeRelation()
         relation.object_id = instance.identifier
         relation.object = instance.object
@@ -561,6 +562,15 @@ class AttributeBroker(BrokerBase):
         relation.attribute = instance
         relation.sameAttribute_id = sameValue.attribute.identifier
         relation.sameAttribute = sameValue.attribute
+        BrokerBase.insert(self, relation, False)
+        # the other way
+        relation = ObjectAttributeRelation()
+        relation.object_id = sameValue.attribute.object.identifier
+        relation.object = sameValue.attribute.object
+        relation.attribute_id = sameValue.attribute.identifier
+        relation.attribute = sameValue.attribute
+        relation.sameAttribute_id = instance.identifier
+        relation.sameAttribute = instance
         BrokerBase.insert(self, relation, False)
 
       self.valueBroker.inserByAttribute(instance, False)

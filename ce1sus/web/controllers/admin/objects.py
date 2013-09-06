@@ -139,6 +139,7 @@ class ObjectController(BaseController):
     else:
       try:
         self.objectBroker.removeByID(obj.identifier)
+        action = None
         obj = None
       except OperationException:
         errorMsg = 'Cannot delete this object. The object is still referenced.'

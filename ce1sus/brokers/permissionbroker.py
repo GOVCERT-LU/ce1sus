@@ -80,14 +80,14 @@ class User(BASE):
     """
     ObjectValidator.validateAlNum(self, 'username', minLength=3)
     # Don't update if the password is already a hash
-    if re.match('^[0-9a-f]{40}$', self.password) is None:
-      ObjectValidator.validateRegex(self,
-                                  'password',
-                                  ("(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
-                                   + "(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$"),
-                                  ('Password has to be set and contain Upper/'
-                                   + 'Lower cases, symbols and numbers and have'
-                                   + ' at least a length of 8'))
+    if not (self.password == 'EXTERNALAUTH' and re.match('^[0-9a-f]{40}$', self.password) is None):
+        ObjectValidator.validateRegex(self,
+                                    'password',
+                                    ("(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
+                                     + "(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$"),
+                                    ('Password has to be set and contain Upper/'
+                                     + 'Lower cases, symbols and numbers and have'
+                                     + ' at least a length of 8'))
     ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
     if not self.last_login is None:
