@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.eventbroker import EventBroker
-from ce1sus.web.helpers.protection import require
+from ce1sus.web.helpers.protection import require, requireReferer
 import types
 from dagr.db.broker import BrokerException
 
@@ -26,7 +26,7 @@ class GroupsController(BaseController):
     self.eventBroker = self.brokerFactory(EventBroker)
 
   @cherrypy.expose
-  @require()
+  @require(requireReferer(('/internal')))
   def groups(self, eventID):
     """
     Event page listing
@@ -42,7 +42,7 @@ class GroupsController(BaseController):
                            eventGroups=event.groups)
 
   @cherrypy.expose
-  @require()
+  @require(requireReferer(('/internal')))
   def modifyGroups(self, eventID, operation, remainingGroups=None,
                      eventGroups=None):
     """
@@ -61,6 +61,11 @@ class GroupsController(BaseController):
 
     :returns: generated HTML
     """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
     try:
       if operation == 'add':
         if not (remainingGroups is None):
@@ -69,7 +74,7 @@ class GroupsController(BaseController):
           else:
             for groupID in remainingGroups:
               self.eventBroker.addGroupToEvent(eventID, groupID, False)
-            self.eventBroker.session.commit()
+            self.eventBroker.doCommit(True)
       else:
         if not (eventGroups is None):
           if isinstance(eventGroups, types.StringTypes):
@@ -77,7 +82,7 @@ class GroupsController(BaseController):
           else:
             for groupID in eventGroups:
               self.eventBroker.removeGroupFromEvent(eventID, groupID, False)
-            self.eventBroker.session.commit()
+            self.eventBroker.doCommit(True)
       return self.returnAjaxOK()
     except BrokerException as e:
       self.getLogger().fatal(e)

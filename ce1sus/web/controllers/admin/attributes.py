@@ -15,7 +15,7 @@ from dagr.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
-from ce1sus.web.helpers.protection import require, privileged
+from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 from dagr.helpers.converters import ObjectConverter
@@ -23,6 +23,9 @@ import types as types
 import dagr.helpers.string as string
 
 class DeletionException(Exception):
+  """
+  Deletion Exception
+  """
   def __init__(self, message):
     Exception.__init__(self, message)
 
@@ -33,7 +36,7 @@ class AttributeController(BaseController):
     BaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeDefinitionBroker)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -45,6 +48,7 @@ class AttributeController(BaseController):
     template = self.getTemplate('/admin/attributes/attributeBase.html')
     return template.render()
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def leftContent(self):
     """
@@ -57,6 +61,7 @@ class AttributeController(BaseController):
     attributes = self.attributeBroker.getAll()
     return template.render(attributes=attributes)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def rightContent(self, attributeid=0, attribute=None):
     """
@@ -92,10 +97,11 @@ class AttributeController(BaseController):
     return template.render(attributeDetails=attribute,
                            remainingObjects=remainingObjects,
                            attributeObjects=attributeObjects,
-                           cbHandlerValues=AttributeDefinition.getHandlerDefinitions(),
+                           cbHandlerValues=
+                           AttributeDefinition.getHandlerDefinitions(),
                            cbValues=cbValues)
 
-
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def addAttribute(self):
     """
@@ -111,11 +117,11 @@ class AttributeController(BaseController):
                            cbValues=cbValues,
                            cbHandlerValues=cbHandlerValues)
 
-
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyAttribute(self, identifier=None, name=None, description='',
-                      regex='^.*$', classIndex=0, action='insert', handlerIndex=0):
+                      regex='^.*$', classIndex=0, action='insert',
+                      handlerIndex=0):
     """
     modifies or inserts an attribute with the data of the post
 
@@ -186,9 +192,10 @@ class AttributeController(BaseController):
       return template.render(attribute=attribute,
                              errorMsg=errorMsg,
                              cbValues=AttributeDefinition.getTableDefinitions(),
-                             cbHandlerValues=AttributeDefinition.getHandlerDefinitions())
+                             cbHandlerValues=
+                             AttributeDefinition.getHandlerDefinitions())
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editAttribute(self, attributeid):
     """
@@ -214,6 +221,7 @@ class AttributeController(BaseController):
                            cbValues=cbValues,
                            cbHandlerValues=cbHandlerValues)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editObjectAttributes(self, attributeid, operation, attributeObjects=None,
                           remainingObjects=None):

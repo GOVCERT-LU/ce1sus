@@ -20,8 +20,12 @@ from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException
 import types as types
+from dagr.helpers.converters import ObjectConverter
 
 class DeletionException(Exception):
+  """
+  Deletion Exception
+  """
   def __init__(self, message):
     Exception.__init__(self, message)
 
@@ -33,7 +37,7 @@ class UserController(BaseController):
     self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -44,7 +48,7 @@ class UserController(BaseController):
     template = self.getTemplate('/admin/users/userBase.html')
     return template.render()
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def leftContent(self):
     """
@@ -56,7 +60,7 @@ class UserController(BaseController):
     users = self.userBroker.getAll()
     return template.render(users=users)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def rightContent(self, userid=0, user=None):
     """
@@ -88,8 +92,7 @@ class UserController(BaseController):
                            userGroups=groups,
                            remainingGroups=remainingGroups)
 
-
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def addUser(self):
     """
@@ -99,6 +102,7 @@ class UserController(BaseController):
     """
     template = self.getTemplate('/admin/users/userModal.html')
     return template.render(user=None, errorMsg=None)
+
 
   @require(privileged())
   @cherrypy.expose
@@ -122,10 +126,12 @@ class UserController(BaseController):
     lh.close()
     return template.render(ldapPaginator=ldapPaginator, errorMsg=None)
 
+
+  @require(privileged(), requireReferer(('/internal')))
   @require(privileged())
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
-                 priv=None, email=None, action='insert',
+                 priv=None, email=None, action='insert', disabled=None,
                  ldapUsersTable_length=None):
     """
     modifies or inserts a user with the data of the post
@@ -156,7 +162,8 @@ class UserController(BaseController):
       user.email = email
       user.password = password
       user.username = username
-      user.privileged = priv
+      ObjectConverter.setInteger(user, 'disabled', disabled)
+      ObjectConverter.setInteger(user, 'privileged', priv)
       if action == 'insertLDAP':
         user.identifier = None
         # get LDAP user
@@ -200,7 +207,7 @@ class UserController(BaseController):
     else:
       return template.render(user=user, errorMsg=errorMsg)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editUser(self, userid):
     """
@@ -220,7 +227,7 @@ class UserController(BaseController):
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
     return template.render(user=user, errorMsg=errorMsg)
 
-  @require(privileged(), requireReferer('/admin', ('/internal')))
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editUserGroups(self, userID, operation, remainingGroups=None,
                      userGroups=None):

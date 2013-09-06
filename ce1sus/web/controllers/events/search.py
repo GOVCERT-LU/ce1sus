@@ -18,6 +18,7 @@ from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.definitionbroker import AttributeDefinition, \
                                             AttributeDefinitionBroker
 from importlib import import_module
+from ce1sus.web.helpers.protection import require, requireReferer
 
 class ResultItem(object):
   """
@@ -40,7 +41,7 @@ class SearchController(BaseController):
     self.attributeDefinition = AttributeDefinition()
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker)
-
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -52,6 +53,7 @@ class SearchController(BaseController):
     cbDefinitions = self.attributeDefinitionBroker.getCBValuesForAll()
     return template.render(cbDefinitions=cbDefinitions)
 
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def searchResults(self, definitionID, needle):
     """

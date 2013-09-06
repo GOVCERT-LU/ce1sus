@@ -164,6 +164,7 @@ class AttributeDefinition(BASE):
                                   withSymbols=True)
     ObjectValidator.validateRegularExpression(self, 'regex')
     ObjectValidator.validateDigits(self, 'classIndex')
+    ObjectValidator.validateDigits(self, 'handlerIndex')
     return ObjectValidator.isObjectValid(self)
 
   def addObject(self, obj):
@@ -239,7 +240,7 @@ class ObjectDefinition(BASE):
                                   'description',
                                   withNonPrintableCharacters=True,
                                   withSpaces=True,
-                                  minLength=3,
+                                  minLength=5,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 

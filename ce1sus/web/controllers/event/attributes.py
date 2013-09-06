@@ -17,7 +17,7 @@ from ce1sus.web.helpers.protection import require
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
                   AttributeBroker, Attribute
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
-from ce1sus.web.helpers.protection import privileged
+from ce1sus.web.helpers.protection import requireReferer
 from dagr.db.broker import ValidationException, \
 BrokerException
 from ce1sus.web.helpers.handlers.base import HandlerException
@@ -36,7 +36,7 @@ class AttributesController(BaseController):
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
 
-  @require(privileged())
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -46,6 +46,7 @@ class AttributesController(BaseController):
     """
     return self.__class__.__name__ + ' is not implemented'
 
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def addAttribute(self, eventID, objectID):
     """
@@ -53,6 +54,12 @@ class AttributesController(BaseController):
 
     :returns: generated HTML
     """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+
     template = self.getTemplate('/events/event/attributes/attributesModal.html')
     obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
@@ -65,7 +72,7 @@ class AttributesController(BaseController):
                            enabled=True)
 
   @cherrypy.expose
-  @require()
+  @require(requireReferer(('/internal')))
   def addFile(self, value=None):
     """
     Uploads a file to the tmp dir
@@ -87,11 +94,8 @@ class AttributesController(BaseController):
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
   @cherrypy.expose
-  @require()
+  @require(requireReferer(('/internal')))
   def modifyAttribute(self, **kwargs):
-                      # eventID=None, attributeID=None,
-                      #      objectID=None, definition=None, value=None,
-                      #      action=None):
     """
     Modification on the attributes of objects
     """
@@ -104,7 +108,7 @@ class AttributesController(BaseController):
       action = params.get('action', None)
       # remove unnecessary elements from the parameters
       params = { k : v for k, v in params.iteritems() if k not in ['eventID',
-                                                                   'attributeID',
+                                                                'attributeID',
                                                                    'objectID',
                                                                    'definition',
                                                                    'action'] }
@@ -113,7 +117,8 @@ class AttributesController(BaseController):
       # right checks
       event = self.eventBroker.getByID(eventID)
       self.checkIfViewable(event.groups,
-                           self.getUser().identifier == event.creator.identifier)
+                           self.getUser().identifier ==
+                           event.creator.identifier)
       obj = self.objectBroker.getByID(objectID)
       try:
         if action != 'remove':
@@ -123,11 +128,11 @@ class AttributesController(BaseController):
           attributes = handler.populateAttributes(params,
                                                   obj,
                                                   definition,
-                                                  self.getUser())  # from handler
+                                                  self.getUser())
           if attributes is None:
             raise HandlerException(('{0}.getAttributes '
                                     + 'does not return attributes ').format(
-                                                          definition.handlerName))
+                                                      definition.handlerName))
           if not isinstance(attributes, types.StringTypes):
             if not isinstance(attributes, types.ListType):
               if isinstance(attributes, Attribute):
@@ -169,13 +174,19 @@ class AttributesController(BaseController):
                              errorMsg=errorMsg)
 
   @cherrypy.expose
-  @require()
+  @require(requireReferer(('/internal')))
   def view(self, eventID, objectID, attributeID):
     """
      renders the file with the requested attribute
 
     :returns: generated HTML
     """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+
     template = self.getTemplate('/events/event/attributes/attributesModal.html')
     obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
@@ -188,6 +199,7 @@ class AttributesController(BaseController):
                            errorMsg=None,
                            enabled=False)
 
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def inputHandler(self, defattribID, enabled, attributeID=None):
     """
@@ -219,6 +231,7 @@ class AttributesController(BaseController):
       enableView = False
     return handler.render(enableView, attribute)
 
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def getTickets(self):
     """

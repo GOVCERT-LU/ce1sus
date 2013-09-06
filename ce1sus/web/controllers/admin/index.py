@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from dagr.web.controllers.base import BaseController
 import cherrypy
-from ce1sus.web.helpers.protection import require, privileged
+from ce1sus.web.helpers.protection import require, privileged, requireReferer
 
 class AdminController(BaseController):
   """admim controller handling all actions in the admin section"""
@@ -21,8 +21,8 @@ class AdminController(BaseController):
   def __init__(self):
     BaseController.__init__(self)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
-  @require(privileged())
   def index(self):
     """
     index page of the administration section

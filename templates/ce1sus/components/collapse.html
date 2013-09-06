@@ -22,7 +22,7 @@
                 <div class="span2" style="text-align: right;">
                     <div class="btn-group">
                        <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
-                       <a href="#" class="btn"  role="button"><i class="icon-tag"></i></a>
+                       <a href="#addChildObjectModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-tag"></i></a>
                        <a href="#" class="btn btn-danger"  role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                                 dialogCall('/events/event/objects/removeObject?eventID=${eventID}&objectID=${object.identifier}',
@@ -44,6 +44,9 @@
 				</%call>
 				<%call expr="modals.genericDialogModal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
 				  <%call expr="forms.eventObjectForm(eventID,object, False,cbObjDefinitions)"/>
+				</%call>
+				<%call expr="baseForms.genericModalForm(modalID='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attachChildObject',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+				    <%call expr="modals.saveButtonModal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',contentUrl='/events/event/objects/addChildObject/{0}/{1}'.format(eventID, object.identifier))"/>
 				</%call>
 				 <!--  dont remove this -->
             </div>

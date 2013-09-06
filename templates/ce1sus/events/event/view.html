@@ -40,7 +40,10 @@ function editComment(eventID,commentID) {
   </div>
   <div class="span8">
     <legend>Objects</legend>
-<%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
+<%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/>
+<br/><br/>
+<legend>Relations</legend>
+<%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
 <br/><br/>
 <legend>Comments</legend>
 <table class="table table-striped table-hover table-condensed">

@@ -15,6 +15,7 @@ from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
 from ce1sus.web.helpers.protection import Protector
+from ce1sus.brokers.permissionbroker import UserBroker
 from dagr.web.helpers.config import WebConfig
 
 class BaseController:
@@ -25,6 +26,7 @@ class BaseController:
     self.logger = Log.getLogger(self.__class__.__name__)
     self.__sessionHandler = SessionManager.getInstance()
     self.config = WebConfig.getInstance()
+    self.userBroker = self.__sessionHandler.brokerFactory(UserBroker)
 
   def brokerFactory(self, clazz):
     """
@@ -82,8 +84,9 @@ class BaseController:
 
     :returns: User
     """
+    user = self.userBroker.getUserByUserName(self.getUserName())
     self.getLogger().debug("Returned user")
-    return Protector.getUser()
+    return user
 
   def getUserName(self):
     """

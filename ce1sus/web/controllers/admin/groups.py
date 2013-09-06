@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, Group
-from ce1sus.web.helpers.protection import require, privileged
+from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 from dagr.helpers.converters import ObjectConverter
@@ -29,7 +29,7 @@ class GroupController(BaseController):
     self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -41,6 +41,7 @@ class GroupController(BaseController):
     template = self.getTemplate('/admin/groups/groupBase.html')
     return template.render()
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def leftContent(self):
     """
@@ -52,6 +53,7 @@ class GroupController(BaseController):
     groups = self.groupBroker.getAll()
     return template.render(groups=groups)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def rightContent(self, groupid=0, group=None):
     """
@@ -82,7 +84,7 @@ class GroupController(BaseController):
                            remainingUsers=remUsers,
                            groupUsers=users)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def addGroup(self):
     """
@@ -93,8 +95,7 @@ class GroupController(BaseController):
     template = self.getTemplate('/admin/groups/groupModal.html')
     return template.render(group=None, errorMsg=None)
 
-
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None, shareTLP=0,
                   description=None, action='insert'):
@@ -152,6 +153,8 @@ class GroupController(BaseController):
     else:
       return template.render(group=group, errorMsg=errorMsg)
 
+
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editGroup(self, groupid):
     """
@@ -171,7 +174,7 @@ class GroupController(BaseController):
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
     return template.render(group=group, errorMsg=errorMsg)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def editGroupUser(self, groupID, operation,
                      groupUsers=None, remainingUsers=None):

@@ -17,8 +17,7 @@ from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from ce1sus.web.helpers.protection import require
-from ce1sus.web.helpers.protection import privileged
+from ce1sus.web.helpers.protection import require, requireReferer
 class EventsController(BaseController):
   """event controller handling all actions in the event section"""
 
@@ -26,7 +25,7 @@ class EventsController(BaseController):
     BaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
-  @require(privileged())
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -37,7 +36,7 @@ class EventsController(BaseController):
     template = self.getTemplate('/events/eventsBase.html')
     return template.render()
 
-  @require()
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def addEvent(self):
     """
@@ -60,7 +59,7 @@ class EventsController(BaseController):
                            cbRiskValues=cbRiskValues,
                            today=datetime.now())
 
-  @require()
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def recent(self):
     """

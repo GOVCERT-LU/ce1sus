@@ -44,6 +44,7 @@ class User(BASE):
   email = Column('email', String)
   groups = relationship('Group', secondary='User_has_Groups',
                         back_populates='users', cascade='all')
+  disabled = Column('disabled', Integer)
 
   def addGroup(self, group):
     """
@@ -78,13 +79,19 @@ class User(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateAlNum(self, 'username', minLength=3)
-    # TODO: find a way to validate password earlier!
-    # validator.validateRegex(self, 'password', "(?=^.{8,}$)(?=.*[a-z])
-    # (?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$", 'Password has to be
-    # set and contain Upper/Lower cases, symbols and numbers and have at least
-    # a length of 8')
+    # Don't update if the password is already a hash
+    if re.match('^[0-9a-f]{40}$', self.password) is None:
+      ObjectValidator.validateRegex(self,
+                                  'password',
+                                  ("(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
+                                   + "(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$"),
+                                  ('Password has to be set and contain Upper/'
+                                   + 'Lower cases, symbols and numbers and have'
+                                   + ' at least a length of 8'))
     ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
+    if not self.last_login is None:
+      ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
 class Group(BASE):
@@ -138,6 +145,12 @@ class Group(BASE):
     ObjectValidator.validateAlNum(self, 'name',
                                   withSymbols=True)
     ObjectValidator.validateDigits(self, 'shareTLP')
+    ObjectValidator.validateAlNum(self,
+                                  'description',
+                                  minLength=5,
+                                  withSpaces=True,
+                                  withNonPrintableCharacters=True,
+                                  withSymbols=True)
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
@@ -236,12 +249,14 @@ class UserBroker(BrokerBase):
     """
     overrides BrokerBase.insert
     """
-    instance.password = hasher.hashSHA1(instance.password,
-                                             instance.username)
+
 
     errors = not instance.validate()
     if errors:
       raise ValidationException('User to be inserted is invalid')
+
+    instance.password = hasher.hashSHA1(instance.password,
+                                             instance.username)
     try:
       BrokerBase.insert(self, instance, commit)
       self.doCommit(commit)
@@ -254,14 +269,17 @@ class UserBroker(BrokerBase):
     """
     overrides BrokerBase.insert
     """
-    # Don't update if the password is already a hash
-    if re.match('^[0-9a-f]{40}$', instance.password) is None:
-      instance.password = hasher.hashSHA1(instance.password,
-                                             instance.username)
+
+
 
     errors = not instance.validate()
     if errors:
       raise ValidationException('User to be inserted is invalid')
+
+    # Don't update if the password is already a hash
+    if re.match('^[0-9a-f]{40}$', instance.password) is None:
+      instance.password = hasher.hashSHA1(instance.password,
+                                             instance.username)
     try:
       BrokerBase.update(self, instance, commit)
       self.doCommit(commit)

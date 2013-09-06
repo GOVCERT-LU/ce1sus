@@ -22,10 +22,21 @@ from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
-from ce1sus.web.helpers.protection import require
+from ce1sus.web.helpers.protection import require, requireReferer
 from ce1sus.api.ticketsystem import TicketSystemBase
 from dagr.db.broker import ValidationException, BrokerException
 from dagr.helpers.converters import ObjectConverter
+
+class Relation(object):
+  def __init__(self):
+    self.identifier = 0
+    self.eventID = 0
+    self.eventName = 0
+    self.objectID = 0
+    self.objectName = 0
+    self.attributeID = 0
+    self.attributeName = 0
+    self.attributeValue = 0
 
 class EventController(BaseController):
   """event controller handling all actions in the event section"""
@@ -39,7 +50,7 @@ class EventController(BaseController):
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.commentBroker = self.brokerFactory(CommentBroker)
 
-  @require()
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def view(self, eventID):
     """
@@ -47,10 +58,15 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return template.render(eventID=eventID)
 
-  @require()
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def event(self, eventID):
     """
@@ -62,7 +78,8 @@ class EventController(BaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier ==
+                         event.creator.identifier)
     cbStatusValues = Status.getDefinitions()
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
@@ -83,18 +100,66 @@ class EventController(BaseController):
                           paginatorOptions=paginatorOptions)
     objectPaginator.itemsPerPage = 3
 
+    relationLabels = [{'eventID':'Event #'},
+                      {'eventName':'Event Name'},
+              {'objectID':'Object #'},
+              {'objectName':'Object Name'},
+              {'attributeID':'Attribute #'},
+              {'attributeName':'Attribute Name'},
+              {'attributeValue':'Attribute Value'}]
+    result = list()
+    try:
+      # get for each object
+      relations = self.__getRelationsObjects(event.objects)
+
+      # prepare list
+
+      for relation in relations:
+        temp = Relation()
+        temp.eventID = relation.sameAttribute.object.event.identifier
+        temp.identifier = temp.eventID
+        temp.eventName = relation.sameAttribute.object.event.title
+        temp.objectID = relation.sameAttribute.object.identifier
+        temp.objectName = relation.sameAttribute.object.definition.name
+        temp.attributeID = relation.sameAttribute.identifier
+        temp.attributeName = relation.sameAttribute.definition.name
+        temp.attributeValue = relation.sameAttribute.value
+        result.append(temp)
+    except BrokerException:
+      pass
+
+    relationsPaginatorOptions = PaginatorOptions('/events/recent',
+                                                 'eventsTabTabContent')
+    relationsPaginatorOptions.addOption('NEWTAB',
+                               'VIEW',
+                               '/events/event/view/',
+                               contentid='')
+
+    relationPaginator = Paginator(items=result,
+                          labelsAndProperty=relationLabels,
+                          paginatorOptions=relationsPaginatorOptions)
+    relationPaginator.itemsPerPage = 3
+
     return template.render(objectPaginator=objectPaginator,
+                           relationPaginator=relationPaginator,
                            event=event,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
                            comments=event.comments,
                            cbAnalysisValues=cbAnalysisValues,
-                           cbRiskValues=cbRiskValues,
-                           cveUrl=self.getConfigVariable('cveurl'),
-                           ticketUrl=TicketSystemBase.getInstance().
-                           getBaseTicketUrl())
+                           cbRiskValues=cbRiskValues)
 
-  @require()
+  def __getRelationsObjects(self, objects):
+    result = list()
+    for obj in objects:
+      result = result + self.__getRelationsObject(obj)
+    return result
+
+  def __getRelationsObject(self, obj):
+    return self.objectBroker.getRelationsByID(obj.identifier)
+
+
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def editEvent(self, eventID):
     """
@@ -102,6 +167,11 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
     return EventController.__populateTemplate(None, event, template)
@@ -122,7 +192,7 @@ class EventController(BaseController):
       cbTLPValues=cbTLPValues)
     return string
 
-  @require()
+  @require(requireReferer(('/internal')))
   @cherrypy.expose
   def modifyEvent(self, **kwargs):
     """
@@ -144,7 +214,7 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
-    params = cherrypy.request.params
+    params = kwargs
     identifier = params.get('identifier', None)
     action = params.get('action', None)
     status = params.get('status', None)

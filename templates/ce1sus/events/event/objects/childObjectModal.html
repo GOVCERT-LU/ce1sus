@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/>
+
+<%call expr="messagesAndText.error(errorMsg)"/>
+<%
+if objectID is None:
+  objectIDValue = ''
+else:
+  objectIDValue = objectID
+%>
+<input type="hidden" name="objectID" value="${objectIDValue}"/>
+<%call expr="forms.eventObjectForm(eventID,object,True,cbObjDefinitions)"/>
+

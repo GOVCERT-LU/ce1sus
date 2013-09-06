@@ -46,6 +46,7 @@ class IndexController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/index/login.html')
+    Protector.clearSession()
     return template.render(errorMsg=errorMsg)
 
   @cherrypy.expose
@@ -74,6 +75,7 @@ class IndexController(BaseController):
       Protector.setSession(username)
       raise HTTPRedirect('/internal')
 
+  @require()
   @cherrypy.expose
   def logout(self):
     """

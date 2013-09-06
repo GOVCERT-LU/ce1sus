@@ -15,10 +15,10 @@ from dagr.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
 ObjectDefinition
-from ce1sus.web.helpers.protection import require, privileged
+from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
-import types as types
+
 
 class ObjectController(BaseController):
   """Controller handling all the requests for objects"""
@@ -27,7 +27,7 @@ class ObjectController(BaseController):
     BaseController.__init__(self)
     self.objectBroker = self.brokerFactory(ObjectDefinitionBroker)
 
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
     """
@@ -39,6 +39,7 @@ class ObjectController(BaseController):
     template = self.getTemplate('/admin/objects/objectBase.html')
     return template.render()
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def leftContent(self):
     """
@@ -50,6 +51,7 @@ class ObjectController(BaseController):
     objects = self.objectBroker.getAll()
     return template.render(objects=objects)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def rightContent(self, objectid=0, obj=None):
     """
@@ -82,6 +84,7 @@ class ObjectController(BaseController):
                            remainingAttributes=remainingAttributes,
                            objectAttributes=attributes)
 
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def addObject(self):
     """
@@ -92,10 +95,9 @@ class ObjectController(BaseController):
     template = self.getTemplate('/admin/objects/objectModal.html')
     return template.render(object=None, errorMsg=None)
 
-
-  @require(privileged())
+  @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
-  def modifyObject(self, identifier=None, name=None, shareTLP=0,
+  def modifyObject(self, identifier=None, name=None,
                   description=None, action='insert'):
     """
     modifies or inserts a object with the data of the post
@@ -146,67 +148,3 @@ class ObjectController(BaseController):
     else:
       return template.render(object=obj, errorMsg=errorMsg)
 
-
-  @cherrypy.expose
-  def editObject(self, objectid):
-    """
-    renders the edit an object page
-
-    :param objectid: The object id of the desired displayed object
-    :type objectid: Integer
-
-    :returns: generated HTML
-    """
-    template = self.getTemplate('/admin/objects/objectModal.html')
-    errorMsg = None
-    try:
-      obj = self.objectBroker.getByID(objectid)
-    except BrokerException as e:
-      obj = None
-      self.getLogger().error('An unexpected error occurred: {0}'.format(e))
-      errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(objectDetails=obj, errorMsg=errorMsg)
-
-  @require(privileged())
-  @cherrypy.expose
-  def editObjectAttributes(self, objectid, operation,
-                     objectAttributes=None, remainingAttributes=None):
-    """
-    modifies the relation between a object and its attributes
-
-    :param objectID: The objectID of the object
-    :type objectID: Integer
-    :param operation: the operation used in the context (either add or remove)
-    :type operation: String
-    :param remainingUsers: The identifiers of the users which the object is not
-                            attributed to
-    :type remainingUsers: Integer array
-    :param objectUsers: The identifiers of the users which the object is
-                       attributed to
-    :type objectUsers: Integer array
-
-    :returns: generated HTML
-    """
-    try:
-      if operation == 'add':
-        if not (remainingAttributes is None):
-          if isinstance(remainingAttributes, types.StringTypes):
-            self.objectBroker.addAttributeToObject(remainingAttributes,
-                                                   objectid)
-          else:
-            for attribute in remainingAttributes:
-              self.objectBroker.addAttributeToObject(attribute, objectid, False)
-            self.objectBroker.doCommit()
-      else:
-        #Note objectAttributes may be a string or an array!!!
-        if not (objectAttributes is None):
-          if isinstance(objectAttributes, types.StringTypes):
-            self.objectBroker.removeAttributeFromObject(objectAttributes,
-                                                        objectid)
-          else:
-            for attribute in objectAttributes:
-              self.objectBroker.removeAttributeFromObject(attribute, objectid)
-            self.objectBroker.doCommit()
-      return self.returnAjaxOK()
-    except BrokerException as e:
-      return e

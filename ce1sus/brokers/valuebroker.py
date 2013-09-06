@@ -147,6 +147,18 @@ class ValueBroker(BrokerBase):
     """
     return self.__clazz
 
+  @staticmethod
+  def getClassByAttribute(attribute):
+    """
+    returns class for the attribute
+
+    :param attribute: the attribute in context
+    :type attribute: Attribute
+    """
+    className = attribute.definition.className
+    module = import_module('.valuebroker', 'ce1sus.brokers')
+    return getattr(module, className)
+
   def __setClassByAttribute(self, attribute):
     """
     sets class for the attribute
@@ -154,9 +166,7 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    className = attribute.definition.className
-    module = import_module('.valuebroker', 'ce1sus.brokers')
-    self.__clazz = getattr(module, className)
+    self.__clazz = self.getClassByAttribute(attribute)
 
   def __convertAttriuteValueToValue(self, attribute):
     """

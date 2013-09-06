@@ -1,4 +1,5 @@
 """module providing authentication"""
+from chardet.constants import False
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -13,7 +14,8 @@ from dagr.db.broker import NothingFoundException, BrokerException
 from dagr.helpers.ldaphandling import LDAPHandler
 import re
 
-SESSION_KEY = '_cp_username'
+SESSION_KEY_USERNAME = '_cp_username'
+SESSION_KEY_USER = '_cp_user'
 
 class Protector(object):
   """The authentication handler for the site. Mainly taken out of the example
@@ -59,7 +61,8 @@ class Protector(object):
           raise BrokerException
       except BrokerException:
         return "Incorrect username or password."
-
+      if user.disabled == 1:
+        return "Incorrect username or password."
     return None
 
   @staticmethod
@@ -70,7 +73,7 @@ class Protector(object):
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
       attribute = getattr(cherrypy, 'session')
-      username = attribute.get(SESSION_KEY)
+      username = attribute.get(SESSION_KEY_USERNAME)
       if username:
         cherrypy.request.login = username
         for condition in conditions:
@@ -92,7 +95,10 @@ class Protector(object):
     """
     attribute = getattr(cherrypy, 'session')
     attribute.regenerate()
-    attribute[SESSION_KEY] = cherrypy.request.login = username
+    attribute[SESSION_KEY_USERNAME] = cherrypy.request.login = username
+    user = Protector.userBroker.getUserByUserName(username)
+    attribute[SESSION_KEY_USER] = user
+
 
   @staticmethod
   def getUserName():
@@ -110,7 +116,8 @@ class Protector(object):
 
     :returns: User
     """
-    user = Protector.userBroker.getUserByUserName(Protector.getUserName())
+    attribute = getattr(cherrypy, 'session')
+    user = attribute[SESSION_KEY_USER]
     return user
 
 
@@ -148,7 +155,7 @@ class Protector(object):
     """
     username = Protector.getUserName()
     attribute = getattr(cherrypy, 'session')
-    attribute[SESSION_KEY] = None
+    attribute[SESSION_KEY_USERNAME] = None
     if username:
       cherrypy.request.login = None
 
@@ -181,7 +188,7 @@ def privileged():
     return Protector.userBroker.isUserPrivileged(Protector.getUserName())
   return check
 
-def requireReferer(redirect, allowedReferers):
+def requireReferer(allowedReferers):
   """
   Condition that verifies if the user has the privileged right set
 
@@ -192,11 +199,14 @@ def requireReferer(redirect, allowedReferers):
       Checks if the user has the privileged right
     """
     referer = cherrypy.request.headers.elements('Referer')
-    referer = referer[0].value
-    referer = '/' + re.search(r'^http[s]?://[\w\d:]+/(.*)$', referer).group(1)
-    if referer in allowedReferers:
-      return True
-    else:
+    try:
+      referer = referer[0].value
+      referer = '/' + re.search(r'^http[s]?://[\w\d:]+/(.*)$', referer).group(1)
+      if referer in allowedReferers:
+        return True
+      else:
+        return False
+    except IndexError:
       return False
   return check
 

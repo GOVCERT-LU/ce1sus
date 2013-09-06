@@ -17,7 +17,7 @@ BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, not_
 from sqlalchemy.orm import relationship
-from dagr.db.session import BASE
+from dagr.db.session import BASE, SessionManager
 from sqlalchemy.types import DateTime
 from ce1sus.brokers.permissionbroker import User, Group
 from dagr.helpers.validator import ObjectValidator
@@ -37,8 +37,10 @@ _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_from', Integer, ForeignKey('Objects.object_id'))
 )
 
+
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
+
   def __init__(self):
     pass
 
@@ -64,6 +66,7 @@ class Attribute(BASE):
                           primaryjoin="Attribute.modifier_id==User.identifier")
   value_id = 0
   __value = None
+  __valueObject = None
 
   @property
   def key(self):
@@ -81,7 +84,17 @@ class Attribute(BASE):
 
     :returns: Any
     """
-    return self.__value
+    if self.__valueObject is None and self.__value is None:
+      # try to get the value some how...
+      try:
+        attributeBroker = SessionManager.getInstance().brokerFactory(AttributeBroker)
+        attributeBroker.getSetValues(self)
+        return self.__value
+      except BrokerException:
+        return self.__value
+    else:
+      return self.__value
+
 
   @value.setter
   def value(self, value):
@@ -102,6 +115,9 @@ class Attribute(BASE):
     ObjectValidator.validateDigits(self, 'def_attribute_id')
     ObjectValidator.validateDigits(self, 'object_id')
     ObjectValidator.validateDigits(self, 'creator_id')
+    ObjectValidator.validateDigits(self, 'modifier_id')
+    ObjectValidator.validateDateTime(self, 'created')
+    ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
 class Event(BASE):
@@ -227,7 +243,10 @@ class Event(BASE):
     ObjectValidator.validateDigits(self, 'tlp_level_id')
     ObjectValidator.validateDigits(self, 'status_id')
     ObjectValidator.validateDigits(self, 'published')
+    ObjectValidator.validateDigits(self, 'risk_id')
+    ObjectValidator.validateDigits(self, 'analysis_status_id')
     ObjectValidator.validateDigits(self, 'creator_id')
+    ObjectValidator.validateDigits(self, 'modifier_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
     if not self.first_seen is None:
@@ -266,6 +285,7 @@ class Comment(BASE):
     """
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDigits(self, 'creator_id')
+    ObjectValidator.validateDigits(self, 'modifier_id')
     ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateAlNum(self,
                                   'comment',
@@ -273,6 +293,8 @@ class Comment(BASE):
                                   withSpaces=True,
                                   withNonPrintableCharacters=True,
                                   withSymbols=True)
+    ObjectValidator.validateDateTime(self, 'created')
+    ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
 class Object(BASE):
@@ -338,11 +360,47 @@ class Object(BASE):
     if not function():
       return False
     ObjectValidator.validateDigits(self, 'creator_id')
+    ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDigits(self, 'def_object_id')
-    ObjectValidator.validateDigits(self, 'event_id')
+    if not self.parentObject_id is None:
+      ObjectValidator.validateDigits(self, 'parentObject_id')
+    if not self.event_id is None:
+      ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
+class ObjectAttributeRelation(BASE):
+  """This is a container class for the ATTRIBUTES table."""
+
+  def __init__(self):
+    pass
+
+  __tablename__ = "Attribute_Object_Relations"
+  identifier = Column('AOR_id', Integer, primary_key=True)
+  object_id = Column(Integer, ForeignKey('Objects.object_id'))
+  object = relationship(Object,
+          primaryjoin="ObjectAttributeRelation.object_id==Object.identifier")
+  attribute_id = Column('attribute_id',
+                        Integer,
+                        ForeignKey('Attributes.attribute_id'))
+  attribute = relationship(Attribute,
+    primaryjoin="ObjectAttributeRelation.attribute_id==Attribute.identifier")
+  sameAttribute_id = Column('ref_attribute_id',
+                            Integer,
+                            ForeignKey('Attributes.attribute_id'))
+  sameAttribute = relationship(Attribute,
+    primaryjoin="ObjectAttributeRelation.sameAttribute_id==Attribute.identifier")
+
+  def validate(self):
+    """
+    Checks if the attributes of the class are valid
+
+    :returns: Boolean
+    """
+    ObjectValidator.validateDigits(self, 'attribute_id')
+    ObjectValidator.validateDigits(self, 'object_id')
+    ObjectValidator.validateDigits(self, 'sameAttribute_id')
+    return ObjectValidator.isObjectValid(self)
 class CommentBroker(BrokerBase):
   """This is the interface between python an the database"""
 
@@ -402,16 +460,24 @@ class ObjectBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-  def getByID(self, identifier):
-    """
-    overrides BrokerBase.getByID
-    """
-    obj = BrokerBase.getByID(self, identifier)
-    # DO NEVER remove these lines else the object attributes will not
-    # be displayed
-    for attribute in obj.attributes:
-      self.attributeBroker.getSetValues(attribute)
-    return obj
+
+  def getRelationsByID(self, identifier):
+    try:
+
+      result = self.session.query(ObjectAttributeRelation).filter(
+                        ObjectAttributeRelation.object_id == identifier).all()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  identifier))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result
 
 class AttributeBroker(BrokerBase):
   """
@@ -457,7 +523,6 @@ class AttributeBroker(BrokerBase):
     overrides BrokerBase.getByID
     """
     attribute = BrokerBase.getByID(self, identifier)
-    self.getSetValues(attribute)
     return attribute
 
   def insert(self, instance, commit=True):
@@ -476,10 +541,28 @@ class AttributeBroker(BrokerBase):
     errors = not instance.validate()
     if errors:
       raise ValidationException('Attribute to be inserted is invalid')
+
+
     try:
-      BrokerBase.insert(self, instance, False)
       # insert value for value table
-      self.doCommit(False)
+      BrokerBase.insert(self, instance, False)
+
+      clazz = self.valueBroker.getClassByAttribute(instance)
+      # find the same values!
+      sameSalues = self.valueBroker.lookforValue(clazz,
+                                           instance.value)
+
+      # add them to relation table
+      for sameValue in sameSalues:
+        relation = ObjectAttributeRelation()
+        relation.object_id = instance.identifier
+        relation.object = instance.object
+        relation.attribute_id = instance.identifier
+        relation.attribute = instance
+        relation.sameAttribute_id = sameValue.attribute.identifier
+        relation.sameAttribute = sameValue.attribute
+        BrokerBase.insert(self, relation, False)
+
       self.valueBroker.inserByAttribute(instance, False)
       self.doCommit(commit)
     except BrokerException as e:
@@ -552,18 +635,6 @@ class EventBroker(BrokerBase):
   def __init__(self, session):
     BrokerBase.__init__(self, session)
     self.attributeBroker = AttributeBroker(session)
-
-  def getByID(self, identifier):
-    """
-    overrides BrokerBase.getByID
-    """
-    event = BrokerBase.getByID(self, identifier)
-    # DO NEVER remove these lines else the object attributes will
-    # not be displayed
-    for obj in event.objects:
-      for attribute in obj.attributes:
-        self.attributeBroker.getSetValues(attribute)
-    return event
 
   def insert(self, instance, commit=True):
     """
@@ -667,9 +738,9 @@ class EventBroker(BrokerBase):
         groupIDs.append(group.identifier)
       try:
         if (len(groupIDs) > 0):
-          result = self.session.query(Event).join(User).filter(
+          result = self.session.query(Event).filter(
                                         or_(
-                                          User.identifier == user.identifier,
+                                          Event.creator_id == user.identifier,
                                           and_(
                                             Group.identifier.in_(groupIDs),
                                             Event.published == 1)
@@ -677,8 +748,8 @@ class EventBroker(BrokerBase):
                                         ).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
         else:
-          result = self.session.query(Event).join(User).filter(
-                                            User.identifier == user.identifier
+          result = self.session.query(Event).filter(
+                                            Event.creator_id == user.identifier
                                             ).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
