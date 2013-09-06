@@ -7,6 +7,7 @@
 		</div>
 	</div>
 	<div class="span9">
+	    %if enabled:
 		<form id="fileuploadForm" enctype="multipart/form-data">
 			<input class="btn-file" name="value" type="file" /><br />
 			<input class="btn" id="uploadButtonID" type="button" value="Upload"
@@ -17,6 +18,7 @@
 			<div class="percent" style="visibility: hidden">0%</div>
 		</div>
 		<div id="status"></div>
+		%endif
 	</div>
 </div>
 <script type="text/javascript">

@@ -174,11 +174,11 @@ class LDAPHandler(object):
 
     :returns: String
     """
-    filter_ = '(uid=*)'
-    attributes = ["uid", "displayName", "mail"]
+    filter_ = '(uid={0})'.format(uid)
+    attributes = ["uid", "displayName", "mail", "dc"]
     try:
       user = None
-      result = self.__connection.search_s(self.__getUserDN(uid),
+      result = self.__connection.search_s(self.__users_dn,
                                           ldap.SCOPE_SUBTREE,
                                           filter_,
                                           attributes)

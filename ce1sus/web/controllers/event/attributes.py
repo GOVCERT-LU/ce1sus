@@ -95,77 +95,78 @@ class AttributesController(BaseController):
     """
     Modification on the attributes of objects
     """
-    params = cherrypy.request.params
+    params = kwargs
     eventID = params.get('eventID', None)
-    attributeID = params.get('attributeID', None)
-    objectID = params.get('objectID', None)
-    definition = params.get('definition', None)
-    action = params.get('action', None)
-    # remove unnecessary elements from the parameters
-    params = { k : v for k, v in params.iteritems() if k not in ['eventID',
-                                                                 'attributeID',
-                                                                 'objectID',
-                                                                 'definition',
-                                                                 'action'] }
-    errorMsg = ''
-    attributes = list()
-    # right checks
-    event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
-    obj = self.objectBroker.getByID(objectID)
-    try:
-      if action != 'remove':
-        definition = self.def_attributesBroker.getByID(definition)
-        handler = HandlerBase.getHandler(definition)
-        # expect generated attributes back
-        attributes = handler.populateAttributes(params,
-                                                obj,
-                                                definition,
-                                                self.getUser())  # from handler
-        if attributes is None:
-          raise HandlerException(('{0}.getAttributes '
-                                  + 'does not return attributes ').format(
-                                                        definition.handlerName))
-        if not isinstance(attributes, types.StringTypes):
-          if not isinstance(attributes, types.ListType):
-            if isinstance(attributes, Attribute):
-              temp = attributes
-              attributes = list()
-              attributes.append(temp)
-      # doAction for all attributes
-      if action == 'insert':
-        # TODO: update event
-        for attribute in attributes:
-          self.attributeBroker.insert(attribute, commit=False)
-      if action == 'remove':
-        self.attributeBroker.removeByID(attributeID, commit=True)
-      self.attributeBroker.doCommit(True)
-      return self.returnAjaxOK()
-    except ValidationException as e:
-      self.getLogger().info(e)
-      errorMsg = e
-    except BrokerException as e:
-      self.getLogger().fatal(e)
-      errorMsg = e
-    except HandlerException as e:
-      self.getLogger().fatal(e)
-      errorMsg = e
-    template = self.getTemplate('/events/event/attributes/'
-                                  + 'attributesModal.html')
-    cbDefinitions = self.def_attributesBroker.getCBValues(
-                                                    obj.definition.identifier)
-    if not (attributes is None):
-      if (len(attributes) == 1):
-        attribute = attributes[0]
-      else:
-        attribute = None
-        errorMsg = '{0} Please try again'.format(errorMsg)
-    return template.render(eventID=eventID,
-                           objectID=objectID,
-                           attribute=attribute,
-                           cbDefinitions=cbDefinitions,
-                           errorMsg=errorMsg)
+    if not eventID is None:
+      attributeID = params.get('attributeID', None)
+      objectID = params.get('objectID', None)
+      definition = params.get('definition', None)
+      action = params.get('action', None)
+      # remove unnecessary elements from the parameters
+      params = { k : v for k, v in params.iteritems() if k not in ['eventID',
+                                                                   'attributeID',
+                                                                   'objectID',
+                                                                   'definition',
+                                                                   'action'] }
+      errorMsg = ''
+      attributes = list()
+      # right checks
+      event = self.eventBroker.getByID(eventID)
+      self.checkIfViewable(event.groups,
+                           self.getUser().identifier == event.creator.identifier)
+      obj = self.objectBroker.getByID(objectID)
+      try:
+        if action != 'remove':
+          definition = self.def_attributesBroker.getByID(definition)
+          handler = HandlerBase.getHandler(definition)
+          # expect generated attributes back
+          attributes = handler.populateAttributes(params,
+                                                  obj,
+                                                  definition,
+                                                  self.getUser())  # from handler
+          if attributes is None:
+            raise HandlerException(('{0}.getAttributes '
+                                    + 'does not return attributes ').format(
+                                                          definition.handlerName))
+          if not isinstance(attributes, types.StringTypes):
+            if not isinstance(attributes, types.ListType):
+              if isinstance(attributes, Attribute):
+                temp = attributes
+                attributes = list()
+                attributes.append(temp)
+        # doAction for all attributes
+        if action == 'insert':
+          # TODO: update event
+          for attribute in attributes:
+            self.attributeBroker.insert(attribute, commit=False)
+        if action == 'remove':
+          self.attributeBroker.removeByID(attributeID, commit=True)
+        self.attributeBroker.doCommit(True)
+        return self.returnAjaxOK()
+      except ValidationException as e:
+        self.getLogger().info(e)
+        errorMsg = e
+      except BrokerException as e:
+        self.getLogger().fatal(e)
+        errorMsg = e
+      except HandlerException as e:
+        self.getLogger().fatal(e)
+        errorMsg = e
+      template = self.getTemplate('/events/event/attributes/'
+                                    + 'attributesModal.html')
+      cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                      obj.definition.identifier)
+      if not (attributes is None):
+        if (len(attributes) == 1):
+          attribute = attributes[0]
+        else:
+          attribute = None
+          errorMsg = '{0} Please try again'.format(errorMsg)
+      return template.render(eventID=eventID,
+                             objectID=objectID,
+                             attribute=attribute,
+                             cbDefinitions=cbDefinitions,
+                             errorMsg=errorMsg)
 
   @cherrypy.expose
   @require()
@@ -202,11 +203,16 @@ class AttributesController(BaseController):
     :returns: generated HTML
     """
     # get Definition
-    definition = self.def_attributesBroker.getByID(defattribID)
-    handler = HandlerBase.getHandler(definition)
+
+
     attribute = None
     if not attributeID is None:
       attribute = self.attributeBroker.getByID(attributeID)
+      definition = attribute.definition
+    else:
+      definition = self.def_attributesBroker.getByID(defattribID)
+
+    handler = HandlerBase.getHandler(definition)
     if enabled == '1':
       enableView = True
     else:

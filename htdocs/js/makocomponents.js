@@ -30,7 +30,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
         url: uri,
         type: "post",
         data: serializedData,
-        timeout: 3000
+        timeout: 10000
     });
 
     // callback handler that will be called on success

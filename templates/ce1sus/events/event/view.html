@@ -41,9 +41,7 @@ function editComment(eventID,commentID) {
   <div class="span8">
     <legend>Objects</legend>
 <%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/> 
-    <legend>Related Event/Object/Attribute</legend>
-<%call expr="pagination.pagination('objectsTable2',objectPaginator,hasSearch=False)"/> 
-
+<br/><br/>
 <legend>Comments</legend>
 <table class="table table-striped table-hover table-condensed">
   <thead>
@@ -73,13 +71,11 @@ function editComment(eventID,commentID) {
 	      <td>
 		      <div class="btn-group">
 		          <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="icon-pencil" title="Edit"/></i></a>  
-		            <button class="btn btn-danger"
+		            <a href="#"  role="button"
 	                onclick="if (confirm('Are you sure you want to delete?')) {
 	                    dialogCall('/events/event/comment/modifyComment?commentID=${comment.identifier}&eventID=${event.identifier}&action=remove',
 	                               'eventsTabTabContent',
-	                               '/events/event/view/${event.identifier}')}">
-	                Delete
-	                </button>
+	                               '/events/event/view/${event.identifier}')}"><i class="icon-remove" title="Remove"/></a>
 		      </div>
 	      </td>
 	    </tr>

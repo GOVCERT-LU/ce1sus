@@ -37,6 +37,28 @@ $("#${id}").on("hide", function() { // wire up modal when shown
 <!-- END GenericModal -->
 </%def>
 
+<%def name="genericDialogModal(id, title, big=False)">
+<%
+if big:
+  style='style="width: 80%;margin-left:-40%;"'
+else:
+  style=''
+%><!-- BEGIN GenericModal -->
+<div id="${id}" class="modal hide fade" ${style}>
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h3 id="${id}Label">${title}</h3>
+  </div>
+  <div id="${id}body" class="modal-body">
+      ${caller.body()}
+  </div>
+  <div id="${id}Footer" class="modal-footer">
+    <button class="btn" data-dismiss="modal">Close</button>
+  </div>
+</div>
+<!-- END GenericModal -->
+</%def>
+
 
 <%def name="saveButtonModal(id,title,contentUrl,enabled=True)">
     <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">

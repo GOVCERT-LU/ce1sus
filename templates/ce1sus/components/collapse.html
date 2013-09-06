@@ -1,0 +1,100 @@
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="pagination" file="/dagr/components/pagination.html"/>
+<%namespace name="objectsHelper" module="dagr.web.helpers.objects"/>
+
+<%def name="objectCollapseItem(id, parentID, eventID, object, paginator, indent=0)">
+% if not object is None: 
+        <div class="accordion-group" >
+        <div class="accordion-heading">
+            <div class="row-fluid">
+                <div class="span9">
+                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}">
+                    ${object.definition.name} - ${object.identifier}
+                    </a>
+                </div>
+                <div class="span1" style="text-align: right;">
+                     <a  class="accordion-toggle" href="#infoModal${object.identifier}" data-toggle="modal">
+                     Info
+                     </a>
+                </div>
+                <div class="span2" style="text-align: right;">
+                    <div class="btn-group">
+                       <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
+                       <a href="#" class="btn"  role="button"><i class="icon-tag"></i></a>
+                       <a href="#" class="btn btn-danger"  role="button"
+                        onclick="if (confirm('Are you sure you want to delete?')) {
+                                dialogCall('/events/event/objects/removeObject?eventID=${eventID}&objectID=${object.identifier}',
+                                           'eventTabs${eventID}TabContent',
+                                           '/events/event/objects/objects/${eventID}')}"><i class="icon-remove"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="${id}" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="scrollBarPanel">
+                    <%call expr="pagination.pagination('attributesTable'+unicode(object.identifier),paginator,hasSearch=False)"/>
+                </div>
+                <!--  dont remove this -->
+                <%call expr="baseForms.genericModalForm(modalID='addAbjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/modifyAttribute',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+				  <input type="hidden" name="action" value="insert">
+				  <%call expr="modals.saveButtonModal(id='addAbjectAttributeModal{0}'.format(object.identifier),title='Add attribute',contentUrl='/events/event/attribute/addAttribute/{0}/{1}'.format(eventID, object.identifier))"/>
+				</%call>
+				<%call expr="modals.genericDialogModal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
+				  <%call expr="forms.eventObjectForm(eventID,object, False,cbObjDefinitions)"/>
+				</%call>
+				 <!--  dont remove this -->
+            </div>
+        </div>
+    </div>
+  %endif
+</%def>
+
+<%def name="node(eventID, objectList, paginator,ident=1)">
+    %if not objectList is None:
+	<%
+    spana = ident
+    spanb = 12 - spana
+	%>
+            %for object in objectList:
+	            <%
+	            newPaginator = objectsHelper.copyObject(paginator)
+	            newPaginator.list = object.attributes
+	            #replace the %(objectID)s tag
+	            newPaginator.options.reloadUrl = newPaginator.options.reloadUrl % dict(objectID=object.identifier)
+	            for option in newPaginator.options.options:
+	               option.url = option.url % dict(objectID=object.identifier)
+	            %>
+		        <%call expr="objectCollapseItem('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),eventID, object, newPaginator, ident)"/>
+	            <div class="row-fluid">
+	            %if spana > 0:
+	            <div class="span${spana}">&nbsp;</div>
+	            %endif
+	            <div class="span${spanb}">
+	               <%call expr="node(eventID, object.children, paginator,ident+1)"/>
+	            </div>
+	            </div>
+            %endfor
+    %endif
+</%def>
+
+<%def name="menuItem(objectList,ident=0)">
+%if not objectList is None:
+  <%
+  if ident>1:
+    identString = '&nbsp;&nbsp;'*(ident-1)+'&nbsp;'
+  else:
+    if ident == 0:
+      identString = ''
+    else:
+      identString = '&nbsp;'
+   
+  %>
+  %for object in objectList:
+    <li><a href="#" onclick="showSelected('${object.identifier}')">${identString} ${object.definition.name} - ${object.identifier}</a></li>
+    <%call expr="menuItem(object.children,ident+1)"/>
+  %endfor
+%endif
+</%def>

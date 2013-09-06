@@ -6,22 +6,6 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 
 </div>
-<script type="text/javascript">
-function deleteAttribute(attributeid){
-	$("#deleteAnswer").load("/admin/attributes/modifyAttribute?identifier="
-			                +attributeid+"&action=remove", "", 
-			   function (responseText, textStatus, XMLHttpRequest) {
-			      if(textStatus == 'error') {
-			    	  alert('Delete Failed:'+responseText);
-			      }
-			      if (responseText.match(/^--OK--/gi)) {
-			    	  loadContent('groupLeft','/admin/attributes/leftContent');
-			      } else {
-			    	  alert('Delete Failed:'+responseText);
-			      }
-			});
-}
-</script>
 
 <!-- group details -->
 <h3>Attribute details:</h3>

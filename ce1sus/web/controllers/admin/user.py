@@ -171,8 +171,6 @@ class UserController(BaseController):
           user.privileged = 0
         except LDAPException as e:
           self.getLogger().error(e)
-      else:
-        action = None
       try:
         if action == 'insert' or action == 'insertLDAP':
           self.userBroker.insert(user)

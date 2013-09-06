@@ -75,7 +75,7 @@ class EventController(BaseController):
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
                           'VIEW',
-                          '/events/event/objects/objects/{0}/'.format(eventID),
+                          '/events/event/objects/objects/{0}'.format(eventID),
                           contentid='',
                           tabid='eventObjects{0}'.format(eventID))
     objectPaginator = Paginator(items=event.objects,

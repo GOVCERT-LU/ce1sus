@@ -46,7 +46,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Username',name='username',value=user.username,enabled=enabled)"/>
   <%call expr="labeledInput.labeledPasswordBox(label='Password',name='password',value=user.password,enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value=user.email,enabled=enabled)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='privileged',enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
   <%call expr="labeledInput.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
 % endif
 </%def>
@@ -113,14 +113,12 @@
 </%def>
 
 <%def name="eventObjectForm(eventID,object,enabled,cbDefinitions)">
-<div id="eventObejctForm">
+<input type="hidden" name="eventID" value="${eventID}">
 % if object is None:
-  <input type="hidden" name="eventID" value="${eventID}">
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value='',enabled=False)"/>
   <%call expr="labeledInput.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
 
 % else:
-  <input type="hidden" name="eventID" value="${eventID}">
   <input type="hidden" name="objIdentifier" value="${object.identifier}">
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='objID',value=object.identifier,enabled=False)"/>
   <%call expr="labeledInput.labeledComboBox(label='Definition',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True,selected=object.def_object_id)"/>
@@ -131,7 +129,8 @@
 
 </%def>
 
-<%def name="eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)">
+<%def name="eventAttributeForm(id,eventID,objectID,attribute,enabled,cbDefinitions)">
+<div id="${id}">
 <input type="hidden" name="eventID" value="${eventID}">
 <input type="hidden" name="objectID" value="${objectID}">
 % if attribute is None:
@@ -159,21 +158,22 @@
   <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value='',enabled=False)"/>
 %endif
 </div>
+</div>
 <script type="text/javascript">
 $(document).ready(function(){
     %if (enabled):
-        $("#eventObejctForm select#definitionID").change(function(event){
+        $("#${id} select#definitionID").change(function(event){
             value = $(this).val();
             if (value) {
                 loadContent('editBox','/events/event/attribute/inputHandler/'+$(this).val()+'/1');
             } else {
-                $('#eventObejctForm #editBox').html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="span9">Please select something</div></div>');
+                $('#${id} #editBox').html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="span9">Please select something</div></div>');
             }
         });
     %else:
-        value = $("#eventObejctForm input#definitionID:last").val();
         %if not attribute is None:
-              loadContent('editBox','/events/event/attribute/inputHandler/'+value+'/0/${attribute.identifier}');
+        	value = $("#${id} input#definitionID:last").val();
+            loadContent('editBox','/events/event/attribute/inputHandler/'+value+'/0/${attribute.identifier}');
         %endif
     %endif
     

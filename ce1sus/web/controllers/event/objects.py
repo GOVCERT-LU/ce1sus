@@ -46,76 +46,55 @@ class ObjectsController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/events/event/objects/objectsBase.html')
-    return template.render(eventID=eventID,
-                           objectID=objectID)
-
-  @cherrypy.expose
-  @require()
-  def all(self, eventID):
-    """
-     renders the file with the all the objects belonging to an event
-
-    :returns: generated HTML
-    """
-    template = self.getTemplate('/events/event/objects/allObjects.html')
     event = self.eventBroker.getByID(eventID)
 
-    return template.render(eventID=eventID,
-                           objectList=event.objects,
-                           cbObjDefinitions=self.def_objectBroker.getCBValues()
-                           )
 
-  @cherrypy.expose
-  @require()
-  def detail(self, eventID, objectID):
-    """
-     renders the file with the details (attributes, object attributes) of the
-     requested object
+    # if event has objects
 
-    :returns: generated HTML
-    """
-    template = self.getTemplate('/events/event/objects/details.html')
     labels = [{'identifier':'#'},
               {'key':'Type'},
-              {'value':'Value'},
-              {'creator.username':'Creator'},
-              {'created':'CreatedOn'}]
+              {'value':'Value'}]
+    # mako will append the missing url part
     paginatorOptions = PaginatorOptions(('/events/event/objects/'
-                                         + 'detail/{0}/{1}').format(eventID,
-                                                                    objectID),
-                                        'objectRight')
+                                         + 'objects/{0}/%(objectID)s/').format(
+                                                                      eventID),
+                                        'eventTabs{0}TabContent'.format(eventID))
+    # mako will append the missing url part
     paginatorOptions.addOption('MODAL',
                                'VIEW',
                                ('/events/event/attribute/'
-                                + 'view/{0}/{1}/').format(eventID,
-                                                         objectID),
+                                + 'view/{0}/%(objectID)s/').format(eventID),
                                modalTitle='View Attribute')
+    # mako will append the missing url part
     paginatorOptions.addOption('DIALOG',
                                'REMOVE',
                                ('/events/event/attribute/modifyAttribute?'
-                                + 'action=remove&eventID={0}&objectID={1}'
-                                + '&attributeID=').format(eventID, objectID),
+                                + 'action=remove&eventID={0}&objectID'
+                                + '=%(objectID)s&attributeID=').format(eventID),
                                refresh=True)
     # will be associated in the view!!! only to keep it simple!
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     # fill dictionary of attribute definitions but only the needed ones
-    objectList = list()
+
+
     try:
-      obj = self.objectBroker.getByID(objectID)
-      cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
+      for obj in event.objects:
+        cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
                                                       obj.definition.identifier)
     except BrokerException:
-      obj = None
       cbAttributeDefintiionsDict = dict()
-    objectList.append(obj)
-    cbObjDefinitions = self.def_objectBroker.getCBValues()
+
+
+
     return template.render(eventID=eventID,
-                          cbObjDefinitions=cbObjDefinitions,
-                          cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
-                          paginator=paginator,
-                          object=obj)
+                           objectList=event.objects,
+                           cbObjDefinitions=self.def_objectBroker.getCBValues(),
+                           cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
+                           paginator=paginator,
+                           objectID=objectID)
+
 
   @require(privileged())
   @cherrypy.expose

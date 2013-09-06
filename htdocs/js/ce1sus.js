@@ -17,3 +17,29 @@ function setCBChange(element, contentid) {
         }
     });
 }
+
+function showSelected(identifier){
+	$('.collapse').each(function () {
+		id = $(this).attr('id');
+		if (id == 'collapseItem'+identifier) {
+			$(this).collapse('show').delay(300);
+		} else {
+			$(this).collapse('hide').delay(300);
+		}
+	});
+}
+
+function openAllColapses(except){
+	$('.collapse').each(function () {
+		//This is just due to the workaround
+		if (except != 'None') {
+			id = $(this).attr('id');
+			if ( id == 'collapseItem'+except) {
+				$(this).collapse('show').delay(300);
+			}
+		} else {
+			$(this).collapse('show').delay(300);}
+		} 
+	);
+}
+

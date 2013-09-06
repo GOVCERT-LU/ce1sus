@@ -6,4 +6,9 @@
 <%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/>
 
 <%call expr="messagesAndText.error(errorMsg)"/>
-<%call expr="forms.eventAttributeForm(eventID,objectID,attribute,enabled,cbDefinitions)"/>
+<%
+identifier = 'eventAttributeFromNone'
+if not attribute is None:
+  identifier = 'eventAttributeFrom{0}'.format(attribute.identifier)
+%>
+<%call expr="forms.eventAttributeForm(identifier,eventID,objectID,attribute,enabled,cbDefinitions)"/>

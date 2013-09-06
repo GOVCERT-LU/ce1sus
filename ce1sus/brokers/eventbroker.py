@@ -287,12 +287,7 @@ class Object(BASE):
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
                             '==Object.def_object_id', innerjoin=True)
-  objects = relationship("Object", secondary=_OBJECT_CROSSREFERENCE,
-                         primaryjoin='Obj_links_Obj.c.object_id_to' +
-                         '==Object.identifier',
-                         secondaryjoin='Obj_links_Obj.c.object_id_from' +
-                         '==Object.identifier',
-                         backref="children")
+
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
                        '==Object.event_id', innerjoin=True)
@@ -301,6 +296,11 @@ class Object(BASE):
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
+  parentObject_id = Column('parentObject', Integer,
+                            ForeignKey('Objects.object_id'))
+  children = relationship("Object", primaryjoin='Object.identifier' +
+                         '==Object.parentObject_id')
+
   def addAttribute(self, attribute):
     """
     Add an attribute to this event
