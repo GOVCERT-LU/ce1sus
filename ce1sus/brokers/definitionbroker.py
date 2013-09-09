@@ -5,20 +5,21 @@ for inserting data into the database.
 
 Created on Jul 5, 2013
 """
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, ValidationException, \
- NothingFoundException, BrokerException, OperationException
+ NothingFoundException, BrokerException, OperationException, DeletionException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.helpers.validator import ObjectValidator
 from ce1sus.web.helpers.handlers.base import HandlerBase
+from dagr.helpers.converters import ObjectConverter
+import dagr.helpers.string as string
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -26,6 +27,7 @@ _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
                                           'DEF_Attributes.def_attribute_id')),
     Column('def_object_id', Integer, ForeignKey('DEF_Objects.def_object_id'))
     )
+
 
 class AttributeDefinition(BASE):
   """This is a container class for the DEF_ATTRIBUTES table."""
@@ -290,6 +292,9 @@ class AttributeDefinitionBroker(BrokerBase):
     return objects
 
   def getCBValuesForAll(self):
+    """
+    Returns all the values the combobox can use
+    """
     definitions = self.getAll()
     result = dict()
     for definition in definitions:
@@ -420,6 +425,48 @@ class AttributeDefinitionBroker(BrokerBase):
 
     self.doCommit(commit)
 
+  # pylint: disable=R0913
+  def buildAttributeDefinition(self, identifier=None, name=None, description='',
+                      regex='^.*$', classIndex=0, action='insert',
+                      handlerIndex=0):
+    """
+    puts an attribute with the data together
+
+    :param identifier: The identifier of the attribute,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param name: The name of the attribute
+    :type name: String
+    :param description: The description of this attribute
+    :type description: String
+    :param regex: The regular expression to use to verify if the value is
+                  correct
+    :type regex: String
+    :param classIndex: The index of the table to use for storing or getting the
+                       attribute actual value
+    :type classIndex: String
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+
+    :returns: AttributeDefinition
+    """
+    attribute = AttributeDefinition()
+    if not action == 'insert':
+      attribute = self.getByID(identifier)
+      if attribute.deletable == 0:
+        raise DeletionException('Attribute cannot be edited or deleted')
+    if not action == 'remove':
+      attribute.name = name
+      attribute.description = description
+      ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
+      ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+      if not string.isNotNull(regex):
+        regex = '^.*$'
+      attribute.regex = regex
+    if action == 'insert':
+      attribute.deletable = 1
+    return attribute
+
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
   def getBrokerClass(self):
@@ -527,3 +574,29 @@ class ObjectDefinitionBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+  @staticmethod
+  def buildObjectDefinition(identifier=None, name=None,
+                  description=None, action='insert'):
+    """
+    puts an object with the data together
+
+    :param identifier: The identifier of the object,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param name: The name of the object
+    :type name: String
+    :param description: The description of this object
+    :type description: String
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+
+    :returns: ObjectDefinition
+    """
+    obj = ObjectDefinition()
+    if not action == 'insert':
+      obj.identifier = identifier
+    if not action == 'remove':
+      obj.name = name
+      obj.description = description
+    return obj

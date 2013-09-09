@@ -22,6 +22,8 @@ from dagr.db.session import BASE
 from dagr.db.broker import BrokerException
 from dagr.helpers.validator import ObjectValidator
 import re
+from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.ldaphandling import LDAPHandler
 
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
 __REL_USER_GROUPS = Table(
@@ -80,14 +82,15 @@ class User(BASE):
     """
     ObjectValidator.validateAlNum(self, 'username', minLength=3)
     # Don't update if the password is already a hash
-    if not (self.password == 'EXTERNALAUTH' and re.match('^[0-9a-f]{40}$', self.password) is None):
-        ObjectValidator.validateRegex(self,
-                                    'password',
-                                    ("(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
-                                     + "(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$"),
-                                    ('Password has to be set and contain Upper/'
-                                     + 'Lower cases, symbols and numbers and have'
-                                     + ' at least a length of 8'))
+    if not (self.password == 'EXTERNALAUTH' and re.match('^[0-9a-f]{40}$',
+                                                        self.password) is None):
+      ObjectValidator.validateRegex(self,
+                                'password',
+                                (r"(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
+                                + r"(?=.*[0-9])(?=.*[\W_])(?=^.*[^\s].*$).*$"),
+                                ('Password has to be set and contain Upper and'
+                                + 'Lower cases, symbols and numbers and have'
+                                + ' at least a length of 8'))
     ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
     if not self.last_login is None:
@@ -241,6 +244,35 @@ class GroupBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+
+  # pylint: disable=R0903
+  @staticmethod
+  def buildGroup(identifier=None, name=None, shareTLP=0,
+                  description=None, action='insert'):
+    """
+    puts a group with the data together
+
+    :param identifier: The identifier of the group,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param name: The name of the group
+    :type name: String
+    :param description: The description of this group
+    :type description: String
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+
+    :returns: Group
+    """
+    group = Group()
+    if not action == 'insert':
+      group.identifier = identifier
+    if not action == 'remove':
+      group.name = name
+      ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
+      group.description = description
+    return group
 
 class UserBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -432,3 +464,47 @@ class UserBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+  # pylint: disable=R0913
+  @staticmethod
+  def buildUser(identifier=None, username=None, password=None,
+                 priv=None, email=None, action='insert', disabled=None):
+    """
+    puts a user with the data together
+
+    :param identifier: The identifier of the user,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param username: The username of the user
+    :type username: String
+    :param password: The password of the user
+    :type password: String
+    :param email: The email of the user
+    :type email: String
+    :param priv: Is the user privileged to access the administration section
+    :type priv: Integer
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+
+    :returns: generated HTML
+    """
+    user = User()
+    if not action == 'insert':
+      user.identifier = identifier
+    if not action == 'remove':
+      user.email = email
+      user.password = password
+      user.username = username
+      ObjectConverter.setInteger(user, 'disabled', disabled)
+      ObjectConverter.setInteger(user, 'privileged', priv)
+    if action == 'insertLDAP':
+      user.identifier = None
+      lh = LDAPHandler.getInstance()
+      lh.open()
+      ldapUser = lh.getUser(identifier)
+      lh.close()
+      user.username = ldapUser.uid
+      user.password = ldapUser.password
+      user.email = ldapUser.mail
+      user.privileged = 0
+    return user

@@ -37,9 +37,18 @@ class FileHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
 
+  # pylint: disable=W0211
   @staticmethod
-  def getAttributesNameList():
-    return ('filename', 'md5', 'sha1', 'sha256', 'sha384', 'sha512', 'size', 'mimeType', 'location')
+  def getAttributesNameList(self):
+    return ('filename',
+            'md5',
+            'sha1',
+            'sha256',
+            'sha384',
+            'sha512',
+            'size',
+            'mimeType',
+            'location')
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)

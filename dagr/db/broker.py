@@ -52,6 +52,12 @@ class OperationException(BrokerException):
   def __init__(self, message):
     BrokerException.__init__(self, message)
 
+class DeletionException(BrokerException):
+  """
+  Deletion Exception
+  """
+  def __init__(self, message):
+    BrokerException.__init__(self, message)
 
 # Created on Jul 4, 2013
 

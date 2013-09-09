@@ -14,8 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.web.controllers.base import BaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from datetime import datetime
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, Object
+from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require, requireReferer
@@ -82,9 +81,12 @@ class ObjectsController(BaseController):
 
 
     try:
-      for obj in event.objects:
-        cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
-                                                      obj.definition.identifier)
+      if len(event.objects) > 0:
+        for obj in event.objects:
+          cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
+                                                        obj.definition.identifier)
+      else:
+        cbAttributeDefintiionsDict = dict()
     except BrokerException:
       cbAttributeDefintiionsDict = dict()
 
@@ -151,6 +153,7 @@ class ObjectsController(BaseController):
 
     :returns: generated HTML
     """
+    template = self.getTemplate('/events/event/objects/objectModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
@@ -158,38 +161,23 @@ class ObjectsController(BaseController):
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
-    obj = Object()
-    obj.identifier = None
-    obj.def_object_id = definition
-    obj.definition = self.def_objectBroker.getByID(obj.def_object_id)
-    obj.created = datetime.now()
-    obj.event_id = eventID
-    obj.event = event
-    obj.creator_id = self.getUser().identifier
-    errors = False
-    errorMsg = None
+    obj = self.objectBroker.buildObject(None,
+                                        event,
+                                      self.def_objectBroker.getByID(definition),
+                                      self.getUser())
     try:
       self.objectBroker.insert(obj)
       # TODO: update event
       # self.updateEvent(event)
-      obj = None
+      return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      errors = True
+      return template.render(object=obj,
+                          cbObjDefinitions=self.def_objectBroker.getCBValues(),
+                             eventID=eventID)
     except BrokerException as e:
-      self.getLogger().critical(e)
-      errorMsg = 'An unexpected error occured: {0}'.format(e)
-      errors = True
-    if errors:
-      template = self.getTemplate('/events/event/objects/objectModal.html')
-      cbObjDefinitions = self.def_objectBroker.getCBValues()
-      return template.render(cbObjDefinitions=cbObjDefinitions,
-                             eventID=eventID,
-                             object=obj,
-                             errorMsg=errorMsg)
-    else:
-      # ok everything went right
-      return self.returnAjaxOK()
+      self.getLogger().error(e)
+      return 'An unexpected error occured: {0}'.format(e)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -204,6 +192,7 @@ class ObjectsController(BaseController):
 
     :returns: generated HTML
     """
+    template = self.getTemplate('/events/event/objects/objectModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
@@ -212,39 +201,26 @@ class ObjectsController(BaseController):
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
 
-    obj = Object()
-    obj.identifier = None
-    obj.def_object_id = definition
-    obj.definition = self.def_objectBroker.getByID(obj.def_object_id)
-    obj.created = datetime.now()
-    obj.event_id = None
-    obj.event = None
-    obj.parentObject_id = objectID
-    obj.creator_id = self.getUser().identifier
-    errors = False
-    errorMsg = None
+    obj = self.objectBroker.build(None,
+                                  None,
+                                  self.def_objectBroker.getByID(definition),
+                                  self.getUser(),
+                                  objectID)
     try:
       self.objectBroker.insert(obj)
       # TODO: update event
       # self.updateEvent(event)
-      obj = None
+      return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      errors = True
+      return template.render(eventID=None,
+                          cbObjDefinitions=self.def_objectBroker.getCBValues(),
+                             object=obj)
     except BrokerException as e:
       self.getLogger().critical(e)
-      errorMsg = 'An unexpected error occured: {0}'.format(e)
-      errors = True
-    if errors:
-      template = self.getTemplate('/events/event/objects/objectModal.html')
-      cbObjDefinitions = self.def_objectBroker.getCBValues()
-      return template.render(cbObjDefinitions=cbObjDefinitions,
-                             eventID=None,
-                             object=obj,
-                             errorMsg=errorMsg)
-    else:
-      # ok everything went right
-      return self.returnAjaxOK()
+      return 'An unexpected error occured: {0}'.format(e)
+
+
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -257,13 +233,10 @@ class ObjectsController(BaseController):
     self.checkIfViewable(event.groups, self.getUser().identifier ==
                          event.creator.identifier)
     # remove object
-    errors = False
     try:
       self.objectBroker.removeByID(objectID)
+      return self.returnAjaxOK()
     except BrokerException as e:
       self.getLogger().critical(e)
-      errors = True
-    if errors:
       return 'Et ass einfach net gangen'
-    else:
-      return self.returnAjaxOK()
+

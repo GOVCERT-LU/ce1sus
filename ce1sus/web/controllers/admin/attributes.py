@@ -16,18 +16,9 @@ import cherrypy
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
-from dagr.db.broker import OperationException, BrokerException, \
-  ValidationException, NothingFoundException
-from dagr.helpers.converters import ObjectConverter
+from dagr.db.broker import BrokerException, \
+  ValidationException, NothingFoundException, DeletionException
 import types as types
-import dagr.helpers.string as string
-
-class DeletionException(Exception):
-  """
-  Deletion Exception
-  """
-  def __init__(self, message):
-    Exception.__init__(self, message)
 
 class AttributeController(BaseController):
   """Controller handling all the requests for attributes"""
@@ -117,6 +108,7 @@ class AttributeController(BaseController):
                            cbValues=cbValues,
                            cbHandlerValues=cbHandlerValues)
 
+  # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyAttribute(self, identifier=None, name=None, description='',
@@ -144,56 +136,37 @@ class AttributeController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/attributes/attributeModal.html')
-
-
-    errorMsg = None
-    attribute = AttributeDefinition()
     try:
-      if not action == 'insert':
-        attribute = self.attributeBroker.getByID(identifier)
-        if attribute.deletable == 0:
-          raise DeletionException('Attribute cannot be edited or deleted')
-      if not action == 'remove':
-        attribute.name = name
-        attribute.description = description
-        ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
-        ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
-
-        if not string.isNotNull(regex):
-          regex = '^.*$'
-        attribute.regex = regex
-        try:
-          if action == 'insert':
-            attribute.deletable = 1
-            self.attributeBroker.insert(attribute)
-          if action == 'update':
-            self.attributeBroker.update(attribute)
-          action = None
-        except ValidationException:
-          self.getLogger().info('Attribute is invalid')
-      else:
-        try:
-          self.attributeBroker.removeByID(attribute.identifier)
-          action = None
-        except OperationException:
-          errorMsg = ('Cannot delete this attribute.' +
-                      ' The attribute is still referenced.')
-
-    except BrokerException as e:
-      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-      return e
+      attribute = self.attributeBroker.buildAttributeDefinition(identifier,
+                                                              name,
+                                                              description,
+                                                              regex,
+                                                              classIndex,
+                                                              action,
+                                                              handlerIndex)
     except DeletionException as e:
       return e
 
-    if action == None:
-      # ok everything went right
+    try:
+      if action == 'insert':
+        self.attributeBroker.insert(attribute)
+      if action == 'update':
+        self.attributeBroker.update(attribute)
+      if action == 'remove':
+        self.attributeBroker.removeByID(attribute.identifier)
+        # ok everything went right
       return self.returnAjaxOK()
-    else:
+    except ValidationException:
+      self.getLogger().info('Attribute is invalid')
       return template.render(attribute=attribute,
-                             errorMsg=errorMsg,
                              cbValues=AttributeDefinition.getTableDefinitions(),
                              cbHandlerValues=
                              AttributeDefinition.getHandlerDefinitions())
+    except DeletionException as e:
+      return e
+    except BrokerException as e:
+      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
+      return e
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

@@ -11,12 +11,10 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import copy
 from dagr.web.controllers.base import BaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, requireReferer
-from ce1sus.brokers.eventbroker import EventBroker, Comment, CommentBroker
-from datetime import datetime
+from ce1sus.brokers.eventbroker import EventBroker, CommentBroker
 from dagr.db.broker import NothingFoundException, ValidationException, \
 BrokerException
 
@@ -53,27 +51,14 @@ class CommentsController(BaseController):
     """
     Modifications of a comment
     """
+    template = self.getTemplate('/events/event/comments/commentModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier ==
                          event.creator.identifier)
-    comment = Comment()
-    errorMsg = ''
-    if not action == 'insert':
-      comment_orig = self.commentBroker.getByID(commentID)
-      # dont want to change the original in case the user cancel!
-      comment = copy.copy(comment_orig)
-    comment.modified = datetime.now()
-    comment.modifier = self.getUser()
-    comment.modifier_id = comment.modifier.identifier
-    if action == 'insert':
-      comment.comment = commentText
-      comment.creator = self.getUser()
-      comment.creator_id = comment.creator.identifier
-      comment.event = event
-      comment.event_id = event.identifier
-      comment.created = datetime.now()
+    comment = self.commentBroker.buildComment(event, self.getUser(), commentID,
+                         commentText, action)
     try:
       if action == 'insert':
         self.commentBroker.insert(comment)
@@ -82,19 +67,14 @@ class CommentsController(BaseController):
         self.commentBroker.update(comment)
       if action == 'remove':
         self.commentBroker.removeByID(comment.identifier)
+      return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
+      return template.render(eventID=eventID,
+                             comment=comment)
     except BrokerException as e:
       self.getLogger().fatal(e)
-      errorMsg = 'An unexpected error occurred: {0}'.format(e)
-
-    if errorMsg:
-      template = self.getTemplate('/events/event/comments/commentModal.html')
-      return template.render(eventID=eventID,
-                             comment=comment,
-                             errorMsg=errorMsg)
-    else:
-      return self.returnAjaxOK()
+      return 'An unexpected error occurred: {0}'.format(e)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))

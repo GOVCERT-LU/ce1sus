@@ -91,6 +91,7 @@ class ForeignKeysListener(PoolListener):
   """
   Foreign Key listener to set the foreign_keys
   """
+  # pylint: disable=W0613
   def connect(self, dbapi_connection, connection_record):
     """
     overridden method of PoolListener

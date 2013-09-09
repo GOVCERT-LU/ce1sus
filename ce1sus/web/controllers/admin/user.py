@@ -10,24 +10,15 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
 from dagr.web.controllers.base import BaseController
 import cherrypy
-from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, User
+from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.web.helpers.pagination import Paginator
 from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
 from dagr.db.broker import OperationException, BrokerException, \
-  ValidationException
+  ValidationException, DeletionException
 import types as types
-from dagr.helpers.converters import ObjectConverter
-
-class DeletionException(Exception):
-  """
-  Deletion Exception
-  """
-  def __init__(self, message):
-    Exception.__init__(self, message)
 
 class UserController(BaseController):
   """Controller handling all the requests for users"""
@@ -126,7 +117,7 @@ class UserController(BaseController):
     lh.close()
     return template.render(ldapPaginator=ldapPaginator, errorMsg=None)
 
-
+  # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
   @require(privileged())
   @cherrypy.expose
@@ -154,58 +145,37 @@ class UserController(BaseController):
     """
     template = self.getTemplate('/admin/users/userModal.html')
     del ldapUsersTable_length
-    errorMsg = None
-    user = User()
-    if not action == 'insert':
-      user.identifier = identifier
-    if not action == 'remove':
-      user.email = email
-      user.password = password
-      user.username = username
-      ObjectConverter.setInteger(user, 'disabled', disabled)
-      ObjectConverter.setInteger(user, 'privileged', priv)
-      if action == 'insertLDAP':
-        user.identifier = None
-        # get LDAP user
-        try:
-          lh = LDAPHandler.getInstance()
-          lh.open()
-          ldapUser = lh.getUser(identifier)
-          lh.close()
-          user.username = ldapUser.uid
-          user.password = ldapUser.password
-          user.email = ldapUser.mail
-          user.privileged = 0
-        except LDAPException as e:
-          self.getLogger().error(e)
-      try:
-        if action == 'insert' or action == 'insertLDAP':
-          self.userBroker.insert(user)
-        if action == 'update':
-          self.userBroker.update(user)
-        action = None
-      except ValidationException:
-        self.getLogger().info('User is invalid')
-      except BrokerException as e:
-        self.getLogger().error('An unexpected error occurred: {0}'.format(e))
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-    else:
-      try:
+    user = self.userBroker.buildUser(identifier, username, password,
+                 priv, email, action, disabled)
+    try:
+      if action == 'insert' or action == 'insertLDAP':
+        self.userBroker.insert(user)
+      if action == 'update':
+        self.userBroker.update(user)
+      action = None
+      if action == 'remove':
         if (user.identifier == '1'):
           raise DeletionException('First user cannot be removed.')
         self.userBroker.removeByID(user.identifier)
-      except OperationException:
-        errorMsg = ('Cannot delete user. The user is referenced by elements.'
-                    + ' Remove his groups instead.')
-      except DeletionException as e:
-        return e
-      action = None
-    if action == None:
-      # ok everything went right
       return self.returnAjaxOK()
-    else:
-      return template.render(user=user, errorMsg=errorMsg)
+    except OperationException as e:
+      self.getLogger().info('User tried to delete referenced user.')
+      return ('Cannot delete user. The user is referenced by elements.'
+                    + ' Disable this user instead.')
+    except LDAPException as e:
+      self.getLogger().error('An unexpected LDAPException occurred: {0}'
+                             .format(e))
+      return e
+    except ValidationException:
+      self.getLogger().debug('User is invalid')
+      return template.render(user=user)
+    except DeletionException as e:
+      self.getLogger().info('User tried to delete undeletable user.')
+      return e
+    except BrokerException as e:
+      self.getLogger().error('An unexpected BrokerException occurred: {0}'
+                             .format(e))
+      return e
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

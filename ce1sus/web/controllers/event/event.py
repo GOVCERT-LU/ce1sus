@@ -12,22 +12,23 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'"""module holding all controllers needed for
                         the event handling"""
 
-import copy
 from dagr.web.controllers.base import BaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
                   AttributeBroker, Event, CommentBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require, requireReferer
-from ce1sus.api.ticketsystem import TicketSystemBase
 from dagr.db.broker import ValidationException, BrokerException
-from dagr.helpers.converters import ObjectConverter
 
+
+# pylint: disable=R0903,R0902
 class Relation(object):
+  """
+  Relation container used for displaying the relations
+  """
   def __init__(self):
     self.identifier = 0
     self.eventID = 0
@@ -80,10 +81,7 @@ class EventController(BaseController):
     self.checkIfViewable(event.groups,
                          self.getUser().identifier ==
                          event.creator.identifier)
-    cbStatusValues = Status.getDefinitions()
-    cbTLPValues = TLPLevel.getDefinitions()
-    cbAnalysisValues = Analysis.getDefinitions()
-    cbRiskValues = Risk.getDefinitions()
+
     objectLabels = [{'identifier':'#'},
               {'definition.name':'Type'},
               {'creator.username':'Created by'},
@@ -111,14 +109,18 @@ class EventController(BaseController):
     try:
       # get for each object
       relations = self.__getRelationsObjects(event.objects)
-
       # prepare list
-
       for relation in relations:
         temp = Relation()
-        temp.eventID = relation.sameAttribute.object.event.identifier
-        temp.identifier = temp.eventID
-        temp.eventName = relation.sameAttribute.object.event.title
+        if relation.sameAttribute.object.event is None:
+          event = self.eventBroker.getEventByObjectID(relation
+                                              .sameAttribute.object
+                                              .parentObject_id)
+        else:
+          event = relation.sameAttribute.object.event
+        temp.eventID = event.identifier
+        temp.identifier = event.identifier
+        temp.eventName = event.title
         temp.objectID = relation.sameAttribute.object.identifier
         temp.objectName = relation.sameAttribute.object.definition.name
         temp.attributeID = relation.sameAttribute.identifier
@@ -143,19 +145,35 @@ class EventController(BaseController):
     return template.render(objectPaginator=objectPaginator,
                            relationPaginator=relationPaginator,
                            event=event,
-                           cbStatusValues=cbStatusValues,
-                           cbTLPValues=cbTLPValues,
+                           cbStatusValues=Status.getDefinitions(),
+                           cbTLPValues=TLPLevel.getDefinitions(),
                            comments=event.comments,
-                           cbAnalysisValues=cbAnalysisValues,
-                           cbRiskValues=cbRiskValues)
+                           cbAnalysisValues=Analysis.getDefinitions(),
+                           cbRiskValues=Risk.getDefinitions())
 
   def __getRelationsObjects(self, objects):
+    """
+    Returns the relation of the given objects
+
+    :param objects: list of Objects
+    :type objects: List of Objects
+
+    :returns: List of Relations
+    """
     result = list()
     for obj in objects:
       result = result + self.__getRelationsObject(obj)
     return result
 
   def __getRelationsObject(self, obj):
+    """
+    Returns the relation of the given object
+
+    :param objects: Object to find the relation
+    :type objects: Objects
+
+    :returns: List of Relations
+    """
     return self.objectBroker.getRelationsByID(obj.identifier)
 
 
@@ -174,10 +192,10 @@ class EventController(BaseController):
                            event.creator.identifier)
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
-    return EventController.__populateTemplate(None, event, template)
+    return EventController.__populateTemplate(event, template)
 
   @staticmethod
-  def __populateTemplate(errorMsg, event, template):
+  def __populateTemplate(event, template):
     """
     Fills the the template
     """
@@ -185,13 +203,14 @@ class EventController(BaseController):
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
     cbRiskValues = Risk.getDefinitions()
-    string = template.render(errorMsg=errorMsg, event=event,
+    string = template.render(event=event,
       cbStatusValues=cbStatusValues,
       cbAnalysisValues=cbAnalysisValues,
       cbRiskValues=cbRiskValues,
       cbTLPValues=cbTLPValues)
     return string
 
+  # pylint: disable=R0914
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def modifyEvent(self, **kwargs):
@@ -214,70 +233,42 @@ class EventController(BaseController):
 
     :returns: generated HTML
     """
-    params = kwargs
-    identifier = params.get('identifier', None)
-    action = params.get('action', None)
-    status = params.get('status', None)
-    tlp_index = params.get('tlp_index', None)
-    description = params.get('description', None)
-    name = params.get('name', None)
-    published = params.get('published', None)
-    first_seen = params.get('first_seen', None)
-    last_seen = params.get('last_seen', None)
-    risk = params.get('risk', None)
-    analysis = params.get('analysis', None)
-    errorMsg = None
-    errors = False
+    identifier = kwargs.get('identifier', None)
+    action = kwargs.get('action', None)
+    status = kwargs.get('status', None)
+    tlp_index = kwargs.get('tlp_index', None)
+    description = kwargs.get('description', None)
+    name = kwargs.get('name', None)
+    published = kwargs.get('published', None)
+    first_seen = kwargs.get('first_seen', None)
+    last_seen = kwargs.get('last_seen', None)
+    risk = kwargs.get('risk', None)
+    analysis = kwargs.get('analysis', None)
     # fill in the values
     event = Event()
-    if not action == 'insert':
-      template = self.getTemplate('/events/event/eventModal.html')
-      # dont want to change the original in case the user cancel!
-      event_orig = self.eventBroker.getByID(identifier)
-      event = copy.copy(event_orig)
-      # right checks only if there is a change!!!!
-      self.checkIfViewable(
-                    event_orig.groups, self.getUser().identifier ==
-                    event_orig.creator.identifier)
-    if not action == 'remove':
-      event.title = name
-      event.description = description
-      ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
-      ObjectConverter.setInteger(event, 'status_id', status)
-      ObjectConverter.setInteger(event, 'published', published)
-      event.modified = datetime.now()
-      event.modifier = self.getUser()
-      event.modifier_id = event.modifier.identifier
-      if first_seen:
-        ObjectConverter.setDate(event, 'first_seen', first_seen)
-      else:
-        event.first_seen = datetime.now()
-      if last_seen:
-        ObjectConverter.setDate(event, 'last_seen', last_seen)
-      else:
-        event.last_seen = datetime.now()
-      ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
-      ObjectConverter.setInteger(event, 'risk_id', risk)
     try:
+      if not action == 'insert':
+        template = self.getTemplate('/events/event/eventModal.html')
+        event = self.eventBroker.buildEvent(identifier, action, status,
+                                            tlp_index, description, name,
+                                            published, first_seen, last_seen,
+                                            risk, analysis, self.getUser())
+        # right checks only if there is a change!!!!
+        self.checkIfViewable(
+                      event.groups, self.getUser().identifier ==
+                      event.creator.identifier)
       if action == 'insert':
         template = self.getTemplate('/events/addEvent.html')
-        event.created = datetime.now()
-        event.creator = self.getUser()
-        event.creator_id = event.creator.identifier
         self.eventBroker.insert(event)
       if action == 'update':
-        # get original event
         self.eventBroker.update(event)
       if action == 'remove':
         self.eventBroker.removeByID(event.identifier)
+      return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      errors = True
+      return EventController.__populateTemplate(event, template)
     except BrokerException as e:
-      errorMsg = 'An unexpected error occurred: {0}'.format(e)
-      self.getLogger().debug('An unexpected error occurred: {0}'.format(e))
-      errors = True
-    if errors:
-      return EventController.__populateTemplate(errorMsg, event, template)
-    else:
-      return self.returnAjaxOK()
+      self.getLogger().error('An unexpected error occurred: {0}'.format(e))
+      return 'An unexpected error occurred: {0}'.format(e)
+

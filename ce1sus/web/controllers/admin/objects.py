@@ -13,12 +13,10 @@ __license__ = 'GPL v3+'
 
 from dagr.web.controllers.base import BaseController
 import cherrypy
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
-ObjectDefinition
+from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
-
 
 class ObjectController(BaseController):
   """Controller handling all the requests for objects"""
@@ -95,6 +93,7 @@ class ObjectController(BaseController):
     template = self.getTemplate('/admin/objects/objectModal.html')
     return template.render(object=None, errorMsg=None)
 
+
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyObject(self, identifier=None, name=None,
@@ -115,37 +114,25 @@ class ObjectController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/objects/objectModal.html')
-
-    errorMsg = None
-    obj = ObjectDefinition()
-    if not action == 'insert':
-      obj.identifier = identifier
-    if not action == 'remove':
-      obj.name = name
-      obj.description = description
-      try:
-        if action == 'insert':
-          self.objectBroker.insert(obj)
-        if action == 'update':
-          self.objectBroker.update(obj)
-        action = None
-      except ValidationException:
-        self.getLogger().info('Object is invalid')
-      except BrokerException as e:
-        self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-        obj = None
-    else:
-      try:
+    obj = self.objectBroker.buildObjectDefinition(identifier,
+                                                  name,
+                                                  description,
+                                                  action)
+    try:
+      if action == 'insert':
+        self.objectBroker.insert(obj)
+      if action == 'update':
+        self.objectBroker.update(obj)
+      if action == 'remove':
         self.objectBroker.removeByID(obj.identifier)
-        action = None
-        obj = None
-      except OperationException:
-        errorMsg = 'Cannot delete this object. The object is still referenced.'
-    if action == None:
-      # ok everything went right
       return self.returnAjaxOK()
-    else:
-      return template.render(object=obj, errorMsg=errorMsg)
+    except OperationException as e:
+      self.getLogger().info('OperationError occurred: {0}'.format(e))
+      return 'Cannot delete this object. The object is still referenced.'
+    except ValidationException:
+      self.getLogger().info('Object is invalid')
+      return template.render(object=obj)
+    except BrokerException as e:
+      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
+      return e
 

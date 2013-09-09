@@ -1,5 +1,4 @@
 """module providing authentication"""
-from chardet.constants import False
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -65,6 +64,7 @@ class Protector(object):
         return "Incorrect username or password."
     return None
 
+  # pylint: disable=W0613
   @staticmethod
   def check_auth(*args, **kwargs):
     """A tool that looks in config for 'auth.require'. If found and it
@@ -159,6 +159,7 @@ class Protector(object):
     if username:
       cherrypy.request.login = None
 
+# pylint: disable=W0212
 def require(*conditions):
   """
   Decorator that verifies if the user is logged in.
@@ -210,6 +211,7 @@ def requireReferer(allowedReferers):
       return False
   return check
 
+# pylint: disable=W0613
 def isAuthenticated(context):
   """
       Note: MAKO ONLY

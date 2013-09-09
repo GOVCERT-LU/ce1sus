@@ -13,13 +13,11 @@ __license__ = 'GPL v3+'
 
 from dagr.web.controllers.base import BaseController
 import cherrypy
-from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker, Group
+from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
-from dagr.helpers.converters import ObjectConverter
 import types as types
-
 
 class GroupController(BaseController):
   """Controller handling all the requests for groups"""
@@ -95,6 +93,7 @@ class GroupController(BaseController):
     template = self.getTemplate('/admin/groups/groupModal.html')
     return template.render(group=None, errorMsg=None)
 
+  # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None, shareTLP=0,
@@ -115,43 +114,28 @@ class GroupController(BaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/groups/groupModal.html')
-
-    errorMsg = None
-    group = Group()
-    if not action == 'insert':
-      group.identifier = identifier
-    if not action == 'remove':
-      group.name = name
-      ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
-      group.description = description
-
-      try:
-        if action == 'insert':
-          self.groupBroker.insert(group)
-        if action == 'update':
-          self.groupBroker.update(group)
-        action = None
-      except ValidationException:
-        self.getLogger().info('Group is invalid')
-      except BrokerException as e:
-        self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-        errorMsg = 'An unexpected error occurred: {0}'.format(e)
-        action = None
-        group = None
-
-    else:
-      try:
+    group = self.groupBroker.buildGroup(identifier,
+                                        name,
+                                        shareTLP,
+                                        description,
+                                        action)
+    try:
+      if action == 'insert':
+        self.groupBroker.insert(group)
+      if action == 'update':
+        self.groupBroker.update(group)
+      if action == 'remove':
         self.groupBroker.removeByID(group.identifier)
-        group = None
-      except OperationException:
-        errorMsg = 'Cannot delete this group. The group is still referenced.'
-      action = None
-
-    if action == None:
-      # ok everything went right
       return self.returnAjaxOK()
-    else:
-      return template.render(group=group, errorMsg=errorMsg)
+    except OperationException as e:
+      self.getLogger().info('OperationError occurred: {0}'.format(e))
+      return 'Cannot delete this group. The group is still referenced.'
+    except ValidationException:
+      self.getLogger().debug('Group is invalid')
+      return template.render(group=group)
+    except BrokerException as e:
+      self.getLogger().error('An unexpected error occurred: {0}'.format(e))
+      return e
 
 
   @require(privileged(), requireReferer(('/internal')))

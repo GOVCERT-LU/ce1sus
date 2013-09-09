@@ -22,6 +22,8 @@ from sqlalchemy.types import DateTime
 from dagr.helpers.validator import ObjectValidator
 from importlib import import_module
 
+
+# pylint: disable=R0903
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
   def __init__(self):
@@ -46,8 +48,7 @@ class StringValue(BASE):
                                          withSpaces=True,
                                          withSymbols=True)
 
-
-
+# pylint: disable=R0903
 class DateValue(BASE):
   """This is a container class for the DATEVALES table."""
   def __init__(self):
@@ -68,6 +69,7 @@ class DateValue(BASE):
     """
     return ObjectValidator.validateAlNum(self, 'value')
 
+# pylint: disable=R0903
 class TextValue(BASE):
   """This is a container class for the TEXTVALUES table."""
   def __init__(self):
@@ -93,6 +95,7 @@ class TextValue(BASE):
                                          withSpaces=True,
                                          withSymbols=True)
 
+# pylint: disable=R0903
 class NumberValue(BASE):
   """This is a container class for the NUMBERVALUES table."""
   def __init__(self):
@@ -276,6 +279,16 @@ class ValueBroker(BrokerBase):
       raise BrokerException(e)
 
   def lookforValue(self, clazz, value):
+    """
+    returns a list of matching values
+
+    :param clazz: Class to use for the lookup
+    :type clazz: Class
+    :param value: Value to look for
+    :type value: String
+
+    :returns: List of clazz
+    """
     self.__clazz = clazz
     try:
       return self.session.query(self.getBrokerClass()).filter(

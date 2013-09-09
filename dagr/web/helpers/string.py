@@ -12,6 +12,7 @@ __license__ = 'GPL v3+'
 
 import dagr.helpers.string as strings
 
+# pylint: disable=W0613
 def plaintext2html(context, text, tabstop=4):
   """
   Converts plain text string to html

@@ -16,6 +16,7 @@ from dagr.helpers.debug import Log
 import ldap
 import types
 
+# pylint:disable=R0903
 class LDAPUser(object):
   """LDAP user container class"""
   def __init__(self):

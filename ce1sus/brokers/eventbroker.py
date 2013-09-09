@@ -27,6 +27,9 @@ from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.web.helpers.handlers.base import HandlerBase
+from datetime import datetime
+import copy
+from dagr.helpers.converters import ObjectConverter
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -87,7 +90,8 @@ class Attribute(BASE):
     if self.__valueObject is None and self.__value is None:
       # try to get the value some how...
       try:
-        attributeBroker = SessionManager.getInstance().brokerFactory(AttributeBroker)
+        attributeBroker = SessionManager.getInstance().brokerFactory(
+                                                              AttributeBroker)
         attributeBroker.getSetValues(self)
         return self.__value
       except BrokerException:
@@ -120,6 +124,7 @@ class Attribute(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
+# pylint: disable=R0902
 class Event(BASE):
   """This is a container class for the EVENTS table."""
   def __init__(self):
@@ -255,6 +260,7 @@ class Event(BASE):
       ObjectValidator.validateDateTime(self, 'last_seen')
     return ObjectValidator.isObjectValid(self)
 
+# pylint: disable=R0903
 class Comment(BASE):
   """This is a container class for the COMMENTS table."""
   def __init__(self):
@@ -369,6 +375,7 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
+# pylint: disable=R0903
 class ObjectAttributeRelation(BASE):
   """This is a container class for the ATTRIBUTES table."""
 
@@ -389,7 +396,7 @@ class ObjectAttributeRelation(BASE):
                             Integer,
                             ForeignKey('Attributes.attribute_id'))
   sameAttribute = relationship(Attribute,
-    primaryjoin="ObjectAttributeRelation.sameAttribute_id==Attribute.identifier")
+  primaryjoin="ObjectAttributeRelation.sameAttribute_id==Attribute.identifier")
 
   def validate(self):
     """
@@ -401,6 +408,7 @@ class ObjectAttributeRelation(BASE):
     ObjectValidator.validateDigits(self, 'object_id')
     ObjectValidator.validateDigits(self, 'sameAttribute_id')
     return ObjectValidator.isObjectValid(self)
+
 class CommentBroker(BrokerBase):
   """This is the interface between python an the database"""
 
@@ -432,6 +440,29 @@ class CommentBroker(BrokerBase):
     """
     return Comment
 
+  # pylint: disable=R0913
+  def buildComment(self, event, user, commentID=None,
+                         commentText=None, action=None):
+    """
+    Modifications of a comment
+    """
+    comment = Comment()
+    if not action == 'insert':
+      comment_orig = self.getByID(commentID)
+      # dont want to change the original in case the user cancel!
+      comment = copy.copy(comment_orig)
+    comment.modified = datetime.now()
+    comment.modifier = user
+    comment.modifier_id = comment.modifier.identifier
+    if action == 'insert':
+      comment.comment = commentText
+      comment.creator = user
+      comment.creator_id = comment.creator.identifier
+      comment.event = event
+      comment.event_id = event.identifier
+      comment.created = datetime.now()
+    return comment
+
 class ObjectBroker(BrokerBase):
   """This is the interface between python an the database"""
 
@@ -461,23 +492,65 @@ class ObjectBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getRelationsByID(self, identifier):
-    try:
+  def getRelationsByID(self, objectID):
+    """
+    returns the relations by the object id
 
+    :param objectID: obect identifier
+    :type objectID: Integer
+
+    :returns: List of ObjectAttributeRelation
+    """
+    try:
       result = self.session.query(ObjectAttributeRelation).filter(
-                        ObjectAttributeRelation.object_id == identifier).all()
+                        ObjectAttributeRelation.object_id == objectID).all()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                  identifier))
+                                                                  objectID))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(identifier))
+                    'Too many results found for ID :{0}'.format(objectID))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
 
     return result
+
+  @staticmethod
+  def buildObject(identifier, event, definition, user, parentObjectID=None):
+    """
+    puts an object together
+
+    :param identifier: ID of the object
+    :type identifier: Ineger
+    :param event: event which the object belongs to
+    :type event: Event
+    :param definition: Definition of the object
+    :type definition: ObjectDefinition
+    :param user: User performing the action
+    :type user: User
+
+    :returns: Object
+    """
+    obj = Object()
+    obj.identifier = identifier
+    obj.definition = definition
+    obj.def_object_id = obj.definition.identifier
+    obj.created = datetime.now()
+    if event is None:
+      obj.event = None
+      obj.event_id = None
+    else:
+      obj.event = event
+      obj.event_id = obj.event.identifier
+    if parentObjectID is None:
+      obj.parentObject_id = None
+    else:
+      obj.parentObject_id = parentObjectID
+    obj.creator = user
+    obj.creator_id = obj.creator.identifier
+    return obj
 
 class AttributeBroker(BrokerBase):
   """
@@ -817,3 +890,93 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
+  # pylint: disable=R0913
+  def buildEvent(self, identifier, action, status, tlp_index, description, name,
+                 published, first_seen, last_seen, risk, analysis, user):
+    """
+    puts an event with the data together
+
+    :param identifier: The identifier of the event,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+    :param status: The identifier of the statuts
+    :type status: Integer
+    :param tlp_index: The identifier of the TLP level
+    :type tlp_index: Integer
+    :param description: The description
+    :type description: String
+    :param name: name or title of the event
+    :type name: String
+    :param published: the flag if the event is published
+    :type published: Integer
+    :param first_seen: DateTime of the fist occurrence of this event
+    :type first_seen: DateTime
+    :param last_seen: DateTime of the last occurrence of this event
+    :type last_seen: DateTime
+    :param risk: Id of the risk of this event
+    :type risk: Integer
+    :param analysis: Id of the analysis of this event
+    :type analysis: Integer
+    :param user: The user doing the action
+    :type user: User
+
+    :returns: Event
+    """
+    event = Event()
+    if not action == 'insert':
+      # dont want to change the original in case the user cancel!
+      event_orig = self.getByID(identifier)
+      event = copy.copy(event_orig)
+      # right checks only if there is a change!!!!
+    if not action == 'remove':
+      event.title = name
+      event.description = description
+      ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
+      ObjectConverter.setInteger(event, 'status_id', status)
+      ObjectConverter.setInteger(event, 'published', published)
+      event.modified = datetime.now()
+      event.modifier = user
+      event.modifier_id = event.modifier.identifier
+      if first_seen:
+        ObjectConverter.setDate(event, 'first_seen', first_seen)
+      else:
+        event.first_seen = datetime.now()
+      if last_seen:
+        ObjectConverter.setDate(event, 'last_seen', last_seen)
+      else:
+        event.last_seen = datetime.now()
+      ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
+      ObjectConverter.setInteger(event, 'risk_id', risk)
+      if action == 'insert':
+        event.created = datetime.now()
+        event.creator = user
+        event.creator_id = event.creator.identifier
+    return event
+
+  def getEventByObjectID(self, objectID):
+    """
+    Returns the event hosting the object with the given id
+
+    :param objectID: The identifier of an object
+    :type objectID: Integer
+
+    :returns: Event
+    """
+    try:
+
+      result = self.session.query(Event).join(Object).filter(
+                        Object.identifier == objectID).one()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  objectID))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for ID :{0}'.format(objectID))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result
