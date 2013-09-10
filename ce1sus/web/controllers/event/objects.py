@@ -84,7 +84,7 @@ class ObjectsController(BaseController):
       if len(event.objects) > 0:
         for obj in event.objects:
           cbAttributeDefintiionsDict = self.def_attributesBroker.getCBValues(
-                                                        obj.definition.identifier)
+                                                    obj.definition.identifier)
       else:
         cbAttributeDefintiionsDict = dict()
     except BrokerException:
@@ -201,7 +201,7 @@ class ObjectsController(BaseController):
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
 
-    obj = self.objectBroker.build(None,
+    obj = self.objectBroker.buildObject(None,
                                   None,
                                   self.def_objectBroker.getByID(definition),
                                   self.getUser(),
@@ -213,7 +213,7 @@ class ObjectsController(BaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return template.render(eventID=None,
+      return template.render(eventID=eventID,
                           cbObjDefinitions=self.def_objectBroker.getCBValues(),
                              object=obj)
     except BrokerException as e:
@@ -240,3 +240,58 @@ class ObjectsController(BaseController):
       self.getLogger().critical(e)
       return 'Et ass einfach net gangen'
 
+  @cherrypy.expose
+  @require(requireReferer(('/internal')))
+  def setObjectParent(self, eventID, objectID):
+    template = self.getTemplate('/events/event/objects/parentModal.html')
+    event = self.eventBroker.getByID(eventID)
+    # right checks
+    self.checkIfViewable(event.groups,
+                         self.getUser().identifier == event.creator.identifier)
+
+    # get concerned object
+    obj = self.objectBroker.getByID(objectID)
+
+    if obj.event_id:
+      isEventParent = True
+      selected = None
+    else:
+      isEventParent = False
+      selected = obj.parentObject_id
+
+    eventChildren = self.objectBroker.getChildObjectsForEvent(eventID)
+    # prepare CBArray
+    cbValues = dict()
+    for child in eventChildren:
+      key = '{0} - {1}'.format(child.definition.name, child.identifier)
+      cbValues[key] = child.identifier
+
+
+
+    return template.render(eventID=eventID,
+                           objectID=objectID,
+                           cbValues=cbValues,
+                           isEventParent=isEventParent,
+                           selected=selected)
+
+  @cherrypy.expose
+  @require(requireReferer(('/internal')))
+  def modifyParentRelation(self, eventID, objectID, parentObjectID=None, setEventParent=None):
+    event = self.eventBroker.getByID(eventID)
+    # right checks
+    self.checkIfViewable(event.groups,
+                         self.getUser().identifier == event.creator.identifier)
+
+    obj = self.objectBroker.getByID(objectID)
+    if setEventParent is None:
+      obj.event_id = None
+      obj.event = None
+      obj.parentObject_id = parentObjectID
+      self.objectBroker.update(obj)
+    else:
+      obj.event_id = eventID
+      obj.event = event
+      obj.parentObject_id = None
+      self.objectBroker.update(obj)
+
+    return self.returnAjaxOK()

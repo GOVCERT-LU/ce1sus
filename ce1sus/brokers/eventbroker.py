@@ -552,6 +552,40 @@ class ObjectBroker(BrokerBase):
     obj.creator_id = obj.creator.identifier
     return obj
 
+  def getChildObjectsForEvent(self, eventID):
+    try:
+      # first level
+      result = self.session.query(Object).filter(
+                        Object.event_id == eventID).all()
+      for obj in result:
+        subChildren = self.getChildOjectsForObjectID(obj.identifier, True)
+        if not subChildren is None:
+          result = result + subChildren
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  eventID))
+
+  def getChildOjectsForObjectID(self, objectID, recursive=False):
+    try:
+      # first level
+      result = self.session.query(Object).filter(
+                        Object.parentObject_id == objectID).all()
+      for obj in result:
+        subChildren = self.getChildOjectsForObjectID(obj.identifier, True)
+        if not subChildren is None:
+          result = result + subChildren
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      if recursive:
+        return None
+      else:
+        raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  objectID))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
 class AttributeBroker(BrokerBase):
   """
   This broker handles all operations on attribute objects

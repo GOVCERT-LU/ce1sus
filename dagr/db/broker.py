@@ -255,10 +255,7 @@ class BrokerBase(object):
     dictionary = self.__objectToDictionary(instance)
     # an elo den update
     try:
-      self.session.query(self.getBrokerClass()).filter(
-                      getattr(self.getBrokerClass(),
-                                'identifier') == instance.identifier
-                      ).update(dictionary)
+      self.session.merge(instance)
     except sqlalchemy.exc.IntegrityError as e:
       self.getLogger().critical(e)
       raise IntegrityException(e)

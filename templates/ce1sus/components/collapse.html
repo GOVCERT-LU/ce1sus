@@ -9,7 +9,7 @@
         <div class="accordion-group" >
         <div class="accordion-heading">
             <div class="row-fluid">
-                <div class="span9">
+                <div class="span6">
                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}">
                     ${object.definition.name} - ${object.identifier}
                     </a>
@@ -19,10 +19,11 @@
                      Info
                      </a>
                 </div>
-                <div class="span2" style="text-align: right;">
+                <div class="span5" style="text-align: right;">
                     <div class="btn-group">
                        <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-tag"></i></a>
+                       <a href="#setParentModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-wrench"></i></a>
                        <a href="#" class="btn btn-danger"  role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                                 dialogCall('/events/event/objects/removeObject?eventID=${eventID}&objectID=${object.identifier}',
@@ -48,6 +49,9 @@
 				<%call expr="baseForms.genericModalForm(modalID='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attachChildObject',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
 				    <%call expr="modals.saveButtonModal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',contentUrl='/events/event/objects/addChildObject/{0}/{1}'.format(eventID, object.identifier))"/>
 				</%call>
+				<%call expr="baseForms.genericModalForm(modalID='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modifyParentRelation',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+                    <%call expr="modals.saveButtonModal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',contentUrl='/events/event/objects/setObjectParent/{0}/{1}'.format(eventID, object.identifier))"/>
+                </%call>
 				 <!--  dont remove this -->
             </div>
         </div>

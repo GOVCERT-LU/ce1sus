@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%
+ if isEventParent: 
+   checkStr = 'checked'
+ else:
+   checkStr = ''
+%>
+<input type="hidden" name="objectID" value="${objectID}">
+<input type="hidden" name="eventID" value="${eventID}">
+<%call expr="labeledInput.genericLabeler('Is parent event')">
+    <input onclick="enableDisableCB()" id ="eventCheckBox" type="checkbox" name="setEventParent" value="1" ${checkStr}/>
+</%call>
+<%call expr="labeledInput.labeledComboBox(label='Parent object',name='parentObjectID',values=cbValues,enabled=(not isEventParent),hasEmpty=True,selected=selected)"/>
+
+<script type="text/javascript">
+function enableDisableCB(){
+	checked = $("#eventCheckBox").prop("checked");
+	if (checked) {
+		$('#parentObjectIDID').prop('disabled', true);
+		$('select#parentObjectIDID option').filter(function() {
+			this.selected = (this.text == '');
+		});
+	} else {
+		$('#parentObjectIDID').prop('disabled', false);
+        $('select#parentObjectIDID option').filter(function() {
+            this.selected = ($(this).val() == '${selected}');
+        });
+	}
+	 
+}
+</script>
