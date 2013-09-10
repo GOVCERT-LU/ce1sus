@@ -9,21 +9,17 @@
         <div class="accordion-group" >
         <div class="accordion-heading">
             <div class="row-fluid">
-                <div class="span6">
+                <div class="span7">
                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}">
                     ${object.definition.name} - ${object.identifier}
                     </a>
-                </div>
-                <div class="span1" style="text-align: right;">
-                     <a  class="accordion-toggle" href="#infoModal${object.identifier}" data-toggle="modal">
-                     Info
-                     </a>
                 </div>
                 <div class="span5" style="text-align: right;">
                     <div class="btn-group">
                        <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-tag"></i></a>
                        <a href="#setParentModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-wrench"></i></a>
+                       <a  class="btn" href="#infoModal${object.identifier}" role="button" data-toggle="modal"><i class="icon-question-sign"></i></a>
                        <a href="#" class="btn btn-danger"  role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                                 dialogCall('/events/event/objects/removeObject?eventID=${eventID}&objectID=${object.identifier}',

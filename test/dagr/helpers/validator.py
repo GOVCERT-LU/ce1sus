@@ -123,11 +123,17 @@ class TestValidator(unittest.TestCase):
       assert ValueValidator.validateDateTime('1999-01-01 - 15:00:00')
       assert ValueValidator.validateDateTime(datetime.now())
       assert ValueValidator.validateDateTime('2013-08-08 14:09:27.186303')
-        # Not working Tests
+      assert ValueValidator.validateDateTime('2013-09-03 11:06:41')
+      assert ValueValidator.validateDateTime('2013-09-10 17:12:49.814602')
+      # Not working Tests
       ValueValidator.validateDateTime('1999/01/01 - 15:00:00')
 
     def testRegex(self):
-      assert ValueValidator.validateRegularExpression('^(')
+      # valid regex
+      assert ValueValidator.validateRegularExpression('^.*$')
+
+      # not a valid regex
+      assert not ValueValidator.validateRegularExpression('^(')
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

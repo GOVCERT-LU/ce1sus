@@ -19,6 +19,7 @@ ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
 DATE = [r'^[\d]{4}-[\d]{2}-[\d]{2}$',
         r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}$',
         r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}$',
+        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3,8}$',
         r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}:[\d]{2}$',
         r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}$',
         r'^[\d]{2}/[\d]{2}/[\d]{4}$',
@@ -26,7 +27,7 @@ DATE = [r'^[\d]{4}-[\d]{2}-[\d]{2}$',
         r'^[\d]{2}/[\d]{2}/[\d]{4} - [\d]{2}:[\d]{2}:[\d]{2}$',
         r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}$',
         r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}:[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{6}$'
+        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3,8}$'
        ]
 DIGITS = r'^[\d.]+$'
 EMAILADDRESS = r'^.+@.+\..{2,3}$'
@@ -56,6 +57,7 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
   """
   if hasattr(obj, attributeName):
     value = unicode(getattr(obj, attributeName))
+    value = value.strip()
     result = re.match(regex, value, re.UNICODE) is not None
     if not result and changeAttribute:
       setattr(obj, attributeName, FailedValidation(value, errorMsg))
@@ -578,18 +580,19 @@ class ObjectValidator:
 
       :return Boolean
     """
-    #TODO: Validation of dates!!!
-    return True
+    errorMsg = ('The date is not under the right form as i.e. ' +
+                 '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
     for dateFormat in DATE:
       result = validateRegex(obj,
                 attributeName,
                 dateFormat,
-                ('The date is not under the right form as i.e. ' +
-                 '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional'),
-                changeAttribute)
+                errorMsg,
+                False)
       if result:
         break
-
+    if not result and changeAttribute:
+      value = getattr(obj, attributeName)
+      setattr(obj, attributeName, FailedValidation(value, errorMsg))
     return result
 
   @staticmethod
@@ -666,6 +669,7 @@ class ObjectValidator:
                 FailedValidation(regex,
                                  ('The given regex is invalid '
                                  + 'due to: {0}').format(errorMsg)))
+      return result
     else:
       raise ValidationException('The given object has no attribute ' +
                                  attributeName)

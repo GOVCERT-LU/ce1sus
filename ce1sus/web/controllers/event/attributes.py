@@ -141,9 +141,10 @@ class AttributesController(BaseController):
                 attributes.append(temp)
         # doAction for all attributes
         if action == 'insert':
-          # TODO: update event
           for attribute in attributes:
             self.attributeBroker.insert(attribute, commit=False)
+          # update last seen etc of event
+          self.eventBroker.updateLastSeen(event, self.getUser(), False)
         if action == 'remove':
           self.attributeBroker.removeByID(attributeID, commit=True)
         self.attributeBroker.doCommit(True)

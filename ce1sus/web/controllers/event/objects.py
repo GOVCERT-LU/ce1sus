@@ -166,9 +166,11 @@ class ObjectsController(BaseController):
                                       self.def_objectBroker.getByID(definition),
                                       self.getUser())
     try:
-      self.objectBroker.insert(obj)
-      # TODO: update event
-      # self.updateEvent(event)
+      self.objectBroker.insert(obj, False)
+      # update last seen etc of event
+      self.eventBroker.updateLastSeen(event, self.getUser(), False)
+      self.eventBroker.doCommit(True)
+
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
@@ -207,9 +209,10 @@ class ObjectsController(BaseController):
                                   self.getUser(),
                                   objectID)
     try:
-      self.objectBroker.insert(obj)
-      # TODO: update event
-      # self.updateEvent(event)
+      self.objectBroker.insert(obj, False)
+      # update last seen etc of event
+      self.eventBroker.updateLastSeen(event, self.getUser(), False)
+      self.eventBroker.doCommit(True)
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')

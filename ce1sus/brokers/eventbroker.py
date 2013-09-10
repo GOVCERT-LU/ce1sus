@@ -788,6 +788,13 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
+  def updateLastSeen(self, event, user, commit=True):
+    event.last_seen = datetime.now()
+    event.modifier = user
+    event.modifier_id = user.identifier
+    self.update(event, commit)
+
+
   def getGroupsByEvent(self, identifier, belongIn=True):
     """
     Returns the groups of the given event
