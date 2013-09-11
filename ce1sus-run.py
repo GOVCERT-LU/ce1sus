@@ -94,6 +94,11 @@ def bootstrap():
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
 
 
+def application(environ, start_response):
+  bootstap()
+  return cherrypy.tree(environ, start_response)
+
+
 if __name__ == '__main__':
 
   bootstrap()
@@ -103,7 +108,4 @@ if __name__ == '__main__':
     cherrypy.engine.block()
   except cherrypy._cperror as e:
     raise ConfigException(e)
-else:
-  bootstrap()
-  cherrypy.engine.start()
-  application = cherrypy.tree
+
