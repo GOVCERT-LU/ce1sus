@@ -17,6 +17,8 @@ from dagr.db.session import SessionManager
 from ce1sus.web.helpers.protection import Protector
 from ce1sus.brokers.permissionbroker import UserBroker
 from dagr.web.helpers.config import WebConfig
+from dagr.db.broker import NothingFoundException, BrokerException
+from dagr.helpers.ldaphandling import LDAPHandler
 
 class BaseController:
   """This is the base class for controlles all controllers should extend this
@@ -63,7 +65,37 @@ class BaseController:
     :returns: Boolean
     """
     self.getLogger().debug("Checked credentials for {0}".format(username))
-    return Protector.checkCredentials(username, password)
+    """Verifies credentials for username and password.
+    Returns None on success or a string describing the error on failure"""
+    # Adapt to your needs
+    try:
+      userBroker = SessionManager.brokerFactory(UserBroker)
+      user = userBroker.getUserByUsernameAndPassword(username,
+                                                               'EXTERNALAUTH')
+      if user is None:
+        raise NothingFoundException
+      # ok it is an LDAPUser
+      lh = LDAPHandler.getInstance()
+      lh.open()
+      valid = lh.isUserValid(username, password)
+      lh.close()
+
+      # an exception is raised as the remaining procedure is similar
+      if not valid:
+        raise NothingFoundException("Username or password are not valid")
+
+    except NothingFoundException:
+      # ok it's not an LDAP User
+      try:
+        userBroker = SessionManager.brokerFactory(UserBroker)
+        user = userBroker.getUserByUsernameAndPassword(username, password)
+        if user is None:
+          raise BrokerException
+      except BrokerException:
+        return "Incorrect username or password."
+      if user.disabled == 1:
+        return "Incorrect username or password."
+    return None
 
   def checkIfViewable(self, groups, isOwner):
     """

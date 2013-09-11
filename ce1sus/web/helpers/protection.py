@@ -8,9 +8,6 @@ __license__ = 'GPL v3+'
 import cherrypy
 from dagr.db.session import SessionManager
 from ce1sus.brokers.permissionbroker import UserBroker
-from dagr.helpers.config import Configuration
-from dagr.db.broker import NothingFoundException, BrokerException
-from dagr.helpers.ldaphandling import LDAPHandler
 import re
 
 SESSION_KEY_USERNAME = '_cp_username'
@@ -22,42 +19,6 @@ class Protector(object):
 
   def __init__(self, configFile):
     cherrypy.tools.auth = cherrypy.Tool('before_handler', Protector.check_auth)
-
-
-
-  @staticmethod
-  def checkCredentials(username, password):
-    """Verifies credentials for username and password.
-    Returns None on success or a string describing the error on failure"""
-    # Adapt to your needs
-    try:
-      userBroker = SessionManager.brokerFactory(UserBroker)
-      user = userBroker.getUserByUsernameAndPassword(username,
-                                                               'EXTERNALAUTH')
-      if user is None:
-        raise NothingFoundException
-      # ok it is an LDAPUser
-      lh = LDAPHandler.getInstance()
-      lh.open()
-      valid = lh.isUserValid(username, password)
-      lh.close()
-
-      # an exception is raised as the remaining procedure is similar
-      if not valid:
-        raise NothingFoundException("Username or password are not valid")
-
-    except NothingFoundException:
-      # ok it's not an LDAP User
-      try:
-        userBroker = SessionManager.brokerFactory(UserBroker)
-        user = userBroker.getUserByUsernameAndPassword(username, password)
-        if user is None:
-          raise BrokerException
-      except BrokerException:
-        return "Incorrect username or password."
-      if user.disabled == 1:
-        return "Incorrect username or password."
-    return None
 
   # pylint: disable=W0613
   @staticmethod

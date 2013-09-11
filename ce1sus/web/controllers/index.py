@@ -65,6 +65,9 @@ class IndexController(BaseController):
     if username is None or password is None:
       raise HTTPRedirect('/index')
 
+
+
+
     errorMsg = self.checkCredentials(username, password)
     if errorMsg:
       return self.index(errorMsg)
