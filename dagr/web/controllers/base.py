@@ -53,50 +53,6 @@ class BaseController:
     """
     return self.mako.getTemplate(name)
 
-  def checkCredentials(self, username=None, password=None):
-    """
-    Checks if the credentials are vaild
-
-    :param username: The username
-    :type username: String
-    :param password: The password of the user in plain text?
-    :typee password: String
-
-    :returns: Boolean
-    """
-    self.getLogger().debug("Checked credentials for {0}".format(username))
-    """Verifies credentials for username and password.
-    Returns None on success or a string describing the error on failure"""
-    # Adapt to your needs
-    try:
-      userBroker = SessionManager.brokerFactory(UserBroker)
-      user = userBroker.getUserByUsernameAndPassword(username,
-                                                               'EXTERNALAUTH')
-      if user is None:
-        raise NothingFoundException
-      # ok it is an LDAPUser
-      lh = LDAPHandler.getInstance()
-      lh.open()
-      valid = lh.isUserValid(username, password)
-      lh.close()
-
-      # an exception is raised as the remaining procedure is similar
-      if not valid:
-        raise NothingFoundException("Username or password are not valid")
-
-    except NothingFoundException:
-      # ok it's not an LDAP User
-      try:
-        userBroker = SessionManager.brokerFactory(UserBroker)
-        user = userBroker.getUserByUsernameAndPassword(username, password)
-        if user is None:
-          raise BrokerException
-      except BrokerException:
-        return "Incorrect username or password."
-      if user.disabled == 1:
-        return "Incorrect username or password."
-    return None
-
   def checkIfViewable(self, groups, isOwner):
     """
     Checks if the page if viewable for the given group

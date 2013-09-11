@@ -40,17 +40,13 @@ class SessionObject(object):
   """
   Session container
   """
-  def __init__(self):
-    self.__session = None
 
   @property
   def session(self):
     """
     returns the session object
     """
-    if self.__session is None:
-      self.__session = cherrypy.request.db
-    return self.__session
+    return cherrypy.request.db
 
 class SAEnginePlugin(plugins.SimplePlugin):
   """The SAEnglinge

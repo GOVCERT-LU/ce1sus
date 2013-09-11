@@ -86,34 +86,6 @@ class BrokerBase(object):
     """
     return self.__class__
 
-  @staticmethod
-  def __objectToDictionary(obj):
-    """
-    Transforms the public/protected
-    attributes of an object to a dictionary
-
-    :param object: the object to be converted
-
-    :returns: Dictionary
-    """
-    dictionary = dict()
-    for name, value in vars(type(obj)).iteritems():
-      # detect
-      if hasattr(value, 'property'):
-        prop = getattr(value, 'property')
-        if hasattr(prop, 'columns'):
-          columns = getattr(prop, 'columns')
-
-          if len(columns) == 1:
-            for column in columns:
-              columnName = column.name
-              # getRealValue
-              # Primary keys cannot be updated!!
-              if (hasattr(obj, name)) and not column.primary_key:
-                instanceValue = getattr(obj, name)
-                dictionary.update({columnName:instanceValue})
-    return dictionary
-
   def getByID(self, identifier):
     """
     Returns the object by the given identifier
