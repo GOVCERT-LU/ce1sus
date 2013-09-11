@@ -241,7 +241,6 @@ class SessionManager:
     if not issubclass(clazz, BrokerBase):
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
-
     broker = clazz(SessionObject())
     return broker
 
