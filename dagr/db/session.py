@@ -69,6 +69,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
     """
     plugins.SimplePlugin.__init__(self, bus)
     self.sa_engine = None
+    self.Base = declarative_base()
     self.bus.subscribe("bind", self.bind)
     self.listener = addListener
     self.debug = debug
@@ -83,6 +84,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
     else:
       self.sa_engine = create_engine(self.connectionString,
                             echo=self.debug)
+    self.Base.metadata.create_all(self.sa_engine)
 
   def stop(self):
     """stops the engine"""
@@ -93,6 +95,9 @@ class SAEnginePlugin(plugins.SimplePlugin):
   def bind(self, session):
     """binds the engine"""
     session.configure(bind=self.sa_engine)
+
+  def getBase(self):
+    return self.Base
 
 
 class ForeignKeysListener(PoolListener):
