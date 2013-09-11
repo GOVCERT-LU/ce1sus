@@ -66,9 +66,16 @@ class BrokerBase(object):
   __metaclass__ = ABCMeta
 
   def __init__(self, session):
-    self.session = session
+    self.__session = session
     self.clazz = None
     self.identifier = None
+
+  @property
+  def session(self):
+    """
+    Returns the db session
+    """
+    return self.__session.session
 
   @abstractmethod
   def getBrokerClass(self):

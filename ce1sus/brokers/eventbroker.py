@@ -74,7 +74,7 @@ class Attribute(BASE):
   @property
   def value_id(self):
     if self.__value_id is None:
-      valueBroker = SessionManager.getInstance().brokerFactory(ValueBroker)
+      valueBroker = SessionManager.brokerFactory(ValueBroker)
       value = valueBroker.getByAttribute(self)
       self.__value_id = value.identifier
     return self.__value_id
@@ -102,8 +102,7 @@ class Attribute(BASE):
     if self.__valueObject is None and self.__value is None:
       # try to get the value some how...
       try:
-        attributeBroker = SessionManager.getInstance().brokerFactory(
-                                                              AttributeBroker)
+        attributeBroker = SessionManager.brokerFactory(AttributeBroker)
         attributeBroker.getSetValues(self)
         return self.__value
       except BrokerException:

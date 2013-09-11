@@ -12,3 +12,4 @@ def copyObject(context, obj):
   returns a copy of the obj
   """
   return copy.deepcopy(obj)
+

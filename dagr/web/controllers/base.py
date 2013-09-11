@@ -24,9 +24,7 @@ class BaseController:
   def __init__(self):
     self.mako = MakoHandler.getInstance()
     self.logger = Log.getLogger(self.__class__.__name__)
-    self.__sessionHandler = SessionManager.getInstance()
     self.config = WebConfig.getInstance()
-    self.userBroker = self.__sessionHandler.brokerFactory(UserBroker)
 
   def brokerFactory(self, clazz):
     """
@@ -40,7 +38,8 @@ class BaseController:
 
     :returns: Instance of a broker
     """
-    return self.__sessionHandler.brokerFactory(clazz)
+    self.logger.debug('Create broker for {0}'.format(clazz))
+    return SessionManager.brokerFactory(clazz)
 
   def getTemplate(self, name):
     """Returns the template
@@ -84,7 +83,8 @@ class BaseController:
 
     :returns: User
     """
-    user = self.userBroker.getUserByUserName(self.getUserName())
+    userBroker = self.brokerFactory(UserBroker)
+    user = userBroker.getUserByUserName(self.getUserName())
     self.getLogger().debug("Returned user")
     return user
 

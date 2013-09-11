@@ -21,14 +21,8 @@ class Protector(object):
   of cherrypy."""
 
   def __init__(self, configFile):
-    cherrypy.tools.auth = cherrypy.Tool('before_handler', self.check_auth)
-    Protector.userBroker = SessionManager.brokerFactory(
-                                                                    UserBroker)
+    cherrypy.tools.auth = cherrypy.Tool('before_handler', Protector.check_auth)
 
-
-    self.__config = Configuration(configFile, 'Protector')
-    Protector.__loginURL = self.__config.get('loginurl')
-    Protector.__events = self.__config.get('firstpage')
 
 
   @staticmethod
@@ -37,7 +31,8 @@ class Protector(object):
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
     try:
-      user = Protector.userBroker.getUserByUsernameAndPassword(username,
+      userBroker = SessionManager.brokerFactory(UserBroker)
+      user = userBroker.getUserByUsernameAndPassword(username,
                                                                'EXTERNALAUTH')
       if user is None:
         raise NothingFoundException
@@ -54,8 +49,8 @@ class Protector(object):
     except NothingFoundException:
       # ok it's not an LDAP User
       try:
-        user = Protector.userBroker.getUserByUsernameAndPassword(username,
-                                                                 password)
+        userBroker = SessionManager.brokerFactory(UserBroker)
+        user = userBroker.getUserByUsernameAndPassword(username, password)
         if user is None:
           raise BrokerException
       except BrokerException:
@@ -96,7 +91,8 @@ class Protector(object):
     attribute = getattr(cherrypy, 'session')
     attribute.regenerate()
     attribute[SESSION_KEY_USERNAME] = cherrypy.request.login = username
-    user = Protector.userBroker.getUserByUserName(username)
+    userBroker = SessionManager.brokerFactory(UserBroker)
+    user = userBroker.getUserByUserName(username)
     attribute[SESSION_KEY_USER] = user
 
 
@@ -117,7 +113,7 @@ class Protector(object):
     :returns: User
     """
     attribute = getattr(cherrypy, 'session')
-    user = attribute[SESSION_KEY_USER]
+    user = attribute.get(SESSION_KEY_USER, None)
     return user
 
 
@@ -186,7 +182,8 @@ def privileged():
     """
       Checks if the user has the privileged right
     """
-    return Protector.userBroker.isUserPrivileged(Protector.getUserName())
+    user = Protector.getUser()
+    return user.privileged
   return check
 
 def requireReferer(allowedReferers):

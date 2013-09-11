@@ -5,7 +5,6 @@ module providing the error handling
 
 Created: Jul, 2013
 """
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'

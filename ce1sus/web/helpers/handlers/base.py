@@ -32,7 +32,7 @@ class HandlerBase(object):
   def __init__(self):
     self.mako = MakoHandler.getInstance()
     self.logger = Log.getLogger(self.__class__.__name__)
-    self.__sessionHandler = SessionManager.getInstance()
+    self.__sessionHandler = SessionManager
 
   @abstractmethod
   def populateAttributes(self, params, obj, definition, user):

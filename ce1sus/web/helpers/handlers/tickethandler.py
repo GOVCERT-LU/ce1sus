@@ -63,7 +63,7 @@ class TicketHandler(GenericHandler):
     # check if params contains tickets
 
 
-  def render(self, enabled, attribute=None):
+  def render(self, enabled, eventID, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/ticket.html')
     string = template.render(attribute=attribute, enabled=enabled)
     return string

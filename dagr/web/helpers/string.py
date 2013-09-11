@@ -18,3 +18,4 @@ def plaintext2html(context, text, tabstop=4):
   Converts plain text string to html
   """
   return strings.plaintext2html(text, tabstop)
+

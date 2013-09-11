@@ -19,6 +19,8 @@
 %endif
 %else:
   <%call expr="labeledInput.genericLabeler('Value')">
+  <div style="padding: 5px;">
     <a href="${attribute.value.url}"  target="_blank">${attribute.value.identifier}</a>
+  </div>
   </%call>
 %endif

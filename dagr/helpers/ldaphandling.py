@@ -191,9 +191,6 @@ class LDAPHandler(object):
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
-
-
-
   def getUserAttribute(self, uid, attributeName):
     """
     Returns the attribute value

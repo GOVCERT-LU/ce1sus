@@ -35,6 +35,23 @@ class BrokerInstantiationException(Exception):
   def __init__(self, message):
     Exception.__init__(self, message)
 
+# pylint: disable=R0903
+class SessionObject(object):
+  """
+  Session container
+  """
+  def __init__(self):
+    self.__session = None
+
+  @property
+  def session(self):
+    """
+    returns the session object
+    """
+    if self.__session is None:
+      self.__session = cherrypy.request.db
+    return self.__session
+
 class SAEnginePlugin(plugins.SimplePlugin):
   """The SAEnglinge
   Original found under
@@ -149,10 +166,8 @@ class SessionManager:
   """
   sessionClazz manager for the session handling
   """
-  instance = None
 
   def __init__(self, configFile):
-    SessionManager.instance = self
     # load __config foo!!
     self.__config = Configuration(configFile, 'SessionManager')
     # setup connection string and engine
@@ -226,9 +241,8 @@ class SessionManager:
     if not issubclass(clazz, BrokerBase):
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
-    print cherrypy.config
-    print cherrypy._cpconfig
-    broker = clazz(cherrypy.request.db)
+
+    broker = clazz(SessionObject())
     return broker
 
   def close(self):
