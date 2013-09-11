@@ -95,7 +95,7 @@ def bootstrap():
 
 
 def application(environ, start_response):
-  bootstap()
+  bootstrap()
   return cherrypy.tree(environ, start_response)
 
 
