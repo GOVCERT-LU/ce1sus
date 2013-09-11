@@ -78,7 +78,7 @@ class CVEHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.url = WebConfig.getInstance().get('cveurl')
 
-  def render(self, enabled, attribute=None):
+  def render(self, enabled, eventID, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/cve.html')
     string = template.render(attribute=attribute, enabled=enabled)
     return string

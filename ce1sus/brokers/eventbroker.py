@@ -67,9 +67,21 @@ class Attribute(BASE):
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Attribute.modifier_id==User.identifier")
-  value_id = 0
+  __value_id = None
   __value = None
   __valueObject = None
+
+  @property
+  def value_id(self):
+    if self.__value_id is None:
+      valueBroker = SessionManager.getInstance().brokerFactory(ValueBroker)
+      value = valueBroker.getByAttribute(self)
+      self.__value_id = value.identifier
+    return self.__value_id
+
+  @value_id.setter
+  def value_id(self, value):
+    self.__value_id = value
 
   @property
   def key(self):
@@ -752,6 +764,7 @@ class EventBroker(BrokerBase):
   def __init__(self, session):
     BrokerBase.__init__(self, session)
     self.attributeBroker = AttributeBroker(session)
+    self.objectBroker = ObjectBroker(session)
 
   def insert(self, instance, commit=True):
     """
@@ -996,7 +1009,7 @@ class EventBroker(BrokerBase):
         event.creator_id = event.creator.identifier
     return event
 
-  def getEventByObjectID(self, objectID):
+  def getEventByObjectID(self, objectID, recursive=True):
     """
     Returns the event hosting the object with the given id
 
@@ -1009,10 +1022,15 @@ class EventBroker(BrokerBase):
 
       result = self.session.query(Event).join(Object).filter(
                         Object.identifier == objectID).one()
-
+      return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
+      if not recursive:
+        raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   objectID))
+      else:
+        obj = self.objectBroker.getByID(objectID)
+        result = self.getEventByObjectID(obj.parentObject_id)
+        return result
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for ID :{0}'.format(objectID))
@@ -1020,4 +1038,4 @@ class EventBroker(BrokerBase):
       self.getLogger().fatal(e)
       raise BrokerException(e)
 
-    return result
+

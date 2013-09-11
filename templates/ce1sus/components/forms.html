@@ -167,7 +167,7 @@ $(document).ready(function(){
         $("#${id} select#definitionID").change(function(event){
             value = $(this).val();
             if (value) {
-                loadContent('editBox','/events/event/attribute/inputHandler/'+$(this).val()+'/1');
+                loadContent('editBox','/events/event/attribute/inputHandler/'+$(this).val()+'/${eventID}/1');
             } else {
                 $('#${id} #editBox').html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="span9">Please select something</div></div>');
             }
@@ -175,7 +175,7 @@ $(document).ready(function(){
     %else:
         %if not attribute is None:
         	value = $("#${id} input#definitionID:last").val();
-            loadContent('editBox','/events/event/attribute/inputHandler/'+value+'/0/${attribute.identifier}');
+            loadContent('editBox','/events/event/attribute/inputHandler/'+value+'/${eventID}/0/${attribute.identifier}');
         %endif
     %endif
     

@@ -40,7 +40,7 @@ class GenericHandler(HandlerBase):
   def getAttributesNameList(self):
     return list()
 
-  def render(self, enabled, attribute=None):
+  def render(self, enabled, eventID, attribute=None):
     template = (self.
                   getTemplate('/events/event/attributes/handlers/generic.html'))
     string = template.render(attribute=attribute, enabled=enabled)

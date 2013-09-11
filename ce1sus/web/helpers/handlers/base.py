@@ -61,7 +61,7 @@ class HandlerBase(object):
                                                     ))
 
   @abstractmethod
-  def render(self, enabled, attribute=None):
+  def render(self, enabled, eventID, attribute=None):
     """
     Generates the HTML for displaying the attribute
 

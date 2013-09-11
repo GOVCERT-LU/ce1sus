@@ -42,7 +42,8 @@ class AttributeDefinition(BASE):
   __handlerDefinitions = {0 : 'generichandler.GenericHandler',
                           1: 'filehandler.FileHandler',
                           2: 'tickethandler.TicketHandler',
-                          3: 'tickethandler.CVEHandler'}
+                          3: 'tickethandler.CVEHandler',
+                          4: 'locationhandler.LocationHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping

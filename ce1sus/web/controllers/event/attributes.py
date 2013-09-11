@@ -25,6 +25,8 @@ import types
 from dagr.web.helpers.pagination import Paginator
 from ce1sus.api.ticketsystem import TicketSystemBase
 from ce1sus.web.helpers.handlers.base import HandlerBase
+from cherrypy.lib.static import serve_file
+from ce1sus.brokers.valuebroker import ValueBroker
 
 class AttributesController(BaseController):
   """event controller handling all actions in the event section"""
@@ -35,6 +37,7 @@ class AttributesController(BaseController):
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
+    self.valueBroker = self.brokerFactory(ValueBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -73,10 +76,17 @@ class AttributesController(BaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def addFile(self, value=None):
+  def addFile(self, eventID, value=None):
     """
     Uploads a file to the tmp dir
     """
+
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+
     if value.file is None:
       return 'No file selected. Try again.'
     size = 0
@@ -202,7 +212,7 @@ class AttributesController(BaseController):
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
-  def inputHandler(self, defattribID, enabled, attributeID=None):
+  def inputHandler(self, defattribID, eventID, enabled, attributeID=None):
     """
     renders the form or input of the requested handler
 
@@ -215,9 +225,13 @@ class AttributesController(BaseController):
 
     :returns: generated HTML
     """
+
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+
     # get Definition
-
-
     attribute = None
     if not attributeID is None:
       attribute = self.attributeBroker.getByID(attributeID)
@@ -230,7 +244,7 @@ class AttributesController(BaseController):
       enableView = True
     else:
       enableView = False
-    return handler.render(enableView, attribute)
+    return handler.render(enableView, eventID, attribute)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -251,3 +265,16 @@ class AttributesController(BaseController):
     return template.render(rtPaginator=rtPaginator,
                            rtUrl=TicketSystemBase.
                            getInstance().getBaseTicketUrl())
+
+  @require(requireReferer(('/internal')))
+  @cherrypy.expose
+  def file(self, eventID, attributeID, action):
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+    attribute = self.attributeBroker.getByID(attributeID)
+    stringValue = self.valueBroker.getByID(attribute.value_id)
+    filepath = stringValue.value
+    return serve_file(filepath, "application/x-download", "attachment")

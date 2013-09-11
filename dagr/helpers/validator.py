@@ -73,7 +73,7 @@ class ValidationException(Exception):
   def __init__(self, message):
     Exception.__init__(self, message)
 
-
+# pylint: disable=R0903
 class FailedValidation(object):
   """
   Failed Validation Class
@@ -87,6 +87,7 @@ class FailedValidation(object):
   def __str__(self, *args, **kwargs):
     return self.value
 
+# pylint: disable=R0903
 class Container(object):
   """
   Container class
@@ -308,15 +309,16 @@ class ValueValidator:
                                                      changeAttribute=False)
 
 class ObjectValidator:
-
   """
   Utility Class for validating object attributes types
   """
   def __init__(self):
     pass
 
+  # pylint: disable=R0913
   @staticmethod
-  def __replacePlaceHolders(baseRegex, minLength=0,
+  def __replacePlaceHolders(baseRegex,
+                            minLength=0,
                             maxLength=0,
                             withSpaces=False,
                             withNonPrintableCharacters=False,

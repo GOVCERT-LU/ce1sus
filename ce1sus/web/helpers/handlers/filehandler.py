@@ -24,6 +24,8 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
 from dagr.web.helpers.config import WebConfig
 from shutil import move
 from os import makedirs
+from dagr.web.helpers.pagination import Link
+from ce1sus.brokers.eventbroker import EventBroker
 
 class FileNotFoundException(HandlerException):
   """File not found Exception"""
@@ -33,9 +35,12 @@ class FileNotFoundException(HandlerException):
 class FileHandler(GenericHandler):
   """Handler for handling files"""
 
+  URLSTR = '/events/event/attribute/file/{0}/{1}/{2}'
+
   def __init__(self):
     GenericHandler.__init__(self)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
+    self.eventBroker = self.brokerFactory(EventBroker)
 
   # pylint: disable=W0211
   @staticmethod
@@ -106,7 +111,7 @@ class FileHandler(GenericHandler):
       move(filepath, destination)
       attributes.append(self.__createAttribute(destination,
                                                obj,
-                                               'location',
+                                               'File',
                                                user))
       # return attributes
       return attributes
@@ -145,10 +150,34 @@ class FileHandler(GenericHandler):
     return attribute
 
 
-  def render(self, enabled, attribute=None):
-    template = self.getTemplate('/events/event/attributes/handlers/file.html')
-    string = template.render(attribute=attribute, enabled=enabled)
+  def render(self, enabled, eventID, attribute=None):
+    if enabled:
+      template = self.getTemplate('/events/event/attributes/handlers/file.html')
+
+      string = template.render(attribute=attribute,
+                               eventID=eventID,
+                               enabled=enabled)
+    else:
+      template = self.getTemplate('/events/event/attributes/'
+                                  + 'handlers/location.html')
+      try:
+        attrID = attribute.identifier
+      except  AttributeError:
+        attrID = ''
+      url = FileHandler.URLSTR.format(eventID,
+                                      attrID,
+                                      'Download')
+      string = template.render(url=url, enabled=enabled)
     return string
 
-
+  def convertToAttributeValue(self, value):
+    attribute = value.attribute
+    event = attribute.object.event
+    if event is None:
+      event = self.eventBroker.getEventByObjectID(attribute.object.identifier)
+    link = Link(FileHandler.URLSTR.format(event.identifier,
+                                          attribute.identifier,
+                                          ''),
+                'Download')
+    return link
 

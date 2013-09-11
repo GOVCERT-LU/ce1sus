@@ -22,7 +22,7 @@ class Protector(object):
 
   def __init__(self, configFile):
     cherrypy.tools.auth = cherrypy.Tool('before_handler', self.check_auth)
-    Protector.userBroker = SessionManager.getInstance().brokerFactory(
+    Protector.userBroker = SessionManager.brokerFactory(
                                                                     UserBroker)
 
 

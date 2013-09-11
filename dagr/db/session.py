@@ -71,7 +71,6 @@ class SAEnginePlugin(plugins.SimplePlugin):
       self.sa_engine = create_engine(self.connectionString,
                             echo=self.debug)
 
-
   def stop(self):
     """stops the engine"""
     if self.sa_engine:
@@ -81,10 +80,6 @@ class SAEnginePlugin(plugins.SimplePlugin):
   def bind(self, session):
     """binds the engine"""
     session.configure(bind=self.sa_engine)
-
-  def getEngine(self):
-    """returns the engine"""
-    return self.sa_engine
 
 
 class ForeignKeysListener(PoolListener):
@@ -122,7 +117,7 @@ class SATool(cherrypy.Tool):
                            self.bind_session,
                            priority=20)
 
-    self.session = scoped_session(sessionmaker(autoflush=False,
+    self.session = scoped_session(sessionmaker(autoflush=True,
                                                autocommit=False))
 
   def _setup(self):
@@ -149,9 +144,6 @@ class SATool(cherrypy.Tool):
     finally:
       self.session.remove()
 
-  def getSession(self):
-    """Returns the session"""
-    return self.session
 
 class SessionManager:
   """
@@ -221,15 +213,8 @@ class SessionManager:
       return False
     return True
 
-  def getEngine(self):
-    """
-    Returns the session engine
-
-    :returns: Session
-    """
-    return self.saTool.getSession()
-
-  def brokerFactory(self, clazz):
+  @staticmethod
+  def brokerFactory(clazz):
     """
     Creates and initializes a broker
 
@@ -241,8 +226,9 @@ class SessionManager:
     if not issubclass(clazz, BrokerBase):
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
-
-    broker = clazz(self.getEngine())
+    print cherrypy.config
+    print cherrypy._cpconfig
+    broker = clazz(cherrypy.request.db)
     return broker
 
   def close(self):
@@ -250,17 +236,6 @@ class SessionManager:
     Closes the session
     """
     pass
-
-  @classmethod
-  def getInstance(cls):
-    """
-    Returns the instance (Singleton pattern)
-
-    :returns: SessionManager
-    """
-    if SessionManager.instance is None:
-      raise IndentationError('No SessionManager present')
-    return SessionManager.instance
 
   def getLogger(self):
     """
