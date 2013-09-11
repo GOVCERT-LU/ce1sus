@@ -226,8 +226,6 @@ class SessionManager:
     if not issubclass(clazz, BrokerBase):
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
-    print cherrypy.config
-    print cherrypy._cpconfig
     broker = clazz(cherrypy.request.db)
     return broker
 
