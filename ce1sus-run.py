@@ -1,7 +1,7 @@
 """main file for launching ce1sus"""
 
-import cherrypy
 import os
+import cherrypy
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
@@ -24,7 +24,6 @@ from ce1sus.web.controllers.event.groups import GroupsController
 from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
-
 
 
 def bootstrap():
@@ -63,7 +62,6 @@ def bootstrap():
   Log.getLogger("run").debug("Loading Ldap")
   LDAPHandler(ce1susConfigFile)
 
-
   # add controllers
   Log.getLogger("run").debug("Adding controllers")
   Log.getLogger("run").debug("Adding index")
@@ -94,18 +92,15 @@ def bootstrap():
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
 
 
-def application(environ, start_response):
-  bootstrap()
-  return cherrypy.tree(environ, start_response)
-
-
 if __name__ == '__main__':
 
   bootstrap()
   try:
-    # this is the way it should be done in cherrypy 3.X
     cherrypy.engine.start()
     cherrypy.engine.block()
   except cherrypy._cperror as e:
     raise ConfigException(e)
-
+else:
+  bootstrap()
+  cherrypy.engine.start()
+  application = cherrypy.tree
