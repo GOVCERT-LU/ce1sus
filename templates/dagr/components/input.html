@@ -18,7 +18,7 @@
 	  validationMsg = getattr(message,'error')
 	%>
 	%if enabled or message is None:
-	    <textarea id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+	    <textarea class="mako-input" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
 	%else:
 	    <div style="padding: 5px;overflow:auto; height:${rows*25}px">
 	      ${dagr.plaintext2html(text=message)}
@@ -48,7 +48,7 @@
 	  value = ''
 	%>
 	%if enabled or value is None:
-	    <input id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
+	    <input class="mako-input" id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
 	%else:
 	    <div style="padding: 5px;">
 	      %if value == 'EXTERNALAUTH':
@@ -82,7 +82,7 @@
 	%>
 	
 	%if enabled or value is None:
-	    <input id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
+	    <input class="mako-input" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
 	%else:
 	    <div style="padding: 5px;">
 	      ${value}
@@ -185,7 +185,7 @@
 %>
 %if enabled:
   <div id="${name}ID" class="input-append date">
-    <input data-format="yyyy-MM-dd hh:mm:ss" type="text" value="${value}"></input>
+    <input  class="mako-input" data-format="yyyy-MM-dd hh:mm:ss" type="text" value="${value}"></input>
     <span class="add-on">
       <i data-time-icon="icon-time" data-date-icon="icon-calendar">
       </i>

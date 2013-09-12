@@ -329,7 +329,7 @@ class Object(BASE):
 
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
-                       '==Object.event_id', innerjoin=True)
+                       '==Object.event_id')
   created = Column('created', DateTime)
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
@@ -337,6 +337,9 @@ class Object(BASE):
                          primaryjoin="Object.creator_id==User.identifier")
   parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
+  # TODO: Fix Me! - FK removed due to errors
+  parentEvent_id = Column('parentEvent', Integer)
+
   children = relationship("Object", primaryjoin='Object.identifier' +
                          '==Object.parentObject_id')
 
@@ -567,11 +570,7 @@ class ObjectBroker(BrokerBase):
     try:
       # first level
       result = self.session.query(Object).filter(
-                        Object.event_id == eventID).all()
-      for obj in result:
-        subChildren = self.getChildOjectsForObjectID(obj.identifier, True)
-        if not subChildren is None:
-          result = result + subChildren
+                        or_(Object.event_id == eventID, Object.parentEvent_id == eventID)).all()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
@@ -1019,8 +1018,11 @@ class EventBroker(BrokerBase):
     """
     try:
 
-      result = self.session.query(Event).join(Object).filter(
+      obj = self.session.query(Object).filter(
                         Object.identifier == objectID).one()
+
+      result = self.session.query(Event).filter(
+                        Event.identifier == obj.parentEvent_id).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       if not recursive:
