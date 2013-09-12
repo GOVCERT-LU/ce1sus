@@ -99,8 +99,9 @@ class IndexController(BaseController):
     # Returns None on success or a string describing the error on failure
     # Adapt to your needs
     try:
-      userBroker = SessionManager.brokerFactory(UserBroker)
-      user = userBroker.getUserByUsernameAndPassword(username, 'EXTERNALAUTH')
+
+      user = self.userBroker.getUserByUsernameAndPassword(username,
+                                                          'EXTERNALAUTH')
       if user is None:
         raise NothingFoundException
       # ok it is an LDAPUser

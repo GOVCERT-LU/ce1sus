@@ -246,6 +246,16 @@ class ObjectsController(BaseController):
   @cherrypy.expose
   @require(requireReferer(('/internal')))
   def setObjectParent(self, eventID, objectID):
+    """
+    Renders page for setting the relations between objects,objects and events
+
+    :param identifier: The identifier of the event
+    :type identifier: Integer
+    :param definition: The identifier of the definition associated to the object
+    :type definition: Integer
+
+    :returns: generated HTML
+    """
     template = self.getTemplate('/events/event/objects/parentModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
@@ -268,9 +278,6 @@ class ObjectsController(BaseController):
     for child in eventChildren:
       key = '{0} - {1}'.format(child.definition.name, child.identifier)
       cbValues[key] = child.identifier
-
-
-
     return template.render(eventID=eventID,
                            objectID=objectID,
                            cbValues=cbValues,
@@ -279,7 +286,14 @@ class ObjectsController(BaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def modifyParentRelation(self, eventID, objectID, parentObjectID=None, setEventParent=None):
+  def modifyParentRelation(self,
+                           eventID,
+                           objectID,
+                           parentObjectID=None,
+                           setEventParent=None):
+    """
+    modifies the relations between objects,objects and events
+    """
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,

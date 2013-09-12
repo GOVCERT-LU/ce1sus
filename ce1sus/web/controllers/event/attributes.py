@@ -103,27 +103,27 @@ class AttributesController(BaseController):
     filepath = '/tmp/' + value.filename
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
+
+  # pylint: disable=R0914,R0912
   @cherrypy.expose
   @require(requireReferer(('/internal')))
   def modifyAttribute(self, **kwargs):
     """
     Modification on the attributes of objects
     """
-    params = kwargs
-    eventID = params.get('eventID', None)
+
+    eventID = kwargs.get('eventID', None)
     if not eventID is None:
-      attributeID = params.get('attributeID', None)
-      objectID = params.get('objectID', None)
-      definition = params.get('definition', None)
-      action = params.get('action', None)
+      attributeID = kwargs.get('attributeID', None)
+      objectID = kwargs.get('objectID', None)
+      definition = kwargs.get('definition', None)
+      action = kwargs.get('action', None)
       # remove unnecessary elements from the parameters
-      params = { k : v for k, v in params.iteritems() if k not in ['eventID',
+      params = { k : v for k, v in kwargs.iteritems() if k not in ['eventID',
                                                                 'attributeID',
                                                                    'objectID',
                                                                    'definition',
                                                                    'action'] }
-      errorMsg = ''
-      attributes = list()
       # right checks
       event = self.eventBroker.getByID(eventID)
       self.checkIfViewable(event.groups,
@@ -161,13 +161,13 @@ class AttributesController(BaseController):
         return self.returnAjaxOK()
       except ValidationException as e:
         self.getLogger().info(e)
-        errorMsg = e
+        return e
       except BrokerException as e:
         self.getLogger().fatal(e)
-        errorMsg = e
+        return e
       except HandlerException as e:
         self.getLogger().fatal(e)
-        errorMsg = e
+        return e
       template = self.getTemplate('/events/event/attributes/'
                                     + 'attributesModal.html')
       cbDefinitions = self.def_attributesBroker.getCBValues(
@@ -177,12 +177,12 @@ class AttributesController(BaseController):
           attribute = attributes[0]
         else:
           attribute = None
-          errorMsg = '{0} Please try again'.format(errorMsg)
+
       return template.render(eventID=eventID,
                              objectID=objectID,
                              attribute=attribute,
                              cbDefinitions=cbDefinitions,
-                             errorMsg=errorMsg)
+                             errorMsg=None)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -269,7 +269,11 @@ class AttributesController(BaseController):
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def file(self, eventID, attributeID, action):
+    """
+    Returns a file to download
+    """
     # right checks
+    del action
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==

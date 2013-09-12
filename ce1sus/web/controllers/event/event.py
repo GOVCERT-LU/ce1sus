@@ -39,6 +39,16 @@ class Relation(object):
     self.attributeName = 0
     self.attributeValue = 0
 
+# pylint: disable=R0903,R0902
+class Object4Paginator(object):
+  """
+  Container only used for displaying the objects in the event view
+  """
+  def __init__(self):
+    self.identifier = 0
+    self.type = 0
+    self.isChildOf = 0
+
 class EventController(BaseController):
   """event controller handling all actions in the event section"""
 
@@ -81,11 +91,6 @@ class EventController(BaseController):
     self.checkIfViewable(event.groups,
                          self.getUser().identifier ==
                          event.creator.identifier)
-
-    objectLabels = [{'identifier':'#'},
-              {'definition.name':'Type'},
-              {'creator.username':'Created by'},
-              {'created':'CreatedOn'}]
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
@@ -93,10 +98,24 @@ class EventController(BaseController):
                           '/events/event/objects/objects/{0}'.format(eventID),
                           contentid='',
                           tabid='eventObjects{0}'.format(eventID))
-    objectPaginator = Paginator(items=event.objects,
-                          labelsAndProperty=objectLabels,
+
+    objectPaginator = Paginator(items=list(),
+                          labelsAndProperty=[{'identifier':'#'},
+                                              {'type':'Type'},
+                                              {'isChildOf':'Child Of'}],
                           paginatorOptions=paginatorOptions)
     objectPaginator.itemsPerPage = 3
+
+    for item in (event.objects
+                    + self.objectBroker.getChildObjectsForEvent(eventID)):
+      newItem = Object4Paginator()
+      newItem.identifier = item.identifier
+      newItem.type = item.definition.name
+      if item.parentObject_id is None:
+        newItem.isChildOf = ''
+      else:
+        newItem.isChildOf = '#{0}'.format(item.parentObject_id)
+      objectPaginator.list .append(newItem)
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -105,12 +124,24 @@ class EventController(BaseController):
               {'attributeID':'Attribute #'},
               {'attributeName':'Attribute Name'},
               {'attributeValue':'Attribute Value'}]
-    result = list()
+
+
+    relationsPaginatorOptions = PaginatorOptions('/events/recent',
+                                                 'eventsTabTabContent')
+    relationsPaginatorOptions.addOption('NEWTAB',
+                               'VIEW',
+                               '/events/event/view/',
+                               contentid='')
+
+    relationPaginator = Paginator(items=list(),
+                          labelsAndProperty=relationLabels,
+                          paginatorOptions=relationsPaginatorOptions)
+    relationPaginator.itemsPerPage = 3
+
     try:
       # get for each object
-      relations = self.__getRelationsObjects(event.objects)
       # prepare list
-      for relation in relations:
+      for relation in self.__getRelationsObjects(event.objects):
         temp = Relation()
         if relation.sameAttribute.object.event is None:
           event = self.eventBroker.getEventByObjectID(relation
@@ -126,21 +157,9 @@ class EventController(BaseController):
         temp.attributeID = relation.sameAttribute.identifier
         temp.attributeName = relation.sameAttribute.definition.name
         temp.attributeValue = relation.sameAttribute.value
-        result.append(temp)
-    except BrokerException:
-      pass
-
-    relationsPaginatorOptions = PaginatorOptions('/events/recent',
-                                                 'eventsTabTabContent')
-    relationsPaginatorOptions.addOption('NEWTAB',
-                               'VIEW',
-                               '/events/event/view/',
-                               contentid='')
-
-    relationPaginator = Paginator(items=result,
-                          labelsAndProperty=relationLabels,
-                          paginatorOptions=relationsPaginatorOptions)
-    relationPaginator.itemsPerPage = 3
+        relationPaginator.list.append(temp)
+    except BrokerException as e:
+      self.getLogger().error(e)
 
     return template.render(objectPaginator=objectPaginator,
                            relationPaginator=relationPaginator,
