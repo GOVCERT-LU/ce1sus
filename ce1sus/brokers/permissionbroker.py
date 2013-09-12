@@ -25,12 +25,15 @@ import re
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
 
+
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
 __REL_USER_GROUPS = Table(
-    'User_has_Groups', BASE.metadata,
-    Column('user_id', Integer, ForeignKey('Users.user_id')),
-    Column('group_id', Integer, ForeignKey('Groups.group_id'))
-    )
+   'User_has_Groups', BASE.metadata,
+   Column('user_id', Integer, ForeignKey('Users.user_id')),
+   Column('group_id', Integer, ForeignKey('Groups.group_id'))
+   )
+
+
 
 class User(BASE):
   """This is a container class for the USERS table."""
