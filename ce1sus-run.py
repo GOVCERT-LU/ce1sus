@@ -25,9 +25,6 @@ from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
 
-def application(environ, start_response):
-  bootstrap()
-  return cherrypy.tree(environ, start_response)
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -103,7 +100,7 @@ if __name__ == '__main__':
     cherrypy.engine.block()
   except cherrypy._cperror as e:
     raise ConfigException(e)
-# else:
-#  bootstrap()
-#  cherrypy.engine.start()
-#  application = cherrypy.tree
+else:
+  bootstrap()
+  cherrypy.engine.start()
+  application = cherrypy.tree

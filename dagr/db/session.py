@@ -18,11 +18,10 @@ import socket
 from dagr.helpers.debug import Log
 from sqlalchemy.ext.declarative import declarative_base
 import cherrypy
-from sqlalchemy.schema import MetaData
-from dagr.db.recepie.satool import SATool
-from dagr.db.recepie.saengineplugin import SAEnginePlugin
-mymetadata = MetaData()
-BASE = declarative_base(metadata=mymetadata)
+from dagr.db.recepie.satool import SATool, SAEnginePlugin
+
+
+BASE = declarative_base()
 
 class SessionManagerException(Exception):
   """sessionClazz Manager Exception"""
@@ -40,6 +39,7 @@ class SessionObject(object):
   Session container
   """
 
+  # pylint: disable=R0201
   @property
   def session(self):
     """
@@ -64,7 +64,7 @@ class SessionManager:
       connetionString = '{prot}:///../../../{db}'.format(prot=protocol,
                                                   db=self.__config.get('db'))
       # setup the engine
-      SAEnginePlugin(cherrypy.engine, connetionString).subscribe()
+      SAEnginePlugin(cherrypy.engine, connetionString, True, debug).subscribe()
     else:
       hostname = self.__config.get('host')
       port = self.__config.get('port')
@@ -86,7 +86,7 @@ class SessionManager:
         db=self.__config.get('db'),
         port=port
       )
-      SAEnginePlugin(cherrypy.engine, connetionString).subscribe()
+      SAEnginePlugin(cherrypy.engine, connetionString, False, debug).subscribe()
     # session setup
     self.saTool = SATool()
     cherrypy.tools.db = self.saTool
