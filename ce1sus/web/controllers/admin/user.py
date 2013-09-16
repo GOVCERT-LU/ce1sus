@@ -149,10 +149,9 @@ class UserController(BaseController):
                  priv, email, action, disabled)
     try:
       if action == 'insert' or action == 'insertLDAP':
-        self.userBroker.insert(user)
+        self.userBroker.insert(user, validate=False)
       if action == 'update':
-        self.userBroker.update(user)
-      action = None
+        self.userBroker.update(user, validate=False)
       if action == 'remove':
         if (user.identifier == '1'):
           raise DeletionException('First user cannot be removed.')
@@ -168,7 +167,7 @@ class UserController(BaseController):
       return e
     except ValidationException:
       self.getLogger().debug('User is invalid')
-      return template.render(user=user)
+      return self.returnAjaxPostError() + template.render(user=user)
     except DeletionException as e:
       self.getLogger().info('User tried to delete undeletable user.')
       return e

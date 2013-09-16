@@ -63,10 +63,10 @@ class Type(object):
 
 class Status(object):
   """Static class defining the status of an event"""
-  __tableDefinitions = {0 : 'Draft',
-                     1 : 'Confirmed',
-                     2 : 'Expired',
-                     3 : 'Deleted'}
+  __tableDefinitions = {0 : 'Confirmed',
+                     1 : 'Draft',
+                     2 : 'Deleted',
+                     3 : 'Expired'}
 
   @staticmethod
   def getDefinitions():

@@ -171,7 +171,7 @@ class ValueBroker(BrokerBase):
     """
     self.__clazz = self.getClassByAttribute(attribute)
 
-  def __convertAttriuteValueToValue(self, attribute):
+  def __convertAttriuteValueToValue(self, attribute, isInsert=True):
     """
     converts an Attribute to a XXXXXValue object
 
@@ -182,8 +182,8 @@ class ValueBroker(BrokerBase):
     """
     valueInstance = self.__clazz()
     valueInstance.value = attribute.value
-
-    valueInstance.identifier = attribute.value_id
+    if not isInsert:
+      valueInstance.identifier = attribute.value_id
     valueInstance.attribute_id = attribute.identifier
     valueInstance.attribute = attribute
     return valueInstance
@@ -232,7 +232,7 @@ class ValueBroker(BrokerBase):
       raise ValidationException('Attribute to be inserted is invalid')
 
     self.__setClassByAttribute(attribute)
-    value = self.__convertAttriuteValueToValue(attribute)
+    value = self.__convertAttriuteValueToValue(attribute, True)
     value.identifier = None
     BrokerBase.insert(self, value, commit)
 
@@ -250,7 +250,7 @@ class ValueBroker(BrokerBase):
       raise ValidationException('Attribute to be updated is invalid')
 
     self.__setClassByAttribute(attribute)
-    value = self.__convertAttriuteValueToValue(attribute)
+    value = self.__convertAttriuteValueToValue(attribute, False)
     BrokerBase.update(self, value, commit)
 
   def removeByAttribute(self, attribute, commit):

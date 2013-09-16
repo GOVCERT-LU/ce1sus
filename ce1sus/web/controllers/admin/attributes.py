@@ -158,7 +158,7 @@ class AttributeController(BaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().info('Attribute is invalid')
-      return template.render(attribute=attribute,
+      return self.returnAjaxPostError() + template.render(attribute=attribute,
                              cbValues=AttributeDefinition.getTableDefinitions(),
                              cbHandlerValues=
                              AttributeDefinition.getHandlerDefinitions())

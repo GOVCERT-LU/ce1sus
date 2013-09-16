@@ -81,6 +81,7 @@ class IndexController(BaseController):
       Protector.setSession(username)
       raise HTTPRedirect('/internal')
 
+  # pylint: disable=R0201
   def checkCredentials(self, username=None, password=None):
     """
     Checks if the credentials are vaild

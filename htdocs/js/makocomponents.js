@@ -44,10 +44,17 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
             	loadContent(refreshContainer,refreshUrl);
             }
     	} else {
-    		if (modalID) {
-    			$("#"+modalID+"body").html(responseText);
+    		if (responseText.match(/^<!--PostError-->/gi)) {
+    			resultText= responseText;
     		} else {
-    			$("#"+refreshContainer+"").html(responseText);
+	    		resultText = '<div class="alert alert-error">';
+	    		resultText += responseText;
+	    		resultText += '</div>';
+    		} 
+    		if (modalID) {
+    			$("#"+modalID+"body").html(resultText);
+    		} else {
+    			$("#"+refreshContainer+"").html(resultText);
     		}
     	}
     });

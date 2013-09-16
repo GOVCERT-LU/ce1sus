@@ -70,7 +70,7 @@ class CommentsController(BaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return template.render(eventID=eventID,
+      return self.returnAjaxPostError() + template.render(eventID=eventID,
                              comment=comment)
     except BrokerException as e:
       self.getLogger().fatal(e)

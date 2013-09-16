@@ -20,7 +20,6 @@ from sqlalchemy.ext.declarative import declarative_base
 import cherrypy
 from dagr.db.recepie.satool import SATool, SAEnginePlugin
 
-
 BASE = declarative_base()
 
 class SessionManagerException(Exception):

@@ -63,7 +63,7 @@ class TicketHandler(GenericHandler):
     # check if params contains tickets
 
 
-  def render(self, enabled, eventID, attribute=None):
+  def render(self, enabled, eventID, user, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/ticket.html')
     string = template.render(attribute=attribute, enabled=enabled)
     return string
@@ -78,7 +78,7 @@ class CVEHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.url = WebConfig.getInstance().get('cveurl')
 
-  def render(self, enabled, eventID, attribute=None):
+  def render(self, enabled, eventID, user, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/cve.html')
     string = template.render(attribute=attribute, enabled=enabled)
     return string

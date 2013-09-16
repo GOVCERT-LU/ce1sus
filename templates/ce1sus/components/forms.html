@@ -6,13 +6,15 @@
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='groupID',value='',enabled=False)"/>
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
-  <%call expr="labeledInput.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='ShareTLP files',name='shareTLP',enabled=enabled,hasEmpty=False)"/>
 % else:
 <input type="hidden" name="identifier" value="${group.identifier}">
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='groupID',value=group.identifier,enabled=False)"/>
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=group.name,enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=group.description,enabled=enabled)"/>
-  <%call expr="labeledInput.labeledComboBox(label='ShareTLP',name='shareTLP',values={'No':0,'Yes':1},selected=group.shareTLP,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False,selected=group.canDownload)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='ShareTLP',name='shareTLP',enabled=enabled,hasEmpty=False,selected=group.shareTLP)"/>
 % endif
 </%def>
 

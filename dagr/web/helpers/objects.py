@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 module in charge of object foo, since cherrypy sends more parameters
 

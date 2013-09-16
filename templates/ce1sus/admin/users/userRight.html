@@ -36,7 +36,7 @@
 	<input type="hidden" name="userID"	value="${userDetails.identifier}"> 
 	<table border="0" cellpadding="5">
 		<tr>
-			<td>User is not part of these groups:<BR /> <select
+			<td>User is <b>not</b> part of these groups:<BR /> <select
 				name="remainingGroups" size="10" multiple="multiple">
 					%if not remainingGroups is None: 
 					   % for group in remainingGroups:

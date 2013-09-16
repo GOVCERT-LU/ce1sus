@@ -16,7 +16,14 @@
                 </div>
                 <div class="span5" style="text-align: right;">
                     <div class="btn-group">
-                       <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
+                    <%
+                   
+                    if len(object.definition.attributes) == 0:
+                      disabledStr = ' disabled" '
+                    else:
+                      disabledStr = '" data-toggle="modal"'
+                    %>
+                       <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn ${disabledStr}><i class="icon-plus"></i></a>
                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-tag"></i></a>
                        <a href="#setParentModal${object.identifier}" role="button" class="btn" data-toggle="modal"><i class="icon-wrench"></i></a>
                        <a  class="btn" href="#infoModal${object.identifier}" role="button" data-toggle="modal"><i class="icon-question-sign"></i></a>

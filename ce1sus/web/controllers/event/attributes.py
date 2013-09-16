@@ -178,7 +178,7 @@ class AttributesController(BaseController):
         else:
           attribute = None
 
-      return template.render(eventID=eventID,
+      return self.returnAjaxPostError() + template.render(eventID=eventID,
                              objectID=objectID,
                              attribute=attribute,
                              cbDefinitions=cbDefinitions,
@@ -244,7 +244,7 @@ class AttributesController(BaseController):
       enableView = True
     else:
       enableView = False
-    return handler.render(enableView, eventID, attribute)
+    return handler.render(enableView, eventID, self.getUser(), attribute)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose

@@ -85,8 +85,8 @@ class User(BASE):
     """
     ObjectValidator.validateAlNum(self, 'username', minLength=3)
     # Don't update if the password is already a hash
-    if not (self.password == 'EXTERNALAUTH' and re.match('^[0-9a-f]{40}$',
-                                                        self.password) is None):
+    if not (self.password == 'EXTERNALAUTH') and re.match('^[0-9a-f]{40}$',
+                                                        self.password) is None:
       ObjectValidator.validateRegex(self,
                                 'password',
                                 (r"(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])"
@@ -110,6 +110,7 @@ class Group(BASE):
   name = Column('name', String)
   shareTLP = Column('auto_share_tlp', Integer)
   description = Column('description', String)
+  canDownload = Column('canDownlad', Integer)
   users = relationship(User, secondary='User_has_Groups',
                        back_populates='groups', cascade='all')
 
@@ -249,10 +250,10 @@ class GroupBroker(BrokerBase):
       raise BrokerException(e)
 
 
-  # pylint: disable=R0903
+  # pylint: disable=R0903,R0913
   @staticmethod
   def buildGroup(identifier=None, name=None, shareTLP=0,
-                  description=None, action='insert'):
+                  description=None, download=None, action='insert'):
     """
     puts a group with the data together
 
@@ -274,49 +275,51 @@ class GroupBroker(BrokerBase):
     if not action == 'remove':
       group.name = name
       ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
+      ObjectConverter.setInteger(group, 'canDownload', download)
       group.description = description
     return group
 
 class UserBroker(BrokerBase):
   """This is the interface between python an the database"""
 
-  def insert(self, instance, commit=True):
+  def insert(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
     """
-
-
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('User to be inserted is invalid')
-
-    instance.password = hasher.hashSHA1(instance.password,
+    errors = False
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('User to be inserted is invalid')
+    if validate and not errors:
+      instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
     try:
-      BrokerBase.insert(self, instance, commit)
+      BrokerBase.insert(self, instance, commit, validate=False)
       self.doCommit(commit)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-  def update(self, instance, commit=True):
+  def update(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
     """
 
-
-
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('User to be inserted is invalid')
+    errors = False
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('User to be updated is invalid')
 
     # Don't update if the password is already a hash
     if re.match('^[0-9a-f]{40}$', instance.password) is None:
-      instance.password = hasher.hashSHA1(instance.password,
+      if validate and not errors:
+        instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
     try:
-      BrokerBase.update(self, instance, commit)
+      BrokerBase.update(self, instance, commit, validate=False)
       self.doCommit(commit)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
@@ -494,7 +497,7 @@ class UserBroker(BrokerBase):
     user = User()
     if not action == 'insert':
       user.identifier = identifier
-    if not action == 'remove':
+    if not action == 'remove' and action != 'insertLDAP':
       user.email = email
       user.password = password
       user.username = username
@@ -509,5 +512,6 @@ class UserBroker(BrokerBase):
       user.username = ldapUser.uid
       user.password = ldapUser.password
       user.email = ldapUser.mail
+      user.disabled = 1
       user.privileged = 0
     return user

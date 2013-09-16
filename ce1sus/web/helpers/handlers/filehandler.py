@@ -26,6 +26,8 @@ from shutil import move
 from os import makedirs
 from dagr.web.helpers.pagination import Link
 from ce1sus.brokers.eventbroker import EventBroker
+from dagr.db.broker import BrokerException
+from ce1sus.web.helpers.protection import Protector
 
 class FileNotFoundException(HandlerException):
   """File not found Exception"""
@@ -149,35 +151,67 @@ class FileHandler(GenericHandler):
     attribute.value = value
     return attribute
 
+  def __canUserDownload(self, eventID, user):
+    """
+    Checks if the user can download files for the given eventID
 
-  def render(self, enabled, eventID, attribute=None):
-    if enabled:
-      template = self.getTemplate('/events/event/attributes/handlers/file.html')
+    :param eventID: ID of the event
+    :type eventID: Intger
+    :param user: User
+    :type user: User
 
-      string = template.render(attribute=attribute,
-                               eventID=eventID,
-                               enabled=enabled)
-    else:
-      template = self.getTemplate('/events/event/attributes/'
-                                  + 'handlers/location.html')
-      try:
-        attrID = attribute.identifier
-      except  AttributeError:
-        attrID = ''
-      url = FileHandler.URLSTR.format(eventID,
+    :returns: Boolean
+    """
+    canDownload = False
+    try:
+      event = self.eventBroker.getByID(eventID)
+
+      if event.creator.identifier == user.identifier:
+        canDownload = True
+      else:
+        for group in event.groups:
+          if group in user.groups:
+            if group.canDownload:
+              canDownload = True
+              break
+
+    except BrokerException as e:
+      self.getLogger().debug(e)
+      canDownload = False
+    return canDownload
+
+  def render(self, enabled, eventID, user, attribute=None):
+
+    template = self.getTemplate('/events/event/attributes/handlers/file.html')
+    try:
+      attrID = attribute.identifier
+    except  AttributeError:
+      attrID = ''
+    url = FileHandler.URLSTR.format(eventID,
                                       attrID,
                                       'Download')
-      string = template.render(url=url, enabled=enabled)
+    canDownload = False
+    if not enabled:
+      canDownload = self.__canUserDownload(eventID, user)
+
+    string = template.render(url=url,
+                             enabled=enabled,
+                             canDownload=canDownload,
+                             eventID=eventID
+                             )
     return string
 
   def convertToAttributeValue(self, value):
     attribute = value.attribute
-    event = attribute.object.event
-    if event is None:
-      event = self.eventBroker.getEventByObjectID(attribute.object.identifier)
-    link = Link(FileHandler.URLSTR.format(event.identifier,
-                                          attribute.identifier,
-                                          ''),
-                'Download')
-    return link
+    user = Protector.getUser()
+    canDownload = self.__canUserDownload(attribute.object.identifier, user)
+
+    if canDownload:
+      link = Link(FileHandler.URLSTR.format(attribute.object.identifier,
+                                            attribute.identifier,
+                                            ''),
+                  'Download')
+      return link
+    else:
+      return '(Not Accessible)'
 

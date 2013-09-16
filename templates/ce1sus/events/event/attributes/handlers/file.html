@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+
 %if enabled:
 <div class="row-fluid">
 	<div class="span3">
@@ -83,7 +85,11 @@ function buttonClick(){
 %else:
   <%call expr="labeledInput.genericLabeler('Location')">
   <div style="padding: 5px;">
-    <a href="${url}"  target="_blank">Download</a>
+    %if canDownload:
+        <a href="${url}"  target="_blank">Download</a>
+    %else:
+        (Not Accessible)
+    %endif
   </div>
   </%call>
 %endif

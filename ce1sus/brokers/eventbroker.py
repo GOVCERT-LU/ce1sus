@@ -28,7 +28,6 @@ from sqlalchemy.sql.expression import or_, and_
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from datetime import datetime
-import copy
 from dagr.helpers.converters import ObjectConverter
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -109,7 +108,6 @@ class Attribute(BASE):
         return self.__value
     else:
       return self.__value
-
 
   @value.setter
   def value(self, value):
@@ -462,9 +460,7 @@ class CommentBroker(BrokerBase):
     """
     comment = Comment()
     if not action == 'insert':
-      comment_orig = self.getByID(commentID)
-      # dont want to change the original in case the user cancel!
-      comment = copy.copy(comment_orig)
+      comment = self.getByID(commentID)
     comment.modified = datetime.now()
     comment.modifier = user
     comment.modifier_id = comment.modifier.identifier
@@ -567,16 +563,26 @@ class ObjectBroker(BrokerBase):
     return obj
 
   def getChildObjectsForEvent(self, eventID):
+    """
+    Returns all the child objects of the objects for a given event
+
+    :returns: List of Objects
+    """
     try:
       # first level
-      result = self.session.query(Object).filter(
-                        or_(Object.event_id == eventID, Object.parentEvent_id == eventID)).all()
+      result = self.session.query(Object).filter(Object.parentEvent_id
+                                                 == eventID).all()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   eventID))
 
   def getChildOjectsForObjectID(self, objectID, recursive=False):
+    """
+    Returns all the child objects of the given object
+
+    :returns: List of Objects
+    """
     try:
       # first level
       result = self.session.query(Object).filter(
@@ -642,7 +648,7 @@ class AttributeBroker(BrokerBase):
     attribute = BrokerBase.getByID(self, identifier)
     return attribute
 
-  def insert(self, instance, commit=True):
+  def insert(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
     """
@@ -662,7 +668,7 @@ class AttributeBroker(BrokerBase):
 
     try:
       # insert value for value table
-      BrokerBase.insert(self, instance, False)
+      BrokerBase.insert(self, instance, False, validate)
 
       clazz = self.valueBroker.getClassByAttribute(instance)
       # find the same values!
@@ -697,7 +703,7 @@ class AttributeBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def update(self, instance, commit=True):
+  def update(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.update
     """
@@ -713,7 +719,7 @@ class AttributeBroker(BrokerBase):
     if errors:
       raise ValidationException('Attribute to be updated is invalid')
     try:
-      BrokerBase.update(self, instance, False)
+      BrokerBase.update(self, instance, False, validate)
       # updates the value of the value table
       self.doCommit(False)
       self.valueBroker.updateByAttribute(instance, False)
@@ -764,7 +770,7 @@ class EventBroker(BrokerBase):
     self.attributeBroker = AttributeBroker(session)
     self.objectBroker = ObjectBroker(session)
 
-  def insert(self, instance, commit=True):
+  def insert(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
     """
@@ -777,14 +783,14 @@ class EventBroker(BrokerBase):
       # insert value for value table
       for obj in instance.objects:
         for attribute in obj.attributes:
-          self.attributeBroker.insert(attribute, False)
+          self.attributeBroker.insert(attribute, False, validate)
       self.doCommit(commit)
     except BrokerException as e:
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-  def update(self, instance, commit=True):
+  def update(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.update
     """
@@ -792,7 +798,7 @@ class EventBroker(BrokerBase):
     if errors:
       raise ValidationException('Event to be inserted is invalid')
     try:
-      BrokerBase.update(self, instance, commit)
+      BrokerBase.update(self, instance, commit, validate)
       self.doCommit(commit)
     except BrokerException as e:
       self.getLogger().fatal(e)
@@ -979,8 +985,7 @@ class EventBroker(BrokerBase):
     event = Event()
     if not action == 'insert':
       # dont want to change the original in case the user cancel!
-      event_orig = self.getByID(identifier)
-      event = copy.copy(event_orig)
+      event = self.getByID(identifier)
       # right checks only if there is a change!!!!
     if not action == 'remove':
       event.title = name

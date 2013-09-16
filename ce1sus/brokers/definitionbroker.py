@@ -144,9 +144,9 @@ class AttributeDefinition(BASE):
     :returns: Dictionary
     """
     result = dict()
-    for index, tableName in (AttributeDefinition.
+    for index, handlerName in (AttributeDefinition.
                                         __handlerDefinitions.iteritems()):
-      key = tableName.replace('Value', '')
+      key = handlerName.split('.')[1]
       value = index
       result[key] = value
     return result

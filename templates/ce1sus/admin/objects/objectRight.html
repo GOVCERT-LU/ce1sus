@@ -39,7 +39,7 @@
 <input type="hidden" name="objectid" value="${objectDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
-    <td>Attributes not part of this object:<BR /> <select name="remainingAttributes"
+    <td>Attributes <b>not</b> part of this object:<BR /> <select name="remainingAttributes"
         size="10" multiple="multiple" tabindex="1"> 
         %if not remainingAttributes is None:
             % for attribute in remainingAttributes:

@@ -187,7 +187,7 @@ class BrokerBase(object):
         self.session.remove()
 
 
-  def insert(self, instance, commit=True):
+  def insert(self, instance, commit=True, validate=True):
     """
     Insert a <<getBrokerClass()>>
 
@@ -197,9 +197,11 @@ class BrokerBase(object):
     Note: handles the commit and the identifier of the user is taken
            into account if set
     """
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('Instance to be inserted is invalid')
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('Instance to be inserted is invalid')
+
     try:
       self.session.add(instance)
       self.doCommit(commit)
@@ -220,7 +222,7 @@ class BrokerBase(object):
 
 
 
-  def update(self, instance, commit=True):
+  def update(self, instance, commit=True, validate=True):
     """
     updates an <<getBrokerClass()>>
 
@@ -228,9 +230,10 @@ class BrokerBase(object):
     :type instance: extension of Base
 
     """
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('Instance to be inserted is invalid')
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('Instance to be inserted is invalid')
     # an elo den update
     try:
       self.session.merge(instance)

@@ -117,3 +117,11 @@ class BaseController:
     :returns:
     """
     return self.config.get(identifier)
+
+  def returnAjaxPostError(self):
+    """
+    Returns the string of an postError for the javascript
+
+    :returns: String
+    """
+    return '<!--PostError--><!--' + self.__class__.__name__ + '-->'

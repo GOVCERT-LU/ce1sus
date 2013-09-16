@@ -97,7 +97,7 @@ class GroupController(BaseController):
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None, shareTLP=0,
-                  description=None, action='insert'):
+                  description=None, download=None, action='insert'):
     """
     modifies or inserts a group with the data of the post
 
@@ -118,6 +118,7 @@ class GroupController(BaseController):
                                         name,
                                         shareTLP,
                                         description,
+                                        download,
                                         action)
     try:
       if action == 'insert':
@@ -132,7 +133,7 @@ class GroupController(BaseController):
       return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
-      return template.render(group=group)
+      return self.returnAjaxPostError() + template.render(group=group)
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return e

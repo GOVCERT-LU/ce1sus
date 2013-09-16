@@ -16,7 +16,7 @@ from dagr.web.controllers.base import BaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Event, CommentBroker
+                  AttributeBroker, CommentBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
                   AttributeDefinitionBroker
@@ -264,14 +264,14 @@ class EventController(BaseController):
     risk = kwargs.get('risk', None)
     analysis = kwargs.get('analysis', None)
     # fill in the values
-    event = Event()
-    try:
-      if not action == 'insert':
-        template = self.getTemplate('/events/event/eventModal.html')
-        event = self.eventBroker.buildEvent(identifier, action, status,
+    event = self.eventBroker.buildEvent(identifier, action, status,
                                             tlp_index, description, name,
                                             published, first_seen, last_seen,
                                             risk, analysis, self.getUser())
+    try:
+      if not action == 'insert':
+        template = self.getTemplate('/events/event/eventModal.html')
+
         # right checks only if there is a change!!!!
         self.checkIfViewable(
                       event.groups, self.getUser().identifier ==
@@ -286,7 +286,8 @@ class EventController(BaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return EventController.__populateTemplate(event, template)
+      return (self.returnAjaxPostError()
+                 + EventController.__populateTemplate(event, template))
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return 'An unexpected error occurred: {0}'.format(e)

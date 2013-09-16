@@ -61,7 +61,7 @@ class HandlerBase(object):
                                                     ))
 
   @abstractmethod
-  def render(self, enabled, eventID, attribute=None):
+  def render(self, enabled, eventID, user, attribute=None):
     """
     Generates the HTML for displaying the attribute
 
@@ -73,10 +73,12 @@ class HandlerBase(object):
     :returns: generated HTML
     """
     raise HandlerException(('render not defined'
-                            + ' for {0} with parameter {1} and{2}')
+                            + ' for {0} with parameter {1},{2},{3} and {4}')
                            .format(self.__class__.__name__,
                                    enabled,
-                                   attribute))
+                                   attribute,
+                                   eventID,
+                                   user))
 
   @abstractmethod
   def convertToAttributeValue(self, value):

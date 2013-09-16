@@ -37,7 +37,7 @@
 <input type="hidden" name="attributeid" value="${attributeDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
-    <td>Objects not using this attribute:<BR /> <select name="remainingObjects"
+    <td>Objects <b>not</b> using this attribute:<BR /> <select name="remainingObjects"
         size="10" multiple="multiple" tabindex="1"> 
         %if not remainingObjects is None:
             % for object in remainingObjects:
