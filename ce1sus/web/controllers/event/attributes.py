@@ -5,6 +5,7 @@ module handing the attributes pages
 
 Created: Aug, 2013
 """
+from dns.rdataclass import NONE
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -240,14 +241,17 @@ class AttributesController(BaseController):
     attribute = None
     if (not attributeID is None) and (attributeID != 'None'):
       attribute = self.attributeBroker.getByID(attributeID)
-      definition = attribute.definition
     else:
       # is an attribute in the session
       try:
         attribute = getattr(cherrypy, 'session')['instertAttribute']
-        definition = attribute.definition
       except KeyError:
-        definition = self.def_attributesBroker.getByID(defattribID)
+        attribute = None
+
+    if attribute is None:
+      definition = self.def_attributesBroker.getByID(defattribID)
+    else:
+      definition = attribute.definition
 
     handler = HandlerBase.getHandler(definition)
     if enabled == '1':
