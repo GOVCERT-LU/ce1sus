@@ -17,6 +17,9 @@
 	if hasattr(message,'error'):
 	  validationMsg = getattr(message,'error')
 	%>
+	<% if message == 'None':
+	     message = ''
+	%>
 	%if enabled or message is None:
 	    <textarea class="mako-input" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
 	%else:

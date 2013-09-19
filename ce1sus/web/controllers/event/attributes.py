@@ -57,6 +57,8 @@ class AttributesController(BaseController):
 
     :returns: generated HTML
     """
+    # Clear Session variable
+    getattr(cherrypy, 'session')['instertAttribute'] = None
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
