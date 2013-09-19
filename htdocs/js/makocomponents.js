@@ -92,9 +92,7 @@ function loadContent(contentid, url) {
 	  //load Content
 	$.ajax({
 	    url: url,
-	    error: function(){
-	    	$("#"+contentid).html('<div class="alert alert-error">An error occured during the AJAX call.</div>');
-	    },
+	    timeout: 3000, // sets timeout to 3 seconds,
 	    success: function(response){
 	    	if(response.match(/^(<HTML>)|(<html>)/)) {
 	    		$("#main").html(response);
@@ -102,7 +100,10 @@ function loadContent(contentid, url) {
 	    		$("#"+contentid).html(response);
 	    	}
 	    },
-	    timeout: 3000 // sets timeout to 3 seconds
+	    error: function(response, type, message){
+	    	$("#"+contentid).html('<div class="alert alert-error">'+type+'<br/>'+message+'</div>');
+	    }
+	    
     });
 	}
 }
@@ -266,11 +267,15 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 	}
 }
 
-function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, closeTab, tabID, tabToClose){
+function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, doCloseTab, tabID, tabToClose){
 	$.ajax({
 	    url: url,
-	    error: function(){
-	    	alert('An error occured during the AJAX call.');
+	    error: function(response){
+	    	if(response.match(/^(<HTML>)|(<html>)/)) {
+	    		$("#main").html(response);
+	    	} else {
+	    		alert(response.responseText);
+	    	}
 	    },
 	    success: function(response){
 	    	if(response.match(/^(<HTML>)|(<html>)/)) {
@@ -281,7 +286,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, cl
 	    			if (refreshContent) {
 	    				loadContent(refreshContainer,refreshUrl);
 	    			} else {
-	    				if (closeTab) {
+	    				if (doCloseTab) {
 	    					closeTab(tabID, tabToClose);
 	    				}
 	    			}

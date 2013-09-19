@@ -86,4 +86,4 @@ class GroupsController(BaseController):
       return self.returnAjaxOK()
     except BrokerException as e:
       self.getLogger().fatal(e)
-      return e
+      return "Error {0}".format(e)

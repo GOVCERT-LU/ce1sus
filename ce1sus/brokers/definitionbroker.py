@@ -43,7 +43,8 @@ class AttributeDefinition(BASE):
                           1: 'filehandler.FileHandler',
                           2: 'tickethandler.TicketHandler',
                           3: 'tickethandler.CVEHandler',
-                          4: 'locationhandler.LocationHandler'}
+                          4: 'locationhandler.LocationHandler',
+                          5: 'multiplegenerichandler.MultipleGenericHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
@@ -158,7 +159,8 @@ class AttributeDefinition(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateAlNum(self, 'name', withSpaces=True,
-                                  withSymbols=True)
+                                  withSymbols=True,
+                                  minLength=3)
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
@@ -238,7 +240,8 @@ class ObjectDefinition(BASE):
     ObjectValidator.validateAlNum(self,
                                   'name',
                                   withSpaces=True,
-                                  withSymbols=True)
+                                  withSymbols=True,
+                                  minLength=3)
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   withNonPrintableCharacters=True,
@@ -346,8 +349,12 @@ class AttributeDefinitionBroker(BrokerBase):
       attribute.addObject(obj)
       if not 'GenericHandler' in attribute.handlerName:
         handler = HandlerBase.getHandler(attribute)
+        try:
+          nameList = handler.getAttributesNameList()
+        except TypeError:
+          nameList = list()
         attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.name.in_(handler.getAttributesNameList()))
+                AttributeDefinition.name.in_(nameList))
         for attribute in attributes:
           attribute.addObject(obj)
       self.doCommit(commit)
@@ -459,10 +466,12 @@ class AttributeDefinitionBroker(BrokerBase):
     if not action == 'remove':
       attribute.name = name
       attribute.description = description
+    if string.isNotNull(classIndex):
       ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
+    if string.isNotNull(classIndex):
       ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
-      if not string.isNotNull(regex):
-        regex = '^.*$'
+    if not string.isNotNull(regex):
+      regex = '^.*$'
       attribute.regex = regex
     if action == 'insert':
       attribute.deletable = 1

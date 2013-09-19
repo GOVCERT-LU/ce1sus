@@ -23,16 +23,14 @@ class Log(object):
   def __init__(self, configFile=None):
     if configFile:
       self.__config = Configuration(configFile, 'Logger')
-      self.__doLog = self.__config.get('log')
+      doLog = self.__config.get('log')
       self.logLvl = getattr(logging, self.__config.get('level').upper())
     else:
-      self.__doLog = True
+      doLog = True
       self.logLvl = logging.INFO
-    if self.__doLog:
+    if doLog:
       # create logger
-      self.__logger = logging.getLogger('root')
       if configFile:
-        self.__logger.setLevel(self.logLvl)
         self.logFileSize = self.__config.get('size')
         self.nbrOfBackups = self.__config.get('backups')
         self.logToConsole = self.__config.get('logconsole')
@@ -46,9 +44,6 @@ class Log(object):
       stringFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
       datefmt = '%m/%d/%Y %I:%M:%S %p'
       self.__formatter = logging.Formatter(fmt=stringFormat, datefmt=datefmt)
-      # create console Handler and set level to debug
-      self.setConsoleHandler(self.__logger)
-      self.setLogFile(self.__logger)
     Log.instance = self
 
   def setConsoleHandler(self, logger):
@@ -83,8 +78,8 @@ class Log(object):
     Returns the instance of the logger
     """
     if Log.instance is None:
-      Log.instance.getLogger('root').error('No configuration loaded')
       Log.instance = Log()
+      Log.instance.getLogger('Log').error('No configuration loaded')
     return Log.instance
 
   @staticmethod

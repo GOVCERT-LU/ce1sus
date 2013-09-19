@@ -272,8 +272,8 @@ class ObjectsController(BaseController):
     else:
       isEventParent = False
       selected = obj.parentObject_id
-
-    eventChildren = self.objectBroker.getChildObjectsForEvent(eventID)
+    eventChildren = self.objectBroker.getCDValuesObjectParents(eventID,
+                                                               obj.identifier)
     # prepare CBArray
     cbValues = dict()
     for child in eventChildren:

@@ -329,20 +329,21 @@ class ObjectValidator:
     placeHolder = ''
     if withNonPrintableCharacters:
       placeHolder += r'\s'
-    if withSpaces and not withNonPrintableCharacters:
-      placeHolder += ' '
+    else:
+      if withSpaces:
+        placeHolder += ' '
     if withSymbols:
       placeHolder += r'!$%^&*()_+|~\-={}\[\]:";\'<>?,.\/\\'
 
     quantifier = ''
     if minLength != 0 and maxLength != 0:
       quantifier = '{{{0},{1}}}'.format(minLength, maxLength)
-    if minLength != 0 and maxLength == 0:
-      quantifier = '{{{0},}}'.format(minLength)
-    if minLength == 0 and maxLength != 0:
-      quantifier = '{{{0}}}'.format(maxLength)
-    if minLength == 0 and maxLength == 0:
+    elif minLength == 0 and maxLength == 0:
       quantifier = '*'.format(minLength, maxLength)
+    elif maxLength == 0:
+      quantifier = '{{{0},}}'.format(minLength)
+    elif minLength == 0:
+      quantifier = '{{{0}}}'.format(maxLength)
 
     return baseRegex.format(PlaceHolder=placeHolder, quantifier=quantifier)
 
@@ -491,13 +492,7 @@ class ObjectValidator:
 
       :return Boolean
     """
-
     errorMsg = 'The value has to be numerical.'
-    if minimal > 0:
-      errorMsg += 'Smaller or equal than {0}.'.format(minimal)
-    if maximal > 0:
-      errorMsg += 'Bigger or equal than {0}'.format(maximal)
-
     result = validateRegex(obj,
                            attributeName,
                            DIGITS,
@@ -510,13 +505,20 @@ class ObjectValidator:
       except ValueError:
         return False
 
-      result = True
-      if not minimal is None and result:
-        result = value >= minimal
-      if not maximal is None and result:
+      if minimal and maximal:
+        errorMsg += ('Smaller or equal than {0} and bigger or equal'
+                     + ' than {0}').format(minimal, maximal)
+        result = minimal <= value <= maximal
+      elif maximal:
+        errorMsg += 'Bigger or equal than {0}'.format(maximal)
         result = value <= maximal
-      if not result:
+      else:
+        errorMsg += 'Smaller or equal than {0}.'.format(minimal)
+        result = value >= minimal
+
+      if not result and changeAttribute:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
+
       return result
 
   @staticmethod

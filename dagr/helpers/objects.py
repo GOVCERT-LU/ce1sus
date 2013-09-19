@@ -249,12 +249,12 @@ def printObject(obj, indent=0, maxRecLVL=3):
                                                       variableName=name,
                                                       variableValue=value)
 
-def dictionaryToString(dictionary):
+def printDictionary(dictionary):
   """
   Prints a dictionary
 
   :param dictionary: the dictionary to output
   :type obj: Dictonary
   """
-  for key in dictionary:
-    print "{0} = '{1}'".format(key, dictionary[key])
+  for key, value in dictionary.iteritems():
+    print "{0} = '{1}'".format(key, value)

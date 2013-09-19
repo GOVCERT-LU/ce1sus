@@ -17,7 +17,7 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
-  ValidationException, NothingFoundException, DeletionException
+  ValidationException, NothingFoundException, DeletionException, OperationException
 import types as types
 
 class AttributeController(BaseController):
@@ -145,7 +145,7 @@ class AttributeController(BaseController):
                                                               action,
                                                               handlerIndex)
     except DeletionException as e:
-      return e
+      return "Error {0}".format(e)
 
     try:
       if action == 'insert':
@@ -163,10 +163,14 @@ class AttributeController(BaseController):
                              cbHandlerValues=
                              AttributeDefinition.getHandlerDefinitions())
     except DeletionException as e:
-      return e
+      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
+      return 'This attribute cannot be deleted or edited.'
+    except OperationException as e:
+      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
+      return 'Cannot delete referenced Attribute.'
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-      return e
+      return "Error {0}".format(e)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -239,4 +243,4 @@ class AttributeController(BaseController):
             self.attributeBroker.session.commit()
       return self.returnAjaxOK()
     except BrokerException as e:
-      return e
+      return "Error {0}".format(e)

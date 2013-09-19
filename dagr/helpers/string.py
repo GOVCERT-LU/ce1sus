@@ -49,7 +49,7 @@ def plaintext2html(text, tabstop=4):
     if characters['htmlchars']:
       return cgi.escape(characters['htmlchars'])
     if characters['lineend']:
-      return '<br>'
+      return '<br/>'
     elif characters['space']:
       t = string.group().replace('\t', '&nbsp;' * tabstop)
       t = t.replace(' ', '&nbsp;')
@@ -65,7 +65,7 @@ def plaintext2html(text, tabstop=4):
         prefix = ''
         last = string.groups()[-1]
         if last in ['\n', '\r', '\r\n']:
-          last = '<br>'
+          last = '<br/>'
         return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
   # convert to text to be compliant
   stringText = unicode(text)

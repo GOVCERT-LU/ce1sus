@@ -14,69 +14,11 @@ __license__ = 'GPL v3+'
 from dagr.helpers.debug import Log
 import dagr.helpers.string as string
 
-class ObjectConverter(object):
-  """Converter for objects"""
+class ConversionException(Exception):
+  """Configuration Exception"""
 
-  @staticmethod
-  def setString(instance, attribtue, value):
-    """
-    Sets a string attribute
-
-    Note: If it is not possible to set the value the attribute is set to None
-
-    :param instance: The instance which attribute has to be set
-    :type instance: object
-    :param attribute: The name of the attribute to set
-    :type: attribute: String
-    :param value: The value to be set
-    :type value: String (at least should be)
-    """
-    try:
-      setattr(instance, attribtue, unicode(value, 'utf-8', errors='replace'))
-    except ValueError as e:
-      setattr(instance, attribtue, None)
-      Log.getLogger("ObjectConverter").error(e)
-
-  @staticmethod
-  def setInteger(instance, attribtue, value):
-    """
-    Sets a Integer attribute
-
-    Note: If it is not possible to set the value the attribute is set to None
-
-    :param instance: The instance which attribute has to be set
-    :type instance: object
-    :param attribute: The name of the attribute to set
-    :type: attribute: Integer
-    :param value: The value to be set
-    :type value: Integer (at least should be)
-    """
-    try:
-      setattr(instance, attribtue, int(value))
-    except ValueError as e:
-      setattr(instance, attribtue, None)
-      Log.getLogger("ObjectConverter").error(e)
-
-  @staticmethod
-  def setDate(instance, attribtue, value):
-    """
-    Sets a date time attribute
-
-    Note: If it is not possible to set the value the attribute is set to None
-
-    :param instance: The instance which attribute has to be set
-    :type instance: object
-    :param attribute: The name of the attribute to set
-    :type: attribute: Datetime
-    :param value: The value to be set
-    :type value: DateTime string (at least should be)
-    """
-    try:
-      setattr(instance, attribtue, string.stringToDateTime(value))
-    except ValueError as e:
-      setattr(instance, attribtue, None)
-      Log.getLogger("ObjectConverter").error(e)
-
+  def __init__(self, message):
+    Exception.__init__(self, message)
 
 class ValueConverter(object):
   """Converter for single values"""
@@ -95,8 +37,8 @@ class ValueConverter(object):
     try:
       return unicode(value, 'utf-8', errors='replace')
     except ValueError as e:
-      Log.getLogger("ValueConverter").error(e)
-      return None
+      raise ConversionException(e)
+
 
   @staticmethod
   def setInteger(value):
@@ -113,8 +55,7 @@ class ValueConverter(object):
     try:
       return int(value)
     except ValueError as e:
-      Log.getLogger("ValueConverter").error(e)
-      return None
+      raise ConversionException(e)
 
   @staticmethod
   def setDate(value):
@@ -131,6 +72,60 @@ class ValueConverter(object):
     try:
       return string.stringToDateTime(value)
     except ValueError as e:
-      Log.getLogger("ValueConverter").error(e)
-      return None
+      raise ConversionException(e)
+
+
+
+class ObjectConverter(object):
+  """Converter for objects"""
+
+  @staticmethod
+  def setString(instance, attribtue, value):
+    """
+    Sets a string attribute
+
+    Note: If it is not possible to set the value the attribute is set to None
+
+    :param instance: The instance which attribute has to be set
+    :type instance: object
+    :param attribute: The name of the attribute to set
+    :type: attribute: String
+    :param value: The value to be set
+    :type value: String (at least should be)
+    """
+    setattr(instance, attribtue, ValueConverter.setString(value))
+
+  @staticmethod
+  def setInteger(instance, attribtue, value):
+    """
+    Sets a Integer attribute
+
+    Note: If it is not possible to set the value the attribute is set to None
+
+    :param instance: The instance which attribute has to be set
+    :type instance: object
+    :param attribute: The name of the attribute to set
+    :type: attribute: Integer
+    :param value: The value to be set
+    :type value: Integer (at least should be)
+    """
+    setattr(instance, attribtue, ValueConverter.setInteger(value))
+
+  @staticmethod
+  def setDate(instance, attribtue, value):
+    """
+    Sets a date time attribute
+
+    Note: If it is not possible to set the value the attribute is set to None
+
+    :param instance: The instance which attribute has to be set
+    :type instance: object
+    :param attribute: The name of the attribute to set
+    :type: attribute: Datetime
+    :param value: The value to be set
+    :type value: DateTime string (at least should be)
+    """
+    setattr(instance, attribtue, ValueConverter.setDate(value))
+
+
 

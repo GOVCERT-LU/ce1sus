@@ -148,8 +148,19 @@ class UserController(BaseController):
     user = self.userBroker.buildUser(identifier, username, password,
                  priv, email, action, disabled)
     try:
-      if action == 'insert' or action == 'insertLDAP':
-        self.userBroker.insert(user, validate=False)
+      if action == 'insert':
+        self.userBroker.insert(user, validate=True)
+      if action == 'insertLDAP':
+        # check if a user with the users username does not already exists
+        existingUser = None
+        try:
+          existingUser = self.userBroker.getUserByUserName(user.username)
+        except BrokerException as e:
+          self.getLogger().debug(e)
+        if existingUser is None:
+          self.userBroker.insert(user, validate=False)
+        else:
+          return 'User with the username ' + user.username + 'already exits'
       if action == 'update':
         self.userBroker.update(user, validate=False)
       if action == 'remove':
@@ -164,17 +175,17 @@ class UserController(BaseController):
     except LDAPException as e:
       self.getLogger().error('An unexpected LDAPException occurred: {0}'
                              .format(e))
-      return e
+      return "Error {0}".format(e)
     except ValidationException:
       self.getLogger().debug('User is invalid')
       return self.returnAjaxPostError() + template.render(user=user)
     except DeletionException as e:
       self.getLogger().info('User tried to delete undeletable user.')
-      return e
+      return "Error {0}".format(e)
     except BrokerException as e:
       self.getLogger().error('An unexpected BrokerException occurred: {0}'
                              .format(e))
-      return e
+      return "Error {0}".format(e)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -235,4 +246,4 @@ class UserController(BaseController):
             self.groupBroker.session.commit()
       return self.returnAjaxOK()
     except BrokerException as e:
-      return e
+      return "Error {0}".format(e)

@@ -562,6 +562,26 @@ class ObjectBroker(BrokerBase):
     obj.creator_id = obj.creator.identifier
     return obj
 
+  def getCDValuesObjectParents(self, eventID, notObject):
+    """
+    Returns all the child objects of the objects for a given event
+
+    :returns: List of Objects
+    """
+    try:
+      # first level
+
+      result = self.session.query(Object).filter(
+                                            or_(
+                                              Object.parentEvent_id == eventID,
+                                              Object.event_id == eventID
+                                               ), Object.identifier != notObject
+                                                          )
+      return result.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  eventID))
+
   def getChildObjectsForEvent(self, eventID):
     """
     Returns all the child objects of the objects for a given event
@@ -571,8 +591,8 @@ class ObjectBroker(BrokerBase):
     try:
       # first level
       result = self.session.query(Object).filter(Object.parentEvent_id
-                                                 == eventID).all()
-      return result
+                                                 == eventID)
+      return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   eventID))
@@ -660,7 +680,7 @@ class AttributeBroker(BrokerBase):
                                   definition.regex,
                                   'The value does not match {0}'.format(
                                                             definition.regex),
-                                  False)
+                                  True)
     errors = not instance.validate()
     if errors:
       raise ValidationException('Attribute to be inserted is invalid')

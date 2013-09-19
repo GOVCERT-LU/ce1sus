@@ -111,6 +111,8 @@ class AttributesController(BaseController):
     """
     Modification on the attributes of objects
     """
+    # Clear Session variable
+    getattr(cherrypy, 'session')['instertAttribute'] = None
 
     eventID = kwargs.get('eventID', None)
     if not eventID is None:
@@ -118,6 +120,7 @@ class AttributesController(BaseController):
       objectID = kwargs.get('objectID', None)
       definition = kwargs.get('definition', None)
       action = kwargs.get('action', None)
+      values = kwargs.get('value', None)
       # remove unnecessary elements from the parameters
       params = { k : v for k, v in kwargs.iteritems() if k not in ['eventID',
                                                                 'attributeID',
@@ -161,13 +164,12 @@ class AttributesController(BaseController):
         return self.returnAjaxOK()
       except ValidationException as e:
         self.getLogger().info(e)
-        return e
       except BrokerException as e:
         self.getLogger().fatal(e)
-        return e
+        return "Error {0}".format(e)
       except HandlerException as e:
         self.getLogger().fatal(e)
-        return e
+        return "Error {0}".format(e)
       template = self.getTemplate('/events/event/attributes/'
                                     + 'attributesModal.html')
       cbDefinitions = self.def_attributesBroker.getCBValues(
@@ -176,13 +178,16 @@ class AttributesController(BaseController):
         if (len(attributes) == 1):
           attribute = attributes[0]
         else:
-          attribute = None
-
+          attribute = attributes[0]
+          attribute.value = values
+        # store in session
+        getattr(cherrypy, 'session')['instertAttribute'] = attribute
       return self.returnAjaxPostError() + template.render(eventID=eventID,
                              objectID=objectID,
                              attribute=attribute,
                              cbDefinitions=cbDefinitions,
-                             errorMsg=None)
+                             errorMsg=None,
+                             enabled=True)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -233,11 +238,16 @@ class AttributesController(BaseController):
 
     # get Definition
     attribute = None
-    if not attributeID is None:
+    if (not attributeID is None) and (attributeID != 'None'):
       attribute = self.attributeBroker.getByID(attributeID)
       definition = attribute.definition
     else:
-      definition = self.def_attributesBroker.getByID(defattribID)
+      # is an attribute in the session
+      try:
+        attribute = getattr(cherrypy, 'session')['instertAttribute']
+        definition = attribute.definition
+      except KeyError:
+        definition = self.def_attributesBroker.getByID(defattribID)
 
     handler = HandlerBase.getHandler(definition)
     if enabled == '1':

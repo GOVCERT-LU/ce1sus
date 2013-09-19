@@ -136,7 +136,7 @@ class GroupController(BaseController):
       return self.returnAjaxPostError() + template.render(group=group)
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
-      return e
+      return "Error {0}".format(e)
 
 
   @require(privileged(), requireReferer(('/internal')))
@@ -198,4 +198,4 @@ class GroupController(BaseController):
             self.userBroker.session.commit()
       return self.returnAjaxOK()
     except BrokerException as e:
-      return e
+      return "Error {0}".format(e)

@@ -19,8 +19,6 @@ def __genericHash(string, hashType, salt=''):
   """
   if not string or string is None:
     return ''
-  if string == 'EXTERNALAUTH':
-    return string
   function = getattr(hashlib, hashType)
   hasher = function()
   function = getattr(hasher, 'update')
@@ -90,7 +88,7 @@ def hashSHA512(string, salt=''):
 
   :returns: String
   """
-  return __genericHash(string, 'sha256', salt)
+  return __genericHash(string, 'sha512', salt)
 
 def __genericFileHash(fileToHash, hashType, block_size=256 * 128):
   """

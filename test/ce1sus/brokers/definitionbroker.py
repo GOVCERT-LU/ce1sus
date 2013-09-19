@@ -6,7 +6,7 @@ Created on Jul 4, 2013
 import unittest
 from dagr.db.session import SessionManager
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker, AttributeDefinition, ObjectDefinition
-
+import dagr.helpers.objects as helpers
 
 class TestDefinitionBrokers(unittest.TestCase):
 
@@ -80,7 +80,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     assert True
 
 
-    assert helpers.objects.compareObjects(obj, self.object)
+    assert helpers.compareObjects(obj, self.object)
 
 
 
@@ -90,7 +90,7 @@ class TestDefinitionBrokers(unittest.TestCase):
       # Check if attribute is still existing
       attribute = self.attributebroker.getByID(self.attribute.identifier)
 
-      if helpers.objects.compareObjects(attribute, self.attribute):
+      if helpers.compareObjects(attribute, self.attribute):
         assert True
       else:
         assert False

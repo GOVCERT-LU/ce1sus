@@ -135,7 +135,7 @@ class ObjectController(BaseController):
       return self.returnAjaxPostError() + template.render(object=obj)
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-      return e
+      return "Error {0}".format(e)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -156,7 +156,7 @@ class ObjectController(BaseController):
       obj = None
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(objectDetails=obj, errorMsg=errorMsg)
+    return template.render(object=obj, errorMsg=errorMsg)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -200,4 +200,4 @@ class ObjectController(BaseController):
             self.objectBroker.doCommit()
       return self.returnAjaxOK()
     except BrokerException as e:
-      return e
+      return "Error {0}".format(e)

@@ -24,6 +24,7 @@ from dagr.helpers.validator import ObjectValidator
 import re
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
+import dagr.helpers.string as string
 
 
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
@@ -95,6 +96,7 @@ class User(BASE):
                                 + 'Lower cases, symbols and numbers and have'
                                 + ' at least a length of 8'))
     ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
+    ObjectValidator.validateDigits(self, 'disabled', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
     if not self.last_login is None:
       ObjectValidator.validateDateTime(self, 'last_login')
@@ -501,7 +503,9 @@ class UserBroker(BrokerBase):
       user.email = email
       user.password = password
       user.username = username
+    if string.isNotNull(disabled):
       ObjectConverter.setInteger(user, 'disabled', disabled)
+    if string.isNotNull(priv):
       ObjectConverter.setInteger(user, 'privileged', priv)
     if action == 'insertLDAP':
       user.identifier = None
