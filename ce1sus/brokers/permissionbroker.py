@@ -381,7 +381,11 @@ class UserBroker(BrokerBase):
 
     :returns: User
     """
-    passwd = hasher.hashSHA1(password, username)
+    if password == 'EXTERNALAUTH':
+      passwd = password
+    else:
+      passwd = hasher.hashSHA1(password, username)
+
     try:
       user = self.session.query(User).filter(User.username == username,
                                              User.password == passwd).one()
