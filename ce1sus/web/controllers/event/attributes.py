@@ -5,7 +5,6 @@ module handing the attributes pages
 
 Created: Aug, 2013
 """
-from dns.rdataclass import NONE
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
