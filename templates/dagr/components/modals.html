@@ -28,7 +28,7 @@ else:
 <script type="text/javascript">
 
 %if not contentUrl is None:
-	$("#${id}").on("shown.bs.modal", function() { // wire up modal when shown
+	$("#${id}").on("show.bs.modal", function() { // wire up modal when shown
 		loadContent('${id}body','${contentUrl}')
 	});
 %endif
