@@ -11,5 +11,5 @@ if active:
 else:
   activeString =''
 %>
-<li ${activeString} id="menu${id}LI"><a href="#" onclick="activateMenuLi(this.id);${onclick}" id="${id}">${name}</a></li>
+<li ${activeString} id="menu${id}LI"><a href="#" onclick="activateMenuLi('menu'+this.id+'LI');${onclick}" id="${id}">${name}</a></li>
 </%def>
