@@ -3,18 +3,18 @@
 <%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
 
 %if enabled:
-<div class="row-fluid">
-	<div class="span3">
+<div class="row">
+	<div class="col-xs-3 col-sm-3">
 		<div style="padding: 5px; text-align: right">
 			<label> Value:</label>
 		</div>
 	</div>
-	<div class="span9">
+	<div class="col-xs-9 col-sm-9">
 	    %if enabled:
 		<form id="fileuploadForm" enctype="multipart/form-data">
 		    <input type="hidden" value="${eventID}" name="eventID"/>
-			<input class="btn-file" name="value" type="file" /><br />
-			<input class="btn" id="uploadButtonID" type="button" value="Upload"
+			<input class="btn-file btn-default" name="value" type="file" /><br />
+			<input class="btn btn-default" id="uploadButtonID" type="button" value="Upload"
 				onclick="buttonClick()" />
 		</form>
 		<div id="progress" class="progress" style="visibility: hidden">
@@ -70,15 +70,15 @@ function buttonClick(){
     request.done(function (responseText, textStatus, XMLHttpRequest){
         if (responseText.match(/^--OK--/gi)) {
             file = responseText.match(/\*(.*)\*/);
-            $("#editBox").html('<div class="row-fluid"><div class="span3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="span9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
+            $("#editBox").html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="col-xs-9 col-sm-9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
         } else {
-            $("#editBox").html('<div class="alert alert-block alert-error fade in"><button type="button" class="close" data-dismiss="alert">x</button><h4 class="alert-heading">An expected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
+            $("#editBox").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An expected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
         }
     });
 
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
-        $("#editBox").html('<div class="alert alert-block alert-error fade in"><button type="button" class="close" data-dismiss="alert">x</button><h4 class="alert-heading">An expected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
+        $("#editBox").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An expected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
     });
 }
 </script>

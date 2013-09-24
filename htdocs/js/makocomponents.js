@@ -1,3 +1,11 @@
+$.fn.scrollView = function () {
+    return this.each(function () {
+        $('html, body').animate({
+            scrollTop: $(this).offset().top
+        }, 1000);
+    });
+}
+
 function formEvent(element,event, uri, contentid, doRefresh,refreshContainer,refreshUrl) {
 	
 	genericFormSubmit(element,event, null,contentid, uri, doRefresh,refreshContainer,refreshUrl);
@@ -37,7 +45,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     request.done(function (responseText, textStatus, XMLHttpRequest){
     	if (responseText.match(/^--OK--/gi)) {
     		if (modalID) {
-    			$("#"+modalID).modal("hide");
+    			$("#"+modalID).modal('hide');
     		}
     		//refrehshPage & container if needed
     		if (doRefresh) {
@@ -47,9 +55,10 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     		if (responseText.match(/^<!--PostError-->/gi)) {
     			resultText= responseText;
     		} else {
-	    		resultText = '<div class="alert alert-error">';
+	    		resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+	    		resultText += '<h4 class="alert-heading">An expected Error occurred!</h4><p>'
 	    		resultText += responseText;
-	    		resultText += '</div>';
+	    		resultText += '</p></div>';
     		} 
     		if (modalID) {
     			$("#"+modalID+"body").html(resultText);
@@ -61,16 +70,15 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
 
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
+		resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+		resultText += '<h4 class="alert-heading">There was an error making the AJAX request</h4><p>'
+		resultText += responseText;
+		resultText += '</p></div>';
     	if (modalID) {
-    		$('#'+modalID+'body').html('<div class="alert alert-error">There '
-    				+'was an error making the AJAX request<br/>'
-    				+responseText
-    				+'</div>');
+    		$('#'+modalID+'body').html(resultText);
     	} else {
-    		$('#'+contentid+'Errors').html('<div class="alert alert-error">'
-    				+'There was an error making the AJAX request<br/>'
-    				+responseText
-    				+'</div>');
+
+    		$('#'+contentid+'Errors').html(resultText);
     	}
     });
     // callback handler that will be called regardless
@@ -101,7 +109,7 @@ function loadContent(contentid, url) {
 	    	}
 	    },
 	    error: function(response, type, message){
-	    	$("#"+contentid).html('<div class="alert alert-error">'+type+'<br/>'+message+'</div>');
+	    	$("#"+contentid).html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">'+type+'</h4><p>'+message+'</p></div>');
 	    }
 	    
     });
@@ -306,3 +314,13 @@ function dialogCall(url, refreshContainer, refreshUrl){
 function dialogCloseTabCall(url, tabID, tabToClose){
 	genericDialogCall(url, '', '', false, true, tabID, tabToClose);
 }
+
+function activateMenuLi(id){
+	  //deactivateActiveOne
+	  $('#'+id).parent().find("li").each(function() {
+	    $(this).attr('class', '');
+	  });
+	  //activate tab
+	  $('#'+id).attr('class', 'active');	
+}
+

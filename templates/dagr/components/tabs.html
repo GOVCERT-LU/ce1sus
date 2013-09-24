@@ -3,9 +3,10 @@
 
 <%def name="tabulator(id)">
 
-<ul class="nav nav-tabs" id="${id}">
+<ul class="nav nav-tabs" id="${id}" style="margin-bottom:15px">
     ${caller.body()}
 </ul>
+
 <div id="${id}TabContent">
 <img src="/img/ajax-loader.gif" alt="loading"/> 
 </div>

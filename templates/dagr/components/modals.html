@@ -9,28 +9,36 @@ if big:
 else:
   style=''
 %><!-- BEGIN GenericModal -->
-<div id="${id}" class="modal hide fade" ${style}>
-  <div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal">×</button>
-  <h3 id="${id}Label">${title}</h3>
+<div id="${id}" class="modal fade" ${style} role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="text-align:left">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title" id="${id}Label">${title}</h3>
+      </div>
+      <div id="${id}body" class="modal-body">
+      </div>
+      <div id="${id}Footer" class="modal-footer">
+        ${caller.body()}
+      <button class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
   </div>
-  <div id="${id}body" class="modal-body">
-  </div>
-  <div id="${id}Footer" class="modal-footer">
-    ${caller.body()}
-    <button class="btn" data-dismiss="modal">Close</button>
-   </div>
 </div>
 <script type="text/javascript">
 
 %if not contentUrl is None:
-	$("#${id}").on("shown", function() { // wire up modal when shown
+	$("#${id}").on("shown.bs.modal", function() { // wire up modal when shown
 		loadContent('${id}body','${contentUrl}')
 	});
 %endif
 
-$("#${id}").on("hide", function() { // wire up modal when shown
+$("#${id}").on("hide.bs.modal", function() { // wire up modal when shown
     $("#${id}body").empty();
+    //workaround---
+    $('.modal-backdrop').remove();
+    document.documentElement.style.overflow = "auto";
+    document.body.style.marginRight='0px';
 });
 </script>
 
@@ -44,16 +52,20 @@ if big:
 else:
   style=''
 %><!-- BEGIN GenericModal -->
-<div id="${id}" class="modal hide fade" ${style}>
-  <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">×</button>
-      <h3 id="${id}Label">${title}</h3>
-  </div>
-  <div id="${id}body" class="modal-body">
-      ${caller.body()}
-  </div>
-  <div id="${id}Footer" class="modal-footer">
-    <button class="btn" data-dismiss="modal">Close</button>
+<div id="${id}" class="modal fade" ${style} role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="text-align:left">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title" id="${id}Label">${title}</h3>
+      </div>
+      <div class="modal-body">
+        ${caller.body()}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
   </div>
 </div>
 <!-- END GenericModal -->

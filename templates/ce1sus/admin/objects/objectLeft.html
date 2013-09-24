@@ -4,15 +4,17 @@
 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
 
 <div class="btn-Object">
-	<a href="#addObjectModal" role="button" class="btn" data-toggle="modal">Add
+	<a href="#addObjectModal" role="button" class="btn btn-default" data-toggle="modal">Add
 		new object</a>
 </div>
-<br />
+<div style="height:15px"/>
 <% 
 foundObject=False 
 fistObjectID=0
+selected = True
 %>
 <!--list of objects -->
 <script type="text/javascript">
@@ -21,16 +23,16 @@ function loadObject(objectID){
 }
 </script>
 
-<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
-	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not objects is None: 
 		% for object in objects:
+		  <%call expr="nav.leftMenuItem(object.identifier, 'loadObject({0})'.format(object.identifier),object.name,selected)"/>
 		  <%
 		  if not foundObject:
 		      fistObjectID = object.identifier
 		      foundObject=True
+		      selected = False
 		  %>
-		   <li><a tabindex="-1" href="#" onclick="loadObject(${object.identifier})">${object.name}</a></li>
 		% endfor 
 	%endif
 	

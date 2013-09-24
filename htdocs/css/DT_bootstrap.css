@@ -178,3 +178,10 @@ div.DTFC_LeftFootWrapper table {
 }
 
 
+/*
+ * Bootstrap 3 fix
+ */
+.pagination {
+  margin: 0px 0px;
+}
+

@@ -5,19 +5,16 @@
 
 <%def name="genericLabeler(label)">
 	<!-- BEGIN genericLabeler -->
-	<div class="row-fluid">
-	  <div class="span3">
-	    <div style="padding: 5px; text-align:right">
-	      <label>${label}
+	<div class="form-group">
+	  <label for="inputEmail1" class="col-lg-3 control-label">
+	      ${label}
 	      %if label:
 	         :
 	      %endif
 	      </label>
-	    </div>
-	  </div>
-	  <div class="span9">
-	    ${caller.body()}
-	  </div>
+	      <div class="col-lg-9">
+	       ${caller.body()}
+	      </div>
 	</div>
 	<!-- END genericLabeler -->
 </%def>

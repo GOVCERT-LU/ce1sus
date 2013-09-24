@@ -35,9 +35,9 @@ class PaginatorOptions(object):
   # MODE = Enum(MODAL=0, LINK=1, DIALOG=2, CONTENT=3, NEWTAB=4,TAB=5)
   # OPTION = Enum(VIEW=0, EDIT=1, REMOVE=2)
 
-  ICON_MAPPER = {'VIEW':'icon-eye-open',
-                 'EDIT':'icon-pencil',
-                 'REMOVE':'icon-remove'}
+  ICON_MAPPER = {'VIEW':'glyphicon glyphicon-eye-open',
+                 'EDIT':'glyphicon glyphicon-edit',
+                 'REMOVE':'glyphicon glyphicon-remove'}
 
   TITLE_MAPPER = {'VIEW':'View',
                   'EDIT':'Edit',

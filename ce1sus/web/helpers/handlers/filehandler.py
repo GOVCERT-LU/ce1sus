@@ -204,7 +204,10 @@ class FileHandler(GenericHandler):
   def convertToAttributeValue(self, value):
     attribute = value.attribute
     user = Protector.getUser()
-    userInGroups = self.__canUserDownload(attribute.object.identifier, user)
+    eventID = attribute.object.event_id
+    if eventID is None:
+      eventID = attribute.object.parentEvent_id
+    userInGroups = self.__canUserDownload(eventID, user)
     userIsOwner = attribute.creator_id == user.identifier
     if userInGroups and userIsOwner:
       link = Link(FileHandler.URLSTR.format(attribute.object.identifier,

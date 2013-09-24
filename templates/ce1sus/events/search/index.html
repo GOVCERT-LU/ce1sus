@@ -2,13 +2,17 @@
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 
 
-<%call expr="baseForms.genericForm(id='searchForm', url='/events/search/searchResults', refreshContainer='serachResults')">
-<div class="row-fluid">
-    <div class="span12">
+<%call expr="baseForms.genericForm(id='searchForm', url='/events/search/searchResults', refreshContainer='serachResults',horizontal=False)">
+<div class="row">
+    <div class="vcol-xs-12 col-sm-12">
 		Search for:
+		  <div class="form-group">
 		<%call expr="input.comboBox(name='definitionID',values=cbDefinitions,enabled=True,hasEmpty=False)"/>
+		</div>
+		  <div class="form-group">
 		<%call expr="input.editBox(name='needle', value='', enabled=True, validationMsg=None)"/>
-		<input class="btn" type="submit" value="Search"/>
+		</div>
+		<input class="btn btn-default" type="submit" value="Search"/>
     </div>
 </div>
 </%call>

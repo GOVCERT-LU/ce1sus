@@ -12,11 +12,11 @@
 <!-- group details -->
 <h3>Object details:</h3>
 <%call expr="forms.objectForm(objectDetails, False)"/>
-<div class="row-fluid">
-	<div class="span3" style="text-align: right">
+<div class="row">
+	<div class="col-xs-3 col-sm-3" style="text-align: right">
 		% if not objectDetails is None:
 		<div class="btn-group">
-			<a href="#editObjectModal" role="button" class="btn"
+			<a href="#editObjectModal" role="button" class="btn  btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
@@ -39,7 +39,7 @@
 <input type="hidden" name="objectid" value="${objectDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
-    <td>Attributes <b>not</b> part of this object:<BR /> <select name="remainingAttributes"
+    <td>Attributes <b>not</b> part of this object:<BR /> <select class="form-control" name="remainingAttributes"
         size="10" multiple="multiple" tabindex="1"> 
         %if not remainingAttributes is None:
             % for attribute in remainingAttributes:
@@ -49,11 +49,11 @@
     </select>
     </td>
     <td>
-        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
         <BR />
-        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
     </td>
-    <td>Attributes part of this object:<BR /> <select name="objectAttributes" size="10"
+    <td>Attributes part of this object:<BR /> <select class="form-control"  name="objectAttributes" size="10"
         multiple> 
         %if not objectAttributes is None:
             % for attribute in objectAttributes:

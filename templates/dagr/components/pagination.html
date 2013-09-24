@@ -90,7 +90,7 @@ isModal=False
                         %>
                         <a href="#" onclick="showPaginatorModal('${option.modalTitle}','${option.url}/${primaryKey}','${option.postUrl}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reloadUrl}');">
         
-                        <i class="${option.icon}" title="${option.title}"></i></a>
+                        <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'LINK':
                         <a href="${option.url}/${primaryKey}"><i class="${option.icon}" title="${option.title}"></i></a>
                     %elif option.mode == 'CONTENT':
@@ -101,13 +101,13 @@ isModal=False
                         %if option.refresh:
                             loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
                         %endif  
-                        <i class="${option.icon}" title="${option.title}"></i></a>
+                        <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'NEWTAB':
                         <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}');">
-                        <i class="${option.icon}" title="${option.title}"></i></a>
+                        <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'TAB':
                         <a href="#" onclick="loadTabFromPaginator('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}','${option.tabid}');">
-                        <i class="${option.icon}" title="${option.title}"></i></a>
+                        <span class="${option.icon}" title="${option.title}"></span></a>
                     %endif
                     
                     

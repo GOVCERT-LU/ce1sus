@@ -21,9 +21,9 @@
 	     message = ''
 	%>
 	%if enabled or message is None:
-	    <textarea class="mako-input" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+	    <textarea class="form-control" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
 	%else:
-	    <div style="padding: 5px;overflow:auto; height:${rows*25}px">
+	    <div style="text-align:left;padding: 10px;overflow:auto; height:${rows*25}px">
 	      ${dagr.plaintext2html(text=message)}
 	    </div>
 	%endif
@@ -51,9 +51,9 @@
 	  value = ''
 	%>
 	%if enabled or value is None:
-	    <input class="mako-input" id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
+	    <input class="form-control" id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
 	%else:
-	    <div style="padding: 5px;">
+	    <div style="text-align:left;padding: 10px;">
 	      %if value == 'EXTERNALAUTH':
 	      ${value}
 	      %else:
@@ -85,9 +85,9 @@
 	%>
 	
 	%if enabled or value is None:
-	    <input class="mako-input" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
+	    <input class="form-control" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
 	%else:
-	    <div style="padding: 5px;">
+	    <div style="text-align:left;padding: 10px;">
 	      ${value}
 	    </div>
 	%endif
@@ -114,7 +114,7 @@
 	dataToggle=''
 	 %>
 	%if enabled or selected is None:
-	 <select id="${name}ID" name="${name}" ${enabledStr}>
+	 <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
 	  %if not values is None:
 	    %if hasEmpty:
 	        %if not selected:
@@ -145,7 +145,7 @@
 	  %endif 
 	</select> 
 	%else:
-	    <div style="padding: 5px">
+	    <div style="text-align:left;padding: 10px">
 	        %for key, value in values.iteritems():
 	           <%
                 if isinstance(value, tuple):
@@ -188,7 +188,7 @@
 %>
 %if enabled:
   <div id="${name}ID" class="input-append date">
-    <input  class="mako-input" data-format="yyyy-MM-dd hh:mm:ss" type="text" value="${value}"></input>
+    <input  class="form-control" data-format="yyyy-MM-dd hh:mm:ss" type="text" value="${value}"></input>
     <span class="add-on">
       <i data-time-icon="icon-time" data-date-icon="icon-calendar">
       </i>
@@ -203,7 +203,7 @@
   });
 </script>
 %else:
-<div style="padding: 5px;">
+<div style="text-align:left;padding: 10px;">
   ${dateTime}
 </div>
 %endif

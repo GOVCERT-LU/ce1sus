@@ -1,9 +1,18 @@
 /* Set the defaults for DataTables initialisation */
+//$.extend( true, $.fn.dataTable.defaults, {
+//  "sDom": "<'row'<'col-6'l><'col-6'f>r>t<'row'<'col-6'i><'col-6'p>>",
+//  "sPaginationType": "bootstrap",
+//  "oLanguage": {
+//    "sLengthMenu": "_MENU_ records per page"
+//  }
+//} );
+
 $.extend( true, $.fn.dataTable.defaults, {
-  "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+  "sDom": "<'row'<'col-6'f><'col-6'l>r>t<'row'<'col-6'i><'col-6'p>>",
   "sPaginationType": "bootstrap",
   "oLanguage": {
-    "sLengthMenu": "_MENU_ records per page"
+    "sLengthMenu": "Show _MENU_ Rows",
+                "sSearch": ""
   }
 } );
 
@@ -43,12 +52,20 @@ $.extend( $.fn.dataTableExt.oPagination, {
         }
       };
 
-      $(nPaging).addClass('pagination').append(
-        '<ul>'+
-          '<li class="prev disabled"><a href="#">&laquo;</a></li>'+
-          '<li class="next disabled"><a href="#">&raquo;</a></li>'+
-        '</ul>'
+//      $(nPaging).append(
+//        '<ul class="pagination">'+
+//          '<li class="prev disabled"><a href="#">&laquo;</a></li>'+
+//          '<li class="next disabled"><a href="#">&raquo;</a></li>'+
+//        '</ul>'
+//      );
+      $(nPaging).append(
+          '<ul class="pagination">'+
+              '<li class="prev disabled"><a href="#"><i class="icon-double-angle-left"></i> '+oLang.sPrevious+'</a></li>'+
+              '<li class="next disabled"><a href="#">'+oLang.sNext+' <i class="icon-double-angle-right"></i></a></li>'+
+          '</ul>'
       );
+
+
       var els = $('a', nPaging);
       $(els[0]).bind( 'click.DT', { action: "previous" }, fnClickHandler );
       $(els[1]).bind( 'click.DT', { action: "next" }, fnClickHandler );
@@ -146,14 +163,3 @@ if ( $.fn.DataTable.TableTools ) {
   } );
 }
 
-
-/* Table initialisation */
-$(document).ready(function() {
-  $('#example').dataTable( {
-    "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-    "sPaginationType": "bootstrap",
-    "oLanguage": {
-      "sLengthMenu": "_MENU_ records per page"
-    }
-  } );
-} );

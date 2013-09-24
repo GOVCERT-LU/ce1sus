@@ -2,26 +2,30 @@
 <%inherit file="/ce1sus/layout/baselayout.html"/>
 
 <div class="span7 offset3">
-	<div class="login-form">
-		<h2>Login</h2>
-		%if not errorMsg is None:
-           <div class="alert alert-block alert-error fade in">
-               <button type="button" class="close" data-dismiss="alert">x</button>
-               <h4 class="alert-heading">An expected Error occurred!</h4>
-               <p>${errorMsg}</p>
-           </div>
-        %endif
-		<form action="/doLogin" method="post">
-			<fieldset>
-				<div class="clearfix">
-					<input  class="mako-input" type="text" name="username" placeholder="Username">
-				</div>
-				<div class="clearfix">
-					<input   class="mako-input" type="password" name="password" placeholder="Password">
-				</div>
-				<button class="btn btn-primary" type="submit">Log in</button>
-			</fieldset>
-		</form>
+	<div class="login-form"">
+		<div class="row">
+		  <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
+			<h2>Login</h2>
+			%if not errorMsg is None:
+	           <div class="alert alert-block alert-danger fade in">
+	               <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+	               <h4 class="alert-heading">An expected Error occurred!</h4>
+	               <p>${errorMsg}</p>
+	           </div>
+	        %endif
+			<form action="/doLogin" method="post">
+				<fieldset>
+					<div class="clearfix">
+						<input  class="form-control" type="text" name="username" placeholder="Username">
+					</div>
+					<div class="clearfix">
+						<input   class="form-control" type="password" name="password" placeholder="Password">
+					</div>
+					<button class="btn btn-primary" type="submit">Log in</button>
+				</fieldset>
+			</form>
+		  </div>
+		</div>
 	</div>
 </div>​​
 

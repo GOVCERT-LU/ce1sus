@@ -143,7 +143,7 @@ class ObjectsController(BaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def attachObject(self, eventID=None, definition=None):
+  def attachObject(self, eventID, definition=None):
     """
     Inserts an an event object.
 
@@ -162,9 +162,10 @@ class ObjectsController(BaseController):
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
+    definition = self.def_objectBroker.getByID(definition)
     obj = self.objectBroker.buildObject(None,
                                         event,
-                                      self.def_objectBroker.getByID(definition),
+                                      definition,
                                       self.getUser())
     try:
       self.objectBroker.insert(obj, False)

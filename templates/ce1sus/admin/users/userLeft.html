@@ -4,19 +4,19 @@
 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
-
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
 
 <div class="btn-group">
-	<a href="#addUserModal" role="button" class="btn" data-toggle="modal">Add
-		new User</a> <a href="#addLDAPUserModal" role="button" class="btn"
+	<a href="#addUserModal" role="button" class="btn btn-default" data-toggle="modal">Add
+		new User</a> <a href="#addLDAPUserModal" role="button" class="btn btn-default"
 		data-toggle="modal">Add LDAP User</a>
 </div>
-<br />
+<div style="height:15px"/>
 <% 
 foundUser=False 
 fistUserID=0
+selected = True
 %>
-<br/>
 <!--list of users -->
 <script type="text/javascript">
 function loadUser(userID){
@@ -25,16 +25,16 @@ function loadUser(userID){
 </script>
 
 
-<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
-	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not users is None: 
 		% for user in users:
+		  <%call expr="nav.leftMenuItem(user.identifier, 'loadUser({0})'.format(user.identifier),user.username,selected)"/>
 		  <%
 		  if not foundUser:
 		      fistUserID = user.identifier
 		      foundUser=True
+		      selected = False
 		  %>
-		   <li><a tabindex="-1" href="#" onclick="loadUser(${user.identifier})">${user.username}</a></li>
 		% endfor 
 	%endif
 	

@@ -4,18 +4,18 @@
 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
-
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
 
 <div class="btn-group">
-	<a href="#addGroupModal" role="button" class="btn" data-toggle="modal">Add
+	<a href="#addGroupModal" role="button" class="btn btn-default" data-toggle="modal">Add
 		new group</a>
 </div>
-<br />
+<div style="height:15px"/>
 <% 
 foundGroup=False 
 fistGroupID=0
+selected = True
 %>
-<br/>
 <!--list of groups -->
 <script type="text/javascript">
 function loadGroup(groupID){
@@ -24,16 +24,17 @@ function loadGroup(groupID){
 </script>
 
 
-<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
-	style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not groups is None: 
 		% for group in groups:
+		  <%call expr="nav.leftMenuItem(group.identifier, 'loadGroup({0})'.format(group.identifier),group.name,selected)"/>
 		  <%
 		  if not foundGroup:
 		      fistGroupID = group.identifier
 		      foundGroup=True
+		      selected=False
 		  %>
-		   <li><a tabindex="-1" href="#" onclick="loadGroup(${group.identifier})">${group.name}</a></li>
+		  
 		% endfor 
 	%endif
 	

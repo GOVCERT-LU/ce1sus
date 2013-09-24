@@ -10,11 +10,11 @@
 <!-- group details -->
 <h3>Attribute details:</h3>
 <%call expr="forms.attributeForm(attributeDetails, False, cbValues, cbHandlerValues)"/>
-<div class="row-fluid">
-	<div class="span3" style="text-align: right">
+<div class="row">
+	<div class="col-xs-3 col-sm-3" style="text-align: right">
 		% if not attributeDetails is None:
 		<div class="btn-group">
-			<a href="#editAttributeModal" role="button" class="btn"
+			<a href="#editAttributeModal" role="button" class="btn btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
 				onclick="if (confirm('Are you sure you want to delete?')) {
@@ -37,7 +37,7 @@
 <input type="hidden" name="attributeid" value="${attributeDetails.identifier}">
 <table border="0" cellpadding="5">
 <tr>
-    <td>Objects <b>not</b> using this attribute:<BR /> <select name="remainingObjects"
+    <td>Objects <b>not</b> using this attribute:<BR /> <select class="form-control"  name="remainingObjects"
         size="10" multiple="multiple" tabindex="1"> 
         %if not remainingObjects is None:
             % for object in remainingObjects:
@@ -47,11 +47,11 @@
     </select>
     </td>
     <td>
-        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
         <BR />
-        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
     </td>
-    <td>Objects using this attribute:<BR /> <select name="attributeObjects" size="10"
+    <td>Objects using this attribute:<BR /> <select class="form-control" name="attributeObjects" size="10"
         multiple> 
         %if not attributeObjects is None:
             % for object in attributeObjects:

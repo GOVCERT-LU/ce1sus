@@ -9,9 +9,11 @@
             <input type="hidden" name="eventID"
                 value="${eventID}">
             %endif
+            <div class="row">
+            <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
             <table border="0" cellpadding="5">
                 <tr>
-                    <td>Event is <b>not</b> part of these groups:<BR /> <select name="remainingGroups"
+                    <td>Event is <b>not</b> part of these groups:<BR /> <select class="form-control"  name="remainingGroups"
                         size="10" multiple="multiple" tabindex="1"> 
                         %if not remainingGroups is None:
                             % for group in remainingGroups:
@@ -21,11 +23,11 @@
                     </select>
                     </td>
                     <td>
-                        <button name="operation" class="btn" type="submit" value="remove">&lt;</button>
+                        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
                         <BR />
-                        <button name="operation" class="btn" type="submit" value="add">&gt;</button>
+                        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
                     </td>
-                    <td>Event is part of these groups:<BR /> <select name="eventGroups" size="10"
+                    <td>Event is part of these groups:<BR /> <select class="form-control"  name="eventGroups" size="10"
                         multiple> 
                         %if not eventGroups is None:
                             % for group in eventGroups:
@@ -36,4 +38,6 @@
                     </td>
                 </tr>
             </table>
+            </div>
+            </div>
 </%call>

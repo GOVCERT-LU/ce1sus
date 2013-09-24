@@ -2,15 +2,13 @@
 
 <%def name="menu(id, contentid, loadSelected=True)">
 
-<div class="navbar navbar-inverse">
-	<div class="navbar-inner">
-		<div class="container">
-			<ul id="${id}" class="nav">
-					    ${caller.body()}
-			</ul>
-		</div>
+<nav class="navbar navbar-inverse" role="navigation">
+	<div class="navbar-header">
+		<ul id="${id}" class="nav navbar-nav">
+				    ${caller.body()}
+		</ul>
 	</div>
-</div>
+</nav>
 
 %if loadSelected:
 <script type="text/javascript">

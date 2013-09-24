@@ -546,7 +546,8 @@ class ObjectBroker(BrokerBase):
     obj = Object()
     obj.identifier = identifier
     obj.definition = definition
-    obj.def_object_id = obj.definition.identifier
+    if not definition is None:
+      obj.def_object_id = obj.definition.identifier
     obj.created = datetime.now()
     if event is None:
       obj.event = None
@@ -1032,7 +1033,7 @@ class EventBroker(BrokerBase):
         event.creator_id = event.creator.identifier
     return event
 
-  def getEventByObjectID(self, objectID, recursive=True):
+  def getEventByObjectID(self, objectID):
     """
     Returns the event hosting the object with the given id
 
@@ -1045,18 +1046,17 @@ class EventBroker(BrokerBase):
 
       obj = self.session.query(Object).filter(
                         Object.identifier == objectID).one()
-
+      # if the object is a direct child of an event
+      eventID = obj.parentObject_id
+      if eventID is None:
+        # if the object is a descendant of an object
+        eventID = obj.event_id
       result = self.session.query(Event).filter(
-                        Event.identifier == obj.parentEvent_id).one()
+                        Event.identifier == eventID).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      if not recursive:
         raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   objectID))
-      else:
-        obj = self.objectBroker.getByID(objectID)
-        result = self.getEventByObjectID(obj.parentObject_id)
-        return result
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for ID :{0}'.format(objectID))

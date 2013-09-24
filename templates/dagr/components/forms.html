@@ -2,9 +2,15 @@
 
 <%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
 
-<%def name="genericForm(id, url, refreshUrl=None,refreshContainer=None)">
+<%def name="genericForm(id, url, refreshUrl=None,refreshContainer=None,horizontal=True)">
+<%
+if horizontal:
+   formClass='class="form-horizontal"'
+else:
+   formClass='class="form-inline"'
+%>
 <div id="${id}Errors"></div>
-<form id="${id}Form">
+<form id="${id}Form" ${formClass} role="form">
     ${caller.body()}
 </form>
 <script type="text/javascript">
@@ -23,7 +29,7 @@ $( document ).ready(function() {
 </%def>
 
 <%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
-<form id="${modalID}Form">
+<form id="${modalID}Form" class="form-horizontal" role="form">
     ${caller.body()}
 </form>
 <script type="text/javascript">
