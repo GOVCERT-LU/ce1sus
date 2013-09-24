@@ -164,11 +164,7 @@ class EventController(BaseController):
     return template.render(objectPaginator=objectPaginator,
                            relationPaginator=relationPaginator,
                            event=event,
-                           cbStatusValues=Status.getDefinitions(),
-                           cbTLPValues=TLPLevel.getDefinitions(),
-                           comments=event.comments,
-                           cbAnalysisValues=Analysis.getDefinitions(),
-                           cbRiskValues=Risk.getDefinitions())
+                           comments=event.comments)
 
   def __getRelationsObjects(self, objects):
     """
@@ -228,6 +224,34 @@ class EventController(BaseController):
       cbRiskValues=cbRiskValues,
       cbTLPValues=cbTLPValues)
     return string
+
+  @require(requireReferer(('/internal')))
+  @cherrypy.expose
+  def details(self, eventID):
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+    template = self.mako.getTemplate('/events/event/details.html')
+    return template.render(event=event,
+                           cbStatusValues=Status.getDefinitions(),
+                           cbTLPValues=TLPLevel.getDefinitions(),
+                           cbAnalysisValues=Analysis.getDefinitions(),
+                           cbRiskValues=Risk.getDefinitions())
+
+  @require(requireReferer(('/internal')))
+  @cherrypy.expose
+  def editDetails(self, eventID):
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event.groups,
+                           self.getUser().identifier ==
+                           event.creator.identifier)
+    template = self.mako.getTemplate('/events/event/editDetails.html')
+    return template.render(event=event,
+                           cbStatusValues=Status.getDefinitions(),
+                           cbTLPValues=TLPLevel.getDefinitions(),
+                           cbAnalysisValues=Analysis.getDefinitions(),
+                           cbRiskValues=Risk.getDefinitions())
 
   # pylint: disable=R0914
   @require(requireReferer(('/internal')))

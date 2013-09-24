@@ -1,0 +1,19 @@
+    <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+    <%namespace name="forms" file="/ce1sus/components/forms.html"/>
+    <legend>Details</legend>
+    ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+    <div class="row">
+        <div class="col-xs-3 col-sm-3" style="text-align:right">
+            <div class="btn-group">
+               <button class="btn btn-default" onclick="loadContent('eventEdit','/events/event/editDetails/${event.identifier}')">Edit</button>
+               <button class="btn btn-danger"
+                onclick="if (confirm('Are you sure you want to delete?')) {
+                    dialogCloseTabCall('/events/event/modifyEvent?identifier=${event.identifier}&action=remove',
+                               'eventsTab',
+                               'eventsTab${event.identifier}')}">
+                Delete
+                </button>
+               
+            </div>
+        </div>
+    </div>

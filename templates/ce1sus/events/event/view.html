@@ -15,29 +15,17 @@ function editComment(eventID,commentID) {
 	//load content
     loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
 }
-
+$(document).ready(function() {
+    loadContent('eventEdit','/events/event/details/${event.identifier}');
+});
 </script>
 
 <div class="row">
   <div class="col-xs-4 col-sm-4">
-    <legend>Details</legend>
-    ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
-    <div class="row">
-	    <div class="col-xs-3 col-sm-3" style="text-align:right">
-		    <div class="btn-group">
-		       <a href="#editEventModal" role="button" class="btn btn-default" data-toggle="modal">Edit</a>
-		       <button class="btn btn-danger"
-                onclick="if (confirm('Are you sure you want to delete?')) {
-                	dialogCloseTabCall('/events/event/modifyEvent?identifier=${event.identifier}&action=remove',
-                               'eventsTab',
-                               'eventsTab${event.identifier}')}">
-	            Delete
-	            </button>
-		       
-		    </div>
-	    </div>
-    </div>
     
+    <div id="eventEdit">
+        
+    </div>
   </div>
   <div class="col-xs-8 col-sm-8">
     <legend>Objects</legend>
@@ -96,10 +84,7 @@ function editComment(eventID,commentID) {
                 new Comment</a>
 </div>
 
-<%call expr="baseForms.genericModalForm(modalID='editEventModal',url='/events/event/modifyEvent',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
-    <input type="hidden" name="action" value="update">
-    <%call expr="modals.saveButtonModal(id='editEventModal',title='Edit Event',contentUrl='/events/event/editEvent/{0}'.format(event.identifier))"/>
-</%call>
+
 
 <%call expr="baseForms.genericModalForm(modalID='addCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
     <input type="hidden" name="action" value="insert">

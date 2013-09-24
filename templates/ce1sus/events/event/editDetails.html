@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+
+
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+
+<legend>Edit Details</legend>
+
+<%call expr="baseForms.genericForm(id='editEventForm', url='/events/event/modifyEvent',refreshUrl='/events/event/details/{0}'.format(event.identifier),refreshContainer='eventEdit')">
+    ${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+    <div class="row">
+        <div class="col-xs-4 col-sm-4" style="text-align:right">
+            <div class="btn-group">
+               <button class="btn btn-primary" type="submit">Save</button>
+               <button class="btn btn-default" onclick="loadContent('eventEdit','/events/event/details/${event.identifier}')">Cancel</button>
+            </div>
+        </div>
+    </div>
+</%call>
+
