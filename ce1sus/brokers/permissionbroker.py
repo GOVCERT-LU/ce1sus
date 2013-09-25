@@ -102,6 +102,8 @@ class User(BASE):
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
+
+
 class Group(BASE):
   """This is a container class for the GRUOPS table."""
   def __init__(self):
@@ -315,8 +317,9 @@ class UserBroker(BrokerBase):
       if errors:
         raise ValidationException('User to be updated is invalid')
 
-    # Don't update if the password is already a hash
-    if re.match('^[0-9a-f]{40}$', instance.password) is None:
+    # Don't update if the password is already a hash and  is not EXTERNALAUTH
+    if (re.match('^[0-9a-f]{40}$', instance.password) is None
+                                and instance.password != 'EXTERNALAUTH'):
       if validate and not errors:
         instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
