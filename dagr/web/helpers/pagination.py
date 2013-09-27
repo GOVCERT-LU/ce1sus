@@ -85,7 +85,7 @@ class PaginatorOptions(object):
 
       :returns: String
       """
-      return PaginatorOptions.ICON_MAPPER[self.option]
+      return PaginatorOptions.TITLE_MAPPER[self.option]
 
     @property
     def message(self):
