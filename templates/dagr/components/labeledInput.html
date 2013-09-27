@@ -7,10 +7,7 @@
 	<!-- BEGIN genericLabeler -->
 	<div class="form-group">
 	  <label for="inputEmail1" class="col-lg-3 control-label">
-	      ${label}
-	      %if label:
-	         :
-	      %endif
+	      ${label}${':' if label else ''}
 	      </label>
 	      <div class="col-lg-9">
 	       ${caller.body()}
