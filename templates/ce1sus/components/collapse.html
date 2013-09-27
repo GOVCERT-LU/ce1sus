@@ -23,7 +23,7 @@
                     else:
                       disabledStr = '" data-toggle="modal"'
                     %> 
-                       <a href="#addAbjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabledStr}" data-toggle="modal"><span class="glyphicon glyphicon-plus-sign"></span></a>
+                       <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabledStr}" data-toggle="modal"><span class="glyphicon glyphicon-plus-sign"></span></a>
                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-tags"></span></a>
                        <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-tag"></span></a>
                        <a  class="btn btn-default" href="#infoModal${object.identifier}" role="button" data-toggle="modal"><span class="glyphicon glyphicon-question-sign"></span></a>
@@ -33,9 +33,9 @@
                                            'eventTabs${eventID}TabContent',
                                            '/events/event/objects/objects/${eventID}')}"><i class="glyphicon glyphicon-remove-circle"></i></a>
                         <!--  dont remove this -->
-			                <%call expr="baseForms.genericModalForm(modalID='addAbjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/modifyAttribute',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+			                <%call expr="baseForms.genericModalForm(modalID='addObjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/modifyAttribute',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
 			                  <input type="hidden" name="action" value="insert">
-			                  <%call expr="modals.saveButtonModal(id='addAbjectAttributeModal{0}'.format(object.identifier),title='Add attribute',contentUrl='/events/event/attribute/addAttribute/{0}/{1}'.format(eventID, object.identifier))"/>
+			                  <%call expr="modals.saveButtonModal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',contentUrl='/events/event/attribute/addAttribute/{0}/{1}'.format(eventID, object.identifier))"/>
 			                </%call>
 			                <%call expr="modals.genericDialogModal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
 			                  <%call expr="forms.eventObjectForm(eventID,object, False,cbObjDefinitions)"/>
