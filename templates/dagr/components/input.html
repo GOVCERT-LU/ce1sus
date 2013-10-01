@@ -23,7 +23,7 @@
 	%if enabled or message is None:
 	    <textarea class="form-control" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
 	%else:
-	    <div style="text-align:left;padding: 10px;overflow:auto; height:${rows*25}px">
+	    <div style="text-align:left;overflow:auto; height:${rows*25}px">
 	      ${dagr.plaintext2html(text=message)}
 	    </div>
 	%endif
@@ -53,7 +53,7 @@
 	%if enabled or value is None:
 	    <input class="form-control" id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
 	%else:
-	    <div style="text-align:left;padding: 10px;">
+	    <div style="text-align:left;">
 	      %if value == 'EXTERNALAUTH':
 	      ${value}
 	      %else:
@@ -87,7 +87,7 @@
 	%if enabled or value is None:
 	    <input class="form-control" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
 	%else:
-	    <div style="text-align:left;padding: 10px;">
+	    <div style="text-align:left;line-height: 20px;vertical-align: middle;">
 	      ${value}
 	    </div>
 	%endif
@@ -145,7 +145,7 @@
 	  %endif 
 	</select> 
 	%else:
-	    <div style="text-align:left;padding: 10px">
+	    <div style="text-align:left;">
 	        %for key, value in values.iteritems():
 	           <%
                 if isinstance(value, tuple):
@@ -204,7 +204,7 @@
 	            </div>
             </div>
             %else:
-            <div style="text-align:left;padding: 10px;">
+            <div style="text-align:left;">
                       ${dateTime}
                     </div>
             %endif

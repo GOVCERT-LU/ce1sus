@@ -14,9 +14,23 @@ __license__ = 'GPL v3+'
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
-from ce1sus.web.helpers.protection import Protector
-from ce1sus.brokers.permissionbroker import UserBroker
 from dagr.web.helpers.config import WebConfig
+from abc import abstractmethod
+
+class BaseControllerException(Exception):
+  """
+  Base exception for the controller api
+  """
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
+
+class NotImplementedException(BaseControllerException):
+  """
+  Not implemented exception
+  """
+  def __init__(self, message):
+    BaseControllerException.__init__(self, message)
 
 
 class BaseController:
@@ -52,6 +66,7 @@ class BaseController:
     """
     return self.mako.getTemplate(name)
 
+  @abstractmethod
   def checkIfViewable(self, groups, isOwner):
     """
     Checks if the page if viewable for the given group
@@ -61,8 +76,11 @@ class BaseController:
 
     :returns: Boolean
     """
-    self.getLogger().debug("Checked if it is viewable for {0}".format(groups))
-    return Protector.checkIfViewable(groups, isOwner)
+    raise NotImplementedException(('{0}.checkIfViewable({1},{2})'
+                                   + ' is not implemented').format(
+                                                     self.__class__.__name__),
+                                                     groups,
+                                                     isOwner)
 
   def getUser(self):
     """
@@ -70,10 +88,9 @@ class BaseController:
 
     :returns: User
     """
-    userBroker = self.brokerFactory(UserBroker)
-    user = userBroker.getUserByUserName(self.getUserName())
-    self.getLogger().debug("Returned user")
-    return user
+    raise NotImplementedException(('{0}.getUser()'
+                                   + ' is not implemented').format(
+                                                     self.__class__.__name__))
 
   def getUserName(self):
     """
@@ -81,15 +98,17 @@ class BaseController:
 
     :returns: String
     """
-    self.getLogger().debug("Returned username")
-    return Protector.getUserName()
+    raise NotImplementedException(('{0}.getUserName()'
+                                   + ' is not implemented').format(
+                                                     self.__class__.__name__))
 
   def clearSession(self):
     """
     Clears the session
     """
-    self.getLogger().debug("Cleared session")
-    Protector.clearSession()
+    raise NotImplementedException(('{0}.clearSession()'
+                                   + ' is not implemented').format(
+                                                     self.__class__.__name__))
 
   def getLogger(self):
     """

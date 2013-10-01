@@ -53,7 +53,10 @@ class ValueConverter(object):
     :returns: Integer
     """
     try:
-      return int(value)
+      if value:
+        return int(value)
+      else:
+        return None
     except ValueError as e:
       raise ConversionException(e)
 

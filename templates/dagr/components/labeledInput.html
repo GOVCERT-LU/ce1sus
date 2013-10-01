@@ -3,22 +3,36 @@
 
 <%namespace name="input" file="/dagr/components/input.html"/>
 
-<%def name="genericLabeler(label)">
+<%def name="genericLabeler(label, enabled=False)">
 	<!-- BEGIN genericLabeler -->
+	%if enabled:
 	<div class="form-group">
-	  <label for="inputEmail1" class="col-lg-3 control-label">
+	  <label class="col-lg-3 control-label">
 	      ${label}${':' if label else ''}
 	      </label>
 	      <div class="col-lg-9">
 	       ${caller.body()}
 	      </div>
 	</div>
+	%else:
+	<div class="row">
+	   <div class="col-lg-3" style="text-align:right;">
+	   <label class="control-label">
+	   ${label}${':' if label else ''}
+	   </label>
+	   </div>
+	   <div class="col-lg-9">
+	   ${caller.body()}
+       </div>
+	</div>
+	%endif
+	
 	<!-- END genericLabeler -->
 </%def>
 
 <%def name="labeledEditBox(label, name, value, enabled=True, validationMsg=None)">
 	<!-- BEGIN labeledEditBox -->
-	<%call expr="genericLabeler(label)">
+	<%call expr="genericLabeler(label,enabled)">
 	  <%call expr="input.editBox(name, value, enabled, validationMsg)"/>
 	</%call>
 	<!-- END labeledEditBox -->
@@ -29,7 +43,7 @@
 
 <%def name="labeledPasswordBox(label, name, value, enabled=True, validationMsg=None)">
 	<!-- BEGIN labeledPasswordBox -->
-	<%call expr="genericLabeler(label)">
+	<%call expr="genericLabeler(label,enabled)">
 	  <%call expr="input.passowdBox(name, value, enabled, validationMsg)"/>
 	</%call>
 	<!-- END labeledPasswordBox -->
@@ -40,7 +54,7 @@
 
 <%def name="labeledTextBox(label, name, message, enabled=True, validationMsg=None)">
 	<!-- BEGIN labeledTextBox -->
-	<%call expr="genericLabeler(label)">
+	<%call expr="genericLabeler(label,enabled)">
 	  <%call expr="input.textBox(name, message, 40, 5, enabled, validationMsg)"/>
 	</%call>
 	<!-- END labeledTextBox -->
@@ -51,7 +65,7 @@
 
 <%def name="labeledComboBox(label, name, values, enabled=True, validationMsg=None, selected=None, hasEmpty=False)">
 	<!-- BEGIN labeledComboBox -->
-	<%call expr="genericLabeler(label)">
+	<%call expr="genericLabeler(label,enabled)">
 	  <%call expr="input.comboBox(name, values, enabled, selected, validationMsg, hasEmpty)"/>
 	</%call>
 	<!-- END labeledComboBox -->
@@ -62,7 +76,7 @@
 
 <%def name="labeledDateTimePicker(label, name, value, enabled=True)">
 	<!-- BEGIN labeledDateTimePicker -->
-	<%call expr="genericLabeler(label)">
+	<%call expr="genericLabeler(label,enabled)">
 	  <%call expr="input.dateTimePicker(name, value, enabled)"/>
 	</%call>
 	<!-- END labeledDateTimePicker -->

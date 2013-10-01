@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.brokers.valuebroker import ValueBroker
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
@@ -20,10 +20,12 @@ from ce1sus.brokers.definitionbroker import AttributeDefinition, \
 from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
 
+# pylint:disable=R0903
 class ResultItem(object):
   """
   Container Class for displaying the search results
   """
+  # pylint:disable=R0913
   def __init__(self, identifier, event, objDef, attrDef, attribute, value):
     self.identifier = identifier
     self.event = event
@@ -32,11 +34,11 @@ class ResultItem(object):
     self.attribute = attribute
     self.value = value
 
-class SearchController(BaseController):
+class SearchController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.valueBroker = self.brokerFactory(ValueBroker)
     self.attributeDefinition = AttributeDefinition()
     self.attributeDefinitionBroker = self.brokerFactory(

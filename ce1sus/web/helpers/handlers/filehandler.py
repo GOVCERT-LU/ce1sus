@@ -34,7 +34,7 @@ class FileNotFoundException(HandlerException):
   def __init__(self, message):
     HandlerException.__init__(self, message)
 
-class FileHandler(GenericHandler):
+class UnMaliciousFileHandler(GenericHandler):
   """Handler for handling files"""
 
   URLSTR = '/events/event/attribute/file/{0}/{1}/{2}'
@@ -66,39 +66,10 @@ class FileHandler(GenericHandler):
                                                obj,
                                                'filename',
                                                user))
-      attributes.append(self.__createAttribute(hasher.fileHashMD5(filepath),
-                                               obj,
-                                               'md5',
-                                               user))
       sha1 = self.__createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
                                     'sha1',
                                     user)
-      attributes.append(sha1)
-      attributes.append(self.__createAttribute(hasher.fileHashSHA256(filepath),
-                                               obj,
-                                               'sha256',
-                                               user))
-      attributes.append(self.__createAttribute(hasher.fileHashSHA384(filepath),
-                                               obj,
-                                               'sha384',
-                                               user))
-      attributes.append(self.__createAttribute(hasher.fileHashSHA512(filepath),
-                                               obj,
-                                               'sha512',
-                                               user))
-      attributes.append(self.__createAttribute('{0}'.
-                                               format(getsize(filepath)),
-                                               obj,
-                                               'size',
-                                               user))
-      url = pathname2url(filepath)
-      mime = MimeTypes()
-      attributes.append(self.__createAttribute(unicode(mime.
-                                                       guess_type(url)[0]),
-                                               obj,
-                                               'mimeType',
-                                               user))
       # move file to destination
       destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
                                               getInstance().get('files'),
@@ -187,7 +158,7 @@ class FileHandler(GenericHandler):
       attrID = attribute.identifier
     except  AttributeError:
       attrID = ''
-    url = FileHandler.URLSTR.format(eventID,
+    url = UnMaliciousFileHandler.URLSTR.format(eventID,
                                       attrID,
                                       'Download')
     canDownload = False
@@ -210,11 +181,77 @@ class FileHandler(GenericHandler):
     userInGroups = self.__canUserDownload(eventID, user)
     userIsOwner = attribute.creator_id == user.identifier
     if userInGroups and userIsOwner:
-      link = Link(FileHandler.URLSTR.format(attribute.object.identifier,
+      link = Link(UnMaliciousFileHandler.URLSTR.format(
+                                            attribute.object.identifier,
                                             attribute.identifier,
                                             ''),
                   'Download')
       return link
     else:
       return '(Not Accessible)'
+
+class MaliciousFileHandler(UnMaliciousFileHandler):
+
+  def populateAttributes(self, params, obj, definition, user):
+    filepath = params.get('value', None)
+    if isfile(filepath):
+      # getNeededAttributeDefinition
+      attributes = list()
+      attributes.append(self.__createAttribute(basename(filepath),
+                                               obj,
+                                               'filename',
+                                               user))
+      attributes.append(self.__createAttribute(hasher.fileHashMD5(filepath),
+                                               obj,
+                                               'md5',
+                                               user))
+      sha1 = self.__createAttribute(hasher.fileHashSHA1(filepath),
+                                    obj,
+                                    'sha1',
+                                    user)
+      attributes.append(sha1)
+      attributes.append(self.__createAttribute(hasher.fileHashSHA256(filepath),
+                                               obj,
+                                               'sha256',
+                                               user))
+      attributes.append(self.__createAttribute(hasher.fileHashSHA384(filepath),
+                                               obj,
+                                               'sha384',
+                                               user))
+      attributes.append(self.__createAttribute(hasher.fileHashSHA512(filepath),
+                                               obj,
+                                               'sha512',
+                                               user))
+      attributes.append(self.__createAttribute('{0}'.
+                                               format(getsize(filepath)),
+                                               obj,
+                                               'size',
+                                               user))
+      url = pathname2url(filepath)
+      mime = MimeTypes()
+      attributes.append(self.__createAttribute(unicode(mime.
+                                                       guess_type(url)[0]),
+                                               obj,
+                                               'mimeType',
+                                               user))
+      # move file to destination
+      destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
+                                              getInstance().get('files'),
+                                                 datetime.now().year,
+                                                 datetime.now().month,
+                                                 datetime.now().day)
+      # in case the directories doesn't exist
+      if not exists(destination):
+        makedirs(destination)
+      # add the name to the file
+      destination += sha1.value
+      move(filepath, destination)
+      attributes.append(self.__createAttribute(destination,
+                                               obj,
+                                               'File',
+                                               user))
+      # return attributes
+      return attributes
+    else:
+      raise FileNotFoundException('Could not find file {0}'.format(filepath))
 

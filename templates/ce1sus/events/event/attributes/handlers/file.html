@@ -83,7 +83,7 @@ function buttonClick(){
 }
 </script>
 %else:
-  <%call expr="labeledInput.genericLabeler('Location')">
+  <%call expr="labeledInput.genericLabeler('Location',enabled)">
   <div style="padding: 5px;">
     %if canDownload:
         <a href="${url}"  target="_blank">Download</a>

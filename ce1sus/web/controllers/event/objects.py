@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker
@@ -22,11 +22,11 @@ from dagr.db.broker import ValidationException, \
 BrokerException
 import dagr.helpers.string as string
 
-class ObjectsController(BaseController):
+class ObjectsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)

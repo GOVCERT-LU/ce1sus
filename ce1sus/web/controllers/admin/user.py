@@ -10,7 +10,7 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
@@ -20,11 +20,11 @@ from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, DeletionException
 import types as types
 
-class UserController(BaseController):
+class UserController(Ce1susBaseController):
   """Controller handling all the requests for users"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
 

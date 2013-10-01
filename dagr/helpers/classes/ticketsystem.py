@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 
 from abc import abstractmethod
 
+# pylint: disable=R0903,R0902
 class Ticket(object):
   """
   Ticket container class.

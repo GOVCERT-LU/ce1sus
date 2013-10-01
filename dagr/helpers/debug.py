@@ -61,9 +61,6 @@ class Log(object):
     Sets the file loggerwith the parameters to the given logger
     """
     if isNotNull(self.logfile):
-      # Remove the default FileHandlers if present.
-      logger.error_file = ""
-      logger.access_file = ""
       maxBytes = getattr(logger, "rot_maxBytes", self.logFileSize)
       backupCount = getattr(logger, "rot_backupCount", self.nbrOfBackups)
       fileRotater = RotatingFileHandler(self.logfile, 'a', maxBytes,

@@ -7,7 +7,7 @@
 %if attribute is None:
     <div id="RTTable">
    <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
-   <%call expr="labeledInput.genericLabeler('')">
+   <%call expr="labeledInput.genericLabeler('',enabled)">
    <div class="btn-group">
     <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/getTickets')">Reference Ticket</a>
    </div>
@@ -18,7 +18,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
 %endif
 %else:
-  <%call expr="labeledInput.genericLabeler('Value')">
+  <%call expr="labeledInput.genericLabeler('Value',enabled)">
   <div style="padding: 5px;">
     <a href="${attribute.value.url}"  target="_blank">${attribute.value.identifier}</a>
   </div>

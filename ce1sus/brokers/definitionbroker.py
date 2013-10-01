@@ -40,11 +40,12 @@ class AttributeDefinition(BASE):
                  3 : 'NumberValue'}
 
   __handlerDefinitions = {0 : 'generichandler.GenericHandler',
-                          1: 'filehandler.FileHandler',
+                          1: 'filehandler.MaliciousFileHandler',
                           2: 'tickethandler.TicketHandler',
                           3: 'tickethandler.CVEHandler',
                           4: 'locationhandler.LocationHandler',
-                          5: 'multiplegenerichandler.MultipleGenericHandler'}
+                          5: 'multiplegenerichandler.MultipleGenericHandler',
+                          6: 'filehandler.UnMaliciousFileHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
@@ -58,6 +59,7 @@ class AttributeDefinition(BASE):
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
                          back_populates='attributes', cascade='all')
+  share = Column('sharable', Integer)
 
   @property
   def className(self):
@@ -436,7 +438,7 @@ class AttributeDefinitionBroker(BrokerBase):
   # pylint: disable=R0913
   def buildAttributeDefinition(self, identifier=None, name=None, description='',
                       regex='^.*$', classIndex=0, action='insert',
-                      handlerIndex=0):
+                      handlerIndex=0, share=None):
     """
     puts an attribute with the data together
 
@@ -466,13 +468,14 @@ class AttributeDefinitionBroker(BrokerBase):
     if not action == 'remove':
       attribute.name = name
       attribute.description = description
-    if string.isNotNull(classIndex):
-      ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
-    if string.isNotNull(classIndex):
-      ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
-    if not string.isNotNull(regex):
-      regex = '^.*$'
+    ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
+    ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+    if string.isNotNull(regex):
       attribute.regex = regex
+    else:
+      attribute.regex = '^.*$'
+    if string.isNotNull(share):
+      attribute.share = share
     if action == 'insert':
       attribute.deletable = 1
     return attribute

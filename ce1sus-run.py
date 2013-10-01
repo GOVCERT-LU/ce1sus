@@ -24,7 +24,7 @@ from ce1sus.web.controllers.event.groups import GroupsController
 from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
-
+from ce1sus.sanity import SantityChecker
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -45,12 +45,18 @@ def bootstrap():
   except cherrypy._cperror as e:
     raise ConfigException(e)
 
+  sanityChecker = SantityChecker(ce1susConfigFile)
+  sanityChecker.check()
+  sanityChecker = None
+
   # Load 'Modules'
 
   # ErrorHandler(ce1susConfigFile)
   Log(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Session")
   SessionManager(ce1susConfigFile)
+
+
   Log.getLogger("run").debug("Loading Mako")
   MakoHandler(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Protector")
@@ -58,7 +64,7 @@ def bootstrap():
   Log.getLogger("run").debug("Loading RT")
   RTTickets(ce1susConfigFile)
   Log.getLogger("run").debug("Loading WebCfg")
-  WebConfig(ce1susConfigFile)
+  WebConfig(ce1susConfigFile, 'ce1sus')
   Log.getLogger("run").debug("Loading Ldap")
   LDAPHandler(ce1susConfigFile)
 
@@ -90,8 +96,6 @@ def bootstrap():
   cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
   Log.getLogger("run").debug("Adding events event comment")
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
-
-
 if __name__ == '__main__':
 
   bootstrap()

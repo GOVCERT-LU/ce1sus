@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'"""module holding all controllers needed for
                         the event handling"""
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
@@ -49,11 +49,11 @@ class Object4Paginator(object):
     self.type = 0
     self.isChildOf = 0
 
-class EventController(BaseController):
+class EventController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)

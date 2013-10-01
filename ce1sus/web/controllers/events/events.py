@@ -11,18 +11,18 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
 from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.web.helpers.protection import require, requireReferer
-class EventsController(BaseController):
+class EventsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
   @require(requireReferer(('/internal')))

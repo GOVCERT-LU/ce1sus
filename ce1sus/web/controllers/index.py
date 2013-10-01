@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.helpers.protection import Protector
@@ -22,11 +22,11 @@ from dagr.db.broker import NothingFoundException, BrokerException
 from dagr.helpers.ldaphandling import LDAPHandler
 from dagr.db.session import SessionManager
 
-class IndexController(BaseController):
+class IndexController(Ce1susBaseController):
   """index controller handling all actions in the index section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
 
   @cherrypy.expose

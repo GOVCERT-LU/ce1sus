@@ -11,18 +11,18 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.web.helpers.protection import require, requireReferer
 import types
 from dagr.db.broker import BrokerException
 
-class GroupsController(BaseController):
+class GroupsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
   @cherrypy.expose

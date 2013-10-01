@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
  AttributeDefinition
@@ -20,11 +20,11 @@ from dagr.db.broker import BrokerException, \
   ValidationException, NothingFoundException, DeletionException, OperationException
 import types as types
 
-class AttributeController(BaseController):
+class AttributeController(Ce1susBaseController):
   """Controller handling all the requests for attributes"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeDefinitionBroker)
 
   @require(privileged(), requireReferer(('/internal')))
@@ -113,7 +113,7 @@ class AttributeController(BaseController):
   @cherrypy.expose
   def modifyAttribute(self, identifier=None, name=None, description='',
                       regex='^.*$', classIndex=0, action='insert',
-                      handlerIndex=0):
+                      handlerIndex=0, share=None):
     """
     modifies or inserts an attribute with the data of the post
 
@@ -143,7 +143,8 @@ class AttributeController(BaseController):
                                                               regex,
                                                               classIndex,
                                                               action,
-                                                              handlerIndex)
+                                                              handlerIndex,
+                                                              share)
     except DeletionException as e:
       return "Error {0}".format(e)
 

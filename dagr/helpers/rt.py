@@ -15,7 +15,7 @@ from dagr.helpers.config import Configuration
 from rtkit.resource import RTResource
 from rtkit.authenticators import CookieAuthenticator
 from rtkit.errors import RTResourceError
-from ce1sus.api.ticketsystem import TicketSystemBase, Ticket, \
+from dagr.helpers.classes.ticketsystem import TicketSystemBase, Ticket, \
                                     NoResponseException
 
 class RTTickets(TicketSystemBase):

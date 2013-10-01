@@ -51,7 +51,7 @@
                 </div>
             </div>
         </div>
-        <div id="${id}" class="panel-collapse collapse in">
+        <div id="${id}" class="panel-collapse collapse">
             <div class="panel-body">
                 <div class="scrollBarPanel">
                     <%call expr="pagination.pagination('attributesTable'+unicode(object.identifier),paginator,hasSearch=False)"/>
@@ -104,7 +104,7 @@
    
   %>
   %for object in objectList:
-    <li id="menu${object.identifier}LI"><a href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${identString} ${object.definition.name} - ${object.identifier}</a></li>
+    <li id="menu${object.identifier}LI"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${identString} ${object.definition.name} - ${object.identifier}</a></li>
     <%call expr="menuItem(object.children,ident+1)"/>
   %endfor
 %endif

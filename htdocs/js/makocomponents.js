@@ -201,8 +201,11 @@ function loadToolbarLi(id,contentID, reload){
 }
 
 function loadTabLi(id, reload){
-	parentName = $('#'+id+'LI').parent().attr('id');
-	loadToolbarLi(id,parentName+'TabContent');
+	obj = $("#"+id+"LI");
+	ul = obj.closest('ul');
+	parentName = ul.get(0).id;
+	parentName = parentName.replace(/\uFFFD/g, '');
+	loadToolbarLi(id,parentName+"TabContent",reload);
 }
 
 function showPaginatorModal(title, contentUrl, postUrl, refresh, 
@@ -317,10 +320,10 @@ function dialogCloseTabCall(url, tabID, tabToClose){
 
 function activateMenuLi(id){
 	  //deactivateActiveOne
-	  $('#'+id).parent().find("li").each(function() {
+	  $('#'+id).parent().parent().find("li").each(function() {
 	    $(this).attr('class', '');
 	  });
 	  //activate tab
-	  $('#'+id).attr('class', 'active');	
+	  $('#'+id).parent().attr('class', 'active');	
 }
 

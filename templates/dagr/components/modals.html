@@ -9,18 +9,21 @@ if big:
 else:
   style=''
 %><!-- BEGIN GenericModal -->
-<div id="${id}" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="text-align:left">
+<div id="${id}" class="modal fade" role="dialog" aria-labelledby="${id}Label" aria-hidden="true" >
   <div class="modal-dialog" ${style}>
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3 class="modal-title" id="${id}Label">${title}</h3>
       </div>
-      <div id="${id}body" class="modal-body">
+      <div class="modal-body">
+        <div class="row">
+            <div class="col-xs-12 col-md-12"><div id="${id}body" ></div></div>
+        </div>
       </div>
-      <div id="${id}Footer" class="modal-footer">
+      <div class="modal-footer">
         ${caller.body()}
-      <button class="btn btn-default" data-dismiss="modal">Close</button>
+        <button class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -28,18 +31,17 @@ else:
 <script type="text/javascript">
 
 %if not contentUrl is None:
-	$("#${id}").on("show.bs.modal", function() { // wire up modal when shown
-		loadContent('${id}body','${contentUrl}')
-	});
+    $("#${id}").on("show.bs.modal", function() { // wire up modal when shown
+        loadContent('${id}body','${contentUrl}')
+    });
+    $("#${id}").on("hide.bs.modal", function() { // wire up modal when shown
+    	$("#${id}body").empty();
+        //workaround---
+        $('.modal-backdrop').remove();
+        document.documentElement.style.overflow = "auto";
+        document.body.style.marginRight='0px';
+    });
 %endif
-
-$("#${id}").on("hide.bs.modal", function() { // wire up modal when shown
-    $("#${id}body").empty();
-    //workaround---
-    $('.modal-backdrop').remove();
-    document.documentElement.style.overflow = "auto";
-    document.body.style.marginRight='0px';
-});
 </script>
 
 <!-- END GenericModal -->
@@ -59,8 +61,10 @@ else:
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3 class="modal-title" id="${id}Label">${title}</h3>
       </div>
-      <div class="modal-body">
-        ${caller.body()}
+      <div id="${id}DLGbody" class="modal-body">
+        <div class="row">
+            <div class="col-xs-12 col-md-12"> ${caller.body()}</div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-default" data-dismiss="modal">Close</button>
@@ -68,6 +72,7 @@ else:
     </div>
   </div>
 </div>
+
 <!-- END GenericModal -->
 </%def>
 

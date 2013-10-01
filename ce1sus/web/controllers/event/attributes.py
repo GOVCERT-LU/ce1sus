@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require
 from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
@@ -23,16 +23,16 @@ BrokerException
 from ce1sus.web.helpers.handlers.base import HandlerException
 import types
 from dagr.web.helpers.pagination import Paginator
-from ce1sus.api.ticketsystem import TicketSystemBase
+from dagr.helpers.classes.ticketsystem import TicketSystemBase
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from cherrypy.lib.static import serve_file
 from ce1sus.brokers.valuebroker import ValueBroker
 
-class AttributesController(BaseController):
+class AttributesController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self):
-    BaseController.__init__(self)
+    Ce1susBaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.eventBroker = self.brokerFactory(EventBroker)
@@ -283,13 +283,17 @@ class AttributesController(BaseController):
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
-  def file(self, eventID, attributeID, action):
+  def file(self, objectID, attributeID, action):
     """
     Returns a file to download
     """
     # right checks
     del action
-    event = self.eventBroker.getByID(eventID)
+    obj = self.objectBroker.getByID(objectID)
+    event = obj.event
+    if event is None:
+      event = self.eventBroker.getByID(obj.parent_id)
+
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
                            event.creator.identifier)

@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 import types
-from ce1sus.api.ticketsystem import TicketSystemBase
+from dagr.helpers.classes.ticketsystem import TicketSystemBase
 from dagr.web.helpers.config import WebConfig
 from dagr.web.helpers.pagination import Link
 from ce1sus.web.helpers.handlers.base import HandlerException

@@ -16,9 +16,9 @@ class WebConfig(object):
 
   instance = None
 
-  def __init__(self, configFile, section):
+  def __init__(self, configFile):
     WebConfig.instance = self
-    self.__config = Configuration(configFile, section)
+    self.__config = Configuration(configFile, 'ce1sus')
 
   def get(self, identifier):
     """

@@ -9,7 +9,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
 %endif
 %else:
-  <%call expr="labeledInput.genericLabeler('Value')">
+  <%call expr="labeledInput.genericLabeler('Value', enabled)">
   <div style="padding: 5px;">
     <a href="${attribute.value.url}"  target="_blank">${attribute.value.identifier}</a>
   </div>

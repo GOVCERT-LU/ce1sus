@@ -37,8 +37,7 @@ class MultipleGenericHandler(GenericHandler):
   def render(self, enabled, eventID, user, attribute=None):
 
       template = (self.
-                  getTemplate('/events/event/attributes/handlers/multGeneric.html'))
-      string = template.render(attribute=attribute, enabled=enabled)
-      return string
+            getTemplate('/events/event/attributes/handlers/multGeneric.html'))
+      return template.render(attribute=attribute, enabled=enabled)
 
 
