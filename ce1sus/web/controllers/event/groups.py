@@ -35,7 +35,8 @@ class GroupsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier == event.creator.identifier,
+                           event.tlp)
     remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier, False)
     return template.render(eventID=event.identifier,
                            remainingGroups=remainingGroups,
@@ -65,7 +66,8 @@ class GroupsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     try:
       if operation == 'add':
         if not (remainingGroups is None):

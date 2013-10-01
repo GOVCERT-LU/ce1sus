@@ -18,6 +18,7 @@ from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
+from ce1sus.brokers.staticbroker import TLPLevel
 
 class GroupController(Ce1susBaseController):
   """Controller handling all the requests for groups"""
@@ -80,7 +81,8 @@ class GroupController(Ce1susBaseController):
       users = group.users
     return template.render(groupDetails=group,
                            remainingUsers=remUsers,
-                           groupUsers=users)
+                           groupUsers=users,
+                           cbTLPValues=TLPLevel.getDefinitions())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -91,13 +93,14 @@ class GroupController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/groups/groupModal.html')
-    return template.render(group=None, errorMsg=None)
+    return template.render(group=None, errorMsg=None,
+                           cbTLPValues=TLPLevel.getDefinitions())
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None, shareTLP=0,
-                  description=None, download=None, action='insert'):
+                  description=None, download=None, action='insert', tlpLvl=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -119,7 +122,8 @@ class GroupController(Ce1susBaseController):
                                         shareTLP,
                                         description,
                                         download,
-                                        action)
+                                        action,
+                                        tlpLvl)
     try:
       if action == 'insert':
         self.groupBroker.insert(group)
@@ -133,7 +137,8 @@ class GroupController(Ce1susBaseController):
       return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
-      return self.returnAjaxPostError() + template.render(group=group)
+      return self.returnAjaxPostError() + template.render(group=group,
+                           cbTLPValues=TLPLevel.getDefinitions())
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)
@@ -157,7 +162,8 @@ class GroupController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(group=group, errorMsg=errorMsg)
+    return template.render(group=group, errorMsg=errorMsg,
+                           cbTLPValues=TLPLevel.getDefinitions())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

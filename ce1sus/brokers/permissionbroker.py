@@ -117,6 +117,7 @@ class Group(BASE):
   canDownload = Column('canDownlad', Integer)
   users = relationship(User, secondary='User_has_Groups',
                        back_populates='groups', cascade='all')
+  tlpLvl = Column('tlplvl', Integer)
 
   def __str__(self):
     return unicode(self.__dict__)
@@ -257,7 +258,7 @@ class GroupBroker(BrokerBase):
   # pylint: disable=R0903,R0913
   @staticmethod
   def buildGroup(identifier=None, name=None, shareTLP=0,
-                  description=None, download=None, action='insert'):
+                  description=None, download=None, action='insert', tlpLvl=None):
     """
     puts a group with the data together
 
@@ -280,6 +281,7 @@ class GroupBroker(BrokerBase):
       group.name = name
       ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
       ObjectConverter.setInteger(group, 'canDownload', download)
+      ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
       group.description = description
     return group
 

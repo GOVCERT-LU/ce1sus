@@ -49,7 +49,8 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
 
     # if event has objects
 
@@ -113,7 +114,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
     return template.render(cbObjDefinitions=cbObjDefinitions,
@@ -132,7 +134,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.getTemplate('/events/event/objects/childObjectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
     return template.render(cbObjDefinitions=cbObjDefinitions,
@@ -158,7 +161,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier == event.creator.identifier,
+                           event.tlp)
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
@@ -200,7 +204,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier == event.creator.identifier,
+                           event.tlp)
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
@@ -236,7 +241,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups, self.getUser().identifier ==
-                         event.creator.identifier)
+                         event.creator.identifier,
+                           event.tlp)
     # remove object
     try:
       self.objectBroker.removeByID(objectID)
@@ -262,7 +268,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier == event.creator.identifier,
+                           event.tlp)
 
     # get concerned object
     obj = self.objectBroker.getByID(objectID)
@@ -299,7 +306,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier)
+                         self.getUser().identifier == event.creator.identifier,
+                           event.tlp)
     if setEventParent is None and not string.isNotNull(parentObjectID):
       return 'Please select someting before saving.'
     obj = self.objectBroker.getByID(objectID)

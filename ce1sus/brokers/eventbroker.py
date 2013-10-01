@@ -896,22 +896,38 @@ class EventBroker(BrokerBase):
       return self.getAllLimited(limit, offset)
     else:
       groupIDs = list()
+      tlpLevels = list()
       for group  in user.groups:
         groupIDs.append(group.identifier)
+        tlpLevels.append(group.tlpLvl)
+
+      if len(tlpLevels) == 0:
+        tlpLevels.append(3)
+
+
       try:
         if (len(groupIDs) > 0):
           result = self.session.query(Event).filter(
                                         or_(
                                           Event.creator_id == user.identifier,
                                           and_(
+                                            or_(
                                             Group.identifier.in_(groupIDs),
+                                            Event.tlp_level_id.in_(tlpLevels)
+                                            ),
                                             Event.published == 1)
                                           )
                                         ).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
         else:
           result = self.session.query(Event).filter(
-                                            Event.creator_id == user.identifier
+                                            or_(
+                                            Event.creator_id == user.identifier,
+                                            and_(
+                                                Event.tlp_level_id.in_(tlpLevels),
+                                                Event.published == 1
+                                                )
+                                              )
                                             ).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:

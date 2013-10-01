@@ -12,6 +12,7 @@ import re
 
 SESSION_KEY_USERNAME = '_cp_username'
 SESSION_KEY_USER = '_cp_user'
+SESSION_KEY_GROUPS = '_cp_userGroups'
 
 class Protector(object):
   """The authentication handler for the site. Mainly taken out of the example
@@ -56,6 +57,7 @@ class Protector(object):
     userBroker = SessionManager.brokerFactory(UserBroker)
     user = userBroker.getUserByUserName(username)
     attribute[SESSION_KEY_USER] = user
+    attribute[SESSION_KEY_GROUPS] = user.groups
 
 
   @staticmethod
@@ -78,31 +80,45 @@ class Protector(object):
     user = attribute.get(SESSION_KEY_USER, None)
     return user
 
+  @staticmethod
+  def getMaxUserTLP(groups):
+    tlpLevel = 3
+    if groups is None:
+      return tlpLevel
+    else:
+      for group in groups:
+        tlpLevel = min(tlpLevel, group.tlpLvl)
+      return tlpLevel
 
   @staticmethod
-  def checkIfViewable(groups, isOwner):
+  def checkIfViewable(groups, isOwner, tlp):
     """
     Checks if the group can 'view' the page, else an exception is raised.
 
     :param groups: The list of groups the page should be asscessible to
     :type gourps: list
     """
-    if not isOwner:
-      try:
-        user = Protector.getUser()
-        result = False
-        if user.privileged:
-          result = True
-        else:
-          for userGrp in user.groups:
-            for group in groups:
-              if userGrp == group:
-                result = True
-                break
-      except:
-        raise cherrypy.HTTPError(403)
-    else:
+
+    if isOwner:
       result = True
+    else:
+      attribute = getattr(cherrypy, 'session')
+      groups = attribute.get(SESSION_KEY_GROUPS, None)
+      result = Protector.getMaxUserTLP(groups) == tlp.identifier
+      if not result:
+        try:
+          user = Protector.getUser()
+          result = False
+          if user.privileged:
+            result = True
+          else:
+            for userGrp in user.groups:
+              for group in groups:
+                if userGrp == group:
+                  result = True
+                  break
+        except:
+          raise cherrypy.HTTPError(403)
     if not result:
       raise cherrypy.HTTPError(403)
 

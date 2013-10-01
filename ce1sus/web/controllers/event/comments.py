@@ -38,7 +38,8 @@ class CommentsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.getTemplate('/events/event/comments/commentModal.html')
     return template.render(eventID=eventID,
                            comment=None,
@@ -56,7 +57,8 @@ class CommentsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier ==
-                         event.creator.identifier)
+                         event.creator.identifier,
+                           event.tlp)
     comment = self.commentBroker.buildComment(event, self.getUser(), commentID,
                          commentText, action)
     try:
@@ -89,7 +91,8 @@ class CommentsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     try:
       comment = self.commentBroker.getByID(commentID)
     except NothingFoundException:

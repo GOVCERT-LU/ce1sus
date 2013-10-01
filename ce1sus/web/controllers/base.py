@@ -17,7 +17,7 @@ from dagr.web.controllers.base import BaseController
 
 class Ce1susBaseController(BaseController):
 
-  def checkIfViewable(self, groups, isOwner):
+  def checkIfViewable(self, groups, isOwner, tlp):
     """
     Checks if the page if viewable for the given group
 
@@ -27,7 +27,7 @@ class Ce1susBaseController(BaseController):
     :returns: Boolean
     """
     self.getLogger().debug("Checked if it is viewable for {0}".format(groups))
-    return Protector.checkIfViewable(groups, isOwner)
+    return Protector.checkIfViewable(groups, isOwner, tlp)
 
   def getUser(self):
     """

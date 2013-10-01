@@ -73,7 +73,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return template.render(eventID=eventID)
 
@@ -90,7 +91,8 @@ class EventController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event.groups,
                          self.getUser().identifier ==
-                         event.creator.identifier)
+                         event.creator.identifier,
+                           event.tlp)
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
@@ -204,7 +206,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
     return EventController.__populateTemplate(event, template)
@@ -231,7 +234,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.mako.getTemplate('/events/event/details.html')
     return template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
@@ -245,7 +249,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event.groups,
                            self.getUser().identifier ==
-                           event.creator.identifier)
+                           event.creator.identifier,
+                           event.tlp)
     template = self.mako.getTemplate('/events/event/editDetails.html')
     return template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
@@ -299,7 +304,8 @@ class EventController(Ce1susBaseController):
         # right checks only if there is a change!!!!
         self.checkIfViewable(
                       event.groups, self.getUser().identifier ==
-                      event.creator.identifier)
+                      event.creator.identifier,
+                           event.tlp)
       if action == 'insert':
         template = self.getTemplate('/events/addEvent.html')
         self.eventBroker.insert(event)
