@@ -14,19 +14,12 @@ __license__ = 'GPL v3+'
 from dagr.db.session import BASE
 from sqlalchemy import Column, String
 import sqlalchemy.orm
-from dagr.db.broker import BrokerBase
 from dagr.helpers.config import Configuration
 from dagr.db.session import SessionManager
-from sqlalchemy.interfaces import PoolListener
-from cherrypy.process import plugins
-from sqlalchemy import create_engine, exc, event
-from sqlalchemy.orm import scoped_session, sessionmaker
-import cherrypy
-from sqlalchemy.pool import Pool
-from dagr.helpers.debug import Log
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from dagr.db.recepie.satool import ForeignKeysListener
 import os
-from sqlalchemy.orm import sessionmaker
 
 class SantityCheckerException(Exception):
   """SantityCheckerException"""
@@ -41,7 +34,7 @@ class SanityValue(BASE):
 class SantityChecker(object):
 
   APP_REL = '0.A.0'
-  DB_REL = '0.1.0'
+  DB_REL = '0.A.0'
 
   def __init__(self, configFile):
     # load __config foo!!
@@ -97,7 +90,7 @@ class SantityChecker(object):
     value = self.getByKey('db_shema')
     if SantityChecker.compareReleases(SantityChecker.DB_REL, value.value) != 0:
       raise SantityCheckerException('DB scheme release mismatch '
-                        + 'expected {0} got {1}'.format(SantityChecker.APP_REL,
+                        + 'expected {0} got {1}'.format(SantityChecker.DB_REL,
                                                        value.value))
     self.__close()
 
@@ -195,3 +188,5 @@ class SantityChecker(object):
           return 0
     return result
 
+def version(context):
+  return SantityChecker.APP_REL
