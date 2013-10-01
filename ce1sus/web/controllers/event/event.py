@@ -146,20 +146,29 @@ class EventController(Ce1susBaseController):
       for relation in self.__getRelationsObjects(event.objects):
         temp = Relation()
         if relation.sameAttribute.object.event is None:
-          event = self.eventBroker.getEventByObjectID(relation
+          event_rel = self.eventBroker.getEventByObjectID(relation
                                               .sameAttribute.object
                                               .parentObject_id)
+
         else:
-          event = relation.sameAttribute.object.event
-        temp.eventID = event.identifier
-        temp.identifier = event.identifier
-        temp.eventName = event.title
-        temp.objectID = relation.sameAttribute.object.identifier
-        temp.objectName = relation.sameAttribute.object.definition.name
-        temp.attributeID = relation.sameAttribute.identifier
-        temp.attributeName = relation.sameAttribute.definition.name
-        temp.attributeValue = relation.sameAttribute.value
-        relationPaginator.list.append(temp)
+          event_rel = relation.sameAttribute.object.event
+          try:
+            self.checkIfViewable(event_rel.groups,
+                         self.getUser().identifier ==
+                         event_rel.creator.identifier,
+                           event_rel.tlp)
+            temp.eventID = event_rel.identifier
+            temp.identifier = event_rel.identifier
+            temp.eventName = event_rel.title
+            temp.objectID = relation.sameAttribute.object.identifier
+            temp.objectName = relation.sameAttribute.object.definition.name
+            temp.attributeID = relation.sameAttribute.identifier
+            temp.attributeName = relation.sameAttribute.definition.name
+            temp.attributeValue = relation.sameAttribute.value
+            relationPaginator.list.append(temp)
+          except cherrypy.HTTPError:
+            self.getLogger().debug('User {0} is not authorized'.format(self.getUser()))
+
     except BrokerException as e:
       self.getLogger().error(e)
 

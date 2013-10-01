@@ -10,15 +10,7 @@
 
 <div id="deleteAnswer" style="display: none;">
 </div>
-<script type="text/javascript">
-function editComment(eventID,commentID) {
-	//load content
-    loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
-}
-$(document).ready(function() {
-    loadContent('eventEdit','/events/event/details/${event.identifier}');
-});
-</script>
+
 
 <div class="row">
   <div class="col-xs-4 col-sm-4">
@@ -96,5 +88,13 @@ $(document).ready(function() {
     <%call expr="modals.saveButtonModal(id='editCommentModal',title='Add a comment',contentUrl=None)"/>
 </%call>
 
-
+<script type="text/javascript">
+function editComment(eventID,commentID) {
+    //load content
+    loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
+}
+$(document).ready(function() {
+    loadContent('eventEdit','/events/event/details/${event.identifier}');
+});
+</script>
 
