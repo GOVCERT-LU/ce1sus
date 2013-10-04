@@ -158,6 +158,7 @@ class SantityChecker(object):
       else:
         result = 1
     return result
+
   @staticmethod
   def compareReleases(release1, release2):
     """
@@ -180,11 +181,11 @@ class SantityChecker(object):
     if len(array1) != len(array2) and len(array1) != 3:
       raise SantityCheckerException('The releases have not the right format.')
     result = SantityChecker.compareValues(array1[0], array2[0])
-    if result == 0:
+    if result >= 0:
       result = SantityChecker.compareValues(array1[1], array2[1])
-      if result == 0:
+      if result >= 0:
         result = SantityChecker.compareValues(array1[2], array2[2])
-        if result == 0:
+        if result >= 0:
           return 0
     return result
 

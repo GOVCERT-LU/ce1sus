@@ -10,8 +10,8 @@
         <div class="panel-heading">
             <div class="row">
                 <div class="col-xs-7 col-sm-7">
-                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}">
-                    ${object.definition.name} - ${object.identifier}
+                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}" >
+                        ${object.definition.name} - ${object.identifier}
                     </a>
                 </div>
                 <div class="col-xs-5 col-sm-5" style="text-align: right;">
@@ -54,12 +54,21 @@
         <div id="${id}" class="panel-collapse collapse">
             <div class="panel-body">
                 <div class="scrollBarPanel">
+                    <script type="text/javascript">
+                    $('#${id}').on('show.bs.collapse', function () {
+                    	$('#menu${object.identifier}Link').parent().attr('class', 'active'); 
+                    });
+                    $('#${id}').on('hidden.bs.collapse', function () {
+                    	$('#menu${object.identifier}Link').parent().attr('class', ''); 
+                    });
+                    </script>
                     <%call expr="pagination.pagination('attributesTable'+unicode(object.identifier),paginator,hasSearch=False)"/>
                 </div>
 
             </div>
         </div>
     </div>
+    
   %endif
 </%def>
 

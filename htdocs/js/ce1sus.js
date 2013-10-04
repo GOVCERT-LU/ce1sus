@@ -72,4 +72,9 @@ function closeAllColapses(except){
 	);
 }
 
-
+function collapseOpenMyClick(except){
+	alert('huhu');
+}
+function collapseCloseMyClick(except){
+	alert('huhu');
+}
