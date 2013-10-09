@@ -13,11 +13,13 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                                                      ObjectDefinitionBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 import types
+
 
 class ObjectController(Ce1susBaseController):
   """Controller handling all the requests for objects"""
@@ -93,7 +95,6 @@ class ObjectController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/objects/objectModal.html')
     return template.render(object=None, errorMsg=None)
-
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -186,7 +187,9 @@ class ObjectController(Ce1susBaseController):
                                                    objectid)
           else:
             for attribute in remainingAttributes:
-              self.objectBroker.addAttributeToObject(attribute, objectid, False)
+              self.objectBroker.addAttributeToObject(attribute,
+                                                     objectid,
+                                                     False)
             self.objectBroker.doCommit()
       else:
         #Note objectAttributes may be a string or an array!!!

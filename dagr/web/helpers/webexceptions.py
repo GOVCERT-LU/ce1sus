@@ -18,6 +18,7 @@ from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
 import re
 
+
 class ErrorHandler(object):
   """
     Generic ErrorHandler for cherrypy projects
@@ -97,10 +98,10 @@ class ErrorHandler(object):
     Log.getLogger(__name__).critical('Default error: '
                                         + traceback.format_exc())
     cherrypy.response.body = ErrorHandler.show(title='500',
-                                               error='2^255*8-2^1024<br/>'
-                                               + 'FORMULA TOO COMPLEX',
-                                               text=stringHelper.plaintext2html(
-                                                        traceback.format_exc()))
+                                              error='2^255*8-2^1024<br/>'
+                                              + 'FORMULA TOO COMPLEX',
+                                              text=stringHelper.plaintext2html(
+                                                      traceback.format_exc()))
 
   @staticmethod
   def error_page_400(status, message, traceback, version):
@@ -120,8 +121,8 @@ class ErrorHandler(object):
     """
     # Unauthorized
     Log.getLogger(__name__).error(message)
-    return ErrorHandler.show(title='401', error=message + '<br/>?SYNTAX ERROR.' +
-                             '<br/><br/>', text=stringHelper.plaintext2html(
+    return ErrorHandler.show(title='401', error=message + '<br/>?SYNTAX ERROR.'
+                             + '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
 
   @staticmethod
@@ -157,5 +158,5 @@ class ErrorHandler(object):
     # Internal Error
     Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='500', error=message + '<br/>FORMULA TOO '
-                             + 'COMPLEX<br/>', text=stringHelper.plaintext2html(
-                                                                    traceback))
+                            + 'COMPLEX<br/>', text=stringHelper.plaintext2html(
+                                                                   traceback))

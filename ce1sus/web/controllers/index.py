@@ -15,12 +15,13 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.helpers.protection import Protector
-from ce1sus.brokers.permissionbroker import UserBroker
 import datetime
 from ce1sus.web.helpers.protection import require
 from dagr.db.broker import NothingFoundException, BrokerException
 from dagr.helpers.ldaphandling import LDAPHandler
 from dagr.db.session import SessionManager
+from ce1sus.brokers.permission.userbroker import UserBroker
+
 
 class IndexController(Ce1susBaseController):
   """index controller handling all actions in the index section"""
@@ -56,8 +57,8 @@ class IndexController(Ce1susBaseController):
   def doLogin(self, username=None, password=None):
     """
     Login of the page. This function checks if the credentials are valid and
-    if so sets a session for the user. Also redirects the user to the index page
-    of the internal site.
+    if so sets a session for the user. Also redirects the user to the index
+    page of the internal site.
 
     :param username: the username
     :type username: String
@@ -67,9 +68,6 @@ class IndexController(Ce1susBaseController):
     """
     if username is None or password is None:
       raise HTTPRedirect('/index')
-
-
-
 
     errorMsg = self.checkCredentials(username, password)
     if errorMsg:
@@ -93,9 +91,6 @@ class IndexController(Ce1susBaseController):
 
     :returns: Boolean
     """
-
-
-
     # Verifies credentials for username and password.
     # Returns None on success or a string describing the error on failure
     # Adapt to your needs

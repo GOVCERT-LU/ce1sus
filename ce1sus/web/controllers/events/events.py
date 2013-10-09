@@ -15,9 +15,11 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from datetime import datetime
-from ce1sus.brokers.eventbroker import EventBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.web.helpers.protection import require, requireReferer
+
+
 class EventsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
@@ -80,7 +82,8 @@ class EventsController(Ce1susBaseController):
     # get only the last 200 events to keep the page small
     user = self.getUser()
     lists = self.eventBroker.getAllForUser(user, 200, 0)
-    paginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
+    paginatorOptions = PaginatorOptions('/events/recent',
+                                        'eventsTabTabContent')
     paginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',

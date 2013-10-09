@@ -22,15 +22,18 @@ from dagr.db.recepie.satool import SATool, SAEnginePlugin
 
 BASE = declarative_base()
 
+
 class SessionManagerException(Exception):
   """sessionClazz Manager Exception"""
   def __init__(self, message):
     Exception.__init__(self, message)
 
+
 class BrokerInstantiationException(Exception):
   """Broker Instantiation Exception"""
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 # pylint: disable=R0903
 class SessionObject(object):
@@ -45,6 +48,7 @@ class SessionObject(object):
     returns the session object
     """
     return cherrypy.request.db
+
 
 class SessionManager:
   """
@@ -75,7 +79,7 @@ class SessionManager:
       # check if socket available
       if not SessionManager.isServiceExisting(hostname, port):
         raise SessionManagerException('Service on "{hostname}:{port}"' +
-                                      ' not available'.format(hostname=hostname,
+                                    ' not available'.format(hostname=hostname,
                                                                port=port))
       connetionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
         prot=protocol,
@@ -85,7 +89,8 @@ class SessionManager:
         db=self.__config.get('db'),
         port=port
       )
-      SAEnginePlugin(cherrypy.engine, connetionString, False, debug).subscribe()
+      SAEnginePlugin(cherrypy.engine, connetionString,
+                     False, debug).subscribe()
     # session setup
     self.saTool = SATool()
     cherrypy.tools.db = self.saTool

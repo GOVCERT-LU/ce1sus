@@ -14,13 +14,17 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                  ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require, requireReferer
 from dagr.db.broker import ValidationException, \
 BrokerException
 import dagr.helpers.string as string
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.objectbroker import ObjectBroker
+
 
 class ObjectsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -72,15 +76,14 @@ class ObjectsController(Ce1susBaseController):
     paginatorOptions.addOption('DIALOG',
                                'REMOVE',
                                ('/events/event/attribute/modifyAttribute?'
-                                + 'action=remove&eventID={0}&objectID'
-                                + '=%(objectID)s&attributeID=').format(eventID),
+                              + 'action=remove&eventID={0}&objectID'
+                              + '=%(objectID)s&attributeID=').format(eventID),
                                refresh=True)
     # will be associated in the view!!! only to keep it simple!
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     # fill dictionary of attribute definitions but only the needed ones
-
 
     try:
       if len(event.objects) > 0:
@@ -92,15 +95,12 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException:
       cbAttributeDefintiionsDict = dict()
 
-
-
     return template.render(eventID=eventID,
-                           objectList=event.objects,
-                           cbObjDefinitions=self.def_objectBroker.getCBValues(),
-                          cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
-                           paginator=paginator,
-                           objectID=objectID)
-
+                        objectList=event.objects,
+                        cbObjDefinitions=self.def_objectBroker.getCBValues(),
+                        cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
+                        paginator=paginator,
+                        objectID=objectID)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -122,6 +122,7 @@ class ObjectsController(Ce1susBaseController):
                            eventID=eventID,
                            object=None,
                            errorMsg=None)
+
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def addChildObject(self, eventID, objectID):
@@ -152,7 +153,8 @@ class ObjectsController(Ce1susBaseController):
 
     :param identifier: The identifier of the event
     :type identifier: Integer
-    :param definition: The identifier of the definition associated to the object
+    :param definition: The identifier of the definition associated to the
+                       object
     :type definition: Integer
 
     :returns: generated HTML
@@ -195,7 +197,8 @@ class ObjectsController(Ce1susBaseController):
 
     :param identifier: The identifier of the event
     :type identifier: Integer
-    :param definition: The identifier of the definition associated to the object
+    :param definition: The identifier of the definition associated to the
+                       object
     :type definition: Integer
 
     :returns: generated HTML
@@ -230,8 +233,6 @@ class ObjectsController(Ce1susBaseController):
       self.getLogger().critical(e)
       return 'An unexpected error occured: {0}'.format(e)
 
-
-
   @cherrypy.expose
   @require(requireReferer(('/internal')))
   def removeObject(self, eventID=None, objectID=None):
@@ -259,7 +260,8 @@ class ObjectsController(Ce1susBaseController):
 
     :param identifier: The identifier of the event
     :type identifier: Integer
-    :param definition: The identifier of the definition associated to the object
+    :param definition: The identifier of the definition associated to the
+                       object
     :type definition: Integer
 
     :returns: generated HTML

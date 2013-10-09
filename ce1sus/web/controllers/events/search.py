@@ -15,10 +15,12 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.brokers.valuebroker import ValueBroker
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.definitionbroker import AttributeDefinition, \
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                            AttributeDefinition, \
                                             AttributeDefinitionBroker
 from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
+
 
 # pylint:disable=R0903
 class ResultItem(object):
@@ -34,6 +36,7 @@ class ResultItem(object):
     self.attribute = attribute
     self.value = value
 
+
 class SearchController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
@@ -43,6 +46,7 @@ class SearchController(Ce1susBaseController):
     self.attributeDefinition = AttributeDefinition()
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker)
+
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def index(self):
@@ -77,7 +81,6 @@ class SearchController(Ce1susBaseController):
       module = import_module('.valuebroker', 'ce1sus.brokers')
       clazz = getattr(module, className)
 
-
       foundValues = self.valueBroker.lookforValue(clazz, needle)
       # prepare displayItems
 
@@ -89,7 +92,6 @@ class SearchController(Ce1susBaseController):
                          value.attribute, value)
         result.append(obj)
 
-
     # Prepare paginator
     labels = [{'event.identifier':'Event #'},
               {'event.title':'Event Name'},
@@ -97,7 +99,8 @@ class SearchController(Ce1susBaseController):
               {'attrDef.name':'Attribute name'},
               {'value.value':'Attribute value'},
               {'event.created':'CreatedOn'}]
-    paginatorOptions = PaginatorOptions('/events/recent', 'eventsTabTabContent')
+    paginatorOptions = PaginatorOptions('/events/recent',
+                                        'eventsTabTabContent')
     paginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',

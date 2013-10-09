@@ -13,26 +13,29 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-from ce1sus.brokers.eventbroker import Attribute
+from ce1sus.brokers.event.attributebroker import Attribute
 from datetime import datetime
 from os.path import isfile, basename, getsize, exists
 import dagr.helpers.hash as hasher
 from urllib import pathname2url
 from mimetypes import MimeTypes
 from ce1sus.web.helpers.handlers.base import HandlerException
-from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                              AttributeDefinitionBroker
 from dagr.web.helpers.config import WebConfig
 from shutil import move
 from os import makedirs
 from dagr.web.helpers.pagination import Link
-from ce1sus.brokers.eventbroker import EventBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
+
 
 class FileNotFoundException(HandlerException):
   """File not found Exception"""
   def __init__(self, message):
     HandlerException.__init__(self, message)
+
 
 class UnMaliciousFileHandler(GenericHandler):
   """Handler for handling files"""
@@ -190,6 +193,7 @@ class UnMaliciousFileHandler(GenericHandler):
     else:
       return '(Not Accessible)'
 
+
 class MaliciousFileHandler(UnMaliciousFileHandler):
 
   def populateAttributes(self, params, obj, definition, user):
@@ -254,4 +258,3 @@ class MaliciousFileHandler(UnMaliciousFileHandler):
       return attributes
     else:
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
-

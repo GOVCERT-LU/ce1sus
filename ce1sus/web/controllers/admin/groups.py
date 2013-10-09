@@ -13,12 +13,14 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
+from ce1sus.brokers.permission.userbroker import UserBroker
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+
 
 class GroupController(Ce1susBaseController):
   """Controller handling all the requests for groups"""
@@ -100,7 +102,8 @@ class GroupController(Ce1susBaseController):
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None, shareTLP=0,
-                  description=None, download=None, action='insert', tlpLvl=None):
+                  description=None, download=None, action='insert',
+                  tlpLvl=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -142,7 +145,6 @@ class GroupController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)
-
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

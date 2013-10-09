@@ -18,6 +18,7 @@ from rtkit.errors import RTResourceError
 from dagr.helpers.classes.ticketsystem import TicketSystemBase, Ticket, \
                                     NoResponseException
 
+
 class RTTickets(TicketSystemBase):
   """Container class for RTTickets"""
   def __init__(self, configFile):
@@ -34,8 +35,8 @@ class RTTickets(TicketSystemBase):
   def getAllTickets(self):
     try:
       query = ("Queue%3D'SOC'%20OR%20Queue%3D'Investigations'%20OR%20Queue%3D'"
-               + "Notifications'%20OR%20Queue%3D'Informations'%20OR%20Queue%3D'"
-               + "Sub-Incidents'")
+              + "Notifications'%20OR%20Queue%3D'Informations'%20OR%20Queue%3D'"
+              + "Sub-Incidents'")
       response = self.__resource.get(path='search/ticket?query=' + query)
       ticketList = list()
       if len(response.parsed) > 0:
@@ -65,11 +66,13 @@ class RTTickets(TicketSystemBase):
         ticket.title = unicode(rsp_dict['Subject'], 'utf-8', errors='replace')
         ticket.queue = unicode(rsp_dict['Queue'], 'utf-8', errors='replace')
         ticket.owner = unicode(rsp_dict['Owner'], 'utf-8', errors='replace')
-        ticket.creator = unicode(rsp_dict['Creator'], 'utf-8', errors='replace')
+        ticket.creator = unicode(rsp_dict['Creator'],
+                                 'utf-8', errors='replace')
         ticket.status = unicode(rsp_dict['Status'], 'utf-8', errors='replace')
         ticket.requestors = unicode(rsp_dict['Requestors'],
                                     'utf-8', errors='replace')
-        ticket.created = unicode(rsp_dict['Created'], 'utf-8', errors='replace')
+        ticket.created = unicode(rsp_dict['Created'],
+                                 'utf-8', errors='replace')
         ticket.lastUpdated = unicode(rsp_dict['LastUpdated'],
                                      'utf-8', errors='replace')
         # froen mech waat daat mecht?
@@ -82,5 +85,3 @@ class RTTickets(TicketSystemBase):
 
   def getBaseTicketUrl(self):
     return self.__rtUrl + '/Ticket/Display.html?id='
-
-

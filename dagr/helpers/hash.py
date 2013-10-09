@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 
 import hashlib
 
+
 def __genericHash(string, hashType, salt=''):
   """
   Returns hashed string
@@ -24,6 +25,7 @@ def __genericHash(string, hashType, salt=''):
   function = getattr(hasher, 'update')
   function(string + salt)
   return hasher.hexdigest()
+
 
 def hashMD5(string, salt=''):
   """
@@ -38,6 +40,7 @@ def hashMD5(string, salt=''):
   """
   return __genericHash(string, 'md5', salt)
 
+
 def hashSHA1(string, salt=''):
   """
   Returns an SHA1 Hash string
@@ -50,6 +53,7 @@ def hashSHA1(string, salt=''):
   :returns: String
   """
   return __genericHash(string, 'sha1', salt)
+
 
 def hashSHA256(string, salt=''):
   """
@@ -64,6 +68,7 @@ def hashSHA256(string, salt=''):
   """
   return __genericHash(string, 'sha256', salt)
 
+
 def hashSHA384(string, salt=''):
   """
   Returns an SHA384 Hash string
@@ -77,6 +82,7 @@ def hashSHA384(string, salt=''):
   """
   return __genericHash(string, 'sha384', salt)
 
+
 def hashSHA512(string, salt=''):
   """
   Returns an SHA512 Hash string
@@ -89,6 +95,7 @@ def hashSHA512(string, salt=''):
   :returns: String
   """
   return __genericHash(string, 'sha512', salt)
+
 
 def __genericFileHash(fileToHash, hashType, block_size=256 * 128):
   """
@@ -104,6 +111,7 @@ def __genericFileHash(fileToHash, hashType, block_size=256 * 128):
       function(chunk)
   return hasher.hexdigest()
 
+
 def fileHashMD5(fileToHash, block_size=256 * 128):
   """
   Returns an MD5  Hash of a file
@@ -116,6 +124,7 @@ def fileHashMD5(fileToHash, block_size=256 * 128):
   :returns: String
   """
   return __genericFileHash(fileToHash, 'md5', block_size)
+
 
 def fileHashSHA1(fileToHash, block_size=256 * 128):
   """
@@ -130,6 +139,7 @@ def fileHashSHA1(fileToHash, block_size=256 * 128):
   """
   return __genericFileHash(fileToHash, 'sha1', block_size)
 
+
 def fileHashSHA256(fileToHash, block_size=256 * 128):
   """
   Returns an SHA256  Hash of a file
@@ -143,6 +153,7 @@ def fileHashSHA256(fileToHash, block_size=256 * 128):
   """
   return __genericFileHash(fileToHash, 'sha256', block_size)
 
+
 def fileHashSHA384(fileToHash, block_size=256 * 128):
   """
   Returns an SHA384  Hash of a file
@@ -155,6 +166,7 @@ def fileHashSHA384(fileToHash, block_size=256 * 128):
   :returns: String
   """
   return __genericFileHash(fileToHash, 'sha384', block_size)
+
 
 def fileHashSHA512(fileToHash, block_size=256 * 128):
   """

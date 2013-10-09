@@ -13,27 +13,19 @@ from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
   ObjectDefinitionBroker, ObjectDefinition, AttributeDefinition
 from dagr.helpers.objects import printObject
 
+
 class TestEventBrokers(unittest.TestCase):
-
-
-
 
   def setUp(self):
 
     self.sessionManager = SessionManager('../ce1sus.cfg')
-
     self.timeStamp = datetime.now()
-
-
-
     # CreateNeeded Users and group
     self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
     self.group = Group()
     self.group.identifier = 1
     self.group.name = 'TestGroup'
     self.group.shareTLP = 0
-
-
     self.userBroker = self.sessionManager.brokerFactory(UserBroker)
     self.user = User()
     self.user.identifier = 1
@@ -43,12 +35,6 @@ class TestEventBrokers(unittest.TestCase):
     self.user.privileged = 0
     self.timeStamp = datetime.now()
     self.user.last_login = self.timeStamp
-
-
-
-
-
-
     self.eventbroker = self.sessionManager.brokerFactory(EventBroker)
     self.event = Event()
     # self.event.creator = self.user
@@ -76,16 +62,11 @@ class TestEventBrokers(unittest.TestCase):
     self.defattribute.name = 'name'
     self.defattribute.regex = 'tege'
     self.defattribute.classIndex = 1
-
-
-
     self.attributeBroker = self.sessionManager.brokerFactory(AttributeBroker)
-
     self.objectBroker = self.sessionManager.brokerFactory(ObjectBroker)
     self.obj = Object()
     self.obj.identifier = 1
     self.obj.tlp_level = 1
-
     self.attribute = Attribute()
     self.attribute.identifier = 1
     self.attribute.value = 'Test'
@@ -103,8 +84,6 @@ class TestEventBrokers(unittest.TestCase):
     self.user.addGroup(group)
     self.userBroker.insert(self.user)
 
-
-
   def test_Z_lastOnce(self):
     # remove created user & group
     self.userBroker.removeByID(self.user.identifier)
@@ -114,14 +93,11 @@ class TestEventBrokers(unittest.TestCase):
     self.defObjectBroker.insert(self.defObj)
     self.defAttributeBroker.insert(self.defattribute)
 
-
-
   def test_C_InsertEvent(self):
     user = self.userBroker.getByID(self.user.identifier)
     self.event.creator_id = user.identifier
     self.creator = user
     self.event.creator = user
-
 
     self.eventbroker.insert(self.event)
 
@@ -142,26 +118,14 @@ class TestEventBrokers(unittest.TestCase):
     self.attribute.object = self.obj
     self.attribute.object_id = self.obj
     self.attribute.value = 'Text'
-
     self.attributeBroker.insert(self.attribute)
-
-
-
-
     self.event.addObject(self.obj)
-
     self.eventbroker.insert(self.event)
 
   def test_G_getID(self):
-
     event = self.eventbroker.getByID(self.event.identifier)
-
     printObject(event)
-
-
-
     # assert helpers.compareObjects(event, self.event)
-
 
   def test_H_updateEvent(self):
     event = self.eventbroker.getByID(self.event.identifier)

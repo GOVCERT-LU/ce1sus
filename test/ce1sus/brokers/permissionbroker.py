@@ -10,6 +10,7 @@ from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
 from dagr.helpers.objects import compareObjects
 from datetime import datetime
 
+
 class TestPermissionBrokers(unittest.TestCase):
 
   # The following test have to be ordered
@@ -23,8 +24,6 @@ class TestPermissionBrokers(unittest.TestCase):
     self.group.identifier = 1
     self.group.name = 'TestGroup'
     self.group.shareTLP = 0
-
-
     self.userBroker = self.sessionManager.brokerFactory(UserBroker)
     self.user = User()
     self.user.identifier = 1
@@ -38,12 +37,10 @@ class TestPermissionBrokers(unittest.TestCase):
   def tearDown(self):
     pass
 
-
   def test_A_Insert(self):
 
     self.groupbroker.insert(self.group)
     assert True
-
 
   def test_B_GetGroupByID(self):
       group = self.groupbroker.getByID(self.group.identifier)
@@ -69,16 +66,12 @@ class TestPermissionBrokers(unittest.TestCase):
     self.userBroker.insert(self.user)
     assert True
 
-
 # Test if the user is setup correctly if found
   def test_D_GetUserByID(self):
 
     user = self.userBroker.getByID(self.user.identifier)
     assert True
-
-
     assert compareObjects(user, self.user)
-
 
   def test_E_DeleteUser(self):
 
@@ -91,13 +84,9 @@ class TestPermissionBrokers(unittest.TestCase):
       else:
         assert False
 
-
-
   def test_F_DeleteGroup(self):
     # self.groupbroker.removeByID(self.group.identifier)
     pass
-
-
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

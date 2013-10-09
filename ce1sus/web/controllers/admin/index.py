@@ -15,6 +15,7 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 
+
 class AdminController(Ce1susBaseController):
   """admim controller handling all actions in the admin section"""
 

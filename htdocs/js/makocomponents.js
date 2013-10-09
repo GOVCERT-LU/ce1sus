@@ -56,7 +56,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     			resultText= responseText;
     		} else {
 	    		resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-	    		resultText += '<h4 class="alert-heading">An expected Error occurred!</h4><p>'
+	    		resultText += '<h4 class="alert-heading">An unexpected Error occurred!</h4><p>'
 	    		resultText += responseText;
 	    		resultText += '</p></div>';
     		} 

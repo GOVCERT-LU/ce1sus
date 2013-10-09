@@ -16,6 +16,7 @@ from dagr.helpers.config import Configuration
 from dagr.helpers.string import isNotNull
 from logging.handlers import RotatingFileHandler
 
+
 class Log(object):
   """Log class"""
   instance = None

@@ -11,15 +11,16 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+
 class Type(object):
   """Static class defining the types of an object"""
-  __tableDefinitions = {0 : 'Virus',
-                   1 : 'Trojan',
-                   2 : 'Expoit',
-                   3 : 'Dropper',
-                   4 : 'KeyLogger',
-                   5 : 'BackDoor',
-                   6 : 'Worm'}
+  __tableDefinitions = {0: 'Virus',
+                   1: 'Trojan',
+                   2: 'Expoit',
+                   3: 'Dropper',
+                   4: 'KeyLogger',
+                   5: 'BackDoor',
+                   6: 'Worm'}
 
   @staticmethod
   def getDefinitions():
@@ -61,12 +62,13 @@ class Type(object):
       raise Exception('Invalid input "{0}"'.format(identifier))
     return Type.__tableDefinitions[identifier]
 
+
 class Status(object):
   """Static class defining the status of an event"""
-  __tableDefinitions = {0 : 'Confirmed',
-                     1 : 'Draft',
-                     2 : 'Deleted',
-                     3 : 'Expired'}
+  __tableDefinitions = {0: 'Confirmed',
+                     1: 'Draft',
+                     2: 'Deleted',
+                     3: 'Expired'}
 
   @staticmethod
   def getDefinitions():
@@ -108,12 +110,13 @@ class Status(object):
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
 
+
 class Analysis(object):
   """Static class defining the status the analysis of an event"""
-  __tableDefinitions = {0 : 'None',
-                     1 : 'Opened',
-                     2 : 'Stalled',
-                     3 : 'Completed'}
+  __tableDefinitions = {0: 'None',
+                     1: 'Opened',
+                     2: 'Stalled',
+                     3: 'Completed'}
 
   @staticmethod
   def getDefinitions():
@@ -155,12 +158,13 @@ class Analysis(object):
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
 
+
 class Risk(object):
   """Static class defining the risk of an event"""
-  __tableDefinitions = {0 : 'None',
-                     1 : 'Low',
-                     2 : 'Medium',
-                     3 : 'High'}
+  __tableDefinitions = {0: 'None',
+                     1: 'Low',
+                     2: 'Medium',
+                     3: 'High'}
 
   @staticmethod
   def getDefinitions():
@@ -202,16 +206,17 @@ class Risk(object):
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
 
+
 class TLPLevel(object):
   """Static class defining the TLP levels of an event"""
-  __tlp_levels = {0 : 'Red',
-                1 : 'Amber',
-                2 : 'Green',
-                3 : 'White'}
-  __tlp_colors = {0 : '#FF0000',
-                1 : '#FFBF00',
-                2 : '#66B032',
-                3 : '#FFFFFF'}
+  __tlp_levels = {0: 'Red',
+                1: 'Amber',
+                2: 'Green',
+                3: 'White'}
+  __tlp_colors = {0: '#FF0000',
+                1: '#FFBF00',
+                2: '#66B032',
+                3: '#FFFFFF'}
 
   def __init__(self, identifier):
     self.identifier = identifier

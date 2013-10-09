@@ -11,14 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.debug import Log
 import dagr.helpers.string as string
+
 
 class ConversionException(Exception):
   """Configuration Exception"""
 
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class ValueConverter(object):
   """Converter for single values"""
@@ -38,7 +39,6 @@ class ValueConverter(object):
       return unicode(value, 'utf-8', errors='replace')
     except ValueError as e:
       raise ConversionException(e)
-
 
   @staticmethod
   def setInteger(value):
@@ -76,7 +76,6 @@ class ValueConverter(object):
       return string.stringToDateTime(value)
     except ValueError as e:
       raise ConversionException(e)
-
 
 
 class ObjectConverter(object):
@@ -129,6 +128,3 @@ class ObjectConverter(object):
     :type value: DateTime string (at least should be)
     """
     setattr(instance, attribtue, ValueConverter.setDate(value))
-
-
-

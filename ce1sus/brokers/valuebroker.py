@@ -19,7 +19,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from sqlalchemy.types import DateTime
-from dagr.helpers.validator import ObjectValidator
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 from importlib import import_module
 
 
@@ -48,6 +48,7 @@ class StringValue(BASE):
                                          withSpaces=True,
                                          withSymbols=True)
 
+
 # pylint: disable=R0903
 class DateValue(BASE):
   """This is a container class for the DATEVALES table."""
@@ -68,6 +69,7 @@ class DateValue(BASE):
     :returns: Boolean
     """
     return ObjectValidator.validateAlNum(self, 'value')
+
 
 # pylint: disable=R0903
 class TextValue(BASE):
@@ -95,6 +97,7 @@ class TextValue(BASE):
                                          withSpaces=True,
                                          withSymbols=True)
 
+
 # pylint: disable=R0903
 class NumberValue(BASE):
   """This is a container class for the NUMBERVALUES table."""
@@ -116,10 +119,10 @@ class NumberValue(BASE):
     return ObjectValidator.validateDigits(self, 'value')
 
 
-
 class ValueBroker(BrokerBase):
   """
-  This broker is used internally to serparate the values to their corresponding tables
+  This broker is used internally to serparate the values to their
+  corresponding tables
 
   Note: Only used by the AttributeBroker
   """
@@ -210,7 +213,7 @@ class ValueBroker(BrokerBase):
                                   attribute.identifier, self.getBrokerClass()))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
-          'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
+        'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
            self.getBrokerClass()))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
@@ -266,7 +269,7 @@ class ValueBroker(BrokerBase):
 
     try:
       self.session.query(self.getBrokerClass()).filter(
-                      self.getBrokerClass().attribute_id == attribute.identifier
+                    self.getBrokerClass().attribute_id == attribute.identifier
                       ).delete(synchronize_session='fetch')
       self.doCommit(commit)
     except sqlalchemy.exc.OperationalError as e:
@@ -298,4 +301,3 @@ class ValueBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-

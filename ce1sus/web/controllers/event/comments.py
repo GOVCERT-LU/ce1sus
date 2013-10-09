@@ -14,9 +14,11 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, requireReferer
-from ce1sus.brokers.eventbroker import EventBroker, CommentBroker
 from dagr.db.broker import NothingFoundException, ValidationException, \
 BrokerException
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.commentbroker import CommentBroker
+
 
 class CommentsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""

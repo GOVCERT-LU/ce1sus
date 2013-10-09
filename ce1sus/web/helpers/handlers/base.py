@@ -18,12 +18,14 @@ from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
 from importlib import import_module
 
+
 class HandlerException(Exception):
   """
   Exception base for handler exceptions
   """
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class HandlerBase(object):
   """
@@ -93,6 +95,7 @@ class HandlerBase(object):
                             + 'defined for {0} with parameter {1}').format(
                                                     self.__class__.__name__,
                                                     value))
+
   @abstractmethod
   def getAttributesNameList(self):
     """
@@ -100,7 +103,6 @@ class HandlerBase(object):
     """
     return HandlerException('{0}.getAttributesNameList is not defined'.format(
                                                     self.__class__.__name__))
-
 
   def getTemplate(self, name):
     """Returns the template

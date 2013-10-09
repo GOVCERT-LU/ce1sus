@@ -9,6 +9,7 @@ from dagr.helpers.debug import Log
 from dagr.helpers.config import ConfigFileNotFoundException, \
 ConfigParsingException
 
+
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903
 class TestLog(unittest.TestCase):
 
@@ -29,7 +30,6 @@ class TestLog(unittest.TestCase):
     if not os.path.exists(basedir):
       os.remove(name)
 
-
   def testSetup(self):
 
     # load without config
@@ -48,7 +48,6 @@ class TestLog(unittest.TestCase):
     finally:
       self.removeFile(name)
       self.removeFile('logger.txt')
-
 
     # load with no file config
     name = 'test2.cfg'
@@ -79,4 +78,3 @@ class TestLog(unittest.TestCase):
       assert True
     finally:
       self.removeFile(name)
-

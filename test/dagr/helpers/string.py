@@ -7,6 +7,7 @@ import unittest
 import dagr.helpers.string as string
 from datetime import datetime
 
+
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903, W0702, W0703
 class TestString(unittest.TestCase):
 
@@ -20,7 +21,6 @@ class TestString(unittest.TestCase):
       assert(True)
     except:
       assert(False)
-
 
   def testDateToStirngFail(self):
     try:

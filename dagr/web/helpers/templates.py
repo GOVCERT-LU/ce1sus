@@ -15,9 +15,11 @@ from dagr.helpers.config import Configuration
 from tempfile import gettempdir
 from mako.lookup import TemplateLookup
 
+
 class MakoHandler(object):
   """Helper class for MAKO templates"""
   instance = None
+
   def __init__(self, configFile):
 
     config = Configuration(configFile, 'Mako')
@@ -31,7 +33,6 @@ class MakoHandler(object):
                               output_encoding=outputEncoding,
                               encoding_errors='replace')
     MakoHandler.instance = self
-
 
   def getTemplate(self, templatename):
     """

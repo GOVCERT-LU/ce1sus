@@ -16,6 +16,7 @@ class TestObj(object):
     self.str = 'None'
     self.date = datetime.now()
 
+
 class TestConverter(unittest.TestCase):
 
   def testConversions(self):

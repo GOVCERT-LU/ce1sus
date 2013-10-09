@@ -11,6 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+
 class Link(object):
   """
   Container class for links
@@ -28,6 +29,7 @@ class Link(object):
     """
     return '{0}{1}'.format(self.urlBase, self.identifier)
 
+
 class PaginatorOptions(object):
   """
   Option class for the paginator
@@ -35,16 +37,16 @@ class PaginatorOptions(object):
   # MODE = Enum(MODAL=0, LINK=1, DIALOG=2, CONTENT=3, NEWTAB=4,TAB=5)
   # OPTION = Enum(VIEW=0, EDIT=1, REMOVE=2)
 
-  ICON_MAPPER = {'VIEW':'glyphicon glyphicon-eye-open',
-                 'EDIT':'glyphicon glyphicon-edit',
-                 'REMOVE':'glyphicon glyphicon-remove'}
+  ICON_MAPPER = {'VIEW': 'glyphicon glyphicon-eye-open',
+                 'EDIT': 'glyphicon glyphicon-edit',
+                 'REMOVE': 'glyphicon glyphicon-remove'}
 
-  TITLE_MAPPER = {'VIEW':'View',
-                  'EDIT':'Edit',
-                  'REMOVE':'Remove'}
-  MSG_MAPPER = {'VIEW':'',
-                'EDIT':'',
-                'REMOVE':'Are you sure you want to delete?'}
+  TITLE_MAPPER = {'VIEW': 'View',
+                  'EDIT': 'Edit',
+                  'REMOVE': 'Remove'}
+  MSG_MAPPER = {'VIEW': '',
+                'EDIT': '',
+                'REMOVE': 'Are you sure you want to delete?'}
 
   class Option(object):
     """
@@ -69,6 +71,7 @@ class PaginatorOptions(object):
       self.tabid = tabid
       self.modalTitle = modalTitle
       self.postUrl = postUrl
+
     @property
     def icon(self):
       """
@@ -162,7 +165,6 @@ class PaginatorOptions(object):
     return len(self.options) > 0
 
 
-
 class Paginator(object):
   """Definition class for the pagintor on the HTML page"""
 
@@ -175,4 +177,3 @@ class Paginator(object):
     self.list = items
     self.options = paginatorOptions
     self.itemsPerPage = itemsPerPage
-

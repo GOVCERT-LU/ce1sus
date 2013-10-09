@@ -56,12 +56,12 @@ class Queue(RTEntity):
     def __str__(self):
         return '{s.id}: {s.name}'.format(s=self)
 
-    def search_tickets(self, query="", active=True, order='id', ):
-        final_query = "Queue = '%s'" % (self.name, )
+    def search_tickets(self, query="", active=True, order='id',):
+        final_query = "Queue = '%s'" % (self.name,)
         if query:
-            final_query = "%s and %s" % (final_query, query, )
+            final_query = "%s and %s" % (final_query, query,)
         if active:
-            final_query = "%s and (Status = 'new' or Status = 'open' or Status = 'stalled')" % (final_query, )
+            final_query = "%s and (Status = 'new' or Status = 'open' or Status = 'stalled')" % (final_query,)
         return self.tracker.search_tickets(query=final_query, order=order)
 
     @staticmethod

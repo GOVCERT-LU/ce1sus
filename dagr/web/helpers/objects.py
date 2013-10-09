@@ -7,10 +7,10 @@ Created Aug, 2013
 """
 import copy
 
+
 # pylint: disable=W0613
 def copyObject(context, obj):
   """
   returns a copy of the obj
   """
   return copy.deepcopy(obj)
-

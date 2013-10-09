@@ -16,6 +16,7 @@ from dagr.helpers.debug import Log
 import ldap
 import types
 
+
 # pylint:disable=R0903
 class LDAPUser(object):
   """LDAP user container class"""
@@ -25,30 +26,36 @@ class LDAPUser(object):
     self.password = 'EXTERNALAUTH'
     self.displayName = None
 
+
 class LDAPException(Exception):
   """LDAP Error"""
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class NothingFoundException(LDAPException):
   """Invalid Error"""
   def __init__(self, message):
     LDAPException.__init__(self, message)
 
+
 class InvalidCredentialsException(LDAPException):
   """Invalid Error"""
   def __init__(self, message):
     LDAPException.__init__(self, message)
+
 
 class ServerErrorException(LDAPException):
   """Server Error"""
   def __init__(self, message):
     LDAPException.__init__(self, message)
 
+
 class NotInitializedException(LDAPException):
   """Server Error"""
   def __init__(self, message):
     LDAPException.__init__(self, message)
+
 
 class LDAPHandler(object):
   "LDAP Handler"
@@ -106,7 +113,8 @@ class LDAPHandler(object):
           self.__connection.simple_bind_s(self.__getUserDN(uid), password)
       except ldap.INVALID_CREDENTIALS:
         Log.getLogger(self.__class__.__name__
-                        ).info('Username or password is invalid for {0}'.format(
+                        ).info(
+                              'Username or password is invalid for {0}'.format(
                                                                           uid))
         raise InvalidCredentialsException('Username or password is invalid.')
     except ldap.LDAPError as e:
@@ -249,4 +257,3 @@ class LDAPHandler(object):
       raise NotInitializedException('LDAPHandler has not been initialized')
     else:
       return LDAPHandler.instance
-

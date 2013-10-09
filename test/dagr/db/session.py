@@ -5,8 +5,8 @@ Created on Jul 5, 2013
 '''
 import unittest
 from dagr.db.session import SessionManager
-from ce1sus.brokers.permissionbroker import GroupBroker
-from dagr.helpers.config import ConfigException
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+
 
 # pylint:disable=R0904, C0111, R0201, W0612, W0613
 class TestSession(unittest.TestCase):

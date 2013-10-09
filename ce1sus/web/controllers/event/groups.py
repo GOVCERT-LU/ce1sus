@@ -13,10 +13,11 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.brokers.eventbroker import EventBroker
 from ce1sus.web.helpers.protection import require, requireReferer
 import types
 from dagr.db.broker import BrokerException
+from ce1sus.brokers.event.eventbroker import EventBroker
+
 
 class GroupsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -37,7 +38,8 @@ class GroupsController(Ce1susBaseController):
     self.checkIfViewable(event.groups,
                          self.getUser().identifier == event.creator.identifier,
                            event.tlp)
-    remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier, False)
+    remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier,
+                                                        False)
     return template.render(eventID=event.identifier,
                            remainingGroups=remainingGroups,
                            eventGroups=event.groups)
@@ -53,8 +55,8 @@ class GroupsController(Ce1susBaseController):
     :type eventID: Integer
     :param operation: the operation used in the context (either add or remove)
     :type operation: String
-    :param remainingGroups: The identifiers of the groups which the event is not
-                            attributed to
+    :param remainingGroups: The identifiers of the groups which the event is
+                            not attributed to
     :type remainingGroups: Integer array
     :param eventGroups: The identifiers of the groups which the event is
                        attributed to

@@ -5,22 +5,19 @@ Created on Jul 4, 2013
 '''
 import unittest
 from dagr.db.session import SessionManager
-from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, ObjectDefinitionBroker, AttributeDefinition, ObjectDefinition
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                  AttributeDefinitionBroker
+
 import dagr.helpers.objects as helpers
+
 
 class TestDefinitionBrokers(unittest.TestCase):
 
   # The following test have to be ordered
-
-
-
   def setUp(self):
 
     self.sessionManager = SessionManager('../ce1sus.cfg')
     self.attributebroker = self.sessionManager.brokerFactory(AttributeDefinitionBroker)
-
-
-
     self.attribute = AttributeDefinition()
     self.attribute.description = 'Description'
     self.attribute.identifier = 1
@@ -35,6 +32,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.object.identifier = 1
     self.object.description = 'A description'
     # self.object.addAttribute(self.attribute)
+
   def tearDown(self):
     pass
 
@@ -72,17 +70,13 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.objectbroker.insert(self.object)
     assert True
 
-
 # Test if the user is setup correctly if found
   def test_D_GetObjectByID(self):
 
     obj = self.objectbroker.getByID(self.object.identifier)
     assert True
 
-
     assert helpers.compareObjects(obj, self.object)
-
-
 
   def test_E_DeleteObject(self):
 
@@ -94,7 +88,6 @@ class TestDefinitionBrokers(unittest.TestCase):
         assert True
       else:
         assert False
-
 
   def test_F_DeleteGroup(self):
     self.attributebroker.removeByID(self.attribute.identifier)

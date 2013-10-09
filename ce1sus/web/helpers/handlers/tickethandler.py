@@ -18,6 +18,7 @@ from dagr.web.helpers.config import WebConfig
 from dagr.web.helpers.pagination import Link
 from ce1sus.web.helpers.handlers.base import HandlerException
 
+
 class TicketHandler(GenericHandler):
   """Handler for handling tickets"""
   def __init__(self):
@@ -26,7 +27,7 @@ class TicketHandler(GenericHandler):
 
   def populateAttributes(self, params, obj, definition, user):
     # check if params contains value
-    if params.has_key('value'):
+    if 'value' in params:
       attributes = list()
       attribute = GenericHandler.populateAttributes(self,
                                                     params,
@@ -36,7 +37,7 @@ class TicketHandler(GenericHandler):
       attributes.append(attribute)
       return attributes
     else:
-      if params.has_key('tickets'):
+      if 'tickets' in params:
         tickets = params.get('tickets')
         attributes = list()
         if isinstance(tickets, types.StringTypes):
@@ -62,15 +63,16 @@ class TicketHandler(GenericHandler):
 
     # check if params contains tickets
 
-
   def render(self, enabled, eventID, user, attribute=None):
-    template = self.getTemplate('/events/event/attributes/handlers/ticket.html')
+    template = self.getTemplate('/events/event/attributes/handlers/ticket.html'
+                                )
     string = template.render(attribute=attribute, enabled=enabled)
     return string
 
   def convertToAttributeValue(self, value):
     link = Link(self.url, value.value)
     return link
+
 
 class CVEHandler(GenericHandler):
   """Handler for handling cves"""

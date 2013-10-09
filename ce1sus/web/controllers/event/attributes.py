@@ -14,9 +14,8 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, Attribute
-from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                  AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import requireReferer
 from dagr.db.broker import ValidationException, \
 BrokerException
@@ -27,6 +26,10 @@ from dagr.helpers.classes.ticketsystem import TicketSystemBase
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from cherrypy.lib.static import serve_file
 from ce1sus.brokers.valuebroker import ValueBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.objectbroker import ObjectBroker
+from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
+
 
 class AttributesController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -66,7 +69,8 @@ class AttributesController(Ce1susBaseController):
                            event.creator.identifier,
                            event.tlp)
 
-    template = self.getTemplate('/events/event/attributes/attributesModal.html')
+    template = self.getTemplate('/events/event/attributes/attributesModal.html'
+                                )
     obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
@@ -107,7 +111,6 @@ class AttributesController(Ce1susBaseController):
     filepath = '/tmp/' + value.filename
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
-
   # pylint: disable=R0914,R0912
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -126,11 +129,11 @@ class AttributesController(Ce1susBaseController):
       action = kwargs.get('action', None)
       values = kwargs.get('value', None)
       # remove unnecessary elements from the parameters
-      params = { k : v for k, v in kwargs.iteritems() if k not in ['eventID',
+      params = {k: v for k, v in kwargs.iteritems() if k not in ['eventID',
                                                                 'attributeID',
-                                                                   'objectID',
-                                                                   'definition',
-                                                                   'action'] }
+                                                                'objectID',
+                                                                'definition',
+                                                                'action']}
       # right checks
       event = self.eventBroker.getByID(eventID)
       self.checkIfViewable(event.groups,
@@ -178,7 +181,7 @@ class AttributesController(Ce1susBaseController):
       template = self.getTemplate('/events/event/attributes/'
                                     + 'attributesModal.html')
       cbDefinitions = self.def_attributesBroker.getCBValues(
-                                                      obj.definition.identifier)
+                                                    obj.definition.identifier)
       if not (attributes is None):
         if (len(attributes) == 1):
           attribute = attributes[0]
@@ -209,7 +212,8 @@ class AttributesController(Ce1susBaseController):
                            event.creator.identifier,
                            event.tlp)
 
-    template = self.getTemplate('/events/event/attributes/attributesModal.html')
+    template = self.getTemplate('/events/event/attributes/attributesModal.html'
+                                )
     obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)

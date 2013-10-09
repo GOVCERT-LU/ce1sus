@@ -12,8 +12,9 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.protection import Protector
-from ce1sus.brokers.permissionbroker import UserBroker
 from dagr.web.controllers.base import BaseController
+from ce1sus.brokers.permission.userbroker import UserBroker
+
 
 class Ce1susBaseController(BaseController):
 

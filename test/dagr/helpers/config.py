@@ -10,6 +10,7 @@ from dagr.helpers.config import Configuration, ConfigException, \
  ConfigFileNotFoundException, ConfigSectionNotFoundException, \
  ConfigKeyNotFoundException, ConfigParsingException
 
+
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903
 class TestConfiguration(unittest.TestCase):
 
@@ -90,7 +91,6 @@ class TestConfiguration(unittest.TestCase):
     finally:
       self.removeFile(name)
 
-
   def testKeys(self):
     try:
       name = 'test.cfg'
@@ -121,4 +121,3 @@ class TestConfiguration(unittest.TestCase):
       assert False
     finally:
       self.removeFile(name)
-

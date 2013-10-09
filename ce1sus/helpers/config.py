@@ -11,6 +11,7 @@ __license__ = 'GPL v3+'
 
 from dagr.helpers.config import Configuration
 
+
 class WebConfig(object):
   """The WebConfig class"""
 
@@ -30,7 +31,6 @@ class WebConfig(object):
     :returns:
     """
     return self.__config.get(identifier)
-
 
   @classmethod
   def getInstance(cls):

@@ -15,11 +15,13 @@ from ConfigParser import ConfigParser, Error, ParsingError
 from os.path import isfile
 from os import getcwd
 
+
 class ConfigException(Exception):
   """Configuration Exception"""
 
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class ConfigParsingException(ConfigException):
   """ConfigFileNotFoundException Exception"""
@@ -34,17 +36,20 @@ class ConfigFileNotFoundException(ConfigException):
   def __init__(self, message):
     ConfigException.__init__(self, message)
 
+
 class ConfigSectionNotFoundException(ConfigException):
   """ConfigFileNotFoundException Exception"""
 
   def __init__(self, message):
     ConfigException.__init__(self, message)
 
+
 class ConfigKeyNotFoundException(ConfigException):
   """ConfigFileNotFoundException Exception"""
 
   def __init__(self, message):
     ConfigException.__init__(self, message)
+
 
 # pylint: disable=C0111, R0903
 class Configuration(object):

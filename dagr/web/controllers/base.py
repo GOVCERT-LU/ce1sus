@@ -17,6 +17,7 @@ from dagr.db.session import SessionManager
 from dagr.web.helpers.config import WebConfig
 from abc import abstractmethod
 
+
 class BaseControllerException(Exception):
   """
   Base exception for the controller api

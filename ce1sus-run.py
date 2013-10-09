@@ -25,6 +25,7 @@ from ce1sus.web.controllers.events.search import SearchController
 from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
 from ce1sus.sanity import SantityChecker
+from ce1sus.rest.restcontroller import RestController
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -46,7 +47,9 @@ def bootstrap():
     raise ConfigException(e)
 
   sanityChecker = SantityChecker(ce1susConfigFile)
-  sanityChecker.check()
+  sanityChecker.checkDB()
+  sanityChecker.checkApplication()
+  sanityChecker.close()
   sanityChecker = None
 
   # Load 'Modules'
@@ -96,6 +99,9 @@ def bootstrap():
   cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
   Log.getLogger("run").debug("Adding events event comment")
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
+
+  # RESTFoo
+  cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
 if __name__ == '__main__':
 
   bootstrap()

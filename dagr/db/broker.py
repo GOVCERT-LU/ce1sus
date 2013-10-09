@@ -16,15 +16,18 @@ import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from dagr.helpers.debug import Log
 
+
 class BrokerException(Exception):
   """Broker Exception"""
   def __init__(self, message):
     Exception.__init__(self, message)
 
+
 class IntegrityException(BrokerException):
   """Broker Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
+
 
 class InstantiationException(BrokerException):
   """Instantiation Exception"""
@@ -32,25 +35,30 @@ class InstantiationException(BrokerException):
   def __init__(self, message):
     BrokerException.__init__(self, message)
 
+
 class NothingFoundException(BrokerException):
   """NothingFound Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
+
 
 class TooManyResultsFoundException(BrokerException):
   """Too many results found Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
 
+
 class ValidationException(BrokerException):
   """Invalid Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
 
+
 class OperationException(BrokerException):
   """Operation Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
+
 
 class DeletionException(BrokerException):
   """
@@ -60,6 +68,7 @@ class DeletionException(BrokerException):
     BrokerException.__init__(self, message)
 
 # Created on Jul 4, 2013
+
 
 class BrokerBase(object):
   """The base class for brokers providing the general methods"""
@@ -156,7 +165,6 @@ class BrokerBase(object):
 
     self.doCommit(commit)
 
-
   def doCommit(self, commit=True):
     """
     General commit, or rollback in case of an esception
@@ -186,7 +194,6 @@ class BrokerBase(object):
       if commit:
         self.session.remove()
 
-
   def insert(self, instance, commit=True, validate=True):
     """
     Insert a <<getBrokerClass()>>
@@ -208,19 +215,14 @@ class BrokerBase(object):
     except sqlalchemy.exc.IntegrityError as e:
       self.getLogger().critical(e)
       raise IntegrityException(e)
-
-
     except sqlalchemy.exc.DatabaseError as e:
       self.getLogger().error(e)
       self.session.rollback()
       raise BrokerException(e)
-
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-
-
 
   def update(self, instance, commit=True, validate=True):
     """
@@ -260,6 +262,3 @@ class BrokerBase(object):
     :returns: Logger
     """
     return Log.getLogger(self.__class__.__name__)
-
-
-

@@ -12,13 +12,15 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.brokers.permissionbroker import UserBroker, GroupBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.web.helpers.pagination import Paginator
 from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
 from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, DeletionException
 import types as types
+from ce1sus.brokers.permission.userbroker import UserBroker
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+
 
 class UserController(Ce1susBaseController):
   """Controller handling all the requests for users"""
@@ -93,7 +95,6 @@ class UserController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/users/userModal.html')
     return template.render(user=None, errorMsg=None)
-
 
   @require(privileged())
   @cherrypy.expose

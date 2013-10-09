@@ -15,6 +15,7 @@ import cherrypy
 from sqlalchemy.pool import Pool
 from dagr.helpers.debug import Log
 
+
 class SAEnginePlugin(plugins.SimplePlugin):
   """The SAEnglinge
   Original found under
@@ -61,6 +62,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
     """binds the engine"""
     session.configure(bind=self.sa_engine)
 
+
 @event.listens_for(Pool, "checkout")
 def ping_connection(dbapi_connection, connection_record, connection_proxy):
     cursor = dbapi_connection.cursor()
@@ -77,6 +79,8 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
         Log.getLogger('PingConnection').debug('Connection gone stale')
         raise exc.DisconnectionError()
     cursor.close()
+
+
 class ForeignKeysListener(PoolListener):
   """
   Foreign Key listener to set the foreign_keys
@@ -88,6 +92,7 @@ class ForeignKeysListener(PoolListener):
     """
     db_cursor = dbapi_connection.execute('pragma foreign_keys=ON')
     db_cursor.close()
+
 
 class SATool(cherrypy.Tool):
   """The SATool

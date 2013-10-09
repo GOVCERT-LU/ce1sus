@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 import dagr.helpers.string as string
 
+
 class MultipleGenericHandler(GenericHandler):
 
   def __init__(self):
@@ -21,7 +22,7 @@ class MultipleGenericHandler(GenericHandler):
 
   def populateAttributes(self, params, obj, definition, user):
     attributes = list()
-    values = params.get('value').split('\n');
+    values = params.get('value').split('\n')
     for value in values:
       stringValue = value.replace('\r', '')
       if (string.isNotNull(stringValue)):
@@ -39,5 +40,3 @@ class MultipleGenericHandler(GenericHandler):
       template = (self.
             getTemplate('/events/event/attributes/handlers/multGeneric.html'))
       return template.render(attribute=attribute, enabled=enabled)
-
-

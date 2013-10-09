@@ -16,6 +16,7 @@ from test.ce1sus.brokers.definitionbroker import TestDefinitionBrokers
 from test.ce1sus.brokers.permissionbroker import TestPermissionBrokers
 from test.ce1sus.brokers.eventbroker import TestEventBrokers
 
+
 def suite():
   testSuite = unittest.TestSuite()
   testSuite.addTest(TestDefinitionBrokers())
@@ -39,4 +40,4 @@ if __name__ == "__main__":
 
   test_suite = suite()
 
-  runner.run (test_suite)
+  runner.run(test_suite)

@@ -13,12 +13,14 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.brokers.definitionbroker import AttributeDefinitionBroker, \
- AttributeDefinition
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                  AttributeDefinitionBroker, \
+                                                  AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
-  ValidationException, NothingFoundException, DeletionException, OperationException
+  ValidationException, NothingFoundException, DeletionException
 import types as types
+
 
 class AttributeController(Ce1susBaseController):
   """Controller handling all the requests for attributes"""
@@ -88,8 +90,7 @@ class AttributeController(Ce1susBaseController):
     return template.render(attributeDetails=attribute,
                            remainingObjects=remainingObjects,
                            attributeObjects=attributeObjects,
-                           cbHandlerValues=
-                           AttributeDefinition.getHandlerDefinitions(),
+                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions(),
                            cbValues=cbValues)
 
   @require(privileged(), requireReferer(('/internal')))
@@ -160,15 +161,8 @@ class AttributeController(Ce1susBaseController):
     except ValidationException:
       self.getLogger().info('Attribute is invalid')
       return self.returnAjaxPostError() + template.render(attribute=attribute,
-                             cbValues=AttributeDefinition.getTableDefinitions(),
-                             cbHandlerValues=
-                             AttributeDefinition.getHandlerDefinitions())
-    except DeletionException as e:
-      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-      return 'This attribute cannot be deleted or edited.'
-    except OperationException as e:
-      self.getLogger().info('An unexpected error occurred: {0}'.format(e))
-      return 'Cannot delete referenced Attribute.'
+                  cbValues=AttributeDefinition.getTableDefinitions(),
+                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions())
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)
@@ -210,8 +204,8 @@ class AttributeController(Ce1susBaseController):
     :type attributeID: Integer
     :param operation: the operation used in the context (either add or remove)
     :type operation: String
-    :param remainingUsers: The identifiers of the users which the attribute is not
-                            attributed to
+    :param remainingUsers: The identifiers of the users which the attribute is
+                            not attributed to
     :type remainingUsers: Integer array
     :param attributeUsers: The identifiers of the users which the attribute is
                        attributed to

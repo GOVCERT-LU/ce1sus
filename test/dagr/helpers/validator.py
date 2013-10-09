@@ -4,8 +4,10 @@ Created on Aug 7, 2013
 @author: jhemp
 '''
 import unittest
-from dagr.helpers.validator import ValueValidator, ValidationException
+from dagr.helpers.validator.valuevalidator import ValueValidator
+from dagr.helpers.validator.objectvalidator import ValidationException
 from datetime import datetime
+
 
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903, W0702, W0703
 class TestValidator(unittest.TestCase):
@@ -27,8 +29,6 @@ class TestValidator(unittest.TestCase):
       maxLength=0,
       withSpaces=False,
       withNonPrintableCharacters=True)
-
-
       # NotWroking
       assert not ValueValidator.validateAlNum(u'!',
       minLength=0,

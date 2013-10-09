@@ -32,11 +32,11 @@ DATE = [r'^[\d]{4}-[\d]{2}-[\d]{2}$',
 DIGITS = r'^[\d.]+$'
 EMAILADDRESS = r'^.+@.+\..{2,3}$'
 IP = r'^[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}$'
-HASHES = {'MD5':r'^[0-9a-fA-F]{32}$',
-               'SHA1':r'^[0-9a-fA-F]{40}$',
-               'SHA256':r'^[0-9a-fA-F]{64}$',
-               'SHA384':r'^[0-9a-fA-F]{96}$',
-               'SHA512':r'^[0-9a-fA-F]{128}$'}
+HASHES = {'MD5': r'^[0-9a-fA-F]{32}$',
+               'SHA1': r'^[0-9a-fA-F]{40}$',
+               'SHA256': r'^[0-9a-fA-F]{64}$',
+               'SHA384': r'^[0-9a-fA-F]{96}$',
+               'SHA512': r'^[0-9a-fA-F]{128}$'}
 
 
 def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
@@ -73,6 +73,7 @@ class ValidationException(Exception):
   def __init__(self, message):
     Exception.__init__(self, message)
 
+
 # pylint: disable=R0903
 class FailedValidation(object):
   """
@@ -87,226 +88,6 @@ class FailedValidation(object):
   def __str__(self, *args, **kwargs):
     return self.value
 
-# pylint: disable=R0903
-class Container(object):
-  """
-  Container class
-
-  Note:
-    Should only be used by the ValueValidator
-  """
-  def __init__(self, value):
-    self.value = value
-
-class ValueValidator:
-  """
-  Utility Class for validating base types
-  """
-  def __init__(self):
-    pass
-
-  @staticmethod
-  def validateAlNum(string,
-                    minLength=0,
-                    maxLength=0,
-                    withSpaces=False,
-                    withNonPrintableCharacters=False):
-    """
-      Validates if the string is of an alphanumeric kind.
-
-      :param string: The string to be validated
-      :type string: String
-      :param minLength: The minimal length of the string
-      :type minLength: Integer
-      :param maxLength: The maximal length of the string
-      :type maxLength: Integer
-      :param withSpaces: If set the string can contain spaces
-      :type withSpaces: Boolean
-      :param withNonPrintableCharacters: If set the string can contain non
-                                         printable characters as tab newlines etc.
-      :type withNonPrintableCharacters: Boolean
-
-      :return Boolean
-    """
-
-    obj = Container(string)
-    return ObjectValidator.validateAlNum(obj,
-                                    'value',
-                                    minLength,
-                                    maxLength,
-                                    withSpaces,
-                                    withNonPrintableCharacters,
-                                    changeAttribute=False)
-
-  @staticmethod
-  def validateAlpha(string,
-                    minLength=0,
-                    maxLength=0,
-                    withSpaces=False,
-                    withNonPrintableCharacters=False):
-    """
-      Validates if the string is of an alphabetical kind.
-
-      :param string: The string to be validated
-      :type string: String
-      :param minLength: The minimal length of the string
-      :type minLength: Integer
-      :param maxLength: The maximal length of the string
-      :type maxLength: Integer
-      :param withSpaces: If set the string can contain spaces
-      :type withSpaces: Boolean
-      :param withNonPrintableCharacters: If set the string can contain non
-                                         printable characters as tab newlines etc.
-      :type withNonPrintableCharacters: Boolean
-
-      :return Boolean
-    """
-
-    obj = Container(string)
-    return ObjectValidator.validateAlpha(obj,
-                                    'value',
-                                    minLength,
-                                    maxLength,
-                                    withSpaces,
-                                    withNonPrintableCharacters,
-                                    changeAttribute=False)
-
-
-  @staticmethod
-  def validateDigits(string,
-                     minimal=None,
-                     maximal=None):
-    """
-      Validates if the attribute is of an numerical kind.
-
-      Note: The actual object is changed internally
-
-      :param string: The string to be validated
-      :type string: String
-      :param minimal: the minimal value the number
-      :type minimal: Number
-      :param maximal: the maximal value the number
-      :type maximal: Number
-
-      :return Boolean
-    """
-
-    obj = Container(string)
-    return ObjectValidator.validateDigits(obj,
-                                    'value',
-                                    minimal,
-                                    maximal,
-                                    changeAttribute=False)
-
-  @staticmethod
-  def validateEmailAddress(string):
-    """
-      Validates if the attribute is an email.
-
-      Note: The actual object is changed internally
-
-      :param string: Text to be analyzed
-      :type string: String
-      :param changeAttribute: If set the given attribute will be changed to a
-                              type of FailedValidation
-      :type changeAttribute: Boolean
-
-      :return Boolean
-    """
-
-    obj = Container(string)
-    return ObjectValidator.validateEmailAddress(obj,
-                                                  'value',
-                                                  changeAttribute=False)
-
-
-  @staticmethod
-  def validateIP(string):
-    """
-      Validates if the attribute is an IP address.
-
-      Note: The actual object is changed internally
-
-      :param string: Text to be analyzed
-      :type string: String
-
-      :return Boolean
-    """
-    obj = Container(string)
-    return ObjectValidator.validateIP(obj, 'value', changeAttribute=False)
-
-  @staticmethod
-  def validateDateTime(string):
-    """
-      Validates if the attribute is a date or date time under the
-      specified formats address.
-
-      Note: The actual object is changed internally
-
-      :param string: Text to be analyzed
-      :type string: String
-
-
-      :return Boolean
-    """
-    obj = Container(string)
-    return ObjectValidator.validateDateTime(obj, 'value', changeAttribute=False)
-
-  @staticmethod
-  def validateRegex(string, regex, errorMsg):
-    """
-    wrapper for validateRegex
-    """
-    obj = Container(string)
-    return validateRegex(obj, 'value', regex, errorMsg, changeAttribute=False)
-
-  @staticmethod
-  def validateHash(string, hashType):
-    """
-      Validates if the attribute is a valid hash.
-
-      The supported types are: MD5,SHA1,SHA256,SHA386,SHA512
-
-      Note: The actual object is changed internally
-
-      :param string: Text to be analyzed
-      :type string: String
-      :param attributeName: attribute name of the object
-      :type attributeName: String
-      :param hashType: Hash type to be validated i.e 'MD5'
-      :param hashType: String
-
-      :return Boolean
-    """
-
-
-    typeUpper = getattr(hashType, 'upper')()
-
-    # get regex
-    regex = HASHES[typeUpper]
-    obj = Container(string)
-    return validateRegex(obj,
-                  'value',
-                  regex,
-                  'The entered hash is not a valid {0} hash'.format(typeUpper),
-                  changeAttribute=False)
-
-  @staticmethod
-  def validateRegularExpression(regex):
-    """
-      Validates if the attribute is a valid regular expression.
-
-      Note: The actual object is changed internally
-
-      :param regex: regular expression to be validated
-      :type regex: String
-
-      :return Boolean
-    """
-    obj = Container(regex)
-    return ObjectValidator.validateRegularExpression(obj,
-                                                     'value',
-                                                     changeAttribute=False)
 
 class ObjectValidator:
   """
@@ -388,7 +169,8 @@ class ObjectValidator:
       :param withSpaces: If set the attribute can contain spaces
       :type withSpaces: Boolean
       :param withNonPrintableCharacters: If set the attribute can contain non
-                                         printable characters as tab newlines etc.
+                                         printable characters as tab newlines
+                                         etc.
       :type withNonPrintableCharacters: Boolean
       :param changeAttribute: If set the given attribute will be changed to a
                               type of FailedValidation
@@ -439,7 +221,8 @@ class ObjectValidator:
       :param withSpaces: If set the attribute can contain spaces
       :type withSpaces: Boolean
       :param withNonPrintableCharacters: If set the attribute can contain non
-                                         printable characters as tab newlines etc.
+                                         printable characters as tab newlines
+                                         etc.
       :type withNonPrintableCharacters: Boolean
       :param changeAttribute: If set the given attribute will be changed to a
                               type of FailedValidation
@@ -457,9 +240,6 @@ class ObjectValidator:
       errorMsg += 'A minimal length of {0}.'.format(minLength)
     if maxLength > 0:
       errorMsg += 'A maximal length of {0}'.format(maxLength)
-
-
-
     regex = ObjectValidator.__replacePlaceHolders(ALPHA_BASE,
                                                   minLength,
                                                   maxLength,
@@ -467,6 +247,7 @@ class ObjectValidator:
                                                   withNonPrintableCharacters,
                                                   withSymbols)
     return validateRegex(obj, attributeName, regex, errorMsg, changeAttribute)
+
   @staticmethod
   def validateDigits(obj,
                      attributeName,
@@ -543,6 +324,7 @@ class ObjectValidator:
                   EMAILADDRESS,
                   'The email has to be under the form (.*)@(.*).(.*){2,3}',
                   changeAttribute)
+
   @staticmethod
   def validateIP(obj, attributeName, changeAttribute=True):
     """
@@ -628,7 +410,6 @@ class ObjectValidator:
       :return Boolean
     """
 
-
     typeUpper = getattr(hashType, 'upper')()
 
     # get regex of the hash
@@ -639,6 +420,7 @@ class ObjectValidator:
                   regex,
                   'The entered hash is not a valid {0} hash'.format(typeUpper),
                   changeAttribute)
+
   @staticmethod
   def validateRegularExpression(obj, attributeName, changeAttribute=True):
     """
@@ -677,4 +459,3 @@ class ObjectValidator:
     else:
       raise ValidationException('The given object has no attribute ' +
                                  attributeName)
-

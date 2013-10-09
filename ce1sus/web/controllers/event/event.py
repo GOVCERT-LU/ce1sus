@@ -15,13 +15,17 @@ __license__ = 'GPL v3+'"""module holding all controllers needed for
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.eventbroker import EventBroker, ObjectBroker, \
-                  AttributeBroker, CommentBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from ce1sus.brokers.definitionbroker import ObjectDefinitionBroker, \
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                  ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require, requireReferer
 from dagr.db.broker import ValidationException, BrokerException
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.objectbroker import ObjectBroker
+from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.event.commentbroker import CommentBroker
 
 
 # pylint: disable=R0903,R0902
@@ -39,6 +43,7 @@ class Relation(object):
     self.attributeName = 0
     self.attributeValue = 0
 
+
 # pylint: disable=R0903,R0902
 class Object4Paginator(object):
   """
@@ -48,6 +53,7 @@ class Object4Paginator(object):
     self.identifier = 0
     self.type = 0
     self.isChildOf = 0
+
 
 class EventController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -127,7 +133,6 @@ class EventController(Ce1susBaseController):
               {'attributeName':'Attribute Name'},
               {'attributeValue':'Attribute Value'}]
 
-
     relationsPaginatorOptions = PaginatorOptions('/events/recent',
                                                  'eventsTabTabContent')
     relationsPaginatorOptions.addOption('NEWTAB',
@@ -167,7 +172,8 @@ class EventController(Ce1susBaseController):
             temp.attributeValue = relation.sameAttribute.value
             relationPaginator.list.append(temp)
           except cherrypy.HTTPError:
-            self.getLogger().debug('User {0} is not authorized'.format(self.getUser()))
+            self.getLogger().debug(('User {0} is not '
+                                    + 'authorized').format(self.getUser()))
 
     except BrokerException as e:
       self.getLogger().error(e)
@@ -201,7 +207,6 @@ class EventController(Ce1susBaseController):
     :returns: List of Relations
     """
     return self.objectBroker.getRelationsByID(obj.identifier)
-
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -330,4 +335,3 @@ class EventController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return 'An unexpected error occurred: {0}'.format(e)
-

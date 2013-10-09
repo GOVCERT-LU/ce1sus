@@ -14,12 +14,14 @@ import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
 
+
 class CompareException(Exception):
   """
   Base compare exception
   """
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class TypeMismatchException(CompareException):
   """
@@ -28,12 +30,14 @@ class TypeMismatchException(CompareException):
   def __init__(self, message):
     CompareException.__init__(self, message)
 
+
 class ArrayMismatchException(CompareException):
   """
   Array mismatch exception
   """
   def __init__(self, message):
     CompareException.__init__(self, message)
+
 
 class ValueMismatchException(CompareException):
   """
@@ -42,6 +46,7 @@ class ValueMismatchException(CompareException):
   def __init__(self, message):
     CompareException.__init__(self, message)
 
+
 class AttributeMismatchException(CompareException):
   """
   Attribute mismatch exception
@@ -49,9 +54,11 @@ class AttributeMismatchException(CompareException):
   def __init__(self, message):
     CompareException.__init__(self, message)
 
+
 def compareObjects(object1, object2, raiseExceptions=True):
   """
-  Compares recursively if the two input objects are equal on their attribute basis
+  Compares recursively if the two input objects are equal on their attribute
+  basis
 
   :param object1: First object
   :param object2: Second object
@@ -87,7 +94,7 @@ def compareObjects(object1, object2, raiseExceptions=True):
         if (isinstance(object1, types.DictionaryType) and
                       isinstance(object2, types.DictionaryType)):
           for key, item1 in object1.iteritems():
-            if object2.has_key(key):
+            if key in object2:
               # This is just to know what was the problem
               attrName = 'Value not matching for key ' + key
               attrValue1 = item1
@@ -119,8 +126,9 @@ def compareObjects(object1, object2, raiseExceptions=True):
         attrValue2 = object2
         result = False
     elif  (isinstance(object1, datetime.datetime)) and (isinstance(object2,
-                                                            datetime.datetime)):
-      if object1.strftime('%Y%m%d_%H%M%S') != object2.strftime('%Y%m%d_%H%M%S'):
+                                                          datetime.datetime)):
+      if (object1.strftime('%Y%m%d_%H%M%S') !=
+                                          object2.strftime('%Y%m%d_%H%M%S')):
         attrValue1 = object1
         attrValue2 = object2
         result = False
@@ -140,7 +148,8 @@ def compareObjects(object1, object2, raiseExceptions=True):
               if (not isfunction(value1) and not isinstance(value1,
                                                             types.FunctionType)
                 and not ismethod(value1)) and (not isfunction(value2) and
-                                      not isinstance(value2, types.FunctionType)
+                                      not isinstance(value2,
+                                                     types.FunctionType)
                 and not ismethod(value2)):
                 attrName = name
                 attrValue1 = value1
@@ -167,12 +176,13 @@ def compareObjects(object1, object2, raiseExceptions=True):
                                                                    attrValue2))
       else:
         raise AttributeMismatchException(
-                      'Attribute {0} is not equal, got {1} expected {2}'.format(
-                                                                    attrName,
-                                                                    attrValue1,
-                                                                    attrValue2))
+                    'Attribute {0} is not equal, got {1} expected {2}'.format(
+                                                                   attrName,
+                                                                   attrValue1,
+                                                                   attrValue2))
   # if this is reached they have to be equal.
   return result
+
 
 def printObject(obj, indent=0, maxRecLVL=3):
   """
@@ -230,7 +240,7 @@ def printObject(obj, indent=0, maxRecLVL=3):
               or isinstance(value, types.FloatType) or isinstance(value,
                                                                 types.LongType)
               or isinstance(value, types.TupleType) or type(value) ==
-                                                             datetime.datetime):
+                                                            datetime.datetime):
             print '{indentation}{variableName}\t: "{variableValue}"'.format(
                                                         indentation=indentStr,
                                                         variableName=name,
@@ -248,6 +258,7 @@ def printObject(obj, indent=0, maxRecLVL=3):
                                                       indentation=indentStr,
                                                       variableName=name,
                                                       variableValue=value)
+
 
 def printDictionary(dictionary):
   """

@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 
 from abc import abstractmethod
 
+
 # pylint: disable=R0903,R0902
 class Ticket(object):
   """
@@ -31,12 +32,14 @@ class Ticket(object):
     self.lastUpdated = None
     self.resolved = 'Definitely not resolved'
 
+
 class TicketingException(Exception):
   """
   Base exception for the ticketing api
   """
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class NoResponseException(TicketingException):
   """
@@ -45,6 +48,7 @@ class NoResponseException(TicketingException):
   def __init__(self, message):
     TicketingException.__init__(self, message)
 
+
 class NoInstanceFoundException(TicketingException):
   """
   No instance exception
@@ -52,12 +56,14 @@ class NoInstanceFoundException(TicketingException):
   def __init__(self, message):
     TicketingException.__init__(self, message)
 
+
 class NotImplementedException(TicketingException):
   """
   Not implemented exception
   """
   def __init__(self, message):
     TicketingException.__init__(self, message)
+
 
 class TicketSystemBase(object):
   """

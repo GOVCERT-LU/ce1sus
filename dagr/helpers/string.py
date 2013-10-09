@@ -15,12 +15,14 @@ import re
 import cgi
 from datetime import datetime
 
+
 class InputException(Exception):
   """
   Base exception for input exceptions
   """
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 def plaintext2html(text, tabstop=4):
   """
@@ -74,6 +76,7 @@ def plaintext2html(text, tabstop=4):
   else:
     return ''
 
+
 def stringToDateTime(string):
   """
   Converts a string to a DateTime if the format is known
@@ -99,6 +102,7 @@ def stringToDateTime(string):
       pass
   raise InputException('Format of Date "{0}" is unknown'.format(string))
 
+
 def isNotNull(value):
   """
   Checks if a string is not null
@@ -109,4 +113,3 @@ def isNotNull(value):
     return False
   string = unicode(value)
   return string and string != ''
-

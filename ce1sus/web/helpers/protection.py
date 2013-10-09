@@ -7,12 +7,14 @@ __license__ = 'GPL v3+'
 
 import cherrypy
 from dagr.db.session import SessionManager
-from ce1sus.brokers.permissionbroker import UserBroker
+from ce1sus.brokers.permission.userbroker import UserBroker
+
 import re
 
 SESSION_KEY_USERNAME = '_cp_username'
 SESSION_KEY_USER = '_cp_user'
 SESSION_KEY_GROUPS = '_cp_userGroups'
+
 
 class Protector(object):
   """The authentication handler for the site. Mainly taken out of the example
@@ -42,7 +44,6 @@ class Protector(object):
         # redirect in case the session is gone or was not set
         raise cherrypy.HTTPRedirect("/")
 
-
   @staticmethod
   def setSession(username):
     """
@@ -58,7 +59,6 @@ class Protector(object):
     user = userBroker.getUserByUserName(username)
     attribute[SESSION_KEY_USER] = user
     attribute[SESSION_KEY_GROUPS] = user.groups
-
 
   @staticmethod
   def getUserName():
@@ -133,6 +133,7 @@ class Protector(object):
     if username:
       cherrypy.request.login = None
 
+
 # pylint: disable=W0212
 def require(*conditions):
   """
@@ -150,6 +151,7 @@ def require(*conditions):
     return function
   return decorate
 
+
 def privileged():
   """
   Condition that verifies if the user has the privileged right set
@@ -163,6 +165,7 @@ def privileged():
     user = Protector.getUser()
     return user.privileged
   return check
+
 
 def requireReferer(allowedReferers):
   """
@@ -179,7 +182,8 @@ def requireReferer(allowedReferers):
     referer = cherrypy.request.headers.elements('Referer')
     try:
       referer = referer[0].value
-      referer = '/' + re.search(r'^http[s]?://[\w\d:]+/(.*)$', referer).group(1)
+      referer = '/' + re.search(r'^http[s]?://[\w\d:]+/(.*)$',
+                                referer).group(1)
       if referer in allowedReferers:
         return True
       else:
@@ -188,6 +192,7 @@ def requireReferer(allowedReferers):
       return False
   return check
 
+
 # pylint: disable=W0613
 def isAuthenticated(context):
   """
@@ -195,4 +200,3 @@ def isAuthenticated(context):
   """
   username = Protector.getUserName()
   return not username is None
-

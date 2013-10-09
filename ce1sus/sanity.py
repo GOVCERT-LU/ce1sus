@@ -21,20 +21,24 @@ from sqlalchemy.orm import sessionmaker
 from dagr.db.recepie.satool import ForeignKeysListener
 import os
 
+
 class SantityCheckerException(Exception):
   """SantityCheckerException"""
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class SanityValue(BASE):
   __tablename__ = "ce1sus"
   key = Column('key', String, primary_key=True)
   value = Column('value', String)
 
+
 class SantityChecker(object):
 
-  APP_REL = '0.A.0'
-  DB_REL = '0.A.0'
+  APP_REL = '0.1.0'
+  DB_REL = '0.1.0'
+  REST_REL = '0.0.1'
 
   def __init__(self, configFile):
     # load __config foo!!
@@ -61,7 +65,7 @@ class SantityChecker(object):
       # check if socket available
       if not SessionManager.isServiceExisting(hostname, port):
         raise SantityCheckerException('Service on "{hostname}:{port}"' +
-                                      ' not available'.format(hostname=hostname,
+                                    ' not available'.format(hostname=hostname,
                                                                port=port))
       connetionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
         prot=protocol,
@@ -79,22 +83,39 @@ class SantityChecker(object):
   def getBrokerClass(self):
     return SanityValue
 
-  def check(self):
-    # check app rel
-    value = self.getByKey('app_rev')
-    if SantityChecker.compareReleases(SantityChecker.APP_REL, value.value) != 0:
-      raise SantityCheckerException('Application release mismatch '
-                        + 'expected {0} got {1}'.format(SantityChecker.APP_REL,
-                                                       value.value))
+  def checkDB(self):
     # check db rel
     value = self.getByKey('db_shema')
     if SantityChecker.compareReleases(SantityChecker.DB_REL, value.value) != 0:
       raise SantityCheckerException('DB scheme release mismatch '
                         + 'expected {0} got {1}'.format(SantityChecker.DB_REL,
                                                        value.value))
-    self.__close()
 
-  def __close(self):
+  def checkApplication(self):
+    # check app rel
+    value = self.getByKey('app_rev')
+    if SantityChecker.compareReleases(SantityChecker.APP_REL,
+                                      value.value) != 0:
+      raise SantityCheckerException('Application release mismatch '
+                        + 'expected {0} got {1}'.format(SantityChecker.APP_REL,
+                                                       value.value))
+
+  def checkRestAPI(self, release):
+    # check app rel
+    value = self.getByKey('rest_api')
+    if SantityChecker.compareReleases(release,
+                                      value.value) != 0:
+      raise SantityCheckerException('RestAPI release mismatch '
+                        + 'expected {0} got {1}'.format(release,
+                                                       value.value))
+    if SantityChecker.compareReleases(SantityChecker.REST_REL,
+                                      value.value) != 0:
+      raise SantityCheckerException('RestAPI release mismatch '
+                        + 'expected {0} got {1}'.format(
+                                                      SantityChecker.REST_REL,
+                                                      value.value))
+
+  def close(self):
     self.sa_engine.dispose()
     self.sa_engine = None
 
@@ -146,7 +167,6 @@ class SantityChecker(object):
     except ValueError:
       isNumber = False
 
-
     if value1 == value2:
       result = 0
     else:
@@ -188,6 +208,7 @@ class SantityChecker(object):
         if result >= 0:
           return 0
     return result
+
 
 def version(context):
   return SantityChecker.APP_REL
