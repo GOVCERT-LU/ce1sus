@@ -6,10 +6,13 @@
 <h2>Add an Event</h2>
 
 <%call expr="baseForms.genericForm(id='editGroupsForm', url='/events/event/modifyEvent',refreshUrl='/events/recent',refreshContainer='eventsTabTabContent')">
+    <div class="row">
+        <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <input type="hidden" name="action" value="insert">
     
-	${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}	
-	<div class="row">
+	${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}
+
+
 	    <div class="col-xs-3 col-sm-3" style="text-align:right">
 			<div class="btn-group">
 				<button class="btn btn-primary" type="submit">Create</button>
