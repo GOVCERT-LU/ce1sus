@@ -249,9 +249,9 @@ class UserBroker(BrokerBase):
     if not action == 'insert':
       user.identifier = identifier
     if not action == 'remove' and action != 'insertLDAP':
-      user.email = email
+      user.email = email.strip()
       user.password = password
-      user.username = username
+      user.username = username.strip()
     if string.isNotNull(disabled):
       ObjectConverter.setInteger(user, 'disabled', disabled)
     if string.isNotNull(priv):

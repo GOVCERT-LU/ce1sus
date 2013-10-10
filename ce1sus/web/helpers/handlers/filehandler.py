@@ -122,7 +122,7 @@ class UnMaliciousFileHandler(GenericHandler):
     attribute.modifier_id = attribute.modifier.identifier
     attribute.object = obj
     attribute.object_id = attribute.object.identifier
-    attribute.value = value
+    attribute.value = value.strip()
     return attribute
 
   def __canUserDownload(self, eventID, user):

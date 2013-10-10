@@ -139,7 +139,8 @@ isModal=False
           %endif;
             "iDisplayLength": ${paginator.itemsPerPage},
           "aoColumns": [
-          % for column in paginator.lables:
+          { "sType": 'numeric' },
+          % for i in range(len(paginator.lables)-1):
                         { "sType": 'string-case' },
           %endfor
           %if paginator.options.isSet:

@@ -128,9 +128,9 @@ class GroupBroker(BrokerBase):
     if not action == 'insert':
       group.identifier = identifier
     if not action == 'remove':
-      group.name = name
+      group.name = name.strip()
       ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
       ObjectConverter.setInteger(group, 'canDownload', download)
       ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
-      group.description = description
+      group.description = description.strip()
     return group

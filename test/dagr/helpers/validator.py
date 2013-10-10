@@ -46,6 +46,11 @@ class TestValidator(unittest.TestCase):
       maxLength=0,
       withSpaces=False,
       withNonPrintableCharacters=False)
+      assert not ValueValidator.validateAlNum('',
+      minLength=1,
+      maxLength=0,
+      withSpaces=False,
+      withNonPrintableCharacters=False)
     except ValidationException:
       assert(False)
 

@@ -154,7 +154,8 @@ class Group(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateAlNum(self, 'name',
-                                  withSymbols=True)
+                                  withSymbols=True,
+                                  minLength=3)
     ObjectValidator.validateDigits(self, 'shareTLP')
     ObjectValidator.validateAlNum(self,
                                   'description',
