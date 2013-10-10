@@ -152,7 +152,8 @@ class EventController(Ce1susBaseController):
         else:
           event_rel = relation.sameAttribute.object.event
           try:
-            self.checkIfViewable(event)
+            if event_rel.identifier != event.identifier:
+              self.checkIfViewable(event_rel)
             temp.eventID = event_rel.identifier
             temp.identifier = event_rel.identifier
             temp.eventName = event_rel.title
