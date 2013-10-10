@@ -196,6 +196,9 @@ class UnMaliciousFileHandler(GenericHandler):
 
 class MaliciousFileHandler(UnMaliciousFileHandler):
 
+  def __init__(self):
+    UnMaliciousFileHandler.__init__(self)
+
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
     if isfile(filepath):
