@@ -41,11 +41,17 @@ class ObjectBroker(BrokerBase):
     """
     try:
       obj = self.getByID(identifier)
-      # remove attributes
-      self.attributeBroker.removeAttributeList(obj.attributes, False)
-      self.doCommit(False)
-      BrokerBase.removeByID(self, obj.identifier, False)
-      self.doCommit(commit)
+      # check if objects does not have children
+      children = self.getChildOjectsForObjectID(obj.identifier)
+      if len(children) > 0:
+        raise BrokerException('Object has children. '
+                  + 'The object cannot be removed if there are still children.')
+      else:
+        # remove attributes
+        self.attributeBroker.removeAttributeList(obj.attributes, False)
+        self.doCommit(False)
+        BrokerBase.removeByID(self, obj.identifier, False)
+        self.doCommit(commit)
     except BrokerException as e:
       self.getLogger().fatal(e)
       self.session.rollback()
@@ -149,7 +155,7 @@ class ObjectBroker(BrokerBase):
       raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   eventID))
 
-  def getChildOjectsForObjectID(self, objectID, recursive=False):
+  def getChildOjectsForObjectID(self, objectID):
     """
     Returns all the child objects of the given object
 
@@ -160,14 +166,11 @@ class ObjectBroker(BrokerBase):
       result = self.session.query(Object).filter(
                         Object.parentObject_id == objectID).all()
       for obj in result:
-        subChildren = self.getChildOjectsForObjectID(obj.identifier, True)
+        subChildren = self.getChildOjectsForObjectID(obj.identifier)
         if not subChildren is None:
           result = result + subChildren
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      if recursive:
-        return None
-      else:
         raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   objectID))
     except sqlalchemy.exc.SQLAlchemyError as e:

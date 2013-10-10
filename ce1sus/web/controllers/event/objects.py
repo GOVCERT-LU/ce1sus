@@ -235,7 +235,7 @@ class ObjectsController(Ce1susBaseController):
       return self.returnAjaxOK()
     except BrokerException as e:
       self.getLogger().critical(e)
-      return 'Et ass einfach net gangen'
+      return '{0}'.format(e)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
