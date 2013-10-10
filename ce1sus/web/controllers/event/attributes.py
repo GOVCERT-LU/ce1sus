@@ -122,6 +122,8 @@ class AttributesController(Ce1susBaseController):
       definition = kwargs.get('definition', None)
       action = kwargs.get('action', None)
       values = kwargs.get('value', None)
+      if not definition:
+        return 'Nothing has been selected'
       # remove unnecessary elements from the parameters
       params = {k: v for k, v in kwargs.iteritems() if k not in ['eventID',
                                                                 'attributeID',
@@ -137,10 +139,14 @@ class AttributesController(Ce1susBaseController):
           definition = self.def_attributesBroker.getByID(definition)
           handler = HandlerBase.getHandler(definition)
           # expect generated attributes back
-          attributes = handler.populateAttributes(params,
-                                                  obj,
-                                                  definition,
-                                                  self.getUser())
+          if len(params) > 0:
+            attributes = handler.populateAttributes(params,
+                                                    obj,
+                                                    definition,
+                                                    self.getUser())
+          else:
+            return ('Process not completed please complete '
+                    + 'the form before saving.')
           if attributes is None:
             raise HandlerException(('{0}.getAttributes '
                                     + 'does not return attributes ').format(
@@ -187,6 +193,9 @@ class AttributesController(Ce1susBaseController):
                              cbDefinitions=cbDefinitions,
                              errorMsg=None,
                              enabled=True)
+    else:
+      return ('An earlier an error occurred. '
+              + 'Please close this dialog and try anew.')
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
