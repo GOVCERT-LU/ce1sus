@@ -12,20 +12,21 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'"""module holding all controllers needed for
                         the event handling"""
 
-from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                  ObjectDefinitionBroker
+
 from ce1sus.brokers.definition.attributedefinitionbroker import \
-                  AttributeDefinitionBroker
-from ce1sus.web.helpers.protection import require, requireReferer
-from dagr.db.broker import ValidationException, BrokerException
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
+  AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+  ObjectDefinitionBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.commentbroker import CommentBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.objectbroker import ObjectBroker
+from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
+from ce1sus.web.controllers.base import Ce1susBaseController
+from ce1sus.web.helpers.protection import require, requireReferer
+from dagr.db.broker import ValidationException, BrokerException
+from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 
 
 # pylint: disable=R0903,R0902
@@ -165,7 +166,7 @@ class EventController(Ce1susBaseController):
             relationPaginator.list.append(temp)
           except cherrypy.HTTPError:
             self.getLogger().debug(('User {0} is not '
-                                    + 'authorized').format(self.getUser()))
+                                    + 'authorized').format(self.getUser(True)))
 
     except BrokerException as e:
       self.getLogger().error(e)
@@ -287,7 +288,7 @@ class EventController(Ce1susBaseController):
                                             risk, analysis, self.getUser())
     try:
       if not action == 'insert':
-        template = self.getTemplate('/events/event/eventModal.html')
+        template = self.getTemplate('/events/event/editDetails.html')
 
         # right checks only if there is a change!!!!
         self.checkIfViewable(event)
@@ -301,8 +302,8 @@ class EventController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return (self.returnAjaxPostError()
-                 + EventController.__populateTemplate(event, template))
+      string = self.returnAjaxPostError() + EventController.__populateTemplate(event, template)
+      return string
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return 'An unexpected error occurred: {0}'.format(e)

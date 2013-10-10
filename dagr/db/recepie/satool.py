@@ -135,8 +135,10 @@ class SATool(cherrypy.Tool):
     """Commit transaction"""
     cherrypy.request.db = None
     try:
-      function = getattr(self.session, 'commit')
-      function()
+      #Disabled as I do it my self!!!
+      # function = getattr(self.session, 'commit')
+      # function()
+      pass
     except:
       function = getattr(self.session, 'rollback')
       function()

@@ -59,14 +59,17 @@ class Ce1susBaseController(BaseController):
     return result
 
 
-  def getUser(self):
+  def getUser(self, cached=False):
     """
     Returns the session user
 
     :returns: User
     """
     self.getLogger().debug("Returned user")
-    return self.userBroker.getUserByUserName(self.getUserName())
+    if cached:
+      return Protector.getUser()
+    else:
+      return self.userBroker.getUserByUserName(self.getUserName())
 
   def getUserName(self):
     """

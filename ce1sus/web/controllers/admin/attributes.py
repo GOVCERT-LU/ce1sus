@@ -155,8 +155,6 @@ class AttributeController(Ce1susBaseController):
       if action == 'update':
         self.attributeBroker.update(attribute)
       if action == 'remove':
-        # TODO: resolve this issue!
-        self.attributeBroker.doRollBack()
         self.attributeBroker.removeByID(attribute.identifier)
 
         # ok everything went right

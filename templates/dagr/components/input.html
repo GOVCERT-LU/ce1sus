@@ -221,7 +221,9 @@
             });
         </script>
         %endif
-
+    % if (not (validationMsg is None)) and enabled:
+      <%call expr="messagesAndText.error(validationMsg)"/>
+    % endif
 </%def>
 
 

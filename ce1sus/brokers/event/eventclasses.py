@@ -167,7 +167,7 @@ class Event(BASE):
     if not self.last_seen is None:
       ObjectValidator.validateDateTime(self, 'last_seen')
     if not self.first_seen is None and not self.last_seen is None:
-      if self.first_seen < self.last_seen:
+      if self.first_seen > self.last_seen:
         setattr(self, 'first_seen',
                 FailedValidation(self.first_seen,
                                  'First seen is after last seen.'))

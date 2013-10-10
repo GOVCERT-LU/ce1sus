@@ -9,6 +9,7 @@
 <legend>Edit Details</legend>
 
 <%call expr="baseForms.genericForm(id='editEventForm', url='/events/event/modifyEvent',refreshUrl='/events/event/details/{0}'.format(event.identifier),refreshContainer='eventEdit')">
+    <input type="hidden" name="action" value="update"/>
     ${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
     <div class="row">
         <div class="col-xs-4 col-sm-4" style="text-align:right">
