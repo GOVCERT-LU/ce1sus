@@ -38,7 +38,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
         url: uri,
         type: "post",
         data: serializedData,
-        timeout: 10000
+        timeout: 3000 //3secs
     });
 
     // callback handler that will be called on success
@@ -100,7 +100,7 @@ function loadContent(contentid, url) {
 	  //load Content
 	$.ajax({
 	    url: url,
-	    timeout: 3000, // sets timeout to 3 seconds,
+	    timeout:  3000, //3secs
 	    success: function(response){
 	    	if(response.match(/^(<HTML>)|(<html>)/)) {
 	    		$("#main").html(response);
@@ -306,7 +306,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, do
 	    		}
 	    	}
 	    },
-	    timeout: 3000 // sets timeout to 3 seconds
+	    timeout:  3000 //3secs
     });
 }
 

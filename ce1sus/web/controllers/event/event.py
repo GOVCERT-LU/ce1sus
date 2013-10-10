@@ -77,10 +77,7 @@ class EventController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return template.render(eventID=eventID)
 
@@ -95,10 +92,7 @@ class EventController(Ce1susBaseController):
     template = self.mako.getTemplate('/events/event/view.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event.groups,
-                         self.getUser().identifier ==
-                         event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
@@ -158,10 +152,7 @@ class EventController(Ce1susBaseController):
         else:
           event_rel = relation.sameAttribute.object.event
           try:
-            self.checkIfViewable(event_rel.groups,
-                         self.getUser().identifier ==
-                         event_rel.creator.identifier,
-                           event_rel.tlp)
+            self.checkIfViewable(event)
             temp.eventID = event_rel.identifier
             temp.identifier = event_rel.identifier
             temp.eventName = event_rel.title
@@ -192,21 +183,12 @@ class EventController(Ce1susBaseController):
 
     :returns: List of Relations
     """
-    result = list()
+    objectIDList = list()
     for obj in objects:
-      result = result + self.__getRelationsObject(obj)
-    return result
-
-  def __getRelationsObject(self, obj):
-    """
-    Returns the relation of the given object
-
-    :param objects: Object to find the relation
-    :type objects: Objects
-
-    :returns: List of Relations
-    """
-    return self.objectBroker.getRelationsByID(obj.identifier)
+      objectIDList.append(obj.identifier)
+    relations = self.objectBroker.getRelationsByObjectIDList(objectIDList)
+    # Check if the event is viewable for the user
+    return relations
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -218,10 +200,7 @@ class EventController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
     return EventController.__populateTemplate(event, template)
@@ -246,10 +225,7 @@ class EventController(Ce1susBaseController):
   @cherrypy.expose
   def details(self, eventID):
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/details.html')
     return template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
@@ -261,10 +237,7 @@ class EventController(Ce1susBaseController):
   @cherrypy.expose
   def editDetails(self, eventID):
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/editDetails.html')
     return template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
@@ -316,10 +289,7 @@ class EventController(Ce1susBaseController):
         template = self.getTemplate('/events/event/eventModal.html')
 
         # right checks only if there is a change!!!!
-        self.checkIfViewable(
-                      event.groups, self.getUser().identifier ==
-                      event.creator.identifier,
-                           event.tlp)
+        self.checkIfViewable(event)
       if action == 'insert':
         template = self.getTemplate('/events/addEvent.html')
         self.eventBroker.insert(event)

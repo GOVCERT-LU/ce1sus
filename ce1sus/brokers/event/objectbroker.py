@@ -51,7 +51,7 @@ class ObjectBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getRelationsByID(self, objectID):
+  def getRelationsByObjectIDList(self, objectIDList):
     """
     returns the relations by the object id
 
@@ -62,7 +62,8 @@ class ObjectBroker(BrokerBase):
     """
     try:
       result = self.session.query(ObjectAttributeRelation).filter(
-                        ObjectAttributeRelation.object_id == objectID).all()
+                        ObjectAttributeRelation.object_id.in_(objectIDList)
+                        ).all()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(

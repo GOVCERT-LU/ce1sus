@@ -17,7 +17,8 @@ from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from sqlalchemy.types import DateTime
 from ce1sus.brokers.permission.permissionclasses import User, Group
-from dagr.helpers.validator.objectvalidator import ObjectValidator
+from dagr.helpers.validator.objectvalidator import ObjectValidator, \
+                                                   FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
 
@@ -165,6 +166,23 @@ class Event(BASE):
       ObjectValidator.validateDateTime(self, 'first_seen')
     if not self.last_seen is None:
       ObjectValidator.validateDateTime(self, 'last_seen')
+    if not self.first_seen is None and not self.last_seen is None:
+      if self.first_seen < self.last_seen:
+        setattr(self, 'first_seen',
+                FailedValidation(self.first_seen,
+                                 'First seen is after last seen.'))
+        setattr(self, 'last_seen',
+                FailedValidation(self.last_seen,
+                                 'Last seen is before last seen.'))
+    if self.first_seen is None and not self.last_seen is None:
+        setattr(self, 'first_seen',
+                FailedValidation(self.first_seen,
+                                 'First seen cannot be empty when last seen is'
+                                 + ' set.'))
+        setattr(self, 'last_seen',
+                FailedValidation(self.last_seen,
+                                 'Last seen cannot be set when first seen is'
+                                 + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
   def toDict(self, full=False):

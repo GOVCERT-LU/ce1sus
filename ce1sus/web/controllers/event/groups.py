@@ -35,9 +35,7 @@ class GroupsController(Ce1susBaseController):
     template = self.mako.getTemplate('/events/event/groups/groups.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event.groups,
-                         self.getUser().identifier == event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier,
                                                         False)
     return template.render(eventID=event.identifier,
@@ -66,10 +64,7 @@ class GroupsController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     try:
       if operation == 'add':
         if not (remainingGroups is None):

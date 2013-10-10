@@ -67,42 +67,6 @@ class BaseController:
     """
     return self.mako.getTemplate(name)
 
-  @abstractmethod
-  def checkIfViewable(self, groups, isOwner):
-    """
-    Checks if the page if viewable for the given group
-
-    :param grous: A list of strings contrianing the group names
-    :type groups: list
-
-    :returns: Boolean
-    """
-    raise NotImplementedException(('{0}.checkIfViewable({1},{2})'
-                                   + ' is not implemented').format(
-                                                     self.__class__.__name__),
-                                                     groups,
-                                                     isOwner)
-
-  def getUser(self):
-    """
-    Returns the session user
-
-    :returns: User
-    """
-    raise NotImplementedException(('{0}.getUser()'
-                                   + ' is not implemented').format(
-                                                     self.__class__.__name__))
-
-  def getUserName(self):
-    """
-    Returns the session username
-
-    :returns: String
-    """
-    raise NotImplementedException(('{0}.getUserName()'
-                                   + ' is not implemented').format(
-                                                     self.__class__.__name__))
-
   def clearSession(self):
     """
     Clears the session

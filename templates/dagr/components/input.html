@@ -186,7 +186,7 @@
       else:
         dateTime = unicode(value)
     #remove seconds if present
-    temp = dateTime.split('.')
+    temp = '{0}'.format(dateTime).split('.')
     dateTime = temp[0]
 %>
 

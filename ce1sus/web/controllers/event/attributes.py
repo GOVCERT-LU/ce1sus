@@ -64,10 +64,7 @@ class AttributesController(Ce1susBaseController):
     getattr(cherrypy, 'session')['instertAttribute'] = None
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
 
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )
@@ -90,10 +87,7 @@ class AttributesController(Ce1susBaseController):
 
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
 
     if value.file is None:
       return 'No file selected. Try again.'
@@ -136,10 +130,7 @@ class AttributesController(Ce1susBaseController):
                                                                 'action']}
       # right checks
       event = self.eventBroker.getByID(eventID)
-      self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+      self.checkIfViewable(event)
       obj = self.objectBroker.getByID(objectID)
       try:
         if action != 'remove':
@@ -207,10 +198,7 @@ class AttributesController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
 
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )
@@ -242,10 +230,7 @@ class AttributesController(Ce1susBaseController):
     """
 
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
 
     # get Definition
     attribute = None
@@ -303,10 +288,7 @@ class AttributesController(Ce1susBaseController):
     if event is None:
       event = self.eventBroker.getByID(obj.parent_id)
 
-    self.checkIfViewable(event.groups,
-                           self.getUser().identifier ==
-                           event.creator.identifier,
-                           event.tlp)
+    self.checkIfViewable(event)
     attribute = self.attributeBroker.getByID(attributeID)
     stringValue = self.valueBroker.getByID(attribute.value_id)
     filepath = stringValue.value

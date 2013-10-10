@@ -81,46 +81,11 @@ class Protector(object):
     return user
 
   @staticmethod
-  def getMaxUserTLP(groups):
-    tlpLevel = 3
-    if groups is None:
-      return tlpLevel
-    else:
-      for group in groups:
-        tlpLevel = min(tlpLevel, group.tlpLvl)
-      return tlpLevel
+  def getUserGroups():
+   attribute = getattr(cherrypy, 'session')
+   groups = attribute.get(SESSION_KEY_GROUPS, None)
+   return groups
 
-  @staticmethod
-  def checkIfViewable(groups, isOwner, tlp):
-    """
-    Checks if the group can 'view' the page, else an exception is raised.
-
-    :param groups: The list of groups the page should be asscessible to
-    :type gourps: list
-    """
-
-    if isOwner:
-      result = True
-    else:
-      attribute = getattr(cherrypy, 'session')
-      groups = attribute.get(SESSION_KEY_GROUPS, None)
-      result = Protector.getMaxUserTLP(groups) == tlp.identifier
-      if not result:
-        try:
-          user = Protector.getUser()
-          result = False
-          if user.privileged:
-            result = True
-          else:
-            for userGrp in user.groups:
-              for group in groups:
-                if userGrp == group:
-                  result = True
-                  break
-        except:
-          raise cherrypy.HTTPError(403)
-    if not result:
-      raise cherrypy.HTTPError(403)
 
   @staticmethod
   def clearSession():

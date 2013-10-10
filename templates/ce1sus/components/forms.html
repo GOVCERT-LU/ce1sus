@@ -87,6 +87,7 @@
 </%def>
 
 <%def name="eventForm(event,enabled,cbStatusValues,cbTLPValues,today=None)">
+
 % if event is None:
   
   <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value='', enabled=enabled)"/>
