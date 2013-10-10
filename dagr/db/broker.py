@@ -165,6 +165,13 @@ class BrokerBase(object):
 
     self.doCommit(commit)
 
+  def doRollBack(self):
+    try:
+      self.session.rollback()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
   def doCommit(self, commit=True):
     """
     General commit, or rollback in case of an esception

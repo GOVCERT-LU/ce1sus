@@ -135,6 +135,7 @@ class Attribute(BASE):
     result[self.__class__.__name__]['value'] = self.value
     return result
 
+
 class AttributeBroker(BrokerBase):
   """
   This broker handles all operations on attribute objects

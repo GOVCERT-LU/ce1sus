@@ -340,7 +340,9 @@ class Object(BASE):
     result[self.__class__.__name__]['event_id'] = self.event_id
     result[self.__class__.__name__]['parentObject_id'] = self.parentObject_id
     result[self.__class__.__name__]['parentEvent_id'] = self.parentEvent_id
-    result[self.__class__.__name__]['definition'] = self.definition.toDict(True)
+    result[self.__class__.__name__]['definition'] = self.definition.toDict(
+                                                                        True
+                                                                        )
     result[self.__class__.__name__]['attributes'] = list()
     if full:
       for attribute in self.attributes:

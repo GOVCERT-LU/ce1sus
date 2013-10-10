@@ -68,8 +68,8 @@
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value='^.+$',enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Group share',name='share',enabled=enabled,hasEmpty=False,selected=0)"/>
-  <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=False)"/>
-  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False)"/>
+  <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=False,selected=1)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=0)"/>
 
 % else:
 %if not attribute.identifier is None:
@@ -80,8 +80,8 @@
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Group share',name='share',enabled=enabled,hasEmpty=False,selected=attribute.share)"/>
-  <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=True)"/>
-  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=True,selected=attribute.handlerIndex)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=False)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=attribute.handlerIndex)"/>
 % endif
 
 </%def>

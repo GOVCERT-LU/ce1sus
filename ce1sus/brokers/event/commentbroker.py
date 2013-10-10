@@ -61,7 +61,7 @@ class CommentBroker(BrokerBase):
     comment.modifier = user
     comment.modifier_id = comment.modifier.identifier
     if action == 'insert':
-      comment.comment = commentText
+      comment.comment = commentText.strip()
       comment.creator = user
       comment.creator_id = comment.creator.identifier
       comment.event = event

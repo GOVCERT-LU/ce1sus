@@ -146,6 +146,6 @@ class ObjectDefinitionBroker(BrokerBase):
     if not action == 'insert':
       obj.identifier = identifier
     if not action == 'remove':
-      obj.name = name
-      obj.description = description
+      obj.name = name.strip()
+      obj.description = description.strip()
     return obj

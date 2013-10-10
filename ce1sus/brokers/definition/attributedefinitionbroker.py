@@ -193,7 +193,6 @@ class AttributeDefinitionBroker(BrokerBase):
                                             identifier == identifier,
                                             AttributeDefinition.deletable == 1
                       ).delete(synchronize_session='fetch')
-
     except sqlalchemy.exc.OperationalError as e:
       self.session.rollback()
       raise OperationException(e)
@@ -241,12 +240,13 @@ class AttributeDefinitionBroker(BrokerBase):
       if attribute.deletable == 0:
         raise DeletionException('Attribute cannot be edited or deleted')
     if not action == 'remove':
-      attribute.name = name
-      attribute.description = description
+      attribute.name = name.strip()
+      attribute.description = description.strip()
     ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
     ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
-    if string.isNotNull(regex):
-      attribute.regex = regex
+    trimmedRegex = regex.strip()
+    if string.isNotNull(trimmedRegex):
+      attribute.regex = trimmedRegex
     else:
       attribute.regex = '^.*$'
     if string.isNotNull(share):

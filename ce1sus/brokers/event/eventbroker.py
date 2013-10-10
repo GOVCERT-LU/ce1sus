@@ -331,8 +331,8 @@ class EventBroker(BrokerBase):
       event = self.getByID(identifier)
       # right checks only if there is a change!!!!
     if not action == 'remove':
-      event.title = name
-      event.description = description
+      event.title = name.strip()
+      event.description = description.strip()
       ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
       ObjectConverter.setInteger(event, 'status_id', status)
       ObjectConverter.setInteger(event, 'published', published)

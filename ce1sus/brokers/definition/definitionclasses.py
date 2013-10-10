@@ -270,5 +270,4 @@ class AttributeDefinition(BASE):
     result[self.__class__.__name__]['handlerIndex'] = self.handlerIndex
     result[self.__class__.__name__]['deletable'] = self.deletable
     result[self.__class__.__name__]['share'] = self.share
-
     return result
