@@ -21,7 +21,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
 from ce1sus.brokers.event.attributebroker import AttributeBroker
-
+import types
 
 # pylint:disable=R0903
 class ResultItem(object):
@@ -83,6 +83,8 @@ class SearchController(Ce1susBaseController):
       module = import_module('.valuebroker', 'ce1sus.brokers')
       clazz = getattr(module, className)
       # convert to the correct type
+      if isinstance(needle, types.ListType):
+        needle = needle[0]
       needle = clazz.convert(needle.strip())
       foundValues = self.attributeBroker.lookforAttributeValue(definition,
                                                                needle)
