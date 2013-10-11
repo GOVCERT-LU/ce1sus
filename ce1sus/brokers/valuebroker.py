@@ -182,6 +182,11 @@ class ValueBroker(BrokerBase):
                                                 attribute.definition)
 
   @staticmethod
+  def getClassByClassString(className):
+    module = import_module('.valuebroker', 'ce1sus.brokers')
+    return getattr(module, className)
+
+  @staticmethod
   def getClassByAttributeDefinition(attributeDefinition):
     """
     returns class for the attribute
@@ -189,9 +194,9 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    className = attributeDefinition.className
-    module = import_module('.valuebroker', 'ce1sus.brokers')
-    return getattr(module, className)
+    return ValueBroker.getClassByClassString(attributeDefinition.className)
+
+
 
   def __setClassByAttribute(self, attribute):
     """
@@ -320,10 +325,9 @@ class ValueBroker(BrokerBase):
 
     :returns: List of clazz
     """
-    self.__clazz = clazz
     try:
-      return self.session.query(self.getBrokerClass()).filter(
-                      self.getBrokerClass().value == value
+      return self.session.query(clazz).filter(
+                      clazz.value == value
                       ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)

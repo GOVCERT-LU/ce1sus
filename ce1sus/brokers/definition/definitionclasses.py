@@ -187,7 +187,7 @@ class AttributeDefinition(BASE):
     return result
 
   @staticmethod
-  def getTableDefinitions():
+  def getTableDefinitions(simple=True):
     """ returns the table definitions where the key is the value and value the
     index of the tables.
 
@@ -197,7 +197,10 @@ class AttributeDefinition(BASE):
     """
     result = dict()
     for index, tableName in AttributeDefinition.__tableDefinitions.iteritems():
-      key = tableName.replace('Value', '')
+      if simple:
+        key = tableName.replace('Value', '')
+      else:
+        key = tableName
       value = index
       result[key] = value
     return result

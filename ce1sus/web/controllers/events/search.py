@@ -60,11 +60,12 @@ class SearchController(Ce1susBaseController):
     """
     template = self.mako.getTemplate('/events/search/index.html')
     cbDefinitions = self.attributeDefinitionBroker.getCBValuesForAll()
+    cbDefinitions['Any'] = 'Any'
     return template.render(cbDefinitions=cbDefinitions)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
-  def searchResults(self, definitionID, needle):
+  def searchResults(self, definitionID, needle, operant):
     """
     Generates the page with the search results
 
@@ -77,18 +78,21 @@ class SearchController(Ce1susBaseController):
     try:
       result = list()
       if needle:
-        # GetClass
-        definition = self.attributeDefinitionBroker.getByID(definitionID)
-
-        className = definition.className
-        module = import_module('.valuebroker', 'ce1sus.brokers')
-        clazz = getattr(module, className)
         # convert to the correct type
         if isinstance(needle, types.ListType):
           needle = needle[0]
-        needle = clazz.convert(needle.strip())
+        # GetClass
+        if definitionID == 'Any':
+          definition = None
+        else:
+          definition = self.attributeDefinitionBroker.getByID(definitionID)
+          className = definition.className
+          module = import_module('.valuebroker', 'ce1sus.brokers')
+          clazz = getattr(module, className)
+          needle = clazz.convert(needle.strip())
         foundValues = self.attributeBroker.lookforAttributeValue(definition,
-                                                                 needle)
+                                                                 needle,
+                                                                 operant)
         # prepare displayItems
 
         for value in foundValues:

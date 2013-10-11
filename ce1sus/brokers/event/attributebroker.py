@@ -296,7 +296,75 @@ class AttributeBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def lookforAttributeValue(self, attributeDefinition, value):
+  def __lookForValueAndAttribID(self, clazz, value, attributeDefinitionID, operand='=='):
+    try:
+      if operand == '==':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value == value
+                        ).all()
+      if operand == '<':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value < value
+                        ).all()
+      if operand == '>':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value > value
+                        ).all()
+      if operand == '<=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value <= value
+                        ).all()
+      if operand == '>=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value >= value
+                        ).all()
+      if operand == 'like':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinitionID,
+                  clazz.value.like('%{0}%'.format(value))
+                        ).all()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
+  def __lookForValue(self, clazz, value, operand='=='):
+    try:
+      if operand == '==':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value == value
+                        ).all()
+      if operand == '<':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value < value
+                        ).all()
+      if operand == '>':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value > value
+                        ).all()
+      if operand == '<=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value <= value
+                        ).all()
+      if operand == '>=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value >= value
+                        ).all()
+      if operand == 'like':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value.like('%{0}%'.format(value))
+                        ).all()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
+  def lookforAttributeValue(self, attributeDefinition, value, operand='=='):
     """
     returns a list of matching values
 
@@ -307,14 +375,23 @@ class AttributeBroker(BrokerBase):
 
     :returns: List of clazz
     """
-    clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
-    try:
-      # Attention cyclic
-      return self.session.query(clazz).join(clazz.attribute).filter(
-                Attribute.def_attribute_id == attributeDefinition.identifier,
-                clazz.value == value
-                      ).all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
+    if attributeDefinition is None:
+      result = list()
+      # take all classes into account
+      tables = AttributeDefinition.getTableDefinitions(False)
+      for classname in tables.iterkeys():
+        clazz = ValueBroker.getClassByClassString(classname)
+        try:
+          needle = clazz.convert(value.strip())
+          result = result + self.__lookForValue(clazz, needle, operand)
+        except:
+          # either it works or doesn't
+          pass
+      return result
+    else:
+      clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
+      return self.__lookForValueAndAttribID(clazz,
+                                            value,
+                                            attributeDefinition.identifier,
+                                            operand)
+
