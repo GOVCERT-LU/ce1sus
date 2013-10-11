@@ -336,27 +336,27 @@ class AttributeBroker(BrokerBase):
   def __lookForValue(self, clazz, value, operand='=='):
     try:
       if operand == '==':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value == value
                         ).all()
       if operand == '<':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value < value
                         ).all()
       if operand == '>':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value > value
                         ).all()
       if operand == '<=':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value <= value
                         ).all()
       if operand == '>=':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value >= value
                         ).all()
       if operand == 'like':
-        return self.session.query(clazz).join(clazz.attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value.like('%{0}%'.format(value))
                         ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
@@ -375,8 +375,8 @@ class AttributeBroker(BrokerBase):
 
     :returns: List of clazz
     """
+    result = list()
     if attributeDefinition is None:
-      result = list()
       # take all classes into account
       tables = AttributeDefinition.getTableDefinitions(False)
       for classname in tables.iterkeys():
@@ -387,11 +387,13 @@ class AttributeBroker(BrokerBase):
         except:
           # either it works or doesn't
           pass
-      return result
+
     else:
       clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
-      return self.__lookForValueAndAttribID(clazz,
+      result = self.__lookForValueAndAttribID(clazz,
                                             value,
                                             attributeDefinition.identifier,
                                             operand)
+
+    return result
 

@@ -23,6 +23,7 @@ from ce1sus.web.helpers.protection import require, requireReferer
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
 from dagr.helpers.string import InputException
+from ce1sus.brokers.event.eventbroker import EventBroker
 
 # pylint:disable=R0903
 class ResultItem(object):
@@ -49,6 +50,7 @@ class SearchController(Ce1susBaseController):
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
+    self.eventBroker = self.brokerFactory(EventBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -96,11 +98,20 @@ class SearchController(Ce1susBaseController):
         # prepare displayItems
 
         for value in foundValues:
-          obj = ResultItem(value.attribute.object.event.identifier,
-                           value.attribute.object.event,
-                           value.attribute.object.definition,
-                           value.attribute.definition,
-                           value.attribute, value)
+          if value.attribute.object.event is None:
+            event = self.eventBroker.getEventByObjectID(
+                                        value.attribute.object.parentObject_id)
+            obj = ResultItem(event.identifier,
+                             event,
+                             value.attribute.object.definition,
+                             value.attribute.definition,
+                             value.attribute, value)
+          else:
+            obj = ResultItem(value.attribute.object.event.identifier,
+                             value.attribute.object.event,
+                             value.attribute.object.definition,
+                             value.attribute.definition,
+                             value.attribute, value)
           result.append(obj)
 
       # Prepare paginator
