@@ -295,3 +295,26 @@ class AttributeBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+  def lookforAttributeValue(self, attributeDefinition, value):
+    """
+    returns a list of matching values
+
+    :param attributeDefinition: attribute definition to use for the lookup
+    :type attributeDefinition: AttributeDefinition
+    :param value: Value to look for
+    :type value: String
+
+    :returns: List of clazz
+    """
+    clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
+    try:
+      # Attention cyclic
+      return self.session.query(clazz).join(clazz.attribute).filter(
+                  Attribute.def_attribute_id == attributeDefinition.identifier,
+                  clazz.value == value
+                      ).all()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)

@@ -20,6 +20,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                                             AttributeDefinitionBroker
 from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
+from ce1sus.brokers.event.attributebroker import AttributeBroker
 
 
 # pylint:disable=R0903
@@ -46,6 +47,7 @@ class SearchController(Ce1susBaseController):
     self.attributeDefinition = AttributeDefinition()
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker)
+    self.attributeBroker = self.brokerFactory(AttributeBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -80,8 +82,9 @@ class SearchController(Ce1susBaseController):
       className = definition.className
       module = import_module('.valuebroker', 'ce1sus.brokers')
       clazz = getattr(module, className)
-
-      foundValues = self.valueBroker.lookforValue(clazz, needle)
+      # convert to the correct type
+      needle = clazz.convert(needle.strip())
+      foundValues = self.attributeBroker.lookforAttributeValue(definition, needle)
       # prepare displayItems
 
       for value in foundValues:
@@ -108,4 +111,4 @@ class SearchController(Ce1susBaseController):
     paginator = Paginator(items=result,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
-    return template.render(paginator=paginator)
+    return self.returnAjaxOK() + template.render(paginator=paginator)

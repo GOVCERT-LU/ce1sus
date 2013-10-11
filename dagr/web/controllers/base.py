@@ -89,7 +89,7 @@ class BaseController:
 
     :returns: String
     """
-    return '--OK--' + self.__class__.__name__
+    return '<!--OK--' + self.__class__.__name__
 
   def getConfigVariable(self, identifier):
     """

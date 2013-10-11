@@ -204,6 +204,8 @@ class MaliciousFileHandler(UnMaliciousFileHandler):
     if isfile(filepath):
       # getNeededAttributeDefinition
       attributes = list()
+      # TODO: Use IDs instead of names as the attributes are fixed due to
+      # the beginning
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
                                                'filename',

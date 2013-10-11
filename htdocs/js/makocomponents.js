@@ -43,13 +43,19 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
 
     // callback handler that will be called on success
     request.done(function (responseText, textStatus, XMLHttpRequest){
-    	if (responseText.match(/^--OK--/gi)) {
+    	if (responseText.match(/^<!--OK--/gi)) {
     		if (modalID) {
     			$("#"+modalID).modal('hide');
     		}
     		//refrehshPage & container if needed
     		if (doRefresh) {
-            	loadContent(refreshContainer,refreshUrl);
+    			if (refreshUrl != "None") {
+    				loadContent(refreshContainer,refreshUrl);
+    			} else {
+    				$("#"+refreshContainer).html(responseText)
+    			} 
+    				
+    			
             }
     	} else {
     		if (responseText.match(/^<!--PostError-->/gi)) {
@@ -244,7 +250,7 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 
 		    // callback handler that will be called on success
 		    request.done(function (responseText, textStatus, XMLHttpRequest){
-		    	if (responseText.match(/^--OK--/gi)) {
+		    	if (responseText.match(/^<!--OK--/gi)) {
 		    		$('#paginatorModal').modal("hide");
 		    		//refrehshPage & container if needed
 		    		if (refresh) {
@@ -292,7 +298,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent, do
 	    	if(response.match(/^(<HTML>)|(<html>)/)) {
 	    		$("#main").html(response);
 	    	} else {
-	    		if (response.match(/^--OK--/gi)) {
+	    		if (response.match(/^<!--OK--/gi)) {
 	    			//do refresh
 	    			if (refreshContent) {
 	    				loadContent(refreshContainer,refreshUrl);

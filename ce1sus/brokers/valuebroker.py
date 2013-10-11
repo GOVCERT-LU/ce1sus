@@ -21,6 +21,7 @@ from dagr.db.session import BASE
 from sqlalchemy.types import DateTime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from importlib import import_module
+from dagr.helpers.converters import ValueConverter
 
 
 # pylint: disable=R0903
@@ -47,6 +48,9 @@ class StringValue(BASE):
                                          minLength=1,
                                          withSpaces=True,
                                          withSymbols=True)
+  @staticmethod
+  def convert(value):
+    return unicode(value)
 
 
 # pylint: disable=R0903
@@ -69,6 +73,10 @@ class DateValue(BASE):
     :returns: Boolean
     """
     return ObjectValidator.validateAlNum(self, 'value')
+
+  @staticmethod
+  def convert(value):
+    return ValueConverter.setDate(value)
 
 
 # pylint: disable=R0903
@@ -97,6 +105,10 @@ class TextValue(BASE):
                                          withSpaces=True,
                                          withSymbols=True)
 
+  @staticmethod
+  def convert(value):
+    return unicode(value)
+
 
 # pylint: disable=R0903
 class NumberValue(BASE):
@@ -117,6 +129,10 @@ class NumberValue(BASE):
     :returns: Boolean
     """
     return ObjectValidator.validateDigits(self, 'value')
+
+  @staticmethod
+  def convert(value):
+    return int(value)
 
 
 class ValueBroker(BrokerBase):
@@ -161,7 +177,18 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    className = attribute.definition.className
+    return ValueBroker.getClassByAttributeDefinition(
+                                                attribute.definition)
+
+  @staticmethod
+  def getClassByAttributeDefinition(attributeDefinition):
+    """
+    returns class for the attribute
+
+    :param attribute: the attribute in context
+    :type attribute: Attribute
+    """
+    className = attributeDefinition.className
     module = import_module('.valuebroker', 'ce1sus.brokers')
     return getattr(module, className)
 
@@ -301,3 +328,5 @@ class ValueBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+
