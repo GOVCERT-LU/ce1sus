@@ -254,5 +254,3 @@ class AttributeDefinitionBroker(BrokerBase):
     if action == 'insert':
       attribute.deletable = 1
     return attribute
-
-

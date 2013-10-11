@@ -14,7 +14,8 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.protection import Protector
 from dagr.web.controllers.base import BaseController
 from ce1sus.brokers.permission.userbroker import UserBroker
-from cherrypy import HTTPError
+import cherrypy
+
 
 class Ce1susBaseController(BaseController):
 
@@ -44,8 +45,8 @@ class Ce1susBaseController(BaseController):
       if groups is None:
         return tlpLevel
       else:
-       for group in groups:
-         tlpLevel = min(tlpLevel, group.tlpLvl)
+        for group in groups:
+          tlpLevel = min(tlpLevel, group.tlpLvl)
       result = event.tlp.identifier >= tlpLevel
       if not result:
         for userGrp in user.groups:
@@ -57,7 +58,6 @@ class Ce1susBaseController(BaseController):
       raise cherrypy.HTTPError(403)
 
     return result
-
 
   def getUser(self, cached=False):
     """

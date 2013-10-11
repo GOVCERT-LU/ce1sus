@@ -84,7 +84,8 @@ class SearchController(Ce1susBaseController):
       clazz = getattr(module, className)
       # convert to the correct type
       needle = clazz.convert(needle.strip())
-      foundValues = self.attributeBroker.lookforAttributeValue(definition, needle)
+      foundValues = self.attributeBroker.lookforAttributeValue(definition,
+                                                               needle)
       # prepare displayItems
 
       for value in foundValues:

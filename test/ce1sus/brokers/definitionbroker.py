@@ -7,7 +7,8 @@ import unittest
 from dagr.db.session import SessionManager
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                   AttributeDefinitionBroker
-
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
+                                                        ObjectDefinition
 import dagr.helpers.objects as helpers
 
 
@@ -17,7 +18,8 @@ class TestDefinitionBrokers(unittest.TestCase):
   def setUp(self):
 
     self.sessionManager = SessionManager('../ce1sus.cfg')
-    self.attributebroker = self.sessionManager.brokerFactory(AttributeDefinitionBroker)
+    self.attributebroker = self.sessionManager.brokerFactory(
+                                                      AttributeDefinitionBroker)
     self.attribute = AttributeDefinition()
     self.attribute.description = 'Description'
     self.attribute.identifier = 1
@@ -25,7 +27,8 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.attribute.regex = 'Regex'
     self.attribute.valuetable = 1
 
-    self.objectbroker = self.sessionManager.brokerFactory(ObjectDefinitionBroker)
+    self.objectbroker = self.sessionManager.brokerFactory(
+                                                      ObjectDefinitionBroker)
 
     self.object = ObjectDefinition()
     self.object.name = 'Name'

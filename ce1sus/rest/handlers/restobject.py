@@ -27,6 +27,7 @@ class RestObjectController(RestControllerBase):
     obj = self.objectBroker.getByID(identifier)
     event = self.eventBroker.getEventForUser(obj.event.identifier,
                                                self.getUser(apiKey))
+    del event
     return obj
 
   @cherrypy.expose

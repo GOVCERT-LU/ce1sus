@@ -1,6 +1,3 @@
-
--- DB Scheme REL_0.1.0
-
 -- MySQL dump 10.13  Distrib 5.5.31, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: ce1sus_jhemp_dev
@@ -40,7 +37,9 @@ CREATE TABLE `Attribute_Object_Relations` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
+--
+-- Dumping data for table `Attribute_Object_Relations`
+--
 
 --
 -- Table structure for table `Attributes`
@@ -71,6 +70,10 @@ CREATE TABLE `Attributes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `Attributes`
+--
+
+--
 -- Table structure for table `Comments`
 --
 
@@ -95,6 +98,9 @@ CREATE TABLE `Comments` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `Comments`
+--
 
 --
 -- Table structure for table `DEF_Attributes`
@@ -142,6 +148,10 @@ CREATE TABLE `DEF_Objects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `DEF_Objects`
+--
+
+--
 -- Table structure for table `DObj_has_DAttr`
 --
 
@@ -177,6 +187,9 @@ CREATE TABLE `DateValues` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `Events`
+--
 
 DROP TABLE IF EXISTS `Events`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -224,6 +237,10 @@ CREATE TABLE `Events_has_Objects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `Events_has_Objects`
+--
+
+--
 -- Table structure for table `Groups`
 --
 
@@ -258,7 +275,6 @@ CREATE TABLE `Groups_has_Events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `NumberValues`
 --
@@ -277,7 +293,6 @@ CREATE TABLE `NumberValues` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `Obj_links_Obj`
 --
@@ -295,7 +310,6 @@ CREATE TABLE `Obj_links_Obj` (
   CONSTRAINT `FK_Olo_Obj_object_id_from` FOREIGN KEY (`object_id_from`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 
 --
 -- Table structure for table `Objects`
@@ -381,7 +395,6 @@ CREATE TABLE `User_has_Groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `Users`
 --
@@ -403,7 +416,13 @@ CREATE TABLE `Users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+LOCK TABLES `Users` WRITE;
+/*!40000 ALTER TABLE `Users` DISABLE KEYS */;
 INSERT INTO `Users` (`user_id`, `username`, `password`, `privileged`, `last_login`, `email`, `disabled`) VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-09-16 11:52:22','admin@admin.com',0);
+/*!40000 ALTER TABLE `Users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

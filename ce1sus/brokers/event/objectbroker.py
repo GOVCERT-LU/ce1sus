@@ -45,7 +45,7 @@ class ObjectBroker(BrokerBase):
       children = self.getChildOjectsForObjectID(obj.identifier)
       if len(children) > 0:
         raise BrokerException('Object has children. '
-                  + 'The object cannot be removed if there are still children.')
+                + 'The object cannot be removed if there are still children.')
       else:
         # remove attributes
         self.attributeBroker.removeAttributeList(obj.attributes, False)
@@ -73,10 +73,10 @@ class ObjectBroker(BrokerBase):
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                  objectID))
+                                                                objectIDList))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(objectID))
+                    'Too many results found for ID :{0}'.format(objectIDList))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)

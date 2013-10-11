@@ -48,6 +48,7 @@ class StringValue(BASE):
                                          minLength=1,
                                          withSpaces=True,
                                          withSymbols=True)
+
   @staticmethod
   def convert(value):
     return unicode(value)
@@ -328,5 +329,3 @@ class ValueBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-
-

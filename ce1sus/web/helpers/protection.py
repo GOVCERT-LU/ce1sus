@@ -82,10 +82,9 @@ class Protector(object):
 
   @staticmethod
   def getUserGroups():
-   attribute = getattr(cherrypy, 'session')
-   groups = attribute.get(SESSION_KEY_GROUPS, None)
-   return groups
-
+    attribute = getattr(cherrypy, 'session')
+    groups = attribute.get(SESSION_KEY_GROUPS, None)
+    return groups
 
   @staticmethod
   def clearSession():

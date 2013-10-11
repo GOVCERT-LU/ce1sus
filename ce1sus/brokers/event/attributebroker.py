@@ -311,8 +311,8 @@ class AttributeBroker(BrokerBase):
     try:
       # Attention cyclic
       return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinition.identifier,
-                  clazz.value == value
+                Attribute.def_attribute_id == attributeDefinition.identifier,
+                clazz.value == value
                       ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)

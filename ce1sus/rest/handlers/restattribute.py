@@ -27,6 +27,7 @@ class RestAttributeController(RestControllerBase):
     attribute = self.attribtueBroker.getByID(identifier)
     event = self.eventBroker.getEventForUser(attribute.object.event.identifier,
                                                self.getUser(apiKey))
+    del event
     return attribute
 
   @cherrypy.expose
