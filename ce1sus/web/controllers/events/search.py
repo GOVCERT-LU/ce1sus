@@ -22,6 +22,7 @@ from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
+from dagr.helpers.string import InputException
 
 # pylint:disable=R0903
 class ResultItem(object):
@@ -73,45 +74,47 @@ class SearchController(Ce1susBaseController):
     :type needle: String
     """
     template = self.mako.getTemplate('/events/search/results.html')
+    try:
+      result = list()
+      if needle:
+        # GetClass
+        definition = self.attributeDefinitionBroker.getByID(definitionID)
 
-    result = list()
-    if needle:
-      # GetClass
-      definition = self.attributeDefinitionBroker.getByID(definitionID)
+        className = definition.className
+        module = import_module('.valuebroker', 'ce1sus.brokers')
+        clazz = getattr(module, className)
+        # convert to the correct type
+        if isinstance(needle, types.ListType):
+          needle = needle[0]
+        needle = clazz.convert(needle.strip())
+        foundValues = self.attributeBroker.lookforAttributeValue(definition,
+                                                                 needle)
+        # prepare displayItems
 
-      className = definition.className
-      module = import_module('.valuebroker', 'ce1sus.brokers')
-      clazz = getattr(module, className)
-      # convert to the correct type
-      if isinstance(needle, types.ListType):
-        needle = needle[0]
-      needle = clazz.convert(needle.strip())
-      foundValues = self.attributeBroker.lookforAttributeValue(definition,
-                                                               needle)
-      # prepare displayItems
+        for value in foundValues:
+          obj = ResultItem(value.attribute.object.event.identifier,
+                           value.attribute.object.event,
+                           value.attribute.object.definition,
+                           value.attribute.definition,
+                           value.attribute, value)
+          result.append(obj)
 
-      for value in foundValues:
-        obj = ResultItem(value.attribute.object.event.identifier,
-                         value.attribute.object.event,
-                         value.attribute.object.definition,
-                         value.attribute.definition,
-                         value.attribute, value)
-        result.append(obj)
-
-    # Prepare paginator
-    labels = [{'event.identifier':'Event #'},
-              {'event.title':'Event Name'},
-              {'objDef.name':'Object'},
-              {'attrDef.name':'Attribute name'},
-              {'value.value':'Attribute value'},
-              {'event.created':'CreatedOn'}]
-    paginatorOptions = PaginatorOptions('/events/recent',
-                                        'eventsTabTabContent')
-    paginatorOptions.addOption('NEWTAB',
-                               'VIEW',
-                               '/events/event/view/',
-                               contentid='')
-    paginator = Paginator(items=result,
-                          labelsAndProperty=labels,
-                          paginatorOptions=paginatorOptions)
-    return self.returnAjaxOK() + template.render(paginator=paginator)
+      # Prepare paginator
+      labels = [{'event.identifier':'Event #'},
+                {'event.title':'Event Name'},
+                {'objDef.name':'Object'},
+                {'attrDef.name':'Attribute name'},
+                {'value.value':'Attribute value'},
+                {'event.created':'CreatedOn'}]
+      paginatorOptions = PaginatorOptions('/events/recent',
+                                          'eventsTabTabContent')
+      paginatorOptions.addOption('NEWTAB',
+                                 'VIEW',
+                                 '/events/event/view/',
+                                 contentid='')
+      paginator = Paginator(items=result,
+                            labelsAndProperty=labels,
+                            paginatorOptions=paginatorOptions)
+      return self.returnAjaxOK() + template.render(paginator=paginator)
+    except InputException as e:
+      return '{0}'.format(e)
