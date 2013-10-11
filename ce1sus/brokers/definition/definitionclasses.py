@@ -110,7 +110,8 @@ class AttributeDefinition(BASE):
                           3: 'tickethandler.CVEHandler',
                           4: 'locationhandler.LocationHandler',
                           5: 'multiplegenerichandler.MultipleGenericHandler',
-                          6: 'filehandler.UnMaliciousFileHandler'}
+                          6: 'filehandler.UnMaliciousFileHandler',
+                          7: 'datehandler.DateHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping

@@ -101,14 +101,11 @@ class SearchController(Ce1susBaseController):
           if value.attribute.object.event is None:
             event = self.eventBroker.getEventByObjectID(
                                         value.attribute.object.parentObject_id)
-            obj = ResultItem(event.identifier,
-                             event,
-                             value.attribute.object.definition,
-                             value.attribute.definition,
-                             value.attribute, value)
+
           else:
-            obj = ResultItem(value.attribute.object.event.identifier,
-                             value.attribute.object.event,
+            event = value.attribute.object.event
+          obj = ResultItem(event.identifier,
+                             event,
                              value.attribute.object.definition,
                              value.attribute.definition,
                              value.attribute, value)
