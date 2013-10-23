@@ -12,7 +12,6 @@ from cherrypy.process import plugins
 from sqlalchemy import create_engine, exc, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 import cherrypy
-from sqlalchemy.pool import Pool
 from dagr.helpers.debug import Log
 
 
@@ -55,25 +54,6 @@ class SAEnginePlugin(plugins.SimplePlugin):
   def bind(self, session):
     """binds the engine"""
     session.configure(bind=self.sa_engine)
-
-
-@event.listens_for(Pool, "checkout")
-def ping_connection(dbapi_connection, connection_record, connection_proxy):
-    cursor = dbapi_connection.cursor()
-    try:
-        cursor.execute("SELECT 1")
-        Log.getLogger('PingConnection').debug('Connection works')
-    except:
-        # optional - dispose the whole pool
-        # instead of invalidating one at a time
-        # connection_proxy._pool.dispose()
-
-        # raise DisconnectionError - pool will try
-        # connecting again up to three times before raising.
-        Log.getLogger('PingConnection').debug('Connection gone stale')
-        raise exc.DisconnectionError()
-    cursor.close()
-
 
 class SATool(cherrypy.Tool):
   """The SATool
