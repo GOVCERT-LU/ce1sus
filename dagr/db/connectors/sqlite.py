@@ -51,9 +51,9 @@ class SqliteConnector(Connector):
       self.engine = create_engine(connetionString,
                                   listeners=[ForeignKeysListener()],
                                   echo=self.debug)
-      self.sessionClazz = scoped_session(sessionmaker(bind=self.engine,
-                                                      autocommit=False,
-                                                      autoflush=False))
+      self.sessionClazz = sessionmaker(bind=self.engine,
+                                       autocommit=False,
+                                       autoflush=False)
       self.session = self.sessionClazz()
 
   def getSession(self):
