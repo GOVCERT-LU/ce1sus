@@ -113,8 +113,7 @@ class IndexController(Ce1susBaseController):
     except NothingFoundException:
       # ok it's not an LDAP User
       try:
-        userBroker = SessionManager.brokerFactory(UserBroker)
-        user = userBroker.getUserByUsernameAndPassword(username, password)
+        user = self.userBroker.getUserByUsernameAndPassword(username, password)
         if user is None:
           raise BrokerException
       except BrokerException:

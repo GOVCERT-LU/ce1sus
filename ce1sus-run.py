@@ -54,7 +54,7 @@ def bootstrap():
 
   # Load 'Modules'
 
-  # ErrorHandler(ce1susConfigFile)
+  ErrorHandler(ce1susConfigFile)
   Log(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Session")
   SessionManager(ce1susConfigFile)

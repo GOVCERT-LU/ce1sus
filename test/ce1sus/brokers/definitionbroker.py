@@ -46,9 +46,9 @@ class TestDefinitionBrokers(unittest.TestCase):
 
   def testNothingFound(self):
     try:
-      user = self.attributebroker.getUserByID('test')
+      attribute = self.attributebroker.getUserByID('test')
       # just to prevent the warning
-      print user
+      del attribute
       assert False
     except Exception:
       assert True

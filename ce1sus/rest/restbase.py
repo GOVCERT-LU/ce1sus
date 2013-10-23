@@ -19,7 +19,7 @@ import json
 class RestControllerBase:
 
   def brokerFactory(self, clazz):
-    return SessionManager.brokerFactory(clazz)
+    return SessionManager.getInstance().brokerFactory(clazz)
 
   def getLogger(self):
     return Log.getLogger(self.__class__.__name__)

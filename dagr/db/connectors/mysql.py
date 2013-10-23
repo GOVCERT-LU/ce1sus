@@ -1,0 +1,101 @@
+'''
+Created on Oct 21, 2013
+
+@author: jhemp
+'''
+
+from dagr.db.common import Connector, SessionObject, SessionManagerException
+import cherrypy
+from dagr.db.recepie.satool import SATool, SAEnginePlugin
+import os
+import socket
+from sqlalchemy.interfaces import PoolListener
+from cherrypy.process import plugins
+from sqlalchemy import create_engine, exc, event
+from sqlalchemy.orm import scoped_session, sessionmaker
+import cherrypy
+from sqlalchemy.pool import Pool
+from dagr.helpers.debug import Log
+
+
+
+class MySqlSession(SessionObject):
+
+  def __init__(self, session=None):
+    SessionObject.__init__(self)
+    self.__session = session
+
+  def getSession(self):
+    if self.__session:
+      return self.__session
+    else:
+      return cherrypy.request.db
+
+class MySqlConnector(Connector):
+
+  def __init__(self, config):
+    Connector.__init__(self, config)
+    hostname = self.config.get('host')
+    port = self.config.get('port')
+    # check if host is available
+    response = os.system("ping -c 1 " + hostname)
+    if response != 0:
+      raise SessionManagerException('Host "{hostname}" not ' +
+                                     'available'.format(hostname=hostname))
+    # check if socket available
+    if not MySqlConnector.isServiceExisting(hostname, port):
+      raise SessionManagerException('Service on "{hostname}:{port}"' +
+                                    ' not available'.format(hostname=hostname,
+                                                            port=port))
+    self.connectionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
+        prot=self.protocol,
+        user=self.config.get('username'),
+        password=self.config.get('password'),
+        host=hostname,
+        db=self.config.get('db'),
+        port=port
+      )
+    if self.config.get('satool'):
+      SAEnginePlugin(cherrypy.engine,
+                     self.connectionString,
+                     self.debug).subscribe()
+      self.saTool = SATool()
+      cherrypy.tools.db = self.saTool
+      self.session = None
+      cherrypy.config.update({'tools.db.on': 'True'})
+    else:
+      self.session = self.getSASession()
+
+  def getDirectSession(self):
+    self.engine = create_engine(self.connectionString,
+                                  echo=self.debug,
+                                  echo_pool=self.debug)
+    self.sessionClazz = scoped_session(sessionmaker(bind=self.engine,
+                                                      autocommit=False,
+                                                      autoflush=False))
+    return self.sessionClazz()
+
+  @staticmethod
+  def isServiceExisting(host, port):
+    """
+    Checks if the service port on the host is opened
+
+    :returns: Boolean
+    """
+    captive_dns_addr = ""
+    host_addr = ""
+    try:
+      host_addr = socket.gethostbyname(host)
+      if (captive_dns_addr == host_addr):
+        return False
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.settimeout(1)
+      s.connect((host, port))
+      s.close()
+    except socket.error as e:
+      Log.getLogger("SessionManager").info(e)
+      return False
+    return True
+
+  def getSession(self):
+    return MySqlSession(self.session)

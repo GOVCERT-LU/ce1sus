@@ -199,7 +199,10 @@ class BrokerBase(object):
       raise BrokerException(e)
     finally:
       if commit:
-        self.session.remove()
+        try:
+          self.session.remove()
+        except AttributeError:
+          pass
 
   def insert(self, instance, commit=True, validate=True):
     """

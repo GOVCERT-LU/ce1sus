@@ -16,11 +16,11 @@ from sqlalchemy import Column, String
 import sqlalchemy.orm
 from dagr.helpers.config import Configuration
 from dagr.db.session import SessionManager
+from dagr.db.connectors.mysql import MySqlConnector
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from dagr.db.recepie.satool import ForeignKeysListener
 import os
-
+from dagr.helpers.debug import Log
 
 class SantityCheckerException(Exception):
   """SantityCheckerException"""
@@ -33,7 +33,6 @@ class SanityValue(BASE):
   key = Column('key', String, primary_key=True)
   value = Column('value', String)
 
-
 class SantityChecker(object):
 
   APP_REL = '0.1.0'
@@ -42,43 +41,9 @@ class SantityChecker(object):
 
   def __init__(self, configFile):
     # load __config foo!!
-    self.__config = Configuration(configFile, 'SessionManager')
     # setup connection string and engine
-    protocol = self.__config.get('protocol')
-    debug = self.__config.get('debug')
-    if debug == None:
-      debug = False
-    if (protocol == 'sqlite'):
-      connetionString = '{prot}:///../../../{db}'.format(prot=protocol,
-                                                  db=self.__config.get('db'))
-      self.sa_engine = create_engine(connetionString,
-                            listeners=[ForeignKeysListener()],
-                            echo=debug, echo_pool=debug)
-    else:
-      hostname = self.__config.get('host')
-      port = self.__config.get('port')
-      # check if host is available
-      response = os.system("ping -c 1 " + hostname)
-      if response != 0:
-        raise SantityCheckerException('Host "{hostname}" not ' +
-                                      'available'.format(hostname=hostname))
-      # check if socket available
-      if not SessionManager.isServiceExisting(hostname, port):
-        raise SantityCheckerException('Service on "{hostname}:{port}"' +
-                                    ' not available'.format(hostname=hostname,
-                                                               port=port))
-      connetionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
-        prot=protocol,
-        user=self.__config.get('username'),
-        password=self.__config.get('password'),
-        host=hostname,
-        db=self.__config.get('db'),
-        port=port
-      )
-      self.sa_engine = create_engine(connetionString,
-                            echo=debug, echo_pool=debug)
-      Session = sessionmaker(bind=self.sa_engine)
-      self.session = Session()
+    sessionHandler = SessionManager(configFile)
+    self.session = sessionHandler.connector.getDirectSession()
 
   def getBrokerClass(self):
     return SanityValue
@@ -116,8 +81,7 @@ class SantityChecker(object):
                                                       value.value))
 
   def close(self):
-    self.sa_engine.dispose()
-    self.sa_engine = None
+    self.session.close()
 
   def getByKey(self, key):
     """
@@ -209,6 +173,13 @@ class SantityChecker(object):
           return 0
     return result
 
+  def getLogger(self):
+    """
+    Returns the logger
+
+    :returns: Logger
+    """
+    return Log.getLogger(self.__class__.__name__)
 
 def version(context):
   return SantityChecker.APP_REL

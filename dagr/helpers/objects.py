@@ -14,7 +14,6 @@ import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
 
-
 class CompareException(Exception):
   """
   Base compare exception

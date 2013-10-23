@@ -23,7 +23,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
                                     sqlalchemy-into-a-cherrypy-application.html
   """
 
-  def __init__(self, bus, connectionString, addListener=False, debug=False):
+  def __init__(self, bus, connectionString, debug=False):
     """
     The plugin is registered to the CherryPy engine and therefore
     is part of the bus (the engine *is* a bus) registery.
@@ -38,18 +38,12 @@ class SAEnginePlugin(plugins.SimplePlugin):
     plugins.SimplePlugin.__init__(self, bus)
     self.sa_engine = None
     self.bus.subscribe("bind", self.bind)
-    self.listener = addListener
     self.debug = debug
     self.connectionString = connectionString
 
   def start(self):
     """Start the engine"""
-    if self.listener:
-      self.sa_engine = create_engine(self.connectionString,
-                            listeners=[ForeignKeysListener()],
-                            echo=self.debug, echo_pool=self.debug)
-    else:
-      self.sa_engine = create_engine(self.connectionString,
+    self.sa_engine = create_engine(self.connectionString,
                             echo=self.debug, echo_pool=self.debug)
 
   def stop(self):
@@ -79,19 +73,6 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
         Log.getLogger('PingConnection').debug('Connection gone stale')
         raise exc.DisconnectionError()
     cursor.close()
-
-
-class ForeignKeysListener(PoolListener):
-  """
-  Foreign Key listener to set the foreign_keys
-  """
-  # pylint: disable=W0613
-  def connect(self, dbapi_connection, connection_record):
-    """
-    overridden method of PoolListener
-    """
-    db_cursor = dbapi_connection.execute('pragma foreign_keys=ON')
-    db_cursor.close()
 
 
 class SATool(cherrypy.Tool):

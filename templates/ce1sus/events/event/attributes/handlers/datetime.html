@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+
+
+%if attribute is None:
+    <%call expr="labeledInput.labeledDateTimePicker(label='Value',name='value',value='',enabled=enabled)"/>
+%else:
+  <%call expr="labeledInput.labeledDateTimePicker(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
+%endif

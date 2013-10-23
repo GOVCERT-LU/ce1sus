@@ -24,6 +24,7 @@ class Protector(object):
     # TODO: Fixme completely
     cherrypy.tools.auth = cherrypy.Tool('before_handler', Protector.check_auth)
 
+
   # pylint: disable=W0613
   @staticmethod
   def check_auth(*args, **kwargs):
@@ -55,7 +56,7 @@ class Protector(object):
     attribute = getattr(cherrypy, 'session')
     attribute.regenerate()
     attribute[SESSION_KEY_USERNAME] = cherrypy.request.login = username
-    userBroker = SessionManager.brokerFactory(UserBroker)
+    userBroker = SessionManager.getInstance().brokerFactory(UserBroker)
     user = userBroker.getUserByUserName(username)
     attribute[SESSION_KEY_USER] = user
     attribute[SESSION_KEY_GROUPS] = user.groups

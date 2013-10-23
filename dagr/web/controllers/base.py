@@ -40,6 +40,7 @@ class BaseController:
     self.mako = MakoHandler.getInstance()
     self.logger = Log.getLogger(self.__class__.__name__)
     self.config = WebConfig.getInstance()
+    self.sessionManager = SessionManager.getInstance()
 
   def brokerFactory(self, clazz):
     """
@@ -54,7 +55,7 @@ class BaseController:
     :returns: Instance of a broker
     """
     self.logger.debug('Create broker for {0}'.format(clazz))
-    return SessionManager.brokerFactory(clazz)
+    return self.sessionManager.brokerFactory(clazz)
 
   def getTemplate(self, name):
     """Returns the template
