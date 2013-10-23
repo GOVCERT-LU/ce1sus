@@ -5,7 +5,6 @@ module for session handling and brokers
 
 Created Jul, 2013
 """
-from abc import abstractmethod
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -14,16 +13,14 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase
 from dagr.helpers.config import Configuration
-import os
-import socket
 from dagr.helpers.debug import Log
 from sqlalchemy.ext.declarative import declarative_base
-import cherrypy
 from dagr.db.connectors.mysql import MySqlConnector
 from dagr.db.connectors.sqlite import SqliteConnector
-from dagr.db.common import SessionManagerException
+from dagr.db.common import SessionManagerException, \
+                           BrokerInstantiationException
 from sqlalchemy.pool import Pool
-from sqlalchemy import create_engine, exc, event
+from sqlalchemy import exc, event
 
 
 BASE = declarative_base()
@@ -45,6 +42,7 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
         Log.getLogger('PingConnection').debug('Connection gone stale')
         raise exc.DisconnectionError()
     cursor.close()
+
 
 class SessionManager:
   """
@@ -94,3 +92,6 @@ class SessionManager:
     if SessionManager.instance is None:
       raise IndentationError('No SessionManager present')
     return SessionManager.instance
+
+  def close(self):
+    self.connector.close()

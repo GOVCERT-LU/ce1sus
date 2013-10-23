@@ -5,18 +5,13 @@ Created on Oct 21, 2013
 '''
 
 from dagr.db.common import Connector, SessionObject, SessionManagerException
-import cherrypy
 from dagr.db.recepie.satool import SATool, SAEnginePlugin
 import os
 import socket
-from sqlalchemy.interfaces import PoolListener
-from cherrypy.process import plugins
-from sqlalchemy import create_engine, exc, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-import cherrypy
-from sqlalchemy.pool import Pool
 from dagr.helpers.debug import Log
-
+import cherrypy
 
 
 class MySqlSession(SessionObject):
@@ -30,6 +25,7 @@ class MySqlSession(SessionObject):
       return self.__session
     else:
       return cherrypy.request.db
+
 
 class MySqlConnector(Connector):
 
@@ -47,15 +43,16 @@ class MySqlConnector(Connector):
       raise SessionManagerException('Service on "{hostname}:{port}"' +
                                     ' not available'.format(hostname=hostname,
                                                             port=port))
-    self.connectionString = '{prot}://{user}:{password}@{host}:{port}/{db}'.format(
-        prot=self.protocol,
-        user=self.config.get('username'),
-        password=self.config.get('password'),
-        host=hostname,
-        db=self.config.get('db'),
-        port=port
-      )
-    if self.config.get('satool'):
+    self.connectionString = ('{prot}://{user}:{password}@'
+                             + '{host}:{port}/{db}').format(
+                                          prot=self.protocol,
+                                          user=self.config.get('username'),
+                                          password=self.config.get('password'),
+                                          host=hostname,
+                                          db=self.config.get('db'),
+                                          port=port
+                                        )
+    if self.config.get('usecherrypy'):
       SAEnginePlugin(cherrypy.engine,
                      self.connectionString,
                      self.debug).subscribe()
@@ -64,7 +61,7 @@ class MySqlConnector(Connector):
       self.session = None
       cherrypy.config.update({'tools.db.on': 'True'})
     else:
-      self.session = self.getSASession()
+      self.session = self.getDirectSession()
 
   def getDirectSession(self):
     self.engine = create_engine(self.connectionString,
@@ -99,3 +96,8 @@ class MySqlConnector(Connector):
 
   def getSession(self):
     return MySqlSession(self.session)
+
+  def close(self):
+    self.session = None
+    self.engine.dispose()
+    self.engine = None

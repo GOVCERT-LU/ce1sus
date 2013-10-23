@@ -1,10 +1,17 @@
-from dagr.db.broker import BrokerBase
-from dagr.helpers.config import Configuration
-import os
-import socket
+# -*- coding: utf-8 -*-
+
+"""
+The base module for common elements of the connectors
+
+Created Jul, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
 from dagr.helpers.debug import Log
-from sqlalchemy.ext.declarative import declarative_base
-import cherrypy
 from abc import abstractmethod
 
 
@@ -12,6 +19,7 @@ class SessionManagerException(Exception):
   """sessionClazz Manager Exception"""
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class ConnectorException(SessionManagerException):
   """Broker Instantiation Exception"""
@@ -42,6 +50,7 @@ class SessionObject(object):
   @abstractmethod
   def getSession(self):
     raise ConnectorException('Not Implemented')
+
 
 class Connector(object):
 

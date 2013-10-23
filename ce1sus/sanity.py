@@ -14,13 +14,9 @@ __license__ = 'GPL v3+'
 from dagr.db.session import BASE
 from sqlalchemy import Column, String
 import sqlalchemy.orm
-from dagr.helpers.config import Configuration
 from dagr.db.session import SessionManager
-from dagr.db.connectors.mysql import MySqlConnector
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import os
 from dagr.helpers.debug import Log
+
 
 class SantityCheckerException(Exception):
   """SantityCheckerException"""
@@ -33,6 +29,7 @@ class SanityValue(BASE):
   key = Column('key', String, primary_key=True)
   value = Column('value', String)
 
+
 class SantityChecker(object):
 
   APP_REL = '0.1.0'
@@ -42,8 +39,8 @@ class SantityChecker(object):
   def __init__(self, configFile):
     # load __config foo!!
     # setup connection string and engine
-    sessionHandler = SessionManager(configFile)
-    self.session = sessionHandler.connector.getDirectSession()
+    self.sessionHandler = SessionManager(configFile)
+    self.session = self.sessionHandler.connector.getDirectSession()
 
   def getBrokerClass(self):
     return SanityValue
@@ -82,6 +79,7 @@ class SantityChecker(object):
 
   def close(self):
     self.session.close()
+    self.sessionHandler.close()
 
   def getByKey(self, key):
     """
@@ -180,6 +178,7 @@ class SantityChecker(object):
     :returns: Logger
     """
     return Log.getLogger(self.__class__.__name__)
+
 
 def version(context):
   return SantityChecker.APP_REL

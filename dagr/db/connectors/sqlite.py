@@ -1,19 +1,13 @@
 
 
-from dagr.db.common import Connector, SessionObject, SessionManagerException, ConnectorException
-import cherrypy
-from dagr.db.recepie.satool import SATool, SAEnginePlugin
-import os
-import socket
+from dagr.db.common import Connector, SessionObject, ConnectorException
 from sqlalchemy.interfaces import PoolListener
-from cherrypy.process import plugins
-from sqlalchemy import create_engine, exc, event
-from sqlalchemy.orm import scoped_session, sessionmaker
-import cherrypy
-from sqlalchemy.pool import Pool
-from dagr.helpers.debug import Log
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from os.path import isfile
 from os import getcwd
+from dagr.db.recepie.satool import SATool, SAEnginePlugin
+import cherrypy
 
 class ForeignKeysListener(PoolListener):
   """
@@ -28,7 +22,6 @@ class ForeignKeysListener(PoolListener):
     db_cursor.close()
 
 
-
 class SqliteSession(SessionObject):
 
   def __init__(self, session=None):
@@ -36,29 +29,50 @@ class SqliteSession(SessionObject):
     self.__session = session
 
   def getSession(self):
-    return self.__session
+    if self.__session:
+      return self.__session
+    else:
+      return cherrypy.request.db
 
 
 class SqliteConnector(Connector):
 
   def __init__(self, config):
-      Connector.__init__(self, config)
-      dbFile = self.config.get('db')
-      if not isfile(dbFile):
-        raise ConnectorException('Cannot find file {0} in {1}'.format(dbFile,
-                                                                      getcwd()))
-      connetionString = 'sqlite:///{db}'.format(db=dbFile)
-      self.engine = create_engine(connetionString,
-                                  listeners=[ForeignKeysListener()],
-                                  echo=self.debug)
-      self.sessionClazz = sessionmaker(bind=self.engine,
-                                       autocommit=False,
-                                       autoflush=False)
-      self.session = self.sessionClazz()
+    Connector.__init__(self, config)
+    dbFile = self.config.get('db')
+    if not isfile(dbFile):
+      raise ConnectorException('Cannot find file {0} in {1}'.format(dbFile,
+                                                                    getcwd()
+                                                                    )
+                               )
+    self.connetionString = 'sqlite:///{db}'.format(db=dbFile)
+
+    if self.config.get('usecherrypy'):
+       SAEnginePlugin(cherrypy.engine,
+                      self.connetionString,
+                      self.debug).subscribe()
+       self.saTool = SATool()
+       cherrypy.tools.db = self.saTool
+       self.session = None
+       cherrypy.config.update({'tools.db.on': 'True'})
+    else:
+      self.session = self.getDirectSession()
 
   def getSession(self):
     return SqliteSession(self.session)
 
   def getDirectSession(self):
-    return self.session
+    self.engine = create_engine(self.connetionString,
+                                  listeners=[ForeignKeysListener()],
+                                  echo=self.debug,
+                                  echo_pool=self.debug,
+                                  strategy='plain')
+    self.sessionClazz = sessionmaker(bind=self.engine,
+                                     autocommit=False,
+                                     autoflush=False)
+    return self.sessionClazz()
 
+  def close(self):
+    self.session = None
+    self.engine.dispose()
+    self.engine = None

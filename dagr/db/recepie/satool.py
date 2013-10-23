@@ -7,12 +7,10 @@ Created 12 Sept 2013
 """
 
 
-from sqlalchemy.interfaces import PoolListener
 from cherrypy.process import plugins
-from sqlalchemy import create_engine, exc, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import cherrypy
-from dagr.helpers.debug import Log
 
 
 class SAEnginePlugin(plugins.SimplePlugin):
@@ -54,6 +52,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
   def bind(self, session):
     """binds the engine"""
     session.configure(bind=self.sa_engine)
+
 
 class SATool(cherrypy.Tool):
   """The SATool

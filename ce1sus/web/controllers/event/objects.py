@@ -91,9 +91,12 @@ class ObjectsController(Ce1susBaseController):
         cbAttributeDefintiionsDict = dict()
     except BrokerException:
       cbAttributeDefintiionsDict = dict()
+    # TODO: show only viewable objects/attribtues
+
+    objects = event.objects
 
     return template.render(eventID=eventID,
-                        objectList=event.objects,
+                        objectList=objects,
                         cbObjDefinitions=self.def_objectBroker.getCBValues(),
                         cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                         paginator=paginator,
