@@ -27,6 +27,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
+from dagr.db.broker import IntegrityException
 
 
 class Attribute(BASE):
@@ -210,24 +211,33 @@ class AttributeBroker(BrokerBase):
 
       # add them to relation table
       for sameValue in sameSalues:
-        # one way
-        relation = ObjectAttributeRelation()
-        relation.object_id = instance.identifier
-        relation.object = instance.object
-        relation.attribute_id = instance.identifier
-        relation.attribute = instance
-        relation.sameAttribute_id = sameValue.attribute.identifier
-        relation.sameAttribute = sameValue.attribute
-        BrokerBase.insert(self, relation, False)
-        # the other way
-        relation = ObjectAttributeRelation()
-        relation.object_id = sameValue.attribute.object.identifier
-        relation.object = sameValue.attribute.object
-        relation.attribute_id = sameValue.attribute.identifier
-        relation.attribute = sameValue.attribute
-        relation.sameAttribute_id = instance.identifier
-        relation.sameAttribute = instance
-        BrokerBase.insert(self, relation, False)
+        # only consider the events which are not part of the current event
+        if (sameValue.attribute.object.event.identifier !=
+             instance.object.event.identifier):
+          # one way
+          relation = ObjectAttributeRelation()
+          relation.object_id = instance.object.identifier
+          relation.object = instance.object
+          relation.attribute_id = instance.identifier
+          relation.attribute = instance
+          relation.sameAttribute_id = sameValue.attribute.identifier
+          relation.sameAttribute = sameValue.attribute
+          try:
+            BrokerBase.insert(self, relation, False)
+          except IntegrityException:
+            self.getLogger().debug('Duplicate found')
+          # the other way
+          relation = ObjectAttributeRelation()
+          relation.object_id = sameValue.attribute.object.identifier
+          relation.object = sameValue.attribute.object
+          relation.attribute_id = sameValue.attribute.identifier
+          relation.attribute = sameValue.attribute
+          relation.sameAttribute_id = instance.identifier
+          relation.sameAttribute = instance
+          try:
+            BrokerBase.insert(self, relation, False)
+          except IntegrityException:
+            self.getLogger().debug('Duplicate found')
 
       self.valueBroker.inserByAttribute(instance, False)
       self.doCommit(commit)
