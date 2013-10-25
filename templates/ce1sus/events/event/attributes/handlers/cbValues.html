@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/>
+%if validationMsg:
+<%call expr="messagesAndText.error(validationMsg)"/>
+%else:
+	%if attribute is None:
+	  <%call expr="labeledInput.labeledComboBox(label='Value',name='value',values=cbValues,enabled=enabled,hasEmpty=False)"/>
+	%else:
+	  <%call expr="labeledInput.labeledComboBox(label='Value',name='value',values=cbValues,enabled=enabled,hasEmpty=False,selected=attribute.value)"/>
+	%endif
+%endif
