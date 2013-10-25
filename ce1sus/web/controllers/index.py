@@ -19,7 +19,6 @@ import datetime
 from ce1sus.web.helpers.protection import require
 from dagr.db.broker import NothingFoundException, BrokerException
 from dagr.helpers.ldaphandling import LDAPHandler
-from dagr.db.session import SessionManager
 from ce1sus.brokers.permission.userbroker import UserBroker
 
 
@@ -95,6 +94,8 @@ class IndexController(Ce1susBaseController):
     # Returns None on success or a string describing the error on failure
     # Adapt to your needs
     try:
+      if not self.getConfigVariable('useldap'):
+        raise NothingFoundException('LDAP support disabled')
 
       user = self.userBroker.getUserByUsernameAndPassword(username,
                                                           'EXTERNALAUTH')

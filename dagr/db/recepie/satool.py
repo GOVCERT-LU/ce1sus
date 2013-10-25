@@ -77,7 +77,7 @@ class SATool(cherrypy.Tool):
                            self.bind_session,
                            priority=20)
 
-    self.session = scoped_session(sessionmaker(autoflush=True,
+    self.session = scoped_session(sessionmaker(autoflush=False,
                                                autocommit=False))
 
   def _setup(self):

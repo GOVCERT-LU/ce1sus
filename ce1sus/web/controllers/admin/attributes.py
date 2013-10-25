@@ -18,7 +18,8 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                   AttributeDefinition
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
-  ValidationException, NothingFoundException, DeletionException
+                          ValidationException, NothingFoundException, \
+                          DeletionException, OperationException
 import types as types
 
 
@@ -155,7 +156,7 @@ class AttributeController(Ce1susBaseController):
       if action == 'update':
         self.attributeBroker.update(attribute)
       if action == 'remove':
-        self.attributeBroker.removeByID(attribute.identifier)
+        self.attributeBroker.removeByID(identifier)
 
         # ok everything went right
       return self.returnAjaxOK()
@@ -164,6 +165,10 @@ class AttributeController(Ce1susBaseController):
       return self.returnAjaxPostError() + template.render(attribute=attribute,
                   cbValues=AttributeDefinition.getTableDefinitions(),
                   cbHandlerValues=AttributeDefinition.getHandlerDefinitions())
+    except OperationException:
+      self.getLogger().info(('User tried to delete item {0} which is '
+                             + 'still referenced.').format(identifier))
+      return 'Error: There are still attributes using this definition.'
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)

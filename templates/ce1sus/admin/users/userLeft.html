@@ -8,8 +8,11 @@
 
 <div class="btn-group">
 	<a href="#addUserModal" role="button" class="btn btn-default" data-toggle="modal">Add
-		new User</a> <a href="#addLDAPUserModal" role="button" class="btn btn-default"
+		new User</a> 
+	%if useLDAP:
+	<a href="#addLDAPUserModal" role="button" class="btn btn-default"
 		data-toggle="modal">Add LDAP User</a>
+	%endif
 </div>
 <div style="height:15px"/>
 <% 

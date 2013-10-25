@@ -152,6 +152,8 @@ class HandlerBase(object):
     clazz = getattr(module, temp[1])
     # instantiate
     handler = clazz()
+    # associate definition to handler
+    handler.definition = definition
     # check if handler base is implemented
     if not isinstance(handler, HandlerBase):
       raise HandlerException(('{0} does not implement '

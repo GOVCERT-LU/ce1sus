@@ -20,6 +20,7 @@ class GenericHandler(HandlerBase):
   """The generic handler for handling known atomic values"""
   def __init__(self):
     HandlerBase.__init__(self)
+    self.definition = None
 
   def populateAttributes(self, params, obj, definition, user):
     attribute = Attribute()

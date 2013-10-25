@@ -51,7 +51,8 @@ class UserController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/users/userLeft.html')
     users = self.userBroker.getAll()
-    return template.render(users=users)
+    return template.render(users=users,
+                           useLDAP=self.getConfigVariable('useldap'))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

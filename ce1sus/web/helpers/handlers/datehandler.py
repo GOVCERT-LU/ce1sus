@@ -12,18 +12,16 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-from ce1sus.brokers.event.attributebroker import Attribute
-from datetime import datetime
 
 
 class DateHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
   def __init__(self):
-    HandlerBase.__init__(self)
+    GenericHandler.__init__(self)
 
   def render(self, enabled, eventID, user, attribute=None):
     template = (self.
-                  getTemplate('/events/event/attributes/handlers/datetime.html')
-                  )
+                getTemplate('/events/event/attributes/handlers/datetime.html')
+                )
     string = template.render(attribute=attribute, enabled=enabled)
     return string

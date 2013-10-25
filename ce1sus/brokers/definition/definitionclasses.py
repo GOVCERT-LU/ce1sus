@@ -111,7 +111,8 @@ class AttributeDefinition(BASE):
                           4: 'locationhandler.LocationHandler',
                           5: 'multiplegenerichandler.MultipleGenericHandler',
                           6: 'filehandler.UnMaliciousFileHandler',
-                          7: 'datehandler.DateHandler'}
+                          7: 'datehandler.DateHandler',
+                          8: 'cbvaluehandler.CBValueHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping

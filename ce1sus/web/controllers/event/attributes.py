@@ -29,7 +29,7 @@ from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
-
+from dagr.db.broker import NothingFoundException
 
 class AttributesController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -244,9 +244,12 @@ class AttributesController(Ce1susBaseController):
     # get Definition
     attribute = None
     if (not attributeID is None) and (attributeID != 'None'):
-      attribute = self.attributeBroker.getByID(attributeID)
-    else:
-      # is an attribute in the session
+      try:
+        attribute = self.attributeBroker.getByID(attributeID)
+      except NothingFoundException:
+        attribute = None
+    if attribute is None:
+        # is an attribute in the session
       try:
         attribute = getattr(cherrypy, 'session')['instertAttribute']
       except KeyError:
