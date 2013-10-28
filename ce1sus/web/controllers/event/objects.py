@@ -95,8 +95,11 @@ class ObjectsController(Ce1susBaseController):
 
     objects = event.objects
     if objectID is None:
-      objectID = getattr(cherrypy, 'session')['instertedObject']
-      getattr(cherrypy, 'session')['instertedObject'] = None
+      try:
+        objectID = getattr(cherrypy, 'session')['instertedObject']
+        getattr(cherrypy, 'session')['instertedObject'] = None
+      except KeyError:
+        objectID = None
 
     return template.render(eventID=eventID,
                         objectList=objects,
