@@ -378,9 +378,9 @@ class ObjectAttributeRelation(BASE):
 
   __tablename__ = "Attribute_Object_Relations"
   identifier = Column('AOR_id', Integer, primary_key=True)
-  object_id = Column(Integer, ForeignKey('Objects.object_id'))
+  ref_object_id = Column('ref_object_id', Integer, ForeignKey('Objects.object_id'))
   object = relationship(Object,
-          primaryjoin="ObjectAttributeRelation.object_id==Object.identifier")
+          primaryjoin="ObjectAttributeRelation.ref_object_id==Object.identifier")
   attribute_id = Column('attribute_id',
                         Integer,
                         ForeignKey('Attributes.attribute_id'))
@@ -399,7 +399,7 @@ class ObjectAttributeRelation(BASE):
     :returns: Boolean
     """
     ObjectValidator.validateDigits(self, 'attribute_id')
-    ObjectValidator.validateDigits(self, 'object_id')
+    ObjectValidator.validateDigits(self, 'ref_object_id')
     ObjectValidator.validateDigits(self, 'sameAttribute_id')
     return ObjectValidator.isObjectValid(self)
 

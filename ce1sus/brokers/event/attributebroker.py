@@ -211,12 +211,14 @@ class AttributeBroker(BrokerBase):
 
       # add them to relation table
       for sameValue in sameSalues:
-        # only consider the events which are not part of the current event
-        if (sameValue.attribute.object.event.identifier !=
-             instance.object.event.identifier):
+        # only consider the events which are not part of the current event and
+
+        if ((sameValue.attribute.object.event.identifier !=
+             instance.object.event.identifier)
+            and (instance.definition.relation == 1)):
           # one way
           relation = ObjectAttributeRelation()
-          relation.object_id = instance.object.identifier
+          relation.ref_object_id = instance.object.identifier
           relation.object = instance.object
           relation.attribute_id = instance.identifier
           relation.attribute = instance
@@ -228,7 +230,7 @@ class AttributeBroker(BrokerBase):
             self.getLogger().debug('Duplicate found')
           # the other way
           relation = ObjectAttributeRelation()
-          relation.object_id = sameValue.attribute.object.identifier
+          relation.ref_object_id = sameValue.attribute.object.identifier
           relation.object = sameValue.attribute.object
           relation.attribute_id = sameValue.attribute.identifier
           relation.attribute = sameValue.attribute

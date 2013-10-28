@@ -212,7 +212,8 @@ class AttributeDefinitionBroker(BrokerBase):
                                classIndex=0,
                                action='insert',
                                handlerIndex=0,
-                               share=None):
+                               share=None,
+                               relation=None):
     """
     puts an attribute with the data together
 
@@ -244,13 +245,13 @@ class AttributeDefinitionBroker(BrokerBase):
       attribute.description = description.strip()
     ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
     ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+    ObjectConverter.setInteger(attribute, 'relation', relation)
     trimmedRegex = regex.strip()
     if string.isNotNull(trimmedRegex):
       attribute.regex = trimmedRegex
     else:
       attribute.regex = '^.*$'
-    if string.isNotNull(share):
-      attribute.share = share
+    ObjectConverter.setInteger(attribute, 'share', share)
     if action == 'insert':
       attribute.deletable = 1
     return attribute

@@ -68,7 +68,7 @@ class ObjectBroker(BrokerBase):
     """
     try:
       result = self.session.query(ObjectAttributeRelation).filter(
-                        ObjectAttributeRelation.object_id.in_(objectIDList)
+                        ObjectAttributeRelation.ref_object_id.in_(objectIDList)
                         ).all()
 
     except sqlalchemy.orm.exc.NoResultFound:

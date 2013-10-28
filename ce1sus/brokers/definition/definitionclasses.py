@@ -127,6 +127,7 @@ class AttributeDefinition(BASE):
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
                          back_populates='attributes', cascade='all')
   share = Column('sharable', Integer)
+  relation = Column('relationable', Integer)
 
   @property
   def className(self):

@@ -70,7 +70,7 @@
   <%call expr="labeledInput.labeledYesNoComboBox(label='Group share',name='share',enabled=enabled,hasEmpty=False,selected=0)"/>
   <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=False,selected=1)"/>
   <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=0)"/>
-
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Relationable',name='relation',enabled=enabled,hasEmpty=False,selected=0)"/>
 % else:
 %if not attribute.identifier is None:
   <input type="hidden" name="identifier" value="${attribute.identifier}">
@@ -82,6 +82,7 @@
   <%call expr="labeledInput.labeledYesNoComboBox(label='Group share',name='share',enabled=enabled,hasEmpty=False,selected=attribute.share)"/>
   <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=False)"/>
   <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=attribute.handlerIndex)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Relationable',name='relation',enabled=enabled,hasEmpty=False,selected=attribute.relation)"/>
 % endif
 
 </%def>

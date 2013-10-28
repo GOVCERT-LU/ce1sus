@@ -115,7 +115,7 @@ class AttributeController(Ce1susBaseController):
   @cherrypy.expose
   def modifyAttribute(self, identifier=None, name=None, description='',
                       regex='^.*$', classIndex=0, action='insert',
-                      handlerIndex=0, share=None):
+                      handlerIndex=0, share=None, relation=None):
     """
     modifies or inserts an attribute with the data of the post
 
@@ -146,7 +146,8 @@ class AttributeController(Ce1susBaseController):
                                                               classIndex,
                                                               action,
                                                               handlerIndex,
-                                                              share)
+                                                              share,
+                                                              relation)
     except DeletionException as e:
       return "Error {0}".format(e)
 
