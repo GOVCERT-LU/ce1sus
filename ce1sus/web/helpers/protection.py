@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """module providing authentication"""
 
 __author__ = 'Weber Jean-Paul'

@@ -1,8 +1,15 @@
-'''
-Created on Oct 21, 2013
+# -*- coding: utf-8 -*-
 
-@author: jhemp
-'''
+"""
+module handing the obejcts pages
+
+Created: Aug, 2013
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
 
 from dagr.db.common import Connector, SessionObject, SessionManagerException
 from dagr.db.recepie.satool import SATool, SAEnginePlugin
