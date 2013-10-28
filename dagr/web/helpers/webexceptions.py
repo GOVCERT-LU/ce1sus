@@ -51,7 +51,9 @@ class ErrorHandler(object):
     """
     return (MakoHandler.getInstance().
                               renderTemplate("/dagr/errors/blueScreen.html",
-                                                    title=title, error=error))
+                                                    title=title,
+                                                    error=error,
+                                                    text=text))
 
   @staticmethod
   def commodore(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):

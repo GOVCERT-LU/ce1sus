@@ -154,24 +154,30 @@
 % if attribute is None:
  
   <%call expr="labeledInput.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=0)"/>
   <div id="editBox">
+  
   <%call expr="labeledInput.genericLabeler('')">
   Please select something
   </%call>
+  
   </div>
   
 %else:
 %if not attribute.identifier is None:
   <input type="hidden" name="attributeID" value="${attribute.identifier}">
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value=attribute.identifier,enabled=False)"/>
+  
 %endif
   <%
   enableCB = attributes is None
   %>
   <%call expr="labeledInput.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enableCB,hasEmpty=True,selected=attribute.definition.identifier)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=attribute.ioc)"/>
   <div id="editBox">
   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
   </div>
+  
   <%call expr="labeledInput.labeledEditBox(label='Creator',name='userID',value=attribute.creator.username,enabled=False)"/>
   <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value=attribute.created,enabled=False)"/>
 %endif

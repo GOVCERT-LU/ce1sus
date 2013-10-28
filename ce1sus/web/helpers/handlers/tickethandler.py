@@ -55,7 +55,8 @@ class TicketHandler(GenericHandler):
                                                           params,
                                                           obj,
                                                           definition,
-                                                          user)
+                                                          user,
+                                                    '0')
             attributes.append(attribute)
         return attributes
       else:

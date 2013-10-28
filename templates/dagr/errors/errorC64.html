@@ -4,17 +4,23 @@
 <HTML>
     <title>${title}</title>
     <style type="text/css">
-        body {
+@font-face {
+     font-family: "C64 User";
+     src: url("/fonts/C64_User_v1.0-STYLE.ttf") format("truetype");
+}
+      body {
                 color:#A5A5FF;
-                font-weight: bold;
+                font: normal 18pt/24px "C64 User", verdana, helvetica, sans-serif;
+                font-size: 12pt;
+                letter-spacing: 0px;
+                line-height: 17px;
                 margin: 0;
-                font-size: 200%;
-                font-family: Impact, Charcoal, sans-serif;
                 background-color:#A5A5FF;
                 padding-top:5%;
                 padding-bottom:5%;
                 padding-right:5%;
                 padding-left:5%;
+                font-family: "C64 User";
             }
         #innderBox {
                      overflow:hidden;
@@ -26,7 +32,7 @@
                      overflow:hidden; 
                      margin: 0;
                      height: 80%;
-                     background-color:blue;
+                     background-color:#352879;
         }
         #innerBoxTop {
                      text-align: center;
@@ -37,7 +43,8 @@
         
         #blinktag {
                     background-color:#A5A5FF;
-                    width:25px;
+                    width:12px;
+                    height: 20px;
         }
     </style>
     <body>
@@ -61,7 +68,7 @@
                     var el = document.getElementById('blinktag');
                     setInterval(function(){
                         if ( el.style.backgroundColor ==  'rgb(165, 165, 255)' ) {
-                            el.style.backgroundColor = 'blue';
+                            el.style.backgroundColor = '#352879';
                     } else {
                             el.style.backgroundColor = '#A5A5FF';
                     }

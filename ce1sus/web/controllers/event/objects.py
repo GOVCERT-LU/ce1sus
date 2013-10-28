@@ -57,7 +57,8 @@ class ObjectsController(Ce1susBaseController):
 
     labels = [{'identifier':'#'},
               {'key':'Type'},
-              {'value':'Value'}]
+              {'value':'Value'},
+              {'isIOC': 'Is an IOC'}]
     # mako will append the missing url part
     paginatorOptions = PaginatorOptions(('/events/event/objects/'
                                          + 'objects/{0}/%(objectID)s/').format(

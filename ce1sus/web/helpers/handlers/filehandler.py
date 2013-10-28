@@ -68,11 +68,13 @@ class UnMaliciousFileHandler(GenericHandler):
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
                                                'filename',
-                                               user))
+                                               user,
+                                               '1'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
                                     'sha1',
-                                    user)
+                                    user,
+                                    '1')
       # move file to destination
       destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
                                               getInstance().get('files'),
@@ -88,13 +90,14 @@ class UnMaliciousFileHandler(GenericHandler):
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                'File (UnMalicious)',
-                                               user))
+                                               user,
+                                               '0'))
       # return attributes
       return attributes
     else:
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
-  def _createAttribute(self, value, obj, definitionName, user):
+  def _createAttribute(self, value, obj, definitionName, user, ioc):
     """
     Creates an attribue object
 
@@ -123,6 +126,9 @@ class UnMaliciousFileHandler(GenericHandler):
     attribute.object = obj
     attribute.object_id = attribute.object.identifier
     attribute.value = value.strip()
+    ObjectConverter.setInteger(attribute,
+                               'ioc',
+                               ioc.strip())
     return attribute
 
   def __canUserDownload(self, eventID, user):
@@ -209,40 +215,48 @@ class MaliciousFileHandler(UnMaliciousFileHandler):
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
                                                'filename',
-                                               user))
+                                               user,
+                                               '1'))
       attributes.append(self._createAttribute(hasher.fileHashMD5(filepath),
                                                obj,
                                                'md5',
-                                               user))
+                                               user,
+                                               '1'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
                                     'sha1',
-                                    user)
+                                    user,
+                                    '1')
       attributes.append(sha1)
       attributes.append(self._createAttribute(hasher.fileHashSHA256(filepath),
                                                obj,
                                                'sha256',
-                                               user))
+                                               user,
+                                               '1'))
       attributes.append(self._createAttribute(hasher.fileHashSHA384(filepath),
                                                obj,
                                                'sha384',
-                                               user))
+                                               user,
+                                               '1'))
       attributes.append(self._createAttribute(hasher.fileHashSHA512(filepath),
                                                obj,
                                                'sha512',
-                                               user))
+                                               user,
+                                               '1'))
       attributes.append(self._createAttribute('{0}'.
                                                format(getsize(filepath)),
                                                obj,
                                                'size',
-                                               user))
+                                               user,
+                                               '0'))
       url = pathname2url(filepath)
       mime = MimeTypes()
       attributes.append(self._createAttribute(unicode(mime.
                                                        guess_type(url)[0]),
                                                obj,
                                                'mimeType',
-                                               user))
+                                               user,
+                                               '0'))
       # move file to destination
       destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
                                               getInstance().get('files'),
@@ -258,7 +272,8 @@ class MaliciousFileHandler(UnMaliciousFileHandler):
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                'File (Malicious)',
-                                               user))
+                                               user,
+                                               '0'))
       # return attributes
       return attributes
     else:

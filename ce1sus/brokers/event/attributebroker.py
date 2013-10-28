@@ -56,6 +56,7 @@ class Attribute(BASE):
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Attribute.modifier_id==User.identifier")
+  ioc = Column('ioc', Integer)
   __value_id = None
   __value = None
   __valueObject = None
@@ -108,6 +109,13 @@ class Attribute(BASE):
     :type value: Any
     """
     self.__value = value
+
+  @property
+  def isIOC(self):
+    if self.ioc == 1:
+      return 'Yes'
+    else:
+      return 'No'
 
   def validate(self):
     """

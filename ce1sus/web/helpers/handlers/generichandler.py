@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.attributebroker import Attribute
 from datetime import datetime
-
+from dagr.helpers.converters import ObjectConverter
 
 class GenericHandler(HandlerBase):
   """The generic handler for handling known atomic values"""
@@ -37,6 +37,11 @@ class GenericHandler(HandlerBase):
     attribute.modifier_id = user.identifier
     attribute.modifier = user
     attribute.creator = user
+    ObjectConverter.setInteger(attribute,
+                               'ioc',
+                               params.get('ioc', '0').strip())
+
+
     return attribute
 
   def getAttributesNameList(self):

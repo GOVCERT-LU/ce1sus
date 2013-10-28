@@ -101,7 +101,7 @@ def bootstrap():
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
 
   # RESTFoo
-  # cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
+  cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
 if __name__ == '__main__':
 
   bootstrap()
