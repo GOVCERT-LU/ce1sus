@@ -161,6 +161,7 @@ class AttributesController(Ce1susBaseController):
         if action == 'insert':
           for attribute in attributes:
             self.attributeBroker.insert(attribute, commit=False)
+            getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
           # update last seen etc of event
           self.eventBroker.updateLastSeen(event, self.getUser(), False)
         if action == 'remove':

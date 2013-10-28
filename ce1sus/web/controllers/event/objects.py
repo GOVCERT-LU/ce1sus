@@ -94,6 +94,9 @@ class ObjectsController(Ce1susBaseController):
     # TODO: show only viewable objects/attribtues
 
     objects = event.objects
+    if objectID is None:
+      objectID = getattr(cherrypy, 'session')['instertedObject']
+      getattr(cherrypy, 'session')['instertedObject'] = None
 
     return template.render(eventID=eventID,
                         objectList=objects,
@@ -167,10 +170,10 @@ class ObjectsController(Ce1susBaseController):
                                       self.getUser())
     try:
       self.objectBroker.insert(obj, False)
+      getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
       # update last seen etc of event
       self.eventBroker.updateLastSeen(event, self.getUser(), False)
       self.eventBroker.doCommit(True)
-
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')

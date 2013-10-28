@@ -133,23 +133,14 @@ isModal=False
     
     $(document).ready(function() {
         $('#${identifier}').dataTable( {
-          "aaSorting": [  [0,'asc'] ],
+          "iDisplayLength": ${paginator.itemsPerPage},
           %if not hasSearch:
-            "sDom": '<"H">t<"F"ip>',
-          %endif;
-            "iDisplayLength": ${paginator.itemsPerPage},
-          "aoColumns": [
-          { "sType": 'numeric' },
-          % for i in range(len(paginator.lables)-1):
-                        { "sType": 'string-case' },
-          %endfor
-          %if paginator.options.isSet:
-              null
+          "sDom": '<"top"i>rt<"bottom"flp><"clear">',
           %endif
-            ]
+          "aaSorting": [[ 0, "desc" ]],
          });
     } );
-    
+
     </script>
 
     <!-- END pagination -->
