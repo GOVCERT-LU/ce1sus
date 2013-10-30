@@ -20,6 +20,7 @@ from dagr.db.broker import BrokerException, NothingFoundException
 class RestObjectController(RestControllerBase):
 
   def __init__(self):
+    RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
 

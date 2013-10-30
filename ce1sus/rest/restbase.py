@@ -18,11 +18,15 @@ import json
 
 class RestControllerBase:
 
+  def __init__(self):
+    self.logger = Log.getLogger(self.__class__.__name__)
+    self.sessionManager = SessionManager.getInstance()
+
   def brokerFactory(self, clazz):
-    return SessionManager.getInstance().brokerFactory(clazz)
+    return self.sessionManager.brokerFactory(clazz)
 
   def getLogger(self):
-    return Log.getLogger(self.__class__.__name__)
+    return self.logger
 
   def getUser(self, apiKey):
     """

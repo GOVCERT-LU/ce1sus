@@ -19,6 +19,7 @@ from dagr.db.broker import BrokerException, NothingFoundException
 class RestEventController(RestControllerBase):
 
   def __init__(self):
+    RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
   @cherrypy.expose

@@ -28,6 +28,7 @@ class RestController(RestControllerBase):
        'PUT': 'add'}
 
   def __init__(self, ce1susConfigFile):
+    RestControllerBase.__init__(self)
     self.instances = dict()
     self.configFile = ce1susConfigFile
     # add instances known to rest
@@ -51,7 +52,8 @@ class RestController(RestControllerBase):
       user = self.getUser(apiKey)
       del user
       exists = True
-    except BrokerException:
+    except BrokerException as e:
+      self.getLogger().debug(e)
       exists = False
 
     if not exists:
@@ -72,7 +74,8 @@ class RestController(RestControllerBase):
       raise cherrypy.HTTPError(500)
     vpath = list(vpath)
     self.__checkVersion(vpath.pop(0))
-    self.__checkApiKey(request.headers.get('key', ''))
+    apikey = request.headers.get('key', '').strip()
+    self.__checkApiKey(apikey)
 
     instance = self.__getController(vpath.pop(0))
     identifier = vpath.pop(0)

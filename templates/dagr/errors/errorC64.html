@@ -51,7 +51,7 @@
        <div id="innderBox"> 
             <div id ="innerBoxTop">
                 <p>
-                    *** COMMODORE 64 BASIC V2 ***
+                    *** COMMODORE 64 BASIC V${version} ***
                 </p>
                 <p>
                     64K RAM SYSTEM &nbsp;&nbsp;38911 BASIC BYTES FREE
@@ -60,6 +60,11 @@
             <div>
                 READY.<BR/>
                 ${error}<BR/>
+                %if text:
+                <p>
+                ${text}
+                </p>
+                %endif
                 READY.<BR/>    
                 <div id="blinktag">
                     &nbsp;

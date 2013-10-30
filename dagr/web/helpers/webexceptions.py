@@ -56,7 +56,7 @@ class ErrorHandler(object):
                                                     text=text))
 
   @staticmethod
-  def commodore(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
+  def commodore(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2'):
     """
     Renders the commodore error page
 
@@ -70,10 +70,13 @@ class ErrorHandler(object):
     """
     return (MakoHandler.getInstance().
                                 renderTemplate("/dagr/errors/errorC64.html",
-                                                    title=title, error=error))
+                                                    title=title,
+                                                    error=error,
+                                                    version=version,
+                                                    text=text))
 
   @staticmethod
-  def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
+  def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2'):
     """
     Renders the error page
 
@@ -87,7 +90,11 @@ class ErrorHandler(object):
     """
 
     # TODO: random error
-    return ErrorHandler.commodore(title, error, text)
+    if ErrorHandler.__debug:
+      restext = text
+    else:
+      restext = None
+    return ErrorHandler.commodore(title, error, restext, version)
 
   @staticmethod
   def handle_error():
@@ -136,7 +143,8 @@ class ErrorHandler(object):
     Log.getLogger(__name__).error(message)
     return ErrorHandler.show(title='403', error=message + '<br/>?SYNTAX ERROR.'
                              + '<br/><br/>', text=stringHelper.plaintext2html(
-                                                                    traceback))
+                                                                    traceback),
+                             version=version)
 
   @staticmethod
   def error_page_404(status, message, traceback, version):

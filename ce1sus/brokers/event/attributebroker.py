@@ -141,7 +141,9 @@ class Attribute(BASE):
     result[self.__class__.__name__]['modified'] = '{0}'.format(self.modified)
     result[self.__class__.__name__]['creator'] = self.creator.toDict()
     result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
-    result[self.__class__.__name__]['value'] = self.value
+    result[self.__class__.__name__]['value'] = '{0}'.format(self.value)
+    result[self.__class__.__name__]['creator'] = self.creator.toDict()
+    result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
     return result
 
 

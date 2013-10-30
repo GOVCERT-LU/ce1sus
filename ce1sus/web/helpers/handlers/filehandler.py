@@ -184,20 +184,23 @@ class UnMaliciousFileHandler(GenericHandler):
   def convertToAttributeValue(self, value):
     attribute = value.attribute
     user = Protector.getUser()
-    eventID = attribute.object.event_id
-    if eventID is None:
-      eventID = attribute.object.parentEvent_id
-    userInGroups = self.__canUserDownload(eventID, user)
-    userIsOwner = attribute.creator_id == user.identifier
-    if userInGroups and userIsOwner:
-      link = Link(UnMaliciousFileHandler.URLSTR.format(
-                                            attribute.object.identifier,
-                                            attribute.identifier,
-                                            ''),
-                  'Download')
-      return link
+    if user is None:
+      return '(Not Provided)'
     else:
-      return '(Not Accessible)'
+      eventID = attribute.object.event_id
+      if eventID is None:
+        eventID = attribute.object.parentEvent_id
+      userInGroups = self.__canUserDownload(eventID, user)
+      userIsOwner = attribute.creator_id == user.identifier
+      if userInGroups and userIsOwner:
+        link = Link(UnMaliciousFileHandler.URLSTR.format(
+                                              attribute.object.identifier,
+                                              attribute.identifier,
+                                              ''),
+                    'Download')
+        return link
+      else:
+        return '(Not Accessible)'
 
 
 class MaliciousFileHandler(UnMaliciousFileHandler):

@@ -87,6 +87,15 @@ class Event(BASE):
     """
     return Status.getByID(self.status_id)
 
+  @stauts.setter
+  def setStauts(self, statusText):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.status_id = Status.getByName(statusText)
+
   @property
   def risk(self):
     """
@@ -94,7 +103,16 @@ class Event(BASE):
 
     :returns: String
     """
-    return Risk.getByID(self.status_id)
+    return Risk.getByID(self.risk_id)
+
+  @risk.setter
+  def risk(self, riskText):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.risk_id = Risk.getByName(riskText)
 
   @property
   def analysis(self):
@@ -103,7 +121,16 @@ class Event(BASE):
 
     :returns: String
     """
-    return Analysis.getByID(self.status_id)
+    return Analysis.getByID(self.analysis_status_id)
+
+  @analysis.setter
+  def analysis(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.analysis_status_id = Analysis.getByName(text)
 
   @property
   def tlp(self):
@@ -115,6 +142,15 @@ class Event(BASE):
     if self.__tlpObj is None:
       self.__tlpObj = TLPLevel(self.tlp_level_id)
     return self.__tlpObj
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    pass
 
   def addGroup(self, group):
     """
@@ -362,6 +398,7 @@ class Object(BASE):
                                                                         True
                                                                         )
     result[self.__class__.__name__]['attributes'] = list()
+    result[self.__class__.__name__]['creator'] = self.creator.toDict()
     if full:
       for attribute in self.attributes:
         result[self.__class__.__name__]['attributes'].append(
