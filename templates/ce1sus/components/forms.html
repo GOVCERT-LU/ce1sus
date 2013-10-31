@@ -6,7 +6,6 @@
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='ShareTLP files',name='shareTLP',enabled=enabled,hasEmpty=False)"/>
   <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=False,selected=3)"/>
   
 % else:
@@ -17,7 +16,6 @@
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=group.name,enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=group.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False,selected=group.canDownload)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='ShareTLP',name='shareTLP',enabled=enabled,hasEmpty=False,selected=group.shareTLP)"/>
   <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=False,selected=group.tlpLvl)"/>
 % endif
 </%def>
@@ -41,8 +39,8 @@
   <%call expr="labeledInput.labeledEditBox(label='Username',name='username',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledPasswordBox(label='Password',name='password',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value='',enabled=enabled)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=True)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='Disabled',name='disabled',enabled=enabled,hasEmpty=True)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=False,selected=0)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Disabled',name='disabled',enabled=enabled,hasEmpty=False,selected=0)"/>
   
   
 % else:

@@ -196,8 +196,6 @@ class ValueBroker(BrokerBase):
     """
     return ValueBroker.getClassByClassString(attributeDefinition.className)
 
-
-
   def __setClassByAttribute(self, attribute):
     """
     sets class for the attribute

@@ -18,34 +18,33 @@ from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.rest.handlers.restobject import RestObjectController
 from ce1sus.rest.handlers.restattribute import RestAttributeController
 from cherrypy import request
+from dagr.db.session import SessionManager
 
 
 class RestController(RestControllerBase):
 
   REST_mapper = {'DELETE': 'remove',
        'GET': 'view',
-       'POST': 'update',
-       'PUT': 'add'}
+       'POST': 'update'}
 
   def __init__(self, ce1susConfigFile):
     RestControllerBase.__init__(self)
-    self.instances = dict()
     self.configFile = ce1susConfigFile
+
+    self.instances = dict()
     # add instances known to rest
     self.instances['event'] = RestEventController()
     self.instances['object'] = RestObjectController()
     self.instances['attribute'] = RestAttributeController()
+    self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
-    sanityChecker = SantityChecker(self.configFile)
+
     try:
-      sanityChecker.checkDB()
-      sanityChecker.checkRestAPI(version)
+      self.sanityChecker.checkDB()
+      self.sanityChecker.checkRestAPI(version)
     except SantityCheckerException as e:
       raise cherrypy.HTTPError(500, 'Exception occurred {0}'.format(e))
-    finally:
-      sanityChecker.close()
-      sanityChecker = None
 
   def __checkApiKey(self, apiKey):
     try:
@@ -74,7 +73,8 @@ class RestController(RestControllerBase):
       raise cherrypy.HTTPError(500)
     vpath = list(vpath)
     self.__checkVersion(vpath.pop(0))
-    apikey = request.headers.get('key', '').strip()
+    # apikey = request.headers.get('key', '').strip()
+    apikey = 'dd94709528bb1c83d08f3088d4043f4742891f4f'
     self.__checkApiKey(apikey)
 
     instance = self.__getController(vpath.pop(0))
@@ -89,7 +89,8 @@ class RestController(RestControllerBase):
     method = getattr(instance, RestController.REST_mapper[action], None)
     if method and getattr(method, "exposed"):
       try:
-        return method(identifier, apikey, **params)
+        result = method(identifier, apikey, **params)
+        return result
       except TypeError as e:
         self.getLogger().debug(
                         'Method {0} is not callable for {1} with {2}'.format(

@@ -94,15 +94,6 @@ class User(BASE):
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['username'] = self.username
-    result[self.__class__.__name__]['email'] = self.email
-    return result
-
-
 class Group(BASE):
   """This is a container class for the GRUOPS table."""
   def __init__(self):
@@ -111,7 +102,6 @@ class Group(BASE):
   __tablename__ = 'Groups'
   identifier = Column('group_id', Integer, primary_key=True)
   name = Column('name', String)
-  shareTLP = Column('auto_share_tlp', Integer)
   description = Column('description', String)
   canDownload = Column('canDownlad', Integer)
   users = relationship(User, secondary='User_has_Groups',
@@ -156,7 +146,6 @@ class Group(BASE):
     ObjectValidator.validateAlNum(self, 'name',
                                   withSymbols=True,
                                   minLength=3)
-    ObjectValidator.validateDigits(self, 'shareTLP')
     ObjectValidator.validateAlNum(self,
                                   'description',
                                   minLength=5,
@@ -170,14 +159,3 @@ class Group(BASE):
                                   minLength=3,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
-
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['name'] = self.name
-    result[self.__class__.__name__]['description'] = self.description
-    result[self.__class__.__name__]['shareTLP'] = self.shareTLP
-    result[self.__class__.__name__]['canDownload'] = self.canDownload
-    result[self.__class__.__name__]['tlpLvl'] = self.tlpLvl
-    return result

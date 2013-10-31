@@ -28,6 +28,7 @@ from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
 from dagr.db.broker import IntegrityException
+from ce1sus.api.restclasses import RestAttribute
 
 
 class Attribute(BASE):
@@ -131,19 +132,11 @@ class Attribute(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['definition'] = self.definition.toDict()
-    result[self.__class__.__name__]['object_id'] = self.object_id
-    result[self.__class__.__name__]['created'] = '{0}'.format(self.created)
-    result[self.__class__.__name__]['modified'] = '{0}'.format(self.modified)
-    result[self.__class__.__name__]['creator'] = self.creator.toDict()
-    result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
-    result[self.__class__.__name__]['value'] = '{0}'.format(self.value)
-    result[self.__class__.__name__]['creator'] = self.creator.toDict()
-    result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
+  def toRestObject(self):
+    result = RestAttribute()
+    result.definition = self.definition.toRestObject()
+    result.value = self.value
+
     return result
 
 

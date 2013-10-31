@@ -101,7 +101,7 @@ class GroupController(Ce1susBaseController):
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
-  def modifyGroup(self, identifier=None, name=None, shareTLP=0,
+  def modifyGroup(self, identifier=None, name=None,
                   description=None, download=None, action='insert',
                   tlpLvl=None):
     """
@@ -122,7 +122,6 @@ class GroupController(Ce1susBaseController):
     template = self.getTemplate('/admin/groups/groupModal.html')
     group = self.groupBroker.buildGroup(identifier,
                                         name,
-                                        shareTLP,
                                         description,
                                         download,
                                         action,

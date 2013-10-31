@@ -9,25 +9,33 @@ __license__ = 'GPL v3+'
 
 import json
 import urllib2
-from collections import namedtuple
-from ce1sus.brokers.event.eventclasses import Event, Comment, Object, \
-                                              ObjectAttributeRelation
-from ce1sus.brokers.event.attributebroker import Attribute
 from types import DictionaryType, ListType
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
-                                                        AttributeDefinition
-from ce1sus.brokers.permission.permissionclasses import User, Group
-
+from importlib import import_module
+from ce1sus.api.restclasses import RestClass
 
 def json_pretty_print(j):
   return json.dumps(j, sort_keys=True, indent=4, separators=(',', ': '))
+
 
 class Ce1susAPIException(Exception):
 
   def __init__(self, message):
     Exception.__init__(self, message)
 
+
 class Ce1susAPI(object):
+
+  @staticmethod
+  def __instantiateClass(className):
+    module = import_module('.restclasses', 'ce1sus.api')
+    clazz = getattr(module, className)
+    # instantiate
+    instance = clazz()
+    # check if handler base is implemented
+    if not isinstance(instance, RestClass):
+      raise RestAPIException(('{0} does not implement '
+                              + 'RestClass').format(className))
+    return instance
 
   def __init__(self, apiUrl, apiKey, proxies={}):
     self.apiUrl = apiUrl
@@ -43,28 +51,32 @@ class Ce1susAPI(object):
   def __populateInstanceByDict(instance, dictionary):
     for key, value in dictionary.iteritems():
       if isinstance(value, DictionaryType):
-        subkey, subvalue = Ce1susAPI.__getObjectData(value)
-        subinstance = Ce1susAPI.__populateClassNamebyDict(subkey, subvalue)
-        setattr(instance, key, subinstance)
+        subkey, subvalue = Ce1susAPI.getObjectData(value)
+        if hasattr(instance, key):
+          subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue)
+          setattr(instance, key, subinstance)
       elif isinstance(value, ListType):
         lsit = list()
-        for item in value:
-          subkey, subvalue = Ce1susAPI.__getObjectData(item)
-          subinstance = Ce1susAPI.__populateClassNamebyDict(subkey, subvalue)
-          lsit.append(subinstance)
-        setattr(instance, key, lsit)
+        if hasattr(instance, key):
+          for item in value:
+            subkey, subvalue = Ce1susAPI.getObjectData(item)
+            subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue)
+            lsit.append(subinstance)
+          setattr(instance, key, lsit)
       else:
+        if value == 'None':
+          value = None
         setattr(instance, key, value)
 
   @staticmethod
-  def __populateClassNamebyDict(clazz, dictionary):
-    instance = eval(clazz)()
+  def populateClassNamebyDict(clazz, dictionary):
+    instance = Ce1susAPI.__instantiateClass(clazz)
     Ce1susAPI.__populateInstanceByDict(instance, dictionary)
     return instance
 
   @staticmethod
-  def __getObjectData(dict):
-    for key, value in dict.iteritems():
+  def getObjectData(dictionary):
+    for key, value in dictionary.iteritems():
       if key == 'response':
         continue
       else:
@@ -74,9 +86,10 @@ class Ce1susAPI(object):
   def __getData(obj):
     response = obj.get('response', None)
     if response.get('status', None) == 'OK':
-      return Ce1susAPI.__getObjectData(obj)
+      return Ce1susAPI.getObjectData(obj)
     else:
-      raise Ce1susAPIException(response.get('errors', None))
+      message = response.get('errors', '')[0]
+      raise Ce1susAPIException(message)
 
   def __request(self, method, data=None, extra_headers=None):
     url = '{0}/{1}'.format(self.apiUrl, method)
@@ -101,28 +114,44 @@ class Ce1susAPI(object):
   @staticmethod
   def __mapJSONToObject(jsonData):
     key, value = Ce1susAPI.__getData(jsonData)
-    return Ce1susAPI.__populateClassNamebyDict(key, value)
+    return Ce1susAPI.populateClassNamebyDict(key, value)
 
-  def getEventByID(self, identifier, complete=False):
-    if complete:
-      showAll = '?showAll=1'
+  def getEventByID(self, identifier, full=False, withDefinition=False):
+    if full:
+      parameters = '?showAll=1'
     else:
-      showAll = ''
+      parameters = ''
+    if withDefinition:
+      if parameters:
+        parameters = parameters + '&withDefinition=1'
+      else:
+        parameters = '?withDefinition=1'
 
     result = self.__request('/event/{0}{1}'.format(identifier,
-                                                   showAll),
+                                                   parameters),
                             None)
-
     return self.__mapJSONToObject(result)
 
-  def getObjectByID(self, identifier, complete=False):
-    if complete:
-      showAll = '?showAll=1'
+  def insertEvent(self, event):
+    if isinstance(event, RestClass):
+      data = dict(event.toJSON())
+      result = self.__request('/event/0', data)
     else:
-      showAll = ''
+      raise Ce1susAPIException(('Object{0} does not implement '
+                                + 'RestClass').format(event))
+
+  def getObjectByID(self, identifier, full=False, withDefinition=False):
+    if full:
+      parameters = '?showAll=1'
+    else:
+      parameters = ''
+    if withDefinition:
+      if parameters:
+        parameters = parameters + '&withDefinition=1'
+      else:
+        parameters = '?withDefinition=1'
 
     result = self.__request('/object/{0}{1}'.format(identifier,
-                                                   showAll),
+                                                   parameters),
                             None)
-
     return self.__mapJSONToObject(result)

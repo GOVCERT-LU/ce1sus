@@ -55,6 +55,18 @@ class AttributeMismatchException(CompareException):
   def __init__(self, message):
     CompareException.__init__(self, message)
 
+def getFields(obj):
+  fields = list()
+  for name in vars(type(obj)).iterkeys():
+    # if not a private or protected value and not a method
+    if not name.startswith('_') and not callable(getattr(obj, name, None)):
+      fields.append(name)
+  for name in obj.__dict__:
+    # if not a private or protected value and not a method
+    if not name.startswith('_') and not callable(getattr(obj, name, None)):
+      if not name in fields:
+        fields.append(name)
+  return fields
 
 def compareObjects(object1, object2, raiseExceptions=True):
   """
@@ -184,7 +196,6 @@ def compareObjects(object1, object2, raiseExceptions=True):
   # if this is reached they have to be equal.
   return result
 
-
 def printObject(obj, indent=0, maxRecLVL=3):
   """
   Compares recursively if the two input objects are equal on their attribute
@@ -206,7 +217,7 @@ def printObject(obj, indent=0, maxRecLVL=3):
   if (indent > maxRecLVL):
     print '{indentation}...'.format(indentation=indentStr)
     return
-  for name in vars(type(obj)).iterkeys():
+  for name in getFields(obj):
     # Not interested in private or protected attributes
     if not name.startswith('_'):
       value = None

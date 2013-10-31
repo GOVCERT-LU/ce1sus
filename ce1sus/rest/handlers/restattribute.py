@@ -56,5 +56,5 @@ class RestAttributeController(RestControllerBase):
     return self.raiseError('Exception', 'Not Implemented')
 
   @cherrypy.expose
-  def add(self, identifier, apiKey, options):
+  def insert(self, identifier, apiKey, options):
     return self.raiseError('Exception', 'Not Implemented')

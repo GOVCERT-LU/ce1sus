@@ -39,7 +39,7 @@ class SantityChecker(object):
   def __init__(self, configFile):
     # load __config foo!!
     # setup connection string and engine
-    self.sessionHandler = SessionManager(configFile)
+    self.sessionHandler = SessionManager(configFile, createInstance=False)
     self.session = self.sessionHandler.connector.getDirectSession()
 
   def getBrokerClass(self):

@@ -19,7 +19,7 @@ from dagr.db.broker import BrokerException, NothingFoundException
 
 class RestObjectController(RestControllerBase):
 
-  def __init__(self):
+  def __init__(self, sessionManager=None):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
@@ -32,10 +32,10 @@ class RestObjectController(RestControllerBase):
     return obj
 
   @cherrypy.expose
-  def view(self, identifier, apiKey, showAll=None):
+  def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
       obj = self.__getObject(identifier, apiKey)
-      return self.objectToJSON(obj, showAll)
+      return self.objectToJSON(obj, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -56,5 +56,5 @@ class RestObjectController(RestControllerBase):
     return self.raiseError('Exception', 'Not Implemented')
 
   @cherrypy.expose
-  def add(self, identifier, apiKey, options):
+  def insert(self, identifier, apiKey, options):
     return self.raiseError('Exception', 'Not Implemented')

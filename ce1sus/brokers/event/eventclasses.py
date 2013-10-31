@@ -21,6 +21,7 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
+from ce1sus.api.restclasses import RestEvent, RestComment, RestObject
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -50,9 +51,9 @@ class Event(BASE):
   status_id = Column('status_id', Integer)
   risk_id = Column('risk_id', Integer)
   analysis_status_id = Column('analysis_status_id', Integer)
-  comments = relationship("Comment", backref="Events")
+  comments = relationship("Comment")
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
-  objects = relationship('Object', backref="Events")
+  objects = relationship('Object')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
   creator_id = Column('creator_id', Integer,
@@ -79,7 +80,7 @@ class Event(BASE):
     function(obj)
 
   @property
-  def stauts(self):
+  def status(self):
     """
     returns the status
 
@@ -87,8 +88,8 @@ class Event(BASE):
     """
     return Status.getByID(self.status_id)
 
-  @stauts.setter
-  def setStauts(self, statusText):
+  @status.setter
+  def setStatus(self, statusText):
     """
     returns the status
 
@@ -221,36 +222,23 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['title'] = self.title
-    result[self.__class__.__name__]['description'] = '{0}'.format(
-                                                              self.description)
-    result[self.__class__.__name__]['first_seen'] = '{0}'.format(
-                                                              self.first_seen)
-    result[self.__class__.__name__]['last_seen'] = '{0}'.format(self.last_seen)
-    result[self.__class__.__name__]['modified'] = '{0}'.format(self.modified)
-    result[self.__class__.__name__]['tlp'] = self.tlp.text
-    result[self.__class__.__name__]['published'] = self.published
-    result[self.__class__.__name__]['status'] = self.stauts
-    result[self.__class__.__name__]['risk'] = self.risk
-    result[self.__class__.__name__]['analysis'] = self.analysis
-    result[self.__class__.__name__]['groups'] = list()
-    if full:
-      for group in self.groups:
-        result[self.__class__.__name__]['groups'].append(group.toDict())
-    result[self.__class__.__name__]['creator'] = self.creator.toDict()
-    result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
-    result[self.__class__.__name__]['objects'] = list()
-    if full:
-      for obj in self.objects:
-        result[self.__class__.__name__]['objects'].append(obj.toDict(True))
-      result[self.__class__.__name__]['comments'] = list()
-    if full:
-      for comment in self.comments:
-        result[self.__class__.__name__]['comments'].append(comment.toDict())
+  def toRestObject(self):
+    result = RestEvent()
+    result.tile = self.tile
+    result.description = self.description
+    result.first_seen = self.first_seen
+    result.last_seen = self.last_seen
+    result.tlp = self.tlp
+    result.risk = self.risk
+    result.analysis = self.analysis
+
+    result.objects = list()
+    for obj in self.objects:
+      result.objects.append(obj.toRestObject())
+
+    result.comments = list()
+    for comment in self.comments:
+      result.comments.append(comment.toRestObject())
 
     return result
 
@@ -298,16 +286,9 @@ class Comment(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['event_id'] = self.event_id
-    result[self.__class__.__name__]['comment'] = self.comment
-    result[self.__class__.__name__]['created'] = '{0}'.format(self.created)
-    result[self.__class__.__name__]['modified'] = '{0}'.format(self.modified)
-    result[self.__class__.__name__]['creator'] = self.creator.toDict()
-    result[self.__class__.__name__]['modifier'] = self.modifier.toDict()
+  def toRestObject(self):
+    result = RestComment()
+    result.comment = self.comment
 
     return result
 
@@ -319,7 +300,7 @@ class Object(BASE):
 
   __tablename__ = "Objects"
   identifier = Column('object_id', Integer, primary_key=True)
-  attributes = relationship('Attribute', backref="objects")
+  attributes = relationship('Attribute')
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
@@ -387,22 +368,14 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['event_id'] = self.event_id
-    result[self.__class__.__name__]['parentObject_id'] = self.parentObject_id
-    result[self.__class__.__name__]['parentEvent_id'] = self.parentEvent_id
-    result[self.__class__.__name__]['definition'] = self.definition.toDict(
-                                                                        True
-                                                                        )
-    result[self.__class__.__name__]['attributes'] = list()
-    result[self.__class__.__name__]['creator'] = self.creator.toDict()
-    if full:
-      for attribute in self.attributes:
-        result[self.__class__.__name__]['attributes'].append(
-                                                        attribute.toDict(True))
+  def toRestObject(self):
+    result = RestObject()
+    result.definition = self.definition.toRestObject()
+
+    result.attributes = list()
+    for attribute in self.attributes:
+      result.attributes.append(attribute.toRestObject())
+
     return result
 
 
@@ -415,9 +388,11 @@ class ObjectAttributeRelation(BASE):
 
   __tablename__ = "Attribute_Object_Relations"
   identifier = Column('AOR_id', Integer, primary_key=True)
-  ref_object_id = Column('ref_object_id', Integer, ForeignKey('Objects.object_id'))
+  ref_object_id = Column('ref_object_id',
+                         Integer,
+                         ForeignKey('Objects.object_id'))
   object = relationship(Object,
-          primaryjoin="ObjectAttributeRelation.ref_object_id==Object.identifier")
+      primaryjoin="ObjectAttributeRelation.ref_object_id==Object.identifier")
   attribute_id = Column('attribute_id',
                         Integer,
                         ForeignKey('Attributes.attribute_id'))
@@ -439,13 +414,3 @@ class ObjectAttributeRelation(BASE):
     ObjectValidator.validateDigits(self, 'ref_object_id')
     ObjectValidator.validateDigits(self, 'sameAttribute_id')
     return ObjectValidator.isObjectValid(self)
-
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['object_id'] = self.name
-    result[self.__class__.__name__]['attribute_id'] = self.description
-    result[self.__class__.__name__]['sameattribute_id'] = list()
-
-    return result

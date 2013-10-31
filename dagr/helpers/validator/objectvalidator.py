@@ -56,11 +56,12 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
     :type changeAttribute: Boolean
   """
   if hasattr(obj, attributeName):
-    value = unicode(getattr(obj, attributeName))
-    value = value.strip()
-    result = re.match(regex, value, re.UNICODE) is not None
+    value = getattr(obj, attributeName, '')
+    stringValue = '{0}'.format(value)
+    stringValue = stringValue.strip()
+    result = re.match(regex, stringValue, re.UNICODE) is not None
     if not result and changeAttribute:
-      setattr(obj, attributeName, FailedValidation(value, errorMsg))
+      setattr(obj, attributeName, FailedValidation(stringValue, errorMsg))
 
     return result
   else:

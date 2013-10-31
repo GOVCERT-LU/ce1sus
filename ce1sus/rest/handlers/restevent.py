@@ -14,24 +14,26 @@ import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
-
+from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
+import json
 
 class RestEventController(RestControllerBase):
 
-  def __init__(self):
+  def __init__(self, sessionManager=None):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
   @cherrypy.expose
-  def view(self, identifier, apiKey, showAll=None):
+  def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
       event = self.eventBroker.getEventForUser(identifier,
                                                self.getUser(apiKey))
+      return self.objectToJSON(event, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
-    return self.objectToJSON(event, showAll)
+
 
   @cherrypy.expose
   def delete(self, identifier, apiKey):
@@ -45,9 +47,33 @@ class RestEventController(RestControllerBase):
       return self.raiseError('BrokerException', e)
 
   @cherrypy.expose
-  def update(self, identifier, options):
-    return self.raiseError('Exception', 'Not Implemented')
+  def update(self, identifier, apiKey, showAll=None, withDefinition=None):
+    if identifier == '0':
+      restEvent = self.getPostObject()
+      # map restEvent on event
+      status = Status.getByName(restEvent.status)
+      tlp_idx = TLPLevel.getByName(restEvent.tlp)
+      risk = Risk.getByName(restEvent.risk)
+      analysis = Analysis.getByName(restEvent.analysis)
+      event = self.eventBroker.buildEvent(
+                     None,
+                     'insert',
+                     status,
+                     tlp_idx,
+                     restEvent.description,
+                     restEvent.title,
+                     restEvent.published,
+                     restEvent.first_seen,
+                     restEvent.last_seen,
+                     risk,
+                     analysis,
+                     self.getUser(apiKey))
+      # TODO: Attach objects
+      # TODO: Attach attribtues
+      self.eventBroker.insert(event)
+      id = event.identifier
+      eventResult = self.eventBroker.getByID()
+      return self.objectToJSON(eventResult, showAll, withDefinition)
+    else:
+      return self.raiseError('Exception', 'Not Implemented')
 
-  @cherrypy.expose
-  def add(self, identifier, apiKey, options):
-    return self.raiseError('Exception', 'Not Implemented')

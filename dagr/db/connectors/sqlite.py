@@ -20,6 +20,7 @@ from os import getcwd
 from dagr.db.recepie.satool import SATool, SAEnginePlugin
 import cherrypy
 
+
 class ForeignKeysListener(PoolListener):
   """
   Foreign Key listener to set the foreign_keys
@@ -59,13 +60,13 @@ class SqliteConnector(Connector):
     self.connetionString = 'sqlite:///{db}'.format(db=dbFile)
 
     if self.config.get('usecherrypy'):
-       SAEnginePlugin(cherrypy.engine,
-                      self.connetionString,
-                      self.debug).subscribe()
-       self.saTool = SATool()
-       cherrypy.tools.db = self.saTool
-       self.session = None
-       cherrypy.config.update({'tools.db.on': 'True'})
+      SAEnginePlugin(cherrypy.engine,
+                     self.connetionString,
+                     self.debug).subscribe()
+      self.saTool = SATool()
+      cherrypy.tools.db = self.saTool
+      self.session = None
+      cherrypy.config.update({'tools.db.on': 'True'})
     else:
       self.session = self.getDirectSession()
 

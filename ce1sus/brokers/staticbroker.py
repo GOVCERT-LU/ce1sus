@@ -49,6 +49,7 @@ class Type(object):
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
+    return result
 
   @staticmethod
   def getByID(identifier):
@@ -109,6 +110,7 @@ class Status(object):
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
+    return result
 
 
 class Analysis(object):
@@ -157,7 +159,7 @@ class Analysis(object):
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
-
+    return result
 
 class Risk(object):
   """Static class defining the risk of an event"""
@@ -205,7 +207,7 @@ class Risk(object):
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
-
+    return result
 
 class TLPLevel(object):
   """Static class defining the TLP levels of an event"""
@@ -270,6 +272,7 @@ class TLPLevel(object):
         break
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
+    return result
 
   @staticmethod
   def getColorByID(identifier):

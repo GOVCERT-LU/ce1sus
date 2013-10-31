@@ -51,7 +51,7 @@ class SessionManager:
 
   instance = None
 
-  def __init__(self, configFile):
+  def __init__(self, configFile, createInstance=True):
     # load __config foo!!
     self.__config = Configuration(configFile, 'SessionManager')
     # setup connection string and engine
@@ -65,7 +65,8 @@ class SessionManager:
     else:
       raise SessionManagerException(('Protocol {0} '
                                     + 'is undefined').format(protocol))
-    SessionManager.instance = self
+    if createInstance:
+      SessionManager.instance = self
 
   def brokerFactory(self, clazz):
     """

@@ -15,6 +15,11 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
+from dagr.helpers.hash import hashSHA1
+from sqlalchemy.ext.hybrid import hybrid_property
+from ce1sus.api.restclasses import RestObjectDefinition, \
+                                   RestAttributeDefinition
+
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -36,6 +41,20 @@ class ObjectDefinition(BASE):
   description = Column('description', String)
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all')
+
+  @hybrid_property
+  def chksum(self):
+    if self.__chksum:
+      return self.__chksum
+    else:
+      if self.name:
+        self.__chksum = hashSHA1(self.name)
+      else:
+        raise UnboundLocalError
+
+  @chksum.setter
+  def chksum(self, chksum):
+    self.__chksum = chksum
 
   def addAttribute(self, attribute):
     """
@@ -82,15 +101,11 @@ class ObjectDefinition(BASE):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['name'] = self.name
-    result[self.__class__.__name__]['description'] = self.description
-    result[self.__class__.__name__]['attributes'] = list()
-    for attribute in self.attributes:
-      result[self.__class__.__name__]['attributes'].append(attribute.toDict())
+  def toRestObject(self):
+    result = RestObjectDefinition()
+    result.name = self.name
+    result.description = self.description
+
     return result
 
 
@@ -128,6 +143,20 @@ class AttributeDefinition(BASE):
                          back_populates='attributes', cascade='all')
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
+
+  @hybrid_property
+  def chksum(self):
+    if self.__chksum:
+      return self.__chksum
+    else:
+      if self.name:
+        self.__chksum = hashSHA1(self.name + self.regex + self.classIndex)
+      else:
+        raise UnboundLocalError
+
+  @chksum.setter
+  def chksum(self, chksum):
+    self.__chksum = chksum
 
   @property
   def className(self):
@@ -265,15 +294,11 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'remove')
     function(obj)
 
-  def toDict(self, full=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['identifier'] = self.identifier
-    result[self.__class__.__name__]['name'] = self.name
-    result[self.__class__.__name__]['description'] = self.description
-    result[self.__class__.__name__]['regex'] = self.regex
-    result[self.__class__.__name__]['classIndex'] = self.classIndex
-    result[self.__class__.__name__]['handlerIndex'] = self.handlerIndex
-    result[self.__class__.__name__]['deletable'] = self.deletable
-    result[self.__class__.__name__]['share'] = self.share
+  def toRestObject(self):
+    result = RestAttributeDefinition()
+    result.description = self.description
+    result.name = self.name
+    result.regex = self.regex
+    result.classIndex = self.classIndex
+
     return result

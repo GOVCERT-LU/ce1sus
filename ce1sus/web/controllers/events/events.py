@@ -75,7 +75,7 @@ class EventsController(Ce1susBaseController):
               {'title':'Title'},
               {'analysis': 'Analysis'},
               {'risk':'Risk'},
-              {'stauts': 'Status'},
+              {'status': 'Status'},
               {'tlp':'TLP'},
               {'modified':'Last modification'},
               {'last_seen':'Last seen'}]

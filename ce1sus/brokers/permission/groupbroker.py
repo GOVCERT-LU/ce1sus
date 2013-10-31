@@ -104,7 +104,6 @@ class GroupBroker(BrokerBase):
   @staticmethod
   def buildGroup(identifier=None,
                  name=None,
-                 shareTLP=0,
                  description=None,
                  download=None,
                  action='insert',
@@ -129,7 +128,6 @@ class GroupBroker(BrokerBase):
       group.identifier = identifier
     if not action == 'remove':
       group.name = name.strip()
-      ObjectConverter.setInteger(group, 'shareTLP', shareTLP)
       ObjectConverter.setInteger(group, 'canDownload', download)
       ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
       group.description = description.strip()

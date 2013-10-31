@@ -31,6 +31,7 @@ from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from dagr.db.broker import NothingFoundException
 
+
 class AttributesController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
