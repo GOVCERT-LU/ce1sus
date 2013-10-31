@@ -56,6 +56,7 @@ CREATE TABLE `Attributes` (
   `modifier_id` bigint(20) DEFAULT NULL,
   `created` datetime NOT NULL,
   `modified` datetime DEFAULT NULL,
+  `ioc` int(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`attribute_id`),
   KEY `IDX_attr_def_attribute_id` (`def_attribute_id`),
   KEY `IDX_attr_object_id` (`object_id`),
@@ -117,6 +118,8 @@ CREATE TABLE `DEF_Attributes` (
   `classIndex` int(11) NOT NULL DEFAULT '0',
   `handlerIndex` int(11) NOT NULL DEFAULT '0',
   `deletable` int(1) NOT NULL DEFAULT '1',
+  `sharable` int(1) NOT NULL DEFAULT '0',
+  `relationable` int(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`def_attribute_id`),
   KEY `IDX_def_attributes_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
@@ -410,6 +413,7 @@ CREATE TABLE `Users` (
   `last_login` datetime DEFAULT NULL,
   `email` varchar(45) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
   `disabled` int(1) NOT NULL DEFAULT '1',
+  `apikey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
@@ -424,6 +428,32 @@ INSERT INTO `Users` (`user_id`, `username`, `password`, `privileged`, `last_logi
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+--
+-- Table structure for table `ce1sus`
+--
+
+DROP TABLE IF EXISTS `ce1sus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ce1sus` (
+  `key` varchar(45) NOT NULL,
+  `value` varchar(100) DEFAULT 'None',
+  PRIMARY KEY (`key`),
+  UNIQUE KEY `key_UNIQUE` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ce1sus`
+--
+
+LOCK TABLES `ce1sus` WRITE;
+/*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
+INSERT INTO `ce1sus` (`key`, `value`) VALUES ('app_rev','0.2.0'),('db_shema','0.2.0'),('rest_api','0.0.1');
+/*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -432,4 +462,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-09-17 14:52:06
+-- Dump completed on 2013-10-31 16:12:55
+
+
+
