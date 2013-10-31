@@ -24,11 +24,13 @@ DROP TABLE IF EXISTS `Attribute_Object_Relations`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Attribute_Object_Relations` (
   `AOR_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ref_attribute_id` bigint(20) NOT NULL,
   `attribute_id` bigint(20) NOT NULL,
   `object_id` bigint(20) NOT NULL,
   `ref_attribute_id` bigint(20) NOT NULL,
   PRIMARY KEY (`AOR_id`),
-  KEY `IDX_AOR_Object_object_id` (`object_id`),
+  UNIQUE KEY `UNQ_AOR_attribID_refAttribID` (`ref_object_id`,`ref_attribute_id`),
+  KEY `IDX_AOR_Attribtues_ref_attribute_id` (`ref_attribute_id`),
   KEY `IDX_AOR_Attribtues_attribute_id` (`attribute_id`),
   KEY `IDX_AOR_Attribtues_ref_attribute_id` (`ref_attribute_id`),
   CONSTRAINT `FK_AOR_Attribtues_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -113,7 +115,7 @@ DROP TABLE IF EXISTS `DEF_Attributes`;
 CREATE TABLE `DEF_Attributes` (
   `def_attribute_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
-  `description` mediumtext,
+  `description` mediumtext NOT NULL,
   `regex` varchar(255) NOT NULL DEFAULT '^.*$',
   `classIndex` int(11) NOT NULL DEFAULT '0',
   `handlerIndex` int(11) NOT NULL DEFAULT '0',
@@ -167,8 +169,8 @@ CREATE TABLE `DObj_has_DAttr` (
   PRIMARY KEY (`def_object_id`,`def_attribute_id`),
   KEY `IDX_DOhDA_def_object_id` (`def_attribute_id`),
   KEY `IDX_DOhDA_def_attribute_id` (`def_object_id`),
-  CONSTRAINT `FK_DObjs_DAttrs_DOId` FOREIGN KEY (`def_object_id`) REFERENCES `DEF_Objects` (`def_object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_DAttrs_DObjs_DAttrID` FOREIGN KEY (`def_attribute_id`) REFERENCES `DEF_Attributes` (`def_attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_DAttrs_DObjs_DAttrID` FOREIGN KEY (`def_attribute_id`) REFERENCES `DEF_Attributes` (`def_attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_DObjs_DAttrs_DOId` FOREIGN KEY (`def_object_id`) REFERENCES `DEF_Objects` (`def_object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -216,8 +218,8 @@ CREATE TABLE `Events` (
   KEY `IDX_Events_User_creator_user_id` (`creator_id`),
   KEY `IDX_Events_User_modifier_user_id` (`modifier_id`),
   KEY `FK_Events_User_modifier_user_id` (`modifier_id`),
-  CONSTRAINT `FK_Events_User_modifier_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_Events_User_creator_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `FK_Events_User_creator_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_Events_User_modifier_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -234,8 +236,8 @@ CREATE TABLE `Events_has_Objects` (
   PRIMARY KEY (`event_id`,`object_id`),
   KEY `IDX_EhO_event_id` (`object_id`),
   KEY `IDX_EhO_object_id` (`event_id`),
-  CONSTRAINT `fk_Eho_Object_object_id` FOREIGN KEY (`object_id`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_Eho_Event_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_Eho_Event_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_Eho_Object_object_id` FOREIGN KEY (`object_id`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -253,9 +255,8 @@ DROP TABLE IF EXISTS `Groups`;
 CREATE TABLE `Groups` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
-  `auto_share_tlp` int(1) DEFAULT '0',
   `description` mediumtext,
-  `canDownlad` int(1) DEFAULT '0',
+  `canDownlad` int(1) NOT NULL DEFAULT '0',
   `tlplvl` int(1) DEFAULT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
@@ -310,8 +311,8 @@ CREATE TABLE `Obj_links_Obj` (
   PRIMARY KEY (`object_id_to`,`object_id_from`),
   KEY `IDX_OlO_from` (`object_id_from`),
   KEY `IDX_OlO_to` (`object_id_to`),
-  CONSTRAINT `FK_Olo_Obj_object_id_to` FOREIGN KEY (`object_id_to`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_Olo_Obj_object_id_from` FOREIGN KEY (`object_id_from`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_Olo_Obj_object_id_from` FOREIGN KEY (`object_id_from`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Olo_Obj_object_id_to` FOREIGN KEY (`object_id_to`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -336,10 +337,10 @@ CREATE TABLE `Objects` (
   KEY `IDX__obj_User_creator_user_id` (`creator_id`),
   KEY `IDX_object_object_object_id` (`parentObject`),
   KEY `IDX_objects_events_event_id_parentEvent` (`parentEvent`),
-  CONSTRAINT `FK_object_object_object_id` FOREIGN KEY (`parentObject`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_DObj_objects_def_object_id` FOREIGN KEY (`def_object_id`) REFERENCES `DEF_Objects` (`def_object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_objects_events_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_objects_events_event_id_parentEvent` FOREIGN KEY (`parentEvent`) REFERENCES `Events` (`event_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_object_object_object_id` FOREIGN KEY (`parentObject`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_obj_User_creator_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -417,7 +418,8 @@ CREATE TABLE `Users` (
   `apikey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`),
-  UNIQUE KEY `username_UNIQUE` (`username`)
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  UNIQUE KEY `apikey_UNIQUE` (`apikey`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
