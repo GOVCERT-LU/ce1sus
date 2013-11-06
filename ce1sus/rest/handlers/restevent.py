@@ -40,8 +40,8 @@ class RestEventController(RestControllerBase):
   @cherrypy.expose
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
-      event = self.eventBroker.getEventForUser(identifier,
-                                               self.getUser(apiKey))
+      event = self.eventBroker.getByID(identifier)
+      self.checkIfViewable(event, self.getUser(apiKey))
       return self.objectToJSON(event, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)

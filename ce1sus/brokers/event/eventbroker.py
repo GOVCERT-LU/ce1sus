@@ -154,7 +154,7 @@ class EventBroker(BrokerBase):
                                             Event.published == 1)
                                           )
                                         ).order_by(
-                        Event.created.desc()).limit(limit).offset(offset).all()
+                        Event.created.desc())
         else:
           result = self.session.query(Event).filter(
                                       or_(
@@ -165,57 +165,17 @@ class EventBroker(BrokerBase):
                                             )
                                         )
                                       ).order_by(
-                        Event.created.desc()).limit(limit).offset(offset).all()
+                        Event.created.desc())
+        if limit is None and offset is None:
+          result = result.all()
+        else:
+          result = result.limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found')
       except sqlalchemy.exc.SQLAlchemyError as e:
         self.getLogger().fatal(e)
         self.session.rollback()
         raise BrokerException(e)
-    return result
-
-  def getEventForUser(self, identifier, user):
-    groupIDs = list()
-    tlpLevels = list()
-    for group  in user.groups:
-      groupIDs.append(group.identifier)
-      tlpLevels.append(group.tlpLvl)
-    if len(tlpLevels) == 0:
-        tlpLevels.append(3)
-    try:
-      if (len(groupIDs) > 0):
-        result = self.session.query(Event).filter(
-                                        or_(
-                                          Event.creator_id == user.identifier,
-                                          and_(
-                                            or_(
-                                            Group.identifier.in_(groupIDs),
-                                            Event.tlp_level_id.in_(tlpLevels)
-                                            ),
-                                            Event.published == 1)
-                                          ), Event.identifier == identifier
-                                                  ).one()
-      else:
-          result = self.session.query(Event).filter(
-                                            or_(
-                                          Event.creator_id == user.identifier,
-                                            and_(
-                                                Event.tlp_level_id.in_(
-                                                                  tlpLevels
-                                                ),
-                                                Event.published == 1
-                                                )
-                                              ), Event.identifier == identifier
-                                                    ).one()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                  identifier))
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
     return result
 
   def getAllForUser(self, user, limit=None, offset=None):

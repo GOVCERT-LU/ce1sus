@@ -110,3 +110,40 @@ class RestControllerBase(BaseController):
     except Exception as e:
       print e
     return obj
+
+  def checkIfViewable(self, event, user):
+    """
+    Checks if the page if viewable for the given group
+
+    :param grous: A list of strings contrianing the group names
+    :type groups: list
+
+    :returns: Boolean
+    """
+    userDefaultGroup = user.defaultGroup
+    # if the user has no default group he has no rights
+    if userDefaultGroup is None:
+      raise cherrypy.HTTPError(403)
+    self.getLogger().debug("Checked if it is viewable for user {0}".format(
+                                                                  user.username
+                                                                  )
+                           )
+    # check is the group of the user is the creation group
+    result = event.creatorGroup.identifier == userDefaultGroup.identifier
+    if not result:
+      # check tlp
+      result = event.tlp.identifier >= userDefaultGroup.tlpLvl
+      # check if the user belong to one of the common maingroups
+      if not result:
+          result = userDefaultGroup in event.maingroups
+      # check if the user belong to one of the common groups
+      if not result:
+        groups = user.defaultGroup.subgroups
+        for group in event.groups:
+          if group in groups:
+              result = True
+              break
+    if not result:
+      raise cherrypy.HTTPError(403)
+
+    return result

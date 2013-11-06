@@ -54,12 +54,12 @@
 	      <td>${comment.creator.username}</td>
 	      <td>
 		      <div class="btn-group">
-		          <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="icon-pencil" title="Edit"/></i></a>  
+		          <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="glyphicon glyphicon-pencil" title="Edit"/></i></a>  
 		            <a href="#"  role="button"
 	                onclick="if (confirm('Are you sure you want to delete?')) {
 	                    dialogCall('/events/event/comment/modifyComment?commentID=${comment.identifier}&eventID=${event.identifier}&action=remove',
 	                               'eventsTabTabContent',
-	                               '/events/event/view/${event.identifier}')}"><i class="icon-remove" title="Remove"/></a>
+	                               '/events/event/view/${event.identifier}')}"><i class="glyphicon glyphicon-remove" title="Remove"/></a>
 		      </div>
 	      </td>
 	    </tr>
