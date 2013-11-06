@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, ValidationException, \
 NothingFoundException, TooManyResultsFoundException, \
 BrokerException
 import sqlalchemy.orm.exc
-from ce1sus.brokers.permission.permissionclasses import Group
+from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
@@ -98,6 +98,40 @@ class EventBroker(BrokerBase):
         for group in groups:
           groupIDs.append(group.identifier)
         groups = self.session.query(Group).filter(not_(Group.identifier.in_(
+                                                                    groupIDs)))
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found for ID: {0}',
+                                  format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+    return groups
+
+  def getSubGroupsByEvent(self, identifier, belongIn=True):
+    """
+    Returns the groups of the given event
+
+    Note: Password will be hashed inside this function
+
+    :param identifier: identifier of the event
+    :type identifier: Integer
+    :param belongIn: If set returns all the groups of the event else
+                     all the groups not belonging to the event
+    :type belongIn: Boolean
+
+    :returns: list of Groups
+
+    :returns: Groups
+    """
+    try:
+      groups = self.session.query(SubGroup).join(Event.maingroups).filter(
+                                          Event.identifier == identifier).all()
+      if not belongIn:
+        groupIDs = list()
+        for group in groups:
+          groupIDs.append(group.identifier)
+        groups = self.session.query(SubGroup).filter(not_(SubGroup.identifier.in_(
                                                                     groupIDs)))
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
@@ -228,6 +262,52 @@ class EventBroker(BrokerBase):
       event = self.session.query(Event).filter(Event.identifier ==
                                                eventID).one()
       event.removeGroup(group)
+      self.doCommit(commit)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Group or user not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
+  def addSubGroupToEvent(self, eventID, groupID, commit=True):
+    """
+    Add a group to an event
+
+    :param eventID: Identifier of the event
+    :type eventID: Integer
+    :param groupID: Identifier of the group
+    :type groupID: Integer
+    """
+    try:
+      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
+                                               groupID).one()
+      event = self.session.query(Event).filter(Event.identifier ==
+                                               eventID).one()
+      event.maingroups.append(group)
+      self.doCommit(commit)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Group or event not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
+  def removeSubGroupFromEvent(self, eventID, groupID, commit=True):
+    """
+    removes a group to an event
+
+    :param eventID: Identifier of the event
+    :type eventID: Integer
+    :param groupID: Identifier of the group
+    :type groupID: Integer
+    """
+    try:
+      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
+                                               groupID).one()
+      event = self.session.query(Event).filter(Event.identifier ==
+                                               eventID).one()
+      event.maingroups.remove(group)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')

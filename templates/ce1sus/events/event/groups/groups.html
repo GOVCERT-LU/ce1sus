@@ -4,11 +4,9 @@
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 
 <h4>Groupmanagment:</h4>
-<%call expr="baseForms.genericForm(id='addEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-            % if not userDetails is None:
+<%call expr="baseForms.genericForm(id='groupEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
             <input type="hidden" name="eventID"
                 value="${eventID}">
-            %endif
             <div class="row">
             <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
             <table border="0" cellpadding="5">
@@ -31,6 +29,42 @@
                         multiple> 
                         %if not eventGroups is None:
                             % for group in eventGroups:
+                                <option value="${group.identifier}">${group.name}</option> 
+                            % endfor
+                        %endif
+                    </select>
+                    </td>
+                </tr>
+            </table>
+            </div>
+            </div>
+</%call>
+
+<%call expr="baseForms.genericForm(id='subGroupEventForm', url='/events/event/groups/modifySubGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+            <input type="hidden" name="eventID"
+                value="${eventID}">
+            <div class="row">
+            <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
+            <table border="0" cellpadding="5">
+                <tr>
+                    <td>Event is <b>not</b> part of these Subgroups:<BR /> <select class="form-control"  name="remainingGroups"
+                        size="10" multiple="multiple" tabindex="1"> 
+                        %if not remainingSubGroups is None:
+                            % for group in remainingSubGroups:
+                                <option value="${group.identifier}">${group.name}</option> 
+                            % endfor
+                        %endif
+                    </select>
+                    </td>
+                    <td>
+                        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
+                        <BR />
+                        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
+                    </td>
+                    <td>Event is part of these Subgroups:<BR /> <select class="form-control"  name="eventGroups" size="10"
+                        multiple> 
+                        %if not eventSubGroups is None:
+                            % for group in eventSubGroups:
                                 <option value="${group.identifier}">${group.name}</option> 
                             % endfor
                         %endif

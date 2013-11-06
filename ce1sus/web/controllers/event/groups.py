@@ -38,9 +38,14 @@ class GroupsController(Ce1susBaseController):
     self.checkIfViewable(event)
     remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier,
                                                         False)
+    remainingSubGroups = self.eventBroker.getSubGroupsByEvent(event.identifier,
+                                                           False)
+
     return template.render(eventID=event.identifier,
                            remainingGroups=remainingGroups,
-                           eventGroups=event.groups)
+                           eventGroups=event.groups,
+                           remainingSubGroups=remainingSubGroups,
+                           eventSubGroups=event.maingroups)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -81,6 +86,51 @@ class GroupsController(Ce1susBaseController):
           else:
             for groupID in eventGroups:
               self.eventBroker.removeGroupFromEvent(eventID, groupID, False)
+            self.eventBroker.doCommit(True)
+      return self.returnAjaxOK()
+    except BrokerException as e:
+      self.getLogger().fatal(e)
+      return "Error {0}".format(e)
+
+  @cherrypy.expose
+  @require(requireReferer(('/internal')))
+  def modifySubGroups(self, eventID, operation, remainingGroups=None,
+                     eventGroups=None):
+    """
+    modifies the relation between a user and his groups
+
+    :param eventID: The eventID of the event
+    :type eventID: Integer
+    :param operation: the operation used in the context (either add or remove)
+    :type operation: String
+    :param remainingGroups: The identifiers of the groups which the event is
+                            not attributed to
+    :type remainingGroups: Integer array
+    :param eventGroups: The identifiers of the groups which the event is
+                       attributed to
+    :type eventGroups: Integer array
+
+    :returns: generated HTML
+    """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfViewable(event)
+    try:
+      if operation == 'add':
+        if not (remainingGroups is None):
+          if isinstance(remainingGroups, types.StringTypes):
+            self.eventBroker.addSubGroupToEvent(eventID, remainingGroups)
+          else:
+            for groupID in remainingGroups:
+              self.eventBroker.addSubGroupToEvent(eventID, groupID, False)
+            self.eventBroker.doCommit(True)
+      else:
+        if not (eventGroups is None):
+          if isinstance(eventGroups, types.StringTypes):
+            self.eventBroker.removeSubGroupFromEvent(eventID, eventGroups)
+          else:
+            for groupID in eventGroups:
+              self.eventBroker.removeSubGroupFromEvent(eventID, groupID, False)
             self.eventBroker.doCommit(True)
       return self.returnAjaxOK()
     except BrokerException as e:
