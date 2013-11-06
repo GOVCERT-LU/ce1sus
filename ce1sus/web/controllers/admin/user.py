@@ -76,15 +76,13 @@ class UserController(Ce1susBaseController):
         user = self.userBroker.getByID(userid)
     else:
       user = user
-      # prevents unnecessary parameter
-    remainingGroups = None
-    groups = None
-    if not user is None:
-      remainingGroups = self.userBroker.getGroupsByUser(user.identifier, False)
-      groups = user.groups
+    # populate the CB
+    groups = self.groupBroker.getAll()
+    cbValues = dict()
+    for group in groups:
+      cbValues[group.name] = group.identifier
     return template.render(userDetails=user,
-                           userGroups=groups,
-                           remainingGroups=remainingGroups)
+                           cbValues=cbValues)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -95,7 +93,11 @@ class UserController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/users/userModal.html')
-    return template.render(user=None, errorMsg=None)
+    groups = self.groupBroker.getAll()
+    cbValues = dict()
+    for group in groups:
+      cbValues[group.name] = group.identifier
+    return template.render(user=None, errorMsg=None, cbValues=cbValues)
 
   @require(privileged())
   @cherrypy.expose
@@ -125,7 +127,7 @@ class UserController(Ce1susBaseController):
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
-                 ldapUsersTable_length=None):
+                 maingroup=None, ldapUsersTable_length=None):
     """
     modifies or inserts a user with the data of the post
 
@@ -148,7 +150,7 @@ class UserController(Ce1susBaseController):
     template = self.getTemplate('/admin/users/userModal.html')
     del ldapUsersTable_length
     user = self.userBroker.buildUser(identifier, username, password,
-                 priv, email, action, disabled)
+                 priv, email, action, disabled, maingroup)
     try:
       if action == 'insert':
         self.userBroker.insert(user, validate=True)
@@ -157,8 +159,8 @@ class UserController(Ce1susBaseController):
         existingUser = None
         try:
           existingUser = self.userBroker.getUserByUserName(user.username)
-        except BrokerException as e:
-          self.getLogger().debug(e)
+        except BrokerException:
+          pass
         if existingUser is None:
           self.userBroker.insert(user, validate=False)
         else:
@@ -180,7 +182,12 @@ class UserController(Ce1susBaseController):
       return "Error {0}".format(e)
     except ValidationException:
       self.getLogger().debug('User is invalid')
-      return self.returnAjaxPostError() + template.render(user=user)
+      groups = self.groupBroker.getAll()
+      cbValues = dict()
+      for group in groups:
+        cbValues[group.name] = group.identifier
+      return self.returnAjaxPostError() + template.render(user=user,
+                                                          cbValues=cbValues)
     except DeletionException as e:
       self.getLogger().info('User tried to delete undeletable user.')
       return "Error {0}".format(e)
@@ -204,10 +211,14 @@ class UserController(Ce1susBaseController):
     errorMsg = None
     try:
       user = self.userBroker.getByID(userid)
+      groups = self.groupBroker.getAll()
+      cbValues = dict()
+      for group in groups:
+        cbValues[group.name] = group.identifier
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(user=user, errorMsg=errorMsg)
+    return template.render(user=user, errorMsg=errorMsg, cbValues=cbValues)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

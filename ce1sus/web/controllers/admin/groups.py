@@ -27,7 +27,6 @@ class GroupController(Ce1susBaseController):
 
   def __init__(self):
     Ce1susBaseController.__init__(self)
-    self.userBroker = self.brokerFactory(UserBroker)
     self.groupBroker = self.brokerFactory(GroupBroker)
 
   @require(privileged(), requireReferer(('/internal')))
@@ -79,11 +78,11 @@ class GroupController(Ce1susBaseController):
     remUsers = None
     users = None
     if not group is None:
-      remUsers = self.groupBroker.getUsersByGroup(group.identifier, False)
-      users = group.users
+      remSubGroups = self.groupBroker.getSubGroupsByGroup(group.identifier, False)
+      subgroups = group.subgroups
     return template.render(groupDetails=group,
-                           remainingUsers=remUsers,
-                           groupUsers=users,
+                           remainingSubGroups=remSubGroups,
+                           subgroups=subgroups,
                            cbTLPValues=TLPLevel.getDefinitions())
 
   @require(privileged(), requireReferer(('/internal')))
@@ -103,7 +102,7 @@ class GroupController(Ce1susBaseController):
   @cherrypy.expose
   def modifyGroup(self, identifier=None, name=None,
                   description=None, download=None, action='insert',
-                  tlpLvl=None):
+                  tlpLvl=None, email=None, usermails=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -125,7 +124,9 @@ class GroupController(Ce1susBaseController):
                                         description,
                                         download,
                                         action,
-                                        tlpLvl)
+                                        tlpLvl,
+                                        email,
+                                        usermails)
     try:
       if action == 'insert':
         self.groupBroker.insert(group)
@@ -168,8 +169,8 @@ class GroupController(Ce1susBaseController):
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
-  def editGroupUser(self, groupID, operation,
-                     groupUsers=None, remainingUsers=None):
+  def editGroupSubGroup(self, groupID, operation,
+                     groupSubGroups=None, remainingSubGroups=None):
     """
     modifies the relation between a group and its users
 
@@ -188,21 +189,21 @@ class GroupController(Ce1susBaseController):
     """
     try:
       if operation == 'add':
-        if not (remainingUsers is None):
-          if isinstance(remainingUsers, types.StringTypes):
-            self.userBroker.addUserToGroup(remainingUsers, groupID)
+        if not (remainingSubGroups is None):
+          if isinstance(remainingSubGroups, types.StringTypes):
+            self.groupBroker.addSubGroupToGroup(remainingSubGroups, groupID)
           else:
-            for userID in remainingUsers:
-              self.userBroker.addUserToGroup(userID, groupID, False)
-            self.userBroker.session.commit()
+            for subGroupID in remainingSubGroups:
+              self.groupBroker.addSubGroupToGroup(subGroupID, groupID, False)
+            self.groupBroker.doCommit(True)
       else:
-        if not (groupUsers is None):
-          if isinstance(groupUsers, types.StringTypes):
-            self.userBroker.removeUserFromGroup(groupUsers, groupID)
+        if not (groupSubGroups is None):
+          if isinstance(groupSubGroups, types.StringTypes):
+            self.groupBroker.removeSubGroupFromGroup(groupSubGroups, groupID)
           else:
-            for userID in groupUsers:
-              self.userBroker.removeUserFromGroup(userID, groupID, False)
-            self.userBroker.session.commit()
+            for subGroupID in groupSubGroups:
+              self.groupBroker.removeSubGroupFromGroup(subGroupID, groupID, False)
+            self.groupBroker.doCommit(True)
       return self.returnAjaxOK()
     except BrokerException as e:
       return "Error {0}".format(e)

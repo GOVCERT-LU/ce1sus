@@ -28,20 +28,20 @@
 	</div>
 </div>
 <br/>
-<h4>Groupmanagment of this user:</h4>
+<h4>SubGroupmanagment of this group:</h4>
 % if not groupDetails is None:
-<%call expr="baseForms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupUser',
+<%call expr="baseForms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupSubGroup',
                                refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
                                refreshContainer='groupRight')">
 <input type="hidden" name="groupID" value="${groupDetails.identifier}">
 <table border="0" cellpadding="5">
   <tr>
-     <td>Users <b>not</b> in this groups:<BR /> 
-	     <select class="form-control" name="remainingUsers"
+     <td>SubGroups <b>not</b> having this group:<BR /> 
+	     <select class="form-control" name="remainingSubGroups"
 	                  size="10" multiple="multiple"> 
-	     %if not remainingUsers is None:
-	       % for user in remainingUsers:
-	           <option value="${user.identifier}">${user.username}</option> 
+	     %if not remainingSubGroups is None:
+	       % for remsubgroup in remainingSubGroups:
+	           <option value="${remsubgroup.identifier}">${remsubgroup.name}</option> 
 	       % endfor
 	     %endif
 	     </select>
@@ -53,12 +53,12 @@
 
      </td>
      <td>
-       Users in this group:
+       Subgroups having this group:
        <BR /> 
-       <select name="groupUsers" class="form-control"  size="10" multiple> 
-       %if not groupUsers is None:
-         % for user in groupUsers:
-           <option value="${user.identifier}">${user.username}</option> 
+       <select name="groupSubGroups" class="form-control"  size="10" multiple> 
+       %if not subgroups is None:
+         % for subgroup in subgroups:
+           <option value="${subgroup.identifier}">${subgroup.name}</option> 
          % endfor
        %endif
        </select>

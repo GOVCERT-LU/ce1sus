@@ -28,43 +28,7 @@
 	</div>
 </div>
 <br/>
-<h4>Groupmanagment of this user:</h4>
-% if not userDetails is None:
-<%call expr="baseForms.genericForm(id='modifyUserGroups',url='/admin/users/editUserGroups',
-                               refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),
-                               refreshContainer='userRight')">
-	<input type="hidden" name="userID"	value="${userDetails.identifier}"> 
-	<table border="0" cellpadding="5">
-		<tr>
-			<td>User is <b>not</b> part of these groups:<BR /> <select class="form-control" 
-				name="remainingGroups" size="10" multiple="multiple">
-					%if not remainingGroups is None: 
-					   % for group in remainingGroups:
-					   <option value="${group.identifier}" data-toggle="tooltip"
-						title="${group.description}">${group.name}</option> 
-						% endfor
-					%endif
-			</select>
-			</td>
-			<td>
-			    <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-				<BR />
-				<button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-			</td>
-			<td>User is part of these groups:<BR /> <select class="form-control" 
-				name="userGroups" size="10" multiple> 
-				%if not userGroups is None: 
-				    % for group in userGroups:
-					<option value="${group.identifier}" data-toggle="tooltip"
-						title="${group.description}">${group.name}</option> 
-					% endfor
-				%endif
-			</select>
-			</td>
-		</tr>
-	</table>
-</%call>
-%endif
+
 %if not userDetails is None:
 	<%call expr="baseForms.genericModalForm(modalID='editUserModal',url='/admin/users/modifyUser',
 	                                    refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),

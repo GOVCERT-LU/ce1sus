@@ -26,6 +26,7 @@ from ce1sus.web.controllers.event.attributes import AttributesController
 from ce1sus.web.controllers.event.comments import CommentsController
 from ce1sus.sanity import SantityChecker
 from ce1sus.rest.restcontroller import RestController
+from ce1sus.web.controllers.admin.subgroups import SubGroupController
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -99,6 +100,7 @@ def bootstrap():
   cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
   Log.getLogger("run").debug("Adding events event comment")
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
+  cherrypy.tree.mount(SubGroupController(), '/admin/subgroups')
 
   # RESTFoo
   cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')

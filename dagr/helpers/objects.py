@@ -148,7 +148,7 @@ def compareObjects(object1, object2, raiseExceptions=True):
     else:
       if not ((isinstance(object1, types.NoneType) and isinstance(object2,
                                                             types.NoneType))):
-        for name in vars(object1).iterkeys():
+        for name in getFields(object1):
           # only compare public attributes/functions
           value1 = None
           if not name.startswith('_'):
@@ -167,11 +167,12 @@ def compareObjects(object1, object2, raiseExceptions=True):
                 attrName = name
                 attrValue1 = value1
                 attrValue2 = value2
-                if not compareObjects(value1, value2, raiseExceptions):
-                  result = False
+                if compareObjects(value1, value2, raiseExceptions):
+                  result = True
+
                 else:
                   # do nothing if it's a function
-                  pass
+                  result = False
             else:
               result = False
   if not result:

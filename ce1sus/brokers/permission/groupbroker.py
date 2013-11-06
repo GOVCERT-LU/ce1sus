@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from dagr.helpers.converters import ObjectConverter
-from ce1sus.brokers.permission.permissionclasses import User, Group
+from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
 
 
 class GroupBroker(BrokerBase):
@@ -27,7 +27,7 @@ class GroupBroker(BrokerBase):
     """
     return Group
 
-  def getUsersByGroup(self, identifier, belongIn=True):
+  def getSubGroupsByGroup(self, identifier, belongIn=True):
     """
     get all users in a given group
 
@@ -40,15 +40,17 @@ class GroupBroker(BrokerBase):
     :returns: list of Users
     """
     try:
-      users = self.session.query(User).join(Group.users).filter(
+      subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(
                                         Group.identifier == identifier).all()
       if not belongIn:
-        userIDs = list()
-        for user in users:
-          userIDs.append(user.identifier)
-        users = self.session.query(User).filter(~User.identifier.in_(
-                                                                    userIDs))
-      return users
+        subgroupsIDs = list()
+        for subgroup in subgroups:
+          subgroupsIDs.append(subgroup.identifier)
+        subgroups = self.session.query(SubGroup).filter(~SubGroup.identifier.in_(
+                                                                  subgroupsIDs
+                                                                            )
+                                                        )
+      return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       users = list()
     except sqlalchemy.exc.SQLAlchemyError as e:
@@ -56,7 +58,7 @@ class GroupBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def addGroupToUser(self, userID, groupID, commit=True):
+  def addSubGroupToGroup(self, subGroupID, groupID, commit=True):
     """
     Add a user to a group
 
@@ -68,17 +70,18 @@ class GroupBroker(BrokerBase):
     try:
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
-      user = self.session.query(User).filter(User.identifier == userID).one()
-      group.addUser(user)
+      subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
+                                                     == subGroupID).one()
+      group.subgroups.append(subgroup)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or user not found')
+      raise NothingFoundException('Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-  def removeGroupFromUser(self, userID, groupID, commit=True):
+  def removeSubGroupFromGroup(self, subGroupID, groupID, commit=True):
     """
     Removes a user to a group
 
@@ -90,8 +93,9 @@ class GroupBroker(BrokerBase):
     try:
       group = self.session.query(Group).filter(Group.identifier ==
                                                groupID).one()
-      user = self.session.query(User).filter(User.identifier == userID).one()
-      group.removeUser(user)
+      subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
+                                                     == subGroupID).one()
+      group.subgroups.remove(subgroup)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
@@ -107,7 +111,9 @@ class GroupBroker(BrokerBase):
                  description=None,
                  download=None,
                  action='insert',
-                 tlpLvl=None):
+                 tlpLvl=None,
+                 email=None,
+                 usermails=None):
     """
     puts a group with the data together
 
@@ -128,7 +134,9 @@ class GroupBroker(BrokerBase):
       group.identifier = identifier
     if not action == 'remove':
       group.name = name.strip()
+      group.email = email.strip()
       ObjectConverter.setInteger(group, 'canDownload', download)
       ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
+      ObjectConverter.setInteger(group, 'usermails', usermails)
       group.description = description.strip()
     return group

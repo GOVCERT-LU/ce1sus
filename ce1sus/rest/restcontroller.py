@@ -36,13 +36,14 @@ class RestController(RestControllerBase):
     self.instances['event'] = RestEventController()
     self.instances['object'] = RestObjectController()
     self.instances['attribute'] = RestAttributeController()
-    self.sanityChecker = SantityChecker(self.configFile)
+    # self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
 
     try:
-      self.sanityChecker.checkDB()
-      self.sanityChecker.checkRestAPI(version)
+      # self.sanityChecker.checkDB()
+      # self.sanityChecker.checkRestAPI(version)
+      pass
     except SantityCheckerException as e:
       raise cherrypy.HTTPError(500, 'Exception occurred {0}'.format(e))
 

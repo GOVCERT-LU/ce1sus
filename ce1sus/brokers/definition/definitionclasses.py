@@ -41,20 +41,21 @@ class ObjectDefinition(BASE):
   description = Column('description', String)
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all')
+  dbchksum = Column('chksum', String)
 
   @hybrid_property
   def chksum(self):
-    if self.__chksum:
-      return self.__chksum
+    if self.dbchksum:
+      return self.dbchksum
     else:
       if self.name:
-        self.__chksum = hashSHA1(self.name)
+        self.dbchksum = hashSHA1(self.name)
       else:
         raise UnboundLocalError
 
   @chksum.setter
   def chksum(self, chksum):
-    self.__chksum = chksum
+    self.dbchksum = chksum
 
   def addAttribute(self, attribute):
     """
@@ -143,20 +144,23 @@ class AttributeDefinition(BASE):
                          back_populates='attributes', cascade='all')
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
+  dbchksum = Column('chksum', String)
 
   @hybrid_property
   def chksum(self):
-    if self.__chksum:
-      return self.__chksum
+    if self.dbchksum:
+      return self.dbchksum
     else:
       if self.name:
-        self.__chksum = hashSHA1(self.name + self.regex + self.classIndex)
+        key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex)
+        self.dbchksum = hashSHA1(key)
+        return self.dbchksum
       else:
         raise UnboundLocalError
 
   @chksum.setter
   def chksum(self, chksum):
-    self.__chksum = chksum
+    self.dbchksum = chksum
 
   @property
   def className(self):
@@ -300,5 +304,6 @@ class AttributeDefinition(BASE):
     result.name = self.name
     result.regex = self.regex
     result.classIndex = self.classIndex
+    result.relation = self.relation
 
     return result

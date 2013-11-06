@@ -113,7 +113,7 @@
 	hasDataContent=False
 	dataToggle=''
 	 %>
-	%if enabled or selected is None:
+	%if enabled:
 	 <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
 	  %if not values is None:
 	    %if hasEmpty:

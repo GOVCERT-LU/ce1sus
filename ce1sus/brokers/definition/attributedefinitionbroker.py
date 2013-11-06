@@ -181,6 +181,28 @@ class AttributeDefinitionBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
+  def getDefintionByCHKSUM(self, chksum):
+    """
+    Returns the attribute definition object with the given name
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param identifier: the id of the requested user object
+    :type identifier: integer
+
+    :returns: Object
+    """
+    try:
+      attributeDefinition = self.session.query(AttributeDefinition).filter(
+                                AttributeDefinition.dbchksum == chksum).one()
+      return attributeDefinition
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Attribute definition not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
   def removeByID(self, identifier, commit=True):
     """
     Removes the <<getBrokerClass()>> with the given identifier

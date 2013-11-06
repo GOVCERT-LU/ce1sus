@@ -20,9 +20,9 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator
 import re
 
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
-__REL_USER_GROUPS = Table(
-   'User_has_Groups', BASE.metadata,
-   Column('user_id', Integer, ForeignKey('Users.user_id')),
+__REL_SUBGROUP_GROUPS = Table(
+   'Subgroups_has_Groups', BASE.metadata,
+   Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
    Column('group_id', Integer, ForeignKey('Groups.group_id'))
    )
 
@@ -39,36 +39,11 @@ class User(BASE):
   privileged = Column('privileged', Integer)
   last_login = Column('last_login', DateTime)
   email = Column('email', String)
-  groups = relationship('Group', secondary='User_has_Groups',
-                        back_populates='users', cascade='all')
   disabled = Column('disabled', Integer)
   apiKey = Column('apikey', Integer)
-
-  def addGroup(self, group):
-    """
-    Add a group to this user
-
-    :param group: Group to be added
-    :type group: Group
-    """
-    errors = not group.validate()
-    if errors:
-      raise ValidationException('Group to be added is invalid')
-    function = getattr(self.groups, 'append')
-    function(group)
-
-  def removeGroup(self, group):
-    """
-    Remove a group to this user
-
-    :param group: Group to be removes
-    :type group: Group
-    """
-    errors = not group.validate()
-    if errors:
-      raise ValidationException('Group to be removed is invalid')
-    function = getattr(self.groups, 'remove')
-    function(group)
+  group_id = Column('group_id', Integer, ForeignKey('Groups.group_id'))
+  defaultGroup = relationship('Group',
+                              primaryjoin='User.group_id==Group.identifier')
 
   def validate(self):
     """
@@ -104,38 +79,11 @@ class Group(BASE):
   name = Column('name', String)
   description = Column('description', String)
   canDownload = Column('canDownlad', Integer)
-  users = relationship(User, secondary='User_has_Groups',
-                       back_populates='groups', cascade='all')
+  usermails = Column('usermails', Integer)
+  email = Column('email', String)
   tlpLvl = Column('tlplvl', Integer)
-
-  def __str__(self):
-    return unicode(self.__dict__)
-
-  def addUser(self, user):
-    """
-    Add a user to this group
-
-    :param user: User to be added
-    :type user: User
-    """
-    errors = not user.validate()
-    if errors:
-      raise ValidationException('User to be added is invalid')
-    function = getattr(self.users, 'append')
-    function(user)
-
-  def removeUser(self, user):
-    """
-    Remove a user to this group
-
-    :param user: User to be removes
-    :type user: User
-    """
-    errors = not user.validate()
-    if errors:
-      raise ValidationException('User to be removed is invalid')
-    function = getattr(self.users, 'remove')
-    function(user)
+  subgroups = relationship('SubGroup', secondary='Subgroups_has_Groups',
+                       back_populates='groups', cascade='all')
 
   def validate(self):
     """
@@ -152,10 +100,36 @@ class Group(BASE):
                                   withSpaces=True,
                                   withNonPrintableCharacters=True,
                                   withSymbols=True)
+    ObjectValidator.validateDigits(self, 'canDownload', minimal=0, maximal=1)
+    ObjectValidator.validateDigits(self, 'usermails', minimal=0, maximal=1)
+    ObjectValidator.validateEmailAddress(self, 'email')
+    return ObjectValidator.isObjectValid(self)
+
+class SubGroup(BASE):
+
+  def __init__(self):
+    pass
+
+  __tablename__ = 'Subgroups'
+  identifier = Column('subgroup_id', Integer, primary_key=True)
+  name = Column('name', String)
+  description = Column('description', String)
+  groups = relationship(Group, secondary='Subgroups_has_Groups',
+                       back_populates='subgroups', cascade='all')
+
+  def validate(self):
+    """
+    Checks if the attributes of the class are valid
+
+    :returns: Boolean
+    """
+    ObjectValidator.validateAlNum(self, 'name',
+                                  withSymbols=True,
+                                  minLength=3)
     ObjectValidator.validateAlNum(self,
                                   'description',
-                                  withNonPrintableCharacters=True,
+                                  minLength=5,
                                   withSpaces=True,
-                                  minLength=3,
+                                  withNonPrintableCharacters=True,
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)

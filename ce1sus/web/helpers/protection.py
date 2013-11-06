@@ -16,6 +16,7 @@ import re
 SESSION_KEY_USERNAME = '_cp_username'
 SESSION_KEY_USER = '_cp_user'
 SESSION_KEY_GROUPS = '_cp_userGroups'
+SESSION_KEY_DEFAULTGROUP = '_cp_defaultUserGroup'
 
 
 class Protector(object):
@@ -61,7 +62,11 @@ class Protector(object):
     userBroker = SessionManager.getInstance().brokerFactory(UserBroker)
     user = userBroker.getUserByUserName(username)
     attribute[SESSION_KEY_USER] = user
-    attribute[SESSION_KEY_GROUPS] = user.groups
+    if user.defaultGroup is None:
+      attribute[SESSION_KEY_GROUPS] = None
+    else:
+      attribute[SESSION_KEY_GROUPS] = user.defaultGroup.subgroups
+    attribute[SESSION_KEY_DEFAULTGROUP] = user.defaultGroup
 
   @staticmethod
   def getUserName():
@@ -87,6 +92,12 @@ class Protector(object):
   def getUserGroups():
     attribute = getattr(cherrypy, 'session')
     groups = attribute.get(SESSION_KEY_GROUPS, None)
+    return groups
+
+  @staticmethod
+  def getUserDefaultGroup():
+    attribute = getattr(cherrypy, 'session')
+    groups = attribute.get(SESSION_KEY_DEFAULTGROUP, None)
     return groups
 
   @staticmethod

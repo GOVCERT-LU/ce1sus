@@ -128,11 +128,15 @@ class RestObject(RestClass):
     RestClass.__init__(self)
     self.definition = None
     self.attributes = None
+    self.parentObject_id = None
+    self.parentEvent_id = None
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
-    method = getattr(self.definition, 'toJSON')
+
+    result[self.__class__.__name__]['parentObject_id'] = self.parentObject_id
+    result[self.__class__.__name__]['parentEvent_id'] = self.parentEvent_id
     result[self.__class__.__name__]['definition'] = self.definition.toJSON(
                                               full=True,
                                               withDefinition=withDefinition
@@ -156,6 +160,7 @@ class RestAttribute(RestClass):
     RestClass.__init__(self)
     self.definition = None
     self.value = None
+    self.ioc = None
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -165,6 +170,7 @@ class RestAttribute(RestClass):
                                                 withDefinition=withDefinition
                                                           )
     result[self.__class__.__name__]['value'] = '{0}'.format(self.value)
+    result[self.__class__.__name__]['ioc'] = '{0}'.format(self.ioc)
     return result
 
 
@@ -174,24 +180,24 @@ class RestObjectDefinition(RestClass):
     RestClass.__init__(self)
     self.name = None
     self.description = None
-    self.__chksum = None
+    self.dbchksum = None
 
   @property
   def chksum(self):
-    if self.__chksum is None:
-      self.__chksum = hashSHA1(self.name)
-    return self.__chksum
+    if self.dbchksum is None:
+      self.dbchksum = hashSHA1(self.name)
+    return self.dbchksum
 
   @chksum.setter
   def chksum(self, value):
     if self.name:
       testvalue = hashSHA1(self.name)
       if testvalue == value:
-        self.__chksum = value
+        self.dbchksum = value
       else:
-        self.__chksum = None
+        self.dbchksum = None
     else:
-      self.__chksum = value
+      self.dbchksum = value
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -212,14 +218,14 @@ class RestAttributeDefinition(RestClass):
     self.description = None
     self.regex = None
     self.classIndex = None
-    self.__chksum = None
+    self.dbchksum = None
 
   @property
   def chksum(self):
-    if self.__chksum is None:
+    if self.dbchksum is None:
       key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex)
-      self.__chksum = hashSHA1(key)
-    return self.__chksum
+      self.dbchksum = hashSHA1(key)
+    return self.dbchksum
 
   @chksum.setter
   def chksum(self, value):
@@ -227,11 +233,11 @@ class RestAttributeDefinition(RestClass):
       key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex)
       testvalue = hashSHA1(key)
       if testvalue == value:
-        self.__chksum = value
+        self.dbchksum = value
       else:
-        self.__chksum = None
+        self.dbchksum = None
     else:
-      self.__chksum = value
+      self.dbchksum = value
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -243,6 +249,7 @@ class RestAttributeDefinition(RestClass):
       result[self.__class__.__name__]['regex'] = self.regex
       result[self.__class__.__name__]['classIndex'] = self.classIndex
 
-    key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex)
     result[self.__class__.__name__]['chksum'] = self.chksum
+    result[self.__class__.__name__]['relation'] = self.relation
+
     return result

@@ -22,6 +22,7 @@ from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.event.eventclasses import Event, Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
+import uuid
 
 
 class EventBroker(BrokerBase):
@@ -42,7 +43,6 @@ class EventBroker(BrokerBase):
       raise ValidationException('Event to be inserted is invalid')
     try:
       BrokerBase.insert(self, instance, False)
-      self.doCommit(False)
       # insert value for value table
       for obj in instance.objects:
         for attribute in obj.attributes:
@@ -129,22 +129,27 @@ class EventBroker(BrokerBase):
     return result
 
   def __getAllAccordingToPermissions(self,
-                                     userID,
-                                     groupIDs,
-                                     tlpLevels,
+                                     user,
                                      limit,
                                      offset):
-      if len(tlpLevels) == 0:
-        tlpLevels.append(3)
+    if user.defaultGroup is None:
+      # as the user has no main group it is impossible to see any thing
+      result = list()
+    else:
+      tlpLVL = user.defaultGroup.tlpLvl
+      mainGroupID = user.defaultGroup.identifier
+      subGroupsIDs = list()
+      for subgroup in user.defaultGroup.subgroups:
+        subGroupsIDs.append(subgroup.identifier)
       try:
-        if (len(groupIDs) > 0):
+        if len(subGroupsIDs) > 0:
           result = self.session.query(Event).filter(
                                         or_(
-                                          Event.creator_id == userID,
+                                          Event.creatorGroup_id == mainGroupID,
                                           and_(
                                             or_(
-                                            Group.identifier.in_(groupIDs),
-                                            Event.tlp_level_id.in_(tlpLevels)
+                                            Event.groups.identifier.in_(subGroupsIDs),
+                                            Event.tlp_level_id >= tlpLVL
                                             ),
                                             Event.published == 1)
                                           )
@@ -152,16 +157,14 @@ class EventBroker(BrokerBase):
                         Event.created.desc()).limit(limit).offset(offset).all()
         else:
           result = self.session.query(Event).filter(
-                                            or_(
-                                            Event.creator_id == userID,
-                                            and_(
-                                                Event.tlp_level_id.in_(
-                                                                  tlpLevels
-                                                ),
-                                                Event.published == 1
-                                                )
-                                              )
-                                            ).order_by(
+                                      or_(
+                                        Event.creatorGroup_id == mainGroupID,
+                                        and_(
+                                            Event.tlp_level_id >= tlpLVL,
+                                            Event.published == 1
+                                            )
+                                        )
+                                      ).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found')
@@ -169,7 +172,7 @@ class EventBroker(BrokerBase):
         self.getLogger().fatal(e)
         self.session.rollback()
         raise BrokerException(e)
-      return result
+    return result
 
   def getEventForUser(self, identifier, user):
     groupIDs = list()
@@ -223,14 +226,7 @@ class EventBroker(BrokerBase):
         offset = 0
       return self.getAllLimited(limit, offset)
     else:
-      groupIDs = list()
-      tlpLevels = list()
-      for group  in user.groups:
-        groupIDs.append(group.identifier)
-        tlpLevels.append(group.tlpLvl)
-      return self.__getAllAccordingToPermissions(user.identifier,
-                                                 groupIDs,
-                                                 tlpLevels,
+      return self.__getAllAccordingToPermissions(user,
                                                  limit,
                                                  offset)
 
@@ -339,6 +335,7 @@ class EventBroker(BrokerBase):
       event.modified = datetime.now()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
+      event.uuid = unicode(uuid.uuid4())
       if first_seen:
         ObjectConverter.setDate(event, 'first_seen', first_seen)
       else:
@@ -349,6 +346,9 @@ class EventBroker(BrokerBase):
         event.last_seen = datetime.now()
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
+      event.creatorGroup = user.defaultGroup
+      event.creatorGroup_id = event.creatorGroup.identifier
+      ObjectConverter.setInteger(event, 'creatorGroup_id', published)
       if action == 'insert':
         event.created = datetime.now()
         event.creator = user

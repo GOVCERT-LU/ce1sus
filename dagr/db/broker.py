@@ -197,12 +197,7 @@ class BrokerBase(object):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-    finally:
-      if commit:
-        try:
-          self.session.remove()
-        except AttributeError:
-          pass
+
 
   def insert(self, instance, commit=True, validate=True):
     """

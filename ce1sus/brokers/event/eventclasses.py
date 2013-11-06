@@ -16,7 +16,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from sqlalchemy.types import DateTime
-from ce1sus.brokers.permission.permissionclasses import User, Group
+from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
 from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
@@ -26,6 +26,10 @@ from ce1sus.api.restclasses import RestEvent, RestComment, RestObject
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
     Column('group_id', Integer, ForeignKey('Groups.group_id'))
+)
+_REL_SUBGROUPS_EVENTS = Table('Subgroups_has_Events', BASE.metadata,
+    Column('event_id', Integer, ForeignKey('Events.event_id')),
+    Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id'))
 )
 _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
@@ -53,9 +57,13 @@ class Event(BASE):
   analysis_status_id = Column('analysis_status_id', Integer)
   comments = relationship("Comment")
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
+  maingroups = relationship(SubGroup,
+                            secondary='Subgroups_has_Events',
+                            backref="events")
   objects = relationship('Object')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
+  # creators and modifiers will be gorups
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
@@ -64,7 +72,11 @@ class Event(BASE):
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Event.modifier_id==User.identifier")
+  creatorGroup_id = Column('creatorGroup', Integer,
+                            ForeignKey('Groups.group_id'))
+  creatorGroup = relationship(Group)
   __tlpObj = None
+  uuid = Column('uuid', String)
 
   def addObject(self, obj):
     """
@@ -370,6 +382,8 @@ class Object(BASE):
 
   def toRestObject(self):
     result = RestObject()
+    result.parentObject_id = self.parentObject_id
+    result.parentEvent_id = self.parentEvent_id
     result.definition = self.definition.toRestObject()
 
     result.attributes = list()

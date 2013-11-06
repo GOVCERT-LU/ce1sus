@@ -32,26 +32,28 @@ class Ce1susBaseController(BaseController):
 
     :returns: Boolean
     """
+    userDefaultGroup = Protector.getUserDefaultGroup()
+    # if the user has no default group he has no rights
+    if userDefaultGroup is None:
+      raise cherrypy.HTTPError(403)
     user = Protector.getUser()
     self.getLogger().debug("Checked if it is viewable for user {0}".format(
                                                                   user.username
                                                                   )
                            )
-    result = event.creator.identifier == user.identifier
+    # check is the group of the user is the creation group
+    result = event.creatorGroup.identifier == userDefaultGroup.identifier
     if not result:
       # check tlp
-      tlpLevel = 3
-      groups = Protector.getUserGroups()
-      if groups is None:
-        return tlpLevel
-      else:
-        for group in groups:
-          tlpLevel = min(tlpLevel, group.tlpLvl)
-      result = event.tlp.identifier >= tlpLevel
+      result = event.tlp.identifier >= userDefaultGroup.tlpLvl
+      # check if the user belong to one of the common maingroups
       if not result:
-        for userGrp in user.groups:
-          for group in groups:
-            if userGrp == group:
+          result = userDefaultGroup in event.maingroups
+      # check if the user belong to one of the common groups
+      if not result:
+        groups = Protector.getUserGroups()
+        for group in event.groups:
+          if group in groups:
               result = True
               break
     if not result:

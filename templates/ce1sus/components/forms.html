@@ -6,8 +6,9 @@
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False)"/>
-  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=False,selected=3)"/>
-  
+  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=True,selected=3)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Send mails to users',name='usermails',enabled=enabled,hasEmpty=False)"/>
 % else:
   <input type="hidden" name="identifier" value="${group.identifier}">
   %if not group.identifier is None:
@@ -16,7 +17,23 @@
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=group.name,enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=group.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Download files',name='download',enabled=enabled,hasEmpty=False,selected=group.canDownload)"/>
-  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=False,selected=group.tlpLvl)"/>
+  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,hasEmpty=True,selected=group.tlpLvl)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Email',name='email',enabled=enabled,value=group.email)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Send mails to users',name='usermails',enabled=enabled,hasEmpty=False,selected=group.usermails)"/>
+% endif
+</%def>
+
+<%def name="subgroupForm(subgroup,enabled)">
+% if subgroup is None:
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+% else:
+  <input type="hidden" name="identifier" value="${subgroup.identifier}">
+  %if not subgroup.identifier is None:
+    <%call expr="labeledInput.labeledEditBox(label='Identifier',name='groupID',value=subgroup.identifier,enabled=False)"/>
+  %endif
+  <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=subgroup.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=subgroup.description,enabled=enabled)"/> 
 % endif
 </%def>
 
@@ -30,7 +47,9 @@
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='objectID',value=object.identifier,enabled=False)"/>
   %endif
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=object.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Checksum',name='',value=object.chksum,enabled=False)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=object.description,enabled=enabled)"/>
+  
 % endif
 </%def>
 
@@ -41,7 +60,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=False,selected=0)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Disabled',name='disabled',enabled=enabled,hasEmpty=False,selected=0)"/>
-  
+  <%call expr="labeledInput.labeledComboBox(label='Main Group',name='maingroup',values=cbValues,enabled=enabled,hasEmpty=False,selected=1)"/>
   
 % else:
 %if not user.identifier is None:
@@ -53,7 +72,9 @@
   <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value=user.email,enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Disabled',name='disabled',enabled=enabled,hasEmpty=True,selected=user.disabled)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Main Group',name='maingroup',values=cbValues,enabled=enabled,hasEmpty=False, selected=user.group_id)"/>
   <%call expr="labeledInput.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
+  
 % endif
 </%def>
 
@@ -75,6 +96,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='AttrID',value=attribute.identifier,enabled=False)"/>
 %endif
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=attribute.name,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Checksum',name='',value=attribute.chksum,enabled=False)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Group share',name='share',enabled=enabled,hasEmpty=False,selected=attribute.share)"/>
@@ -109,6 +131,7 @@
   <input type="hidden" name="identifier" value="${event.identifier}">
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value=event.identifier,enabled=False)"/>
 %endif
+  <%call expr="labeledInput.labeledEditBox(label='UUID',name='',value=event.uuid, enabled=False)"/>
   <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value=event.title, enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=event.description,enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Published',name='published',enabled=enabled,hasEmpty=True,selected=event.published)"/>

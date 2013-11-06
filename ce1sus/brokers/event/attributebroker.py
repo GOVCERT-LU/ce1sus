@@ -136,6 +136,7 @@ class Attribute(BASE):
     result = RestAttribute()
     result.definition = self.definition.toRestObject()
     result.value = self.value
+    result.ioc = self.ioc
 
     return result
 
@@ -186,6 +187,45 @@ class AttributeBroker(BrokerBase):
     attribute = BrokerBase.getByID(self, identifier)
     return attribute
 
+  def createRelations(self, instance, commit=False):
+    clazz = self.valueBroker.getClassByAttribute(instance)
+    # find the same values!
+    sameSalues = self.valueBroker.lookforValue(clazz,
+                                           instance.value)
+
+    # add them to relation table
+    for sameValue in sameSalues:
+      # only consider the events which are not part of the current event and
+
+      if ((sameValue.attribute.object.event.identifier !=
+           instance.object.event.identifier)
+          and (instance.definition.relation == 1)):
+        # one way
+        relation = ObjectAttributeRelation()
+        relation.ref_object_id = instance.object.identifier
+        relation.object = instance.object
+        relation.attribute_id = instance.identifier
+        relation.attribute = instance
+        relation.sameAttribute_id = sameValue.attribute.identifier
+        relation.sameAttribute = sameValue.attribute
+        try:
+          BrokerBase.insert(self, relation, False)
+        except IntegrityException:
+          self.getLogger().debug('Duplicate found')
+        # the other way
+        relation = ObjectAttributeRelation()
+        relation.ref_object_id = sameValue.attribute.object.identifier
+        relation.object = sameValue.attribute.object
+        relation.attribute_id = sameValue.attribute.identifier
+        relation.attribute = sameValue.attribute
+        relation.sameAttribute_id = instance.identifier
+        relation.sameAttribute = instance
+        try:
+          BrokerBase.insert(self, relation, False)
+        except IntegrityException:
+          self.getLogger().debug('Duplicate found')
+    self.doCommit(commit)
+
   def insert(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
@@ -207,42 +247,7 @@ class AttributeBroker(BrokerBase):
       # insert value for value table
       BrokerBase.insert(self, instance, False, validate)
 
-      clazz = self.valueBroker.getClassByAttribute(instance)
-      # find the same values!
-      sameSalues = self.valueBroker.lookforValue(clazz,
-                                           instance.value)
-
-      # add them to relation table
-      for sameValue in sameSalues:
-        # only consider the events which are not part of the current event and
-
-        if ((sameValue.attribute.object.event.identifier !=
-             instance.object.event.identifier)
-            and (instance.definition.relation == 1)):
-          # one way
-          relation = ObjectAttributeRelation()
-          relation.ref_object_id = instance.object.identifier
-          relation.object = instance.object
-          relation.attribute_id = instance.identifier
-          relation.attribute = instance
-          relation.sameAttribute_id = sameValue.attribute.identifier
-          relation.sameAttribute = sameValue.attribute
-          try:
-            BrokerBase.insert(self, relation, False)
-          except IntegrityException:
-            self.getLogger().debug('Duplicate found')
-          # the other way
-          relation = ObjectAttributeRelation()
-          relation.ref_object_id = sameValue.attribute.object.identifier
-          relation.object = sameValue.attribute.object
-          relation.attribute_id = sameValue.attribute.identifier
-          relation.attribute = sameValue.attribute
-          relation.sameAttribute_id = instance.identifier
-          relation.sameAttribute = instance
-          try:
-            BrokerBase.insert(self, relation, False)
-          except IntegrityException:
-            self.getLogger().debug('Duplicate found')
+      self.createRelations(instance)
 
       self.valueBroker.inserByAttribute(instance, False)
       self.doCommit(commit)
@@ -311,7 +316,11 @@ class AttributeBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def __lookForValueAndAttribID(self, clazz, value, attributeDefinitionID, operand='=='):
+  def __lookForValueAndAttribID(self,
+                                clazz,
+                                value,
+                                attributeDefinitionID,
+                                operand='=='):
     try:
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(

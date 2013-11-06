@@ -178,54 +178,11 @@ class UserBroker(BrokerBase):
       raise BrokerException(e)
     return groups
 
-  def addUserToGroup(self, userID, groupID, commit=True):
-    """
-    Add a group to a user
-
-    :param userID: Identifier of the user
-    :type userID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
-    """
-    try:
-      group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
-      user = self.session.query(User).filter(User.identifier == userID).one()
-      user.addGroup(group)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or user not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def removeUserFromGroup(self, userID, groupID, commit=True):
-    """
-    removes a group to a user
-
-    :param userID: Identifier of the user
-    :type userID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
-    """
-    try:
-      group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
-      user = self.session.query(User).filter(User.identifier == userID).one()
-      user.removeGroup(group)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or user not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
   # pylint: disable=R0913
   @staticmethod
   def buildUser(identifier=None, username=None, password=None,
-                 priv=None, email=None, action='insert', disabled=None):
+                 priv=None, email=None, action='insert', disabled=None,
+                 maingroup=None):
     """
     puts a user with the data together
 
@@ -256,6 +213,8 @@ class UserBroker(BrokerBase):
       ObjectConverter.setInteger(user, 'disabled', disabled)
     if string.isNotNull(priv):
       ObjectConverter.setInteger(user, 'privileged', priv)
+    if string.isNotNull(maingroup):
+      ObjectConverter.setInteger(user, 'group_id', maingroup)
     if action == 'insertLDAP':
       user.identifier = None
       lh = LDAPHandler.getInstance()
@@ -267,6 +226,7 @@ class UserBroker(BrokerBase):
       user.email = ldapUser.mail
       user.disabled = 1
       user.privileged = 0
+      user.group_id = 1
     return user
 
   def getUserByApiKey(self, apiKey):

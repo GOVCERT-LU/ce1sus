@@ -42,6 +42,7 @@ class SantityChecker(object):
     self.sessionHandler = SessionManager(configFile, createInstance=False)
     self.session = self.sessionHandler.connector.getDirectSession()
 
+
   def getBrokerClass(self):
     return SanityValue
 

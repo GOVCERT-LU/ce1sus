@@ -125,6 +125,28 @@ class ObjectDefinitionBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
+  def getDefintionByCHKSUM(self, chksum):
+    """
+    Returns the object definition with the given check sum
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param chksum: the chksum of the requested object definition
+    :type identifier: integer
+
+    :returns: ObjectDefiniton
+    """
+    try:
+      objectDefinition = self.session.query(ObjectDefinition).filter(
+                                ObjectDefinition.dbchksum == chksum).one()
+      return objectDefinition
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Object definition not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
   @staticmethod
   def buildObjectDefinition(identifier=None, name=None,
                   description=None, action='insert'):
