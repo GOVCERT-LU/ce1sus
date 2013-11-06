@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*- 
+
+<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/> 
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+
+</div>
+
+<!-- group details -->
+<h3>SubGroup details:</h3>
+<%call expr="forms.subgroupForm(subgroupDetails, False)"/>
+<div class="row">
+	<div class="col-xs-3 col-sm-3" style="text-align: right">
+		% if not subgroupDetails is None:
+		<div class="btn-group">
+			<a href="#editSubGroupModal" role="button" class="btn  btn-default"
+				data-toggle="modal">Edit</a>
+			<button class="btn btn-danger"
+                onclick="if (confirm('Are you sure you want to delete?')) {
+                    dialogCall('/admin/subgroups/modifySubGroup?identifier=${subgroupDetails.identifier}&action=remove',
+                               'adminTabsTabContent',
+                               '/admin/subgroups')}">
+            Delete
+            </button>
+		</div>
+		%endif
+	</div>
+</div>
+<br/>
+<h4>Groupmanagment of this subgroup:</h4>
+% if not subgroupDetails is None:
+<%call expr="baseForms.genericForm(id='editGroupUsers',url='/admin/subgroups/editSubGroupGroup',
+                               refreshUrl='/admin/subgroups/rightContent?subGroupid={0}'.format(subgroupDetails.identifier),
+                               refreshContainer='groupRight')">
+<input type="hidden" name="subGroupID" value="${subgroupDetails.identifier}">
+<table border="0" cellpadding="5">
+  <tr>
+     <td>Groups <b>not</b> belonging to this SubGroup:<BR /> 
+	     <select class="form-control" name="remainingGroups"
+	                  size="10" multiple="multiple"> 
+	     %if not remainingGroups is None:
+	       % for remgroup in remainingGroups:
+	           <option value="${remgroup.identifier}">${remgroup.name}</option> 
+	       % endfor
+	     %endif
+	     </select>
+     </td>
+     <td>
+       <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
+       <BR />
+       <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
+
+     </td>
+     <td>
+       Groups belonging to this SubGroup:
+       <BR /> 
+       <select name="subGroupGroups" class="form-control"  size="10" multiple> 
+       %if not groups is None:
+         % for group in groups:
+           <option value="${group.identifier}">${group.name}</option> 
+         % endfor
+       %endif
+       </select>
+     </td>
+  </tr>
+</table>
+</%call>
+%endif
+%if not subgroupDetails is None:
+	<%call expr="baseForms.genericModalForm(modalID='editSubGroupModal',
+	                                    url='/admin/subgroups/modifySubGroup',
+	                                    refreshUrl='/admin/subgroups/rightContent?subGroupid={0}'.format(subgroupDetails.identifier),
+	                                    refreshContainer='groupRight')">
+	<input type="hidden" name="action" value="update">
+	<%call expr="modals.saveButtonModal(id='editSubGroupModal',
+	                              title='Edit Group',
+	                              contentUrl='/admin/subgroups/editSubGroup/{0}'.format(subgroupDetails.identifier))"/>
+	</%call>
+%endif
