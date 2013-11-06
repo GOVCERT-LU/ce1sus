@@ -121,12 +121,12 @@ class AttributeDefinition(BASE):
                  3: 'NumberValue'}
 
   __handlerDefinitions = {0: 'generichandler.GenericHandler',
-                          1: 'filehandler.MaliciousFileHandler',
+                          1: 'filehandler.FileWithHashesHandler',
                           2: 'tickethandler.TicketHandler',
                           3: 'tickethandler.CVEHandler',
                           4: 'locationhandler.LocationHandler',
                           5: 'multiplegenerichandler.MultipleGenericHandler',
-                          6: 'filehandler.UnMaliciousFileHandler',
+                          6: 'filehandler.FileHandler',
                           7: 'datehandler.DateHandler',
                           8: 'cbvaluehandler.CBValueHandler'}
 

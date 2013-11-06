@@ -37,6 +37,7 @@ class RestEventController(RestControllerBase):
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
     self.attributeDefinitionBroker = self.brokerFactory(AttributeDefinitionBroker)
+
   @cherrypy.expose
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
@@ -47,7 +48,6 @@ class RestEventController(RestControllerBase):
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
-
 
   @cherrypy.expose
   def delete(self, identifier, apiKey):

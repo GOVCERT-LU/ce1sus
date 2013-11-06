@@ -27,9 +27,10 @@ _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
     Column('group_id', Integer, ForeignKey('Groups.group_id'))
 )
-_REL_SUBGROUPS_EVENTS = Table('Subgroups_has_Events', BASE.metadata,
-    Column('event_id', Integer, ForeignKey('Events.event_id')),
-    Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id'))
+_REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', BASE.metadata,
+    Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
+    Column('event_id', Integer, ForeignKey('Events.event_id'))
+
 )
 _OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
     Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
@@ -58,8 +59,7 @@ class Event(BASE):
   comments = relationship("Comment")
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
   maingroups = relationship(SubGroup,
-                            secondary='Subgroups_has_Events',
-                            backref="events")
+                            secondary='SubGroups_has_Events')
   objects = relationship('Object')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
@@ -328,6 +328,8 @@ class Object(BASE):
                          primaryjoin="Object.creator_id==User.identifier")
   parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
+  parentObject = relationship('Object',
+                         primaryjoin="Object.parentObject_id==Object.identifier")
   # TODO: Fix Me! - FK removed due to errors
   parentEvent_id = Column('parentEvent', Integer)
 

@@ -29,7 +29,7 @@ from dagr.web.helpers.pagination import Link
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
-
+from dagr.helpers.converters import ObjectConverter
 
 class FileNotFoundException(HandlerException):
   """File not found Exception"""
@@ -37,7 +37,7 @@ class FileNotFoundException(HandlerException):
     HandlerException.__init__(self, message)
 
 
-class UnMaliciousFileHandler(GenericHandler):
+class FileHandler(GenericHandler):
   """Handler for handling files"""
 
   URLSTR = '/events/event/attribute/file/{0}/{1}/{2}'
@@ -167,7 +167,7 @@ class UnMaliciousFileHandler(GenericHandler):
       attrID = attribute.identifier
     except  AttributeError:
       attrID = ''
-    url = UnMaliciousFileHandler.URLSTR.format(eventID,
+    url = FileHandler.URLSTR.format(eventID,
                                       attrID,
                                       'Download')
     canDownload = False
@@ -203,10 +203,10 @@ class UnMaliciousFileHandler(GenericHandler):
         return '(Not Accessible)'
 
 
-class MaliciousFileHandler(UnMaliciousFileHandler):
+class FileWithHashesHandler(FileHandler):
 
   def __init__(self):
-    UnMaliciousFileHandler.__init__(self)
+    FileHandler.__init__(self)
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
@@ -281,3 +281,4 @@ class MaliciousFileHandler(UnMaliciousFileHandler):
       return attributes
     else:
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
+

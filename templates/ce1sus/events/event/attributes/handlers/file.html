@@ -68,7 +68,7 @@ function buttonClick(){
     });
     // callback handler that will be called on success
     request.done(function (responseText, textStatus, XMLHttpRequest){
-        if (responseText.match(/^--OK--/gi)) {
+        if (responseText.match(/^<!--OK--/gi)) {
             file = responseText.match(/\*(.*)\*/);
             $("#editBox").html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="col-xs-9 col-sm-9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
         } else {

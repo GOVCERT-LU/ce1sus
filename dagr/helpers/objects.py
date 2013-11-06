@@ -59,8 +59,8 @@ def getFields(obj):
   fields = list()
   for name in vars(type(obj)).iterkeys():
     # if not a private or protected value and not a method
-    if not name.startswith('_') and not callable(getattr(obj, name, None)):
-      fields.append(name)
+      if not name.startswith('_') and not callable(getattr(obj, name, None)):
+        fields.append(name)
   for name in obj.__dict__:
     # if not a private or protected value and not a method
     if not name.startswith('_') and not callable(getattr(obj, name, None)):
