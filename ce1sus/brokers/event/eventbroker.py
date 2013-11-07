@@ -131,8 +131,12 @@ class EventBroker(BrokerBase):
         groupIDs = list()
         for group in groups:
           groupIDs.append(group.identifier)
-        groups = self.session.query(SubGroup).filter(not_(SubGroup.identifier.in_(
-                                                                    groupIDs)))
+        groups = self.session.query(SubGroup).filter(not_(
+                                                      SubGroup.identifier.in_(
+                                                                    groupIDs
+                                                                             )
+                                                          )
+                                                     )
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
@@ -182,7 +186,9 @@ class EventBroker(BrokerBase):
                                           Event.creatorGroup_id == mainGroupID,
                                           and_(
                                             or_(
-                                            Event.groups.identifier.in_(subGroupsIDs),
+                                            Event.groups.identifier.in_(
+                                                                  subGroupsIDs
+                                                                       ),
                                             Event.tlp_level_id >= tlpLVL
                                             ),
                                             Event.published == 1)

@@ -161,6 +161,7 @@ class Analysis(object):
       raise Exception('Invalid input "{0}"'.format(name))
     return result
 
+
 class Risk(object):
   """Static class defining the risk of an event"""
   __tableDefinitions = {0: 'None',
@@ -208,6 +209,7 @@ class Risk(object):
     if result is None:
       raise Exception('Invalid input "{0}"'.format(name))
     return result
+
 
 class TLPLevel(object):
   """Static class defining the TLP levels of an event"""

@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 from dagr.db.broker import BrokerBase, NothingFoundException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
-from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 
 
@@ -41,7 +40,8 @@ class SubGroupBroker(BrokerBase):
     """
     try:
       groups = self.session.query(Group).join(SubGroup.groups).filter(
-                                        SubGroup.identifier == identifier).all()
+                                              SubGroup.identifier == identifier
+                                                                      ).all()
       if not belongIn:
         groupIDs = list()
         for subgroup in groups:
@@ -52,7 +52,7 @@ class SubGroupBroker(BrokerBase):
                                                         )
       return groups
     except sqlalchemy.orm.exc.NoResultFound:
-      users = list()
+      return list()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()

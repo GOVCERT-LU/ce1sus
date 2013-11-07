@@ -56,7 +56,10 @@ class ErrorHandler(object):
                                                     text=text))
 
   @staticmethod
-  def commodore(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2'):
+  def commodore(title='500',
+                error='DEFAULT',
+                text='DEFAULT MESSAGE',
+                version='2'):
     """
     Renders the commodore error page
 

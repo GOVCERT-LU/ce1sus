@@ -31,6 +31,7 @@ from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
 from dagr.helpers.converters import ObjectConverter
 
+
 class FileNotFoundException(HandlerException):
   """File not found Exception"""
   def __init__(self, message):
@@ -97,6 +98,7 @@ class FileHandler(GenericHandler):
     else:
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
+  # pylint: disable=R0913
   def _createAttribute(self, value, obj, definitionName, user, ioc):
     """
     Creates an attribue object
@@ -285,4 +287,3 @@ class FileWithHashesHandler(FileHandler):
       return attributes
     else:
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
-

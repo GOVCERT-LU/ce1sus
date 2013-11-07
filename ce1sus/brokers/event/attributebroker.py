@@ -93,7 +93,9 @@ class Attribute(BASE):
     if self.__valueObject is None and self.__value is None:
       # try to get the value some how...
       try:
-        attributeBroker = SessionManager.getInstance().brokerFactory(AttributeBroker)
+        attributeBroker = SessionManager.getInstance().brokerFactory(
+                                                                AttributeBroker
+                                                                    )
         attributeBroker.getSetValues(self)
         return self.__value
       except BrokerException:
@@ -420,4 +422,3 @@ class AttributeBroker(BrokerBase):
                                             operand)
 
     return result
-

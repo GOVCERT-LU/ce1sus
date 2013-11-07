@@ -18,7 +18,6 @@ from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
-from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 
 
@@ -75,10 +74,11 @@ class GroupController(Ce1susBaseController):
         group = None
     else:
       group = group
-    remUsers = None
-    users = None
+    remSubGroups = None
+    subgroups = None
     if not group is None:
-      remSubGroups = self.groupBroker.getSubGroupsByGroup(group.identifier, False)
+      remSubGroups = self.groupBroker.getSubGroupsByGroup(group.identifier,
+                                                          False)
       subgroups = group.subgroups
     return template.render(groupDetails=group,
                            remainingSubGroups=remSubGroups,
@@ -202,7 +202,9 @@ class GroupController(Ce1susBaseController):
             self.groupBroker.removeSubGroupFromGroup(groupSubGroups, groupID)
           else:
             for subGroupID in groupSubGroups:
-              self.groupBroker.removeSubGroupFromGroup(subGroupID, groupID, False)
+              self.groupBroker.removeSubGroupFromGroup(subGroupID,
+                                                       groupID,
+                                                       False)
             self.groupBroker.doCommit(True)
       return self.returnAjaxOK()
     except BrokerException as e:

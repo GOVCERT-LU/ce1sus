@@ -79,7 +79,7 @@ class RestControllerBase(BaseController):
                               + 'RestClass').format(className))
     return instance
 
-  def objectToJSON(self, obj, full=False, withDefinition=False):
+  def _objectToJSON(self, obj, full=False, withDefinition=False):
     className = 'Rest' + obj.__class__.__name__
     instance = RestControllerBase.__instantiateClass(className)
 
@@ -87,10 +87,10 @@ class RestControllerBase(BaseController):
 
     result = dict(instance.toJSON(full=full,
                              withDefinition=withDefinition).items()
-                  + self.createStatus().items())
+                  + self._createStatus().items())
     return json.dumps(result)
 
-  def createStatus(self, classname=None, message=None):
+  def _createStatus(self, classname=None, message=None):
     result = dict()
     result['response'] = dict()
     result['response']['errors'] = list()
@@ -102,7 +102,7 @@ class RestControllerBase(BaseController):
     return result
 
   def raiseError(self, classname, message):
-    temp = dict(self.createStatus(classname, message))
+    temp = dict(self._createStatus(classname, message))
     return json.dumps(temp)
 
   def getPostObject(self):
@@ -116,7 +116,7 @@ class RestControllerBase(BaseController):
       print e
     return obj
 
-  def checkIfViewable(self, event, user):
+  def _checkIfViewable(self, event, user):
     """
     Checks if the page if viewable for the given group
 
@@ -153,7 +153,7 @@ class RestControllerBase(BaseController):
 
     return result
 
-  def convertToAttributeDefinition(self,
+  def _convertToAttributeDefinition(self,
                                    restAttributeDefinition,
                                    objectDefinition,
                                    commit=False):
@@ -183,7 +183,7 @@ class RestControllerBase(BaseController):
 
       return attrDefinition
 
-  def createAttribute(self,
+  def _createAttribute(self,
                         restAttribute,
                         attributeDefinition,
                         object,
@@ -213,16 +213,16 @@ class RestControllerBase(BaseController):
 
     return dbAttribute
 
-  def convertToAttribues(self, restAttributes, obj, commit=False):
+  def _convertToAttribues(self, restAttributes, obj, commit=False):
 
     result = list()
     for attribute in restAttributes:
       if attribute.value != '(Not Provided)':
-        attrDefinition = self.convertToAttributeDefinition(
+        attrDefinition = self._convertToAttributeDefinition(
                                                          attribute.definition,
                                                          obj.definition,
                                                          False)
-        dbAttribute = self.createAttribute(attribute,
+        dbAttribute = self._createAttribute(attribute,
                                            attrDefinition,
                                            obj,
                                            False)
@@ -230,7 +230,7 @@ class RestControllerBase(BaseController):
     self.attributeBroker.doCommit(commit)
     return result
 
-  def convertToObjectDefinition(self, restObjectDefinition, commit=False):
+  def _convertToObjectDefinition(self, restObjectDefinition, commit=False):
     # create object
 
     # get definition if existing
@@ -246,8 +246,8 @@ class RestControllerBase(BaseController):
 
     return objDefinition
 
-  def convertToObject(self, restObject, event, commit=False):
-    objectDefinition = self.convertToObjectDefinition(restObject.definition,
+  def _convertToObject(self, restObject, event, commit=False):
+    objectDefinition = self._convertToObjectDefinition(restObject.definition,
                                                         commit)
     user = event.creator
 

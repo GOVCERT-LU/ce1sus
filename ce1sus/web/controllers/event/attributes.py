@@ -106,7 +106,7 @@ class AttributesController(Ce1susBaseController):
     filepath = '/tmp/' + value.filename
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
-  # pylint: disable=R0914,R0912
+  # pylint: disable=R0914,R0912,R0911
   @cherrypy.expose
   @require(requireReferer(('/internal')))
   def modifyAttribute(self, **kwargs):

@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from dagr.helpers.validator.valuevalidator import ValueValidator
 
+
 class CBValueHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
   def __init__(self):

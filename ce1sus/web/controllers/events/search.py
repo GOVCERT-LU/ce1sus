@@ -25,6 +25,7 @@ import types
 from dagr.helpers.string import InputException
 from ce1sus.brokers.event.eventbroker import EventBroker
 
+
 # pylint:disable=R0903
 class ResultItem(object):
   """

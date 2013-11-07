@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+# pylint: disable=R0903
 class Link(object):
   """
   Container class for links
@@ -48,10 +49,12 @@ class PaginatorOptions(object):
                 'EDIT': '',
                 'REMOVE': 'Are you sure you want to delete?'}
 
+  # pylint: disable=R0902
   class Option(object):
     """
     Option container class
     """
+    # pylint: disable=R0913
     def __init__(self,
                  option,
                  mode,
@@ -108,6 +111,7 @@ class PaginatorOptions(object):
     self.reloadUrl = reloadUrl
     self.contentid = contentid
 
+  # pylint: disable=R0913
   def addOption(self,
                 mode,
                 option,

@@ -14,10 +14,7 @@ import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
-from ce1sus.brokers.event.eventclasses import Object, Event
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
-                                                        ObjectDefinition
+from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                       AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
@@ -42,8 +39,8 @@ class RestEventController(RestControllerBase):
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
       event = self.eventBroker.getByID(identifier)
-      self.checkIfViewable(event, self.getUser(apiKey))
-      return self.objectToJSON(event, showAll, withDefinition)
+      self._checkIfViewable(event, self.getUser(apiKey))
+      return self._objectToJSON(event, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -53,7 +50,7 @@ class RestEventController(RestControllerBase):
   def delete(self, identifier, apiKey):
     try:
       event = self.eventBroker.getByID(identifier)
-      self.checkIfViewable(event, self.getUser(apiKey))
+      self._checkIfViewable(event, self.getUser(apiKey))
       self.eventBroker.removeByID(event.identifier)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -66,23 +63,19 @@ class RestEventController(RestControllerBase):
       try:
         restEvent = self.getPostObject()
         # map restEvent on event
-        status = Status.getByName(restEvent.status)
-        tlp_idx = TLPLevel.getByName(restEvent.tlp)
-        risk = Risk.getByName(restEvent.risk)
-        analysis = Analysis.getByName(restEvent.analysis)
         user = self.getUser(apiKey)
         event = self.eventBroker.buildEvent(
                        None,
                        'insert',
-                       status,
-                       tlp_idx,
+                       Status.getByName(restEvent.status),
+                       TLPLevel.getByName(restEvent.tlp),
                        restEvent.description,
                        restEvent.title,
                        restEvent.published,
                        restEvent.first_seen,
                        restEvent.last_seen,
-                       risk,
-                       analysis,
+                       Risk.getByName(restEvent.risk),
+                       Analysis.getByName(restEvent.analysis),
                        user)
         # flush to DB
         self.eventBroker.insert(event, commit=False)
@@ -91,8 +84,8 @@ class RestEventController(RestControllerBase):
         for obj in restEvent.objects:
           # create object
 
-          dbObject = self.convertToObject(obj, event, commit=False)
-          dbObject.attributes = self.convertToAttribues(obj.attributes,
+          dbObject = self._convertToObject(obj, event, commit=False)
+          dbObject.attributes = self._convertToAttribues(obj.attributes,
                                                           dbObject)
           objs.append(dbObject)
 
@@ -101,7 +94,7 @@ class RestEventController(RestControllerBase):
         self.objectBroker.doCommit(True)
         self.attributeBroker.doCommit(True)
 
-        return self.objectToJSON(event, showAll, withDefinition)
+        return self._objectToJSON(event, showAll, withDefinition)
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)

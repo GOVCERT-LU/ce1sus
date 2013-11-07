@@ -11,7 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import ValidationException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
@@ -69,6 +68,7 @@ class User(BASE):
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
+
 class Group(BASE):
   """This is a container class for the GRUOPS table."""
   def __init__(self):
@@ -104,6 +104,7 @@ class Group(BASE):
     ObjectValidator.validateDigits(self, 'usermails', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
     return ObjectValidator.isObjectValid(self)
+
 
 class SubGroup(BASE):
 

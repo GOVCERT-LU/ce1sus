@@ -18,8 +18,6 @@ from dagr.db.broker import OperationException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
-from ce1sus.brokers.permission.userbroker import UserBroker
-from ce1sus.brokers.permission.groupbroker import GroupBroker
 from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
 
 
@@ -40,7 +38,6 @@ class SubGroupController(Ce1susBaseController):
 
     template = self.getTemplate('/admin/subgroups/subgroupBase.html')
     return template.render()
-
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

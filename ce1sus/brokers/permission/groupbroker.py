@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from dagr.helpers.converters import ObjectConverter
-from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
+from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 
 
 class GroupBroker(BrokerBase):
@@ -46,13 +46,14 @@ class GroupBroker(BrokerBase):
         subgroupsIDs = list()
         for subgroup in subgroups:
           subgroupsIDs.append(subgroup.identifier)
-        subgroups = self.session.query(SubGroup).filter(~SubGroup.identifier.in_(
+        subgroups = self.session.query(SubGroup).filter(
+ ~SubGroup.identifier.in_(
                                                                   subgroupsIDs
                                                                             )
                                                         )
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
-      users = list()
+      return list()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()

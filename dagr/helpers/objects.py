@@ -16,6 +16,7 @@ import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
 
+
 class CompareException(Exception):
   """
   Base compare exception
@@ -55,6 +56,7 @@ class AttributeMismatchException(CompareException):
   def __init__(self, message):
     CompareException.__init__(self, message)
 
+
 def getFields(obj):
   fields = list()
   for name in vars(type(obj)).iterkeys():
@@ -67,6 +69,7 @@ def getFields(obj):
       if not name in fields:
         fields.append(name)
   return fields
+
 
 def compareObjects(object1, object2, raiseExceptions=True):
   """
@@ -196,6 +199,7 @@ def compareObjects(object1, object2, raiseExceptions=True):
                                                                    attrValue2))
   # if this is reached they have to be equal.
   return result
+
 
 def printObject(obj, indent=0, maxRecLVL=3):
   """

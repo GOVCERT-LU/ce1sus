@@ -28,8 +28,8 @@ class RestObjectController(RestControllerBase):
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
       obj = self.objectBroker.getByID(identifier)
-      self.checkIfViewable(obj.event, self.getUser(apiKey))
-      return self.objectToJSON(obj, showAll, withDefinition)
+      self._checkIfViewable(obj.event, self.getUser(apiKey))
+      return self._objectToJSON(obj, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -39,13 +39,14 @@ class RestObjectController(RestControllerBase):
   def delete(self, identifier, apiKey):
     try:
       obj = self.objectBroker.getByID(identifier)
-      self.checkIfViewable(obj.event, self.getUser(apiKey))
+      self._checkIfViewable(obj.event, self.getUser(apiKey))
       self.objectBroker.removeByID(obj.identifier)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
+  # pylint: disable =R0913
   @cherrypy.expose
   def  update(self,
               identifier,
@@ -59,17 +60,18 @@ class RestObjectController(RestControllerBase):
         # create object
         if not eventUUID:
           return self.raiseError('BrokerException',
-                                 'No UUID specified for event use eventUUUID=(a UUID)')
+                                 ('No UUID specified for event use eventUUUID='
+                                  + '(a UUID)'))
         event = self.eventBroker.getByUUID(eventUUID)
 
-        dbObject = self.convertToObject(obj, event, commit=False)
-        dbObject.attributes = self.convertToAttribues(obj.attributes,
+        dbObject = self._convertToObject(obj, event, commit=False)
+        dbObject.attributes = self._convertToAttribues(obj.attributes,
                                                           dbObject)
 
         self.objectBroker.doCommit(True)
         self.attributeBroker.doCommit(True)
 
-        return self.objectToJSON(dbObject, showAll, withDefinition)
+        return self._objectToJSON(dbObject, showAll, withDefinition)
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)

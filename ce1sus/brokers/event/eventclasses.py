@@ -329,7 +329,7 @@ class Object(BASE):
   parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
   parentObject = relationship('Object',
-                         primaryjoin="Object.parentObject_id==Object.identifier")
+                      primaryjoin="Object.parentObject_id==Object.identifier")
   # TODO: Fix Me! - FK removed due to errors
   parentEvent_id = Column('parentEvent', Integer)
 

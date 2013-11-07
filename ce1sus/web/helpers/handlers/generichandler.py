@@ -16,6 +16,7 @@ from ce1sus.brokers.event.attributebroker import Attribute
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
 
+
 class GenericHandler(HandlerBase):
   """The generic handler for handling known atomic values"""
   def __init__(self):
@@ -40,8 +41,6 @@ class GenericHandler(HandlerBase):
     ObjectConverter.setInteger(attribute,
                                'ioc',
                                params.get('ioc', '0').strip())
-
-
     return attribute
 
   def getAttributesNameList(self):

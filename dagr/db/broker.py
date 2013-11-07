@@ -198,7 +198,6 @@ class BrokerBase(object):
       self.session.rollback()
       raise BrokerException(e)
 
-
   def insert(self, instance, commit=True, validate=True):
     """
     Insert a <<getBrokerClass()>>

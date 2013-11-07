@@ -145,39 +145,6 @@ class UserBroker(BrokerBase):
       raise BrokerException(e)
     return user
 
-  def getGroupsByUser(self, identifier, belongIn=True):
-    """
-    Returns the groups of the given user
-
-    Note: Password will be hashed inside this function
-
-    :param identifier: identifier of the user
-    :type identifier: Integer
-    :param belongIn: If set returns all the groups of the user else
-                     all the groups not belonging to the user
-    :type belongIn: Boolean
-
-    :returns: list of Users
-
-    :returns: User
-    """
-    try:
-      groups = self.session.query(Group).join(User.groups).filter(
-                                          User.identifier == identifier).all()
-      if not belongIn:
-        groupIDs = list()
-        for group in groups:
-          groupIDs.append(group.identifier)
-        groups = self.session.query(Group).filter(~Group.identifier.in_(
-                                                                    groupIDs))
-    except sqlalchemy.orm.exc.NoResultFound:
-      groups = list()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-    return groups
-
   # pylint: disable=R0913
   @staticmethod
   def buildUser(identifier=None, username=None, password=None,

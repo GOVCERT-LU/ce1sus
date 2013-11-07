@@ -28,8 +28,8 @@ class RestAttributeController(RestControllerBase):
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
       attribute = self.attribtueBroker.getByID(identifier)
-      self.checkIfViewable(attribute.object.event, self.getUser(apiKey))
-      return self.objectToJSON(attribute, showAll, withDefinition)
+      self._checkIfViewable(attribute.object.event, self.getUser(apiKey))
+      return self._objectToJSON(attribute, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -39,13 +39,14 @@ class RestAttributeController(RestControllerBase):
   def delete(self, identifier, apiKey):
     try:
       attribute = self.attribtueBroker.getByID(identifier)
-      self.checkIfViewable(attribute.object.event, self.getUser(apiKey))
+      self._checkIfViewable(attribute.object.event, self.getUser(apiKey))
       self.attribtueBroker.removeByID(attribute.identifier)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
+  # pylint: disable =R0913
   @cherrypy.expose
   def  update(self,
               identifier,
@@ -59,15 +60,16 @@ class RestAttributeController(RestControllerBase):
         # create object
         if not objectID:
           return self.raiseError('BrokerException',
-                                 'No ID specified for object use objectID=(an id of an object)')
+                                 ('No ID specified for object use objectID='
+                                  + '(an id of an object)'))
         obj = self.objectBroker.getByID(objectID)
 
         if attribute.value != '(Not Provided)':
-          attrDefinition = self.convertToAttributeDefinition(
+          attrDefinition = self._convertToAttributeDefinition(
                                                           attribute.definition,
                                                           obj.definition,
                                                           False)
-          dbAttribute = self.createAttribute(attribute,
+          dbAttribute = self._createAttribute(attribute,
                                              attrDefinition,
                                              obj,
                                              False)
@@ -76,7 +78,7 @@ class RestAttributeController(RestControllerBase):
         self.objectBroker.doCommit(True)
         self.attributeBroker.doCommit(True)
 
-        return self.objectToJSON(dbAttribute, showAll, withDefinition)
+        return self._objectToJSON(dbAttribute, showAll, withDefinition)
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)
