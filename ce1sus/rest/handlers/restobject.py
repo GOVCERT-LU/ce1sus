@@ -24,17 +24,11 @@ class RestObjectController(RestControllerBase):
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
 
-  def __getObject(self, identifier, apiKey):
-    obj = self.objectBroker.getByID(identifier)
-    event = self.eventBroker.getEventForUser(obj.event.identifier,
-                                               self.getUser(apiKey))
-    del event
-    return obj
-
   @cherrypy.expose
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
-      obj = self.__getObject(identifier, apiKey)
+      obj = self.objectBroker.getByID(identifier)
+      self.checkIfViewable(obj.event, self.getUser(apiKey))
       return self.objectToJSON(obj, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -44,7 +38,8 @@ class RestObjectController(RestControllerBase):
   @cherrypy.expose
   def delete(self, identifier, apiKey):
     try:
-      obj = self.__getObject(identifier, apiKey)
+      obj = self.objectBroker.getByID(identifier)
+      self.checkIfViewable(obj.event, self.getUser(apiKey))
       self.objectBroker.removeByID(obj.identifier)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -52,9 +47,32 @@ class RestObjectController(RestControllerBase):
       return self.raiseError('BrokerException', e)
 
   @cherrypy.expose
-  def update(self, identifier, options):
-    return self.raiseError('Exception', 'Not Implemented')
+  def  update(self,
+              identifier,
+              apiKey,
+              eventUUID=None,
+              showAll=None,
+              withDefinition=None):
+    if identifier == '0':
+      try:
+        obj = self.getPostObject()
+        # create object
+        if not eventUUID:
+          return self.raiseError('BrokerException',
+                                 'No UUID specified for event use eventUUUID=(a UUID)')
+        event = self.eventBroker.getByUUID(eventUUID)
 
-  @cherrypy.expose
-  def insert(self, identifier, apiKey, options):
-    return self.raiseError('Exception', 'Not Implemented')
+        dbObject = self.convertToObject(obj, event, commit=False)
+        dbObject.attributes = self.convertToAttribues(obj.attributes,
+                                                          dbObject)
+
+        self.objectBroker.doCommit(True)
+        self.attributeBroker.doCommit(True)
+
+        return self.objectToJSON(dbObject, showAll, withDefinition)
+
+      except BrokerException as e:
+        return self.raiseError('BrokerException', e)
+
+    else:
+      return self.raiseError('Exception', 'Not Implemented')

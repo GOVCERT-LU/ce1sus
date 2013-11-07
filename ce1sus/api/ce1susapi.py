@@ -13,6 +13,7 @@ from types import DictionaryType, ListType
 from importlib import import_module
 from ce1sus.api.restclasses import RestClass
 
+
 def json_pretty_print(j):
   return json.dumps(j, sort_keys=True, indent=4, separators=(',', ': '))
 

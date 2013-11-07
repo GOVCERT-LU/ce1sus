@@ -12,30 +12,24 @@ __license__ = 'GPL v3+'
 
 import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
-from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from dagr.db.broker import BrokerException, NothingFoundException
+from ce1sus.brokers.event.objectbroker import ObjectBroker
 
 
 class RestAttributeController(RestControllerBase):
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.eventBroker = self.brokerFactory(EventBroker)
     self.attribtueBroker = self.brokerFactory(AttributeBroker)
-
-  def __getAttribute(self, identifier, apiKey):
-    attribute = self.attribtueBroker.getByID(identifier)
-    event = self.eventBroker.getEventForUser(attribute.object.event.identifier,
-                                               self.getUser(apiKey))
-    del event
-    return attribute
+    self.objectBroker = self.brokerFactory(ObjectBroker)
 
   @cherrypy.expose
-  def view(self, identifier, apiKey, showAll=None):
+  def view(self, identifier, apiKey, showAll=None, withDefinition=None):
     try:
-      attribute = self.__getAttribute(identifier, apiKey)
-      return self.objectToJSON(attribute, showAll)
+      attribute = self.attribtueBroker.getByID(identifier)
+      self.checkIfViewable(attribute.object.event, self.getUser(apiKey))
+      return self.objectToJSON(attribute, showAll, withDefinition)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -44,7 +38,8 @@ class RestAttributeController(RestControllerBase):
   @cherrypy.expose
   def delete(self, identifier, apiKey):
     try:
-      attribute = self.__getAttribute(identifier, apiKey)
+      attribute = self.attribtueBroker.getByID(identifier)
+      self.checkIfViewable(attribute.object.event, self.getUser(apiKey))
       self.attribtueBroker.removeByID(attribute.identifier)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -52,9 +47,39 @@ class RestAttributeController(RestControllerBase):
       return self.raiseError('BrokerException', e)
 
   @cherrypy.expose
-  def update(self, identifier, options):
-    return self.raiseError('Exception', 'Not Implemented')
+  def  update(self,
+              identifier,
+              apiKey,
+              objectID=None,
+              showAll=None,
+              withDefinition=None):
+    if identifier == '0':
+      try:
+        attribute = self.getPostObject()
+        # create object
+        if not objectID:
+          return self.raiseError('BrokerException',
+                                 'No ID specified for object use objectID=(an id of an object)')
+        obj = self.objectBroker.getByID(objectID)
 
-  @cherrypy.expose
-  def insert(self, identifier, apiKey, options):
-    return self.raiseError('Exception', 'Not Implemented')
+        if attribute.value != '(Not Provided)':
+          attrDefinition = self.convertToAttributeDefinition(
+                                                          attribute.definition,
+                                                          obj.definition,
+                                                          False)
+          dbAttribute = self.createAttribute(attribute,
+                                             attrDefinition,
+                                             obj,
+                                             False)
+        obj.attributes.append(dbAttribute)
+
+        self.objectBroker.doCommit(True)
+        self.attributeBroker.doCommit(True)
+
+        return self.objectToJSON(dbAttribute, showAll, withDefinition)
+
+      except BrokerException as e:
+        return self.raiseError('BrokerException', e)
+
+    else:
+      return self.raiseError('Exception', 'Not Implemented')

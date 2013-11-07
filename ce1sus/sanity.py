@@ -32,16 +32,14 @@ class SanityValue(BASE):
 
 class SantityChecker(object):
 
-  APP_REL = '0.2.0'
-  DB_REL = '0.2.0'
-  REST_REL = '0.0.1'
+  APP_REL = '0.2.2'
+  DB_REL = '0.3.0'
+  REST_REL = '0.1.0'
 
   def __init__(self, configFile):
-    # load __config foo!!
     # setup connection string and engine
     self.sessionHandler = SessionManager(configFile, createInstance=False)
     self.session = self.sessionHandler.connector.getDirectSession()
-
 
   def getBrokerClass(self):
     return SanityValue
@@ -69,12 +67,12 @@ class SantityChecker(object):
     if SantityChecker.compareReleases(release,
                                       value.value) != 0:
       raise SantityCheckerException('RestAPI release mismatch '
-                        + 'expected {0} got {1}'.format(release,
+                        + 'expected {1} got {1}'.format(release,
                                                        value.value))
     if SantityChecker.compareReleases(SantityChecker.REST_REL,
                                       value.value) != 0:
       raise SantityCheckerException('RestAPI release mismatch '
-                        + 'expected {0} got {1}'.format(
+                        + 'expected {1} got {0}'.format(
                                                       SantityChecker.REST_REL,
                                                       value.value))
 

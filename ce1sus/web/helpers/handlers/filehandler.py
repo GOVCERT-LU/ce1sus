@@ -143,12 +143,16 @@ class FileHandler(GenericHandler):
     :returns: Boolean
     """
     canDownload = False
+    if user.privileged:
+      return True
     try:
       event = self.eventBroker.getByID(eventID)
 
       if event.creator.identifier == user.identifier:
         canDownload = True
       else:
+        if user.defaultgroup in event.maingroups:
+          return True
         for group in event.groups:
           if group in user.groups:
             if group.canDownload:
@@ -192,8 +196,8 @@ class FileHandler(GenericHandler):
         eventID = attribute.object.parentEvent_id
       userInGroups = self.__canUserDownload(eventID, user)
       userIsOwner = attribute.creator_id == user.identifier
-      if userInGroups and userIsOwner:
-        link = Link(UnMaliciousFileHandler.URLSTR.format(
+      if userInGroups or userIsOwner:
+        link = Link(FileHandler.URLSTR.format(
                                               attribute.object.identifier,
                                               attribute.identifier,
                                               ''),

@@ -36,7 +36,7 @@ class RestController(RestControllerBase):
     self.instances['event'] = RestEventController()
     self.instances['object'] = RestObjectController()
     self.instances['attribute'] = RestAttributeController()
-    # self.sanityChecker = SantityChecker(self.configFile)
+    self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
 

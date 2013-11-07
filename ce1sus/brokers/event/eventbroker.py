@@ -424,3 +424,31 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
+
+  def getByUUID(self, identifier):
+    """
+    Returns the object by the given identifier
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param uuid: the uuid of the requested user object
+    :type uuid: String
+
+    :returns: Object
+    """
+    try:
+
+      result = self.session.query(Event).filter(
+                        Event.uuid == identifier).one()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with uuid :{0}'.format(
+                                                                  identifier))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for uuid :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result
