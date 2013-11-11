@@ -46,7 +46,7 @@ class RestObjectController(RestControllerBase):
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-  # pylint: disable =R0913
+  # pylint: disable=R0913
   @cherrypy.expose
   def  update(self,
               identifier,

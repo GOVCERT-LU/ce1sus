@@ -26,6 +26,7 @@ __REL_SUBGROUP_GROUPS = Table(
    )
 
 
+# pylint: disable=R0903
 class User(BASE):
   """This is a container class for the USERS table."""
   def __init__(self):

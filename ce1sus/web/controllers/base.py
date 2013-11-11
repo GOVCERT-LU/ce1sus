@@ -23,15 +23,7 @@ class Ce1susBaseController(BaseController):
     BaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
 
-  def checkIfViewable(self, event):
-    """
-    Checks if the page if viewable for the given group
-
-    :param grous: A list of strings contrianing the group names
-    :type groups: list
-
-    :returns: Boolean
-    """
+  def __internalCheck(self, event):
     userDefaultGroup = Protector.getUserDefaultGroup()
     # if the user has no default group he has no rights
     if userDefaultGroup is None:
@@ -60,6 +52,37 @@ class Ce1susBaseController(BaseController):
       raise cherrypy.HTTPError(403)
 
     return result
+
+  def checkIfViewable(self, event):
+    """
+    Checks if the page if viewable for the given group
+
+    :param grous: A list of strings contrianing the group names
+    :type groups: list
+
+    :returns: Boolean
+    """
+    # get eventfrom session
+    attribute = getattr(cherrypy, 'session')
+    eventDict = attribute.get('ViewableEventsDict', None)
+    if eventDict:
+      viewable = eventDict.get(event.identifier, None)
+      if viewable:
+        return viewable
+      else:
+        # set in session
+        self.getLogger().debug('Found rights in session')
+        result = self.__internalCheck(event)
+        attribute['ViewableEventsDict'][event.identifier] = result
+        return result
+    else:
+      attribute['ViewableEventsDict'] = dict()
+      # set in session
+      result = self.__internalCheck(event)
+      attribute['ViewableEventsDict'][event.identifier] = result
+      return result
+
+
 
   def getUser(self, cached=False):
     """

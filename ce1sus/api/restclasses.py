@@ -13,9 +13,15 @@ __license__ = 'GPL v3+'
 
 from dagr.helpers.hash import hashSHA1
 from types import ListType
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from dagr.helpers.objects import getFields
 
+class RestAPIException(Exception):
+  """
+  Exception base for handler exceptions
+  """
+  def __init__(self, message):
+    Exception.__init__(self, message)
 
 class RestClassException(Exception):
   """Broker Exception"""

@@ -8,6 +8,8 @@ from dagr.helpers.objects import printObject, compareObjects
 from ce1sus.api.ce1susapi import Ce1susAPI
 from ce1sus.api.restclasses import RestEvent
 
+
+# pylint:disable=R0904
 class Test(unittest.TestCase):
 
   def testName(self):

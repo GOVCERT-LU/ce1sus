@@ -31,7 +31,7 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
     cursor = dbapi_connection.cursor()
     try:
         cursor.execute("SELECT 1")
-        Log.getLogger('PingConnection').debug('Connection works')
+
     except:
         # optional - dispose the whole pool
         # instead of invalidating one at a time

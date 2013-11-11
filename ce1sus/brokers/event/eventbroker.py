@@ -25,6 +25,7 @@ from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid
 
 
+# pylint: disable=R0904
 class EventBroker(BrokerBase):
   """
   This broker handles all operations on event objects

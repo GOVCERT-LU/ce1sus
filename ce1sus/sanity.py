@@ -24,7 +24,7 @@ class SantityCheckerException(Exception):
     Exception.__init__(self, message)
 
 
-# pylint: disable= R0903
+# pylint: disable=R0903
 class SanityValue(BASE):
   __tablename__ = "ce1sus"
   key = Column('key', String, primary_key=True)

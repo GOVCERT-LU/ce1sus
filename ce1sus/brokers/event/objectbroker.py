@@ -66,6 +66,8 @@ class ObjectBroker(BrokerBase):
 
     :returns: List of ObjectAttributeRelation
     """
+    if len(objectIDList) == 0:
+      return list()
     try:
       result = self.session.query(ObjectAttributeRelation).filter(
                         ObjectAttributeRelation.ref_object_id.in_(objectIDList)

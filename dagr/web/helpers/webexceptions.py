@@ -115,6 +115,7 @@ class ErrorHandler(object):
                                               text=stringHelper.plaintext2html(
                                                       traceback.format_exc()))
 
+  # pylint: disable=W0621
   @staticmethod
   def error_page_400(status, message, traceback, version):
     """
@@ -126,6 +127,7 @@ class ErrorHandler(object):
                              + '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
 
+  # pylint: disable=W0621
   @staticmethod
   def error_page_401(status, message, traceback, version):
     """
@@ -137,6 +139,7 @@ class ErrorHandler(object):
                              + '<br/><br/>', text=stringHelper.plaintext2html(
                                                                     traceback))
 
+  # pylint: disable=W0621
   @staticmethod
   def error_page_403(status, message, traceback, version):
     """
@@ -149,6 +152,7 @@ class ErrorHandler(object):
                                                                     traceback),
                              version=version)
 
+  # pylint: disable=W0621
   @staticmethod
   def error_page_404(status, message, traceback, version):
     """
@@ -163,6 +167,7 @@ class ErrorHandler(object):
                               + '<br/>LOADING<br/><br/>FILE NOT FOUND',
                               text=stringHelper.plaintext2html(traceback))
 
+  # pylint: disable=W0621
   @staticmethod
   def error_page_500(status, message, traceback, version):
     """

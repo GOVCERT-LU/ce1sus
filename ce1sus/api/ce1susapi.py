@@ -11,8 +11,7 @@ import json
 import urllib2
 from types import DictionaryType, ListType
 from importlib import import_module
-from ce1sus.api.restclasses import RestClass
-from ce1sus.rest.restbase import RestAPIException
+from ce1sus.api.restclasses import RestClass, RestAPIException
 
 
 def json_pretty_print(j):
