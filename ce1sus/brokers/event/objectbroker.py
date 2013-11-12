@@ -20,7 +20,7 @@ from datetime import datetime
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
                                               Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
-
+from sqlalchemy.orm import joinedload, joinedload_all
 
 class ObjectBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -69,7 +69,10 @@ class ObjectBroker(BrokerBase):
     if len(objectIDList) == 0:
       return list()
     try:
-      result = self.session.query(ObjectAttributeRelation).filter(
+      result = self.session.query(ObjectAttributeRelation).options(
+                                                                joinedload_all(
+                                        ObjectAttributeRelation.sameAttribute)
+                                                                   ).filter(
                         ObjectAttributeRelation.ref_object_id.in_(objectIDList)
                         ).all()
 

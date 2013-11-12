@@ -15,6 +15,7 @@ __license__ = 'GPL v3+'
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from dagr.helpers.debug import Log
+from sqlalchemy.orm import joinedload
 
 
 class BrokerException(Exception):

@@ -100,8 +100,7 @@ class SearchController(Ce1susBaseController):
 
         for value in foundValues:
           if value.attribute.object.event is None:
-            event = self.eventBroker.getEventByObjectID(
-                                        value.attribute.object.parentObject_id)
+            event = value.attribute.object.parentObject.parentObject.event
 
           else:
             event = value.attribute.object.event

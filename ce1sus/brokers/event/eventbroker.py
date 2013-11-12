@@ -19,7 +19,8 @@ from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
-from ce1sus.brokers.event.eventclasses import Event, Object
+from ce1sus.brokers.event.eventclasses import Event, Object, \
+                                              ObjectAttributeRelation
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid
@@ -402,36 +403,6 @@ class EventBroker(BrokerBase):
         event.creator_id = event.creator.identifier
     return event
 
-  def getEventByObjectID(self, objectID):
-    """
-    Returns the event hosting the object with the given id
-
-    :param objectID: The identifier of an object
-    :type objectID: Integer
-
-    :returns: Event
-    """
-    try:
-      obj = self.session.query(Object).filter(
-                        Object.identifier == objectID).one()
-      # if the object is a direct child of an event
-      eventID = obj.parentObject_id
-      if eventID is None:
-        # if the object is a descendant of an object
-        eventID = obj.event_id
-      result = self.session.query(Event).filter(
-                        Event.identifier == eventID).one()
-      return result
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                  objectID))
-    except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(objectID))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
-
   def getByUUID(self, identifier):
     """
     Returns the object by the given identifier
@@ -454,6 +425,22 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for uuid :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result
+
+  def getRelatedEventsByObjectIDList(self, objectIDs):
+    try:
+
+      result = self.session.query(Event).join(Object,
+                                              ObjectAttributeRelation
+                                              ).all()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with for ids :{0}'.format(
+                                                                  objectIDs))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)

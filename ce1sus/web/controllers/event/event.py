@@ -37,6 +37,8 @@ class Relation(object):
   def __init__(self):
     self.identifier = 0
     self.eventID = 0
+    self.eventFirstSeen = None
+    self.eventLastSeen = None
     self.eventName = 0
     self.objectID = 0
     self.objectName = 0
@@ -122,11 +124,8 @@ class EventController(Ce1susBaseController):
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
-              {'objectID':'Object #'},
-              {'objectName':'Object Name'},
-              {'attributeID':'Attribute #'},
-              {'attributeName':'Attribute Name'},
-              {'attributeValue':'Attribute Value'}]
+                      {'eventFirstSeen':'First Seen'},
+                      {'eventLastSeen':'Last Seen'}]
 
     relationsPaginatorOptions = PaginatorOptions('/events/recent',
                                                  'eventsTabTabContent')
@@ -143,29 +142,21 @@ class EventController(Ce1susBaseController):
     try:
       # get for each object
       # prepare list
-      for relation in self.__getRelationsObjects(event.objects):
+      #
+      for event_rel in self.__getRelationsEventsByObjects(event.objects):
         temp = Relation()
-        if relation.sameAttribute.object.event is None:
-          event_rel = self.eventBroker.getEventByObjectID(relation
-                                              .sameAttribute.object
-                                              .parentObject_id)
-
-        else:
-          event_rel = relation.sameAttribute.object.event
-          try:
-            if event_rel.identifier != event.identifier:
-              self.checkIfViewable(event_rel)
-            temp.eventID = event_rel.identifier
-            temp.identifier = event_rel.identifier
-            temp.eventName = event_rel.title
-            temp.objectID = relation.sameAttribute.object.identifier
-            temp.objectName = relation.sameAttribute.object.definition.name
-            temp.attributeID = relation.sameAttribute.identifier
-            temp.attributeName = relation.sameAttribute.definition.name
-            temp.attributeValue = relation.sameAttribute.value
+        try:
+          if event_rel.identifier != event.identifier:
+            self.checkIfViewable(event_rel)
+          temp.eventID = event_rel.identifier
+          temp.identifier = event_rel.identifier
+          temp.eventName = event_rel.title
+          temp.eventFirstSeen = event_rel.first_seen
+          temp.eventLastSeen = event_rel.last_seen
+          if not temp in relationPaginator.list:
             relationPaginator.list.append(temp)
-          except cherrypy.HTTPError:
-            self.getLogger().debug(('User {0} is not '
+        except cherrypy.HTTPError:
+          self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))
 
     except BrokerException as e:
@@ -175,6 +166,14 @@ class EventController(Ce1susBaseController):
                            relationPaginator=relationPaginator,
                            event=event,
                            comments=event.comments)
+
+  def __getRelationsEventsByObjects(self, objects):
+    objectIDList = list()
+    for obj in objects:
+      objectIDList.append(obj.identifier)
+    relations = self.eventBroker.getRelatedEventsByObjectIDList(objectIDList)
+    # TODO Check if the event is viewable for the user
+    return relations
 
   def __getRelationsObjects(self, objects):
     """
@@ -189,7 +188,7 @@ class EventController(Ce1susBaseController):
     for obj in objects:
       objectIDList.append(obj.identifier)
     relations = self.objectBroker.getRelationsByObjectIDList(objectIDList)
-    # Check if the event is viewable for the user
+
     return relations
 
   @require(requireReferer(('/internal')))
@@ -308,3 +307,62 @@ class EventController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return 'An unexpected error occurred: {0}'.format(e)
+
+  @require(requireReferer(('/internal')))
+  @cherrypy.expose
+  def relations(self, eventID):
+    template = self.mako.getTemplate('/events/event/relations.html')
+
+    event = self.eventBroker.getByID(eventID)
+    # right checks
+    self.checkIfViewable(event)
+
+    relationLabels = [{'eventID':'Event #'},
+                      {'eventName':'Event Name'},
+              {'objectID':'Object #'},
+              {'objectName':'Object Name'},
+              {'attributeID':'Attribute #'},
+              {'attributeName':'Attribute Name'},
+              {'attributeValue':'Attribute Value'}]
+
+    relationsPaginatorOptions = PaginatorOptions('/events/recent',
+                                                 'eventsTabTabContent')
+    relationsPaginatorOptions.addOption('NEWTAB',
+                               'VIEW',
+                               '/events/event/view/',
+                               contentid='')
+
+    relationPaginator = Paginator(items=list(),
+                          labelsAndProperty=relationLabels,
+                          paginatorOptions=relationsPaginatorOptions)
+
+    try:
+      # get for each object
+      # prepare list
+      #
+      for relation in self.__getRelationsObjects(event.objects):
+        temp = Relation()
+        # TODO Check if the event is viewable for the user
+        if relation.sameAttribute.object.event is None:
+          event_rel = relation.sameAttribute.object.parentObject.event
+        else:
+          event_rel = relation.sameAttribute.object.event
+          try:
+            if event_rel.identifier != event.identifier:
+              self.checkIfViewable(event_rel)
+            temp.eventID = event_rel.identifier
+            temp.identifier = event_rel.identifier
+            temp.eventName = event_rel.title
+            temp.objectID = relation.sameAttribute.object.identifier
+            temp.objectName = relation.sameAttribute.object.definition.name
+            temp.attributeID = relation.sameAttribute.identifier
+            temp.attributeName = relation.sameAttribute.definition.name
+            temp.attributeValue = relation.sameAttribute.value
+            relationPaginator.list.append(temp)
+          except cherrypy.HTTPError:
+            self.getLogger().debug(('User {0} is not '
+                                    + 'authorized').format(self.getUser(True)))
+
+    except BrokerException as e:
+      self.getLogger().error(e)
+    return template.render(relationPaginator=relationPaginator)

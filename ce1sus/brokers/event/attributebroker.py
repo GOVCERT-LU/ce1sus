@@ -65,9 +65,12 @@ class Attribute(BASE):
   @property
   def value_id(self):
     if self.__value_id is None:
-      valueBroker = SessionManager.getInstance().brokerFactory(ValueBroker)
-      value = valueBroker.getByAttribute(self)
-      self.__value_id = value.identifier
+      if self.__value is None:
+        valueBroker = SessionManager.getInstance().brokerFactory(ValueBroker)
+        self.__value = valueBroker.getByAttribute(self)
+      else:
+        self.__value_id = self.__value.identifier
+
     return self.__value_id
 
   @value_id.setter
@@ -181,13 +184,6 @@ class AttributeBroker(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-
-  def getByID(self, identifier):
-    """
-    overrides BrokerBase.getByID
-    """
-    attribute = BrokerBase.getByID(self, identifier)
-    return attribute
 
   def createRelations(self, instance, commit=False):
     clazz = self.valueBroker.getClassByAttribute(instance)
