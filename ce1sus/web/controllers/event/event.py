@@ -143,7 +143,7 @@ class EventController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for event_rel in self.__getRelationsEventsByObjects(event.objects):
+      for event_rel in self.eventBroker.getRelatedEvents(event):
         temp = Relation()
         try:
           if event_rel.identifier != event.identifier:
@@ -166,14 +166,6 @@ class EventController(Ce1susBaseController):
                            relationPaginator=relationPaginator,
                            event=event,
                            comments=event.comments)
-
-  def __getRelationsEventsByObjects(self, objects):
-    objectIDList = list()
-    for obj in objects:
-      objectIDList.append(obj.identifier)
-    relations = self.eventBroker.getRelatedEventsByObjectIDList(objectIDList)
-    # TODO Check if the event is viewable for the user
-    return relations
 
   def __getRelationsObjects(self, objects):
     """
@@ -285,6 +277,7 @@ class EventController(Ce1susBaseController):
                                             tlp_index, description, name,
                                             published, first_seen, last_seen,
                                             risk, analysis, self.getUser())
+
     try:
       if not action == 'insert':
         template = self.getTemplate('/events/event/editDetails.html')
@@ -293,6 +286,8 @@ class EventController(Ce1susBaseController):
         self.checkIfViewable(event)
       if action == 'insert':
         template = self.getTemplate('/events/addEvent.html')
+        event.bitValue.isWebInsert = True
+        event.bitValue.isValidated = True
         self.eventBroker.insert(event)
       if action == 'update':
         self.eventBroker.update(event)

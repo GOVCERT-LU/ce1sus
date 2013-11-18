@@ -24,6 +24,7 @@ from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
 from dagr.db.broker import BrokerException, NothingFoundException
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 class RestAPIException(Exception):
@@ -205,6 +206,7 @@ class RestControllerBase(BaseController):
     dbAttribute.creator_id = user.identifier
     dbAttribute.modifier_id = user.identifier
     dbAttribute.modifier = user
+    dbAttribute.bitValue = BitValue('1010')
     ObjectConverter.setInteger(dbAttribute,
                                'ioc',
                                restAttribute.ioc)
@@ -264,6 +266,7 @@ class RestControllerBase(BaseController):
                                                user,
                                                restObject.parentObject_id)
     # flush to DB
+    dbObject.bitValue.isRestInsert = True
     self.objectBroker.insert(dbObject, commit=False)
 
     return dbObject

@@ -30,6 +30,7 @@ from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from dagr.db.broker import NothingFoundException
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 class AttributesController(Ce1susBaseController):
@@ -161,6 +162,7 @@ class AttributesController(Ce1susBaseController):
         # doAction for all attributes
         if action == 'insert':
           for attribute in attributes:
+            attribute.bitValue = BitValue('1001', attribute)
             self.attributeBroker.insert(attribute, commit=False)
             getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
           # update last seen etc of event

@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="input" file="/dagr/components/input.html"/>
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="dagr" module="dagr.web.helpers.string"/>
+<%namespace name="pagination" file="/dagr/components/pagination.html"/>
+<%namespace name="tabulator" file="/dagr/components/tabs.html"/>
+
+<div id="deleteAnswer" style="display: none;">
+</div>
+
+
+<div class="row">
+  <div class="col-xs-4 col-sm-4">
+    
+    <div id="eventEdit">
+        <legend>Details</legend>
+        <div class="btn-group">
+            <a  class="btn btn-default" href="#" onclick="if (confirm('Do you want to validate this event')) {
+               //call function
+               $.get('/admin/validation/validateEvent/${event.identifier}', function(data) {
+	               if (data.match(/^<!--OK--/gi)) {
+	            	   closeTab('validationTabs','validationTabs${event.identifier}LI');
+	            	   loadTabLi('unValiEvLI', true);
+	            	   
+	               } else {
+	                   alert('An unexpected error occured.');
+	               }
+                            
+               }).fail(function() { alert('Could not perform action: '); });
+            }">Validate All</a>
+            
+        </div>
+        ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+    </div>
+  </div>
+  <div class="col-xs-8 col-sm-8">
+    <legend>Objects</legend>
+<%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/>
+<br/><br/>
+<legend>Relations</legend>
+<%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
+<br/><br/>
+

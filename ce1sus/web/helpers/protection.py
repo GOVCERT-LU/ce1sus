@@ -24,7 +24,6 @@ class Protector(object):
   of cherrypy."""
 
   def __init__(self, configFile):
-    # TODO: Fixme completely
     cherrypy.tools.auth = cherrypy.Tool('before_handler', Protector.check_auth)
 
   # pylint: disable=W0613

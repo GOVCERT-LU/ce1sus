@@ -72,7 +72,7 @@ isModal=False
                         <a href="#" onclick="if (confirm('${option.message}')) {
                         //call function
                         $.get('${option.url}${primaryKey}', function(data) {
-                        	if (data.match(/^--OK--/gi)) {
+                        	if (data.match(/^<!--OK--/gi)) {
                         		%if option.refresh:
                                     loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
                                 %endif

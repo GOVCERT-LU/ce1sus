@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+
+
+<%namespace name="tabulator" file="/dagr/components/tabs.html"/>
+
+<%call expr="tabulator.tabulator(id='validationTabs')">
+    <%call expr="tabulator.tab(id='unValiEv',url='/admin/validation/unvalidated', name='Unvalidated events',active=True)"/> 
+</%call>

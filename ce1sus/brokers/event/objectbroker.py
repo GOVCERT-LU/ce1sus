@@ -21,6 +21,8 @@ from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
                                               Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from sqlalchemy.orm import joinedload, joinedload_all
+from ce1sus.helpers.bitdecoder import BitValue
+
 
 class ObjectBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -69,11 +71,20 @@ class ObjectBroker(BrokerBase):
     if len(objectIDList) == 0:
       return list()
     try:
-      result = self.session.query(ObjectAttributeRelation).options(
-                                                                joinedload_all(
-                                        ObjectAttributeRelation.sameAttribute)
-                                                                   ).filter(
-                        ObjectAttributeRelation.ref_object_id.in_(objectIDList)
+      result = self.session.query(
+                              ObjectAttributeRelation
+                            ).join(
+                                   ObjectAttributeRelation.sameAttribute
+                                  ).options(
+                                        joinedload_all(
+                                         ObjectAttributeRelation.sameAttribute
+                                                       )
+                                           ).filter(
+                                    ObjectAttributeRelation.ref_object_id.in_(
+                                                                    objectIDList
+                                                                             ),
+                        # only object wich are validated and shared are shown
+                        Object.dbcode.op('&')(12) == 12
                         ).all()
 
     except sqlalchemy.orm.exc.NoResultFound:
@@ -122,6 +133,8 @@ class ObjectBroker(BrokerBase):
       obj.parentObject_id = parentObjectID
     obj.creator = user
     obj.creator_id = obj.creator.identifier
+
+    obj.bitValue = BitValue('1000', obj)
     return obj
 
   def getCDValuesObjectParents(self, eventID, notObject):

@@ -1,0 +1,52 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="collapse" file="/components/collapse.html"/>
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
+
+
+
+
+<%call expr="baseForms.genericModalForm(modalID='addObjectModal',url='/events/event/objects/attachObject',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+    <%call expr="modals.saveButtonModal(id='addObjectModal',title='Add object',contentUrl='/events/event/objects/addObject/{0}'.format(eventID))"/>
+</%call>
+<div class="row">
+    <div class="col-xs-3 col-sm-3">
+        <div id="objectLeft">
+            <div style="height:15px"/>
+            
+            <div class="row">
+              <div class="col-xs-12 col-sm-12">
+              <legend>Objects</legend>
+
+              <%call expr="nav.leftMenu('leftMenu')">
+              <ul class="nav nav-pills nav-stacked" style="max-width: 300px;" >
+                  <%call expr="collapse.menuItem(objectList)"/>
+               </ul>
+               </%call>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-8 col-sm-8">
+        <div id="objectRight">
+            <div style="padding-bottom: 15px">
+                <div class="btn-group">
+                  <button class="btn btn-default" onclick="openAllColapses('None');">Open All</button>
+                  <button class="btn btn-default" onclick="closeAllColapses('None')">Close All</button>
+                </div>
+            </div>
+            <div class="panel-group" id="accordion">
+              <%call expr="collapse.node(eventID, objectList, paginator,showMenu=False)"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+    openAllColapses('${objectID}');
+    
+});
+</script>

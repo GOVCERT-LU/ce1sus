@@ -29,11 +29,12 @@ class BitValue(object):
   VALIDATED = 2
   SHARABLE = 3
 
-  def __init__(self, bitValue):
+  def __init__(self, bitValue, parentObj=None):
     if isinstance(bitValue, IntType):
       bits = bitValue
     else:
       bits = int('{0}'.format(bitValue), 2)
+    self.__parentObj = parentObj
     self.__bitValue = bits
 
   @property
@@ -76,19 +77,23 @@ class BitValue(object):
     mask = 1 << offset
     return self.__bitValue & mask
 
-  def __setBit(self, offset, value):
+  def __setBit(self, offset):
     mask = 1 << offset
-    self.__bitValue = self.__bitVale | mask
+    self.__bitValue = self.__bitValue | mask
 
-  def __unsetBit(self, offset, value):
+  def __unsetBit(self, offset):
     mask = ~(1 << offset)
-    self.__bitValue = self.__bitVale & mask
+    self.__bitValue = self.__bitValue & mask
 
   def __setValue(self, offset, value):
     if value:
       self.__setBit(offset)
     else:
       self.__unsetBit(offset)
+    if not self.__parentObj is None:
+      # check if parent has the correct attribute
+      if hasattr(self.__parentObj, 'dbcode'):
+        self.__parentObj.dbcode = self.bitCode
 
   def __countBits(self, value):
     return bin(value).count('1')

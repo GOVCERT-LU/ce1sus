@@ -77,6 +77,7 @@ class RestEventController(RestControllerBase):
                        Risk.getByName(restEvent.risk),
                        Analysis.getByName(restEvent.analysis),
                        user)
+        event.bitValue.isRestInsert = True
         # flush to DB
         self.eventBroker.insert(event, commit=False)
 

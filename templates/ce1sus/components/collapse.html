@@ -4,7 +4,7 @@
 <%namespace name="pagination" file="/dagr/components/pagination.html"/>
 <%namespace name="objectsHelper" module="dagr.web.helpers.objects"/>
 
-<%def name="objectCollapseItem(id, parentID, eventID, object, paginator, indent=0)">
+<%def name="objectCollapseItem(id, parentID, eventID, object, paginator, indent=0, showMenu=True)">
 % if not object is None: 
         <div class="panel panel-default" >
         <div class="panel-heading">
@@ -23,6 +23,7 @@
                     else:
                       disabledStr = '" data-toggle="modal"'
                     %> 
+                    %if showMenu:
                        <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabledStr}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-tags"></span></a>
                        <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add parent object"><span class="glyphicon glyphicon-tag"></span></a>
@@ -47,6 +48,7 @@
 			                    <%call expr="modals.saveButtonModal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',contentUrl='/events/event/objects/setObjectParent/{0}/{1}'.format(eventID, object.identifier))"/>
 			                </%call>
 		                 <!--  dont remove this -->
+		            %endif
                     </div>
                 </div>
             </div>
@@ -72,7 +74,7 @@
   %endif
 </%def>
 
-<%def name="node(eventID, objectList, paginator,ident=1)">
+<%def name="node(eventID, objectList, paginator,ident=1, showMenu=True)">
     %if not objectList is None:
 	<%
     spana = ident
@@ -87,13 +89,13 @@
 	            for option in newPaginator.options.options:
 	               option.url = option.url % dict(objectID=object.identifier)
 	            %>
-		        <%call expr="objectCollapseItem('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),eventID, object, newPaginator, ident)"/>
+		        <%call expr="objectCollapseItem('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),eventID, object, newPaginator, ident, showMenu)"/>
 	            <div class="row">
 	            %if spana > 0:
 	            <div class="col-xs-${spana} col-sm-${spana}">&nbsp;</div>
 	            %endif
 	            <div class="col-xs-${spanb} col-sm-${spanb}">
-	               <%call expr="node(eventID, object.children, paginator,ident+1)"/>
+	               <%call expr="node(eventID, object.children, paginator,ident+1, showMenu)"/>
 	            </div>
 	            </div>
             %endfor

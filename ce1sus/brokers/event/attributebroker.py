@@ -29,6 +29,8 @@ from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
 from dagr.db.broker import IntegrityException
 from ce1sus.api.restclasses import RestAttribute
+from sqlalchemy.ext.hybrid import hybrid_property
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 class Attribute(BASE):
@@ -61,6 +63,18 @@ class Attribute(BASE):
   __value_id = None
   __value = None
   __valueObject = None
+  dbcode = Column('code', Integer)
+  __bitCode = None
+
+  @property
+  def bitValue(self):
+    if self.__bitCode is None:
+        self.__bitCode = BitValue(self.dbcode, self)
+    return self.__bitCode
+
+  @bitValue.setter
+  def bitValue(self, bitvalue):
+    self.__bitCode = bitvalue
 
   @property
   def value_id(self):

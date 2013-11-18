@@ -22,6 +22,8 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator, \
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
 from ce1sus.api.restclasses import RestEvent, RestComment, RestObject
+from ce1sus.helpers.bitdecoder import BitValue
+from sqlalchemy.ext.hybrid import hybrid_property
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -77,6 +79,18 @@ class Event(BASE):
   creatorGroup = relationship(Group)
   __tlpObj = None
   uuid = Column('uuid', String)
+  dbcode = Column('code', Integer)
+  __bitCode = None
+
+  @property
+  def bitValue(self):
+    if self.__bitCode is None:
+        self.__bitCode = BitValue(self.dbcode, self)
+    return self.__bitCode
+
+  @bitValue.setter
+  def bitValue(self, bitvalue):
+    self.__bitCode = bitvalue
 
   def addObject(self, obj):
     """
@@ -335,6 +349,19 @@ class Object(BASE):
 
   children = relationship("Object", primaryjoin='Object.identifier' +
                          '==Object.parentObject_id')
+  dbcode = Column('code', Integer)
+  __bitCode = None
+
+  @property
+  def bitValue(self):
+    if self.__bitCode is None:
+        self.__bitCode = BitValue(self.dbcode, self)
+    return self.__bitCode
+
+  @bitValue.setter
+  def bitValue(self, bitvalue):
+    self.__bitCode = bitvalue
+    self.dbcode = bitvalue.bitCode
 
   def addAttribute(self, attribute):
     """

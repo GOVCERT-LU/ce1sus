@@ -21,9 +21,10 @@ from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.event.eventclasses import Event, Object, \
                                               ObjectAttributeRelation
-from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 # pylint: disable=R0904
@@ -158,7 +159,7 @@ class EventBroker(BrokerBase):
     """Returns only a subset of entries"""
     try:
       result = self.session.query(self.getBrokerClass()
-                        ).order_by(
+                        ).filter(Event.dbcode.op('&')(4) == 4).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
@@ -191,7 +192,8 @@ class EventBroker(BrokerBase):
                                             Event.groups.identifier.in_(
                                                                   subGroupsIDs
                                                                        ),
-                                            Event.tlp_level_id >= tlpLVL
+                                            Event.tlp_level_id >= tlpLVL,
+                                            Event.dbcode.op('&')(12) == 12
                                             ),
                                             Event.published == 1)
                                           )
@@ -203,7 +205,8 @@ class EventBroker(BrokerBase):
                                         Event.creatorGroup_id == mainGroupID,
                                         and_(
                                             Event.tlp_level_id >= tlpLVL,
-                                            Event.published == 1
+                                            Event.published == 1,
+                                            Event.dbcode.op('&')(12) == 12
                                             )
                                         )
                                       ).order_by(
@@ -218,6 +221,17 @@ class EventBroker(BrokerBase):
         self.getLogger().fatal(e)
         self.session.rollback()
         raise BrokerException(e)
+    return result
+
+  def getAllUnvalidated(self, limit=None, offset=None):
+    try:
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
     return result
 
   def getAllForUser(self, user, limit=None, offset=None):
@@ -374,6 +388,7 @@ class EventBroker(BrokerBase):
       # dont want to change the original in case the user cancel!
       event = self.getByID(identifier)
       # right checks only if there is a change!!!!
+
     if not action == 'remove':
       event.title = name.strip()
       event.description = description.strip()
@@ -398,9 +413,12 @@ class EventBroker(BrokerBase):
       event.creatorGroup_id = event.creatorGroup.identifier
       ObjectConverter.setInteger(event, 'creatorGroup_id', published)
       if action == 'insert':
+        event.bitValue = BitValue('1000', event)
         event.created = datetime.now()
         event.creator = user
         event.creator_id = event.creator.identifier
+
+
     return event
 
   def getByUUID(self, identifier):
@@ -431,12 +449,25 @@ class EventBroker(BrokerBase):
 
     return result
 
-  def getRelatedEventsByObjectIDList(self, objectIDs):
+  def getRelatedEvents(self, event):
     try:
+      # get All the attributes from for the event
+      attributes = self.session.query(Attribute).join(Object,
+                                                      Event).filter(
+                                          Event.identifier == event.identifier
+                                                      ).all()
+      # get All ids
+      attributeIDs = list()
+      for attribute in attributes:
+        attributeIDs.append(attribute.identifier)
 
+      # getAll RelatedEvents
       result = self.session.query(Event).join(Object,
                                               ObjectAttributeRelation
-                                              ).all()
+                                              ).filter(
+                    ObjectAttributeRelation.sameAttribute_id.in_(attributeIDs),
+                    Event.dbcode.op('&')(12) == 12
+                    ).all()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with for ids :{0}'.format(

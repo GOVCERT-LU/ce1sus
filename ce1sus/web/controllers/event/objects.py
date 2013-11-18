@@ -173,6 +173,7 @@ class ObjectsController(Ce1susBaseController):
                                       definition,
                                       self.getUser())
     try:
+      obj.bitValue.isWebInsert = True
       self.objectBroker.insert(obj, False)
       getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
       # update last seen etc of event
