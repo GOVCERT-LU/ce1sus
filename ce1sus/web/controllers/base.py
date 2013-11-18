@@ -82,8 +82,6 @@ class Ce1susBaseController(BaseController):
       attribute['ViewableEventsDict'][event.identifier] = result
       return result
 
-
-
   def getUser(self, cached=False):
     """
     Returns the session user

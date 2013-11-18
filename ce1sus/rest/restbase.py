@@ -18,10 +18,9 @@ import cherrypy
 from ce1sus.api.ce1susapi import Ce1susAPI
 from dagr.web.controllers.base import BaseController
 from ce1sus.brokers.event.attributebroker import Attribute
-from ce1sus.brokers.event.eventclasses import Object, Event
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
-from dagr.db.broker import BrokerException, NothingFoundException
+from dagr.db.broker import NothingFoundException
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
@@ -187,17 +186,17 @@ class RestControllerBase(BaseController):
   def _createAttribute(self,
                         restAttribute,
                         attributeDefinition,
-                        object,
+                        obj,
                         commit=False):
 
-    user = object.creator
+    user = obj.creator
 
     # create the actual attribute
     dbAttribute = Attribute()
     dbAttribute.identifier = None
     dbAttribute.value = restAttribute.value
-    dbAttribute.object = object
-    dbAttribute.object_id = object.identifier
+    dbAttribute.object = obj
+    dbAttribute.object_id = obj.identifier
     dbAttribute.def_attribute_id = attributeDefinition.identifier
     dbAttribute.definition = attributeDefinition
     dbAttribute.created = datetime.now()

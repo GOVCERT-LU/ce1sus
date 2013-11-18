@@ -23,7 +23,6 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
 from ce1sus.api.restclasses import RestEvent, RestComment, RestObject
 from ce1sus.helpers.bitdecoder import BitValue
-from sqlalchemy.ext.hybrid import hybrid_property
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),

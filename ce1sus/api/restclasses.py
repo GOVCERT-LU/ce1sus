@@ -16,12 +16,14 @@ from types import ListType
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
 
+
 class RestAPIException(Exception):
   """
   Exception base for handler exceptions
   """
   def __init__(self, message):
     Exception.__init__(self, message)
+
 
 class RestClassException(Exception):
   """Broker Exception"""

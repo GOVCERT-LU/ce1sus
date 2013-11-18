@@ -20,7 +20,7 @@ from datetime import datetime
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
                                               Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload_all
 from ce1sus.helpers.bitdecoder import BitValue
 
 
@@ -81,8 +81,8 @@ class ObjectBroker(BrokerBase):
                                                        )
                                            ).filter(
                                     ObjectAttributeRelation.ref_object_id.in_(
-                                                                    objectIDList
-                                                                             ),
+                                                                  objectIDList
+                                                                            ),
                         # only object wich are validated and shared are shown
                         Object.dbcode.op('&')(12) == 12
                         ).all()

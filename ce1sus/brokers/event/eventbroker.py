@@ -225,7 +225,9 @@ class EventBroker(BrokerBase):
 
   def getAllUnvalidated(self, limit=None, offset=None):
     try:
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).all()
+      result = self.session.query(Event).filter(
+                                            Event.dbcode.op('&')(4) != 4
+                                               ).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:
@@ -417,8 +419,6 @@ class EventBroker(BrokerBase):
         event.created = datetime.now()
         event.creator = user
         event.creator_id = event.creator.identifier
-
-
     return event
 
   def getByUUID(self, identifier):
@@ -471,7 +471,7 @@ class EventBroker(BrokerBase):
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with for ids :{0}'.format(
-                                                                  objectIDs))
+                                                                  attributeIDs))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)

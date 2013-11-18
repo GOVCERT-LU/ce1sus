@@ -123,7 +123,6 @@ class UserController(Ce1susBaseController):
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
-  @require(privileged())
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,

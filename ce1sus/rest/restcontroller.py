@@ -18,7 +18,6 @@ from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.rest.handlers.restobject import RestObjectController
 from ce1sus.rest.handlers.restattribute import RestAttributeController
 from cherrypy import request
-from dagr.db.session import SessionManager
 
 
 class RestController(RestControllerBase):

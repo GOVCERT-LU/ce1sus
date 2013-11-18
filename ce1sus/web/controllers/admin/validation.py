@@ -14,13 +14,10 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
-from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
-from dagr.db.broker import OperationException, BrokerException, \
-  ValidationException, DeletionException
-import types as types
+from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.web.controllers.event.event import Object4Paginator
+from ce1sus.web.controllers.event.event import Object4Paginator, Relation
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definition.attributedefinitionbroker import \
@@ -275,4 +272,3 @@ class ValidationController(Ce1susBaseController):
       return self.returnAjaxOK()
     except BrokerException as e:
       return '{0}'.format(e)
-

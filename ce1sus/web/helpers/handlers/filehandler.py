@@ -101,11 +101,11 @@ class FileHandler(GenericHandler):
   # pylint: disable=R0913
   def _createAttribute(self, value, obj, definitionName, user, ioc):
     """
-    Creates an attribue object
+    Creates an attribue obj
 
-    :param value: The value of the object
+    :param value: The value of the obj
     :type value: an atomic value
-    :param obj: The object the attribute belongs to
+    :param obj: The obj the attribute belongs to
     :type obj: Object
     :param definitionName: The name of the definition
     :type definitionName: String

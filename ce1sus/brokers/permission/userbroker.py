@@ -20,7 +20,7 @@ import re
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
 import dagr.helpers.string as string
-from ce1sus.brokers.permission.permissionclasses import User, Group
+from ce1sus.brokers.permission.permissionclasses import User
 
 
 class UserBroker(BrokerBase):

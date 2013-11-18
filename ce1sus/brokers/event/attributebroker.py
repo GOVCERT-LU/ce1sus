@@ -29,7 +29,6 @@ from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
 from dagr.db.broker import IntegrityException
 from ce1sus.api.restclasses import RestAttribute
-from sqlalchemy.ext.hybrid import hybrid_property
 from ce1sus.helpers.bitdecoder import BitValue
 
 
