@@ -111,8 +111,15 @@ class EventController(Ce1susBaseController):
                           paginatorOptions=paginatorOptions)
     objectPaginator.itemsPerPage = 3
 
-    for item in (event.objects
-                    + self.objectBroker.getChildObjectsForEvent(eventID)):
+    if self.isEventOwner(event):
+      objectList = (self.objectBroker.getObjectsOfEvent(eventID)
+                + self.objectBroker.getChildObjectsForEvent(eventID))
+    else:
+      objectList = (self.objectBroker.getViewableOfEvent(eventID)
+                + self.objectBroker.getViewableChildObjectsForEvent(eventID))
+
+
+    for item in objectList:
       newItem = Object4Paginator()
       newItem.identifier = item.identifier
       newItem.type = item.definition.name

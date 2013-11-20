@@ -99,7 +99,7 @@ class ObjectController(Ce1susBaseController):
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def modifyObject(self, identifier=None, name=None,
-                  description=None, action='insert'):
+                  description=None, action='insert', share=None):
     """
     modifies or inserts a object with the data of the post
 
@@ -119,7 +119,8 @@ class ObjectController(Ce1susBaseController):
     obj = self.objectBroker.buildObjectDefinition(identifier,
                                                   name,
                                                   description,
-                                                  action)
+                                                  action,
+                                                  share)
     try:
       if action == 'insert':
         self.objectBroker.insert(obj)

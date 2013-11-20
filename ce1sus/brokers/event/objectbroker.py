@@ -173,6 +173,23 @@ class ObjectBroker(BrokerBase):
       raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   eventID))
 
+  def getViewableChildObjectsForEvent(self, eventID):
+    """
+    Returns all the child objects of the objects for a given event
+
+    :returns: List of Objects
+    """
+    try:
+      # first level
+      result = self.session.query(Object).filter(Object.parentEvent_id
+                                                 == eventID,
+                                                 Object.dbcode.op('&')(12) == 12
+                                                 )
+      return result.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0}'.format(
+                                                                  eventID))
+
   def getChildOjectsForObjectID(self, objectID):
     """
     Returns all the child objects of the given object
@@ -191,6 +208,35 @@ class ObjectBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   objectID))
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+  def getObjectsOfEvent(self, eventID):
+    try:
+      # first level
+      result = self.session.query(Object).filter(Object.event_id
+                                                 == eventID
+                                                 )
+      return result.all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+        return list()
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+  def getViewableOfEvent(self, eventID):
+    try:
+      # first level
+      result = self.session.query(Object).filter(Object.event_id
+                                                 == eventID,
+                                                 Object.dbcode.op('&')(12) == 12
+                                                 )
+      return result.all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+        return list()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)

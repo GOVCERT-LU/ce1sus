@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+
+
+<%
+if identifier is None:
+  identifierValue = ''
+else:
+  identifierValue = identifier
+%>
+<input type="hidden" name="identifier" value="${identifierValue}"/>
+<input type="hidden" name="eventID" value="${eventID}"/>
+<%call expr="forms.bitValueForm(bitValue,enabled=True)"/>
+

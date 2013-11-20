@@ -70,6 +70,16 @@ class ObjectsController(Ce1susBaseController):
                                ('/events/event/attribute/'
                                 + 'view/{0}/%(objectID)s/').format(eventID),
                                modalTitle='View Attribute')
+    paginatorOptions.addOption('MODAL',
+                               'CONFIG',
+                               ('/events/event/bitValue/setAttribute'
+                                        + 'Properties/{0}/%(objectID)s/'
+                                        ).format(eventID),
+                               modalTitle='Attribute Properties',
+                               postUrl=('/events/event/bitValue/modifyAttribute'
+                                        + 'Properties'
+                                        ).format(eventID),
+                               refresh=True)
     # mako will append the missing url part
     paginatorOptions.addOption('DIALOG',
                                'REMOVE',
@@ -92,9 +102,14 @@ class ObjectsController(Ce1susBaseController):
         cbAttributeDefintiionsDict = dict()
     except BrokerException:
       cbAttributeDefintiionsDict = dict()
-    # TODO: show only viewable objects/attribtues
 
-    objects = event.objects
+    if self.isEventOwner(event):
+      objectList = (self.objectBroker.getObjectsOfEvent(eventID)
+                + self.objectBroker.getChildObjectsForEvent(eventID))
+    else:
+      objectList = (self.objectBroker.getViewableOfEvent(eventID)
+                + self.objectBroker.getViewableChildObjectsForEvent(eventID))
+
     if objectID is None:
       try:
         objectID = getattr(cherrypy, 'session')['instertedObject']
@@ -103,11 +118,12 @@ class ObjectsController(Ce1susBaseController):
         objectID = None
 
     return template.render(eventID=eventID,
-                        objectList=objects,
+                        objectList=objectList,
                         cbObjDefinitions=self.def_objectBroker.getCBValues(),
                         cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                         paginator=paginator,
-                        objectID=objectID)
+                        objectID=objectID,
+                        owner=self.isEventOwner(event))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose

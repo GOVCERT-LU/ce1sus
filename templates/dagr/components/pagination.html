@@ -146,7 +146,9 @@ isModal=False
     <!-- END pagination -->
 % if isModal:
 <form id="paginatorModalForm">
-    <%call expr="modals.genericModal(id='paginatorModal',title='No Title',contentUrl=None)"/>
+    <%call expr="modals.genericModal(id='paginatorModal',title='No Title',contentUrl=None)">
+    </%call>
 </form>
 %endif
+
 </%def>

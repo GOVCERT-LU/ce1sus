@@ -2,6 +2,7 @@
 
 <%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
 <%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
 
 %if enabled:
 %if attribute is None:
@@ -12,6 +13,7 @@
     <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/getTickets')">Reference Ticket</a>
    </div>
    </%call>
+   <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enabled)"/>
    </div>
   
 %else:

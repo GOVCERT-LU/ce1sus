@@ -166,7 +166,7 @@ class FileHandler(GenericHandler):
       canDownload = False
     return canDownload
 
-  def render(self, enabled, eventID, user, attribute=None):
+  def render(self, enabled, eventID, user, definition, attribute=None):
 
     template = self.getTemplate('/events/event/attributes/handlers/file.html')
     try:
@@ -180,11 +180,16 @@ class FileHandler(GenericHandler):
     if not enabled:
       canDownload = self.__canUserDownload(eventID, user)
 
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
+
     string = template.render(url=url,
                              enabled=enabled,
                              canDownload=canDownload,
-                             eventID=eventID
-                             )
+                             eventID=eventID,
+                             defaultShareValue=defaultShareValue)
     return string
 
   def convertToAttributeValue(self, value):

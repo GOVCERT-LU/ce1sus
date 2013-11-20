@@ -40,14 +40,17 @@ class PaginatorOptions(object):
 
   ICON_MAPPER = {'VIEW': 'glyphicon glyphicon-eye-open',
                  'EDIT': 'glyphicon glyphicon-edit',
-                 'REMOVE': 'glyphicon glyphicon-remove'}
+                 'REMOVE': 'glyphicon glyphicon-remove',
+                 'CONFIG': 'glyphicon glyphicon-wrench'}
 
   TITLE_MAPPER = {'VIEW': 'View',
                   'EDIT': 'Edit',
-                  'REMOVE': 'Remove'}
+                  'REMOVE': 'Remove',
+                  'CONFIG': 'Properties'}
   MSG_MAPPER = {'VIEW': '',
                 'EDIT': '',
-                'REMOVE': 'Are you sure you want to delete?'}
+                'REMOVE': 'Are you sure you want to delete?',
+                'CONFIG': ''}
 
   # pylint: disable=R0902
   class Option(object):

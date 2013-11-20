@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 <%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
 
 %if enabled:
 <div class="row">
@@ -10,7 +11,6 @@
 		</div>
 	</div>
 	<div class="col-xs-9 col-sm-9">
-	    %if enabled:
 		<form id="fileuploadForm" enctype="multipart/form-data">
 		    <input type="hidden" value="${eventID}" name="eventID"/>
 			<input class="btn-file btn-default" name="value" type="file" /><br />
@@ -22,9 +22,11 @@
 			<div class="percent" style="visibility: hidden">0%</div>
 		</div>
 		<div id="status"></div>
-		%endif
+		
 	</div>
+	
 </div>
+<%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enabled)"/>
 <script type="text/javascript">
 function buttonClick(){
     var formData = new FormData($('#fileuploadForm')[0]);

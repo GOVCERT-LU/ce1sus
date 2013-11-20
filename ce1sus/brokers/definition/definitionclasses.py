@@ -42,6 +42,7 @@ class ObjectDefinition(BASE):
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all')
   dbchksum = Column('chksum', String)
+  share = Column('sharable', Integer)
 
   @hybrid_property
   def chksum(self):

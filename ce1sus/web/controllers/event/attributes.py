@@ -269,7 +269,7 @@ class AttributesController(Ce1susBaseController):
       enableView = True
     else:
       enableView = False
-    return handler.render(enableView, eventID, self.getUser(), attribute)
+    return handler.render(enableView, eventID, self.getUser(), definition, attribute)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose

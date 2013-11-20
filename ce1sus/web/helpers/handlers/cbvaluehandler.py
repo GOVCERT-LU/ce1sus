@@ -20,7 +20,7 @@ class CBValueHandler(GenericHandler):
   def __init__(self):
     GenericHandler.__init__(self)
 
-  def render(self, enabled, eventID, user, attribute=None):
+  def render(self, enabled, eventID, user, definition, attribute=None):
     template = (self.
                 getTemplate('/events/event/attributes/handlers/cbValues.html')
                 )
@@ -45,8 +45,13 @@ class CBValueHandler(GenericHandler):
                        + '<br/> It should be under the form of:<br/><b>'
                        + '{0}</b><br/>'
                   + 'Please fix the definition before using.').format(valRegex)
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
     string = template.render(attribute=attribute,
                              cbValues=cbValues,
                              enabled=enabled,
-                             validationMsg=validationMsg)
+                             validationMsg=validationMsg,
+                             defaultShareValue=defaultShareValue)
     return string

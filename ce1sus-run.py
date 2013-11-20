@@ -28,6 +28,7 @@ from ce1sus.sanity import SantityChecker
 from ce1sus.rest.restcontroller import RestController
 from ce1sus.web.controllers.admin.subgroups import SubGroupController
 from ce1sus.web.controllers.admin.validation import ValidationController
+from ce1sus.web.controllers.event.bitvalue import BitValueController
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -103,7 +104,7 @@ def bootstrap():
   cherrypy.tree.mount(CommentsController(), '/events/event/comment')
   cherrypy.tree.mount(SubGroupController(), '/admin/subgroups')
   cherrypy.tree.mount(ValidationController(), '/admin/validation')
-
+  cherrypy.tree.mount(BitValueController(), '/events/event/bitValue')
   # RESTFoo
   cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
 if __name__ == '__main__':

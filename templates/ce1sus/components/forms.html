@@ -41,6 +41,7 @@
 % if object is None:
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value='', enabled=enabled)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message='',enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Default Shareable',name='share',enabled=enabled,hasEmpty=False,selected=0)"/>
 % else:
   <input type="hidden" name="identifier" value="${object.identifier}">
   %if not object.identifier is None:
@@ -49,6 +50,7 @@
   <%call expr="labeledInput.labeledEditBox(label='Name',name='name',value=object.name,enabled=enabled)"/>
   <%call expr="labeledInput.labeledEditBox(label='Checksum',name='',value=object.chksum,enabled=False)"/>
   <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=object.description,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Default Shareable',name='share',enabled=enabled,hasEmpty=False,selected=object.share)"/>
   
 % endif
 </%def>
@@ -90,6 +92,7 @@
   <%call expr="labeledInput.labeledComboBox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,hasEmpty=False,selected=1)"/>
   <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=0)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Relationable',name='relation',enabled=enabled,hasEmpty=False,selected=0)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Default Shareable',name='share',enabled=enabled,hasEmpty=False,selected=0)"/>
 % else:
 %if not attribute.identifier is None:
   <input type="hidden" name="identifier" value="${attribute.identifier}">
@@ -103,6 +106,7 @@
   <%call expr="labeledInput.labeledComboBox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,hasEmpty=False)"/>
   <%call expr="labeledInput.labeledComboBox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,hasEmpty=False,selected=attribute.handlerIndex)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Relationable',name='relation',enabled=enabled,hasEmpty=False,selected=attribute.relation)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Default Shareable',name='share',enabled=enabled,hasEmpty=False,selected=attribute.share)"/>
 % endif
 
 </%def>
@@ -245,5 +249,35 @@ $(document).ready(function(){
   <%call expr="labeledInput.labeledEditBox(label='Identifier',name='attID',value=commentObj.identifier,enabled=False)"/>
   %endif
   <%call expr="labeledInput.labeledTextBox(label='Comment',name='commentText',message=commentObj.comment,enabled=enabled)"/>
+%endif
+</%def>
+
+<%def name="bitValueForm(bitValue, defaultShareValue=0, enabled=True)">
+
+
+% if bitValue is None:
+<%call expr="labeledInput.labeledYesNoComboBox(label='Shared',name='shared',enabled=enabled,hasEmpty=False,selected=defaultShareValue)"/>
+%else:
+<%
+if bitValue.isRestInsert and not bitValue.isWebInsert:
+    origin = 'REST API'
+else:
+    if not bitValue.isRestInsert and bitValue.isWebInsert:
+        origin = 'Manual'
+    else:
+        origin = 'Errornous'
+if bitValue.isValidated:
+    validated = 1
+else:
+    validated = 0
+if bitValue.isSharable:
+    shared = 1
+else:
+    shared = 0
+
+%>
+<%call expr="labeledInput.labeledEditBox(label='Origin',name='',value=origin,enabled=False)"/>
+<%call expr="labeledInput.labeledYesNoComboBox(label='Validated',name='',enabled=False,hasEmpty=False,selected=validated)"/>
+<%call expr="labeledInput.labeledYesNoComboBox(label='Shared',name='shared',enabled=enabled,hasEmpty=False,selected=shared)"/>
 %endif
 </%def>

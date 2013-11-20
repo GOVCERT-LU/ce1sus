@@ -109,3 +109,13 @@ class Ce1susBaseController(BaseController):
     """
     self.getLogger().debug("Cleared session")
     Protector.clearSession()
+
+  def isEventOwner(self, event):
+    user = Protector.getUser()
+    if user.privileged == 1:
+      return True
+    else:
+      if user.group_id == event.creatorGroup_id:
+        return True
+      else:
+        return False

@@ -19,9 +19,15 @@ class DateHandler(GenericHandler):
   def __init__(self):
     GenericHandler.__init__(self)
 
-  def render(self, enabled, eventID, user, attribute=None):
+  def render(self, enabled, eventID, user, definition, attribute=None):
     template = (self.
                 getTemplate('/events/event/attributes/handlers/datetime.html')
                 )
-    string = template.render(attribute=attribute, enabled=enabled)
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
+    string = template.render(attribute=attribute,
+                             enabled=enabled,
+                             defaultShareValue=defaultShareValue)
     return string

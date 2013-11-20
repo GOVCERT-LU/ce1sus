@@ -64,7 +64,7 @@ class TicketHandler(GenericHandler):
 
     # check if params contains tickets
 
-  def render(self, enabled, eventID, user, attribute=None):
+  def render(self, enabled, eventID, user, definition, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/ticket.html'
                                 )
     string = template.render(attribute=attribute, enabled=enabled)
@@ -81,10 +81,16 @@ class CVEHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.url = WebConfig.getInstance().get('cveurl')
 
-  def render(self, enabled, eventID, user, attribute=None):
+  def render(self, enabled, eventID, user, definition, attribute=None):
     template = self.getTemplate('/events/event/attributes/handlers/cve.html')
-    string = template.render(attribute=attribute, enabled=enabled)
-    return string
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
+
+    return template.render(attribute=attribute,
+                             enabled=enabled,
+                             defaultShareValue=defaultShareValue)
 
   def convertToAttributeValue(self, value):
     link = Link(self.url, value.value)

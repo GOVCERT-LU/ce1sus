@@ -15,7 +15,7 @@ import sqlalchemy.orm.exc
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
-
+from dagr.helpers.converters import ObjectConverter
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -149,7 +149,8 @@ class ObjectDefinitionBroker(BrokerBase):
 
   @staticmethod
   def buildObjectDefinition(identifier=None, name=None,
-                  description=None, action='insert'):
+                  description=None, action='insert',
+                               share=None):
     """
     puts an object with the data together
 
@@ -171,4 +172,5 @@ class ObjectDefinitionBroker(BrokerBase):
     if not action == 'remove':
       obj.name = name.strip()
       obj.description = description.strip()
+      ObjectConverter.setInteger(obj, 'share', share)
     return obj

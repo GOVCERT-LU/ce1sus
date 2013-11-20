@@ -272,7 +272,7 @@ class AttributeBroker(BrokerBase):
     overrides BrokerBase.update
     """
     # validation of the value of the attribute first
-    definition = instance.definiton
+    definition = instance.definition
     ObjectValidator.validateRegex(instance,
                                   'value',
                                   definition.regex,

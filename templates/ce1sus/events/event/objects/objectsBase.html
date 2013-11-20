@@ -25,7 +25,7 @@
 
               <%call expr="nav.leftMenu('leftMenu')">
               <ul class="nav nav-pills nav-stacked" style="max-width: 300px;" >
-                  <%call expr="collapse.menuItem(objectList)"/>
+                  <%call expr="collapse.menuItem(objectList, owner)"/>
                </ul>
                </%call>
             </div>
@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div class="panel-group" id="accordion">
-              <%call expr="collapse.node(eventID, objectList, paginator)"/>
+              <%call expr="collapse.node(eventID, objectList, paginator, owner=owner)"/>
             </div>
         </div>
     </div>

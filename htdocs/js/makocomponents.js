@@ -6,6 +6,23 @@ $.fn.scrollView = function () {
     });
 }
 
+function getErrorMsg(resonseText) {
+	resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+	if (typeof(resonseText.status) !== 'undefined') {
+		resultText += '<h4 class="alert-heading">Error: '+resonseText.status+'</h4><p><div style="text-align:left">'
+	} else {
+		resultText += '<h4 class="alert-heading">An unexpected Error occurred!</h4><p>'
+	}
+	
+	if (typeof(resonseText.statusText) !== 'undefined') {
+		resultText += resonseText.statusText;
+	} else {
+		resultText += resonseText;
+	}
+	resultText += '</div></p></div>';
+	return resultText
+}
+
 function formEvent(element,event, uri, contentid, doRefresh,refreshContainer,refreshUrl) {
 	
 	genericFormSubmit(element,event, null,contentid, uri, doRefresh,refreshContainer,refreshUrl);
@@ -61,10 +78,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     		if (responseText.match(/^<!--PostError-->/gi)) {
     			resultText= responseText;
     		} else {
-	    		resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-	    		resultText += '<h4 class="alert-heading">An unexpected Error occurred!</h4><p>'
-	    		resultText += responseText;
-	    		resultText += '</p></div>';
+    			resultText = getErrorMsg(responseText)
     		} 
     		if (modalID) {
     			$("#"+modalID+"body").html(resultText);
@@ -76,10 +90,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
 
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
-		resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-		resultText += '<h4 class="alert-heading">There was an error making the AJAX request</h4><p>'
-		resultText += responseText;
-		resultText += '</p></div>';
+    	resultText = getErrorMsg(responseText)
     	if (modalID) {
     		$('#'+modalID+'body').html(resultText);
     	} else {
@@ -256,15 +267,24 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		    		if (refresh) {
 		            	loadContent(refreshContentID,refreshContentUrl);
 		            }
+		            //workaround---
+		            $('.modal-backdrop').remove();
+		            document.documentElement.style.overflow = "auto";
+		            document.body.style.marginRight='0px';
 		    	} else {
-		    		$("#paginatorModalbody").html(responseText);
+		    		if (responseText.match(/^<!--PostError-->/gi)) {
+		    			resultText= responseText;
+		    		} else {
+		    			resultText = getErrorMsg(responseText)
+		    		} 
+		    		$("#paginatorModalbody").html(resultText);
 		    	}
 		    });
 
 		    // callback handler that will be called on failure
 		    request.fail(function (responseText, textStatus, XMLHttpRequest){
-		    	$('#paginatorModalbody').html('<div class="alert alert-error">'
-		    			+'There was an error making the AJAX request</div>');
+		    	resultText = getErrorMsg(responseText)
+				$("#paginatorModalbody").html(resultText);
 		    });
 		    // callback handler that will be called regardless
 		    // if the request failed or succeeded
@@ -276,10 +296,10 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		    event.preventDefault();
 		});
 		$('#paginatorModalFooter').html('<input class="btn btn-primary" value="'
-				+'Save changes" type="submit"><button class="btn" data-'
+				+'Save changes" type="submit"><button class="btn btn-default" data-'
 				+'dismiss="modal">Close</button>');
 	} else {
-		$('#paginatorModalFooter').html('<button class="btn" data-dismiss="'
+		$('#paginatorModalFooter').html('<button class="btn btn-default" data-dismiss="'
 				+'modal">Close</button>');
 	}
 }
