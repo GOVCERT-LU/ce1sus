@@ -164,7 +164,7 @@ class ObjectsController(Ce1susBaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def attachObject(self, eventID, definition=None):
+  def attachObject(self, eventID, definition=None, shared=None):
     """
     Inserts an an event object.
 
@@ -187,7 +187,8 @@ class ObjectsController(Ce1susBaseController):
     obj = self.objectBroker.buildObject(None,
                                         event,
                                       definition,
-                                      self.getUser())
+                                      self.getUser(),
+                                      shared=shared)
     try:
       obj.bitValue.isWebInsert = True
       self.objectBroker.insert(obj, False)
@@ -333,3 +334,17 @@ class ObjectsController(Ce1susBaseController):
       self.objectBroker.update(obj)
 
     return self.returnAjaxOK()
+
+  @cherrypy.expose
+  @require(requireReferer(('/internal')))
+  def renderProperties(self, definitionID, eventID):
+    template = self.getTemplate('/events/event/objects/properties.html')
+    event = self.eventBroker.getByID(eventID)
+    # right checks
+    self.checkIfViewable(event)
+    definition = self.def_objectBroker.getByID(definitionID)
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
+    return template.render(defaultShareValue=defaultShareValue)

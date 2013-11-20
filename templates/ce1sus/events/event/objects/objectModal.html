@@ -3,6 +3,27 @@
 
 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
-
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<div id="objectModal">
 <%call expr="forms.eventObjectForm(eventID,object,True,cbObjDefinitions)"/>
+  <div id="editBox">
+  
+  <%call expr="labeledInput.genericLabeler('')">
+  Please select something
+  </%call>
+  
+  </div>
+  </div>
+<script type="text/javascript">
+$(document).ready(function(){
+        $("#objectModal select#definitionID").change(function(event){
+            value = $(this).val();
+            if (value) {
+                loadContent('editBox','/events/event/objects/renderProperties/'+$(this).val()+'/${eventID}');
+            } else {
+                $('#objectModal #editBox').html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9">Please select something</div></div>');
+            }
+        });
+});
 
+</script>

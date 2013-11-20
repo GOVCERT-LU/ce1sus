@@ -22,6 +22,7 @@ from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from sqlalchemy.orm import joinedload_all
 from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.converters import ObjectConverter
 
 
 class ObjectBroker(BrokerBase):
@@ -100,7 +101,12 @@ class ObjectBroker(BrokerBase):
     return result
 
   @staticmethod
-  def buildObject(identifier, event, definition, user, parentObjectID=None):
+  def buildObject(identifier,
+                  event,
+                  definition,
+                  user,
+                  parentObjectID=None,
+                  shared=0):
     """
     puts an object together
 
@@ -133,7 +139,7 @@ class ObjectBroker(BrokerBase):
       obj.parentObject_id = parentObjectID
     obj.creator = user
     obj.creator_id = obj.creator.identifier
-
+    ObjectConverter.setInteger(obj, 'shared', shared)
     obj.bitValue = BitValue('1000', obj)
     return obj
 
