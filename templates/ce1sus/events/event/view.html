@@ -26,6 +26,7 @@
 <legend>Relations</legend>
 <%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
 <br/><br/>
+%if owner:
 <legend>Comments</legend>
 <table class="table table-striped table-hover table-condensed">
   <thead>
@@ -70,11 +71,11 @@
 
 
 
-
 <div class="btn-group">
 <a href="#addCommentModal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add
                 new Comment</a>
 </div>
+
 
 
 
@@ -87,13 +88,16 @@
     <input type="hidden" name="action" value="update">
     <%call expr="modals.saveButtonModal(id='editCommentModal',title='Add a comment',contentUrl=None)"/>
 </%call>
+%endif
 
 <script type="text/javascript">
+%if owner:
 function editComment(eventID,commentID) {
     //load content
     
     loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
 }
+%endif
 $(document).ready(function() {
     loadContent('eventEdit','/events/event/details/${event.identifier}');
 });

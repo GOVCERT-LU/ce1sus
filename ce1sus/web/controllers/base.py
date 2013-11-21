@@ -53,6 +53,10 @@ class Ce1susBaseController(BaseController):
 
     return result
 
+  def checkIfOwner(self, event):
+    if not self.isEventOwner(event):
+      raise cherrypy.HTTPError(403)
+
   def checkIfViewable(self, event):
     """
     Checks if the page if viewable for the given group

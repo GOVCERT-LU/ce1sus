@@ -82,7 +82,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/eventBase.html')
-    return template.render(eventID=eventID)
+    return template.render(eventID=eventID,
+                           owner=self.isEventOwner(event))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -231,13 +232,16 @@ class EventController(Ce1susBaseController):
                            cbStatusValues=Status.getDefinitions(),
                            cbTLPValues=TLPLevel.getDefinitions(),
                            cbAnalysisValues=Analysis.getDefinitions(),
-                           cbRiskValues=Risk.getDefinitions())
+                           cbRiskValues=Risk.getDefinitions(),
+                           owner=self.isEventOwner(event))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def editDetails(self, eventID):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
+
     template = self.mako.getTemplate('/events/event/editDetails.html')
     return template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),

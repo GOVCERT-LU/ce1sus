@@ -33,7 +33,7 @@ class SanityValue(BASE):
 
 class SantityChecker(object):
 
-  APP_REL = '0.2.2'
+  APP_REL = '0.2.3'
   DB_REL = '0.3.0'
   REST_REL = '0.1.0'
 

@@ -45,7 +45,8 @@ class GroupsController(Ce1susBaseController):
                            remainingGroups=remainingGroups,
                            eventGroups=event.groups,
                            remainingSubGroups=remainingSubGroups,
-                           eventSubGroups=event.maingroups)
+                           eventSubGroups=event.maingroups,
+                           owner=self.isEventOwner(event))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -70,6 +71,7 @@ class GroupsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
     try:
       if operation == 'add':
         if not (remainingGroups is None):
@@ -115,6 +117,7 @@ class GroupsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
     try:
       if operation == 'add':
         if not (remainingGroups is None):

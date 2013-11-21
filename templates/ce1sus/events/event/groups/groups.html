@@ -4,6 +4,7 @@
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 
 <h4>Groupmanagment:</h4>
+%if owner:
 <%call expr="baseForms.genericForm(id='groupEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
             <input type="hidden" name="eventID"
                 value="${eventID}">
@@ -75,3 +76,6 @@
             </div>
             </div>
 </%call>
+%else:
+Not available
+%endif

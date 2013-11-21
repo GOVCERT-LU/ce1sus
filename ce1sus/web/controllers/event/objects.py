@@ -136,6 +136,7 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
+
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
     return template.render(cbObjDefinitions=cbObjDefinitions,
@@ -154,6 +155,7 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
+
     template = self.getTemplate('/events/event/objects/childObjectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
     return template.render(cbObjDefinitions=cbObjDefinitions,
@@ -180,6 +182,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
+
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
@@ -224,6 +228,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
+
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
@@ -257,6 +263,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
+
     # remove object
     try:
       self.objectBroker.removeByID(objectID)
@@ -283,6 +291,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
 
     # get concerned object
     obj = self.objectBroker.getByID(objectID)
@@ -319,6 +328,8 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.checkIfOwner(event)
+
     if setEventParent is None and not string.isNotNull(parentObjectID):
       return 'Please select someting before saving.'
     obj = self.objectBroker.getByID(objectID)
