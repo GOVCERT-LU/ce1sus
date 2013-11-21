@@ -96,3 +96,6 @@ class SessionManager:
 
   def close(self):
     self.connector.close()
+
+  def setInstance(self, instance):
+    SessionManager.instance = instance
