@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.helpers.config import Configuration
 from dagr.helpers.debug import Log
 import ldap
-import old_types
+import types
 
 
 # pylint:disable=R0903
@@ -132,7 +132,7 @@ class LDAPHandler(object):
     :returns:
     """
     for attributes in user:
-      if isinstance(attributes, old_types.DictType):
+      if isinstance(attributes, types.DictType):
         user = LDAPUser()
         for key, value in attributes.iteritems():
           if hasattr(user, key):
@@ -222,7 +222,7 @@ class LDAPHandler(object):
     # dierft nemmen 1 sinn
     for resultTuple in result:
       for item in resultTuple:
-        if isinstance(item, old_types.DictType):
+        if isinstance(item, types.DictType):
           attribute = item[attributeName][0]
     return attribute
 
