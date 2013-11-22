@@ -51,14 +51,14 @@ class FileHandler(GenericHandler):
   # pylint: disable=W0211
   @staticmethod
   def getAttributesNameList(self):
-    return ('filename',
-            'md5',
-            'sha1',
-            'sha256',
-            'sha384',
-            'sha512',
-            'size',
-            'mimeType',
+    return ('file_name',
+            'hash_md5',
+            'hash_sha1',
+            'hash_sha256',
+            'hash_sha384',
+            'hash_sha512',
+            'size_in_bytes',
+            'magic_number',
             'location')
 
   def populateAttributes(self, params, obj, definition, user):
@@ -68,12 +68,12 @@ class FileHandler(GenericHandler):
       attributes = list()
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
-                                               'filename',
+                                               'file_name',
                                                user,
                                                '1'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
-                                    'sha1',
+                                    'hash_sha1',
                                     user,
                                     '1')
       # move file to destination
@@ -90,7 +90,7 @@ class FileHandler(GenericHandler):
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
-                                               'File (UnMalicious)',
+                                               'raw_document_file',
                                                user,
                                                '0'))
       # return attributes
@@ -228,39 +228,39 @@ class FileWithHashesHandler(FileHandler):
       # the beginning
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
-                                               'filename',
+                                               'file_name',
                                                user,
                                                '1'))
       attributes.append(self._createAttribute(hasher.fileHashMD5(filepath),
                                                obj,
-                                               'md5',
+                                               'hash_md5',
                                                user,
                                                '1'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
-                                    'sha1',
+                                    'hash_sha1',
                                     user,
                                     '1')
       attributes.append(sha1)
       attributes.append(self._createAttribute(hasher.fileHashSHA256(filepath),
                                                obj,
-                                               'sha256',
+                                               'hash_sha256',
                                                user,
                                                '1'))
       attributes.append(self._createAttribute(hasher.fileHashSHA384(filepath),
                                                obj,
-                                               'sha384',
+                                               'hash_sha384',
                                                user,
                                                '1'))
       attributes.append(self._createAttribute(hasher.fileHashSHA512(filepath),
                                                obj,
-                                               'sha512',
+                                               'hash_sha512',
                                                user,
                                                '1'))
       attributes.append(self._createAttribute('{0}'.
                                                format(getsize(filepath)),
                                                obj,
-                                               'size',
+                                               'size_in_bytes',
                                                user,
                                                '0'))
       url = pathname2url(filepath)
@@ -268,7 +268,7 @@ class FileWithHashesHandler(FileHandler):
       attributes.append(self._createAttribute(unicode(mime.
                                                        guess_type(url)[0]),
                                                obj,
-                                               'mimeType',
+                                               'magic_number',
                                                user,
                                                '0'))
       # move file to destination
@@ -285,7 +285,7 @@ class FileWithHashesHandler(FileHandler):
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
-                                               'File (Malicious)',
+                                               'raw_file',
                                                user,
                                                '0'))
       # return attributes
