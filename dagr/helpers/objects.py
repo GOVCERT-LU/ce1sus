@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import old_types
+import types
 import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
@@ -89,7 +89,7 @@ def compareObjects(object1, object2, raiseExceptions=True):
   listIssue = False
   inputIssue = False
   if (type(object1) != type(object2)) and not (isinstance(object1,
-      old_types.StringTypes) and isinstance(object2, old_types.StringTypes)):
+      types.StringTypes) and isinstance(object2, types.StringTypes)):
     result = False
     typeIssue = True
     attrValue1 = type(object1)
@@ -97,8 +97,8 @@ def compareObjects(object1, object2, raiseExceptions=True):
   else:
     # check if not a baseType
     if (isinstance(object1, Iterable) and not isinstance(object1,
-                old_types.StringTypes)) and (isinstance(object1, Iterable) and
-                not isinstance(object1, old_types.StringTypes)):
+                types.StringTypes)) and (isinstance(object1, Iterable) and
+                not isinstance(object1, types.StringTypes)):
       listIssue = True
       inputIssue = True
       if (len(object1) != len(object2)):
@@ -107,8 +107,8 @@ def compareObjects(object1, object2, raiseExceptions=True):
         attrValue2 = len(object2)
         result = False
       else:
-        if (isinstance(object1, old_types.DictionaryType) and
-                      isinstance(object2, old_types.DictionaryType)):
+        if (isinstance(object1, types.DictionaryType) and
+                      isinstance(object2, types.DictionaryType)):
           for key, item1 in object1.iteritems():
             if key in object2:
               # This is just to know what was the problem
@@ -126,16 +126,16 @@ def compareObjects(object1, object2, raiseExceptions=True):
               attrValue1 = object1[i]
               attrValue2 = object2[i]
               break
-    elif ((isinstance(object1, old_types.StringTypes) or isinstance(object1,
-                                                                old_types.IntType)
-                or isinstance(object1, old_types.FloatType) or isinstance(object1,
-                                                                old_types.LongType)
-                or isinstance(object1, old_types.TupleType)) and
-                (isinstance(object2, old_types.StringTypes) or isinstance(object2,
-                                                                old_types.IntType)
-                or isinstance(object2, old_types.FloatType) or isinstance(object2,
-                                                                old_types.LongType)
-                or isinstance(object2, old_types.TupleType))):
+    elif ((isinstance(object1, types.StringTypes) or isinstance(object1,
+                                                                types.IntType)
+                or isinstance(object1, types.FloatType) or isinstance(object1,
+                                                                types.LongType)
+                or isinstance(object1, types.TupleType)) and
+                (isinstance(object2, types.StringTypes) or isinstance(object2,
+                                                                types.IntType)
+                or isinstance(object2, types.FloatType) or isinstance(object2,
+                                                                types.LongType)
+                or isinstance(object2, types.TupleType))):
       inputIssue = True
       if object1 != object2:
         attrValue1 = object1
@@ -149,8 +149,8 @@ def compareObjects(object1, object2, raiseExceptions=True):
         attrValue2 = object2
         result = False
     else:
-      if not ((isinstance(object1, old_types.NoneType) and isinstance(object2,
-                                                            old_types.NoneType))):
+      if not ((isinstance(object1, types.NoneType) and isinstance(object2,
+                                                            types.NoneType))):
         for name in getFields(object1):
           # only compare public attributes/functions
           value1 = None
@@ -162,10 +162,10 @@ def compareObjects(object1, object2, raiseExceptions=True):
               value2 = getattr(object2, name)
               # functions/methods will not be compared
               if (not isfunction(value1) and not isinstance(value1,
-                                                            old_types.FunctionType)
+                                                            types.FunctionType)
                 and not ismethod(value1)) and (not isfunction(value2) and
                                       not isinstance(value2,
-                                                     old_types.FunctionType)
+                                                     types.FunctionType)
                 and not ismethod(value2)):
                 attrName = name
                 attrValue1 = value1
@@ -230,14 +230,14 @@ def printObject(obj, indent=0, maxRecLVL=3):
         value = getattr(obj, name)
       else:
         value = 'None'
-      if (isinstance(value, old_types.NoneType)):
+      if (isinstance(value, types.NoneType)):
         value = 'None'
       # Not interested in functions or methods
-      if (not isfunction(value) and not isinstance(value, old_types.FunctionType)
+      if (not isfunction(value) and not isinstance(value, types.FunctionType)
           and not ismethod(value)):
         # If it is an list or array
         if isinstance(value, Iterable) and not isinstance(value,
-                                                          old_types.StringTypes):
+                                                          types.StringTypes):
           if len(value) == 0:
             print '{indentation}{variableName}: Empty'.format(
                                                         indentation=indentStr,
@@ -252,11 +252,11 @@ def printObject(obj, indent=0, maxRecLVL=3):
         elif isinstance(value, object):
           # It should be one base type only the following ones are supported
           # to give a direct output
-          if (isinstance(value, old_types.StringTypes) or isinstance(value,
-                                                                 old_types.IntType)
-              or isinstance(value, old_types.FloatType) or isinstance(value,
-                                                                old_types.LongType)
-              or isinstance(value, old_types.TupleType) or type(value) ==
+          if (isinstance(value, types.StringTypes) or isinstance(value,
+                                                                 types.IntType)
+              or isinstance(value, types.FloatType) or isinstance(value,
+                                                                types.LongType)
+              or isinstance(value, types.TupleType) or type(value) ==
                                                             datetime.datetime):
             print '{indentation}{variableName}\t: "{variableValue}"'.format(
                                                         indentation=indentStr,

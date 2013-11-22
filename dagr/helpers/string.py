@@ -65,7 +65,7 @@ def plaintext2html(text, tabstop=4):
         url = url[1:]
       else:
         prefix = ''
-        last = string.old_groups()[-1]
+        last = string.groups()[-1]
         if last in ['\n', '\r', '\r\n']:
           last = '<br/>'
         return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
