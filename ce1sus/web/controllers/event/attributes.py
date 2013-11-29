@@ -118,11 +118,20 @@ class AttributesController(Ce1susBaseController):
     getattr(cherrypy, 'session')['instertAttribute'] = None
 
     eventID = kwargs.get('eventID', None)
+    action = kwargs.get('action', None)
+    attributeID = kwargs.get('attributeID', None)
+
     if not eventID is None:
-      attributeID = kwargs.get('attributeID', None)
+      # right checks
+      event = self.eventBroker.getByID(eventID)
+      self.checkIfViewable(event)
+      if action == 'remove':
+        self.attributeBroker.removeByID(attributeID, commit=True)
+        return self.returnAjaxOK()
+
       objectID = kwargs.get('objectID', None)
       definition = kwargs.get('definition', None)
-      action = kwargs.get('action', None)
+
       values = kwargs.get('value', None)
       if not definition:
         return 'Nothing has been selected'
@@ -132,9 +141,7 @@ class AttributesController(Ce1susBaseController):
                                                                 'objectID',
                                                                 'definition',
                                                                 'action']}
-      # right checks
-      event = self.eventBroker.getByID(eventID)
-      self.checkIfViewable(event)
+
 
 
       obj = self.objectBroker.getByID(objectID)
@@ -169,8 +176,6 @@ class AttributesController(Ce1susBaseController):
             getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
           # update last seen etc of event
           self.eventBroker.updateLastSeen(event, self.getUser(), False)
-        if action == 'remove':
-          self.attributeBroker.removeByID(attributeID, commit=True)
         self.attributeBroker.doCommit(True)
         return self.returnAjaxOK()
       except ValidationException as e:
