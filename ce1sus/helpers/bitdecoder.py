@@ -36,6 +36,8 @@ class BitValue(object):
       bits = int('{0}'.format(bitValue), 2)
     self.__parentObj = parentObj
     self.__bitValue = bits
+    if hasattr(self.__parentObj, 'dbcode'):
+        self.__parentObj.dbcode = self.bitCode
 
   @property
   def bitCode(self):

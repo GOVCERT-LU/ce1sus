@@ -90,8 +90,7 @@ class ObjectDefinitionBroker(BrokerBase):
       if not 'GenericHandler' in attribute.handlerName:
         handler = HandlerBase.getHandler(attribute)
         attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.name.in_(handler.getAttributesNameList(
-                                                                  handler)))
+                AttributeDefinition.name.in_(handler.getAttributesNameList()))
         for attribute in attributes:
           attribute.addObject(obj)
       self.doCommit(commit)
