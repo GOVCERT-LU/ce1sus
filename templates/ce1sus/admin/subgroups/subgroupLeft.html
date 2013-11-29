@@ -23,7 +23,8 @@ function loadGroup(groupID){
 }
 </script>
 
-
+<div style="height: 800px;
+   overflow: scroll;">
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not groups is None: 
 		% for group in groups:
@@ -39,7 +40,7 @@ function loadGroup(groupID){
 	%endif
 	
 </ul>
-
+</div>
 <!-- AddGroupForm -->
 <%call expr="baseForms.genericModalForm(modalID='addSubGroupModal',url='/admin/subgroups/modifySubGroup',refreshUrl='/admin/subgroups', refreshContainer='adminTabsTabContent')">
 <input type="hidden" name="action" value="insert">

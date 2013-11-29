@@ -22,7 +22,8 @@ function loadObject(objectID){
 	loadContent('objectRight','/admin/objects/rightContent?objectid='+objectID);
 }
 </script>
-
+<div style="height: 800px;
+   overflow: scroll;">
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not objects is None: 
 		% for object in objects:
@@ -37,7 +38,7 @@ function loadObject(objectID){
 	%endif
 	
 </ul>
-
+</div>
 <!-- AddObjectForm -->
 <%call expr="baseForms.genericModalForm(modalID='addObjectModal',
                                     url='/admin/objects/modifyObject',refreshUrl='/admin/objects', refreshContainer='adminTabsTabContent')">

@@ -73,8 +73,7 @@ class RestController(RestControllerBase):
       raise cherrypy.HTTPError(500)
     vpath = list(vpath)
     self.__checkVersion(vpath.pop(0))
-    # apikey = request.headers.get('key', '').strip()
-    apikey = 'dd94709528bb1c83d08f3088d4043f4742891f4f'
+    apikey = request.headers.get('key', '').strip()
     self.__checkApiKey(apikey)
 
     instance = self.__getController(vpath.pop(0))

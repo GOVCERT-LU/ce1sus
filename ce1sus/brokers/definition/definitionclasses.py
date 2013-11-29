@@ -153,7 +153,7 @@ class AttributeDefinition(BASE):
       return self.dbchksum
     else:
       if self.name:
-        key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex)
+        key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex, self.handlerIndex)
         self.dbchksum = hashSHA1(key)
         return self.dbchksum
       else:

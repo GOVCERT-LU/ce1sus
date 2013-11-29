@@ -18,6 +18,7 @@ import cherrypy
 from ce1sus.api.ce1susapi import Ce1susAPI
 from dagr.web.controllers.base import BaseController
 from ce1sus.brokers.event.attributebroker import Attribute
+from ce1sus.brokers.event.eventclasses import Event
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
 from dagr.db.broker import NothingFoundException
@@ -205,7 +206,9 @@ class RestControllerBase(BaseController):
     dbAttribute.creator_id = user.identifier
     dbAttribute.modifier_id = user.identifier
     dbAttribute.modifier = user
-    dbAttribute.bitValue = BitValue('1010')
+    dbAttribute.bitValue = BitValue('0', dbAttribute)
+    dbAttribute.bitValue.isRestInsert = True
+    dbAttribute.bitValue.isSharable = True
     ObjectConverter.setInteger(dbAttribute,
                                'ioc',
                                restAttribute.ioc)
@@ -247,14 +250,15 @@ class RestControllerBase(BaseController):
 
     return objDefinition
 
-  def _convertToObject(self, restObject, event, commit=False):
+  def _convertToObject(self, restObject, parent, event, commit=False):
     objectDefinition = self._convertToObjectDefinition(restObject.definition,
                                                         commit)
-    user = event.creator
 
-    if restObject.parentObject_id is None:
+    user = parent.creator
+    if isinstance(parent, Event):
+
       dbObject = self.objectBroker.buildObject(None,
-                                               event,
+                                               parent,
                                                objectDefinition,
                                                user,
                                                None)
@@ -263,9 +267,11 @@ class RestControllerBase(BaseController):
                                                None,
                                                objectDefinition,
                                                user,
-                                               restObject.parentObject_id)
+                                               parent.identifier)
+      dbObject.parentEvent_id = event.identifier
     # flush to DB
     dbObject.bitValue.isRestInsert = True
+    dbObject.bitValue.isSharable = True
     self.objectBroker.insert(dbObject, commit=False)
 
     return dbObject

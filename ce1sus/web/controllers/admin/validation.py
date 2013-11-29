@@ -76,6 +76,9 @@ class ValidationController(Ce1susBaseController):
     paginator.itemsPerPage = 100
     return template.render(paginator=paginator)
 
+
+
+
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def event(self, eventID):
@@ -86,7 +89,7 @@ class ValidationController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+
     template = self.mako.getTemplate('/admin/validation/eventValBase.html')
     return template.render(eventID=eventID)
 
@@ -101,12 +104,11 @@ class ValidationController(Ce1susBaseController):
     template = self.mako.getTemplate('/admin/validation/eventDetails.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
                           'VIEW',
-                          '/events/event/objects/objects/{0}'.format(eventID),
+                          '/admin/validation/eventObjects/{0}'.format(eventID),
                           contentid='',
                           tabid='eventObjects{0}'.format(eventID))
 
@@ -191,8 +193,7 @@ class ValidationController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/validation/eventValobjects.html')
     event = self.eventBroker.getByID(eventID)
-    # right checks
-    self.checkIfViewable(event)
+
 
     # if event has objects
 
@@ -254,8 +255,6 @@ class ValidationController(Ce1susBaseController):
   def validateEvent(self, eventID):
     try:
       event = self.eventBroker.getByID(eventID)
-      # right checks
-      self.checkIfViewable(event)
       # perfom validation of event
       event.bitValue.isValidated = True
       # update modifier

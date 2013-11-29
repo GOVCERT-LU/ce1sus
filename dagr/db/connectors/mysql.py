@@ -108,3 +108,8 @@ class MySqlConnector(Connector):
     self.session = None
     self.engine.dispose()
     self.engine = None
+
+  def createEngine(self):
+    return create_engine(self.connectionString,
+                                  echo=self.debug,
+                                  echo_pool=self.debug)

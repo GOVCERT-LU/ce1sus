@@ -189,8 +189,8 @@ class SubGroupController(Ce1susBaseController):
                                                    subGroupID)
           else:
             for groupID in remainingGroups:
-              self.subgroupBroker.addGroupToSubGroup(remainingGroups,
-                                                     groupID,
+              self.subgroupBroker.addGroupToSubGroup(groupID,
+                                                     subGroupID,
                                                      False)
             self.subgroupBroker.doCommit(True)
       else:
@@ -200,8 +200,8 @@ class SubGroupController(Ce1susBaseController):
                                                         subGroupID)
           else:
             for groupID in subGroupGroups:
-              self.subgroupBroker.removeSubGroupFromGroup(subGroupGroups,
-                                                       groupID,
+              self.subgroupBroker.removeSubGroupFromGroup(groupID,
+                                                       subGroupID,
                                                        False)
             self.subgroupBroker.doCommit(True)
       return self.returnAjaxOK()

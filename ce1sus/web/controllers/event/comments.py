@@ -55,7 +55,7 @@ class CommentsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     comment = self.commentBroker.buildComment(event, self.getUser(), commentID,
                          commentText, action)

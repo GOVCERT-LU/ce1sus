@@ -36,6 +36,7 @@ class EventsController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/events/eventsBase.html')
+    self.setAdminArea(False)
     return template.render()
 
   @require(requireReferer(('/internal')))

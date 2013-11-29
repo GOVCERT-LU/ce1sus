@@ -182,7 +182,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
@@ -228,7 +228,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
@@ -263,7 +263,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     # remove object
     try:
@@ -291,7 +291,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     # get concerned object
     obj = self.objectBroker.getByID(objectID)
@@ -328,7 +328,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
 
     if setEventParent is None and not string.isNotNull(parentObjectID):
       return 'Please select someting before saving.'

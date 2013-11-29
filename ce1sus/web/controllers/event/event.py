@@ -240,7 +240,6 @@ class EventController(Ce1susBaseController):
   def editDetails(self, eventID):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
 
     template = self.mako.getTemplate('/events/event/editDetails.html')
     return template.render(event=event,
@@ -321,7 +320,10 @@ class EventController(Ce1susBaseController):
 
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    if self.isAdminArea():
+      self.checkIfPriviledged()
+    else:
+      self.checkIfViewable(event)
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},

@@ -40,7 +40,11 @@ class Ce1susBaseController(BaseController):
       result = event.tlp.identifier >= userDefaultGroup.tlpLvl
       # check if the user belong to one of the common maingroups
       if not result:
-          result = userDefaultGroup in event.maingroups
+        for group in event.maingroups:
+          result = userDefaultGroup.identifier == group.identifier
+          if result:
+            break
+
       # check if the user belong to one of the common groups
       if not result:
         groups = Protector.getUserGroups()
@@ -53,8 +57,17 @@ class Ce1susBaseController(BaseController):
 
     return result
 
-  def checkIfOwner(self, event):
-    if not self.isEventOwner(event):
+  def isAdminArea(self):
+    attribute = getattr(cherrypy, 'session')
+    return attribute.get('isAdminArea', False)
+
+  def setAdminArea(self, value):
+    attribute = getattr(cherrypy, 'session')
+    attribute['isAdminArea'] = value
+
+  def checkIfPriviledged(self):
+    user = self.getUser()
+    if not user.privileged:
       raise cherrypy.HTTPError(403)
 
   def checkIfViewable(self, event):

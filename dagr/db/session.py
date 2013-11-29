@@ -65,6 +65,7 @@ class SessionManager:
     else:
       raise SessionManagerException(('Protocol {0} '
                                     + 'is undefined').format(protocol))
+
     if createInstance:
       SessionManager.instance = self
 
@@ -97,5 +98,5 @@ class SessionManager:
   def close(self):
     self.connector.close()
 
-  def setInstance(self, instance):
-    SessionManager.instance = instance
+  def getSession(self):
+    return self.connector.getSession()

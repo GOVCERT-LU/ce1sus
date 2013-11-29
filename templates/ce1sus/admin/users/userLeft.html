@@ -27,7 +27,8 @@ function loadUser(userID){
 }
 </script>
 
-
+<div style="height: 800px;
+   overflow: scroll;">
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not users is None: 
 		% for user in users:
@@ -42,6 +43,7 @@ function loadUser(userID){
 	%endif
 	
 </ul>
+</div>
 
 <!-- AddUserForm -->
 <%call expr="baseForms.genericModalForm(modalID='addUserModal',url='/admin/users/modifyUser',refreshUrl='/admin/users', refreshContainer='adminTabsTabContent')">

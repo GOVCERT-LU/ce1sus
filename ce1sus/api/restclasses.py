@@ -73,8 +73,8 @@ class RestEvent(RestClass):
     self.tlp = None
     self.risk = None
     self.analysis = None
-    self.objects = None
-    self.comments = None
+    self.objects = list()
+    self.comments = list()
     self.published = None
     self.status = None
 
@@ -136,17 +136,20 @@ class RestObject(RestClass):
     RestClass.__init__(self)
     self.definition = None
     self.attributes = None
-    self.parentObject_id = None
-    self.parentEvent_id = None
+    self.parent = None
+    self.children = None
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
-
-    result[self.__class__.__name__]['parentObject_id'] = self.parentObject_id
-    result[self.__class__.__name__]['parentEvent_id'] = self.parentEvent_id
+    result[self.__class__.__name__]['children'] = list()
+    for child in self.children:
+      result[self.__class__.__name__]['children'].append(child.toJSON(
+                                              full=full,
+                                              withDefinition=withDefinition
+                                              ))
     result[self.__class__.__name__]['definition'] = self.definition.toJSON(
-                                              full=True,
+                                              full=full,
                                               withDefinition=withDefinition
                                               )
     if full:
@@ -258,6 +261,5 @@ class RestAttributeDefinition(RestClass):
       result[self.__class__.__name__]['classIndex'] = self.classIndex
 
     result[self.__class__.__name__]['chksum'] = self.chksum
-    result[self.__class__.__name__]['relation'] = self.relation
 
     return result

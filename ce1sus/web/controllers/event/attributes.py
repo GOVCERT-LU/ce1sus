@@ -135,7 +135,7 @@ class AttributesController(Ce1susBaseController):
       # right checks
       event = self.eventBroker.getByID(eventID)
       self.checkIfViewable(event)
-      self.checkIfOwner(event)
+
 
       obj = self.objectBroker.getByID(objectID)
       try:

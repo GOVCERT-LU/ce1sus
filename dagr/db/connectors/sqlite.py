@@ -88,3 +88,10 @@ class SqliteConnector(Connector):
     self.session = None
     self.engine.dispose()
     self.engine = None
+
+  def createEngine(self):
+        return create_engine(self.connetionString,
+                                  listeners=[ForeignKeysListener()],
+                                  echo=self.debug,
+                                  echo_pool=self.debug,
+                                  strategy='plain')

@@ -31,4 +31,5 @@ class AdminController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/adminBase.html')
+    self.setAdminArea(True)
     return template.render()

@@ -78,16 +78,14 @@ class RestEventController(RestControllerBase):
                        Analysis.getByName(restEvent.analysis),
                        user)
         event.bitValue.isRestInsert = True
+        event.bitValue.isSharable = True
         # flush to DB
         self.eventBroker.insert(event, commit=False)
 
         objs = list()
         for obj in restEvent.objects:
           # create object
-
-          dbObject = self._convertToObject(obj, event, commit=False)
-          dbObject.attributes = self._convertToAttribues(obj.attributes,
-                                                          dbObject)
+          dbObject = self.__convertObject(obj, event, event)
           objs.append(dbObject)
 
         event.objects = objs
@@ -102,3 +100,15 @@ class RestEventController(RestControllerBase):
 
     else:
       return self.raiseError('Exception', 'Not Implemented')
+
+  def __convertObject(self, obj, parent, event):
+    dbObject = self._convertToObject(obj, parent, event, commit=False)
+    dbObject.attributes = self._convertToAttribues(obj.attributes,
+                                                          dbObject)
+    dbObject.children = list()
+    for child in obj.children:
+      childDBObj = self.__convertObject(child, dbObject, event)
+      childDBObj.attributes = self._convertToAttribues(child.attributes,
+                                                          childDBObj)
+      dbObject.children.append(childDBObj)
+    return dbObject

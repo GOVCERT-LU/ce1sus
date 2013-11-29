@@ -207,9 +207,15 @@ class AttributeBroker(BrokerBase):
     # add them to relation table
     for sameValue in sameSalues:
       # only consider the events which are not part of the current event and
-
-      if ((sameValue.attribute.object.event.identifier !=
-           instance.object.event.identifier)
+      if instance.object.event is None:
+        eventID = instance.object.parentEvent_id
+      else:
+        eventID = instance.object.event.identifier
+      if sameValue.attribute.object.event is None:
+        sameEventID = sameValue.attribute.object.parentEvent_id
+      else:
+        sameEventID = sameValue.attribute.object.event.identifier
+      if ((sameEventID != eventID)
           and (instance.definition.relation == 1)):
         # one way
         relation = ObjectAttributeRelation()

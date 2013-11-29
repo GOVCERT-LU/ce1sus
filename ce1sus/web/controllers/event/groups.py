@@ -35,7 +35,10 @@ class GroupsController(Ce1susBaseController):
     template = self.mako.getTemplate('/events/event/groups/groups.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    if self.isAdminArea():
+      self.checkIfPriviledged()
+    else:
+      self.checkIfViewable(event)
     remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier,
                                                         False)
     remainingSubGroups = self.eventBroker.getSubGroupsByEvent(event.identifier,
@@ -70,8 +73,12 @@ class GroupsController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
-    self.checkIfOwner(event)
+    if self.isAdminArea():
+      self.checkIfPriviledged()
+    else:
+      self.checkIfViewable(event)
+
+
     try:
       if operation == 'add':
         if not (remainingGroups is None):
@@ -117,7 +124,7 @@ class GroupsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
-    self.checkIfOwner(event)
+
     try:
       if operation == 'add':
         if not (remainingGroups is None):

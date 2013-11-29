@@ -70,6 +70,10 @@ class Connector(object):
     raise ConnectorException('Not implemented')
 
   @abstractmethod
+  def createEngine(self):
+    raise ConnectorException('Not implemented')
+
+  @abstractmethod
   def getDirectSession(self):
     raise ConnectorException('Not implemented')
 

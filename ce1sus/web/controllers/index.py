@@ -50,6 +50,7 @@ class IndexController(Ce1susBaseController):
     """
     template = self.getTemplate('/index/login.html')
     Protector.clearSession()
+    self.setAdminArea(False)
     return template.render(errorMsg=errorMsg)
 
   @cherrypy.expose
