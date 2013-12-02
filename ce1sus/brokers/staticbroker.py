@@ -12,58 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class Type(object):
-  """Static class defining the types of an object"""
-  __tableDefinitions = {0: 'Virus',
-                   1: 'Trojan',
-                   2: 'Expoit',
-                   3: 'Dropper',
-                   4: 'KeyLogger',
-                   5: 'BackDoor',
-                   6: 'Worm'}
-
-  @staticmethod
-  def getDefinitions():
-    """
-    Returns all definitions where the key is the index and the value the key
-
-    :returns: Dictionary
-    """
-    result = dict()
-    for key, value in Type.__tableDefinitions.iteritems():
-      result[value] = key
-    return result
-
-  @staticmethod
-  def getByName(name):
-    """
-    returns the index by the given name
-
-    :returns: Integer
-    """
-    formatedName = unicode(name).title()
-    result = None
-    for key, value in Type.__tableDefinitions.items():
-      if formatedName == value:
-        result = key
-        break
-    if result is None:
-      raise Exception('Invalid input "{0}"'.format(name))
-    return result
-
-  @staticmethod
-  def getByID(identifier):
-    """
-    returns the status by the given id
-
-    :returns: String
-    """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > len(Type.__tableDefinitions):
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return Type.__tableDefinitions[identifier]
-
-
 class Status(object):
   """Static class defining the status of an event"""
   __tableDefinitions = {0: 'Confirmed',
