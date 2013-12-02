@@ -105,10 +105,9 @@ class ObjectsController(Ce1susBaseController):
 
     if self.isEventOwner(event):
       objectList = (self.objectBroker.getObjectsOfEvent(eventID)
-                + self.objectBroker.getChildObjectsForEvent(eventID))
+                )
     else:
-      objectList = (self.objectBroker.getViewableOfEvent(eventID)
-                + self.objectBroker.getViewableChildObjectsForEvent(eventID))
+      objectList = (self.objectBroker.getViewableOfEvent(eventID))
 
     if objectID is None:
       try:
