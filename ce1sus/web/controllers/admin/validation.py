@@ -259,6 +259,7 @@ class ValidationController(Ce1susBaseController):
       event.modifier = self.getUser()
       event.modifier_id = event.modifier.identifier
       event.modified = datetime.now()
+      event.published = 1
       # perform validation of objects
       for obj in event.objects:
         obj.bitValue.isValidated = True
