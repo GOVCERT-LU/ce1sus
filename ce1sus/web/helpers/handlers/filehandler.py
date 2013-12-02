@@ -61,12 +61,12 @@ class FileHandler(GenericHandler):
       attributes = list()
       attributes.append(self._createAttribute(basename(filepath),
                                                obj,
-                                               'file_name',
+                                               7,
                                                user,
                                                '1'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
-                                    'hash_sha1',
+                                    2,
                                     user,
                                     '1')
       # move file to destination
@@ -83,7 +83,7 @@ class FileHandler(GenericHandler):
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
-                                               'raw_document_file',
+                                               12,
                                                user,
                                                '0'))
       # return attributes
@@ -92,7 +92,7 @@ class FileHandler(GenericHandler):
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
   # pylint: disable=R0913
-  def _createAttribute(self, value, obj, definitionName, user, ioc):
+  def _createAttribute(self, value, obj, definitionID, user, ioc):
     """
     Creates an attribue obj
 
@@ -109,8 +109,7 @@ class FileHandler(GenericHandler):
     """
     attribute = Attribute()
     attribute.identifier = None
-    attribute.definition = (self.def_attributesBroker.
-                                      getDefintionByName(definitionName))
+    attribute.definition = (self.def_attributesBroker.getByID(definitionID))
     attribute.def_attribute_id = attribute.definition.identifier
     attribute.created = datetime.now()
     attribute.modified = datetime.now()
@@ -230,51 +229,53 @@ class FileWithHashesHandler(FileHandler):
     if isfile(filepath):
       # getNeededAttributeDefinition
       attributes = list()
-      # TODO: Use IDs instead of names as the attributes are fixed due to
       # the beginning
-      attributes.append(self._createAttribute(basename(filepath),
+      fileName = basename(filepath)
+      attributes.append(self._createAttribute(fileName,
                                                obj,
-                                               'file_name',
+                                               7,
                                                user,
                                                '1'))
       attributes.append(self._createAttribute(hasher.fileHashMD5(filepath),
                                                obj,
-                                               'hash_md5',
+                                               1,
                                                user,
                                                '1'))
-      sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
+      attributes.append(self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
-                                    'hash_sha1',
+                                    2,
                                     user,
-                                    '1')
-      attributes.append(sha1)
-      attributes.append(self._createAttribute(hasher.fileHashSHA256(filepath),
+                                    '1'))
+
+      sha256 = self._createAttribute(hasher.fileHashSHA256(filepath),
                                                obj,
-                                               'hash_sha256',
+                                               3,
                                                user,
-                                               '1'))
+                                               '1')
+      attributes.append(sha256)
       attributes.append(self._createAttribute(hasher.fileHashSHA384(filepath),
                                                obj,
-                                               'hash_sha384',
+                                               4,
                                                user,
                                                '1'))
       attributes.append(self._createAttribute(hasher.fileHashSHA512(filepath),
                                                obj,
-                                               'hash_sha512',
+                                               5,
                                                user,
                                                '1'))
       attributes.append(self._createAttribute('{0}'.
                                                format(getsize(filepath)),
                                                obj,
-                                               'size_in_bytes',
+                                               8,
                                                user,
                                                '0'))
       url = pathname2url(filepath)
       mime = MimeTypes()
+      # TODO - use magic number
       attributes.append(self._createAttribute(unicode(mime.
                                                        guess_type(url)[0]),
                                                obj,
-                                               'magic_number',
+                                               9,
                                                user,
                                                '0'))
       # move file to destination
@@ -287,11 +288,15 @@ class FileWithHashesHandler(FileHandler):
       if not exists(destination):
         makedirs(destination)
       # add the name to the file
-      destination += sha1.value
+      hashedFileName = hasher.hashSHA256(fileName)
+      svrFileName = '{0}{1}{2}'.format(sha256.value,
+                                       datetime.now(),
+                                       hashedFileName)
+      destination += hasher.hashSHA256(svrFileName)
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
-                                               'raw_file',
+                                               12,
                                                user,
                                                '0'))
       # return attributes
