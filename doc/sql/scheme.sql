@@ -107,7 +107,7 @@ CREATE TABLE `DEF_Attributes` (
   UNIQUE KEY `chksum_UNIQUE` (`chksum`),
   KEY `IDX_def_attributes_name` (`name`),
   KEY `IDX_def_attributes_chksum` (`chksum`)
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `DEF_Attributes` WRITE;
