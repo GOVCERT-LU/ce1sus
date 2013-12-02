@@ -32,7 +32,7 @@ class BitValue(object):
   def __init__(self, bitValue, parentObj=None):
     # TODO make an intvalue and check if between 0 and 15
     value = int('{0}'.format(bitValue))
-    if 0 <= value and value <= 15:
+    if 0 >= value and value <= 15:
       bits = bitValue
     else:
       bits = int('{0}'.format(bitValue), 2)
