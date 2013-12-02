@@ -201,9 +201,7 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,0,1,1,1,'cdb3d8e146f88e7ab652207429afa5458da55dd1'),
 (88,'mime_type','mime_type','^.+$',0,0,1,1,0,'1498236cfea91bc2b7fe82625ec223e9dc6f4710'),
 (89,'compromized_hostname','compromized_hostname','^.+$',1,0,1,1,1,'64f2717e8ceb9f660e776399d022476a276d9dcd'),
-(90,'ipv4_addr_phishingSite','ipv4_addr_phishingSite','^.+$',1,0,1,1,1,'9ba844adf500b08be89a389d2cbba0716d554da6'),
-(91,'rt_ ticket','RT Ticket','^\\d+$',3,2,1,0,1,'0deb03329e7ec3abf17620e4e46a4b91cf3c3bac'),
-(92,'CVE','Known Exploit','^.+$',1,3,1,0,1,'b10cd33bb1600ed5839b0738b9fe7c4baf078beb');
+(90,'ipv4_addr_phishingSite','ipv4_addr_phishingSite','^.+$',1,0,1,1,1,'9ba844adf500b08be89a389d2cbba0716d554da6');
 /*!40000 ALTER TABLE `DEF_Attributes` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DEF_Objects`;
