@@ -33,7 +33,7 @@ class BitValue(object):
     # TODO make an intvalue and check if between 0 and 15
     value = int('{0}'.format(bitValue))
     if (value >= 0) and (value <= 20):
-      bits = bitValue
+      bits = value
     else:
       bits = int('{0}'.format(bitValue), 2)
 
