@@ -25,6 +25,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
 from datetime import datetime
+from ce1sus.brokers.event.attributebroker import AttributeBroker
 
 
 class ValidationController(Ce1susBaseController):
@@ -35,6 +36,7 @@ class ValidationController(Ce1susBaseController):
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)
+    self.attributeBroker = self.brokerFactory(AttributeBroker)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -45,13 +47,14 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/validation/validationBase.html')
+    self.checkIfPriviledged()
     return template.render()
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def unvalidated(self):
     template = self.mako.getTemplate('/admin/validation/recent.html')
-
+    self.checkIfPriviledged()
     labels = [{'identifier':'#'},
               {'title':'Title'},
               {'analysis': 'Analysis'},
@@ -89,7 +92,7 @@ class ValidationController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-
+    self.checkIfPriviledged()
     template = self.mako.getTemplate('/admin/validation/eventValBase.html')
     return template.render(eventID=eventID)
 
@@ -104,6 +107,7 @@ class ValidationController(Ce1susBaseController):
     template = self.mako.getTemplate('/admin/validation/eventDetails.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
+    self.checkIfPriviledged()
     paginatorOptions = PaginatorOptions('/events/recent',
                                         'eventsTabTabContent')
     paginatorOptions.addOption('TAB',
@@ -193,7 +197,7 @@ class ValidationController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/validation/eventValobjects.html')
     event = self.eventBroker.getByID(eventID)
-
+    self.checkIfPriviledged()
 
     # if event has objects
 
@@ -209,16 +213,9 @@ class ValidationController(Ce1susBaseController):
     # mako will append the missing url part
     paginatorOptions.addOption('MODAL',
                                'VIEW',
-                               ('/events/event/attribute/'
-                                + 'view/{0}/%(objectID)s/').format(eventID),
+                               ('/admin/validation/'
+                                + 'viewAttributeDetails/{0}/%(objectID)s/').format(eventID),
                                modalTitle='View Attribute')
-    # mako will append the missing url part
-    paginatorOptions.addOption('DIALOG',
-                               'REMOVE',
-                               ('/events/event/attribute/modifyAttribute?'
-                              + 'action=remove&eventID={0}&objectID'
-                              + '=%(objectID)s&attributeID=').format(eventID),
-                               refresh=True)
     # will be associated in the view!!! only to keep it simple!
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
@@ -253,6 +250,7 @@ class ValidationController(Ce1susBaseController):
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def validateEvent(self, eventID):
+    self.checkIfPriviledged()
     try:
       event = self.eventBroker.getByID(eventID)
       # perfom validation of event
@@ -271,3 +269,26 @@ class ValidationController(Ce1susBaseController):
       return self.returnAjaxOK()
     except BrokerException as e:
       return '{0}'.format(e)
+
+  @require(privileged(), requireReferer(('/internal')))
+  @cherrypy.expose
+  def viewAttributeDetails(self, eventID, objectID, attributeID):
+    """
+     renders the file with the requested attribute
+    :returns: generated HTML
+    """
+    # right checks
+    event = self.eventBroker.getByID(eventID)
+    self.checkIfPriviledged()
+    template = self.getTemplate('/events/event/attributes/attributesModal.html'
+                                )
+    obj = self.objectBroker.getByID(objectID)
+    cbDefinitions = self.def_attributesBroker.getCBValues(
+                                                    obj.definition.identifier)
+    attribute = self.attributeBroker.getByID(attributeID)
+    return template.render(eventID=eventID,
+                           objectID=objectID,
+                           attribute=attribute,
+                           cbDefinitions=cbDefinitions,
+                           errorMsg=None,
+                           enabled=False)

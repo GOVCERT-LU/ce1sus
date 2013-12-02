@@ -21,6 +21,7 @@ from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
 import dagr.helpers.string as string
 from ce1sus.brokers.permission.permissionclasses import User
+from dagr.helpers.hash import hashSHA1
 
 
 class UserBroker(BrokerBase):
@@ -149,7 +150,7 @@ class UserBroker(BrokerBase):
   @staticmethod
   def buildUser(identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None):
+                 maingroup=None, apikey=None):
     """
     puts a user with the data together
 
@@ -194,6 +195,9 @@ class UserBroker(BrokerBase):
       user.disabled = 1
       user.privileged = 0
       user.group_id = 1
+    if apikey == '1':
+      # generate key
+      user.apiKey = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))
     return user
 
   def getUserByApiKey(self, apiKey):

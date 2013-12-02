@@ -52,14 +52,7 @@ class FileHandler(GenericHandler):
   @staticmethod
   def getAttributesNameList(self):
     return ('file_name',
-            'hash_md5',
-            'hash_sha1',
-            'hash_sha256',
-            'hash_sha384',
-            'hash_sha512',
-            'size_in_bytes',
-            'magic_number',
-            'location')
+            'hash_sha1')
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
@@ -218,6 +211,19 @@ class FileWithHashesHandler(FileHandler):
 
   def __init__(self):
     FileHandler.__init__(self)
+
+  # pylint: disable=W0211
+  @staticmethod
+  def getAttributesNameList(self):
+    return ('file_name',
+            'hash_md5',
+            'hash_sha1',
+            'hash_sha256',
+            'hash_sha384',
+            'hash_sha512',
+            'size_in_bytes',
+            'magic_number',
+            'location')
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)

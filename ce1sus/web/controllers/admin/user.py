@@ -126,7 +126,7 @@ class UserController(Ce1susBaseController):
   @cherrypy.expose
   def modifyUser(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None, ldapUsersTable_length=None):
+                 maingroup=None, ldapUsersTable_length=None, apikey=None):
     """
     modifies or inserts a user with the data of the post
 
@@ -149,7 +149,7 @@ class UserController(Ce1susBaseController):
     template = self.getTemplate('/admin/users/userModal.html')
     del ldapUsersTable_length
     user = self.userBroker.buildUser(identifier, username, password,
-                 priv, email, action, disabled, maingroup)
+                 priv, email, action, disabled, maingroup, apikey)
     try:
       if action == 'insert':
         self.userBroker.insert(user, validate=True)

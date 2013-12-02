@@ -15,7 +15,6 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
-from dagr.helpers.hash import hashSHA1
 from sqlalchemy.ext.hybrid import hybrid_property
 from ce1sus.api.restclasses import RestObjectDefinition, \
                                    RestAttributeDefinition
@@ -44,15 +43,9 @@ class ObjectDefinition(BASE):
   dbchksum = Column('chksum', String)
   share = Column('sharable', Integer)
 
-  @hybrid_property
+  @property
   def chksum(self):
-    if self.dbchksum:
-      return self.dbchksum
-    else:
-      if self.name:
-        self.dbchksum = hashSHA1(self.name)
-      else:
-        raise UnboundLocalError
+    return self.dbchksum
 
   @chksum.setter
   def chksum(self, chksum):
@@ -147,17 +140,9 @@ class AttributeDefinition(BASE):
   relation = Column('relationable', Integer)
   dbchksum = Column('chksum', String)
 
-  @hybrid_property
+  @property
   def chksum(self):
-    if self.dbchksum:
-      return self.dbchksum
-    else:
-      if self.name:
-        key = '{0}{1}{2}'.format(self.name, self.regex, self.classIndex, self.handlerIndex)
-        self.dbchksum = hashSHA1(key)
-        return self.dbchksum
-      else:
-        raise UnboundLocalError
+    return self.dbchksum
 
   @chksum.setter
   def chksum(self, chksum):

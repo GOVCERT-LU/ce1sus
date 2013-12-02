@@ -30,10 +30,13 @@ class BitValue(object):
   SHARABLE = 3
 
   def __init__(self, bitValue, parentObj=None):
-    if isinstance(bitValue, IntType):
+    # TODO make an intvalue and check if between 0 and 15
+    value = int('{0}'.format(bitValue))
+    if 0 <= value and value <= 15:
       bits = bitValue
     else:
       bits = int('{0}'.format(bitValue), 2)
+
     self.__parentObj = parentObj
     self.__bitValue = bits
     if hasattr(self.__parentObj, 'dbcode'):

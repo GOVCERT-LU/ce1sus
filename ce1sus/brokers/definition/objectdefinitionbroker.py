@@ -16,6 +16,7 @@ from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.hash import hashSHA1
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -172,4 +173,5 @@ class ObjectDefinitionBroker(BrokerBase):
       obj.name = name.strip()
       obj.description = description.strip()
       ObjectConverter.setInteger(obj, 'share', share)
+      obj.dbchksum = hashSHA1(obj.name)
     return obj

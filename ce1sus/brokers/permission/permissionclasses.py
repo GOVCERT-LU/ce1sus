@@ -40,10 +40,17 @@ class User(BASE):
   last_login = Column('last_login', DateTime)
   email = Column('email', String)
   disabled = Column('disabled', Integer)
-  apiKey = Column('apikey', Integer)
+  apiKey = Column('apikey', String)
   group_id = Column('group_id', Integer, ForeignKey('Groups.group_id'))
   defaultGroup = relationship('Group',
                               primaryjoin='User.group_id==Group.identifier')
+
+  @property
+  def hasAPIKey(self):
+    if self.apiKey is None:
+      return 0
+    else:
+      return 1
 
   def validate(self):
     """
