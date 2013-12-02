@@ -13,12 +13,6 @@ __license__ = 'GPL v3+'
 import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                                      AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                                                        ObjectDefinitionBroker
 from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 
@@ -28,12 +22,6 @@ class RestEventController(RestControllerBase):
   def __init__(self, sessionManager=None):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
-    self.attributeBroker = self.brokerFactory(AttributeBroker)
-    self.objectBroker = self.brokerFactory(ObjectBroker)
-    self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.attributeDefinitionBroker = self.brokerFactory(
-                                                    AttributeDefinitionBroker
-                                                       )
 
   @cherrypy.expose
   def view(self, identifier, apiKey, showAll=None, withDefinition=None):
@@ -82,16 +70,13 @@ class RestEventController(RestControllerBase):
         # flush to DB
         self.eventBroker.insert(event, commit=False)
 
-        objs = list()
+        event.objects = list()
         for obj in restEvent.objects:
           # create object
-          dbObject = self.__convertObject(obj, event, event)
-          objs.append(dbObject)
+          dbObject = self.__convertRestObject(obj, event, event, commit=False)
+          event.objects.append(dbObject)
 
-        event.objects = objs
         self.eventBroker.doCommit(True)
-        self.objectBroker.doCommit(True)
-        self.attributeBroker.doCommit(True)
 
         return self._objectToJSON(event, showAll, withDefinition)
 
@@ -101,14 +86,14 @@ class RestEventController(RestControllerBase):
     else:
       return self.raiseError('Exception', 'Not Implemented')
 
-  def __convertObject(self, obj, parent, event):
-    dbObject = self._convertToObject(obj, parent, event, commit=False)
+
+  def __convertRestObject(self, obj, parent, event, commit=False):
+    dbObject = self._convertToObject(obj, parent, event, commit=commit)
+    # generate Attributes
     dbObject.attributes = self._convertToAttribues(obj.attributes,
-                                                          dbObject)
+                                                          dbObject, commit)
     dbObject.children = list()
     for child in obj.children:
-      childDBObj = self.__convertObject(child, dbObject, event)
-      childDBObj.attributes = self._convertToAttribues(child.attributes,
-                                                          childDBObj)
+      childDBObj = self.__convertRestObject(child, dbObject, event, commit)
       dbObject.children.append(childDBObj)
     return dbObject

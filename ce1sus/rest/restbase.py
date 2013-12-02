@@ -25,7 +25,12 @@ from dagr.db.broker import NothingFoundException
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
-
+from ce1sus.brokers.event.objectbroker import ObjectBroker
+from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                      AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                                                        ObjectDefinitionBroker
 
 class RestAPIException(Exception):
   """
@@ -40,6 +45,12 @@ class RestControllerBase(BaseController):
   def __init__(self):
     BaseController.__init__(self)
     self.userBroker = self.brokerFactory(UserBroker)
+    self.attributeBroker = self.brokerFactory(AttributeBroker)
+    self.objectBroker = self.brokerFactory(ObjectBroker)
+    self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
+    self.attributeDefinitionBroker = self.brokerFactory(
+                                                    AttributeDefinitionBroker
+                                                       )
 
   def brokerFactory(self, clazz):
     """
@@ -213,7 +224,8 @@ class RestControllerBase(BaseController):
                                'ioc',
                                restAttribute.ioc)
 
-    self.attributeBroker.insert(dbAttribute, commit=False)
+    self.attributeBroker.insert(dbAttribute, commit=commit)
+
 
     return dbAttribute
 
@@ -225,13 +237,12 @@ class RestControllerBase(BaseController):
         attrDefinition = self._convertToAttributeDefinition(
                                                          attribute.definition,
                                                          obj.definition,
-                                                         False)
+                                                         commit)
         dbAttribute = self._createAttribute(attribute,
                                            attrDefinition,
                                            obj,
-                                           False)
+                                           commit)
         result.append(dbAttribute)
-    self.attributeBroker.doCommit(commit)
     return result
 
   def _convertToObjectDefinition(self, restObjectDefinition, commit=False):
@@ -272,6 +283,6 @@ class RestControllerBase(BaseController):
     # flush to DB
     dbObject.bitValue.isRestInsert = True
     dbObject.bitValue.isSharable = True
-    self.objectBroker.insert(dbObject, commit=False)
+    self.objectBroker.insert(dbObject, commit=commit)
 
     return dbObject

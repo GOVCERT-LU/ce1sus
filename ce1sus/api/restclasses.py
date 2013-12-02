@@ -137,12 +137,13 @@ class RestObject(RestClass):
     self.definition = None
     self.attributes = None
     self.parent = None
-    self.children = None
+    self.children = list()
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['children'] = list()
+
     for child in self.children:
       result[self.__class__.__name__]['children'].append(child.toJSON(
                                               full=full,
