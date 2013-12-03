@@ -11,7 +11,7 @@ function getErrorMsg(resonseText) {
 	if (typeof(resonseText.status) !== 'undefined') {
 		resultText += '<h4 class="alert-heading">Error: '+resonseText.status+'</h4><p><div style="text-align:left">'
 	} else {
-		resultText += '<h4 class="alert-heading">An unexpected Error occurred!</h4><p>'
+		resultText += '<h4 class="alert-heading">Error occurred!</h4><p>'
 	}
 	
 	if (typeof(resonseText.statusText) !== 'undefined') {

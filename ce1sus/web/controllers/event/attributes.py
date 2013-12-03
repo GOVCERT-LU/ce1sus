@@ -171,7 +171,6 @@ class AttributesController(Ce1susBaseController):
         # doAction for all attributes
         if action == 'insert':
           for attribute in attributes:
-            attribute.bitValue = BitValue('1001', attribute)
             self.attributeBroker.insert(attribute, commit=False)
             getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
           # update last seen etc of event
