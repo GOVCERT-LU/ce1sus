@@ -66,20 +66,23 @@ class LDAPHandler(object):
     self.__config = Configuration(configFile, 'LDAP')
     self.__users_dn = self.__config.get('users_dn')
     self.__tls = self.__config.get('usetls')
+    self.__connection = None
     LDAPHandler.instance = self
 
   def __getConnection(self):
     """
     Open the connection to the LDAP server
     """
-    try:
-      connection = ldap.initialize(self.__config.get('server'))
-      if self.__tls:
-        connection.start_tls_s()
-      return connection
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: ' + unicode(e))
+    if self.__connection is None:
+      try:
+        connection = ldap.initialize(self.__config.get('server'))
+        if self.__tls:
+          connection.start_tls_s()
+          return connection
+      except ldap.LDAPError as e:
+        Log.getLogger(self.__class__.__name__).fatal(e)
+        raise ServerErrorException('LDAP error: ' + unicode(e))
+    return self.__connection
 
 
   def isUserValid(self, uid, password):
@@ -143,7 +146,10 @@ class LDAPHandler(object):
               setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
     if user.mail is None:
       # Try a secondtime just to get the email
-      user.mail = self.getUserAttribute(user.uid, 'dc')
+      try:
+        user.mail = self.getUserAttribute(user.uid, 'mail')
+      except ServerErrorException:
+        pass
     return user
 
   def getAllUsers(self):
