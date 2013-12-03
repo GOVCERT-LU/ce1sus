@@ -69,7 +69,7 @@ function genericFormSubmit(formElement,event, modalID, contentid, uri, doRefresh
     			if (refreshUrl != "None") {
     				loadContent(refreshContainer,refreshUrl);
     			} else {
-    				$("#"+refreshContainer).html(responseText)
+    				$("#"+refreshContainer).html(responseText);
     			} 
     				
     			
@@ -124,6 +124,7 @@ function loadContent(contentid, url) {
 	    	} else {
 	    		$("#"+contentid).html(response);
 	    	}
+
 	    },
 	    error: function(response, type, message){
 	    	$("#"+contentid).html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">'+type+'</h4><p>'+message+'</p></div>');
@@ -211,17 +212,45 @@ function findAndLoadActiveLi(id,contentID){
     })
 }
 
+function hiddeHidden(contentID){
+	$('#'+contentID).find('div').each(function () {    
+		if (this.id.match(/Hidden$/)) {
+			$(this).css("display","none");
+		}
+	});
+}
+
+function getHiddenDivID(id,contentID) {
+	var found = false;
+	hiddeHidden(contentID);
+	$('#'+id+'Hidden').css("display","block");
+	$('#'+contentID).find('div').each(function () {    
+		if (this.id == id+'Hidden') {
+			$(this).css("display","block");
+			found = true;
+		}
+	});
+	if (!found) {
+		$("<div id="+id+"Hidden></div>").appendTo('#'+contentID);
+	}
+	return id+'Hidden'
+}
+
+
+
 function loadToolbarLi(id,contentID, reload){
+	
 	activateLi(id);
+	url = $('#'+id).attr('src');
 	if (reload) {
-		url = $('#'+id).attr('src');
+		hiddeHidden(contentID+'Hidden');
 		loadContent(contentID,url);
 	} else {
-		text = $('#'+id+'Hidden').html();
-		if ((!text)  || (text.replace(/\s/g,"") == "")) {
-			loadContent(contentID,url);
-		} else {
-			$('#'+contentID).html(text);
+		$('#'+contentID).html('');
+		
+		hiddenDivID = getHiddenDivID(id,contentID+'Hidden');
+		if ($('#'+hiddenDivID).is(':empty')){
+			loadContent(hiddenDivID,url);
 		}
 	}
 }
@@ -232,6 +261,14 @@ function loadTabLi(id, reload){
 	parentName = ul.get(0).id;
 	parentName = parentName.replace(/\uFFFD/g, '');
 	loadToolbarLi(id,parentName+"TabContent",reload);
+}
+
+function loadTabLiReload(id) {
+	parentName = ul.get(0).id;
+	parentName = parentName.replace(/\uFFFD/g, '');
+	hiddenDivID = getHiddenDivID(id,parentName+"TabContentHidden");
+	loadToolbarLi(id, hiddenDivID, true);
+	
 }
 
 function showPaginatorModal(id, title, contentUrl, postUrl, refresh, 

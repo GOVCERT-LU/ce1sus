@@ -5,9 +5,9 @@
 
 <%call expr="tabulator.tabulator(id='adminTabs')">
     <%call expr="tabulator.tab(id='adminValidation',url='/admin/validation', name='Validation',active=True)"/> 
-    <%call expr="tabulator.tab(id='adminObjects',url='/admin/objects', name='Objects')"/> 
-    <%call expr="tabulator.tab(id='adminAttribute',url='/admin/attributes', name='Attributes')"/> 
-    <%call expr="tabulator.tab(id='adminUsers',url='/admin/users',name='Users' )"/> 
-    <%call expr="tabulator.tab(id='adminGroups',url='/admin/groups', name='Groups')"/> 
-    <%call expr="tabulator.tab(id='adminSubGroups',url='/admin/subgroups', name='SubGroups')"/> 
+    <%call expr="tabulator.tab(id='adminObjects',url='/admin/objects', name='Objects',reload=False)"/> 
+    <%call expr="tabulator.tab(id='adminAttribute',url='/admin/attributes', name='Attributes',reload=False)"/> 
+    <%call expr="tabulator.tab(id='adminUsers',url='/admin/users',name='Users' ,reload=False)"/> 
+    <%call expr="tabulator.tab(id='adminGroups',url='/admin/groups', name='Groups',reload=False)"/> 
+    <%call expr="tabulator.tab(id='adminSubGroups',url='/admin/subgroups', name='SubGroups',reload=False)"/> 
 </%call>
