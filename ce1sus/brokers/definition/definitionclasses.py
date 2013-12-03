@@ -39,7 +39,8 @@ class ObjectDefinition(BASE):
   name = Column('name', String, nullable=False)
   description = Column('description', String)
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
-                            back_populates='objects', cascade='all')
+                            back_populates='objects', cascade='all',
+                            order_by="AttributeDefinition.name")
   dbchksum = Column('chksum', String)
   share = Column('sharable', Integer)
 
@@ -135,7 +136,8 @@ class AttributeDefinition(BASE):
   deletable = Column('deletable', Integer)
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
-                         back_populates='attributes', cascade='all')
+                         back_populates='attributes', cascade='all',
+                            order_by="ObjectDefinition.name")
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
   dbchksum = Column('chksum', String)

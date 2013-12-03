@@ -213,3 +213,21 @@ class UserBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
+
+  def getAll(self):
+    """
+    Returns all getBrokerClass() instances
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :returns: list of instances
+    """
+    try:
+      result = self.session.query(self.getBrokerClass()).order_by(User.username.asc()).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result

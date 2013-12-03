@@ -91,7 +91,8 @@ class Group(BASE):
   email = Column('email', String)
   tlpLvl = Column('tlplvl', Integer)
   subgroups = relationship('SubGroup', secondary='Subgroups_has_Groups',
-                       back_populates='groups', cascade='all')
+                       back_populates='groups', cascade='all',
+                            order_by="SubGroup.name")
 
   def validate(self):
     """
@@ -124,7 +125,8 @@ class SubGroup(BASE):
   name = Column('name', String)
   description = Column('description', String)
   groups = relationship(Group, secondary='Subgroups_has_Groups',
-                       back_populates='subgroups', cascade='all')
+                       back_populates='subgroups', cascade='all',
+                            order_by="Group.name")
 
   def validate(self):
     """

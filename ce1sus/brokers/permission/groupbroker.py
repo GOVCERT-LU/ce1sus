@@ -40,7 +40,7 @@ class GroupBroker(BrokerBase):
     """
     try:
       subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(
-                                        Group.identifier == identifier).all()
+                                        Group.identifier == identifier).order_by(SubGroup.name).all()
       if not belongIn:
         subgroupsIDs = list()
         for subgroup in subgroups:
@@ -49,7 +49,7 @@ class GroupBroker(BrokerBase):
  ~SubGroup.identifier.in_(
                                                                   subgroupsIDs
                                                                             )
-                                                        )
+                                                        ).order_by(SubGroup.name).all()
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
@@ -140,3 +140,21 @@ class GroupBroker(BrokerBase):
       ObjectConverter.setInteger(group, 'usermails', usermails)
       group.description = description.strip()
     return group
+
+  def getAll(self):
+    """
+    Returns all getBrokerClass() instances
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :returns: list of instances
+    """
+    try:
+      result = self.session.query(self.getBrokerClass()).order_by(Group.name.asc()).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result

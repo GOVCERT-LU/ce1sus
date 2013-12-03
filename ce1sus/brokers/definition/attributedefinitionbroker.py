@@ -51,13 +51,13 @@ class AttributeDefinitionBroker(BrokerBase):
                                               AttributeDefinition.objects
                                               ).filter(
                                         AttributeDefinition.identifier ==
-                                        identifier).all()
+                                        identifier).order_by(ObjectDefinition.name.asc()).all()
       if not belongIn:
         objIDs = list()
         for obj in objects:
           objIDs.append(obj.identifier)
         objects = self.session.query(ObjectDefinition).filter(
- ~ObjectDefinition.identifier.in_(objIDs))
+ ~ObjectDefinition.identifier.in_(objIDs)).order_by(ObjectDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
@@ -283,3 +283,21 @@ class AttributeDefinitionBroker(BrokerBase):
     if action == 'insert':
       attribute.deletable = 1
     return attribute
+
+  def getAll(self):
+    """
+    Returns all getBrokerClass() instances
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :returns: list of instances
+    """
+    try:
+      result = self.session.query(self.getBrokerClass()).order_by(AttributeDefinition.name.asc()).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result

@@ -44,13 +44,13 @@ class ObjectDefinitionBroker(BrokerBase):
       attributes = self.session.query(AttributeDefinition).join(
                                           ObjectDefinition.attributes).filter(
                                           ObjectDefinition.identifier ==
-                                          identifier).all()
+                                          identifier).order_by(AttributeDefinition.name.asc()).all()
       if not belongIn:
         attributeIDs = list()
         for attribute in attributes:
           attributeIDs.append(attribute.identifier)
         attributes = self.session.query(AttributeDefinition).filter(
- ~AttributeDefinition.identifier.in_(attributeIDs))
+ ~AttributeDefinition.identifier.in_(attributeIDs)).order_by(AttributeDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
@@ -175,3 +175,21 @@ class ObjectDefinitionBroker(BrokerBase):
       ObjectConverter.setInteger(obj, 'share', share)
       obj.dbchksum = hashSHA1(obj.name)
     return obj
+
+  def getAll(self):
+    """
+    Returns all getBrokerClass() instances
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :returns: list of instances
+    """
+    try:
+      result = self.session.query(self.getBrokerClass()).order_by(ObjectDefinition.name.asc()).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+    return result
