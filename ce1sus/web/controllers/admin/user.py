@@ -115,10 +115,8 @@ class UserController(Ce1susBaseController):
               ]
 
     lh = LDAPHandler.getInstance()
-    lh.open()
     ldapPaginator = Paginator(items=lh.getAllUsers(),
                           labelsAndProperty=labels)
-    lh.close()
     return template.render(ldapPaginator=ldapPaginator, errorMsg=None)
 
   # pylint: disable=R0913

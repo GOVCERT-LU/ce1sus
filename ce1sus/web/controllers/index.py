@@ -104,9 +104,7 @@ class IndexController(Ce1susBaseController):
         raise NothingFoundException
       # ok it is an LDAPUser
       lh = LDAPHandler.getInstance()
-      lh.open()
       valid = lh.isUserValid(username, password)
-      lh.close()
 
       # an exception is raised as the remaining procedure is similar
       if not valid:

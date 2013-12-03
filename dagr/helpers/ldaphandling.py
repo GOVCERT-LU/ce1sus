@@ -64,22 +64,26 @@ class LDAPHandler(object):
 
   def __init__(self, configFile):
     self.__config = Configuration(configFile, 'LDAP')
-    self.__connection = None
     self.__users_dn = self.__config.get('users_dn')
     self.__tls = self.__config.get('usetls')
+    self.connection = None
     LDAPHandler.instance = self
 
-  def open(self):
+  def __getConnection(self):
     """
     Open the connection to the LDAP server
     """
-    self.__connection = ldap.initialize(self.__config.get('server'))
-    try:
-      if self.__tls:
-        self.__connection.start_tls_s()
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: ' + unicode(e))
+    if self.connection is None:
+      try:
+        connection = ldap.initialize(self.__config.get('server'))
+        if self.__tls:
+          connection.start_tls_s()
+        self.connection = connection
+      except ldap.LDAPError as e:
+        Log.getLogger(self.__class__.__name__).fatal(e)
+        raise ServerErrorException('LDAP error: ' + unicode(e))
+    return self.connection
+
 
   def isUserValid(self, uid, password):
     """
@@ -158,9 +162,10 @@ class LDAPHandler(object):
     filter_ = '(uid=*)'
     attributes = ["uid", "displayName", "mail"]
     try:
-      result = self.__connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
+      connection = self.__getConnection()
+      result = connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
                                filter_, attributes)
-      # dierft nemmen 1 sinn
+      self.__closeConnection(connection)
       userList = list()
       for user in result:
         user = LDAPHandler.__mapUser(user)
@@ -187,10 +192,12 @@ class LDAPHandler(object):
     attributes = ["uid", "displayName", "mail", "dc"]
     try:
       user = None
-      result = self.__connection.search_s(self.__users_dn,
+      connection = self.__getConnection()
+      result = connection.search_s(self.__users_dn,
                                           ldap.SCOPE_SUBTREE,
                                           filter_,
                                           attributes)
+      self.__closeConnection(connection)
       # dierft nemmen 1 sinn
       for user in result:
         user = LDAPHandler.__mapUser(user)
@@ -213,8 +220,10 @@ class LDAPHandler(object):
     filter_ = '(uid=' + uid + ')'
     userdn = self.__getUserDN(uid)
     try:
-      result = self.__connection.search_s(userdn, ldap.SCOPE_SUBTREE,
+      connection = self.__getConnection()
+      result = connection.search_s(userdn, ldap.SCOPE_SUBTREE,
                                filter_, [attributeName])
+      self.__closeConnection(connection)
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
@@ -237,12 +246,13 @@ class LDAPHandler(object):
     """
     return 'uid=' + uid + ',' + self.__users_dn
 
-  def close(self):
+  def __closeConnection(self, connection):
     """
     close the connection
     """
     try:
-      self.__connection.unbind_s()
+      # connection.unbind_s()
+      pass
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
 

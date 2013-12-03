@@ -186,9 +186,7 @@ class UserBroker(BrokerBase):
     if action == 'insertLDAP':
       user.identifier = None
       lh = LDAPHandler.getInstance()
-      lh.open()
       ldapUser = lh.getUser(identifier)
-      lh.close()
       user.username = ldapUser.uid
       user.password = ldapUser.password
       user.email = ldapUser.mail
