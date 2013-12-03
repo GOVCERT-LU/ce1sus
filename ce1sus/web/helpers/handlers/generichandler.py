@@ -15,6 +15,7 @@ from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.attributebroker import Attribute
 from datetime import datetime
 from dagr.helpers.converters import ObjectConverter
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 class GenericHandler(HandlerBase):
@@ -29,6 +30,7 @@ class GenericHandler(HandlerBase):
     attribute.value = params.get('value').strip()
     attribute.obejct = obj
     attribute.object_id = obj.identifier
+    attribute.definition = definition
     attribute.def_attribute_id = definition.identifier
     attribute.definition = definition
     attribute.created = datetime.now()
@@ -41,6 +43,13 @@ class GenericHandler(HandlerBase):
     ObjectConverter.setInteger(attribute,
                                'ioc',
                                params.get('ioc', '0').strip())
+    attribute.bitValue = BitValue('0', attribute)
+    attribute.bitValue.isWebInsert = True
+    attribute.bitValue.isValidated = True
+    if definition.share == 1:
+      attribute.bitValue.isSharable = True
+    else:
+      attribute.bitValue.isSharable = False
     return attribute
 
   def getAttributesNameList(self):

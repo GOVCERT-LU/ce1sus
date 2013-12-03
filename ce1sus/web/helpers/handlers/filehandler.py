@@ -30,6 +30,7 @@ from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
 from dagr.helpers.converters import ObjectConverter
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 class FileNotFoundException(HandlerException):
@@ -123,6 +124,13 @@ class FileHandler(GenericHandler):
     ObjectConverter.setInteger(attribute,
                                'ioc',
                                ioc.strip())
+    attribute.bitValue = BitValue('0', attribute)
+    attribute.bitValue.isWebInsert = True
+    attribute.bitValue.isValidated = True
+    if attribute.definition.share == 1:
+      attribute.bitValue.isSharable = True
+    else:
+      attribute.bitValue.isSharable = False
     return attribute
 
   def __canUserDownload(self, eventID, user):
@@ -226,6 +234,8 @@ class FileWithHashesHandler(FileHandler):
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
+    if filepath is None:
+      raise FileNotFoundException('No file Uploaded. Upload the file before saving')
     if isfile(filepath):
       # getNeededAttributeDefinition
       attributes = list()

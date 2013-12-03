@@ -88,7 +88,7 @@ isModal=False
                         <% 
                         isModal=True
                         %>
-                        <a href="#" onclick="showPaginatorModal('${option.modalTitle}','${option.url}/${primaryKey}','${option.postUrl}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reloadUrl}');">
+                        <a href="#" onclick="showPaginatorModal('paginatorModal${identifier}','${option.modalTitle}','${option.url}/${primaryKey}','${option.postUrl}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reloadUrl}');">
         
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'LINK':
@@ -145,8 +145,8 @@ isModal=False
 
     <!-- END pagination -->
 % if isModal:
-<form id="paginatorModalForm">
-    <%call expr="modals.genericModal(id='paginatorModal',title='No Title',contentUrl=None)">
+<form id="paginatorModal${identifier}Form">
+    <%call expr="modals.genericModal(id='paginatorModal{0}'.format(identifier),title='No Title',contentUrl=None)">
     </%call>
 </form>
 %endif

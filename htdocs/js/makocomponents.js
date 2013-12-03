@@ -225,18 +225,18 @@ function loadTabLi(id, reload){
 	loadToolbarLi(id,parentName+"TabContent",reload);
 }
 
-function showPaginatorModal(title, contentUrl, postUrl, refresh, 
+function showPaginatorModal(id, title, contentUrl, postUrl, refresh, 
 							refreshContentID, refreshContentUrl ) {
-	$('#paginatorModal').modal('show');
-	loadContent('paginatorModalbody',contentUrl);
-	$('#paginatorModalLabel').html(title);
+	$('#'+id).modal('show');
+	loadContent(''+id+'body',contentUrl);
+	$('#'+id+'Label').html(title);
 	if (postUrl) {
-		$("#paginatorModalForm").unbind('submit');
-		$("#paginatorModalForm").submit(function(event){
+		$("#"+id+"Form").unbind('submit');
+		$("#"+id+"Form").submit(function(event){
 			
 			
 			// setup some local variables
-		    form = $('#paginatorModalForm');
+		    form = $('#'+id+'Form');
 		    // let's select and cache all the fields
 		    inputs = form.find("input, select, button, textarea");
 		    // serialize the data in the form
@@ -262,7 +262,7 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		    // callback handler that will be called on success
 		    request.done(function (responseText, textStatus, XMLHttpRequest){
 		    	if (responseText.match(/^<!--OK--/gi)) {
-		    		$('#paginatorModal').modal("hide");
+		    		$('#'+id).modal("hide");
 		    		//refrehshPage & container if needed
 		    		if (refresh) {
 		            	loadContent(refreshContentID,refreshContentUrl);
@@ -277,14 +277,14 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		    		} else {
 		    			resultText = getErrorMsg(responseText)
 		    		} 
-		    		$("#paginatorModalbody").html(resultText);
+		    		$("#'+id+'body").html(resultText);
 		    	}
 		    });
 
 		    // callback handler that will be called on failure
 		    request.fail(function (responseText, textStatus, XMLHttpRequest){
 		    	resultText = getErrorMsg(responseText)
-				$("#paginatorModalbody").html(resultText);
+				$("#"+id+"body").html(resultText);
 		    });
 		    // callback handler that will be called regardless
 		    // if the request failed or succeeded
@@ -295,11 +295,11 @@ function showPaginatorModal(title, contentUrl, postUrl, refresh,
 		    // prevent default posting of form
 		    event.preventDefault();
 		});
-		$('#paginatorModalFooter').html('<input class="btn btn-primary" value="'
+		$('#'+id+'Footer').html('<input class="btn btn-primary" value="'
 				+'Save changes" type="submit"><button class="btn btn-default" data-'
 				+'dismiss="modal">Close</button>');
 	} else {
-		$('#paginatorModalFooter').html('<button class="btn btn-default" data-dismiss="'
+		$('#'+id+'Footer').html('<button class="btn btn-default" data-dismiss="'
 				+'modal">Close</button>');
 	}
 }
