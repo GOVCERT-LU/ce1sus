@@ -213,8 +213,17 @@ function findAndLoadActiveLi(id,contentID){
 
 function loadToolbarLi(id,contentID, reload){
 	activateLi(id);
-	url = $('#'+id).attr('src');
-	loadContent(contentID,url);
+	if (reload) {
+		url = $('#'+id).attr('src');
+		loadContent(contentID,url);
+	} else {
+		text = $('#'+id+'Hidden').html();
+		if ((!text)  || (text.replace(/\s/g,"") == "")) {
+			loadContent(contentID,url);
+		} else {
+			$('#'+contentID).html(text);
+		}
+	}
 }
 
 function loadTabLi(id, reload){

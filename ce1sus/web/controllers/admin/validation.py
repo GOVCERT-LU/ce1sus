@@ -260,6 +260,11 @@ class ValidationController(Ce1susBaseController):
       event.modifier_id = event.modifier.identifier
       event.modified = datetime.now()
       event.published = 1
+      # check if the event has a group
+      if event.creatorGroup is None:
+        # if not add the default group of the validating user
+        event.creatorGroup = self.getUser().defaultGroup
+
       # perform validation of objects
       for obj in event.objects:
         obj.bitValue.isValidated = True

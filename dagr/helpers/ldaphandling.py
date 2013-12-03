@@ -114,7 +114,9 @@ class LDAPHandler(object):
     try:
       try:
         if not (uid is None or password is None):
-          self.__connection.simple_bind_s(self.__getUserDN(uid), password)
+          connection = self.__getConnection()
+          connection.simple_bind_s(self.__getUserDN(uid), password)
+          self.__closeConnection(connection)
       except ldap.INVALID_CREDENTIALS:
         Log.getLogger(self.__class__.__name__
                         ).info(
