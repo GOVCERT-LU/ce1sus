@@ -285,7 +285,7 @@ class FileWithHashesHandler(FileHandler):
       attributes.append(self._createAttribute(unicode(mime.
                                                        guess_type(url)[0]),
                                                obj,
-                                               9,
+                                               88,
                                                user,
                                                '0'))
       # move file to destination
