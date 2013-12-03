@@ -122,8 +122,7 @@ class LDAPHandler(object):
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
-  @staticmethod
-  def __mapUser(user):
+  def __mapUser(self, user):
     """
     Maps the response from the LDAP server to userobject container
 
@@ -142,7 +141,9 @@ class LDAPHandler(object):
               setattr(user, key, unicode(value[0]))
             except UnicodeDecodeError:
               setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
-
+    if user.mail is None:
+      # Try a secondtime just to get the email
+      user.mail = self.getUserAttribute(user.uid, 'dc')
     return user
 
   def getAllUsers(self):
@@ -165,7 +166,7 @@ class LDAPHandler(object):
       self.__closeConnection(connection)
       userList = list()
       for user in result:
-        user = LDAPHandler.__mapUser(user)
+        user = self.__mapUser(user)
         userList.append(user)
       if len(userList) < 1:
         raise NothingFoundException('No  users were found')
@@ -197,7 +198,7 @@ class LDAPHandler(object):
       self.__closeConnection(connection)
       # dierft nemmen 1 sinn
       for user in result:
-        user = LDAPHandler.__mapUser(user)
+        user = self.__mapUser(user)
       return user
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
@@ -229,7 +230,10 @@ class LDAPHandler(object):
     for resultTuple in result:
       for item in resultTuple:
         if isinstance(item, types.DictType):
-          attribute = item[attributeName][0]
+          try:
+            attribute = item[attributeName][0]
+          except KeyError:
+            return None
     return attribute
 
   def __getUserDN(self, uid):
