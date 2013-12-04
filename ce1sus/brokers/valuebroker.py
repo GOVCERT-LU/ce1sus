@@ -73,7 +73,7 @@ class DateValue(BASE):
 
     :returns: Boolean
     """
-    return ObjectValidator.validateAlNum(self, 'value')
+    return ObjectValidator.validateDateTime(self, 'value')
 
   @staticmethod
   def convert(value):
