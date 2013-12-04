@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+
+%if attribute is None:
+    <%call expr="labeledInput.labeledTextBox(label='Value',name='value',message='',enabled=enabled)"/>
+    <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enabled)"/>
+%else:
+  <%call expr="labeledInput.labeledTextBox(label='Value',name='value',message=attribute.value,enabled=enabled)"/>
+%endif
