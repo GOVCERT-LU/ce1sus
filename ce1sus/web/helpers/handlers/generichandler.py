@@ -27,7 +27,10 @@ class GenericHandler(HandlerBase):
   def populateAttributes(self, params, obj, definition, user):
     attribute = Attribute()
     attribute.identifier = None
-    attribute.value = params.get('value').strip()
+    value = params.get('value')
+    if isinstance(value, list):
+      value = value[0]
+    attribute.value = value.strip()
     attribute.obejct = obj
     attribute.object_id = obj.identifier
     attribute.definition = definition
