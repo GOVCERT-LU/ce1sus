@@ -115,7 +115,7 @@ class ObjectValidator:
       if withSpaces:
         placeHolder += ' '
     if withSymbols:
-      placeHolder += r'!$%^&*()_+|~\-={}\[\]:";\'<>?,.\/\\'
+      placeHolder += r'\W'
 
     quantifier = ''
     if minLength != 0 and maxLength != 0:
@@ -152,8 +152,8 @@ class ObjectValidator:
                     maxLength=0,
                     withSpaces=False,
                     withNonPrintableCharacters=False,
-                    changeAttribute=True,
-                    withSymbols=False):
+                    withSymbols=False,
+                    changeAttribute=True):
     """
       Validates if the attribute is of an alphanumeric kind.
 

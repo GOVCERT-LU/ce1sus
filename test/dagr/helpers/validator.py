@@ -13,6 +13,11 @@ from datetime import datetime
 class TestValidator(unittest.TestCase):
   def testAlNum(self):
     try:
+      assert ValueValidator.validateAlNum('a@a.com',
+                                   minLength=1,
+                                   withNonPrintableCharacters=True,
+                                   withSpaces=True,
+                                   withSymbols=True)
   # working Tests
       assert ValueValidator.validateAlNum('Test123',
       minLength=0,
@@ -51,6 +56,9 @@ class TestValidator(unittest.TestCase):
       maxLength=0,
       withSpaces=False,
       withNonPrintableCharacters=False)
+
+
+
     except ValidationException:
       assert(False)
 

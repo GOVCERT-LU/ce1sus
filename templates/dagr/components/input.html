@@ -196,31 +196,18 @@
             %if enabled:
             <div>
 	            <div class="form-group" style="padding-left:15px;padding-right:15px">
-	                <div class='input-group date' id='${name}ID'>
-	                    <input type='text' class="form-control" data-format="yyyy-MM-dd HH:mm:ss" name="${name}" value="${dateTime}"/>
-	                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
-	                    </span>
-	                </div>
+	              <input class="form-control" type='text' id="${name}ID" name="${name}" value="${dateTime}"/>
+	              Format must be: 'yyyy-MM-dd HH:mm:ss'
 	            </div>
             </div>
+            
+     
             %else:
             <div style="text-align:left;">
                       ${dateTime}
                     </div>
             %endif
-    
-        %if enabled:
-        <script type="text/javascript">
-            $(function () {
-                $('#${name}ID').datetimepicker({
-                    language: 'uk',
-                    pickSeconds: true,
-                    pickTime: true,
-                    pickDate: true
-                });
-            });
-        </script>
-        %endif
+
     % if (not (validationMsg is None)) and enabled:
       <%call expr="messagesAndText.error(validationMsg)"/>
     % endif

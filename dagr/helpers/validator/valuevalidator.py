@@ -39,7 +39,8 @@ class ValueValidator:
                     minLength=0,
                     maxLength=0,
                     withSpaces=False,
-                    withNonPrintableCharacters=False):
+                    withNonPrintableCharacters=False,
+                    withSymbols=False):
     """
       Validates if the string is of an alphanumeric kind.
 
@@ -62,11 +63,12 @@ class ValueValidator:
     obj = Container(string)
     return ObjectValidator.validateAlNum(obj,
                                     'value',
-                                    minLength,
-                                    maxLength,
-                                    withSpaces,
-                                    withNonPrintableCharacters,
-                                    changeAttribute=False)
+                          minLength=minLength,
+                          maxLength=maxLength,
+                          withSpaces=withSpaces,
+                          withNonPrintableCharacters=withNonPrintableCharacters,
+                          withSymbols=withSymbols,
+                          changeAttribute=False)
 
   @staticmethod
   def validateAlpha(string,

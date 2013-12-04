@@ -305,9 +305,10 @@ class EventController(Ce1susBaseController):
         self.eventBroker.removeByID(event.identifier)
       return self.returnAjaxOK()
     except ValidationException:
+
       self.getLogger().debug('Event is invalid')
       return (self.returnAjaxPostError()
-                  + EventController.__populateTemplate(event, template))
+                        + EventController.__populateTemplate(event, template))
 
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))

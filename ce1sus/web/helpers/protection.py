@@ -153,6 +153,7 @@ def requireReferer(allowedReferers):
     """
       Checks if the user has the privileged right
     """
+    print 'AAAAAAAA'
     # TODO fix this for the server
     return True
     referer = cherrypy.request.headers.elements('Referer')

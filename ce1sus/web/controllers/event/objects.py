@@ -194,6 +194,7 @@ class ObjectsController(Ce1susBaseController):
                                       shared=shared)
     try:
       obj.bitValue.isWebInsert = True
+      obj.bitValue.isValidated = True
       self.objectBroker.insert(obj, False)
       getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
       # update last seen etc of event
@@ -239,6 +240,8 @@ class ObjectsController(Ce1susBaseController):
                                   self.getUser(),
                                   objectID)
     try:
+      obj.bitValue.isWebInsert = True
+      obj.bitValue.isValidated = True
       self.objectBroker.insert(obj, False)
       # update last seen etc of event
       self.eventBroker.updateLastSeen(event, self.getUser(), False)

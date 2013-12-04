@@ -72,7 +72,6 @@ class EventBroker(BrokerBase):
       raise BrokerException(e)
 
   def updateLastSeen(self, event, user, commit=True):
-    event.last_seen = datetime.now()
     event.modifier = user
     event.modifier_id = user.identifier
     self.update(event, commit)
@@ -394,6 +393,8 @@ class EventBroker(BrokerBase):
     if not action == 'remove':
       event.title = name.strip()
       event.description = description.strip()
+      if not event.description:
+        event.description = 'no description'
       ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
       ObjectConverter.setInteger(event, 'status_id', status)
       ObjectConverter.setInteger(event, 'published', published)
@@ -413,6 +414,8 @@ class EventBroker(BrokerBase):
       ObjectConverter.setInteger(event, 'risk_id', risk)
       event.creatorGroup = user.defaultGroup
       event.creatorGroup_id = event.creatorGroup.identifier
+      event.groups = list()
+      event.groups.append(user.defaultGroup)
       ObjectConverter.setInteger(event, 'creatorGroup_id', published)
       if action == 'insert':
         event.bitValue = BitValue('1000', event)

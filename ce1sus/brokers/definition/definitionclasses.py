@@ -123,7 +123,8 @@ class AttributeDefinition(BASE):
                           5: 'multiplegenerichandler.MultipleGenericHandler',
                           6: 'filehandler.FileHandler',
                           7: 'datehandler.DateHandler',
-                          8: 'cbvaluehandler.CBValueHandler'}
+                          8: 'cbvaluehandler.CBValueHandler',
+                          9: 'texthandler.TextHandler'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
