@@ -59,7 +59,7 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
     value = getattr(obj, attributeName, '')
     stringValue = '{0}'.format(value)
     stringValue = stringValue.strip()
-    result = re.match(regex, stringValue, re.UNICODE) is not None
+    result = re.match(regex, stringValue, re.MULTILINE) is not None
     if not result and changeAttribute:
       setattr(obj, attributeName, FailedValidation(stringValue, errorMsg))
 
