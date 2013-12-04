@@ -31,6 +31,7 @@ from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
+import magic
 
 
 class FileNotFoundException(HandlerException):
