@@ -100,7 +100,7 @@
 
 
 
-<%def name="comboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False)">
+<%def name="comboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False, sorted=True)">
 	<!-- BEGIN comboBox --><%
 	if (enabled):
 	  enabledStr = ''
@@ -112,6 +112,9 @@
 	
 	hasDataContent=False
 	dataToggle=''
+	keys = list(values.keys())
+	if sorted:
+	   keys.sort()
 	 %>
 	%if enabled:
 	 <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
@@ -124,8 +127,9 @@
 	        %endif
 	    %endif
 	    %if not values is None:
-	        %for key, value in values.iteritems():
+	        %for key in keys:
 	            <%
+	            value = values.get(key,None)
 	            if isinstance(value, tuple):
 	               title = 'title="{0}"'.format(value[1])
 	               value = value[0]
