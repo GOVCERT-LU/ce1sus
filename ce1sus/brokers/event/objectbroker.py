@@ -189,7 +189,7 @@ class ObjectBroker(BrokerBase):
       # first level
       result = self.session.query(Object).filter(Object.parentEvent_id
                                                  == eventID,
-                                                 Object.dbcode.op('&')(12) == 12
+                                                Object.dbcode.op('&')(12) == 12
                                                  )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
@@ -237,7 +237,7 @@ class ObjectBroker(BrokerBase):
       # first level
       result = self.session.query(Object).filter(Object.event_id
                                                  == eventID,
-                                                 Object.dbcode.op('&')(12) == 12
+                                                Object.dbcode.op('&')(12) == 12
                                                  )
       return result.all()
       return result

@@ -86,7 +86,6 @@ class RestEventController(RestControllerBase):
     else:
       return self.raiseError('Exception', 'Not Implemented')
 
-
   def __convertRestObject(self, obj, parent, event, commit=False):
     dbObject = self._convertToObject(obj, parent, event, commit=commit)
     # generate Attributes

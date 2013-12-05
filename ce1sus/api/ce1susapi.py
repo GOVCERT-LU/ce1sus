@@ -110,6 +110,7 @@ class Ce1susAPI(object):
       raise Ce1susAPIException('Error ({0})'.format(e.code))
     except urllib2.URLError as e:
       raise Ce1susAPIException('Error ({0})'.format(e.reason.args[1]))
+    # Process custom exceptions
     jsonObj = json.loads(response)
     for item in jsonObj:
       resonseObj = jsonObj.get('response', None)
@@ -121,7 +122,7 @@ class Ce1susAPI(object):
               errorMsg += value + '.'
           raise Ce1susAPIException(errorMsg)
         else:
-          return json.loads(response)
+          return jsonObj
     raise Ce1susAPIException('Undefined Error')
 
   @staticmethod
@@ -129,7 +130,7 @@ class Ce1susAPI(object):
     key, value = Ce1susAPI.__getData(jsonData)
     return Ce1susAPI.populateClassNamebyDict(key, value)
 
-  def getEventByID(self, identifier, full=False, withDefinition=False):
+  def getEventByUUID(self, uuid, full=False, withDefinition=False):
     if full:
       parameters = '?showAll=1'
     else:
@@ -140,7 +141,7 @@ class Ce1susAPI(object):
       else:
         parameters = '?withDefinition=1'
 
-    result = self.__request('/event/{0}{1}'.format(identifier,
+    result = self.__request('/event/{0}{1}'.format(uuid,
                                                    parameters),
                             None)
     return self.__mapJSONToObject(result)

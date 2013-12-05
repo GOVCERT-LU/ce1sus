@@ -401,7 +401,7 @@ class EventBroker(BrokerBase):
       event.modified = datetime.now()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
-      event.uuid = unicode(uuid.uuid4())
+
       if first_seen:
         ObjectConverter.setDate(event, 'first_seen', first_seen)
       else:
@@ -412,12 +412,13 @@ class EventBroker(BrokerBase):
         event.last_seen = datetime.now()
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
-      event.creatorGroup = user.defaultGroup
-      event.creatorGroup_id = event.creatorGroup.identifier
-      event.groups = list()
-      event.groups.append(user.defaultGroup)
       ObjectConverter.setInteger(event, 'creatorGroup_id', published)
       if action == 'insert':
+        event.uuid = unicode(uuid.uuid4())
+        event.creatorGroup = user.defaultGroup
+        event.creatorGroup_id = event.creatorGroup.identifier
+        event.groups = list()
+        event.groups.append(user.defaultGroup)
         event.bitValue = BitValue('1000', event)
         event.created = datetime.now()
         event.creator = user
@@ -474,7 +475,7 @@ class EventBroker(BrokerBase):
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with for ids :{0}'.format(
-                                                                  attributeIDs))
+                                                                 attributeIDs))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)

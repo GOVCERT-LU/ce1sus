@@ -75,7 +75,7 @@ class Event(BASE):
                           primaryjoin="Event.modifier_id==User.identifier")
   creatorGroup_id = Column('creatorGroup', Integer,
                             ForeignKey('Groups.group_id'))
-  creatorGroup = relationship(Group)
+  creatorGroup = relationship(Group, backref="createdEvents")
   __tlpObj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
