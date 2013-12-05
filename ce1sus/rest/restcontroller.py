@@ -14,11 +14,11 @@ import cherrypy
 from dagr.db.broker import BrokerException
 from ce1sus.sanity import SantityChecker, SantityCheckerException
 from ce1sus.rest.handlers.restevent import RestEventController
-from ce1sus.rest.restbase import RestControllerBase
+from ce1sus.rest.restbase import RestControllerBase, RestAPIException
 from ce1sus.rest.handlers.restobject import RestObjectController
 from ce1sus.rest.handlers.restattribute import RestAttributeController
 from cherrypy import request
-
+import json
 
 class RestController(RestControllerBase):
 
@@ -101,11 +101,19 @@ class RestController(RestControllerBase):
                                                                         action,
                                                                    instance, e)
                                )
+      except RestAPIException as e:
+        self.getLogger().debug(
+                        'Error occured during {0} for {1} due to {2}'.format(
+                                                                        action,
+                                                                   instance, e))
+        temp = dict(self._createStatus('RestException', e.message))
+        return json.dumps(temp)
     else:
       self.getLogger().debug(
                         'Method {0} is not defined for {0}'.format(action,
                                                                    instance))
       # if nothing is found do default
       path = request.script_name + request.path_info
-      self.raiseError('Exception',
-                          "The path '%s' was not found." % path)
+      temp = dict(self._createStatus('RestException',
+                                     "The path '%s' was not found." % path))
+      return json.dumps(temp)

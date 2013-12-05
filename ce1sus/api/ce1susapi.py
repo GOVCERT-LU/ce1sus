@@ -110,7 +110,19 @@ class Ce1susAPI(object):
       raise Ce1susAPIException('Error ({0})'.format(e.code))
     except urllib2.URLError as e:
       raise Ce1susAPIException('Error ({0})'.format(e.reason.args[1]))
-    return json.loads(response)
+    jsonObj = json.loads(response)
+    for item in jsonObj:
+      resonseObj = jsonObj.get('response', None)
+      if resonseObj :
+        if resonseObj.get('status', 'ERROR') == 'ERROR':
+          errorMsg = '';
+          for error in resonseObj.get('errors', list()):
+            for value in error.itervalues():
+              errorMsg += value + '.'
+          raise Ce1susAPIException(errorMsg)
+        else:
+          return json.loads(response)
+    raise Ce1susAPIException('Undefined Error')
 
   @staticmethod
   def __mapJSONToObject(jsonData):

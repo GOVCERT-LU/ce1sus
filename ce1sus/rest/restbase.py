@@ -114,8 +114,9 @@ class RestControllerBase(BaseController):
     return result
 
   def raiseError(self, classname, message):
-    temp = dict(self._createStatus(classname, message))
-    return json.dumps(temp)
+
+    raise RestAPIException('{0}: {1}'.format(classname, message))
+
 
   def getPostObject(self):
     try:
@@ -184,7 +185,6 @@ class RestControllerBase(BaseController):
         attrDefinition.handlerIndex = 0
         attrDefinition.deletable = 1
         attrDefinition.share = 1
-        attrDefinition.relation = restAttributeDefinition.relation
         self.attributeDefinitionBroker.insert(attrDefinition, commit=False)
 
         # update objectRelations as the attribute was not set
