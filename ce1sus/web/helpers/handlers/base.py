@@ -97,11 +97,11 @@ class HandlerBase(object):
                                                     value))
 
   @abstractmethod
-  def getAttributesNameList(self):
+  def getAttributesIDList(self):
     """
     Returns a list of attributes required for the handling
     """
-    return HandlerException('{0}.getAttributesNameList is not defined'.format(
+    return HandlerException('{0}.getAttributesIDList is not defined'.format(
                                                     self.__class__.__name__))
 
   def getTemplate(self, name):

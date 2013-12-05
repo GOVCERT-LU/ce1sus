@@ -15,7 +15,6 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
-from sqlalchemy.ext.hybrid import hybrid_property
 from ce1sus.api.restclasses import RestObjectDefinition, \
                                    RestAttributeDefinition
 

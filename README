@@ -1,0 +1,64 @@
+Requirements
+---------
+* python (2.6+)
+* mysql (5.1+)
+* mako (0.7+)
+** paste (1.7.5.1+)
+* webtest (1.2.1+)
+* sqlalchemy (0.7+)
+** sqlalchemy-ext (0.7+)
+** mysqldb (1.2.3, optional)
+* python-magic (0.4.6+)
+* python-ldap (optional)
+* rtkit (optional)
+
+** https://github.com/ahupp/python-magic
+
+
+Webserver
+---------
+There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
+* nginx (1.2.1+)
+* uwsgi (1.2.3+, with python-2 support)
+
+
+uwsgi config (ce1sus.ini):
+_______________________________________
+[uwsgi]
+uid = www-data
+gid = www-data
+pythonpath = /path/to/ce1sus
+ini-paste = /path/to/ce1sus/production.ini
+plugins = python27
+_______________________________________
+
+
+nginx config:
+_______________________________________
+server {
+  listen 443;
+  server_name <servername>;
+
+  root /path/to/ce1sus/ce1sus/public;
+
+  access_log /var/log/nginx/ce1sus_access.log common;
+  error_log /var/log/nginx/ce1sus_error.log;
+
+  ssl on;
+  ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+  ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+
+  ssl_ciphers AESGCM:SHA512:SHA384:SHA256:AES128:SHA512:SHA384:SHA256:-SSLv3:-RC4:HIGH:!MD5:!aNULL:!eNULL:!EDH;
+  ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+  ssl_prefer_server_ciphers on;
+  ssl_session_cache    shared:SSL:10m;
+  ssl_session_timeout  5m;
+
+  location / {
+    uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
+    include     uwsgi_params;
+    uwsgi_param SCRIPT_NAME "";
+    uwsgi_param HTTPS on;
+  }
+}
+_______________________________________

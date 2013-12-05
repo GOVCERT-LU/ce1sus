@@ -52,7 +52,7 @@ class FileHandler(GenericHandler):
 
   # pylint: disable=W0211
   @staticmethod
-  def getAttributesNameList(self):
+  def getAttributesIDList(self):
     return ('file_name',
             'hash_sha1')
 
@@ -222,16 +222,8 @@ class FileWithHashesHandler(FileHandler):
 
   # pylint: disable=W0211
   @staticmethod
-  def getAttributesNameList(self):
-    return ('file_name',
-            'hash_md5',
-            'hash_sha1',
-            'hash_sha256',
-            'hash_sha384',
-            'hash_sha512',
-            'size_in_bytes',
-            'magic_number',
-            'location')
+  def getAttributesIDList(self):
+    return (7, 1, 2, 3, 4, 5, 8, 9, 88, 94)
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
@@ -280,15 +272,23 @@ class FileWithHashesHandler(FileHandler):
                                                8,
                                                user,
                                                '0'))
-      url = pathname2url(filepath)
-      mime = MimeTypes()
-      # TODO - use magic number
-      attributes.append(self._createAttribute(unicode(mime.
-                                                       guess_type(url)[0]),
+
+      mimeType = magic.from_file(filepath, mime=True)
+      if mimeType:
+        attributes.append(self._createAttribute(mimeType,
                                                obj,
                                                88,
                                                user,
                                                '0'))
+
+      fileID = magic.from_file(filepath)
+      if fileID:
+        attributes.append(self._createAttribute(fileID,
+                                               obj,
+                                               94,
+                                               user,
+                                               '0'))
+
       # move file to destination
       destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
                                               getInstance().get('files'),

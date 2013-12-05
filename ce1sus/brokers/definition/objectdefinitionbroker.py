@@ -18,6 +18,7 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
 
+
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
   def getBrokerClass(self):
@@ -44,13 +45,15 @@ class ObjectDefinitionBroker(BrokerBase):
       attributes = self.session.query(AttributeDefinition).join(
                                           ObjectDefinition.attributes).filter(
                                           ObjectDefinition.identifier ==
-                                          identifier).order_by(AttributeDefinition.name.asc()).all()
+                                          identifier).order_by(
+                                          AttributeDefinition.name.asc()).all()
       if not belongIn:
         attributeIDs = list()
         for attribute in attributes:
           attributeIDs.append(attribute.identifier)
         attributes = self.session.query(AttributeDefinition).filter(
- ~AttributeDefinition.identifier.in_(attributeIDs)).order_by(AttributeDefinition.name.asc()).all()
+ ~AttributeDefinition.identifier.in_(attributeIDs)).order_by(
+                                          AttributeDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
@@ -91,7 +94,7 @@ class ObjectDefinitionBroker(BrokerBase):
       if not 'GenericHandler' in attribute.handlerName:
         handler = HandlerBase.getHandler(attribute)
         attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.name.in_(handler.getAttributesNameList()))
+                AttributeDefinition.identifier.in_(handler.getAttributesIDList()))
         for attribute in attributes:
           attribute.addObject(obj)
       self.doCommit(commit)
@@ -185,7 +188,8 @@ class ObjectDefinitionBroker(BrokerBase):
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()).order_by(ObjectDefinition.name.asc()).all()
+      result = self.session.query(self.getBrokerClass()
+                                  ).order_by(ObjectDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:

@@ -55,7 +55,7 @@ class GenericHandler(HandlerBase):
       attribute.bitValue.isSharable = False
     return attribute
 
-  def getAttributesNameList(self):
+  def getAttributesIDList(self):
     return list()
 
   def render(self, enabled, eventID, user, definition, attribute=None):
