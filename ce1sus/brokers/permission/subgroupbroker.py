@@ -15,6 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
+from dagr.helpers.string import cleanPostValue
 
 
 class SubGroupBroker(BrokerBase):
@@ -129,8 +130,8 @@ class SubGroupBroker(BrokerBase):
     if not action == 'insert':
       subgroup.identifier = identifier
     if not action == 'remove':
-      subgroup.name = name.strip()
-      subgroup.description = description.strip()
+      subgroup.name = cleanPostValue(name)
+      subgroup.description = cleanPostValue(description)
     return subgroup
 
   def getAll(self):

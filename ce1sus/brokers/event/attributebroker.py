@@ -30,6 +30,7 @@ from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
 from dagr.db.broker import IntegrityException
 from ce1sus.api.restclasses import RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.string import cleanPostValue
 
 
 class Attribute(BASE):
@@ -423,7 +424,7 @@ class AttributeBroker(BrokerBase):
       for classname in tables.iterkeys():
         clazz = ValueBroker.getClassByClassString(classname)
         try:
-          needle = clazz.convert(value.strip())
+          needle = clazz.convert(cleanPostValue(value))
           result = result + self.__lookForValue(clazz, needle, operand)
         except:
           # either it works or doesn't

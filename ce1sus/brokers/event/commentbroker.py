@@ -15,6 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from datetime import datetime
 from ce1sus.brokers.event.eventclasses import Comment
+from dagr.helpers.string import cleanPostValue
 
 
 class CommentBroker(BrokerBase):
@@ -61,7 +62,7 @@ class CommentBroker(BrokerBase):
     comment.modifier = user
     comment.modifier_id = comment.modifier.identifier
     if action == 'insert':
-      comment.comment = commentText.strip()
+      comment.comment = cleanPostValue(commentText)
       comment.creator = user
       comment.creator_id = comment.creator.identifier
       comment.event = event

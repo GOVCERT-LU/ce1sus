@@ -15,6 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
+from dagr.helpers.string import cleanPostValue
 
 
 class GroupBroker(BrokerBase):
@@ -40,7 +41,8 @@ class GroupBroker(BrokerBase):
     """
     try:
       subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(
-                                        Group.identifier == identifier).order_by(SubGroup.name).all()
+                                        Group.identifier == identifier
+                                        ).order_by(SubGroup.name).all()
       if not belongIn:
         subgroupsIDs = list()
         for subgroup in subgroups:
@@ -49,7 +51,8 @@ class GroupBroker(BrokerBase):
  ~SubGroup.identifier.in_(
                                                                   subgroupsIDs
                                                                             )
-                                                        ).order_by(SubGroup.name).all()
+                                                        ).order_by(SubGroup.name
+                                                                   ).all()
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
@@ -133,12 +136,12 @@ class GroupBroker(BrokerBase):
     if not action == 'insert':
       group.identifier = identifier
     if not action == 'remove':
-      group.name = name.strip()
-      group.email = email.strip()
+      group.name = cleanPostValue(name)
+      group.email = cleanPostValue(email)
       ObjectConverter.setInteger(group, 'canDownload', download)
       ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
       ObjectConverter.setInteger(group, 'usermails', usermails)
-      group.description = description.strip()
+      group.description = cleanPostValue(description)
     return group
 
   def getAll(self):
@@ -150,7 +153,8 @@ class GroupBroker(BrokerBase):
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()).order_by(Group.name.asc()).all()
+      result = self.session.query(self.getBrokerClass()
+                                  ).order_by(Group.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:

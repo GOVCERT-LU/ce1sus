@@ -17,6 +17,7 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
+from dagr.helpers.string import cleanPostValue
 
 
 class ObjectDefinitionBroker(BrokerBase):
@@ -176,8 +177,8 @@ class ObjectDefinitionBroker(BrokerBase):
     if not action == 'insert':
       obj.identifier = identifier
     if not action == 'remove':
-      obj.name = name.strip()
-      obj.description = description.strip()
+      obj.name = cleanPostValue(name)
+      obj.description = cleanPostValue(description)
       ObjectConverter.setInteger(obj, 'share', share)
       obj.dbchksum = hashSHA1(obj.name)
     return obj

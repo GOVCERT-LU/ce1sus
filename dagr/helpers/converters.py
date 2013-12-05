@@ -53,6 +53,8 @@ class ValueConverter(object):
     :returns: Integer
     """
     try:
+      if value is None:
+        return None
       strValue = '{0}'.format(value)
       if strValue:
         return int(strValue)

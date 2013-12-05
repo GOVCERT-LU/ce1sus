@@ -20,6 +20,7 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
 from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.string as string
 from dagr.helpers.hash import hashSHA1
+from dagr.helpers.string import cleanPostValue
 
 
 class AttributeDefinitionBroker(BrokerBase):
@@ -269,8 +270,10 @@ class AttributeDefinitionBroker(BrokerBase):
       if attribute.deletable == 0:
         raise DeletionException('Attribute cannot be edited or deleted')
     if not action == 'remove':
-      attribute.name = name.strip()
-      attribute.description = description.strip()
+      if isinstance(name, list):
+        name = name[0]
+      attribute.name = cleanPostValue(name)
+      attribute.description = cleanPostValue(description)
     ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
     ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
     ObjectConverter.setInteger(attribute, 'relation', relation)
@@ -279,7 +282,7 @@ class AttributeDefinitionBroker(BrokerBase):
                              attribute.classIndex,
                              attribute.handlerIndex)
     attribute.dbchksum = hashSHA1(key)
-    trimmedRegex = regex.strip()
+    trimmedRegex = cleanPostValue(regex)
     if string.isNotNull(trimmedRegex):
       attribute.regex = trimmedRegex
     else:

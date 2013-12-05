@@ -65,6 +65,16 @@
 	  <%call expr="messagesAndText.error(validationMsg)"/>
 	% endif
 	<!-- END passowdBox -->
+    <script type="text/javascript">
+       $(document).ready(function() {
+    	  $('#${name}ID').keydown(function(event){
+    	    if(event.keyCode == 13) {
+    	      event.preventDefault();
+    	      return false;
+    	    }
+    	  });
+    	});
+    </script>
 </%def>
 
 
@@ -95,6 +105,16 @@
 	  <%call expr="messagesAndText.error(validationMsg)"/>
 	% endif
 	<!-- END editBox -->
+	    <script type="text/javascript">
+       $(document).ready(function() {
+          $('#${name}ID').keydown(function(event){
+            if(event.keyCode == 13) {
+              event.preventDefault();
+              return false;
+            }
+          });
+        });
+    </script>
 </%def>
 
 
@@ -215,6 +235,16 @@
     % if (not (validationMsg is None)) and enabled:
       <%call expr="messagesAndText.error(validationMsg)"/>
     % endif
+        <script type="text/javascript">
+       $(document).ready(function() {
+          $('#${name}ID').keydown(function(event){
+            if(event.keyCode == 13) {
+              event.preventDefault();
+              return false;
+            }
+          });
+        });
+    </script>
 </%def>
 
 

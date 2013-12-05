@@ -22,6 +22,7 @@ from dagr.helpers.ldaphandling import LDAPHandler
 import dagr.helpers.string as string
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
+from dagr.helpers.string import cleanPostValue
 
 
 class UserBroker(BrokerBase):
@@ -174,9 +175,9 @@ class UserBroker(BrokerBase):
     if not action == 'insert':
       user.identifier = identifier
     if not action == 'remove' and action != 'insertLDAP':
-      user.email = email.strip()
-      user.password = password
-      user.username = username.strip()
+      user.email = cleanPostValue(email)
+      user.password = cleanPostValue(password)
+      user.username = cleanPostValue(username)
     if string.isNotNull(disabled):
       ObjectConverter.setInteger(user, 'disabled', disabled)
     if string.isNotNull(priv):
@@ -223,7 +224,8 @@ class UserBroker(BrokerBase):
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()).order_by(User.username.asc()).all()
+      result = self.session.query(self.getBrokerClass()
+                                  ).order_by(User.username.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:

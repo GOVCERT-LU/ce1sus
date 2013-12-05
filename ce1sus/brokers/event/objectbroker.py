@@ -23,6 +23,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from sqlalchemy.orm import joinedload_all
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.string import cleanPostValue
 
 
 class ObjectBroker(BrokerBase):

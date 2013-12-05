@@ -25,6 +25,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid
 from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.string import cleanPostValue
 
 
 # pylint: disable=R0904
@@ -371,8 +372,8 @@ class EventBroker(BrokerBase):
       # right checks only if there is a change!!!!
 
     if not action == 'remove':
-      event.title = name.strip()
-      event.description = description.strip()
+      event.title = cleanPostValue(name)
+      event.description = cleanPostValue(description)
       if not event.description:
         event.description = 'no description'
       ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)

@@ -102,6 +102,13 @@ def stringToDateTime(string):
       pass
   raise InputException('Format of Date "{0}" is unknown'.format(string))
 
+def cleanPostValue(value):
+  result = None
+  if isinstance(value, list):
+    result = value[0]
+  if result:
+    result.strip()
+  return result
 
 def isNotNull(value):
   """
