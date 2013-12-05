@@ -23,13 +23,21 @@ else:
       </div>
       <div class="modal-footer"  id="${id}Footer">
         ${caller.body()}
-        <button class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="${id}ModalFooterClose" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
 <script type="text/javascript">
-
+$(document).ready(function() {
+    $('#${id}ModalFooterClose').keydown(function(event){
+      if(event.keyCode == 13) {
+        event.preventDefault();
+        return false;
+      }
+    });
+  });
+  
 %if not contentUrl is None:
     $("#${id}").on("show.bs.modal", function() { // wire up modal when shown
         loadContent('${id}body','${contentUrl}')
@@ -67,12 +75,21 @@ else:
         </div>
       </div>
       <div class="modal-footer" id="${id}Footer">
-        <button class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="${id}ModalFooterClose" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
-
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#${id}ModalFooterClose').keydown(function(event){
+      if(event.keyCode == 13) {
+        event.preventDefault();
+        return false;
+      }
+    });
+  });
+</script>
 <!-- END GenericModal -->
 </%def>
 
@@ -80,7 +97,18 @@ else:
 <%def name="saveButtonModal(id,title,contentUrl,enabled=True)">
     <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
       %if enabled:
-       <input class="btn btn-primary" type="submit" value="Save changes"/>
+       <input id="${id}ModalFooterSubmit" class="btn btn-primary" type="submit" value="Save changes"/>
       %endif
     </%call>
+    
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#${id}ModalFooterSubmit').keydown(function(event){
+      if(event.keyCode == 13) {
+        event.preventDefault();
+        return false;
+      }
+    });
+  });
+</script>
 </%def>

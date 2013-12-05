@@ -283,10 +283,18 @@ class EventController(Ce1susBaseController):
     risk = kwargs.get('risk', None)
     analysis = kwargs.get('analysis', None)
     # fill in the values
-    event = self.eventBroker.buildEvent(identifier, action, status,
-                                            tlp_index, description, name,
-                                            published, first_seen, last_seen,
-                                            risk, analysis, self.getUser())
+    event = self.eventBroker.buildEvent(identifier,
+                                        action,
+                                        status,
+                                        tlp_index,
+                                        description,
+                                        name,
+                                        published,
+                                        first_seen,
+                                        last_seen,
+                                        risk,
+                                        analysis,
+                                        self.getUser())
 
     try:
       if not action == 'insert':

@@ -106,6 +106,8 @@ def cleanPostValue(value):
   result = None
   if isinstance(value, list):
     result = value[0]
+  else:
+    result = value
   if result:
     result.strip()
   return result

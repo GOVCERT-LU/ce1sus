@@ -14,10 +14,26 @@
     <div class="row">
         <div class="col-xs-4 col-sm-4" style="text-align:right">
             <div class="btn-group">
-               <button class="btn btn-primary" type="submit">Save</button>
-               <button class="btn btn-default" onclick="loadContent('eventEdit','/events/event/details/${event.identifier}')">Cancel</button>
+               <button id="${event.identifier}Save" class="btn btn-primary" type="submit">Save</button>
+               <button id="${event.identifier}Cancel" class="btn btn-default" onclick="loadContent('eventEdit','/events/event/details/${event.identifier}')">Cancel</button>
             </div>
         </div>
     </div>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#${event.identifier}Save').keydown(function(event){
+      if(event.keyCode == 13) {
+        event.preventDefault();
+        return false;
+      }
+    });
+    $('#${event.identifier}Cancel').keydown(function(event){
+        if(event.keyCode == 13) {
+          event.preventDefault();
+          return false;
+        }
+      });
+  });
+</script>
 </%call>
 

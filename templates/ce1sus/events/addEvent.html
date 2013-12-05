@@ -12,9 +12,26 @@
 	${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues,today=today)}
 	<div class="col-xs-3 col-sm-3" style="text-align:right">
 		<div class="btn-group">
-			<button class="btn btn-primary" type="submit">Create</button>
-			<button class="btn btn-default" onclick="loadContent('eventsTabTabContent','/events/addEvent')">Cancel</button>
+			<button id ="AddSave" class="btn btn-primary" type="submit">Create</button>
+			<button id="AddCancel" class="btn btn-default" onclick="loadContent('eventsTabTabContent','/events/addEvent')">Cancel</button>
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#AddSave').keydown(function(event){
+      if(event.keyCode == 13) {
+        event.preventDefault();
+        return false;
+      }
+    });
+    $('#AddCancel').keydown(function(event){
+        if(event.keyCode == 13) {
+          event.preventDefault();
+          return false;
+        }
+      });
+  });
+</script>
 </%call>
+
