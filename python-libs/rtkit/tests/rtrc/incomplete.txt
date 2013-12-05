@@ -1,2 +1,0 @@
-user   RT_USERNAME
-passwd RT_PASSWORD

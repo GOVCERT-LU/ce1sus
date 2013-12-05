@@ -1,4 +1,3 @@
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -107,7 +106,7 @@ CREATE TABLE `DEF_Attributes` (
   UNIQUE KEY `chksum_UNIQUE` (`chksum`),
   KEY `IDX_def_attributes_name` (`name`),
   KEY `IDX_def_attributes_chksum` (`chksum`)
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `DEF_Attributes` WRITE;
@@ -126,26 +125,26 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (12,'raw_file','The raw file data','^.+$',1,1,1,0,0,'ddb88c41be6b708aaf6309bcfc4bb3762ec387e8'),
 (13,'raw_document_file','The raw document (non malicious file)','^.+$',1,6,1,0,0,'dbfd4fd4cc323f1063ce1ab03586bc03e0944537'),
 (14,'hostname','Fully qualified domain name','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,5,1,1,1,'2376b03d4148c212c63cc1904a04e17b1baa26ac'),
-(15,'description','Contains free text description for an object','^.+$',0,0,1,1,0,'b248f7d94db2e4da5188d7d8ba242f23ba733012'),
+(15,'description','Contains free text description for an object','^.+$',0,9,1,1,0,'b248f7d94db2e4da5188d7d8ba242f23ba733012'),
 (16,'comment','Holds free text for comments about objects and event.','^.+$',0,9,1,0,0,'cc9cd84564e9d314ad638af0ed55ba878d6f9bc8'),
 (17,'is_malicious','Boolean to identify malicious objects','^(yes|no)$',1,8,1,1,0,'db890b47e4ec3946095bec3790632afe9c9164fb'),
 (18,'malware_file_type','dropper, trojan, banking trojan, RAT, rogue document, phishing document,....','^virus$|^trojan$|^dropper$|^malware$|^Rootkit$|^keyLogger$|^worm$',1,8,1,1,0,'d792cabf19e21de61666fef24e9767679bc9400c'),
 (19,'file_full_path','The File path including the file name.','^.+$',1,0,1,1,0,'6354375248dfc43a70cab71553392c3918534075'),
 (20,'file_extension','The File_Extension field specifies the file extension of the file.','^.+$',1,0,1,1,0,'735c8591b0e10f6dae47d4fe94c65c4d340b6a91'),
 (21,'file_format','The File_Format field specifies the particular file format of the file, most typically specified by a tool such as the UNIX file command.','^.+$',1,0,1,1,0,'93f88eb103448bf84b332535a0f9ded721aaae0c'),
-(22,'digital_signature','The Digital_Signatures field is optional and captures one or more digital signatures for the file.','^.+$',0,0,1,1,1,'ff6f1e3f3814b88261d6bb4f41710395d89fcd80'),
+(22,'digital_signature','The Digital_Signatures field is optional and captures one or more digital signatures for the file.','^.+$',0,9,1,1,1,'ff6f1e3f3814b88261d6bb4f41710395d89fcd80'),
 (23,'file_modified_time','The Modified_Time field specifies the date/time the file was last modified.','^.+$',2,7,1,1,0,'23dbb232d5c045fdaf45d1d0e2963758649ec9ff'),
 (24,'file_accessed_datetime','The Accessed_Time field specifies the date/time the file was last accessed.','^.+$',2,7,1,1,0,'6cc63a956e62effc14868b23a9ae47cf80012c28'),
 (25,'file_created_datetime','The Created_Time field specifies the date/time the file was created.','^.+$',2,7,1,1,0,'7e57114f701bea9d407e6d921ed06867ca69c6b5'),
 (26,'packer','The Packer_List field specifies any packers that the file may be packed with. The term \'packer\' here refers to packers, as well as things like archivers and installers.','^.+$',1,0,1,1,0,'4ebdf814d95f7225af11511476beada1c7bd7628'),
 (27,'peak_entropy','The Peak_Entropy field specifies the calculated peak entropy of the file.','^[\\d]{1,}$',3,0,1,1,0,'1d6a8927167fad3035de083b0c2c2e389b386e8f'),
-(28,'encryption_mechanism','The encryption_mechanism field is optional and specifies the protection/encryption algorithm utilized to protect the Raw_Artifact content.','^.+$',0,0,1,1,0,'e6216dd1a1c17e6cbcc5043b503ab8e6b918f8fa'),
-(29,'discovery_method','The Discovery_Method field is intended to characterize the method and/or tool used to discover the object.','^.+$',0,0,1,1,0,'e3d34e69981d1aa2a1d7a8de4f8797a90b100664'),
-(30,'vulnerability_free_text','Free text description for a vulnerability','^.+$',0,0,1,1,0,'f044a402f0b814a2793bb7bb5c87543d346fd16c'),
+(28,'encryption_mechanism','The encryption_mechanism field is optional and specifies the protection/encryption algorithm utilized to protect the Raw_Artifact content.','^.+$',0,9,1,1,0,'e6216dd1a1c17e6cbcc5043b503ab8e6b918f8fa'),
+(29,'discovery_method','The Discovery_Method field is intended to characterize the method and/or tool used to discover the object.','^.+$',0,9,1,1,0,'e3d34e69981d1aa2a1d7a8de4f8797a90b100664'),
+(30,'vulnerability_free_text','Free text description for a vulnerability','^.+$',0,9,1,1,0,'f044a402f0b814a2793bb7bb5c87543d346fd16c'),
 (31,'reference_url','URL pointing to online information','^.+$',1,0,1,1,0,'1aadfbb852f3a7f0011860ac73827b74b092f3a3'),
-(32,'reference_free_text','Free text used to give reference information.','^.+$',0,0,1,1,0,'0c4cc172541bd84db2f8f174ff584335e28d807b'),
+(32,'reference_free_text','Free text used to give reference information.','^.+$',0,9,1,1,0,'0c4cc172541bd84db2f8f174ff584335e28d807b'),
 (33,'analysis_free_text','A free text analysis for the object.','^.+$',0,0,1,1,0,'3e736b49ccf3e6fcd8b4461e75db71d2a989a620'),
-(34,'information_source','Free text holding information about the source of an information (e.g where did a document come from).','^.+$',0,0,1,1,0,'35eb5619ec22bdd899d9b4a835fd335ad11d3c4f'),
+(34,'information_source','Free text holding information about the source of an information (e.g where did a document come from).','^.+$',0,9,1,1,0,'35eb5619ec22bdd899d9b4a835fd335ad11d3c4f'),
 (35,'reference_internal_case','Holds a reference to an internal case to which the event is related.','^.+$',1,0,1,1,0,'b15c8ba0fa7fd16f67fdd7e7e04c47487e935fc2'),
 (36,'reference_external_identifier','Contains an external identifier for the event','^.+$',1,0,1,1,1,'6a83cfd07cb7832ef48a753e305944c3a03b6ebf'),
 (37,'creation_datetime','The creation time stamp of an object','^.+$',2,7,1,0,0,'8769e7ee65c31e29324f6e3e4251a7265f210862'),
@@ -176,15 +175,15 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (62,'targeted_platform','The Targeted_Platforms field specifies a list platforms that this code is targeted for.','^.+$',1,0,1,1,0,'ca79fd7458448da044aa8d00fb8e5ef284786edb'),
 (63,'antivirus_record','The results of one or many antivirus scans for an object. This is a multiline csv value (datetime, engine, result, threat name).','^.+$',1,5,1,1,0,'527763bd485569daa6932fd54f26a2097989a891'),
 (64,'ida_pro_file','An IDA pro file.','^.+$',1,6,1,1,0,'ac40cb187dae87fb3df620d6e9e0dd0911dd5bee'),
-(65,'log_records','Free text for storing log information.','^.+$',0,0,1,1,0,'1eb94af819d5d07fcd0d9796e831782ba3df2eda'),
-(66,'whois','Whois network information','^.+$',0,0,1,1,0,'f70a4f20e5aac42543af7ebd6fd0102cd7b20b52'),
+(65,'log_records','Free text for storing log information.','^.+$',0,9,1,1,0,'1eb94af819d5d07fcd0d9796e831782ba3df2eda'),
+(66,'whois','Whois network information','^.+$',0,9,1,1,0,'f70a4f20e5aac42543af7ebd6fd0102cd7b20b52'),
 (67,'asn','The asn value specifies an identifier for an autonomous system number.','^.+$',1,0,1,1,1,'c4b7ba59f89604d79e518bf8b48fe434ff8b20c7'),
 (68,'domain','Contains a fully qualified domain name','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,5,1,1,0,'61f2d8f22ad9225e600c3eefb1f73aed0a4249b4'),
 (69,'file_content_pattern','Contains a pattern that can be found in the raw file data','^.+$',1,0,1,1,0,'f49f038063fbfdc016812993978936de8278f80b'),
 (70,'file_full_path_pattern','A pattern that matches the full path of a file','^.+$',1,0,1,1,0,'44527df11fe11a85e442473dc14b7c3cb516b631'),
 (71,'file_name_pattern','A pattern that matches the file name','^.+$',1,0,1,1,0,'1b06f42af72052dd3b244575099044c9ef948499'),
 (72,'hostname_c&c','Fully qualified domain name of a host hosting a command and control server','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,5,1,1,1,'3030c45848fa71ebe5a658ba69ebe9c80eb51fa7'),
-(73,'ids_rules','Holds IDS rules. These rules need to be prefixed with the used format (e.g. snort).','^.+$',0,0,1,1,0,'c70c84d41c9cdb556aa01cf5b052881e286569ea'),
+(73,'ids_rules','Holds IDS rules. These rules need to be prefixed with the used format (e.g. snort).','^.+$',0,9,1,1,0,'c70c84d41c9cdb556aa01cf5b052881e286569ea'),
 (74,'ipv4_addr','The IPv4-addr value specifies an IPV4 address.','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$',1,5,1,1,0,'9ea7c45fc7512c4b99e2c072ae24e495f2007a60'),
 (75,'ipv4_addr_c&c','IPv4 address hosting a command and control server','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$',1,5,1,1,1,'bc0a065aa9458c8332517e678dc2cf11d2e47ab7'),
 (76,'ipv4_net','IPv4 CIDR block','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$',1,5,1,1,0,'6821ac2b0f1e0285be361410421b134fd7b02cdb'),
@@ -197,15 +196,14 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (83,'url','Holds a complete URL (e.g. http://www.govcert.lu/en/index.hmtl)','^.+$',1,5,1,1,0,'a3ca7d9357ed835069fc1e4e0969608c43178cf4'),
 (84,'url_path','Holds only the path part of an URL. (e.g. /en/index.html)','^.+$',1,5,1,1,0,'4d966ad1d920da2053bdbdf29e1b8e012bc7aa96'),
 (85,'url_pattern','Holds a pattern that matches URL.','^.+$',1,5,1,1,0,'89d93b434b4aae1c9845fafc626f54d2adf05291'),
-(86,'win_registry_key','The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.','^.+$',0,0,1,1,1,'2d110b2d1019751b7e09ed5831320364b88626de'),
-(87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,0,1,1,1,'cdb3d8e146f88e7ab652207429afa5458da55dd1'),
+(86,'win_registry_key','The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.','^.+$',0,9,1,1,1,'2d110b2d1019751b7e09ed5831320364b88626de'),
+(87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,9,1,1,1,'cdb3d8e146f88e7ab652207429afa5458da55dd1'),
 (88,'mime_type','File mime-type','^.+$',0,0,1,1,0,'1498236cfea91bc2b7fe82625ec223e9dc6f4710'),
 (89,'compromized_hostname','compromized_hostname','^.+$',1,0,1,1,1,'64f2717e8ceb9f660e776399d022476a276d9dcd'),
 (90,'ipv4_addr_phishingSite','ipv4_addr_phishingSite','^.+$',1,0,1,1,1,'9ba844adf500b08be89a389d2cbba0716d554da6'),
-(91,'rt_ ticket','RT Ticket','^\\d+$',3,2,1,0,1,'0deb03329e7ec3abf17620e4e46a4b91cf3c3bac'),
-(92,'file_id','File description as returned by unix “file” command','^.+$',1,0,1,1,0,'2a4380007eec26779e9cf203dda1da3094a3d1db'),
-(93,'ip_port','IP Port','^[\\d]{1,}$',3,0,1,1,0,'2c4312677d38a636ba1d77fe150bce7ecea345ac'),
-(94,'ip_protocol','IP Protocol','^tcp$|^udp$|^icmp$',1,8,1,1,0,'5271302bbb13211bb4f2e09c4a5b7628b8520506');
+(91,'ip_port','IP Port','^[\\d]{1,}$',3,0,1,1,0,'2c4312677d38a636ba1d77fe150bce7ecea345ac'),
+(101,'ip_protocol','IP Protocol','^tcp$|^udp$|^icmp$',1,8,1,1,0,'5271302bbb13211bb4f2e09c4a5b7628b8520506'),
+(111,'file_id','File description as returned by unix “file” command','^.+$',1,0,1,1,0,'2a4380007eec26779e9cf203dda1da3094a3d1db');
 /*!40000 ALTER TABLE `DEF_Attributes` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DEF_Objects`;
@@ -455,10 +453,10 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (8,87),
 (1,88),
 (6,88),
-(1,92),
-(6,92),
-(8,93),
-(8,94);
+(8,91),
+(8,101),
+(1,111),
+(6,111);
 /*!40000 ALTER TABLE `DObj_has_DAttr` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DateValues`;
@@ -759,7 +757,7 @@ CREATE TABLE `Users` (
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-05 13:51:02','admin@admin.com',0,NULL,2,NULL);
+INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-05 15:53:47','admin@admin.com',0,NULL,2,NULL);
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `ce1sus`;
@@ -790,4 +788,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
