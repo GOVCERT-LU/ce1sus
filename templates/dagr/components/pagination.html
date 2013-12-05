@@ -137,7 +137,7 @@ isModal=False
           %if not hasSearch:
           "sDom": '<"top"i>rt<"bottom"flp><"clear">',
           %endif
-          "aaSorting": [[ 0, "desc" ]],
+          "aaSorting": [[ ${paginator.sortColunmID}, "${paginator.sortOrder}" ]],
          });
     } );
 

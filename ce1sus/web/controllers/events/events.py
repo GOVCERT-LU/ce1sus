@@ -92,5 +92,6 @@ class EventsController(Ce1susBaseController):
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
+    paginator.sortColumn = 'modified'
     paginator.itemsPerPage = 100
     return template.render(paginator=paginator)

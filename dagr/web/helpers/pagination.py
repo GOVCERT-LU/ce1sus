@@ -184,3 +184,16 @@ class Paginator(object):
     self.list = items
     self.options = paginatorOptions
     self.itemsPerPage = itemsPerPage
+    self.sortColumn = None
+    self.sortOrder = "desc"
+
+  @property
+  def sortColunmID(self):
+    if self.sortColumn:
+      # search index
+      for id, item in enumerate(self.lables):
+        for key in item.iterkeys():
+          if key == self.sortColumn:
+            return id
+    else:
+      return 0
