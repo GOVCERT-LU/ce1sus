@@ -244,6 +244,7 @@ class BrokerBase(object):
     # an elo den update
     try:
       self.session.merge(instance)
+      self.doCommit(commit)
     except sqlalchemy.exc.IntegrityError as e:
       self.getLogger().critical(e)
       raise IntegrityException(e)

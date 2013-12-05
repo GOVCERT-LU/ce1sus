@@ -173,8 +173,7 @@ class AttributesController(Ce1susBaseController):
           for attribute in attributes:
             self.attributeBroker.insert(attribute, commit=False)
             getattr(cherrypy, 'session')['instertedObject'] = obj.identifier
-          # update last seen etc of event
-          self.eventBroker.updateLastSeen(event, self.getUser(), False)
+
         self.attributeBroker.doCommit(True)
         return self.returnAjaxOK()
       except ValidationException as e:

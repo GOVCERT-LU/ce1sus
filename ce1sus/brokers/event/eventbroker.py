@@ -56,26 +56,6 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def update(self, instance, commit=True, validate=True):
-    """
-    overrides BrokerBase.update
-    """
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('Event to be inserted is invalid')
-    try:
-      BrokerBase.update(self, instance, commit, validate)
-      self.doCommit(commit)
-    except BrokerException as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def updateLastSeen(self, event, user, commit=True):
-    event.modifier = user
-    event.modifier_id = user.identifier
-    self.update(event, commit)
-
   def getGroupsByEvent(self, identifier, belongIn=True):
     """
     Returns the groups of the given event
@@ -412,7 +392,6 @@ class EventBroker(BrokerBase):
         event.last_seen = datetime.now()
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
-      ObjectConverter.setInteger(event, 'creatorGroup_id', published)
       if action == 'insert':
         event.uuid = unicode(uuid.uuid4())
         event.creatorGroup = user.defaultGroup
