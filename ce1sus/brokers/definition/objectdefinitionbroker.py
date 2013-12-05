@@ -93,10 +93,13 @@ class ObjectDefinitionBroker(BrokerBase):
       obj.addAttribute(attribute)
       if not 'GenericHandler' in attribute.handlerName:
         handler = HandlerBase.getHandler(attribute)
-        attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.identifier.in_(handler.getAttributesIDList()))
-        for attribute in attributes:
-          attribute.addObject(obj)
+        idList = handler.getAttributesIDList()
+        # only add attributes if there attributes to be added
+        if idList:
+          attributes = self.session.query(AttributeDefinition).filter(
+                  AttributeDefinition.identifier.in_(idList))
+          for attribute in attributes:
+            attribute.addObject(obj)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
