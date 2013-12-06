@@ -88,7 +88,8 @@ class EventsController(Ce1susBaseController):
     paginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',
-                               contentid='')
+                               contentid='',
+                               autoReload=True)
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)

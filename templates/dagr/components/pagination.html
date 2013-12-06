@@ -103,7 +103,12 @@ isModal=False
                         %endif  
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'NEWTAB':
-                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}');">
+                        <%
+                        enabledStr = 'true'
+                        if option.reload:
+                          enabledStr = 'false'
+                        %>
+                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}',${enabledStr});">
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'TAB':
                         <a href="#" onclick="loadTabFromPaginator('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}','${option.tabid}');">

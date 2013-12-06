@@ -61,7 +61,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
         url : uri,
         type : "post",
         data : serializedData,
-    // timeout: 3000 //3secs
+     timeout: 3000 //3secs
     });
 
     // callback handler that will be called on success
@@ -72,6 +72,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
             }
             // refrehshPage & container if needed
             if (doRefresh) {
+                form[0].reset();
                 if (refreshUrl != "None") {
                     loadContent(refreshContainer, refreshUrl);
                 } else {
@@ -115,24 +116,29 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
 }
 
 function loadContent(contentid, url) {
-    if ((contentid) && (url)) {
-        $("#" + contentid).html(
+    //Append new div to content
+    if (contentid.match(/Hidden$/)) {
+        hiddenDiv = contentid;
+    } else {
+        hiddenDiv = getHiddenDivID(contentid, contentid);
+    }
+    if ((hiddenDiv) && (url)) {
+        $("#" + hiddenDiv).html(
                 '<img src="/img/ajax-loader.gif" alt="loading"/> ');
         // load Content
-        $
-                .ajax({
+        $.ajax({
                     url : url,
-                    // timeout: 3000, //3secs
+                     timeout: 3000, //3secs
                     success : function(response) {
                         if (response.match(/^(<HTML>)|(<html>)/)) {
                             $("#main").html(response);
                         } else {
-                            $("#" + contentid).html(response);
+                            $("#" + hiddenDiv).html(response);
                         }
 
                     },
                     error : function(response, type, message) {
-                        $("#" + contentid)
+                        $("#" + hiddenDiv)
                                 .html(
                                         '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">'
                                                 + type
@@ -145,7 +151,7 @@ function loadContent(contentid, url) {
     }
 }
 
-function loadNewTab(pk, id, url) {
+function loadNewTab(pk, id, url, reload) {
     // getTabID
     tabID = id.replace("TabContent", "");
     // deactivate Tabs
@@ -158,24 +164,45 @@ function loadNewTab(pk, id, url) {
         $('#' + tabID + pk + 'LI').attr('class', 'active');
     } else {
         // createTab
-        $("#" + tabID)
-                .append(
-                        $('<li class="active" id="'
-                                + tabID
-                                + pk
-                                + 'LI">'
-                                + '<a href="#" src="'
-                                + url
-                                + '" onclick="loadTabLi(this.id, true)" id="'
-                                + tabID
-                                + pk
-                                + '">'
-                                + 'Event '
-                                + pk
-                                + '&nbsp;<button class="close" title="Remove this Tab" '
-                                + 'type="button" onclick="closeTab(\'' + tabID
-                                + '\',\'' + tabID + pk + 'LI\');">×</button>'
-                                + '</a></li>'));
+        var keyValue = tabID+pk
+        var tab = $("<li/>")
+        .attr("id", keyValue +'LI')
+        .attr("class", 'active');
+        var link = $('<a/>')
+        .attr("href", '#')
+        .attr("src", url)
+        .attr("id", keyValue)
+        .html("Event #" + pk);
+        
+        if (reload) {
+            link.attr("onclick", 'loadTabLi(this.id, true)');
+        } else {
+            link.attr("onclick", 'loadTabLi(this.id, false)');
+        }
+        
+        
+        if (!reload) {
+            var reload = $('<button/>')
+            .attr("class", 'close')
+            .attr("title", 'Reloads this Tab')
+            .attr("type", 'button')
+            .attr("onclick", 'loadTabLi("'+keyValue+'", true);')
+            .html('&nbsp;&#x21bb;');
+            link.append(reload);
+            
+        }
+        
+        
+        var button = $('<button/>')
+        .attr("class", 'close')
+        .attr("title", 'Remove this Tab')
+        .attr("type", 'button')
+        .attr("onclick", 'closeTab(\'' + tabID + '\',\'' + tabID + pk + 'LI\');')
+        .html('&nbsp;&times;');
+        link.append(button);
+        tab.append(link)
+        
+        $("#" + tabID).append(tab);
     }
     // load Content
     loadContent(id, url);
@@ -232,8 +259,8 @@ function findAndLoadActiveLi(id, contentID) {
     })
 }
 
-function hiddeHidden(contentID) {
-    $('#' + contentID).find('div').each(function() {
+function hideHidden(contentID) {
+    $('#' + contentID).children('div').each(function() {
         if (this.id.match(/Hidden$/)) {
             $(this).css("display", "none");
         }
@@ -242,33 +269,48 @@ function hiddeHidden(contentID) {
 
 function getHiddenDivID(id, contentID) {
     var found = false;
-    hiddeHidden(contentID);
-    $('#' + id + 'Hidden').css("display", "block");
-    $('#' + contentID).find('div').each(function() {
-        if (this.id == id + 'Hidden') {
+    //hide all in container
+    hideHidden(contentID);
+    var hiddenID =   id + 'Hidden'
+    var parentDiv = $('#' + contentID)
+    parentParend = parentDiv.parent()
+    //heck if one is existing and then show it else
+    parentDiv.children('div').each(function() {
+        if (this.id == hiddenID) {
             $(this).css("display", "block");
             found = true;
         }
     });
+    //if noone found append a new one
+    
     if (!found) {
-        $("<div id=" + id + "Hidden></div>").appendTo('#' + contentID);
+        var $div = $("<div/>")
+        .attr("id", hiddenID)
+        .html("");
+
+        parentDiv.append($div);
     }
-    return id + 'Hidden'
+    
+    return hiddenID
+    
+    
 }
 
 function loadToolbarLi(id, contentID, reload) {
 
     activateLi(id);
     url = $('#' + id).attr('src');
+    hideHidden(contentID + 'Hidden');
     if (reload) {
-        hiddeHidden(contentID + 'Hidden');
         loadContent(contentID, url);
     } else {
-        $('#' + contentID).html('');
-
-        hiddenDivID = getHiddenDivID(id, contentID + 'Hidden');
+        var hiddenDivID = getHiddenDivID(id, contentID);
+        //if div is empty load content 
         if ($('#' + hiddenDivID).is(':empty')) {
             loadContent(hiddenDivID, url);
+        } else {
+            //show content
+            $('#' + hiddenDivID).css("display", "block");
         }
     }
 }
@@ -279,14 +321,6 @@ function loadTabLi(id, reload) {
     parentName = ul.get(0).id;
     parentName = parentName.replace(/\uFFFD/g, '');
     loadToolbarLi(id, parentName + "TabContent", reload);
-}
-
-function loadTabLiReload(id) {
-    parentName = ul.get(0).id;
-    parentName = parentName.replace(/\uFFFD/g, '');
-    hiddenDivID = getHiddenDivID(id, parentName + "TabContentHidden");
-    loadToolbarLi(id, hiddenDivID, true);
-
 }
 
 function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
@@ -399,7 +433,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
                 }
             }
         },
-    // timeout: 3000 //3secs
+     timeout: 3000 //3secs
     });
 }
 

@@ -21,10 +21,10 @@
   </div>
   <div class="col-xs-8 col-sm-8">
     <legend>Objects</legend>
-<%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/>
+<%call expr="pagination.pagination('objectsTableOverView{0}'.format(event.identifier),objectPaginator,hasSearch=False)"/>
 <br/><br/>
 <legend>Relations</legend>
-<%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
+<%call expr="pagination.pagination('relationsTableOverView{0}'.format(event.identifier),relationPaginator,hasSearch=False)"/>
 <br/><br/>
 %if owner:
 <legend>Comments</legend>

@@ -5,6 +5,6 @@
 
 <%call expr="tabulator.tabulator(id='eventsTab')"> 
     <%call expr="tabulator.tab(id='recentEvents',url='/events/recent',name='Recent Events' ,active=True)"/> 
-    <%call expr="tabulator.tab(id='searchEvent',url='/events/search', name='Search Events',reload=True)"/> 
-    <%call expr="tabulator.tab(id='addEvent',url='/events/addEvent', name='Add Event',reload=True)"/> 
+    <%call expr="tabulator.tab(id='searchEvent',url='/events/search', name='Search Events',reload=False)"/> 
+    <%call expr="tabulator.tab(id='addEvent',url='/events/addEvent', name='Add Event',reload=False)"/> 
 </%call>

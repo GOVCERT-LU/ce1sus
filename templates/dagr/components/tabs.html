@@ -6,9 +6,7 @@
 <ul class="nav nav-tabs" id="${id}" style="margin-bottom:15px">
     ${caller.body()}
 </ul>
-<div id="${id}TabContentHidden" ></div>
 <div id="${id}TabContent">
-<img src="/img/ajax-loader.gif" alt="loading"/> 
 </div>
 
 <script type="text/javascript">
@@ -31,7 +29,7 @@ if reload:
   reloadButton = ''
 else:
   reloadStr = 'false'
-  reloadButton = '&nbsp;<button id="{0}" class="close" title="Reloads this Tab type="button" onclick="loadTabLiReload(this.id)" >&#x21bb;</button>'.format(id)
+  reloadButton = '&nbsp;<button id="{0}" class="close" title="Reloads this Tab" type="button" onclick="loadTabLi(this.id, true)" >&#x21bb;</button>'.format(id)
 %>
 <li ${activeString} id="${id}LI"><a href="#" src="${url}" onclick="loadTabLi(this.id, ${reloadStr})" id="${id}">${name} ${reloadButton}</a></li>
 </%def>

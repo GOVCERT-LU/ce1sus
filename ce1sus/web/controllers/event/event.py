@@ -382,4 +382,5 @@ class EventController(Ce1susBaseController):
 
     except BrokerException as e:
       self.getLogger().error(e)
-    return template.render(relationPaginator=relationPaginator)
+    return template.render(relationPaginator=relationPaginator,
+                           eventID=eventID)
