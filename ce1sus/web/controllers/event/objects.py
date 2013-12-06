@@ -117,13 +117,13 @@ class ObjectsController(Ce1susBaseController):
       except KeyError:
         objectID = None
 
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                         objectList=objectList,
                         cbObjDefinitions=self.def_objectBroker.getCBValues(),
                         cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                         paginator=paginator,
                         objectID=objectID,
-                        owner=self.isEventOwner(event))
+                        owner=self.isEventOwner(event)))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -139,10 +139,10 @@ class ObjectsController(Ce1susBaseController):
 
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
-    return template.render(cbObjDefinitions=cbObjDefinitions,
+    return self.cleanHTMLCode(template.render(cbObjDefinitions=cbObjDefinitions,
                            eventID=eventID,
                            object=None,
-                           errorMsg=None)
+                           errorMsg=None))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -158,11 +158,11 @@ class ObjectsController(Ce1susBaseController):
 
     template = self.getTemplate('/events/event/objects/childObjectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
-    return template.render(cbObjDefinitions=cbObjDefinitions,
+    return self.cleanHTMLCode(template.render(cbObjDefinitions=cbObjDefinitions,
                            eventID=eventID,
                            object=None,
                            objectID=objectID,
-                           errorMsg=None)
+                           errorMsg=None))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -202,9 +202,9 @@ class ObjectsController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return template.render(object=obj,
+      return self.cleanHTMLCode(template.render(object=obj,
                           cbObjDefinitions=self.def_objectBroker.getCBValues(),
-                             eventID=eventID)
+                             eventID=eventID))
     except BrokerException as e:
       self.getLogger().error(e)
       return 'An unexpected error occured: {0}'.format(e)
@@ -246,9 +246,9 @@ class ObjectsController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return template.render(eventID=eventID,
+      return self.cleanHTMLCode(template.render(eventID=eventID,
                           cbObjDefinitions=self.def_objectBroker.getCBValues(),
-                             object=obj)
+                             object=obj))
     except BrokerException as e:
       self.getLogger().critical(e)
       return 'An unexpected error occured: {0}'.format(e)
@@ -308,11 +308,11 @@ class ObjectsController(Ce1susBaseController):
     for child in eventChildren:
       key = '{0} - {1}'.format(child.definition.name, child.identifier)
       cbValues[key] = child.identifier
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            objectID=objectID,
                            cbValues=cbValues,
                            isEventParent=isEventParent,
-                           selected=selected)
+                           selected=selected))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -357,4 +357,4 @@ class ObjectsController(Ce1susBaseController):
       defaultShareValue = 1
     else:
       defaultShareValue = 0
-    return template.render(defaultShareValue=defaultShareValue)
+    return self.cleanHTMLCode(template.render(defaultShareValue=defaultShareValue))

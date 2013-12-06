@@ -44,12 +44,12 @@ class GroupsController(Ce1susBaseController):
     remainingSubGroups = self.eventBroker.getSubGroupsByEvent(event.identifier,
                                                            False)
 
-    return template.render(eventID=event.identifier,
+    return self.cleanHTMLCode(template.render(eventID=event.identifier,
                            remainingGroups=remainingGroups,
                            eventGroups=event.groups,
                            remainingSubGroups=remainingSubGroups,
                            eventSubGroups=event.maingroups,
-                           owner=self.isEventOwner(event))
+                           owner=self.isEventOwner(event)))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))

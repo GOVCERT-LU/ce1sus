@@ -78,7 +78,7 @@ class PaginatorOptions(object):
       self.tabid = tabid
       self.modalTitle = modalTitle
       self.postUrl = postUrl
-      self.reload = not autoReload
+      self.reload = autoReload
 
     @property
     def icon(self):

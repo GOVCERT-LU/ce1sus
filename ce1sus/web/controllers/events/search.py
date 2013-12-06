@@ -64,7 +64,7 @@ class SearchController(Ce1susBaseController):
     template = self.mako.getTemplate('/events/search/index.html')
     cbDefinitions = self.attributeDefinitionBroker.getCBValuesForAll()
     cbDefinitions['Any'] = 'Any'
-    return template.render(cbDefinitions=cbDefinitions)
+    return self.cleanHTMLCode(template.render(cbDefinitions=cbDefinitions))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -127,6 +127,6 @@ class SearchController(Ce1susBaseController):
       paginator = Paginator(items=result,
                             labelsAndProperty=labels,
                             paginatorOptions=paginatorOptions)
-      return self.returnAjaxOK() + template.render(paginator=paginator)
+      return self.returnAjaxOK() + self.cleanHTMLCode(template.render(paginator=paginator))
     except InputException as e:
       return '{0}'.format(e)

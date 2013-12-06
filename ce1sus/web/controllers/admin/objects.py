@@ -38,7 +38,7 @@ class ObjectController(Ce1susBaseController):
     """
 
     template = self.getTemplate('/admin/objects/objectBase.html')
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -50,7 +50,7 @@ class ObjectController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/objects/objectLeft.html')
     objects = self.objectBroker.getAll()
-    return template.render(objects=objects)
+    return self.cleanHTMLCode(template.render(objects=objects))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -81,9 +81,9 @@ class ObjectController(Ce1susBaseController):
       remainingAttributes = self.objectBroker.getAttributesByObject(
                                                 obj.identifier, False)
       attributes = obj.attributes
-    return template.render(objectDetails=obj,
+    return self.cleanHTMLCode(template.render(objectDetails=obj,
                            remainingAttributes=remainingAttributes,
-                           objectAttributes=attributes)
+                           objectAttributes=attributes))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -94,7 +94,7 @@ class ObjectController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/objects/objectModal.html')
-    return template.render(object=None, errorMsg=None)
+    return self.cleanHTMLCode(template.render(object=None, errorMsg=None))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -134,7 +134,7 @@ class ObjectController(Ce1susBaseController):
       return 'Cannot delete this object. The object is still referenced.'
     except ValidationException:
       self.getLogger().info('Object is invalid')
-      return self.returnAjaxPostError() + template.render(object=obj)
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(object=obj))
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)
@@ -158,7 +158,7 @@ class ObjectController(Ce1susBaseController):
       obj = None
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(object=obj, errorMsg=errorMsg)
+    return self.cleanHTMLCode(template.render(object=obj, errorMsg=errorMsg))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

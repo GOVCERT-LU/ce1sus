@@ -15,6 +15,7 @@ from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
 from dagr.web.helpers.config import WebConfig
+import re
 
 
 class BaseControllerException(Exception):
@@ -109,3 +110,7 @@ class BaseController:
     :returns: String
     """
     return '<!--PostError--><!--' + self.__class__.__name__ + '-->'
+
+  def cleanHTMLCode(self, code):
+    code = re.sub(r"(\n|\t)", "", code)
+    return re.sub(r"[ ]{2,}", " ", code)

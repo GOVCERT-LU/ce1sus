@@ -32,4 +32,4 @@ class AdminController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/adminBase.html')
     self.setAdminArea(True)
-    return template.render()
+    return self.cleanHTMLCode(template.render())

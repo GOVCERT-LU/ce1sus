@@ -82,8 +82,8 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/eventBase.html')
-    return template.render(eventID=eventID,
-                           owner=self.isEventOwner(event))
+    return self.cleanHTMLCode(template.render(eventID=eventID,
+                           owner=self.isEventOwner(event)))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -140,7 +140,8 @@ class EventController(Ce1susBaseController):
     relationsPaginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',
-                               contentid='')
+                               contentid='',
+                               autoReload=True)
 
     relationPaginator = Paginator(items=list(),
                           labelsAndProperty=relationLabels,
@@ -170,10 +171,10 @@ class EventController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error(e)
 
-    return template.render(objectPaginator=objectPaginator,
+    return self.cleanHTMLCode(template.render(objectPaginator=objectPaginator,
                            relationPaginator=relationPaginator,
                            event=event,
-                           comments=event.comments)
+                           comments=event.comments))
 
   def __getRelationsObjects(self, objects):
     """
@@ -215,11 +216,11 @@ class EventController(Ce1susBaseController):
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
     cbRiskValues = Risk.getDefinitions()
-    string = template.render(event=event,
+    string = self.cleanHTMLCode(template.render(event=event,
       cbStatusValues=cbStatusValues,
       cbAnalysisValues=cbAnalysisValues,
       cbRiskValues=cbRiskValues,
-      cbTLPValues=cbTLPValues)
+      cbTLPValues=cbTLPValues))
     return string
 
   @require(requireReferer(('/internal')))
@@ -228,12 +229,12 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
     template = self.mako.getTemplate('/events/event/details.html')
-    return template.render(event=event,
+    return self.cleanHTMLCode(template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
                            cbTLPValues=TLPLevel.getDefinitions(),
                            cbAnalysisValues=Analysis.getDefinitions(),
                            cbRiskValues=Risk.getDefinitions(),
-                           owner=self.isEventOwner(event))
+                           owner=self.isEventOwner(event)))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -242,11 +243,11 @@ class EventController(Ce1susBaseController):
     self.checkIfViewable(event)
 
     template = self.mako.getTemplate('/events/event/editDetails.html')
-    return template.render(event=event,
+    return self.cleanHTMLCode(template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
                            cbTLPValues=TLPLevel.getDefinitions(),
                            cbAnalysisValues=Analysis.getDefinitions(),
-                           cbRiskValues=Risk.getDefinitions())
+                           cbRiskValues=Risk.getDefinitions()))
 
   # pylint: disable=R0914
   @require(requireReferer(('/internal')))
@@ -382,5 +383,4 @@ class EventController(Ce1susBaseController):
 
     except BrokerException as e:
       self.getLogger().error(e)
-    return template.render(relationPaginator=relationPaginator,
-                           eventID=eventID)
+    return self.cleanHTMLCode(template.render(relationPaginator=relationPaginator))

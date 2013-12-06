@@ -73,12 +73,12 @@ class AttributesController(Ce1susBaseController):
     obj = self.objectBroker.getByID(objectID)
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=None,
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
-                           enabled=True)
+                           enabled=True))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -196,12 +196,12 @@ class AttributesController(Ce1susBaseController):
           attribute.value = values
         # store in session
         getattr(cherrypy, 'session')['instertAttribute'] = attribute
-      return self.returnAjaxPostError() + template.render(eventID=eventID,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(eventID=eventID,
                              objectID=objectID,
                              attribute=attribute,
                              cbDefinitions=cbDefinitions,
                              errorMsg=None,
-                             enabled=True)
+                             enabled=True))
     else:
       return ('An earlier an error occurred. '
               + 'Please close this dialog and try anew.')
@@ -224,12 +224,12 @@ class AttributesController(Ce1susBaseController):
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
     attribute = self.attributeBroker.getByID(attributeID)
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
-                           enabled=False)
+                           enabled=False))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -292,9 +292,9 @@ class AttributesController(Ce1susBaseController):
     rtPaginator = Paginator(items=TicketSystemBase.
                             getInstance().getAllTickets(),
                             labelsAndProperty=labels)
-    return template.render(rtPaginator=rtPaginator,
+    return self.cleanHTMLCode(template.render(rtPaginator=rtPaginator,
                            rtUrl=TicketSystemBase.
-                           getInstance().getBaseTicketUrl())
+                           getInstance().getBaseTicketUrl()))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose

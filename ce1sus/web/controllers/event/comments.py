@@ -40,9 +40,9 @@ class CommentsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfViewable(event)
     template = self.getTemplate('/events/event/comments/commentModal.html')
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            comment=None,
-                           errorMsg=None)
+                           errorMsg=None))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -70,8 +70,8 @@ class CommentsController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return self.returnAjaxPostError() + template.render(eventID=eventID,
-                             comment=comment)
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(eventID=eventID,
+                             comment=comment))
     except BrokerException as e:
       self.getLogger().fatal(e)
       return 'An unexpected error occurred: {0}'.format(e)
@@ -92,6 +92,6 @@ class CommentsController(Ce1susBaseController):
       comment = self.commentBroker.getByID(commentID)
     except NothingFoundException:
       comment = None
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            comment=comment,
-                           errorMsg=None)
+                           errorMsg=None))

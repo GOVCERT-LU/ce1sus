@@ -39,7 +39,7 @@ class UserController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/users/userBase.html')
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -51,8 +51,8 @@ class UserController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/users/userLeft.html')
     users = self.userBroker.getAll()
-    return template.render(users=users,
-                           useLDAP=self.getConfigVariable('useldap'))
+    return self.cleanHTMLCode(template.render(users=users,
+                           useLDAP=self.getConfigVariable('useldap')))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -81,8 +81,8 @@ class UserController(Ce1susBaseController):
     cbValues = dict()
     for group in groups:
       cbValues[group.name] = group.identifier
-    return template.render(userDetails=user,
-                           cbValues=cbValues)
+    return self.cleanHTMLCode(template.render(userDetails=user,
+                           cbValues=cbValues))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -97,7 +97,7 @@ class UserController(Ce1susBaseController):
     cbValues = dict()
     for group in groups:
       cbValues[group.name] = group.identifier
-    return template.render(user=None, errorMsg=None, cbValues=cbValues)
+    return self.cleanHTMLCode(template.render(user=None, errorMsg=None, cbValues=cbValues))
 
   @require(privileged())
   @cherrypy.expose
@@ -117,7 +117,7 @@ class UserController(Ce1susBaseController):
     lh = LDAPHandler.getInstance()
     ldapPaginator = Paginator(items=lh.getAllUsers(),
                           labelsAndProperty=labels)
-    return template.render(ldapPaginator=ldapPaginator, errorMsg=None)
+    return self.cleanHTMLCode(template.render(ldapPaginator=ldapPaginator, errorMsg=None))
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
@@ -183,8 +183,8 @@ class UserController(Ce1susBaseController):
       cbValues = dict()
       for group in groups:
         cbValues[group.name] = group.identifier
-      return self.returnAjaxPostError() + template.render(user=user,
-                                                          cbValues=cbValues)
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(user=user,
+                                                          cbValues=cbValues))
     except DeletionException as e:
       self.getLogger().info('User tried to delete undeletable user.')
       return "Error {0}".format(e)
@@ -215,7 +215,7 @@ class UserController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(user=user, errorMsg=errorMsg, cbValues=cbValues)
+    return self.cleanHTMLCode(template.render(user=user, errorMsg=errorMsg, cbValues=cbValues))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

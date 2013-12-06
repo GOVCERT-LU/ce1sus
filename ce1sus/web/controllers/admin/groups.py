@@ -38,7 +38,7 @@ class GroupController(Ce1susBaseController):
     """
 
     template = self.getTemplate('/admin/groups/groupBase.html')
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -50,7 +50,7 @@ class GroupController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/groups/groupLeft.html')
     groups = self.groupBroker.getAll()
-    return template.render(groups=groups)
+    return self.cleanHTMLCode(template.render(groups=groups))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -80,10 +80,10 @@ class GroupController(Ce1susBaseController):
       remSubGroups = self.groupBroker.getSubGroupsByGroup(group.identifier,
                                                           False)
       subgroups = group.subgroups
-    return template.render(groupDetails=group,
+    return self.cleanHTMLCode(template.render(groupDetails=group,
                            remainingSubGroups=remSubGroups,
                            subgroups=subgroups,
-                           cbTLPValues=TLPLevel.getDefinitions())
+                           cbTLPValues=TLPLevel.getDefinitions()))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -94,8 +94,8 @@ class GroupController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/groups/groupModal.html')
-    return template.render(group=None, errorMsg=None,
-                           cbTLPValues=TLPLevel.getDefinitions())
+    return self.cleanHTMLCode(template.render(group=None, errorMsg=None,
+                           cbTLPValues=TLPLevel.getDefinitions()))
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
@@ -140,8 +140,8 @@ class GroupController(Ce1susBaseController):
       return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
-      return self.returnAjaxPostError() + template.render(group=group,
-                           cbTLPValues=TLPLevel.getDefinitions())
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(group=group,
+                           cbTLPValues=TLPLevel.getDefinitions()))
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)
@@ -164,8 +164,8 @@ class GroupController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return template.render(group=group, errorMsg=errorMsg,
-                           cbTLPValues=TLPLevel.getDefinitions())
+    return self.cleanHTMLCode(template.render(group=group, errorMsg=errorMsg,
+                           cbTLPValues=TLPLevel.getDefinitions()))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

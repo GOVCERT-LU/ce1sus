@@ -37,7 +37,7 @@ class EventsController(Ce1susBaseController):
     """
     template = self.getTemplate('/events/eventsBase.html')
     self.setAdminArea(False)
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -55,12 +55,12 @@ class EventsController(Ce1susBaseController):
     cbTLPValues = TLPLevel.getDefinitions()
     cbAnalysisValues = Analysis.getDefinitions()
     cbRiskValues = Risk.getDefinitions()
-    return template.render(event=None,
+    return self.cleanHTMLCode(template.render(event=None,
                            cbStatusValues=cbStatusValues,
                            cbTLPValues=cbTLPValues,
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
-                           today=datetime.now())
+                           today=datetime.now()))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -89,10 +89,10 @@ class EventsController(Ce1susBaseController):
                                'VIEW',
                                '/events/event/view/',
                                contentid='',
-                               autoReload=True)
+                               autoReload=False)
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     paginator.sortColumn = 'modified'
     paginator.itemsPerPage = 100
-    return template.render(paginator=paginator)
+    return self.cleanHTMLCode(template.render(paginator=paginator))

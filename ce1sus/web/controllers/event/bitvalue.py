@@ -47,9 +47,9 @@ class BitValueController(Ce1susBaseController):
 
   def __generateTemplate(self, eventID, instance):
     template = self.getTemplate('/events/event/bitvalue/bitvalueModal.html')
-    return template.render(identifier=instance.identifier,
+    return self.cleanHTMLCode(template.render(identifier=instance.identifier,
                            bitValue=instance.bitValue,
-                           eventID=eventID)
+                           eventID=eventID))
 
 
   @cherrypy.expose

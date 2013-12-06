@@ -40,7 +40,7 @@ class AttributeController(Ce1susBaseController):
     """
 
     template = self.getTemplate('/admin/attributes/attributeBase.html')
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -53,7 +53,7 @@ class AttributeController(Ce1susBaseController):
     template = self.getTemplate('/admin/attributes/attributeLeft.html')
 
     attributes = self.attributeBroker.getAll()
-    return template.render(attributes=attributes)
+    return self.cleanHTMLCode(template.render(attributes=attributes))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -88,11 +88,11 @@ class AttributeController(Ce1susBaseController):
       attributeObjects = attribute.objects
 
     cbValues = AttributeDefinition.getTableDefinitions()
-    return template.render(attributeDetails=attribute,
+    return self.cleanHTMLCode(template.render(attributeDetails=attribute,
                            remainingObjects=remainingObjects,
                            attributeObjects=attributeObjects,
                   cbHandlerValues=AttributeDefinition.getHandlerDefinitions(),
-                           cbValues=cbValues)
+                           cbValues=cbValues))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -105,10 +105,10 @@ class AttributeController(Ce1susBaseController):
     template = self.getTemplate('/admin/attributes/attributeModal.html')
     cbValues = AttributeDefinition.getTableDefinitions()
     cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
-    return template.render(attribute=None,
+    return self.cleanHTMLCode(template.render(attribute=None,
                            errorMsg=None,
                            cbValues=cbValues,
-                           cbHandlerValues=cbHandlerValues)
+                           cbHandlerValues=cbHandlerValues))
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
@@ -163,9 +163,9 @@ class AttributeController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().info('Attribute is invalid')
-      return self.returnAjaxPostError() + template.render(attribute=attribute,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(attribute=attribute,
                   cbValues=AttributeDefinition.getTableDefinitions(),
-                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions())
+                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions()))
     except OperationException:
       self.getLogger().info(('User tried to delete item {0} which is '
                              + 'still referenced.').format(identifier))
@@ -195,10 +195,10 @@ class AttributeController(Ce1susBaseController):
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
     cbValues = AttributeDefinition.getTableDefinitions()
     cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
-    return template.render(attribute=attribute,
+    return self.cleanHTMLCode(template.render(attribute=attribute,
                            errorMsg=errorMsg,
                            cbValues=cbValues,
-                           cbHandlerValues=cbHandlerValues)
+                           cbHandlerValues=cbHandlerValues))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

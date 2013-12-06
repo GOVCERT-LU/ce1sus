@@ -48,7 +48,7 @@ class ValidationController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/validation/validationBase.html')
     self.checkIfPriviledged()
-    return template.render()
+    return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -77,7 +77,7 @@ class ValidationController(Ce1susBaseController):
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     paginator.itemsPerPage = 100
-    return template.render(paginator=paginator)
+    return self.cleanHTMLCode(template.render(paginator=paginator))
 
 
 
@@ -94,7 +94,7 @@ class ValidationController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     self.checkIfPriviledged()
     template = self.mako.getTemplate('/admin/validation/eventValBase.html')
-    return template.render(eventID=eventID)
+    return self.cleanHTMLCode(template.render(eventID=eventID))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -174,14 +174,14 @@ class ValidationController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error(e)
 
-    return template.render(objectPaginator=objectPaginator,
+    return self.cleanHTMLCode(template.render(objectPaginator=objectPaginator,
                            relationPaginator=relationPaginator,
                            event=event,
                            comments=event.comments,
                            cbStatusValues=Status.getDefinitions(),
                            cbTLPValues=TLPLevel.getDefinitions(),
                            cbAnalysisValues=Analysis.getDefinitions(),
-                           cbRiskValues=Risk.getDefinitions())
+                           cbRiskValues=Risk.getDefinitions()))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -240,12 +240,12 @@ class ValidationController(Ce1susBaseController):
       except KeyError:
         objectID = None
 
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                         objectList=objects,
                         cbObjDefinitions=self.def_objectBroker.getCBValues(),
                         cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                         paginator=paginator,
-                        objectID=objectID)
+                        objectID=objectID))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -292,9 +292,9 @@ class ValidationController(Ce1susBaseController):
     cbDefinitions = self.def_attributesBroker.getCBValues(
                                                     obj.definition.identifier)
     attribute = self.attributeBroker.getByID(attributeID)
-    return template.render(eventID=eventID,
+    return self.cleanHTMLCode(template.render(eventID=eventID,
                            objectID=objectID,
                            attribute=attribute,
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
-                           enabled=False)
+                           enabled=False))
