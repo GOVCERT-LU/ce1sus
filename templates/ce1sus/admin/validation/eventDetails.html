@@ -19,7 +19,6 @@
         <legend>Details</legend>
         <div class="btn-group">
             <a  class="btn btn-default" href="#" onclick="if (confirm('Do you want to validate this event')) {
-               //call function
                $.get('/admin/validation/validateEvent/${event.identifier}', function(data) {
 	               if (data.match(/^<!--OK--/gi)) {
 	            	   closeTab('validationTabs','validationTabs${event.identifier}LI');

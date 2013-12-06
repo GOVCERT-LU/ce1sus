@@ -18,16 +18,13 @@ rtPaginator.lables = rtLabels
 function setValue(sender) {
   text = $('#valueID').val();
   id = $(sender).val();
-  //check if checked
   checked = $(sender).is(':checked');
   if (checked){
-	  //add to text
 	  if ($.trim(text)) {
 		 text += ','
 	  }
 	  text += id;
   } else {
-	  //remove from text
 	  text = text.replace(','+id,'');
 	  text = text.replace(id+',','');
 	  text = text.replace(id,'');

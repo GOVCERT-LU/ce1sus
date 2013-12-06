@@ -38,11 +38,9 @@ function buttonClick(){
     var status = $('#status');
     var cb = $('#definitionID');
     request = $.ajax({
-        url: '/events/event/attribute/addFile',  //Server script to process data
+        url: '/events/event/attribute/addFile',
         type: 'POST',
-        // Form data
         data: formData,
-        //Options to tell jQuery not to process data or worry about content-type.
         cache: false,
         contentType: false,
         processData: false,
@@ -71,7 +69,6 @@ function buttonClick(){
             status.html(xhr.responseText);
         }
     });
-    // callback handler that will be called on success
     request.done(function (responseText, textStatus, XMLHttpRequest){
         if (responseText.match(/^<!--OK--/gi)) {
             file = responseText.match(/\*(.*)\*/);
@@ -81,8 +78,6 @@ function buttonClick(){
             $("#editBox").html(getErrorMsg(responseText)+'<input id="valueID" name="value" type="hidden" value=""/>');
         }
     });
-
-    // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
         $("#editBox").html(getErrorMsg(responseText)+'<input id="valueID" name="value" type="hidden" value=""/>');
     });

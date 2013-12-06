@@ -29,7 +29,9 @@ else:
   </div>
 </div>
 <script type="text/javascript">
+
 $(document).ready(function() {
+
     $('#${id}ModalFooterClose').keydown(function(event){
       if(event.keyCode == 13) {
         event.preventDefault();
@@ -37,14 +39,12 @@ $(document).ready(function() {
       }
     });
   });
-  
 %if not contentUrl is None:
-    $("#${id}").on("show.bs.modal", function() { // wire up modal when shown
+    $("#${id}").on("show.bs.modal", function() {
         loadContent('${id}body','${contentUrl}')
     });
-    $("#${id}").on("hide.bs.modal", function() { // wire up modal when shown
+    $("#${id}").on("hide.bs.modal", function() {
     	$("#${id}body").empty();
-        //workaround---
         $('.modal-backdrop').remove();
         document.documentElement.style.overflow = "auto";
         document.body.style.marginRight='0px';
