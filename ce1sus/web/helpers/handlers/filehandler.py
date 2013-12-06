@@ -223,7 +223,7 @@ class FileWithHashesHandler(FileHandler):
   # pylint: disable=W0211
   @staticmethod
   def getAttributesIDList(self):
-    return (7, 1, 2, 3, 4, 5, 8, 9, 88, 94)
+    return (7, 1, 2, 3, 4, 5, 8, 9, 88, 111)
 
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
@@ -285,7 +285,7 @@ class FileWithHashesHandler(FileHandler):
       if fileID:
         attributes.append(self._createAttribute(fileID,
                                                obj,
-                                               94,
+                                               111,
                                                user,
                                                '0'))
 

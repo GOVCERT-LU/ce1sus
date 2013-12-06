@@ -61,7 +61,7 @@ isModal=False
     else:
       primaryKey = 0
     %>                
-             <td ${style}><%call expr="messagesAndText.objectToHTML(value)"/></td>
+             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength)"/></td>
            %endfor
     
              %endfor

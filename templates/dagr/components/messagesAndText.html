@@ -24,9 +24,13 @@
 
 
 
-<%def name="objectToHTML(object)">
+<%def name="objectToHTML(object,shortenTo=0)">
 	<%
 	  classname = type(object).__name__
+	  string = unicode(object)
+	  if shortenTo > 0:
+	    string = string[:shortenTo]
+	  
 	%>
 
 	    %if "Link" in classname:
