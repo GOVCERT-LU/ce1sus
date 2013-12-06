@@ -91,6 +91,7 @@ class ObjectsController(Ce1susBaseController):
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
+    paginator.maxColumnLength = 100
     # fill dictionary of attribute definitions but only the needed ones
 
     try:
@@ -181,7 +182,6 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-
 
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would

@@ -29,13 +29,16 @@
 	  classname = type(object).__name__
 	  string = unicode(object)
 	  if shortenTo > 0:
-	    string = string[:shortenTo]
-	  
+	    result = string[:shortenTo]
+	    if len(string) > shortenTo:
+	      result = result + '...'
+	  else:
+	   result = string
 	%>
 
 	    %if "Link" in classname:
 	       <a href="${object.url}"  target="_blank">${object.identifier}</a>
 	    %else:
-	       ${object}
+	       ${result}
 	    %endif
 </%def>
