@@ -140,7 +140,9 @@ class RestControllerBase(BaseController):
     """
     userDefaultGroup = user.defaultGroup
     # if the user has no default group he has no rights
-    if userDefaultGroup is None:
+    if userDefaultGroup is None or not event.published:
+      raise cherrypy.HTTPError(403)
+    if (not event.bitValue.isValidated and not event.bitValue.isSharable):
       raise cherrypy.HTTPError(403)
     self.getLogger().debug("Checked if it is viewable for user {0}".format(
                                                                   user.username

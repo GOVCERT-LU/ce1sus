@@ -72,7 +72,8 @@ class ValidationController(Ce1susBaseController):
     paginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/admin/validation/event/',
-                               contentid='')
+                               contentid='',
+                               autoReload=True)
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)

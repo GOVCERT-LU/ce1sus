@@ -261,11 +261,9 @@ class Event(BASE):
 
     result.objects = list()
     for obj in self.objects:
-      result.objects.append(obj.toRestObject())
-
+      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+        result.objects.append(obj.toRestObject())
     result.comments = list()
-    for comment in self.comments:
-      result.comments.append(comment.toRestObject())
 
     return result
 
@@ -418,7 +416,13 @@ class Object(BASE):
 
     result.attributes = list()
     for attribute in self.attributes:
-      result.attributes.append(attribute.toRestObject())
+      if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
+        result.attributes.append(attribute.toRestObject())
+    result.children = list()
+    for obj in self.children:
+      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+        result.children.append(obj.toRestObject())
+
 
     return result
 
