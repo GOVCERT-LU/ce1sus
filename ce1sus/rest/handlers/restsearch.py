@@ -43,25 +43,33 @@ class RestSearchController(RestControllerBase):
       return None
 
     orgParentObj = self.objectBroker.getByID(obj.parentObject_id)
+    if orgParentObj.bitValue.isValidated and orgParentObj.bitValue.isSharable:
 
-    parentObject = seenEvents[event.identifier][1].get(orgParentObj.identifier, None)
-    if not parentObject:
-      # memorize parentObject
-      parentObject = orgParentObj.toRestObject(False)
-      seenEvents[event.identifier][1][orgParentObj.identifier] = parentObject
-      if orgParentObj.parentObject_id:
-        parentParentObject = seenEvents[event.identifier][1].get(orgParentObj.parentObject.identifier, None)
-        if not parentParentObject:
-          parentParentObject = self.getParentObject(event, orgParentObj, seenEvents)
-          restParent = parentParentObject.toRestObject(False)
-          seenEvents[event.identifier][1][orgParentObj.parentObject.identifier] = restParent
-        parentObject.parent = restParent
+      parentObject = seenEvents[event.identifier][1].get(orgParentObj.identifier, None)
+      if not parentObject:
+        # memorize parentObject
+        parentObject = orgParentObj.toRestObject(False)
+        seenEvents[event.identifier][1][orgParentObj.identifier] = parentObject
+        if orgParentObj.parentObject_id:
+          parentParentObject = seenEvents[event.identifier][1].get(orgParentObj.parentObject.identifier, None)
+          if not parentParentObject:
+            parentParentObject = self.getParentObject(event, orgParentObj, seenEvents)
+            if parentParentObject:
+              restParent = parentParentObject.toRestObject(False)
+              seenEvents[event.identifier][1][orgParentObj.parentObject.identifier] = restParent
+              parentObject.parent = restParent
+            else:
+              return None
+          else:
+            parentObject.parent = restParent
 
-      else:
-        restEvent = seenEvents[event.identifier][0]
-        restEvent.objects.append(parentObject)
+        else:
+          restEvent = seenEvents[event.identifier][0]
+          restEvent.objects.append(parentObject)
 
-    return parentObject
+      return parentObject
+    else:
+      return None
 
   def viewAttributes(self, uuid, apiKey, **options):
     try:
