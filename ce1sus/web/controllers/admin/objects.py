@@ -38,6 +38,7 @@ class ObjectController(Ce1susBaseController):
     """
 
     template = self.getTemplate('/admin/objects/objectBase.html')
+
     return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
