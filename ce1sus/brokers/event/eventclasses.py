@@ -251,7 +251,7 @@ class Event(BASE):
 
   def toRestObject(self, full=True):
     result = RestEvent()
-    result.tile = self.tile
+    result.tile = self.title
     result.description = self.description
     result.first_seen = self.first_seen
     result.last_seen = self.last_seen

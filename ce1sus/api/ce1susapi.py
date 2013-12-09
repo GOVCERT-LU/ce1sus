@@ -111,7 +111,7 @@ class Ce1susAPI(object):
     except urllib2.URLError as e:
       raise Ce1susAPIException('Error ({0})'.format(e.reason.args[1]))
     # Process custom exceptions
-    print response
+
     jsonObj = json.loads(response)
     for item in jsonObj:
       resonseObj = jsonObj.get('response', None)
@@ -201,6 +201,35 @@ class Ce1susAPI(object):
     result = self.__request('/search/events', None, headers)
     key, uuids = Ce1susAPI.__getData(result)
     return uuids
+
+  def searchAttributes(self, objectType, objectContainsAttribute=list(), filterAttributes=list(), startDate=None, endDate=None, offset=0, limit=20, withDefinition=False):
+    if withDefinition:
+      headers = {'full_definitions': True}
+    else:
+      headers = {'full_definitions': False}
+
+    if startDate:
+      headers['startdate'] = startDate
+    if endDate:
+      headers['enddate'] = endDate
+    if offset >= 0:
+      headers['page'] = offset
+    if limit:
+      headers['limit'] = limit
+
+    headers['object_attributes'] = objectContainsAttribute
+    headers['object_type'] = objectType
+
+    events = list()
+    result = self.__request('/search/attributes', None, headers)
+    key, values = Ce1susAPI.__getData(result)
+    for item in values:
+      jsonObject = json.loads(item)
+      for key, value in jsonObject.iteritems():
+        restEvent = Ce1susAPI.populateClassNamebyDict(key, value)
+        events.append(restEvent)
+
+    return events
 
 
 

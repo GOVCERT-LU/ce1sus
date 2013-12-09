@@ -85,7 +85,7 @@ class FileHandler(GenericHandler):
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
-                                               12,
+                                               13,
                                                user,
                                                '0'))
       # return attributes

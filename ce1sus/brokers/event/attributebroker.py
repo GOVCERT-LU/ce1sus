@@ -343,32 +343,38 @@ class AttributeBroker(BrokerBase):
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value == value
+                  clazz.value == value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value < value
+                  clazz.value < value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value > value
+                  clazz.value > value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<=':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value <= value
+                  clazz.value <= value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>=':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value >= value
+                  clazz.value >= value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == 'like':
         return self.session.query(clazz).join(clazz.attribute).filter(
                   Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value.like('%{0}%'.format(value))
+                  clazz.value.like('%{0}%'.format(value)),
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
@@ -378,28 +384,34 @@ class AttributeBroker(BrokerBase):
   def __lookForValue(self, clazz, value, operand='=='):
     try:
       if operand == '==':
-        return self.session.query(clazz).filter(
-                  clazz.value == value
+        return self.session.query(clazz, Attribute).filter(
+                  clazz.value == value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<':
-        return self.session.query(clazz).filter(
-                  clazz.value < value
+        return self.session.query(clazz, Attribute).filter(
+                  clazz.value < value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>':
-        return self.session.query(clazz).filter(
-                  clazz.value > value
+        return self.session.query(clazz, Attribute).filter(
+                  clazz.value > value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<=':
-        return self.session.query(clazz).filter(
-                  clazz.value <= value
+        return self.session.query(clazz, Attribute).filter(
+                  clazz.value <= value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>=':
-        return self.session.query(clazz).filter(
+        return self.session.query(clazz, Attribute).filter(
                   clazz.value >= value
+                  , Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == 'like':
-        return self.session.query(clazz).filter(
-                  clazz.value.like('%{0}%'.format(value))
+        return self.session.query(clazz, Attribute).filter(
+                  clazz.value.like('%{0}%'.format(value)),
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)

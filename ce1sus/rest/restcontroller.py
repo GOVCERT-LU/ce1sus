@@ -30,7 +30,7 @@ class RestController(RestControllerBase):
        'GET': 'view',
        'POST': 'update'}
 
-  REST_Allowed_Parameters = ['metadata', 'attribtues', 'events']
+  REST_Allowed_Parameters = ['metadata', 'attributes', 'events']
   REST_Allowed_Options = ['Full-Definitions',
                           'page',
                           'limit',
