@@ -111,6 +111,7 @@ class Ce1susAPI(object):
     except urllib2.URLError as e:
       raise Ce1susAPIException('Error ({0})'.format(e.reason.args[1]))
     # Process custom exceptions
+    print response
     jsonObj = json.loads(response)
     for item in jsonObj:
       resonseObj = jsonObj.get('response', None)
@@ -126,47 +127,80 @@ class Ce1susAPI(object):
     raise Ce1susAPIException('Undefined Error')
 
   @staticmethod
-  def __mapJSONToObject(jsonData):
+  def __mapResponseToObject(jsonData):
     key, value = Ce1susAPI.__getData(jsonData)
     return Ce1susAPI.populateClassNamebyDict(key, value)
 
-  def getEventByUUID(self, uuid, full=False, withDefinition=False):
-    if full:
-      parameters = '?showAll=1'
-    else:
-      parameters = ''
-    if withDefinition:
-      if parameters:
-        parameters = parameters + '&withDefinition=1'
-      else:
-        parameters = '?withDefinition=1'
+  @staticmethod
+  def __mapJSONToObject(jsonData):
+    key, value = Ce1susAPI.getObjectData(jsonData)
+    return Ce1susAPI.populateClassNamebyDict(key, value)
 
-    result = self.__request('/event/{0}{1}'.format(uuid,
-                                                   parameters),
-                            None)
-    return self.__mapJSONToObject(result)
+  def getEventByUUID(self, uuid, withDefinition=False):
+    if withDefinition:
+      headers = {'full_definitions': True}
+    else:
+      headers = {'full_definitions': False}
+
+    result = self.__request('/event/{0}'.format(uuid),
+                            None, headers)
+    return self.__mapResponseToObject(result)
 
   def insertEvent(self, event):
     if isinstance(event, RestClass):
       data = dict(event.toJSON(True, True))
       result = self.__request('/event', data)
-      return result
+      return self.__mapResponseToObject(result)
     else:
       raise Ce1susAPIException(('Object{0} does not implement '
                                 + 'RestClass').format(event))
 
-  def getObjectByID(self, identifier, full=False, withDefinition=False):
-    if full:
-      parameters = '?showAll=1'
-    else:
-      parameters = ''
+  def getEvents(self, startDate=None, endDate=None, offset=0, limit=20, withDefinition=False, uuids=list()):
     if withDefinition:
-      if parameters:
-        parameters = parameters + '&withDefinition=1'
-      else:
-        parameters = '?withDefinition=1'
+      headers = {'full_definitions': True}
+    else:
+      headers = {'full_definitions': False}
 
-    result = self.__request('/object/{0}{1}'.format(identifier,
-                                                   parameters),
-                            None)
-    return self.__mapJSONToObject(result)
+    headers['UUID'] = uuids
+
+    if startDate:
+      headers['startdate'] = startDate
+    if endDate:
+      headers['enddate'] = endDate
+    if offset >= 0:
+      headers['page'] = offset
+    if limit:
+      headers['limit'] = limit
+
+    result = self.__request('/events', None, headers)
+    key, values = Ce1susAPI.__getData(result)
+    result = list()
+    for value in values:
+      jsonData = json.loads(value)
+      result.append(Ce1susAPI.__mapJSONToObject(jsonData))
+    return result
+
+  def searchEvents(self, objectType, objectContainsAttribute=list(), startDate=None, endDate=None, offset=0, limit=20, withDefinition=False):
+    if withDefinition:
+      headers = {'full_definitions': True}
+    else:
+      headers = {'full_definitions': False}
+
+    if startDate:
+      headers['startdate'] = startDate
+    if endDate:
+      headers['enddate'] = endDate
+    if offset >= 0:
+      headers['page'] = offset
+    if limit:
+      headers['limit'] = limit
+
+    headers['object_attributes'] = objectContainsAttribute
+    headers['object_type'] = objectType
+
+    result = self.__request('/search/events', None, headers)
+    key, uuids = Ce1susAPI.__getData(result)
+    return uuids
+
+
+

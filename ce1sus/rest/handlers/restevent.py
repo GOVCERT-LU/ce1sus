@@ -21,7 +21,7 @@ class RestEventController(RestControllerBase):
 
   PARAMETER_MAPPER = {'metadata':'viewMetaData'}
 
-  def __init__(self, sessionManager=None):
+  def __init__(self):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
@@ -29,7 +29,8 @@ class RestEventController(RestControllerBase):
     try:
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
-      return self._objectToJSON(event, False, False)
+      obj = self._objectToJSON(event, False, False)
+      return self._returnMessage(obj)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -40,8 +41,10 @@ class RestEventController(RestControllerBase):
     try:
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
-      withDefinition = options.get('full_definitions', False)
-      return self._objectToJSON(event, True, withDefinition)
+      withDefinition = options.get('Full-Definitions', False)
+      obj = self._objectToJSON(event, True, withDefinition)
+
+      return self._returnMessage(obj)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -91,8 +94,9 @@ class RestEventController(RestControllerBase):
 
         self.eventBroker.doCommit(True)
 
-        withDefinition = options.get('full_definitions', False)
-        return self._objectToJSON(event, True, withDefinition)
+        withDefinition = options.get('Full-Definitions', False)
+        obj = self._objectToJSON(event, True, withDefinition)
+        return self._returnMessage(obj)
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)
@@ -111,5 +115,7 @@ class RestEventController(RestControllerBase):
       dbObject.children.append(childDBObj)
     return dbObject
 
-  def getFunctionName(self, parameter):
-    return RestEventController.PARAMETER_MAPPER.get(parameter, None)
+  def getFunctionName(self, parameter, action):
+    if action == 'GET':
+      return RestEventController.PARAMETER_MAPPER.get(parameter, None)
+    return None

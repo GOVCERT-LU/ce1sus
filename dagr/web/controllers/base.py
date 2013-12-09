@@ -112,7 +112,6 @@ class BaseController:
     return '<!--PostError--><!--' + self.__class__.__name__ + '-->'
 
   def cleanHTMLCode(self, code):
-    code = re.sub(r"(\n|\t)", "", code)
     code = re.sub(r"[ ]{2,}", " ", code)
     return code
 

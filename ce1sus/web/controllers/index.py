@@ -51,7 +51,10 @@ class IndexController(Ce1susBaseController):
     template = self.getTemplate('/index/login.html')
     Protector.clearSession()
     self.setAdminArea(False)
-    return self.cleanHTMLCode(template.render(errorMsg=errorMsg))
+    env = self.getConfigVariable('environment')
+    if env:
+      env = '[' + env + ']'
+    return self.cleanHTMLCode(template.render(errorMsg=errorMsg, env=env))
 
   @cherrypy.expose
   def doLogin(self, username=None, password=None):
@@ -140,4 +143,7 @@ class IndexController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/index/basePage.html')
-    return self.cleanHTMLCode(template.render())
+    env = self.getConfigVariable('environment')
+    if env:
+      env = '[' + env + ']'
+    return self.cleanHTMLCode(template.render(env=env))

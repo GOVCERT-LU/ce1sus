@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
   def testName(self):
     api = Ce1susAPI('http://localhost:8080/REST/0.1.0',
                     '5abc424daa7448af9c4a249036dbd064a2a9a087')
-    event = api.getEventByUUID('43ecf6c4-d25b-4862-9b63-4bc17125fc70', True, True)
+    event = api.getEventByUUID('43ecf6c4-d25b-4862-9b63-4bc17125fc70', True)
 
     printObject(event, maxRecLVL=4)
     assert True

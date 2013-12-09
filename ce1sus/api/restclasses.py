@@ -77,10 +77,12 @@ class RestEvent(RestClass):
     self.comments = list()
     self.published = None
     self.status = None
+    self.uuid = None
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
+    result[self.__class__.__name__]['uuid'] = self.uuid
     result[self.__class__.__name__]['title'] = self.title
     result[self.__class__.__name__]['description'] = '{0}'.format(
                                                               self.description)

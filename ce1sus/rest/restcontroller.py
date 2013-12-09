@@ -14,10 +14,15 @@ import cherrypy
 from dagr.db.broker import BrokerException
 from ce1sus.sanity import SantityChecker, SantityCheckerException
 from ce1sus.rest.handlers.restevent import RestEventController
+from ce1sus.rest.handlers.restevents import RestEventsController
+from ce1sus.rest.handlers.restsearch import RestSearchController
 from ce1sus.rest.restbase import RestControllerBase, RestAPIException
 from cherrypy import request
 import json
 from dagr.helpers.validator.valuevalidator import ValueValidator
+from dagr.helpers.converters import ValueConverter
+import re
+
 
 class RestController(RestControllerBase):
 
@@ -26,15 +31,16 @@ class RestController(RestControllerBase):
        'POST': 'update'}
 
   REST_Allowed_Parameters = ['metadata', 'attribtues', 'events']
-  REST_Allowed_Options = ['full_definitions',
+  REST_Allowed_Options = ['Full-Definitions',
                           'page',
                           'limit',
                           'startdate',
                           'enddate',
-                          'object_type',
-                          'object_attibute',
+                          'Object-Type',
+                          'Object-Attributes',
                           'attribtes',
-                          'key']
+                          'key',
+                          'UUID']
   def __init__(self, ce1susConfigFile):
     RestControllerBase.__init__(self)
     self.configFile = ce1susConfigFile
@@ -42,6 +48,8 @@ class RestController(RestControllerBase):
     self.instances = dict()
     # add instances known to rest
     self.instances['event'] = RestEventController()
+    self.instances['events'] = RestEventsController()
+    self.instances['search'] = RestSearchController()
     self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
@@ -120,6 +128,17 @@ class RestController(RestControllerBase):
   def __getHeaderValue(self, key):
     value = request.headers.get(key, '').strip()
     if value:
+      if value == 'True':
+        return True
+      if value == 'False':
+        return False
+      if value.isdigit():
+        return ValueConverter.setInteger(value)
+      # check if datetime
+      if ValueValidator.validateDateTime(value):
+        return ValueConverter.setDate(value)
+      if re.match(r'^\[.*\]', value, re.MULTILINE) is not None:
+        return eval(value)
       return value
     else:
       return None
@@ -154,7 +173,7 @@ class RestController(RestControllerBase):
       raise cherrypy.HTTPError(400)
 
     if parameter:
-      methodName = controller.getFunctionName(parameter)
+      methodName = controller.getFunctionName(parameter, action)
     else:
       methodName = RestController.REST_mapper[action]
 
@@ -179,7 +198,7 @@ class RestController(RestControllerBase):
     else:
       self.getLogger().debug(
                         'Method {0} is not defined for {0}'.format(action,
-                                                                   instance))
+                                                                   controller))
       # if nothing is found do default
       path = request.script_name + request.path_info
       temp = dict(self._createStatus('RestException',

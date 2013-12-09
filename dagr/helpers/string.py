@@ -95,6 +95,9 @@ def stringToDateTime(string):
   # loops over the different formats and if the loop ends raise an exception
   # as no format is applicable
   dateString = unicode(string)
+  # remove milisecs if there are
+  temp = dateString.split('.')
+  dateString = temp[0]
   for dateFormat in dateFormats:
     try:
       return datetime.strptime(dateString, dateFormat)

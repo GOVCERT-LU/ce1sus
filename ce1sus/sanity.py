@@ -68,14 +68,14 @@ class SantityChecker(object):
     if SantityChecker.compareReleases(release,
                                       value.value) != 0:
       raise SantityCheckerException('RestAPI release mismatch '
-                        + 'expected {1} got {1}'.format(release,
-                                                       value.value))
+                        + 'expected {1} got {1}'.format(value.value,
+                                                      release))
     if SantityChecker.compareReleases(SantityChecker.REST_REL,
                                       value.value) != 0:
       raise SantityCheckerException('RestAPI release mismatch '
                         + 'expected {1} got {0}'.format(
-                                                      SantityChecker.REST_REL,
-                                                      value.value))
+                                                      value.value,
+                                                      release))
 
   def close(self):
     self.session.close()

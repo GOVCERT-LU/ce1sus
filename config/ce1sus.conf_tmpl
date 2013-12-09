@@ -6,10 +6,13 @@ host=127.0.0.1
 db=
 port=3306
 debug=no
+usecherrypy=yes
 
 [ce1sus]
+useldap=yes
 cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
 files=/files
+environment=LOCAL_DEV
 
 [ErrorHandler]
 debug=no
@@ -24,11 +27,7 @@ backups=1000
 
 [Mako]
 templateRoot=templates
-collectionsize=200
-outputencoding=utf-8
-
-[Mako]
-templateRoot=templates
+projectRoot=templates/ce1sus
 collectionsize=200
 outputencoding=utf-8
 

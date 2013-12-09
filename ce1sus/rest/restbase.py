@@ -91,14 +91,23 @@ class RestControllerBase(BaseController):
                               + 'RestClass').format(className))
     return instance
 
-  def _objectToJSON(self, obj, full=False, withDefinition=False):
+  def _toRestObject(self, obj):
     className = 'Rest' + obj.__class__.__name__
     instance = RestControllerBase.__instantiateClass(className)
 
     instance.populate(obj)
+    return instance
+
+  def _objectToJSON(self, obj, full=False, withDefinition=False):
+    instance = self._toRestObject(obj)
 
     result = dict(instance.toJSON(full=full,
                              withDefinition=withDefinition).items()
+                 )
+    return json.dumps(result)
+
+  def _returnMessage(self, dictionary):
+    result = dict(dictionary.items()
                   + self._createStatus().items())
     return json.dumps(result)
 

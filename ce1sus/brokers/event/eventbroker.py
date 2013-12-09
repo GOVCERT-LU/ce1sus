@@ -461,3 +461,24 @@ class EventBroker(BrokerBase):
       raise BrokerException(e)
 
     return result
+
+  def getEvents(self, uuids, startDate, endDate, offset, limit):
+    query = self.session.query(Event)
+    try:
+      if uuids:
+        query = query.filter(Event.uuid.in_(uuids))
+
+      if startDate:
+        query = query.filter(Event.created >= startDate)
+      query = query.filter(Event.created <= endDate)
+      query = query.order_by(Event.created.desc())
+      query = query.limit(limit).offset(offset)
+      return query.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Search did not yield any results.')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      raise BrokerException(e)
+
+
+

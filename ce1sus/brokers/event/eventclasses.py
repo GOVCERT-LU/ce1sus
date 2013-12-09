@@ -249,7 +249,7 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, full=True):
     result = RestEvent()
     result.tile = self.tile
     result.description = self.description
@@ -258,11 +258,13 @@ class Event(BASE):
     result.tlp = self.tlp
     result.risk = self.risk
     result.analysis = self.analysis
+    result.uuid = self.uuid
 
     result.objects = list()
-    for obj in self.objects:
-      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-        result.objects.append(obj.toRestObject())
+    if full:
+      for obj in self.objects:
+        if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+          result.objects.append(obj.toRestObject())
     result.comments = list()
 
     return result
@@ -408,20 +410,22 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, full=True):
     result = RestObject()
     result.parentObject_id = self.parentObject_id
     result.parentEvent_id = self.parentEvent_id
     result.definition = self.definition.toRestObject()
 
     result.attributes = list()
-    for attribute in self.attributes:
-      if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
-        result.attributes.append(attribute.toRestObject())
+    if full:
+      for attribute in self.attributes:
+        if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
+          result.attributes.append(attribute.toRestObject())
     result.children = list()
-    for obj in self.children:
-      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-        result.children.append(obj.toRestObject())
+    if full:
+      for obj in self.children:
+        if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+          result.children.append(obj.toRestObject())
 
 
     return result

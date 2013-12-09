@@ -181,6 +181,9 @@ class AttributeDefinitionBroker(BrokerBase):
       attributeDefinition = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.name == name).one()
       return attributeDefinition
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for name :{0}'.format(name))
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute definition not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
