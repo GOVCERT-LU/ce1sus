@@ -200,7 +200,7 @@ function loadNewTab(pk, id, url, reload) {
         .attr("onclick", 'closeTab(\'' + tabID + '\',\'' + tabID + pk + 'LI\');')
         .html('&nbsp;&times;');
         link.append(button);
-        tab.append(link)
+        tab.append(link);
         
         $("#" + tabID).append(tab);
     }
@@ -271,9 +271,9 @@ function getHiddenDivID(id, contentID) {
     var found = false;
     //hide all in container
     hideHidden(contentID);
-    var hiddenID =   id + 'Hidden'
-    var parentDiv = $('#' + contentID)
-    parentParend = parentDiv.parent()
+    var hiddenID =   id + 'Hidden';
+    var parentDiv = $('#' + contentID);
+    parentParend = parentDiv.parent();
     //heck if one is existing and then show it else
     parentDiv.children('div').each(function() {
         if (this.id == hiddenID) {
@@ -291,7 +291,7 @@ function getHiddenDivID(id, contentID) {
         parentDiv.append($div);
     }
     
-    return hiddenID
+    return hiddenID;
     
     
 }

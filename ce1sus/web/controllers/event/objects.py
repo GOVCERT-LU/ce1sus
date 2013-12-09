@@ -105,8 +105,7 @@ class ObjectsController(Ce1susBaseController):
       cbAttributeDefintiionsDict = dict()
 
     if self.isEventOwner(event):
-      objectList = (self.objectBroker.getObjectsOfEvent(eventID)
-                )
+      objectList = (self.objectBroker.getObjectsOfEvent(eventID))
     else:
       objectList = (self.objectBroker.getViewableOfEvent(eventID))
 
@@ -301,6 +300,8 @@ class ObjectsController(Ce1susBaseController):
     else:
       isEventParent = False
       selected = obj.parentObject_id
+
+
     eventChildren = self.objectBroker.getCDValuesObjectParents(eventID,
                                                                obj.identifier)
     # prepare CBArray
@@ -336,11 +337,13 @@ class ObjectsController(Ce1susBaseController):
       obj.event_id = None
       obj.event = None
       obj.parentObject_id = parentObjectID
+      obj.parentEvent_id = eventID
       self.objectBroker.update(obj)
     else:
       obj.event_id = eventID
       obj.event = event
       obj.parentObject_id = None
+      obj.parentEvent_id = None
       self.objectBroker.update(obj)
 
     return self.returnAjaxOK()

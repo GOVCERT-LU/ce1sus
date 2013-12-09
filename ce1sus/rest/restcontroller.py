@@ -15,10 +15,9 @@ from dagr.db.broker import BrokerException
 from ce1sus.sanity import SantityChecker, SantityCheckerException
 from ce1sus.rest.handlers.restevent import RestEventController
 from ce1sus.rest.restbase import RestControllerBase, RestAPIException
-from ce1sus.rest.handlers.restobject import RestObjectController
-from ce1sus.rest.handlers.restattribute import RestAttributeController
 from cherrypy import request
 import json
+from dagr.helpers.validator.valuevalidator import ValueValidator
 
 class RestController(RestControllerBase):
 
@@ -26,6 +25,16 @@ class RestController(RestControllerBase):
        'GET': 'view',
        'POST': 'update'}
 
+  REST_Allowed_Parameters = ['metadata', 'attribtues', 'events']
+  REST_Allowed_Options = ['full_definitions',
+                          'page',
+                          'limit',
+                          'startdate',
+                          'enddate',
+                          'object_type',
+                          'object_attibute',
+                          'attribtes',
+                          'key']
   def __init__(self, ce1susConfigFile):
     RestControllerBase.__init__(self)
     self.configFile = ce1susConfigFile
@@ -33,15 +42,13 @@ class RestController(RestControllerBase):
     self.instances = dict()
     # add instances known to rest
     self.instances['event'] = RestEventController()
-    self.instances['object'] = RestObjectController()
-    self.instances['attribute'] = RestAttributeController()
     self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
 
     try:
-      # self.sanityChecker.checkDB()
-      # self.sanityChecker.checkRestAPI(version)
+      self.sanityChecker.checkDB()
+      self.sanityChecker.checkRestAPI(version)
       pass
     except SantityCheckerException as e:
       raise cherrypy.HTTPError(500, 'Exception occurred {0}'.format(e))
@@ -67,45 +74,106 @@ class RestController(RestControllerBase):
                         'No instance defined for {0}'.format(controllerName))
       raise cherrypy.NotFound
 
+  def __checkIfValidUIID(self, string):
+    regex = r'^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$'
+    return ValueValidator.validateRegex(string,
+                                        regex,
+                                        'Not a valid UUID')
+
+  def __splitPath(self, vpath):
+    # path need at least 2 elements version/controller/....
+    if not vpath:
+      raise cherrypy.HTTPError(400)
+    controllerName = None
+    parameter = None
+    uuid = None
+
+    pathElements = list(vpath)
+
+    if (len(pathElements) > 0):
+      self.__checkVersion(pathElements[0])
+
+    if (len(pathElements) > 1) and (len(pathElements) < 5):
+      controllerName = pathElements[1].strip()
+      if (len(pathElements) > 2):
+        possibleUUID = pathElements[2]
+        if self.__checkIfValidUIID(possibleUUID):
+          uuid = possibleUUID.strip()
+        else:
+          parameter = possibleUUID
+          try:
+            int(parameter)
+            raise cherrypy.HTTPError(418)
+          except ValueError:
+            if parameter not in RestController.REST_Allowed_Parameters:
+              raise cherrypy.HTTPError(418)
+        if (len(pathElements) > 3):
+          if self.__checkIfValidUIID(pathElements[3]):
+            uuid = possibleUUID.strip()
+          else:
+            raise cherrypy.HTTPError(418)
+    else:
+      raise cherrypy.HTTPError(400)
+
+    return controllerName, parameter, uuid
+
+  def __getHeaderValue(self, key):
+    value = request.headers.get(key, '').strip()
+    if value:
+      return value
+    else:
+      return None
+
+  def __processHeaders(self):
+    remoteAddr = self.__getHeaderValue('Remote-Addr')
+    self.getLogger().info('Connection from {0}'.format(remoteAddr))
+
+    apiKey = self.__getHeaderValue('key')
+    # self.__checkApiKey(apiKey)
+
+    # make custom parmeters
+    options = dict()
+    for key in RestController.REST_Allowed_Options:
+      options[key] = self.__getHeaderValue(key)
+    return apiKey, options
+
   @cherrypy.expose
   def default(self, *vpath, **params):
-    if not vpath:
-      raise cherrypy.HTTPError(500)
-    vpath = list(vpath)
-    self.__checkVersion(vpath.pop(0))
-    apikey = request.headers.get('key', '').strip()
-    self.__checkApiKey(apikey)
 
-    instance = self.__getController(vpath.pop(0))
-    identifier = vpath.pop(0)
+    # check if the path is correct
+    controllerName, parameter, uuid = self.__splitPath(vpath)
+    apiKey, options = self.__processHeaders()
+
+    controller = self.__getController(controllerName)
+
+    # getMethodToCall
     action = cherrypy.request.method
     if not action in RestController.REST_mapper:
       self.getLogger().debug(
                         'Action {0} is not defined in mapper'.format(action))
-      self.raiseError('Exception',
-                      'Action {0} is not defined in mapper'.format(action))
-    # call method
-    method = getattr(instance, RestController.REST_mapper[action], None)
-    if method and getattr(method, "exposed"):
+      raise cherrypy.HTTPError(400)
+
+    if parameter:
+      methodName = controller.getFunctionName(parameter)
+    else:
+      methodName = RestController.REST_mapper[action]
+
+    if methodName:
+    # call method if existing
+      method = getattr(controller, methodName, None)
+    else:
+      raise cherrypy.HTTPError(400)
+
+    if method:
       try:
-        result = method(identifier, apikey, **params)
+        result = method(uuid, apiKey, **options)
         return result
-      except TypeError as e:
-        self.getLogger().debug(
-                        'Method {0} is not callable for {1} with {2}'.format(
-                                                                        action,
-                                                                   instance, e)
-                               )
-        return self.raiseError('Exception',
-                          'Method {0} is not callable for {1} with {2}'.format(
-                                                                        action,
-                                                                   instance, e)
-                               )
       except RestAPIException as e:
         self.getLogger().debug(
                         'Error occured during {0} for {1} due to {2}'.format(
-                                                                        action,
-                                                                   instance, e))
+                                                                   action,
+                                                                   controller,
+                                                                   e))
         temp = dict(self._createStatus('RestException', e.message))
         return json.dumps(temp)
     else:

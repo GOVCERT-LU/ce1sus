@@ -149,7 +149,7 @@ class Ce1susAPI(object):
   def insertEvent(self, event):
     if isinstance(event, RestClass):
       data = dict(event.toJSON(True, True))
-      result = self.__request('/event/0', data)
+      result = self.__request('/event', data)
       return result
     else:
       raise Ce1susAPIException(('Object{0} does not implement '

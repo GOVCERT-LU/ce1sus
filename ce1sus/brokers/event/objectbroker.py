@@ -174,8 +174,8 @@ class ObjectBroker(BrokerBase):
     try:
       # first level
       result = self.session.query(Object).filter(Object.parentEvent_id
-                                                 == eventID)
-      return result.all()
+                                                 == eventID).all()
+      return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0}'.format(
                                                                   eventID))

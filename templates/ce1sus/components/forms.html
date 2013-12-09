@@ -181,11 +181,11 @@
   <%call expr="labeledInput.labeledComboBox(label='Type',name='definition',values=cbDefinitions,enabled=enabled,hasEmpty=True)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=0)"/>
   <div id="editBox">
-  
+  <div id="editBoxHidden">
   <%call expr="labeledInput.genericLabeler('')">
   Please select something
   </%call>
-  
+  </div>
   </div>
   
 %else:
@@ -215,19 +215,22 @@ $(document).ready(function(){
     if enabled:
         enabledStr = '1'
     %>
+    
+
     %if (enabled):
+        getHiddenID = getHiddenDivID('editBox','editBox');
         $("#${id} select#definitionID").change(function(event){
             value = $(this).val();
             if (value) {
-                loadContent('editBox','/events/event/attribute/inputHandler/'+$(this).val()+'/${eventID}/${enabledStr}');
+                loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+$(this).val()+'/${eventID}/${enabledStr}');
             } else {
-                $('#${id} #editBox').html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9">Please select something</div></div>');
+                $('#${id} #'+getHiddenID).html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9"><div id="editBox"><div id="editBoxHidden">Please select something</div></div></div></div>');
             }
         });
 
         %if not attribute is None:
         	value = $("#${id} input#definitionID:last").val();
-            loadContent('editBox','/events/event/attribute/inputHandler/'+value+'/${eventID}/${enabledStr}/${attribute.identifier}');
+            loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+value+'/${eventID}/${enabledStr}/${attribute.identifier}');
         %endif
     %endif
     

@@ -13,9 +13,9 @@ from ce1sus.api.restclasses import RestEvent
 class Test(unittest.TestCase):
 
   def testName(self):
-    api = Ce1susAPI('http://localhost:8080/REST/0.0.0',
-                    'dd94709528bb1c83d08f3088d4043f4742891f4f')
-    event = api.getEventByID('147', True, True)
+    api = Ce1susAPI('http://localhost:8080/REST/0.1.0',
+                    '5abc424daa7448af9c4a249036dbd064a2a9a087')
+    event = api.getEventByUUID('394b1184-3879-4e20-91e5-c86e8a060055', True, True)
 
     printObject(event, maxRecLVL=4)
     assert True
@@ -28,9 +28,9 @@ class Test(unittest.TestCase):
     event = RestEvent()
     api = Ce1susAPI('http://localhost:8080/REST/0.1.0',
                     'dd94709528bb1c83d08f3088d4043f4742891f4f')
-    event = api.getEventByID('147', True, True)
+    event = api.getEventByUUID('147', True, True)
     api.insertEvent(event)
-    event_orig = api.getEventByID('147', True, True)
+    event_orig = api.getEventByUUID('147', True, True)
     printObject(event, maxRecLVL=4)
 
     assert compareObjects(event, event_orig)

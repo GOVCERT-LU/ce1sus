@@ -5,7 +5,7 @@
 <%namespace name="objectsHelper" module="dagr.web.helpers.objects"/>
 
 <%def name="objectCollapseItem(id, parentID, eventID, object, paginator, indent=0, showMenu=True, owner=False)">
-% if not object is None: 
+% if (not object is None) or ((object.bitValue.isValidated and object.bitValue.isSharable) or owner): 
         <div class="panel panel-default" >
         <div class="panel-heading">
             <div class="row">
@@ -116,7 +116,7 @@
     %endif
 </%def>
 
-<%def name="menuItem(objectList,ident=0)">
+<%def name="menuItem(objectList,owner,ident=0)">
 %if not objectList is None:
   <%
   if ident>1:
@@ -129,8 +129,10 @@
    
   %>
   %for object in objectList:
+     %if (object.bitValue.isValidated and object.bitValue.isSharable) or owner:
      <li id="menu${object.identifier}LI"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${identString} ${object.definition.name} - ${object.identifier}</a></li>
-     <%call expr="menuItem(object.children,ident+1)"/>
+     <%call expr="menuItem(object.children,owner, ident+1)"/>
+     %endif
   %endfor
 %endif
 </%def>

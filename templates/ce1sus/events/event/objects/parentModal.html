@@ -12,24 +12,67 @@
 <input type="hidden" name="objectID" value="${objectID}">
 <input type="hidden" name="eventID" value="${eventID}">
 <%call expr="labeledInput.genericLabeler('Is parent event',isEventParent)">
-    <input onclick="enableDisableCB()" id ="eventCheckBox" type="checkbox" name="setEventParent" value="1" ${checkStr}/>
+    <input onclick="enableDisableCB(this.id);" id ="eventCheckBox" type="checkbox" name="setEventParent" value="1" ${checkStr}/>
 </%call>
-<%call expr="labeledInput.labeledComboBox(label='Parent object',name='parentObjectID',values=cbValues,enabled=(not isEventParent),hasEmpty=True,selected=selected)"/>
+<%call expr="labeledDisabledComboBox(label='Parent object',name='parentObjectID',values=cbValues,enabled=(not isEventParent),hasEmpty=True,selected=selected)"/>
 
-<script type="text/javascript">
-function enableDisableCB(){
-	checked = $("#eventCheckBox").prop("checked");
-	if (checked) {
-		$('#parentObjectIDID').prop('disabled', true);
-		$('select#parentObjectIDID option').filter(function() {
-			this.selected = (this.text == '');
-		});
-	} else {
-		$('#parentObjectIDID').prop('disabled', false);
-        $('select#parentObjectIDID option').filter(function() {
-            this.selected = ($(this).val() == '${selected}');
-        });
-	}
-	 
-}
-</script>
+<%def name="labeledDisabledComboBox(label, name, values, enabled=True, validationMsg=None, selected=None, hasEmpty=False)">
+    <!-- BEGIN labeledComboBox -->
+    <%call expr="labeledInput.genericLabeler(label,enabled)">
+      <%call expr="diabledcomboBox(name, values, enabled, selected, validationMsg, hasEmpty)"/>
+    </%call>
+    <!-- END labeledComboBox -->
+</%def>
+
+<%def name="diabledcomboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False, sorted=True)">
+    <!-- BEGIN comboBox --><%
+    if (enabled):
+      enabledStr = ''
+    else:
+      enabledStr =  ' disabled ' 
+    
+    if not selected is None and hasattr(selected,'error'):
+      validationMsg = getattr(selected,'error')
+    
+    hasDataContent=False
+    dataToggle=''
+    keys = list(values.keys())
+    if sorted:
+       keys.sort()
+     %>
+     <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
+      %if not values is None:
+        %if hasEmpty:
+            %if not selected:
+            <option value="" data-toggle="tooltip" title="Empty Value. Please Select one." selected></option>
+            %else:
+            <option value="" data-toggle="tooltip" title="Empty Value. Please Select one."></option>
+            %endif
+        %endif
+        %if not values is None:
+            %for key in keys:
+                <%
+                value = values.get(key,None)
+                if isinstance(value, tuple):
+                   title = 'title="{0}"'.format(value[1])
+                   value = value[0]
+                   if not hasDataContent:
+                     hasDataContent = True
+                     dataToggle='data-toggle="tooltip"'
+                else:
+                   title = ''
+                %>
+                %if not selected is None and value == selected:
+                  <option value="${value}" ${dataToggle} ${title} selected>${key}</option>
+                %else:
+                  <option value="${value}" ${dataToggle} ${title} >${key}</option>
+                %endif
+            %endfor
+        %endif
+      %endif
+    </select> 
+    % if (not (validationMsg is None)) and enabled:
+      <%call expr="messagesAndText.error(validationMsg)"/>
+    % endif
+    <!-- END comboBox -->
+</%def>

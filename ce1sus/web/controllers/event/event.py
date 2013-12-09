@@ -128,7 +128,7 @@ class EventController(Ce1susBaseController):
         newItem.isChildOf = ''
       else:
         newItem.isChildOf = '#{0}'.format(item.parentObject_id)
-      objectPaginator.list .append(newItem)
+      objectPaginator.list.append(newItem)
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},

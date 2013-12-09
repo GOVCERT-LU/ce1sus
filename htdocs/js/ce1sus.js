@@ -123,15 +123,34 @@ function buttonClick(){
     request.done(function (responseText, textStatus, XMLHttpRequest){
         if (responseText.match(/^--OK--/gi)) {
             file = responseText.match(/\*(.*)\*/);
-            $("#editBox").html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="col-xs-9 col-sm-9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
+            $("#editBoxHidden").html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="col-xs-9 col-sm-9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
         } else {
-            $("#editBox").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
+            $("#editBoxHidden").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
         }
     });
 
     // callback handler that will be called on failure
     request.fail(function (responseText, textStatus, XMLHttpRequest){
-        $("#editBox").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
+        $("#editBoxHidden").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
     });
+}
+
+function enableDisableCB(eventID) {
+    checked = $("#eventCheckBox").prop("checked");
+    if (checked) {
+        $('#parentObjectIDID').prop('disabled', true);
+        $('select#parentObjectIDID option').filter(
+                function() {
+                    this.selected = (this.text == '');
+                });
+    } else {
+        $('#parentObjectIDID').prop('disabled', false);
+        $('select#parentObjectIDID option')
+                .filter(
+                        function() {
+                            this.selected = ($(this)
+                                    .val() == 'None');
+                        });
+    }
 }
 

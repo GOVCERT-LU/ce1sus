@@ -113,4 +113,6 @@ class BaseController:
 
   def cleanHTMLCode(self, code):
     code = re.sub(r"(\n|\t)", "", code)
-    return re.sub(r"[ ]{2,}", " ", code)
+    code = re.sub(r"[ ]{2,}", " ", code)
+    return code
+

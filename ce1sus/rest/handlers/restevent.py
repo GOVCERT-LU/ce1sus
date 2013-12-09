@@ -19,23 +19,36 @@ from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 
 class RestEventController(RestControllerBase):
 
+  PARAMETER_MAPPER = {'metadata':'viewMetaData'}
+
   def __init__(self, sessionManager=None):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
 
-  @cherrypy.expose
-  def view(self, identifier, apiKey, showAll=None, withDefinition=None):
+  def viewMetaData(self, uuid, apiKey, **options):
     try:
-      event = self.eventBroker.getByID(identifier)
+      event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
-      return self._objectToJSON(event, showAll, withDefinition)
+      return self._objectToJSON(event, False, False)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-  @cherrypy.expose
-  def delete(self, identifier, apiKey):
+
+  def view(self, uuid, apiKey, **options):
+    try:
+      event = self.eventBroker.getByUUID(uuid)
+      self._checkIfViewable(event, self.getUser(apiKey))
+      withDefinition = options.get('full_definitions', False)
+      return self._objectToJSON(event, True, withDefinition)
+    except NothingFoundException as e:
+      return self.raiseError('NothingFoundException', e)
+    except BrokerException as e:
+      return self.raiseError('BrokerException', e)
+
+
+  def delete(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByID(identifier)
       self._checkIfViewable(event, self.getUser(apiKey))
@@ -45,9 +58,9 @@ class RestEventController(RestControllerBase):
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-  @cherrypy.expose
-  def update(self, identifier, apiKey, showAll=None, withDefinition=None):
-    if identifier == '0':
+
+  def update(self, uuid, apiKey, **options):
+    if not uuid:
       try:
         restEvent = self.getPostObject()
         # map restEvent on event
@@ -78,7 +91,8 @@ class RestEventController(RestControllerBase):
 
         self.eventBroker.doCommit(True)
 
-        return self._objectToJSON(event, showAll, withDefinition)
+        withDefinition = options.get('full_definitions', False)
+        return self._objectToJSON(event, True, withDefinition)
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)
@@ -96,3 +110,6 @@ class RestEventController(RestControllerBase):
       childDBObj = self.__convertRestObject(child, dbObject, event, commit)
       dbObject.children.append(childDBObj)
     return dbObject
+
+  def getFunctionName(self, parameter):
+    return RestEventController.PARAMETER_MAPPER.get(parameter, None)
