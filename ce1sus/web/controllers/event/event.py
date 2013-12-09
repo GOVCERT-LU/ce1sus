@@ -368,19 +368,25 @@ class EventController(Ce1susBaseController):
           try:
             if event_rel.identifier != event.identifier:
               self.checkIfViewable(event_rel)
-            temp.eventID = event_rel.identifier
-            temp.identifier = event_rel.identifier
-            temp.eventName = event_rel.title
-            temp.objectID = relation.sameAttribute.object.identifier
-            temp.objectName = relation.sameAttribute.object.definition.name
-            temp.attributeID = relation.sameAttribute.identifier
-            temp.attributeName = relation.sameAttribute.definition.name
-            temp.attributeValue = relation.sameAttribute.value
-            relationPaginator.list.append(temp)
+            # check if user can see the object
+            if self.isEventOwner(event) or (
+                (relation.sameAttribute.object.bitValue.isValidated and
+                 relation.sameAttribute.object.isSharable) or
+                              (relation.sameAttribute.bitValue.isValidated and
+                               relation.sameAttribute.bitValue.isSharable)) :
+              temp.eventID = event_rel.identifier
+              temp.identifier = event_rel.identifier
+              temp.eventName = event_rel.title
+              temp.objectID = relation.sameAttribute.object.identifier
+              temp.objectName = relation.sameAttribute.object.definition.name
+              temp.attributeID = relation.sameAttribute.identifier
+              temp.attributeName = relation.sameAttribute.definition.name
+              temp.attributeValue = relation.sameAttribute.value
+              relationPaginator.list.append(temp)
           except cherrypy.HTTPError:
             self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))
 
     except BrokerException as e:
       self.getLogger().error(e)
-    return self.cleanHTMLCode(template.render(relationPaginator=relationPaginator))
+    return self.cleanHTMLCode(template.render(relationPaginator=relationPaginator, eventID=eventID))

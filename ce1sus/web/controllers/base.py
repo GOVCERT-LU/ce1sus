@@ -33,25 +33,31 @@ class Ce1susBaseController(BaseController):
                                                                   user.username
                                                                   )
                            )
-    # check is the group of the user is the creation group
-    result = event.creatorGroup.identifier == userDefaultGroup.identifier
-    if not result:
-      # check tlp
-      result = event.tlp.identifier >= userDefaultGroup.tlpLvl
-      # check if the user belong to one of the common maingroups
-      if not result:
-        for group in event.maingroups:
-          result = userDefaultGroup.identifier == group.identifier
-          if result:
-            break
+    # check if event is pubished valided and shared
+    result = event.published and event.bitValue.isValidated and event.bitValue.isSharable
 
-      # check if the user belong to one of the common groups
+    if not result:
+      # check is the group of the user is the creation group
+      result = event.creatorGroup.identifier == userDefaultGroup.identifier
       if not result:
-        groups = Protector.getUserGroups()
-        for group in event.groups:
-          if group in groups:
-              result = True
+        # check tlp
+        result = event.tlp.identifier >= userDefaultGroup.tlpLvl
+        # check if the user belong to one of the common maingroups
+        if not result:
+          for group in event.maingroups:
+            result = userDefaultGroup.identifier == group.identifier
+            if result:
               break
+
+        # check if the user belong to one of the common groups
+        if not result:
+          groups = Protector.getUserGroups()
+          for group in event.groups:
+            if group in groups:
+                result = True
+                break
+
+
     if not result:
       raise cherrypy.HTTPError(403)
 
