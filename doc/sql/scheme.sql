@@ -547,7 +547,7 @@ CREATE TABLE `Groups` (
   `pgpKey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`group_id`),
   KEY `IDK_Groups_tlplvl` (`tlplvl`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Groups` WRITE;
@@ -744,19 +744,20 @@ CREATE TABLE `Users` (
   `email` varchar(45) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
   `disabled` int(1) NOT NULL DEFAULT '1',
   `apikey` varchar(255) DEFAULT NULL,
-  `group_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT '1',
   `pgpKey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`),
   UNIQUE KEY `username_UNIQUE` (`username`),
   UNIQUE KEY `apikey_UNIQUE` (`apikey`),
-  KEY `fk_users_groups_mainGroup` (`group_id`)
+  KEY `IDX_User_Group_Group_id` (`group_id`),
+  CONSTRAINT `FK_User_Group_Group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-10 11:05:37','admin@admin.com',0,NULL,2,NULL);
+INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-10 11:57:14','admin@admin.com',0,NULL,1,NULL);
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `ce1sus`;
