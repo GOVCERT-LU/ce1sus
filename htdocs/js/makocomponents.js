@@ -453,3 +453,9 @@ function activateMenuLi(id) {
     // activate tab
     $('#' + id).parent().attr('class', 'active');
 }
+
+function resizeScrollPannel(id) {
+    var div = $(id);
+    var windowHeight = $(window).height() - 300;
+    div.css({'height': windowHeight+'px' });
+}

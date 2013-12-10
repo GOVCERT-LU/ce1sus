@@ -27,8 +27,7 @@ function loadUser(userID){
 }
 </script>
 
-<div style="height: 800px;
-   overflow: scroll;">
+<div id="pannelDiv" style="overflow:auto;height:90%;width:100%;padding-bottom:5px"> 
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not users is None: 
 		% for user in users:
@@ -61,5 +60,6 @@ function loadUser(userID){
 <script type="text/javascript">
 $(document).ready(function() {
 	loadUser('${fistUserID}');
+	resizeScrollPannel('pannelDiv');
 });
 </script>

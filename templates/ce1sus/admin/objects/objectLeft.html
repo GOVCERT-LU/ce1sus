@@ -22,8 +22,7 @@ function loadObject(objectID){
 	loadContent('objectRight','/admin/objects/rightContent?objectid='+objectID);
 }
 </script>
-<div style="height: 800px;
-   overflow: scroll;">
+<div id="pannelDiv" style="overflow:auto;height:90%;width:100%;padding-bottom:5px"> 
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not objects is None: 
 		% for object in objects:
@@ -48,6 +47,8 @@ function loadObject(objectID){
 
 <script type="text/javascript">
 $(document).ready(function() {
+    
 	loadObject(${fistObjectID});
+	resizeScrollPannel('pannelDiv');
 });
 </script>

@@ -20,8 +20,7 @@ function loadAttribute(attributeID){
 	loadContent('attributeRight','/admin/attributes/rightContent?attributeid='+attributeID);
 }
 </script>
-<div style="height: 800px;
-   overflow: scroll;">
+<div id="pannelDiv" style="overflow:auto;height:90%;padding-bottom:5px"> 
 <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
 	%if not attributes is None: 
 		% for attribute in attributes:
@@ -51,6 +50,8 @@ function loadAttribute(attributeID){
 
 <script type="text/javascript">
 $(document).ready(function() {
-	loadAttribute(${fistAttributeID});
+    loadAttribute(${fistAttributeID});
+    resizeScrollPannel('pannelDiv');
+	
 });
 </script>
