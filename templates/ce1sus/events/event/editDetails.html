@@ -12,7 +12,7 @@
     <input type="hidden" name="action" value="update"/>
     ${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
     <div class="row">
-        <div class="col-xs-4 col-sm-4" style="text-align:right">
+        <div class="col-xs-12 col-sm-12" style="text-align:left">
             <div class="btn-group">
                <button id="${event.identifier}Save" class="btn btn-primary" type="submit">Save</button>
                <button id="${event.identifier}Cancel" class="btn btn-default" onclick="loadContent('eventEdit','/events/event/details/${event.identifier}')">Cancel</button>

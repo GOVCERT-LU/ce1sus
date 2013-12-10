@@ -56,6 +56,8 @@
 </%def>
 
 <%def name="userForm(user,enabled)">
+<div class="row">
+<div class="col-xs-12 col-sm-12" style="text-align:left">
 % if user is None:
   <%call expr="labeledInput.labeledEditBox(label='Username',name='username',value='',enabled=enabled)"/>
   <%call expr="labeledInput.labeledPasswordBox(label='Password',name='password',value='',enabled=enabled)"/>
@@ -80,6 +82,8 @@
   <%call expr="labeledInput.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
   
 % endif
+</div>
+</div>
 </%def>
 
 <%def name="attributeForm(attribute,enabled,cbValues, cbHandlerValues)">

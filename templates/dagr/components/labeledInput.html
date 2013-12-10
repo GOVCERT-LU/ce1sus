@@ -7,21 +7,21 @@
 	<!-- BEGIN genericLabeler -->
 	%if enabled:
 	<div class="form-group">
-	  <label class="col-lg-3 control-label">
+	  <label class="col-xs-3 control-label">
 	      ${label}${':' if label else ''}
 	      </label>
-	      <div class="col-lg-9">
+	      <div class="col-xs-9">
 	       ${caller.body()}
 	      </div>
 	</div>
 	%else:
 	<div class="row">
-	   <div class="col-lg-3" style="text-align:right;padding:7px;padding-left:15px">
+	   <div class="col-xs-3" style="text-align:right;padding:7px;padding-left:15px">
 	   <label>
 	   ${label}${':' if label else ''}
 	   </label>
 	   </div>
-	   <div class="col-lg-9" style="padding:7px;padding-left:15px">
+	   <div class="col-xs-9" style="padding:7px;padding-left:15px">
 	   ${caller.body()}
        </div>
 	</div>
