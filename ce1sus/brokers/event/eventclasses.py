@@ -31,13 +31,7 @@ _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
 _REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', BASE.metadata,
     Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
     Column('event_id', Integer, ForeignKey('Events.event_id'))
-
 )
-_OBJECT_CROSSREFERENCE = Table('Obj_links_Obj', BASE.metadata,
-    Column('object_id_to', Integer, ForeignKey('Objects.object_id')),
-    Column('object_id_from', Integer, ForeignKey('Objects.object_id'))
-)
-
 
 # pylint: disable=R0902
 class Event(BASE):

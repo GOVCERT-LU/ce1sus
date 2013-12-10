@@ -1,3 +1,4 @@
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -515,24 +516,6 @@ LOCK TABLES `Events` WRITE;
 /*!40000 ALTER TABLE `Events` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Events` ENABLE KEYS */;
 UNLOCK TABLES;
-DROP TABLE IF EXISTS `Events_has_Objects`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Events_has_Objects` (
-  `event_id` bigint(20) NOT NULL,
-  `object_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`event_id`,`object_id`),
-  KEY `IDX_EhO_event_id` (`object_id`),
-  KEY `IDX_EhO_object_id` (`event_id`),
-  CONSTRAINT `fk_Eho_Event_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_Eho_Object_object_id` FOREIGN KEY (`object_id`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `Events_has_Objects` WRITE;
-/*!40000 ALTER TABLE `Events_has_Objects` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Events_has_Objects` ENABLE KEYS */;
-UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -552,8 +535,7 @@ CREATE TABLE `Groups` (
 
 LOCK TABLES `Groups` WRITE;
 /*!40000 ALTER TABLE `Groups` DISABLE KEYS */;
-INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL),
-(2,'test','testddd',0,3,'a@a.com',0,NULL);
+INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL);
 /*!40000 ALTER TABLE `Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups_has_Events`;
@@ -592,24 +574,6 @@ CREATE TABLE `NumberValues` (
 LOCK TABLES `NumberValues` WRITE;
 /*!40000 ALTER TABLE `NumberValues` DISABLE KEYS */;
 /*!40000 ALTER TABLE `NumberValues` ENABLE KEYS */;
-UNLOCK TABLES;
-DROP TABLE IF EXISTS `Obj_links_Obj`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Obj_links_Obj` (
-  `object_id_to` bigint(20) NOT NULL,
-  `object_id_from` bigint(20) NOT NULL,
-  PRIMARY KEY (`object_id_to`,`object_id_from`),
-  KEY `IDX_OlO_from` (`object_id_from`),
-  KEY `IDX_OlO_to` (`object_id_to`),
-  CONSTRAINT `FK_Olo_Obj_object_id_from` FOREIGN KEY (`object_id_from`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_Olo_Obj_object_id_to` FOREIGN KEY (`object_id_to`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `Obj_links_Obj` WRITE;
-/*!40000 ALTER TABLE `Obj_links_Obj` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Obj_links_Obj` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Objects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -776,7 +740,7 @@ CREATE TABLE `ce1sus` (
 LOCK TABLES `ce1sus` WRITE;
 /*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
 INSERT INTO `ce1sus` VALUES ('app_rev','0.4.0'),
-('db_shema','0.4.0'),
+('db_shema','0.5.0'),
 ('definitions','5.9.2'),
 ('rest_api','0.2.0');
 /*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;
