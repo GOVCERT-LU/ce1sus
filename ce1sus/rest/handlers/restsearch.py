@@ -4,7 +4,6 @@
 
 Created on Oct 8, 2013
 """
-from clonedigger.logilab.common.ureports.nodes import List
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
