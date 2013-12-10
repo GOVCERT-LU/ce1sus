@@ -125,8 +125,10 @@ class AttributesController(Ce1susBaseController):
       # right checks
       event = self.eventBroker.getByID(eventID)
       self.checkIfViewable(event)
+      self.eventBroker.updateEvent(event, commit=False)
       if action == 'remove':
-        self.attributeBroker.removeByID(attributeID, commit=True)
+        self.attributeBroker.removeByID(attributeID, commit=False)
+        self.attributeBroker.doCommit(True)
         return self.returnAjaxOK()
 
       objectID = kwargs.get('objectID', None)

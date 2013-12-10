@@ -390,7 +390,7 @@ class EventBroker(BrokerBase):
       if last_seen:
         ObjectConverter.setDate(event, 'last_seen', last_seen)
       else:
-        event.last_seen = datetime.now()
+        event.last_seen = event.first_seen
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
       if action == 'insert':
@@ -479,6 +479,11 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
+
+  def updateEvent(self, event, commit=True):
+    event.modified = datetime.now()
+    self.update(event, False)
+    self.doCommit(commit)
 
 
 

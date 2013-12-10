@@ -60,13 +60,15 @@ class CommentsController(Ce1susBaseController):
     comment = self.commentBroker.buildComment(event, self.getUser(), commentID,
                          commentText, action)
     try:
+      self.eventBroker.updateEvent(event, False)
       if action == 'insert':
-        self.commentBroker.insert(comment)
+        self.commentBroker.insert(comment, False)
       if action == 'update':
         comment.comment = commentText
-        self.commentBroker.update(comment)
+        self.commentBroker.update(comment, False)
       if action == 'remove':
         self.commentBroker.removeByID(comment.identifier)
+      self.commentBroker.doCommit(True)
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')

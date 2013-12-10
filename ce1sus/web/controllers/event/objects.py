@@ -181,6 +181,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.eventBroker.updateEvent(event, commit=False)
 
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
@@ -226,6 +227,7 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
+    self.eventBroker.updateEvent(event, commit=False)
 
 
     # Here is an insertion only so the action parameter is not needed, btw.

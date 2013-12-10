@@ -309,7 +309,9 @@ class EventController(Ce1susBaseController):
         event.bitValue.isValidated = True
         self.eventBroker.insert(event)
       if action == 'update':
-        self.eventBroker.update(event)
+        self.eventBroker.update(event, False)
+        self.eventBroker.updateEvent(event, False)
+        self.eventBroker.doCommit(True)
       if action == 'remove':
         self.eventBroker.removeByID(event.identifier)
       return self.returnAjaxOK()
