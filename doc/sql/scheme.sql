@@ -111,14 +111,14 @@ CREATE TABLE `DEF_Attributes` (
 
 LOCK TABLES `DEF_Attributes` WRITE;
 /*!40000 ALTER TABLE `DEF_Attributes` DISABLE KEYS */;
-INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-fA-F]{32}$',1,0,1,1,1,'8b5b60262a070b4e86bdeee771df1c5f82af411d'),
-(2,'hash_sha1','sha1 hash of a file','^[0-9a-fA-F]{40}$',1,0,1,1,1,'071eb20cd80ea3d874dfad489c822a2016daa00d'),
-(3,'hash_sha256','sha256 hash of a file','^[0-9a-fA-F]{64}$',1,0,1,1,1,'2551d42b10cf0a1716671436b77698f90fed0c27'),
-(4,'hash_sha384','sha384 hash of a file','^[0-9a-fA-F]{96}$',1,0,1,1,1,'7e44a3ebb32e48e812c3301277e96b695cc0ed89'),
-(5,'hash_sha512','sha512 hash of a file','^[0-9a-fA-F]{128}$',1,0,1,1,1,'782f49137df2fc3589ff472664036e64621e2b66'),
+INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-fA-F]{32}$',1,0,0,1,1,'8b5b60262a070b4e86bdeee771df1c5f82af411d'),
+(2,'hash_sha1','sha1 hash of a file','^[0-9a-fA-F]{40}$',1,0,0,1,1,'071eb20cd80ea3d874dfad489c822a2016daa00d'),
+(3,'hash_sha256','sha256 hash of a file','^[0-9a-fA-F]{64}$',1,0,0,1,1,'2551d42b10cf0a1716671436b77698f90fed0c27'),
+(4,'hash_sha384','sha384 hash of a file','^[0-9a-fA-F]{96}$',1,0,0,1,1,'7e44a3ebb32e48e812c3301277e96b695cc0ed89'),
+(5,'hash_sha512','sha512 hash of a file','^[0-9a-fA-F]{128}$',1,0,0,1,1,'782f49137df2fc3589ff472664036e64621e2b66'),
 (6,'hash_ssdeep','ssdeep hash of a file','^\\d+:[a-zA-Z0-9+]+:[a-zA-Z0-9+]+$',1,0,1,1,0,'a92dbb7f7bf68020e6fd74b0de2de661c716d128'),
-(7,'file_name','The file_name field specifies the name of the file.','^.+$',1,0,1,1,0,'9802f41df84b79d361e9aafe62386299a77c76f8'),
-(8,'size_in_bytes','The size_in_bytes field specifies the size of the file, in bytes.','^\\d+$',3,0,1,1,0,'32c393fd3ea0ea1f5439d5b7e1db310e283a1cc1'),
+(7,'file_name','The file_name field specifies the name of the file.','^.+$',1,0,0,1,0,'9802f41df84b79d361e9aafe62386299a77c76f8'),
+(8,'size_in_bytes','The size_in_bytes field specifies the size of the file, in bytes.','^\\d+$',3,0,0,1,0,'32c393fd3ea0ea1f5439d5b7e1db310e283a1cc1'),
 (9,'magic_number','The magic_number specifies the particular magic number (typically a hexadecimal constant used to identify a file format) corresponding to the file, if applicable.','^.+$',1,0,1,1,0,'12764f37a8f9997ebdd5c7f2f4905d4ed17ab1df'),
 (10,'reference_internal_identifier','Holds a reference to an internal ID number.','^\\d+$',3,2,1,1,0,'c0695d0f2113b426fd5355f49c27979034de2ee3'),
 (11,'vulnerability_cve','CVE reference to a known vulnerability','^CVE-(19|20)\\d{2}-[\\d]{4}$',1,3,1,1,1,'fd669897a7768fbfd703a2cd033fc48d54f17c83'),
@@ -127,8 +127,8 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (14,'hostname','Fully qualified domain name','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,5,1,1,1,'2376b03d4148c212c63cc1904a04e17b1baa26ac'),
 (15,'description','Contains free text description for an object','^.+$',0,9,1,1,0,'b248f7d94db2e4da5188d7d8ba242f23ba733012'),
 (16,'comment','Holds free text for comments about objects and event.','^.+$',0,9,1,0,0,'cc9cd84564e9d314ad638af0ed55ba878d6f9bc8'),
-(17,'is_malicious','Boolean to identify malicious objects','^(yes|no)$',1,8,1,1,0,'db890b47e4ec3946095bec3790632afe9c9164fb'),
-(18,'malware_file_type','dropper, trojan, banking trojan, RAT, rogue document, phishing document,....','^virus$|^trojan$|^dropper$|^malware$|^Rootkit$|^keyLogger$|^worm$',1,8,1,1,0,'d792cabf19e21de61666fef24e9767679bc9400c'),
+(17,'is_malicious','Boolean to identify malicious objects','^yes$|^no$',1,8,1,1,0,'edab2b114e8e2d727c5e0e226aae1b8aa1ddd4f1'),
+(18,'malware_file_type','dropper, trojan, banking trojan, RAT, rogue document, phishing document,....','^virus$|^trojan$|^dropper$|^malware$|^rootkit$|^key_logger$|^worm$',1,8,1,1,0,'d792cabf19e21de61666fef24e9767679bc9400c'),
 (19,'file_full_path','The File path including the file name.','^.+$',1,0,1,1,0,'6354375248dfc43a70cab71553392c3918534075'),
 (20,'file_extension','The File_Extension field specifies the file extension of the file.','^.+$',1,0,1,1,0,'735c8591b0e10f6dae47d4fe94c65c4d340b6a91'),
 (21,'file_format','The File_Format field specifies the particular file format of the file, most typically specified by a tool such as the UNIX file command.','^.+$',1,0,1,1,0,'93f88eb103448bf84b332535a0f9ded721aaae0c'),
@@ -198,12 +198,12 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (85,'url_pattern','Holds a pattern that matches URL.','^.+$',1,5,1,1,0,'89d93b434b4aae1c9845fafc626f54d2adf05291'),
 (86,'win_registry_key','The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.','^.+$',0,9,1,1,1,'2d110b2d1019751b7e09ed5831320364b88626de'),
 (87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,9,1,1,1,'cdb3d8e146f88e7ab652207429afa5458da55dd1'),
-(88,'mime_type','File mime-type','^.+$',0,0,1,1,0,'1498236cfea91bc2b7fe82625ec223e9dc6f4710'),
+(88,'mime_type','File mime-type','^.+$',0,0,0,1,0,'1498236cfea91bc2b7fe82625ec223e9dc6f4710'),
 (89,'compromized_hostname','compromized_hostname','^.+$',1,0,1,1,1,'64f2717e8ceb9f660e776399d022476a276d9dcd'),
 (90,'ipv4_addr_phishingSite','ipv4_addr_phishingSite','^.+$',1,0,1,1,1,'9ba844adf500b08be89a389d2cbba0716d554da6'),
 (91,'ip_port','IP Port','^[\\d]{1,}$',3,0,1,1,0,'2c4312677d38a636ba1d77fe150bce7ecea345ac'),
 (101,'ip_protocol','IP Protocol','^tcp$|^udp$|^icmp$',1,8,1,1,0,'5271302bbb13211bb4f2e09c4a5b7628b8520506'),
-(111,'file_id','File description as returned by unix “file” command','^.+$',1,0,1,1,0,'2a4380007eec26779e9cf203dda1da3094a3d1db');
+(111,'file_id','File description as returned by unix “file” command','^.+$',1,0,0,1,0,'2a4380007eec26779e9cf203dda1da3094a3d1db');
 /*!40000 ALTER TABLE `DEF_Attributes` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DEF_Objects`;
@@ -622,6 +622,7 @@ CREATE TABLE `Objects` (
   `parentEvent` bigint(20) DEFAULT NULL,
   `code` int(1) NOT NULL DEFAULT '0',
   `modifier_id` bigint(20) DEFAULT NULL,
+  `uuid` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`object_id`),
   KEY `IDX_DObj_objects_def_object_id` (`def_object_id`),
   KEY `IDX_objects_events_event_id` (`event_id`),
@@ -630,9 +631,9 @@ CREATE TABLE `Objects` (
   KEY `IDX_Obj_modifier_id` (`modifier_id`),
   KEY `IDX_obj_id_shareable` (`object_id`),
   KEY `FK_Obj_Obj_parent_id_object_id` (`parentObject`),
-  CONSTRAINT `FK_objects_events_event_id_parentEvent` FOREIGN KEY (`parentEvent`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `FK_DObj_objects_def_object_id` FOREIGN KEY (`def_object_id`) REFERENCES `DEF_Objects` (`def_object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_objects_events_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_objects_events_event_id_parentEvent` FOREIGN KEY (`parentEvent`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `FK_Obj_Obj_parent_id_object_id` FOREIGN KEY (`parentObject`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Obj_user_creator_id_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Obj_user_modifier_id_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -711,9 +712,7 @@ CREATE TABLE `Subgroups_has_Groups` (
 LOCK TABLES `Subgroups_has_Groups` WRITE;
 /*!40000 ALTER TABLE `Subgroups_has_Groups` DISABLE KEYS */;
 INSERT INTO `Subgroups_has_Groups` VALUES (1,1),
-(2,1),
-(1,2),
-(2,2);
+(2,1);
 /*!40000 ALTER TABLE `Subgroups_has_Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `TextValues`;
@@ -757,7 +756,7 @@ CREATE TABLE `Users` (
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-05 15:53:47','admin@admin.com',0,NULL,2,NULL);
+INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2013-12-10 11:05:37','admin@admin.com',0,NULL,2,NULL);
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `ce1sus`;
@@ -773,10 +772,10 @@ CREATE TABLE `ce1sus` (
 
 LOCK TABLES `ce1sus` WRITE;
 /*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
-INSERT INTO `ce1sus` VALUES ('app_rev','0.3.2'),
-('db_shema','0.3.5'),
-('definitions','5.9.0'),
-('rest_api','0.1.0');
+INSERT INTO `ce1sus` VALUES ('app_rev','0.4.0'),
+('db_shema','0.3.6'),
+('definitions','5.9.2'),
+('rest_api','0.2.0');
 /*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -788,3 +787,4 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
