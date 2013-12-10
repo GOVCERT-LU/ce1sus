@@ -4,6 +4,7 @@
 
 Created on Oct 8, 2013
 """
+from clonedigger.logilab.common.ureports.nodes import List
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -71,6 +72,12 @@ class RestSearchController(RestControllerBase):
     else:
       return None
 
+  def __checkIfBelongs(self, id, array):
+    if array:
+      return id in array
+    else:
+      return True
+
   def viewAttributes(self, uuid, apiKey, **options):
     try:
       withDefinition = options.get('Full-Definitions', False)
@@ -79,92 +86,123 @@ class RestSearchController(RestControllerBase):
       offset = options.get('page', 0)
       limit = self.__getLimit(options)
 
-      # serach on objecttype
-      objectType = options.get('Object-Type', None)
-      # with the following attribtes type + value
-      objectAttribtues = options.get('Object-Attributes', list())
-      # Filter on Attributes
-      filterAttributes = options.get('attributes', list())
+      # object type to look foor
+      performSearch = True
+      objectNeedle = options.get('Object-Type', None)
+      if objectNeedle:
+        definition = self.objectDefinitionBroker.getDefintionByName(objectNeedle)
+        # TODO: search inside textfield
+      else:
+        performSearch = False
 
-      filter = options.get('attributes', list())
+      if performSearch:
+        # object Attribues to look for
+        needles = options.get('Object-Attributes', list())
+        completeNeedles = dict()
+        for needle in needles:
+            for key, value in needle.iteritems():
+              definition = self.attributeDefinitionBroker.getDefintionByName(key)
+              if definition.classIndex != 0:
+                completeNeedles[value] = definition
+        if not completeNeedles:
+          performSearch = False
 
-      if objectType or objectAttribtues:
-        valuesToLookFor = dict()
+      # Desired Return Attibutes
+      if performSearch:
+        requestedAttributes = list()
+        for item in options.get('attributes', list()):
+          definition = self.attributeDefinitionBroker.getDefintionByName(item)
+          requestedAttributes.append(definition.identifier)
 
-        for item in objectAttribtues:
-          for key, value in item.iteritems():
-            definition = self.attributeDefinitionBroker.getDefintionByName(key)
-            # TODO: search inside textfield
-            if definition.classIndex != 0:
-              valuesToLookFor[value] = definition
+          # Note if no requested attribues are defined return all for the object having the needle
 
+      if performSearch:
+
+        # find Matching attribtues
         matchingAttributes = list()
-        # find results
-        for value, key in valuesToLookFor.iteritems():
-          foundValues = self.attributeBroker.lookforAttributeValue(key,
-                                                                 value,
+        for definition, needle in completeNeedles.iteritems():
+          foundValues = self.attributeBroker.lookforAttributeValue(needle,
+                                                                 definition,
                                                                  '==')
           matchingAttributes = matchingAttributes + foundValues
 
-        result = list()
-        seenEvents = dict()
-        for needle in matchingAttributes:
-          if needle.attribute.bitValue.isValidated and needle.attribute.bitValue.isSharable:
+        # cache
+        seenItems = dict()
 
-            try:
-              event = needle.attribute.object.event
-
-              if not event:
-                event = self.eventBroker.getByID(needle.attribute.object.parentEvent_id)
-              self._checkIfViewable(event, self.getUser(apiKey))
-
-
-              restEvent = seenEvents.get(event.identifier, None)
-              if not restEvent:
-                restEvent = event.toRestObject(False)
-                seenEvents[event.identifier] = (restEvent, dict())
+        for item in matchingAttributes:
+          attribute = item.attribute
+          # check if attribute is sharable and validated
+          if attribute.bitValue.isValidated and attribute.bitValue.isSharable:
+            # check it is one of the requested attributes
+            obj = attribute.object
+             # check if object is sharable and validated
+            if obj.bitValue.isValidated and obj.bitValue.isSharable:
+              if requestedAttributes:
+                # append only the requested attributes
+                neededAttributes = list()
+                for item in obj.attributes:
+                  if item.def_attribute_id in requestedAttributes:
+                    neededAttributes.append(item)
               else:
-                restEvent = restEvent[0]
-              # check if obj is accessible
-              if needle.attribute.object.bitValue.isValidated and needle.attribute.object.bitValue.isSharable:
-                restObject = seenEvents[event.identifier][1].get(needle.attribute.object.identifier, None)
+                # append all attributes
+                neededAttributes = obj.attributes
+
+              # get the event
+              event = obj.event
+              if not event:
+                event = self.eventBroker.getByID(obj.parentEvent_id)
+
+              try:
+                # check if the event can be accessed
+                self._checkIfViewable(event, self.getUser(apiKey))
+
+                # get rest from cache
+                restEvent = seenItems.get(event.identifier, None)
+                if not restEvent:
+                  # if not cached put it there
+                  restEvent = event.toRestObject(False)
+                  seenItems[event.identifier] = (restEvent, dict())
+                else:
+                  # get it from cache
+                  restEvent = restEvent[0]
+
+                # get obj from cache
+                restObject = seenItems[event.identifier][1].get(obj.identifier, None)
                 if not restObject:
-                  obj = needle.attribute.object
                   restObject = obj.toRestObject(False)
                   if obj.parentObject_id is None:
                     restEvent.objects.append(restObject)
                   else:
-                    parentObject = self.getParentObject(event, obj, seenEvents)
+                    parentObject = self.getParentObject(event, obj, seenItems)
                     if parentObject:
                       parentObject.children.append(restObject)
 
-                  seenEvents[event.identifier][1][obj.identifier] = restObject
 
-                restAttribute = needle.attribute.toRestObject()
-                restObject.attributes.append(restAttribute)
+                  # append required attributes to the object
+                  for item in neededAttributes:
+                    restObject.attributes.append(item.toRestObject())
 
-            except cherrypy.HTTPError:
-              pass
+                  seenItems[event.identifier][1][obj.identifier] = restObject
 
-        # make list of results
+              except cherrypy.HTTPError:
+                # Do nothing if the user cant see the event
+                pass
+
+            # make list of results
+
         result = list()
-        for event, objs in seenEvents.itervalues():
-          dictionary = dict(event.toJSON(full=True,
-                             withDefinition=withDefinition).items()
-                 )
-          obj = json.dumps(dictionary)
-          result.append(obj)
+        if performSearch:
+
+          for event, objs in seenItems.itervalues():
+            dictionary = dict(event.toJSON(full=True,
+                               withDefinition=withDefinition).items()
+                   )
+            obj = json.dumps(dictionary)
+            result.append(obj)
 
         resultDict = {'Results': result}
         return self._returnMessage(resultDict)
 
-
-
-
-
-      else:
-        self.raiseError('InvalidArgument',
-                         'At least one argument has to be specified')
 
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)

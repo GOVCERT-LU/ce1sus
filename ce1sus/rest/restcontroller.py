@@ -38,7 +38,7 @@ class RestController(RestControllerBase):
                           'enddate',
                           'Object-Type',
                           'Object-Attributes',
-                          'attribtes',
+                          'attributes',
                           'key',
                           'UUID']
   def __init__(self, ce1susConfigFile):

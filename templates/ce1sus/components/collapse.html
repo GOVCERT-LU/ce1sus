@@ -119,18 +119,11 @@
 <%def name="menuItem(objectList,owner,ident=0)">
 %if not objectList is None:
   <%
-  if ident>1:
-    identString = '&nbsp;&nbsp;'*(ident-1)+'&nbsp;'
-  else:
-    if ident == 0:
-      identString = ''
-    else:
-      identString = '&nbsp;'
-   
+   identString = 20 * ident
   %>
   %for object in objectList:
      %if (object.bitValue.isValidated and object.bitValue.isSharable) or owner:
-     <li id="menu${object.identifier}LI"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${identString} ${object.definition.name} - ${object.identifier}</a></li>
+     <li id="menu${object.identifier}LI" style="margin-left:${identString}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
      <%call expr="menuItem(object.children,owner, ident+1)"/>
      %endif
   %endfor

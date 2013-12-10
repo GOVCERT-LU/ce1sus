@@ -219,6 +219,7 @@ class Ce1susAPI(object):
 
     headers['object_attributes'] = objectContainsAttribute
     headers['object_type'] = objectType
+    headers['attributes'] = filterAttributes
 
     events = list()
     result = self.__request('/search/attributes', None, headers)

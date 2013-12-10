@@ -28,6 +28,31 @@ class ObjectDefinitionBroker(BrokerBase):
     """
     return ObjectDefinition
 
+  def getDefintionByName(self, name):
+    """
+    Returns the attribute definition object with the given name
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param identifier: the id of the requested user object
+    :type identifier: integer
+
+    :returns: Object
+    """
+    try:
+      attributeDefinition = self.session.query(ObjectDefinition).filter(
+                                ObjectDefinition.name == name).one()
+      return attributeDefinition
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for name :{0}'.format(name))
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Attribute definition not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
   def getAttributesByObject(self, identifier, belongIn=True):
     """
     returns all attributes belonging to an object with the given identifier

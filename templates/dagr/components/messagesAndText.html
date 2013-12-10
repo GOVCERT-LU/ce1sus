@@ -1,44 +1,37 @@
 # -*- coding: utf-8 -*-
 
-
-
-
 <%def name="error(message=None)">
-	<!-- BEGIN ErrorMsg -->
-	%if not message is None:
-	    <div class="alert alert-block alert-danger">${message}</div>
-	%endif
-	<!-- END ErrorMsgs -->
+%if not message is None:
+	<div class="alert alert-block alert-danger">${message}</div>
+%endif
 </%def>
 
 <%def name="errorDialog(message=None)">
-	%if not errorMsg is None:
+%if not errorMsg is None:
 	<div class="alert alert-block alert-danger fade in">
-	    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 		<h4 class="alert-heading">An unexpected Error occurred!</h4>
 		<p>${errorMsg}</p>
 	</div>
-	%endif
+%endif
 </%def>
 
 
 
 
 <%def name="objectToHTML(object,shortenTo=0)">
-	<%
-	  classname = type(object).__name__
-	  string = unicode(object)
-	  if shortenTo > 0:
-	    result = string[:shortenTo]
-	    if len(string) > shortenTo:
-	      result = result + '...'
-	  else:
-	   result = string
-	%>
-
-	    %if "Link" in classname:
-	       <a href="${object.url}"  target="_blank">${object.identifier}</a>
-	    %else:
-	       ${result}
-	    %endif
+<%
+	classname = type(object).__name__
+	string = unicode(object)
+	if shortenTo > 0:
+	  result = string[:shortenTo]
+	if len(string) > shortenTo:
+	  result = result + '...'
+	else:
+	  result = string %>
+%if "Link" in classname:
+    <a href="${object.url}"  target="_blank">${object.identifier}</a>
+%else:
+    <div>${result}</div>
+%endif
 </%def>
