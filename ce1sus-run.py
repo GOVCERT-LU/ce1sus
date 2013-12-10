@@ -51,7 +51,7 @@ def bootstrap():
 
   sanityChecker = SantityChecker(ce1susConfigFile)
   sanityChecker.checkDB()
-  sanityChecker.checkApplication()
+  # sanityChecker.checkApplication()
   sanityChecker.close()
   sanityChecker = None
 
