@@ -24,7 +24,7 @@ CREATE TABLE `Attribute_Object_Relations` (
   CONSTRAINT `FK_AOR_Attribtues_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_AOR_Attribtues_ref_attribute_id` FOREIGN KEY (`ref_attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_AOR_Objects_obejct_id` FOREIGN KEY (`ref_object_id`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 COMMENT='The ref_object_id is just to keep the relations unique to pr';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='The ref_object_id is just to keep the relations unique to pr';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Attribute_Object_Relations` WRITE;
@@ -56,7 +56,7 @@ CREATE TABLE `Attributes` (
   CONSTRAINT `FK_Attr_Object_Object_id` FOREIGN KEY (`object_id`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Attr_Users_creator_id_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Attr_Users_modifier_id_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Attributes` WRITE;
@@ -470,7 +470,7 @@ CREATE TABLE `DateValues` (
   KEY `IDX_DateValues_attribute_id` (`attribute_id`),
   KEY `IDX_DateValues_Value` (`value`),
   CONSTRAINT `FK_DateValues_Attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `DateValues` WRITE;
@@ -547,12 +547,13 @@ CREATE TABLE `Groups` (
   `pgpKey` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`group_id`),
   KEY `IDK_Groups_tlplvl` (`tlplvl`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Groups` WRITE;
 /*!40000 ALTER TABLE `Groups` DISABLE KEYS */;
-INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL);
+INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL),
+(2,'test','testddd',0,3,'a@a.com',0,NULL);
 /*!40000 ALTER TABLE `Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups_has_Events`;
@@ -571,6 +572,7 @@ CREATE TABLE `Groups_has_Events` (
 
 LOCK TABLES `Groups_has_Events` WRITE;
 /*!40000 ALTER TABLE `Groups_has_Events` DISABLE KEYS */;
+INSERT INTO `Groups_has_Events` VALUES (1,1);
 /*!40000 ALTER TABLE `Groups_has_Events` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `NumberValues`;
@@ -584,7 +586,7 @@ CREATE TABLE `NumberValues` (
   KEY `IDX_numberValue_attribute_id` (`attribute_id`),
   KEY `IDX_NumberValue_value` (`value`),
   CONSTRAINT `fk_NumberValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `NumberValues` WRITE;
@@ -637,7 +639,7 @@ CREATE TABLE `Objects` (
   CONSTRAINT `FK_Obj_Obj_parent_id_object_id` FOREIGN KEY (`parentObject`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Obj_user_creator_id_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Obj_user_modifier_id_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Objects` WRITE;
@@ -655,7 +657,7 @@ CREATE TABLE `StringValues` (
   KEY `IDX_StrValues_attr_id` (`attribute_id`),
   KEY `IDX_StrValue_Value` (`value`),
   CONSTRAINT `fk_StringValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `StringValues` WRITE;
@@ -725,7 +727,7 @@ CREATE TABLE `TextValues` (
   PRIMARY KEY (`TextValue_id`),
   KEY `IDX_TextValues_attribute_id` (`attribute_id`),
   CONSTRAINT `FK_TextValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `TextValues` WRITE;
@@ -751,7 +753,7 @@ CREATE TABLE `Users` (
   UNIQUE KEY `username_UNIQUE` (`username`),
   UNIQUE KEY `apikey_UNIQUE` (`apikey`),
   KEY `IDX_User_Group_Group_id` (`group_id`),
-  CONSTRAINT `FK_User_Group_Group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `FK_User_Group_Group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -774,7 +776,7 @@ CREATE TABLE `ce1sus` (
 LOCK TABLES `ce1sus` WRITE;
 /*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
 INSERT INTO `ce1sus` VALUES ('app_rev','0.4.0'),
-('db_shema','0.3.6'),
+('db_shema','0.4.0'),
 ('definitions','5.9.2'),
 ('rest_api','0.2.0');
 /*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;

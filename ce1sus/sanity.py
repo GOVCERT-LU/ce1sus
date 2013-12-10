@@ -34,7 +34,7 @@ class SanityValue(BASE):
 class SantityChecker(object):
 
   APP_REL = '0.4.0'
-  DB_REL = '0.3.6'
+  DB_REL = '0.4.0'
   REST_REL = '0.1.1'
 
   def __init__(self, configFile):
@@ -163,9 +163,9 @@ class SantityChecker(object):
     if len(array1) != len(array2) and len(array1) != 3:
       raise SantityCheckerException('The releases have not the right format.')
     result = SantityChecker.compareValues(array1[0], array2[0])
-    if result >= 0:
+    if result == 0:
       result = SantityChecker.compareValues(array1[1], array2[1])
-      if result >= 0:
+      if result == 0:
         result = SantityChecker.compareValues(array1[2], array2[2])
         if result >= 0:
           return 0

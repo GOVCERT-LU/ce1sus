@@ -139,8 +139,14 @@ class GroupController(Ce1susBaseController):
         self.groupBroker.removeByID(group.identifier)
       return self.returnAjaxOK()
     except OperationException as e:
+      errorMsg = '{0}'.format(e)
       self.getLogger().info('OperationError occurred: {0}'.format(e))
-      return 'Cannot delete this group. The group is still referenced.'
+      if 'FK_User_Group_Group_id' in errorMsg:
+        return 'Cannot delete this group. The group is still referenced by some Users.'
+      elif 'FK_Events_Groups_creatorGroup_groupID' in errorMsg:
+        return 'Cannot delete this group. The group is still referenced as creator Group by some Events.'
+      else:
+        return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
       return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(group=group,
