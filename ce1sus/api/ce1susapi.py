@@ -8,7 +8,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import json
-import urllib2
+import requests
 from types import DictionaryType, ListType
 from importlib import import_module
 from ce1sus.api.restclasses import RestClass, RestAPIException
@@ -38,15 +38,10 @@ class Ce1susAPI(object):
                               + 'RestClass').format(className))
     return instance
 
-  def __init__(self, apiUrl, apiKey, proxies={}):
+  def __init__(self, apiUrl, apiKey, proxies=dict()):
     self.apiUrl = apiUrl
     self.apiKey = apiKey
-
     self.proxies = proxies
-    if len(self.proxies) > 0:
-      proxy = urllib2.ProxyHandler(self.proxies)
-      opener = urllib2.build_opener(proxy)
-      urllib2.install_opener(opener)
 
   @staticmethod
   def __populateInstanceByDict(instance, dictionary):
@@ -93,6 +88,7 @@ class Ce1susAPI(object):
       raise Ce1susAPIException(message)
 
   def __request(self, method, data=None, extra_headers=None):
+
     url = '{0}/{1}'.format(self.apiUrl, method)
     headers = {'Content-Type': 'application/json; charset=utf-8',
                'key': self.apiKey}
@@ -101,11 +97,11 @@ class Ce1susAPI(object):
       for key, value in extra_headers.items():
         headers[key] = value
     if data:
-      request = urllib2.Request(url, data=json.dumps(data), headers=headers)
+      request = requests.get(url, data=json.dumps(data), headers=headers, proxies=self.proxies)
     else:
-      request = urllib2.Request(url, headers=headers)
+      request = requests.get(url, headers=headers, proxies=self.proxies)
     try:
-      response = urllib2.urlopen(request).read()
+      response = request.text
     except urllib2.HTTPError as e:
       raise Ce1susAPIException('Error ({0})'.format(e.code))
     except urllib2.URLError as e:

@@ -33,9 +33,9 @@ class SanityValue(BASE):
 
 class SantityChecker(object):
 
-  APP_REL = '0.4.0'
+  APP_REL = '0.4.2'
   DB_REL = '0.4.0'
-  REST_REL = '0.1.1'
+  REST_REL = '0.2.0'
 
   def __init__(self, configFile):
     # setup connection string and engine

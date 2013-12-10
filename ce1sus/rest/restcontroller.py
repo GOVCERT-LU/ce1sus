@@ -59,7 +59,8 @@ class RestController(RestControllerBase):
       self.sanityChecker.checkRestAPI(version)
       pass
     except SantityCheckerException as e:
-      raise cherrypy.HTTPError(500, 'Exception occurred {0}'.format(e))
+      self.raiseError('VersionMismatch', '{0}'.format(e))
+
 
   def __checkApiKey(self, apiKey):
     try:
@@ -148,7 +149,7 @@ class RestController(RestControllerBase):
     self.getLogger().info('Connection from {0}'.format(remoteAddr))
 
     apiKey = self.__getHeaderValue('key')
-    # self.__checkApiKey(apiKey)
+    self.__checkApiKey(apiKey)
 
     # make custom parmeters
     options = dict()
@@ -158,49 +159,54 @@ class RestController(RestControllerBase):
 
   @cherrypy.expose
   def default(self, *vpath, **params):
+    try:
+      # check if the path is correct
+      controllerName, parameter, uuid = self.__splitPath(vpath)
+      apiKey, options = self.__processHeaders()
 
-    # check if the path is correct
-    controllerName, parameter, uuid = self.__splitPath(vpath)
-    apiKey, options = self.__processHeaders()
+      controller = self.__getController(controllerName)
 
-    controller = self.__getController(controllerName)
-
-    # getMethodToCall
-    action = cherrypy.request.method
-    if not action in RestController.REST_mapper:
-      self.getLogger().debug(
-                        'Action {0} is not defined in mapper'.format(action))
-      raise cherrypy.HTTPError(400)
-
-    if parameter:
-      methodName = controller.getFunctionName(parameter, action)
-    else:
-      methodName = RestController.REST_mapper[action]
-
-    if methodName:
-    # call method if existing
-      method = getattr(controller, methodName, None)
-    else:
-      raise cherrypy.HTTPError(400)
-
-    if method:
-      try:
-        result = method(uuid, apiKey, **options)
-        return result
-      except RestAPIException as e:
+      # getMethodToCall
+      action = cherrypy.request.method
+      if not action in RestController.REST_mapper:
         self.getLogger().debug(
-                        'Error occured during {0} for {1} due to {2}'.format(
-                                                                   action,
-                                                                   controller,
-                                                                   e))
-        temp = dict(self._createStatus('RestException', e.message))
+                          'Action {0} is not defined in mapper'.format(action))
+        raise cherrypy.HTTPError(400)
+
+      if parameter:
+        methodName = controller.getFunctionName(parameter, action)
+      else:
+        methodName = RestController.REST_mapper[action]
+
+      if methodName:
+      # call method if existing
+        method = getattr(controller, methodName, None)
+      else:
+        raise cherrypy.HTTPError(400)
+
+      if method:
+        try:
+          result = method(uuid, apiKey, **options)
+          return result
+        except RestAPIException as e:
+          self.getLogger().debug(
+                          'Error occured during {0} for {1} due to {2}'.format(
+                                                                     action,
+                                                                     controller,
+                                                                     e))
+          temp = dict(self._createStatus('RestException', e.message))
+          return json.dumps(temp)
+      else:
+        self.getLogger().debug(
+                          'Method {0} is not defined for {0}'.format(action,
+                                                                     controller))
+        # if nothing is found do default
+        path = request.script_name + request.path_info
+        temp = dict(self._createStatus('RestException',
+                                       "The path '%s' was not found." % path))
         return json.dumps(temp)
-    else:
-      self.getLogger().debug(
-                        'Method {0} is not defined for {0}'.format(action,
-                                                                   controller))
-      # if nothing is found do default
-      path = request.script_name + request.path_info
-      temp = dict(self._createStatus('RestException',
-                                     "The path '%s' was not found." % path))
-      return json.dumps(temp)
+    except RestAPIException as e:
+          self.getLogger().debug(
+                          'Error occured during {0}'.format(e))
+          temp = dict(self._createStatus('RestException', e.message))
+          return json.dumps(temp)

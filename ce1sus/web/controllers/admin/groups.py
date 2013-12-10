@@ -135,22 +135,26 @@ class GroupController(Ce1susBaseController):
       if action == 'remove':
         identifier = group.identifier
         if identifier == '1' or identifier == 1:
-          return 'Cannot delete this group. The group is essential to the application.'
+          return ('Cannot delete this group. The group is essential to '
+                  + 'the application.')
         self.groupBroker.removeByID(group.identifier)
       return self.returnAjaxOK()
     except IntegrityException as e:
       errorMsg = '{0}'.format(e)
       self.getLogger().info('OperationError occurred: {0}'.format(e))
       if 'FK_User_Group_Group_id' in errorMsg:
-        return 'Cannot delete this group. The group is still referenced by some Users.'
+        return ('Cannot delete this group. The group is still referenced '
+                + 'by some Users.')
       elif 'FK_Events_Groups_creatorGroup_groupID' in errorMsg:
-        return 'Cannot delete this group. The group is still referenced as creator Group by some Events.'
+        return ('Cannot delete this group. The group is still referenced as '
+                + 'creator Group by some Events.')
       else:
         return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(group=group,
-                           cbTLPValues=TLPLevel.getDefinitions()))
+      return (self.returnAjaxPostError()
+              + self.cleanHTMLCode(template.render(group=group,
+                           cbTLPValues=TLPLevel.getDefinitions())))
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)

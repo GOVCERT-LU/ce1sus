@@ -77,7 +77,12 @@
   <%call expr="labeledInput.labeledEditBox(label='Email',name='email',value=user.email,enabled=enabled)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Priviledged',name='priv',enabled=enabled,hasEmpty=True,selected=user.privileged)"/>
   <%call expr="labeledInput.labeledYesNoComboBox(label='Disabled',name='disabled',enabled=enabled,hasEmpty=True,selected=user.disabled)"/>
-  <%call expr="labeledInput.labeledYesNoComboBox(label='API Access',name='apikey',enabled=enabled,hasEmpty=False,selected=user.hasAPIKey)"/>
+  
+  %if user.hasAPIKey and not enabled:
+    <%call expr="labeledInput.labeledEditBox(label='APIKey',name='',value=user.apiKey,enabled=False)"/>
+  %else:
+    <%call expr="labeledInput.labeledYesNoComboBox(label='API Access',name='apikey',enabled=enabled,hasEmpty=False,selected=user.hasAPIKey)"/>
+  %endif
   <%call expr="labeledInput.labeledComboBox(label='Main Group',name='maingroup',values=cbValues,enabled=enabled,hasEmpty=False, selected=user.group_id)"/>
   <%call expr="labeledInput.labeledEditBox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
   
