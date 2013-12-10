@@ -15,7 +15,7 @@ import cherrypy
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.web.helpers.pagination import Paginator
 from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
-from dagr.db.broker import OperationException, BrokerException, \
+from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, DeletionException
 import types as types
 from ce1sus.brokers.permission.userbroker import UserBroker
@@ -169,7 +169,7 @@ class UserController(Ce1susBaseController):
           raise DeletionException('First user cannot be removed.')
         self.userBroker.removeByID(user.identifier)
       return self.returnAjaxOK()
-    except OperationException as e:
+    except IntegrityException as e:
       self.getLogger().info('User tried to delete referenced user.')
       return ('Cannot delete user. The user is referenced by elements.'
                     + ' Disable this user instead.')

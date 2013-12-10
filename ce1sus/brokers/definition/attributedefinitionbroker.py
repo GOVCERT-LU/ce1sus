@@ -12,7 +12,7 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, \
                            BrokerException, \
-                           OperationException, DeletionException
+                           IntegrityException, DeletionException
 import sqlalchemy.orm.exc
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
@@ -227,7 +227,7 @@ class AttributeDefinitionBroker(BrokerBase):
                       ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.OperationalError as e:
       self.session.rollback()
-      raise OperationException(e)
+      raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()

@@ -55,7 +55,7 @@ class ValidationException(BrokerException):
     BrokerException.__init__(self, message)
 
 
-class OperationException(BrokerException):
+class IntegrityException(BrokerException):
   """Operation Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
@@ -155,10 +155,9 @@ class BrokerBase(object):
                       getattr(self.getBrokerClass(),
                                 'identifier') == identifier
                       ).delete(synchronize_session='fetch')
-
-    except sqlalchemy.exc.OperationalError as e:
+    except sqlalchemy.exc.IntegrityError as e:
       self.session.rollback()
-      raise OperationException(e)
+      raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()

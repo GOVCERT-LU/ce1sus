@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
-from dagr.db.broker import OperationException, BrokerException, \
+from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
@@ -138,7 +138,7 @@ class GroupController(Ce1susBaseController):
           return 'Cannot delete this group. The group is essential to the application.'
         self.groupBroker.removeByID(group.identifier)
       return self.returnAjaxOK()
-    except OperationException as e:
+    except IntegrityException as e:
       errorMsg = '{0}'.format(e)
       self.getLogger().info('OperationError occurred: {0}'.format(e))
       if 'FK_User_Group_Group_id' in errorMsg:

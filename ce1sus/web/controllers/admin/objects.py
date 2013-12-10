@@ -16,7 +16,7 @@ import cherrypy
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                                                       ObjectDefinitionBroker
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
-from dagr.db.broker import OperationException, BrokerException, \
+from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, NothingFoundException
 import types
 
@@ -130,7 +130,7 @@ class ObjectController(Ce1susBaseController):
       if action == 'remove':
         self.objectBroker.removeByID(obj.identifier)
       return self.returnAjaxOK()
-    except OperationException as e:
+    except IntegrityException as e:
       self.getLogger().info('OperationError occurred: {0}'.format(e))
       return 'Cannot delete this object. The object is still referenced.'
     except ValidationException:

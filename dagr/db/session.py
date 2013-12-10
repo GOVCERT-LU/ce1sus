@@ -60,7 +60,7 @@ class SessionManager:
     if (protocol == 'sqlite'):
       self.connector = SqliteConnector(self.__config)
       pass
-    elif (protocol == 'mysql') or (protocol == 'mysql+mysqlconnector'):
+    elif ('mysql' in protocol):
       self.connector = MySqlConnector(self.__config)
     else:
       raise SessionManagerException(('Protocol {0} '

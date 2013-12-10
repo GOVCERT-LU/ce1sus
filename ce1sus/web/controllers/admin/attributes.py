@@ -19,7 +19,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
                           ValidationException, NothingFoundException, \
-                          DeletionException, OperationException
+                          DeletionException, IntegrityException
 import types as types
 
 
@@ -166,7 +166,7 @@ class AttributeController(Ce1susBaseController):
       return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(attribute=attribute,
                   cbValues=AttributeDefinition.getTableDefinitions(),
                   cbHandlerValues=AttributeDefinition.getHandlerDefinitions()))
-    except OperationException:
+    except IntegrityException:
       self.getLogger().info(('User tried to delete item {0} which is '
                              + 'still referenced.').format(identifier))
       return 'Error: There are still attributes using this definition.'

@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from ce1sus.web.helpers.protection import require, privileged, requireReferer
-from dagr.db.broker import OperationException, BrokerException, \
+from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, NothingFoundException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
@@ -129,7 +129,7 @@ class SubGroupController(Ce1susBaseController):
       if action == 'remove':
         self.subgroupBroker.removeByID(group.identifier)
       return self.returnAjaxOK()
-    except OperationException as e:
+    except IntegrityException as e:
       self.getLogger().info('OperationError occurred: {0}'.format(e))
       return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:

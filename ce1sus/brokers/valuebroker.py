@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, ValidationException, \
-NothingFoundException, TooManyResultsFoundException, OperationException, \
+NothingFoundException, TooManyResultsFoundException, IntegrityException, \
 BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey
@@ -306,7 +306,7 @@ class ValueBroker(BrokerBase):
     except sqlalchemy.exc.OperationalError as e:
       self.getLogger().error(e)
       self.session.rollback()
-      raise OperationException(e)
+      raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
