@@ -133,6 +133,9 @@ class GroupController(Ce1susBaseController):
       if action == 'update':
         self.groupBroker.update(group)
       if action == 'remove':
+        identifier = group.identifier
+        if identifier == '1' or identifier == 1:
+          return 'Cannot delete this group. The group is essential to the application.'
         self.groupBroker.removeByID(group.identifier)
       return self.returnAjaxOK()
     except OperationException as e:

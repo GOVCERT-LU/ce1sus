@@ -552,7 +552,7 @@ CREATE TABLE `Groups` (
 
 LOCK TABLES `Groups` WRITE;
 /*!40000 ALTER TABLE `Groups` DISABLE KEYS */;
-INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,0,'a@a.com',0,NULL);
+INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL);
 /*!40000 ALTER TABLE `Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups_has_Events`;
