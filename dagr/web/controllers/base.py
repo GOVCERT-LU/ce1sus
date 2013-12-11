@@ -52,14 +52,6 @@ class BaseController:
     """
     return self.mako.getTemplate(name)
 
-  def clearSession(self):
-    """
-    Clears the session
-    """
-    raise NotImplementedException(('{0}.clearSession()'
-                                   + ' is not implemented').format(
-                                                     self.__class__.__name__))
-
   def getLogger(self):
     """
     Returns the logger
