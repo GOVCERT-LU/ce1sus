@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.helpers.protection import Protector
 from dagr.web.controllers.base import BaseController
 from ce1sus.brokers.permission.userbroker import UserBroker
+from dagr.db.session import SessionManager
 import cherrypy
 
 
@@ -21,6 +22,7 @@ class Ce1susBaseController(BaseController):
 
   def __init__(self):
     BaseController.__init__(self)
+    self.sessionManager = SessionManager.getInstance()
     self.userBroker = self.brokerFactory(UserBroker)
 
   def __internalCheck(self, event):
@@ -142,3 +144,18 @@ class Ce1susBaseController(BaseController):
         return True
       else:
         return False
+
+  def brokerFactory(self, clazz):
+    """
+    Instantiates a broker.
+
+    Note: In short sets up the broker in a correct manner with all the
+    required settings
+
+    :param clazz: The BrokerClass to be instantiated
+    :type clazz: Extension of brokerbase
+
+    :returns: Instance of a broker
+    """
+    self.logger.debug('Create broker for {0}'.format(clazz))
+    return self.sessionManager.brokerFactory(clazz)

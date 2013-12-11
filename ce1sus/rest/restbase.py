@@ -34,6 +34,7 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
 from dagr.helpers.hash import fileHashSHA256, hashMD5, hashSHA256
 from ce1sus.web.helpers.handlers.filehandler import FileHandler
 import os
+from dagr.db.session import SessionManager
 from shutil import move
 
 
@@ -49,6 +50,7 @@ class RestControllerBase(BaseController):
 
   def __init__(self):
     BaseController.__init__(self)
+    self.sessionManager = SessionManager.getInstance()
     self.userBroker = self.brokerFactory(UserBroker)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
@@ -56,6 +58,8 @@ class RestControllerBase(BaseController):
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker
                                                        )
+
+
 
   def brokerFactory(self, clazz):
     """

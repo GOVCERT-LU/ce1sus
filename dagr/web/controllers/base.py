@@ -13,8 +13,8 @@ __license__ = 'GPL v3+'
 
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
-from dagr.db.session import SessionManager
 from dagr.web.helpers.config import WebConfig
+from dagr.db.session import SessionManager
 import re
 
 
@@ -41,22 +41,6 @@ class BaseController:
     self.mako = MakoHandler.getInstance()
     self.logger = Log.getLogger(self.__class__.__name__)
     self.config = WebConfig.getInstance()
-    self.sessionManager = SessionManager.getInstance()
-
-  def brokerFactory(self, clazz):
-    """
-    Instantiates a broker.
-
-    Note: In short sets up the broker in a correct manner with all the
-    required settings
-
-    :param clazz: The BrokerClass to be instantiated
-    :type clazz: Extension of brokerbase
-
-    :returns: Instance of a broker
-    """
-    self.logger.debug('Create broker for {0}'.format(clazz))
-    return self.sessionManager.brokerFactory(clazz)
 
   def getTemplate(self, name):
     """Returns the template
