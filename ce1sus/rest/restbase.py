@@ -104,7 +104,7 @@ class RestControllerBase(BaseController):
     result = dict(instance.toJSON(full=full,
                              withDefinition=withDefinition).items()
                  )
-    return json.dumps(result)
+    return result
 
   def _returnMessage(self, dictionary):
     result = dict(dictionary.items()

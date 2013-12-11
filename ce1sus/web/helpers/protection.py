@@ -17,6 +17,7 @@ SESSION_KEY_USERNAME = '_cp_username'
 SESSION_KEY_USER = '_cp_user'
 SESSION_KEY_GROUPS = '_cp_userGroups'
 SESSION_KEY_DEFAULTGROUP = '_cp_defaultUserGroup'
+REST_API_KEY = '_cp_restAPIKey'
 
 
 class Protector(object):
@@ -45,6 +46,18 @@ class Protector(object):
       else:
         # redirect in case the session is gone or was not set
         raise cherrypy.HTTPRedirect("/")
+
+  @staticmethod
+  def setRestSession(apiKey):
+    attribute = getattr(cherrypy, 'session')
+    attribute.regenerate()
+    attribute[REST_API_KEY] = apiKey
+
+  @staticmethod
+  def getRestAPIKey():
+    attribute = getattr(cherrypy, 'session')
+    key = attribute.get(REST_API_KEY, None)
+    return key
 
   @staticmethod
   def setSession(username):
@@ -108,6 +121,11 @@ class Protector(object):
     attribute[SESSION_KEY_USERNAME] = None
     if username:
       cherrypy.request.login = None
+
+  @staticmethod
+  def clearRestSession():
+    attribute = getattr(cherrypy, 'session')
+    attribute[REST_API_KEY] = None
 
 
 # pylint: disable=W0212

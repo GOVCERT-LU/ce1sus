@@ -22,6 +22,7 @@ import json
 from dagr.helpers.validator.valuevalidator import ValueValidator
 from dagr.helpers.converters import ValueConverter
 import re
+from ce1sus.web.helpers.protection import Protector
 
 
 class RestController(RestControllerBase):
@@ -74,6 +75,10 @@ class RestController(RestControllerBase):
     if not exists:
       self.getLogger().debug('Key does not exists')
       raise cherrypy.HTTPError(403)
+
+    # store key in session
+    Protector.setRestSession(apiKey)
+
 
   def __getController(self, controllerName):
     if controllerName in self.instances:
@@ -187,6 +192,7 @@ class RestController(RestControllerBase):
       if method:
         try:
           result = method(uuid, apiKey, **options)
+          Protector.clearRestSession()
           return result
         except RestAPIException as e:
           self.getLogger().debug(

@@ -43,31 +43,37 @@ class Ce1susAPI(object):
     self.apiKey = apiKey
     self.proxies = proxies
 
-  @staticmethod
-  def __populateInstanceByDict(instance, dictionary):
+  def __populateInstanceByDict(self, instance, dictionary):
     for key, value in dictionary.iteritems():
       if isinstance(value, DictionaryType):
         subkey, subvalue = Ce1susAPI.getObjectData(value)
         if hasattr(instance, key):
-          subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue)
+          subinstance = self.populateClassNamebyDict(subkey, subvalue)
           setattr(instance, key, subinstance)
       elif isinstance(value, ListType):
         lsit = list()
         if hasattr(instance, key):
           for item in value:
             subkey, subvalue = Ce1susAPI.getObjectData(item)
-            subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue)
+            subinstance = self.populateClassNamebyDict(subkey, subvalue)
             lsit.append(subinstance)
           setattr(instance, key, lsit)
       else:
         if value == 'None':
           value = None
+        if 'file' in '{0}'.format(value):
+          # decompress file
+          dictionary = eval(value)
+          jsonFile = dictionary.get('file', None)
+          if jsonFile:
+            value = jsonFile.decode('base64')
+          pass
+
         setattr(instance, key, value)
 
-  @staticmethod
-  def populateClassNamebyDict(clazz, dictionary):
+  def populateClassNamebyDict(self, clazz, dictionary):
     instance = Ce1susAPI.__instantiateClass(clazz)
-    Ce1susAPI.__populateInstanceByDict(instance, dictionary)
+    self.__populateInstanceByDict(instance, dictionary)
     return instance
 
   @staticmethod
@@ -97,15 +103,20 @@ class Ce1susAPI(object):
       for key, value in extra_headers.items():
         headers[key] = value
     if data:
-      request = requests.get(url, data=json.dumps(data), headers=headers, proxies=self.proxies)
+      request = requests.get(url,
+                             data=json.dumps(data),
+                             headers=headers,
+                             proxies=self.proxies)
     else:
       request = requests.get(url, headers=headers, proxies=self.proxies)
-    try:
+    if request.status_code == requests.codes.ok:
       response = request.text
-    except urllib2.HTTPError as e:
-      raise Ce1susAPIException('Error ({0})'.format(e.code))
-    except urllib2.URLError as e:
-      raise Ce1susAPIException('Error ({0})'.format(e.reason.args[1]))
+    else:
+      try:
+        request.raise_for_status()
+      except requests.exceptions.HTTPError as e:
+        raise Ce1susAPIException('Error ({0})'.format(e))
+
     # Process custom exceptions
 
     jsonObj = json.loads(response)
@@ -122,15 +133,15 @@ class Ce1susAPI(object):
           return jsonObj
     raise Ce1susAPIException('Undefined Error')
 
-  @staticmethod
-  def __mapResponseToObject(jsonData):
-    key, value = Ce1susAPI.__getData(jsonData)
-    return Ce1susAPI.populateClassNamebyDict(key, value)
 
-  @staticmethod
-  def __mapJSONToObject(jsonData):
+  def __mapResponseToObject(self, jsonData):
+    key, value = Ce1susAPI.__getData(jsonData)
+    return self.populateClassNamebyDict(key, value)
+
+
+  def __mapJSONToObject(self, jsonData):
     key, value = Ce1susAPI.getObjectData(jsonData)
-    return Ce1susAPI.populateClassNamebyDict(key, value)
+    return self.populateClassNamebyDict(key, value)
 
   def getEventByUUID(self, uuid, withDefinition=False):
     if withDefinition:
@@ -151,7 +162,13 @@ class Ce1susAPI(object):
       raise Ce1susAPIException(('Object{0} does not implement '
                                 + 'RestClass').format(event))
 
-  def getEvents(self, startDate=None, endDate=None, offset=0, limit=20, withDefinition=False, uuids=list()):
+  def getEvents(self,
+                startDate=None,
+                endDate=None,
+                offset=0,
+                limit=20,
+                withDefinition=False,
+                uuids=list()):
     if withDefinition:
       headers = {'full_definitions': True}
     else:
@@ -173,10 +190,17 @@ class Ce1susAPI(object):
     result = list()
     for value in values:
       jsonData = json.loads(value)
-      result.append(Ce1susAPI.__mapJSONToObject(jsonData))
+      result.append(self.__mapJSONToObject(jsonData))
     return result
 
-  def searchEvents(self, objectType, objectContainsAttribute=list(), startDate=None, endDate=None, offset=0, limit=20, withDefinition=False):
+  def searchEvents(self,
+                   objectType,
+                   objectContainsAttribute=list(),
+                   startDate=None,
+                   endDate=None,
+                   offset=0,
+                   limit=20,
+                   withDefinition=False):
     if withDefinition:
       headers = {'full_definitions': True}
     else:
@@ -198,7 +222,15 @@ class Ce1susAPI(object):
     key, uuids = Ce1susAPI.__getData(result)
     return uuids
 
-  def searchAttributes(self, objectType, objectContainsAttribute=list(), filterAttributes=list(), startDate=None, endDate=None, offset=0, limit=20, withDefinition=False):
+  def searchAttributes(self,
+                       objectType,
+                       objectContainsAttribute=list(),
+                       filterAttributes=list(),
+                       startDate=None,
+                       endDate=None,
+                       offset=0,
+                       limit=20,
+                       withDefinition=False):
     if withDefinition:
       headers = {'full_definitions': True}
     else:
@@ -223,7 +255,7 @@ class Ce1susAPI(object):
     for item in values:
       jsonObject = json.loads(item)
       for key, value in jsonObject.iteritems():
-        restEvent = Ce1susAPI.populateClassNamebyDict(key, value)
+        restEvent = self.populateClassNamebyDict(key, value)
         events.append(restEvent)
 
     return events

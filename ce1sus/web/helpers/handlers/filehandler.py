@@ -31,7 +31,9 @@ from dagr.db.broker import BrokerException
 from ce1sus.web.helpers.protection import Protector
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
+from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
+import base64
 
 
 class FileNotFoundException(HandlerException):
@@ -49,6 +51,7 @@ class FileHandler(GenericHandler):
     GenericHandler.__init__(self)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.eventBroker = self.brokerFactory(EventBroker)
+    self.userBroker = self.brokerFactory(UserBroker)
 
   # pylint: disable=W0211
   @staticmethod
@@ -151,21 +154,26 @@ class FileHandler(GenericHandler):
     try:
       event = self.eventBroker.getByID(eventID)
 
-      if event.creator.identifier == user.identifier:
-        canDownload = True
+      if event.creatorGroup_id == user.defaultGroup.identifier:
+        return True
       else:
-        if user.defaultgroup in event.maingroups:
-          return True
+        ids = list()
+        for group in event.maingroups:
+          ids.append(group.identifier)
+        if user.defaultGroup.identifier in ids:
+          if user.defaultGroup.canDownload:
+            return True
+        ids = list()
+        for group in user.defaultGroup.subgroups:
+          ids.append(group.identifier)
         for group in event.groups:
-          if group in user.groups:
+          if group.identifier in ids:
             if group.canDownload:
-              canDownload = True
-              break
+              return True
 
     except BrokerException as e:
       self.getLogger().debug(e)
-      canDownload = False
-    return canDownload
+      return False
 
   def render(self, enabled, eventID, user, definition, attribute=None):
 
@@ -196,9 +204,21 @@ class FileHandler(GenericHandler):
   def convertToAttributeValue(self, value):
     attribute = value.attribute
     user = Protector.getUser()
+    restUser = False
     if user is None:
-      return '(Not Provided)'
-    else:
+      # check if not a rest user
+      apiKey = Protector.getRestAPIKey()
+      # if there is a key in the session then the user has logged in via REST
+      if apiKey:
+        try:
+          user = self.userBroker.getUserByApiKey(apiKey)
+          restUser = True
+        except BrokerException:
+          return '(Not Provided)'
+      else:
+        return '(Not Provided)'
+
+    if not user is None and not restUser:
       eventID = attribute.object.event_id
       if eventID is None:
         eventID = attribute.object.parentEvent_id
@@ -213,6 +233,14 @@ class FileHandler(GenericHandler):
         return link
       else:
         return '(Not Accessible)'
+    else:
+      if restUser:
+        with open(value.value, "rb") as file:
+          data = file.read()
+          binaryASCII = '{0}'.format(data.encode("base64"))
+        return {'file': binaryASCII}
+      else:
+        return '(Not Provided)'
 
 
 class FileWithHashesHandler(FileHandler):
