@@ -12,6 +12,7 @@ import requests
 from types import DictionaryType, ListType
 from importlib import import_module
 from ce1sus.api.restclasses import RestClass, RestAPIException
+import os
 
 
 def json_pretty_print(j):
@@ -43,37 +44,39 @@ class Ce1susAPI(object):
     self.apiKey = apiKey
     self.proxies = proxies
 
-  def __populateInstanceByDict(self, instance, dictionary):
+  @staticmethod
+  def __populateInstanceByDict(instance, dictionary, isClient=True):
     for key, value in dictionary.iteritems():
       if isinstance(value, DictionaryType):
         subkey, subvalue = Ce1susAPI.getObjectData(value)
         if hasattr(instance, key):
-          subinstance = self.populateClassNamebyDict(subkey, subvalue)
+          subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, isClient)
           setattr(instance, key, subinstance)
       elif isinstance(value, ListType):
         lsit = list()
         if hasattr(instance, key):
           for item in value:
             subkey, subvalue = Ce1susAPI.getObjectData(item)
-            subinstance = self.populateClassNamebyDict(subkey, subvalue)
+            subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, isClient)
             lsit.append(subinstance)
           setattr(instance, key, lsit)
       else:
         if value == 'None':
           value = None
-        if 'file' in '{0}'.format(value):
+        if isClient and 'file' in '{0}'.format(value):
           # decompress file
           dictionary = eval(value)
           jsonFile = dictionary.get('file', None)
           if jsonFile:
-            value = jsonFile.decode('base64')
-          pass
-
+            fileName = jsonFile[0]
+            strData = jsonFile[1]
+            value = strData.decode('base64')
         setattr(instance, key, value)
 
-  def populateClassNamebyDict(self, clazz, dictionary):
+  @staticmethod
+  def populateClassNamebyDict(clazz, dictionary, isClient=True):
     instance = Ce1susAPI.__instantiateClass(clazz)
-    self.__populateInstanceByDict(instance, dictionary)
+    Ce1susAPI.__populateInstanceByDict(instance, dictionary, isClient=isClient)
     return instance
 
   @staticmethod
@@ -103,7 +106,7 @@ class Ce1susAPI(object):
       for key, value in extra_headers.items():
         headers[key] = value
     if data:
-      request = requests.get(url,
+      request = requests.post(url,
                              data=json.dumps(data),
                              headers=headers,
                              proxies=self.proxies)
@@ -133,15 +136,15 @@ class Ce1susAPI(object):
           return jsonObj
     raise Ce1susAPIException('Undefined Error')
 
-
-  def __mapResponseToObject(self, jsonData):
+  @staticmethod
+  def __mapResponseToObject(jsonData):
     key, value = Ce1susAPI.__getData(jsonData)
-    return self.populateClassNamebyDict(key, value)
+    return Ce1susAPI.populateClassNamebyDict(key, value)
 
-
-  def __mapJSONToObject(self, jsonData):
+  @staticmethod
+  def __mapJSONToObject(jsonData):
     key, value = Ce1susAPI.getObjectData(jsonData)
-    return self.populateClassNamebyDict(key, value)
+    return Ce1susAPI.populateClassNamebyDict(key, value)
 
   def getEventByUUID(self, uuid, withDefinition=False):
     if withDefinition:
@@ -151,13 +154,13 @@ class Ce1susAPI(object):
 
     result = self.__request('/event/{0}'.format(uuid),
                             None, headers)
-    return self.__mapResponseToObject(result)
+    return Ce1susAPI.__mapResponseToObject(result)
 
   def insertEvent(self, event):
     if isinstance(event, RestClass):
       data = dict(event.toJSON(True, True))
       result = self.__request('/event', data)
-      return self.__mapResponseToObject(result)
+      return Ce1susAPI.__mapResponseToObject(result)
     else:
       raise Ce1susAPIException(('Object{0} does not implement '
                                 + 'RestClass').format(event))
@@ -190,7 +193,7 @@ class Ce1susAPI(object):
     result = list()
     for value in values:
       jsonData = json.loads(value)
-      result.append(self.__mapJSONToObject(jsonData))
+      result.append(Ce1susAPI.__mapJSONToObject(jsonData))
     return result
 
   def searchEvents(self,
@@ -255,7 +258,7 @@ class Ce1susAPI(object):
     for item in values:
       jsonObject = json.loads(item)
       for key, value in jsonObject.iteritems():
-        restEvent = self.populateClassNamebyDict(key, value)
+        restEvent = Ce1susAPI.populateClassNamebyDict(key, value, True)
         events.append(restEvent)
 
     return events

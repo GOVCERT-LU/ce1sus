@@ -31,6 +31,11 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                       AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                                                         ObjectDefinitionBroker
+from dagr.helpers.hash import fileHashSHA256, hashMD5, hashSHA256
+from ce1sus.web.helpers.handlers.filehandler import FileHandler
+import os
+from shutil import move
+
 
 class RestAPIException(Exception):
   """
@@ -133,10 +138,11 @@ class RestControllerBase(BaseController):
       raw = cherrypy.request.body.read(int(cl))
       jsonData = json.loads(raw)
       key, value = Ce1susAPI.getObjectData(jsonData)
-      obj = Ce1susAPI.populateClassNamebyDict(key, value)
+      obj = Ce1susAPI.populateClassNamebyDict(key, value, False)
+      return obj
     except Exception as e:
-      print e
-    return obj
+      self.raiseError('Aua', '{0}'.format(e))
+
 
   def _checkIfViewable(self, event, user):
     """
@@ -217,7 +223,33 @@ class RestControllerBase(BaseController):
     # create the actual attribute
     dbAttribute = Attribute()
     dbAttribute.identifier = None
-    dbAttribute.value = restAttribute.value
+    if 'file' in restAttribute.value:
+      try:
+        value = eval(restAttribute.value)
+        jsonFile = value.get('file', None)
+        if jsonFile:
+          fileName = jsonFile[0]
+          strData = jsonFile[1]
+          value = strData.decode('base64')
+          tmpFolder = '/tmp/' + hashMD5('{0}'.format(datetime.now()))
+          os.mkdir(tmpFolder)
+          tmpFolder = tmpFolder + '/{0}'.format(fileName)
+
+          fh = open(tmpFolder, "wb")
+          fh.write(value)
+
+          # filename
+          destination = FileHandler.getDestination()
+          fileHash = fileHashSHA256(tmpFolder)
+          fileName = FileHandler.getFileName(fileHash, hashSHA256(fileName))
+          destination = destination + '/' + fileName
+          move(tmpFolder, destination)
+          value = destination
+      except:
+        value = '(Corrupted File)'
+    else:
+      value = restAttribute.value
+    dbAttribute.value = value
     dbAttribute.object = obj
     dbAttribute.object_id = obj.identifier
     dbAttribute.def_attribute_id = attributeDefinition.identifier

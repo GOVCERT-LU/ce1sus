@@ -31,6 +31,9 @@ from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from dagr.db.broker import NothingFoundException
 from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.hash import hashMD5
+from datetime import datetime
+import os
 
 
 class AttributesController(Ce1susBaseController):
@@ -94,7 +97,11 @@ class AttributesController(Ce1susBaseController):
     if value.file is None:
       return 'No file selected. Try again.'
     size = 0
-    fileObj = open('/tmp/' + value.filename, 'a')
+    newFolderName = hashMD5('{0}'.format(datetime.now()))
+    destFolderPath = '/tmp/' + newFolderName
+    os.mkdir(destFolderPath)
+    filepath = destFolderPath + '/' + value.filename
+    fileObj = open(filepath, 'a')
     while True:
       data = value.file.read(8192)
       if not data:
@@ -104,7 +111,8 @@ class AttributesController(Ce1susBaseController):
     fileObj.close()
     if size == 0:
       self.getLogger().fatal('Upload of the given file failed.')
-    filepath = '/tmp/' + value.filename
+    # make hash folder of timestamp
+
     return self.returnAjaxOK() + '*{0}*'.format(filepath)
 
   # pylint: disable=R0914,R0912,R0911

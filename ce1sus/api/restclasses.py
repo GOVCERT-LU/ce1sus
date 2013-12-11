@@ -15,6 +15,7 @@ from dagr.helpers.hash import hashSHA1
 from types import ListType
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
+from os.path import basename
 
 
 class RestAPIException(Exception):
@@ -183,7 +184,14 @@ class RestAttribute(RestClass):
                                                 full=True,
                                                 withDefinition=withDefinition
                                                           )
-    result[self.__class__.__name__]['value'] = '{0}'.format(self.value)
+    if isinstance(self.value, file):
+      data = self.value.read()
+      binaryASCII = '{0}'.format(data.encode("base64"))
+      fileName = basename(self.value.name)
+      value = {'file': (fileName, binaryASCII)}
+    else:
+      value = self.value
+    result[self.__class__.__name__]['value'] = '{0}'.format(value)
     result[self.__class__.__name__]['ioc'] = '{0}'.format(self.ioc)
     return result
 

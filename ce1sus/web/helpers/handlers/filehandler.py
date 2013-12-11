@@ -34,6 +34,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
 import base64
+from os.path import basename, exists
 
 
 class FileNotFoundException(HandlerException):
@@ -59,6 +60,27 @@ class FileHandler(GenericHandler):
     return ('file_name',
             'hash_sha1')
 
+  @staticmethod
+  def getFileName(fileHash, fileName):
+    hashedFileName = hasher.hashSHA256(fileName)
+    svrFileName = '{0}{1}{2}'.format(fileHash,
+                                       datetime.now(),
+                                       hashedFileName)
+    return hasher.hashSHA256(svrFileName)
+
+  @staticmethod
+  def getDestination():
+    # move file to destination
+    destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
+                                              getInstance().get('files'),
+                                                 datetime.now().year,
+                                                 datetime.now().month,
+                                                 datetime.now().day)
+    # in case the directories doesn't exist
+    if not exists(destination):
+      makedirs(destination)
+    return destination
+
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
     if isfile(filepath):
@@ -75,14 +97,7 @@ class FileHandler(GenericHandler):
                                     user,
                                     '1')
       # move file to destination
-      destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
-                                              getInstance().get('files'),
-                                                 datetime.now().year,
-                                                 datetime.now().month,
-                                                 datetime.now().day)
-      # in case the directories doesn't exist
-      if not exists(destination):
-        makedirs(destination)
+      destination = FileHandler.getDestination()
       # add the name to the file
       destination += sha1.value
       move(filepath, destination)
@@ -173,7 +188,7 @@ class FileHandler(GenericHandler):
 
     except BrokerException as e:
       self.getLogger().debug(e)
-      return False
+
 
   def render(self, enabled, eventID, user, definition, attribute=None):
 
@@ -225,11 +240,14 @@ class FileHandler(GenericHandler):
       userInGroups = self.__canUserDownload(eventID, user)
       userIsOwner = attribute.creator_id == user.identifier
       if userInGroups or userIsOwner:
-        link = Link(FileHandler.URLSTR.format(
+        if exists(value.value):
+          link = Link(FileHandler.URLSTR.format(
                                               attribute.object.identifier,
                                               attribute.identifier,
                                               ''),
                     'Download')
+        else:
+          return '(File vanished or is corrupt)'
         return link
       else:
         return '(Not Accessible)'
@@ -238,7 +256,8 @@ class FileHandler(GenericHandler):
         with open(value.value, "rb") as file:
           data = file.read()
           binaryASCII = '{0}'.format(data.encode("base64"))
-        return {'file': binaryASCII}
+        fileName = basename(value.value)
+        return {'file': (fileName, binaryASCII)}
       else:
         return '(Not Provided)'
 
@@ -317,21 +336,10 @@ class FileWithHashesHandler(FileHandler):
                                                user,
                                                '0'))
 
-      # move file to destination
-      destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
-                                              getInstance().get('files'),
-                                                 datetime.now().year,
-                                                 datetime.now().month,
-                                                 datetime.now().day)
-      # in case the directories doesn't exist
-      if not exists(destination):
-        makedirs(destination)
+      destination = FileHandler.getDestination()
       # add the name to the file
       hashedFileName = hasher.hashSHA256(fileName)
-      svrFileName = '{0}{1}{2}'.format(sha256.value,
-                                       datetime.now(),
-                                       hashedFileName)
-      destination += hasher.hashSHA256(svrFileName)
+      destination += FileHandler.getFileName(sha256.value, hashedFileName)
       move(filepath, destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
