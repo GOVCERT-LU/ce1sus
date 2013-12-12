@@ -45,25 +45,25 @@ class Ce1susAPI(object):
     self.proxies = proxies
 
   @staticmethod
-  def __populateInstanceByDict(instance, dictionary, isClient=True):
+  def __populateInstanceByDict(instance, dictionary, makeBinary=True):
     for key, value in dictionary.iteritems():
       if isinstance(value, DictionaryType):
         subkey, subvalue = Ce1susAPI.getObjectData(value)
         if hasattr(instance, key):
-          subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, isClient)
+          subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, makeBinary)
           setattr(instance, key, subinstance)
       elif isinstance(value, ListType):
         lsit = list()
         if hasattr(instance, key):
           for item in value:
             subkey, subvalue = Ce1susAPI.getObjectData(item)
-            subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, isClient)
+            subinstance = Ce1susAPI.populateClassNamebyDict(subkey, subvalue, makeBinary)
             lsit.append(subinstance)
           setattr(instance, key, lsit)
       else:
         if value == 'None':
           value = None
-        if isClient and 'file' in '{0}'.format(value):
+        if makeBinary and 'file' in '{0}'.format(value):
           # decompress file
           dictionary = eval(value)
           jsonFile = dictionary.get('file', None)
@@ -74,9 +74,9 @@ class Ce1susAPI(object):
         setattr(instance, key, value)
 
   @staticmethod
-  def populateClassNamebyDict(clazz, dictionary, isClient=True):
+  def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
     instance = Ce1susAPI.__instantiateClass(clazz)
-    Ce1susAPI.__populateInstanceByDict(instance, dictionary, isClient=isClient)
+    Ce1susAPI.__populateInstanceByDict(instance, dictionary, makeBinary=makeBinary)
     return instance
 
   @staticmethod
