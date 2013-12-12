@@ -47,17 +47,6 @@ class Relation(object):
     self.attributeValue = 0
 
 
-# pylint: disable=R0903,R0902
-class Object4Paginator(object):
-  """
-  Container only used for displaying the objects in the event view
-  """
-  def __init__(self):
-    self.identifier = 0
-    self.type = 0
-    self.isChildOf = 0
-
-
 class EventController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
@@ -105,30 +94,10 @@ class EventController(Ce1susBaseController):
                           contentid='',
                           tabid='eventObjects{0}'.format(eventID))
 
-    objectPaginator = Paginator(items=list(),
-                          labelsAndProperty=[{'identifier':'#'},
-                                              {'type':'Type'},
-                                              {'isChildOf':'Child Of'}],
-                          paginatorOptions=paginatorOptions)
-    objectPaginator.itemsPerPage = 3
-
-    if self.isEventOwner(event):
-      objectList = (self.objectBroker.getObjectsOfEvent(eventID)
-                + self.objectBroker.getChildObjectsForEvent(eventID))
-    else:
-      objectList = (self.objectBroker.getViewableOfEvent(eventID)
-                + self.objectBroker.getViewableChildObjectsForEvent(eventID))
 
 
-    for item in objectList:
-      newItem = Object4Paginator()
-      newItem.identifier = item.identifier
-      newItem.type = item.definition.name
-      if item.parentObject_id is None:
-        newItem.isChildOf = ''
-      else:
-        newItem.isChildOf = '#{0}'.format(item.parentObject_id)
-      objectPaginator.list.append(newItem)
+
+
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -171,10 +140,11 @@ class EventController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error(e)
 
-    return self.cleanHTMLCode(template.render(objectPaginator=objectPaginator,
+    return self.cleanHTMLCode(template.render(objectList=event.objects,
                            relationPaginator=relationPaginator,
                            event=event,
-                           comments=event.comments))
+                           comments=event.comments,
+                           owner=self.isEventOwner(event)))
 
   def __getRelationsObjects(self, objects):
     """

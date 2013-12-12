@@ -7,22 +7,21 @@
 <%namespace name="dagr" module="dagr.web.helpers.string"/>
 <%namespace name="pagination" file="/dagr/components/pagination.html"/>
 <%namespace name="tabulator" file="/dagr/components/tabs.html"/>
+<%namespace name="collapse" file="/components/collapse.html"/>
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
 
 <div id="deleteAnswer" style="display: none;">
 </div>
 
 
 <div class="row">
-  <div class="col-xs-4 col-sm-4">
+  <div class="col-xs-12 col-sm-12">
     
     <div id="eventEdit">
         
     </div>
-  </div>
-  <div class="col-xs-8 col-sm-8">
-    <legend>Objects</legend>
-<%call expr="pagination.pagination('objectsTableOverView{0}'.format(event.identifier),objectPaginator,hasSearch=False)"/>
-
+  
+ 
 <legend>Relations</legend>
 <%call expr="pagination.pagination('relationsTableOverView{0}'.format(event.identifier),relationPaginator,hasSearch=False)"/>
 <br/><br/>
@@ -69,15 +68,13 @@
   </tbody>
 </table>
 
-
+</div>
+</div>
 
 <div class="btn-group">
 <a href="#addCommentModal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add
                 new Comment</a>
 </div>
-
-
-
 
 <%call expr="baseForms.genericModalForm(modalID='addCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
     <input type="hidden" name="action" value="insert">

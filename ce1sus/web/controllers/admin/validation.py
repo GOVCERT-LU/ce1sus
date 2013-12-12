@@ -17,7 +17,7 @@ from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.web.controllers.event.event import Object4Paginator, Relation
+from ce1sus.web.controllers.event.event import Relation
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definition.attributedefinitionbroker import \
