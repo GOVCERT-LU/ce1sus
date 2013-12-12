@@ -107,7 +107,7 @@ isModal=False
                         if option.reload:
                           enabledStr = 'false'
                         %>
-                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}',${enabledStr});">
+                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}',${enabledStr}, '${option.tabTitle} #${primaryKey}' );">
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'TAB':
                         <a href="#" onclick="loadTabFromPaginator('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}','${option.tabid}');">

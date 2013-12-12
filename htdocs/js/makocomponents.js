@@ -151,7 +151,7 @@ function loadContent(contentid, url) {
     }
 }
 
-function loadNewTab(pk, id, url, reload) {
+function loadNewTab(pk, id, url, reload, title) {
     // getTabID
     tabID = id.replace("TabContent", "");
     // deactivate Tabs
@@ -172,7 +172,7 @@ function loadNewTab(pk, id, url, reload) {
         .attr("href", '#')
         .attr("src", url)
         .attr("id", keyValue)
-        .html("Event #" + pk);
+        .html(title);
         
         if (reload) {
             link.attr("onclick", 'loadTabLi(this.id, true)');

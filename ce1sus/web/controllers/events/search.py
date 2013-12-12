@@ -123,7 +123,8 @@ class SearchController(Ce1susBaseController):
       paginatorOptions.addOption('NEWTAB',
                                  'VIEW',
                                  '/events/event/view/',
-                                 contentid='')
+                                 contentid='',
+                               tabTitle='Event')
       paginator = Paginator(items=result,
                             labelsAndProperty=labels,
                             paginatorOptions=paginatorOptions)

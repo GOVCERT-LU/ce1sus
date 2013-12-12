@@ -78,6 +78,7 @@ class EventsController(Ce1susBaseController):
               {'risk':'Risk'},
               {'status': 'Status'},
               {'tlp':'TLP'},
+              {'Creator Group':'creatorGroup.name'},
               {'modified':'Last modification'},
               {'last_seen':'Last seen'}]
     # get only the last 200 events to keep the page small
@@ -89,7 +90,8 @@ class EventsController(Ce1susBaseController):
                                'VIEW',
                                '/events/event/view/',
                                contentid='',
-                               autoReload=False)
+                               autoReload=False,
+                               tabTitle='Event')
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)

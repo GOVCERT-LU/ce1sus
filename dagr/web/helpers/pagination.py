@@ -68,7 +68,8 @@ class PaginatorOptions(object):
                  tabid='',
                  modalTitle='',
                  postUrl='',
-                 autoReload=True):
+                 autoReload=True,
+                 tabTitle=''):
       self.option = option
       self.mode = mode
       self.url = url
@@ -79,6 +80,7 @@ class PaginatorOptions(object):
       self.modalTitle = modalTitle
       self.postUrl = postUrl
       self.reload = autoReload
+      self.tabTitle = tabTitle
 
     @property
     def icon(self):
@@ -127,6 +129,7 @@ class PaginatorOptions(object):
                 tabid='',
                 modalTitle='',
                 postUrl='',
+                tabTitle='',
                 autoReload=True):
     """
     Adds an option
@@ -163,7 +166,8 @@ class PaginatorOptions(object):
                                      tabid,
                                      modalTitle,
                                      postUrl,
-                                     autoReload)
+                                     autoReload,
+                                     tabTitle)
     self.options.append(option)
 
   @property
