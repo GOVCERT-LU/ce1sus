@@ -73,7 +73,8 @@ class ValidationController(Ce1susBaseController):
                                'VIEW',
                                '/admin/validation/event/',
                                contentid='',
-                               autoReload=True)
+                               autoReload=False,
+                               tabTitle='Event')
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
@@ -130,8 +131,8 @@ class ValidationController(Ce1susBaseController):
                                'VIEW',
                                '/events/event/view/',
                                contentid='',
-                               tabTitle='Event',
-                               autoReload=True)
+                               autoReload=False,
+                               tabTitle='Event')
 
     relationPaginator = Paginator(items=list(),
                           labelsAndProperty=relationLabels,
