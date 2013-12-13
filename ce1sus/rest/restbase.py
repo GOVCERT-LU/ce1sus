@@ -95,6 +95,7 @@ class RestControllerBase(BaseController):
     instance = clazz()
     # check if handler base is implemented
     if not isinstance(instance, RestClass):
+      Protector.clearRestSession()
       raise RestAPIException(('{0} does not implement '
                               + 'RestClass').format(className))
     return instance
@@ -131,7 +132,6 @@ class RestControllerBase(BaseController):
     return result
 
   def raiseError(self, classname, message):
-
     raise RestAPIException('{0}: {1}'.format(classname, message))
 
 
@@ -159,8 +159,10 @@ class RestControllerBase(BaseController):
     userDefaultGroup = user.defaultGroup
     # if the user has no default group he has no rights
     if userDefaultGroup is None or not event.published:
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(403)
     if (not event.bitValue.isValidated and not event.bitValue.isSharable):
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(403)
     self.getLogger().debug("Checked if it is viewable for user {0}".format(
                                                                   user.username
@@ -182,6 +184,7 @@ class RestControllerBase(BaseController):
               result = True
               break
     if not result:
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(403)
 
     return result
@@ -303,6 +306,7 @@ class RestControllerBase(BaseController):
       objDefinition = ObjectDefinition()
       objDefinition.name = restObjectDefinition.name
       objDefinition.description = restObjectDefinition.description
+      objDefinition.share = 1
       self.objectDefinitionBroker.insert(objDefinition, commit=commit)
 
     return objDefinition

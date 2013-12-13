@@ -280,7 +280,7 @@ class AttributeDefinitionBroker(BrokerBase):
     ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
     ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
     ObjectConverter.setInteger(attribute, 'relation', relation)
-    key = '{0}{1}{2}'.format(attribute.name,
+    key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,
                              attribute.classIndex,
                              attribute.handlerIndex)

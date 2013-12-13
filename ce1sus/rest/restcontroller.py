@@ -74,6 +74,7 @@ class RestController(RestControllerBase):
 
     if not exists:
       self.getLogger().debug('Key does not exists')
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(403)
 
     # store key in session
@@ -86,6 +87,7 @@ class RestController(RestControllerBase):
     else:
       self.getLogger().debug(
                         'No instance defined for {0}'.format(controllerName))
+      Protector.clearRestSession()
       raise cherrypy.NotFound
 
   def __checkIfValidUIID(self, string):
@@ -97,6 +99,7 @@ class RestController(RestControllerBase):
   def __splitPath(self, vpath):
     # path need at least 2 elements version/controller/....
     if not vpath:
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(400)
     controllerName = None
     parameter = None
@@ -117,16 +120,20 @@ class RestController(RestControllerBase):
           parameter = possibleUUID
           try:
             int(parameter)
+            Protector.clearRestSession()
             raise cherrypy.HTTPError(418)
           except ValueError:
             if parameter not in RestController.REST_Allowed_Parameters:
+              Protector.clearRestSession()
               raise cherrypy.HTTPError(418)
         if (len(pathElements) > 3):
           if self.__checkIfValidUIID(pathElements[3]):
             uuid = possibleUUID.strip()
           else:
+            Protector.clearRestSession()
             raise cherrypy.HTTPError(418)
     else:
+      Protector.clearRestSession()
       raise cherrypy.HTTPError(400)
 
     return controllerName, parameter, uuid
@@ -176,6 +183,7 @@ class RestController(RestControllerBase):
       if not action in RestController.REST_mapper:
         self.getLogger().debug(
                           'Action {0} is not defined in mapper'.format(action))
+        Protector.clearRestSession()
         raise cherrypy.HTTPError(400)
 
       if parameter:
@@ -187,6 +195,7 @@ class RestController(RestControllerBase):
       # call method if existing
         method = getattr(controller, methodName, None)
       else:
+        Protector.clearRestSession()
         raise cherrypy.HTTPError(400)
 
       if method:
@@ -201,6 +210,7 @@ class RestController(RestControllerBase):
                                                                      controller,
                                                                      e))
           temp = dict(self._createStatus('RestException', e.message))
+          Protector.clearRestSession()
           return json.dumps(temp)
       else:
         self.getLogger().debug(
@@ -210,9 +220,12 @@ class RestController(RestControllerBase):
         path = request.script_name + request.path_info
         temp = dict(self._createStatus('RestException',
                                        "The path '%s' was not found." % path))
+        Protector.clearRestSession()
         return json.dumps(temp)
     except RestAPIException as e:
           self.getLogger().debug(
                           'Error occured during {0}'.format(e))
           temp = dict(self._createStatus('RestException', e.message))
+          Protector.clearRestSession()
           return json.dumps(temp)
+

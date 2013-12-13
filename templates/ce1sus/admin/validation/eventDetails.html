@@ -13,8 +13,7 @@
 
 
 <div class="row">
-  <div class="col-xs-4 col-sm-4">
-    
+  <div class="col-xs-12 col-sm-12" style="text-align:left">
     <div id="eventEdit">
         <legend>Details</legend>
         <div class="btn-group">
@@ -35,11 +34,77 @@
         ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
     </div>
   </div>
-  <div class="col-xs-8 col-sm-8">
-    <legend>Objects</legend>
-<%call expr="pagination.pagination('objectsTable',objectPaginator,hasSearch=False)"/>
+  
 <br/><br/>
 <legend>Relations</legend>
 <%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
 <br/><br/>
 
+<legend>Comments</legend>
+<table class="table table-striped table-hover table-condensed">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Comment</th>
+      <th>Date</th>
+      <th>User</th>
+      <th width="150px">Options</th>
+    </tr>
+  </thead>
+  <tbody>
+    %if comments is None:
+    <tr>
+      <td></td>
+      <td></td>
+      <td><div style="text-align:center">No data available in table</div></td>
+      <td></td>
+    </tr>
+    %else:
+      %for comment in comments:
+        <tr>
+          <td>${comment.identifier}</td>
+          <td>${dagr.plaintext2html(text=comment.comment)}</td>
+          <td>${comment.created}</td>
+          <td>${comment.creator.username}</td>
+          <td>
+              <div class="btn-group">
+                  <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="glyphicon glyphicon-pencil" title="Edit"/></i></a>  
+                    <a href="#"  role="button"
+                    onclick="if (confirm('Are you sure you want to delete?')) {
+                        dialogCall('/events/event/comment/modifyComment?commentID=${comment.identifier}&eventID=${event.identifier}&action=remove',
+                                   'eventsTabTabContent',
+                                   '/events/event/view/${event.identifier}')}"><i class="glyphicon glyphicon-remove" title="Remove"/></a>
+              </div>
+          </td>
+        </tr>
+      %endfor
+    %endif
+  </tbody>
+</table>
+
+</div>
+</div>
+
+<div class="btn-group">
+<a href="#addCommentModal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add
+                new Comment</a>
+</div>
+
+<%call expr="baseForms.genericModalForm(modalID='addCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
+    <input type="hidden" name="action" value="insert">
+    <%call expr="modals.saveButtonModal(id='addCommentModal',title='Add a comment',contentUrl='/events/event/comment/addComment/{0}'.format(event.identifier))"/>
+</%call>
+
+<%call expr="baseForms.genericModalForm(modalID='editCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
+    <input type="hidden" name="action" value="update">
+    <%call expr="modals.saveButtonModal(id='editCommentModal',title='Add a comment',contentUrl=None)"/>
+</%call>
+
+<script type="text/javascript">
+
+function editComment(eventID,commentID) {   
+    loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
+}
+
+
+</script>

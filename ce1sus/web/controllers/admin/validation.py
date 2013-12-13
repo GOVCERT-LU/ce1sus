@@ -117,23 +117,7 @@ class ValidationController(Ce1susBaseController):
                           contentid='',
                           tabid='eventObjects{0}'.format(eventID))
 
-    objectPaginator = Paginator(items=list(),
-                          labelsAndProperty=[{'identifier':'#'},
-                                              {'type':'Type'},
-                                              {'isChildOf':'Child Of'}],
-                          paginatorOptions=paginatorOptions)
-    objectPaginator.itemsPerPage = 3
 
-    for item in (event.objects
-                    + self.objectBroker.getChildObjectsForEvent(eventID)):
-      newItem = Object4Paginator()
-      newItem.identifier = item.identifier
-      newItem.type = item.definition.name
-      if item.parentObject_id is None:
-        newItem.isChildOf = ''
-      else:
-        newItem.isChildOf = '#{0}'.format(item.parentObject_id)
-      objectPaginator.list .append(newItem)
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -145,7 +129,9 @@ class ValidationController(Ce1susBaseController):
     relationsPaginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',
-                               contentid='')
+                               contentid='',
+                               tabTitle='Event',
+                               autoReload=True)
 
     relationPaginator = Paginator(items=list(),
                           labelsAndProperty=relationLabels,
@@ -175,7 +161,7 @@ class ValidationController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error(e)
 
-    return self.cleanHTMLCode(template.render(objectPaginator=objectPaginator,
+    return self.cleanHTMLCode(template.render(objectList=event.objects,
                            relationPaginator=relationPaginator,
                            event=event,
                            comments=event.comments,

@@ -12,3 +12,7 @@
 
 !.gitignore
 
+/oldCe1sus
+/python-libs
+/reports
+/mysql_backup.sh

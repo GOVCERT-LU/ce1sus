@@ -206,11 +206,11 @@ class UserBroker(BrokerBase):
                        User.apiKey == apiKey).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
+      raise NothingFoundException('Nothing found with apikey :{0}'.format(
                                                                   apiKey))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(apiKey))
+                    'Too many results found for apikey :{0}'.format(apiKey))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
