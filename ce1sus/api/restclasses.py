@@ -16,7 +16,77 @@ from types import ListType
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
 from os.path import basename
+from importlib import import_module
+from types import DictionaryType, ListType
 
+
+def __instantiateClass(className):
+  module = import_module('.restclasses', 'ce1sus.api')
+  clazz = getattr(module, className)
+  # instantiate
+  instance = clazz()
+  # check if handler base is implemented
+  if not isinstance(instance, RestClass):
+    raise RestAPIException(('{0} does not implement '
+                            + 'RestClass').format(className))
+  return instance
+
+def __populateInstanceByDict(instance, dictionary, makeBinary=True):
+  for key, value in dictionary.iteritems():
+    if isinstance(value, DictionaryType):
+      subkey, subvalue = getObjectData(value)
+      if hasattr(instance, key):
+        subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+        setattr(instance, key, subinstance)
+    elif isinstance(value, ListType):
+      lsit = list()
+      if hasattr(instance, key):
+        for item in value:
+          subkey, subvalue = getObjectData(item)
+          subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+          lsit.append(subinstance)
+        setattr(instance, key, lsit)
+    else:
+      if value == 'None':
+        value = None
+      if makeBinary and 'file' in '{0}'.format(value):
+        # decompress file
+        dictionary = eval(value)
+        jsonFile = dictionary.get('file', None)
+        if jsonFile:
+          fileName = jsonFile[0]
+          strData = jsonFile[1]
+          value = strData.decode('base64')
+      setattr(instance, key, value)
+
+def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
+  instance = __instantiateClass(clazz)
+  __populateInstanceByDict(instance, dictionary, makeBinary=makeBinary)
+  return instance
+
+def getObjectData(dictionary):
+  for key, value in dictionary.iteritems():
+    if key == 'response':
+      continue
+    else:
+      return key, value
+
+def getData(obj):
+  response = obj.get('response', None)
+  if response.get('status', None) == 'OK':
+    return getObjectData(obj)
+  else:
+    message = response.get('errors', '')[0]
+    raise Ce1susAPIException(message)
+
+
+def mapResponseToObject(jsonData):
+  key, value = getData(jsonData)
+  return populateClassNamebyDict(key, value)
+
+def mapJSONToObject(jsonData):
+  key, value = getObjectData(jsonData)
+  return populateClassNamebyDict(key, value)
 
 class RestAPIException(Exception):
   """

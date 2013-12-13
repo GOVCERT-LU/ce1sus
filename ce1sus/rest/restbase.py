@@ -12,10 +12,9 @@ __license__ = 'GPL v3+'
 
 from ce1sus.brokers.permission.userbroker import UserBroker
 import json
-from ce1sus.api.restclasses import RestClass
+from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, getObjectData
 from importlib import import_module
 import cherrypy
-from ce1sus.api.ce1susapi import Ce1susAPI
 from dagr.web.controllers.base import BaseController
 from ce1sus.brokers.event.attributebroker import Attribute
 from ce1sus.brokers.event.eventclasses import Event
@@ -141,8 +140,8 @@ class RestControllerBase(BaseController):
       cl = cherrypy.request.headers['Content-Length']
       raw = cherrypy.request.body.read(int(cl))
       jsonData = json.loads(raw)
-      key, value = Ce1susAPI.getObjectData(jsonData)
-      obj = Ce1susAPI.populateClassNamebyDict(key, value, False)
+      key, value = getObjectData(jsonData)
+      obj = populateClassNamebyDict(key, value, False)
       return obj
     except Exception as e:
       self.raiseError('Aua', '{0}'.format(e))
