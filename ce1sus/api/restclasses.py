@@ -47,9 +47,12 @@ def __populateInstanceByDict(instance, dictionary, makeBinary=True):
           lsit.append(subinstance)
         setattr(instance, key, lsit)
     else:
-      if value == 'None':
+      if value == '':
         value = None
-      if makeBinary and 'file' in '{0}'.format(value):
+      stringValue = '{0}'.format(value)
+      if (makeBinary
+          and ('{' in stringValue and '}' in stringValue)
+          and 'file' in stringValue):
         # decompress file
         dictionary = eval(value)
         jsonFile = dictionary.get('file', None)

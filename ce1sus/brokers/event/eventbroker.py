@@ -17,13 +17,13 @@ BrokerException
 import sqlalchemy.orm.exc
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
-from datetime import datetime
-from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.datumzait import datumzait
+from dagr.helpers.converters import ObjectConverter, ConversionException
 from ce1sus.brokers.event.eventclasses import Event, Object, \
                                               ObjectAttributeRelation
 from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-import uuid
+import uuid as uuidgen
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.string import cleanPostValue
 
@@ -333,7 +333,8 @@ class EventBroker(BrokerBase):
                  last_seen,
                  risk,
                  analysis,
-                 user):
+                 user,
+                 uuid=None):
     """
     puts an event with the data together
 
@@ -379,28 +380,39 @@ class EventBroker(BrokerBase):
       ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
       ObjectConverter.setInteger(event, 'status_id', status)
       ObjectConverter.setInteger(event, 'published', published)
-      event.modified = datetime.now()
+      event.modified = datumzait.utcnow()
+      print event.modified.isoformat()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
 
       if first_seen:
-        ObjectConverter.setDate(event, 'first_seen', first_seen)
+        try:
+          ObjectConverter.setDate(event, 'first_seen', first_seen)
+        except ConversionException:
+          event.first_seen = first_seen
       else:
-        event.first_seen = datetime.now()
+        event.first_seen = datumzait.utcnow()
       if last_seen:
-        ObjectConverter.setDate(event, 'last_seen', last_seen)
+        try:
+          ObjectConverter.setDate(event, 'last_seen', last_seen)
+        except ConversionException:
+          event.last_seen = last_seen
       else:
         event.last_seen = event.first_seen
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
       if action == 'insert':
-        event.uuid = unicode(uuid.uuid4())
+        if uuid is None:
+          event.uuid = unicode(uuidgen.uuid4())
+        else:
+          event.uuid = uuid
         event.creatorGroup = user.defaultGroup
         event.creatorGroup_id = event.creatorGroup.identifier
         event.groups = list()
         event.groups.append(user.defaultGroup)
         event.bitValue = BitValue('1000', event)
-        event.created = datetime.now()
+        event.created = datumzait.utcnow()
+        print event.created.tzname
         event.creator = user
         event.creator_id = event.creator.identifier
     return event
@@ -481,7 +493,7 @@ class EventBroker(BrokerBase):
       raise BrokerException(e)
 
   def updateEvent(self, event, commit=True):
-    event.modified = datetime.now()
+    event.modified = datumzait.utcnow()
     self.update(event, False)
     self.doCommit(commit)
 

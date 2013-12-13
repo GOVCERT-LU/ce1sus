@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy.types import DateTime
+from dagr.db.broker import DateTime
 from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 import re

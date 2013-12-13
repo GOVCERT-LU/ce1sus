@@ -15,7 +15,7 @@ from dagr.db.broker import ValidationException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
-from sqlalchemy.types import DateTime
+from dagr.db.broker import DateTime
 from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
 from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
@@ -56,8 +56,8 @@ class Event(BASE):
   maingroups = relationship(SubGroup,
                             secondary='SubGroups_has_Events')
   objects = relationship('Object')
-  created = Column('created', DateTime)
-  modified = Column('modified', DateTime)
+  created = Column('created', DateTime(timezone=True))
+  modified = Column('modified', DateTime(timezone=True))
   # creators and modifiers will be gorups
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
@@ -224,7 +224,10 @@ class Event(BASE):
       ObjectValidator.validateDateTime(self, 'first_seen')
     if not self.last_seen is None:
       ObjectValidator.validateDateTime(self, 'last_seen')
-    if not self.first_seen is None and not self.last_seen is None:
+    if ((not self.first_seen is None and not self.last_seen is None) and
+        not isinstance(self.first_seen, FailedValidation) and
+        not isinstance(self.last_seen, FailedValidation)
+        ):
       if self.first_seen > self.last_seen:
         setattr(self, 'first_seen',
                 FailedValidation(self.first_seen,
@@ -243,7 +246,7 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, full=True):
+  def toRestObject(self):
     result = RestEvent()
     result.tile = self.title
     result.description = self.description
@@ -255,10 +258,9 @@ class Event(BASE):
     result.uuid = self.uuid
 
     result.objects = list()
-    if full:
-      for obj in self.objects:
-        if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-          result.objects.append(obj.toRestObject())
+    for obj in self.objects:
+      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+        result.objects.append(obj.toRestObject())
     result.comments = list()
 
     return result
@@ -404,24 +406,20 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, full=True):
+  def toRestObject(self):
     result = RestObject()
     result.parentObject_id = self.parentObject_id
     result.parentEvent_id = self.parentEvent_id
     result.definition = self.definition.toRestObject()
 
     result.attributes = list()
-    if full:
-      for attribute in self.attributes:
-        if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
-          result.attributes.append(attribute.toRestObject())
+    for attribute in self.attributes:
+      if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
+        result.attributes.append(attribute.toRestObject())
     result.children = list()
-    if full:
-      for obj in self.children:
-        if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-          result.children.append(obj.toRestObject())
-
-
+    for obj in self.children:
+      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
+        result.children.append(obj.toRestObject())
     return result
 
 

@@ -15,7 +15,7 @@ from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 import json
 
 
@@ -81,7 +81,7 @@ class RestSearchController(RestControllerBase):
     try:
       withDefinition = options.get('Full-Definitions', False)
       startDate = options.get('startdate', None)
-      endDate = options.get('enddate', datetime.now())
+      endDate = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
       limit = self.__getLimit(options)
 
@@ -211,7 +211,7 @@ class RestSearchController(RestControllerBase):
   def viewEvents(self, uuid, apiKey, **options):
     try:
       startDate = options.get('startdate', None)
-      endDate = options.get('enddate', datetime.now())
+      endDate = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
       limit = self.__getLimit(options)
 

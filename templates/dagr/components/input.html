@@ -208,10 +208,16 @@
       if value is None:
         dateTime = ''
       else:
-        dateTime = unicode(value)
-    #remove seconds if present
-    temp = '{0}'.format(dateTime).split('.')
-    dateTime = temp[0]
+         if enabled:
+            dateTime = unicode(value)
+            #remove seconds if present
+            temp = '{0}'.format(dateTime).split('.')
+            dateTime = temp[0]
+         else:
+	        if hasattr(value,'isoformat'):
+	            dateTime = value.isoformat()
+	        else:
+	            dateTime = unicode(value)
 %>
 
 
@@ -221,7 +227,7 @@
             <div>
 	            <div class="form-group" style="padding-left:15px;padding-right:15px">
 	              <input class="form-control" type='text' id="${name}ID" name="${name}" value="${dateTime}"/>
-	              Format must be: 'yyyy-MM-dd HH:mm:ss'
+	              Format must be: 'yyyy-MM-dd HH:mm:ss' UTC
 	            </div>
             </div>
             
@@ -232,7 +238,7 @@
                     </div>
             %endif
 
-    % if (not (validationMsg is None)) and enabled:
+    % if (not (validationMsg is None)):
       <%call expr="messagesAndText.error(validationMsg)"/>
     % endif
         <script type="text/javascript">

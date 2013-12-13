@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.eventclasses import Comment
 from dagr.helpers.string import cleanPostValue
 
@@ -58,7 +58,7 @@ class CommentBroker(BrokerBase):
     comment = Comment()
     if not action == 'insert':
       comment = self.getByID(commentID)
-    comment.modified = datetime.now()
+    comment.modified = datumzait.utcnow()
     comment.modifier = user
     comment.modifier_id = comment.modifier.identifier
     if action == 'insert':
@@ -67,5 +67,5 @@ class CommentBroker(BrokerBase):
       comment.creator_id = comment.creator.identifier
       comment.event = event
       comment.event_id = event.identifier
-      comment.created = datetime.now()
+      comment.created = datumzait.utcnow()
     return comment

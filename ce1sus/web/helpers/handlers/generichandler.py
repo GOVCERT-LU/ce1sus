@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.event.attributebroker import Attribute
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
 
@@ -36,8 +36,8 @@ class GenericHandler(HandlerBase):
     attribute.definition = definition
     attribute.def_attribute_id = definition.identifier
     attribute.definition = definition
-    attribute.created = datetime.now()
-    attribute.modified = datetime.now()
+    attribute.created = datumzait.utcnow()
+    attribute.modified = datumzait.utcnow()
     attribute.creator = user
     attribute.creator_id = user.identifier
     attribute.modifier_id = user.identifier

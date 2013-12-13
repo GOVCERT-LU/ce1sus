@@ -13,22 +13,11 @@ __license__ = 'GPL v3+'
 
 import re
 from sre_constants import error
+from dagr.helpers.string import stringToDateTime, InputException
+import datetime
 
 ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'
 ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
-DATE = [r'^[\d]{4}-[\d]{2}-[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3,8}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}:[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} - [\d]{2}:[\d]{2}$',
-        r'^[\d]{2}/[\d]{2}/[\d]{4}$',
-        r'^[\d]{2}/[\d]{2}/[\d]{4} - [\d]{2}:[\d]{2}$',
-        r'^[\d]{2}/[\d]{2}/[\d]{4} - [\d]{2}:[\d]{2}:[\d]{2}$',
-        r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}$',
-        r'^[\d]{2}/[\d]{2}/[\d]{4} [\d]{2}:[\d]{2}:[\d]{2}$',
-        r'^[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3,8}$'
-       ]
 DIGITS = r'^[\d.]+$'
 EMAILADDRESS = r'^.+@.+\..{2,3}$'
 IP = r'^[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}$'
@@ -369,18 +358,19 @@ class ObjectValidator:
     """
     errorMsg = ('The date is not under the right form as i.e. ' +
                  '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
-    for dateFormat in DATE:
-      result = validateRegex(obj,
-                attributeName,
-                dateFormat,
-                errorMsg,
-                False)
-      if result:
-        break
-    if not result and changeAttribute:
-      value = getattr(obj, attributeName)
-      setattr(obj, attributeName, FailedValidation(value, errorMsg))
-    return result
+
+
+    value = getattr(obj, attributeName)
+    if isinstance(value, datetime.datetime):
+      return True
+    try:
+      stringToDateTime(value)
+      return True
+    except InputException as e:
+      if changeAttribute:
+        setattr(obj, attributeName, FailedValidation(value, errorMsg))
+      return False
+
 
   @staticmethod
   def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=True):

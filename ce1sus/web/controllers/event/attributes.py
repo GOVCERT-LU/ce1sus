@@ -32,7 +32,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
 from dagr.db.broker import NothingFoundException
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.hash import hashMD5
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 import os
 
 
@@ -97,7 +97,7 @@ class AttributesController(Ce1susBaseController):
     if value.file is None:
       return 'No file selected. Try again.'
     size = 0
-    newFolderName = hashMD5('{0}'.format(datetime.now()))
+    newFolderName = hashMD5('{0}'.format(datumzait.now()))
     destFolderPath = '/tmp/' + newFolderName
     os.mkdir(destFolderPath)
     filepath = destFolderPath + '/' + value.filename

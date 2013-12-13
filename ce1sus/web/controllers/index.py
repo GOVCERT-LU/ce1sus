@@ -15,7 +15,7 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.helpers.protection import Protector
-import datetime
+from dagr.helpers.datumzait import datumzait
 from ce1sus.web.helpers.protection import require
 from dagr.db.broker import NothingFoundException, BrokerException
 from dagr.helpers.ldaphandling import LDAPHandler
@@ -77,7 +77,7 @@ class IndexController(Ce1susBaseController):
       return self.index(errorMsg)
     else:
       user = self.userBroker.getUserByUserName(username)
-      user.last_login = datetime.datetime.now()
+      user.last_login = datumzait.utcnow()
       self.userBroker.update(user)
       Protector.setSession(username)
       raise HTTPRedirect('/internal')

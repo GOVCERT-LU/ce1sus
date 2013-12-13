@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from ce1sus.brokers.event.attributebroker import Attribute
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from os.path import isfile, basename, getsize, exists
 import dagr.helpers.hash as hasher
 from urllib import pathname2url
@@ -64,7 +64,7 @@ class FileHandler(GenericHandler):
   def getFileName(fileHash, fileName):
     hashedFileName = hasher.hashSHA256(fileName)
     svrFileName = '{0}{1}{2}'.format(fileHash,
-                                       datetime.now(),
+                                       datumzait.now(),
                                        hashedFileName)
     return hasher.hashSHA256(svrFileName)
 
@@ -73,9 +73,9 @@ class FileHandler(GenericHandler):
     # move file to destination
     destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
                                               getInstance().get('files'),
-                                                 datetime.now().year,
-                                                 datetime.now().month,
-                                                 datetime.now().day)
+                                                 datumzait.now().year,
+                                                 datumzait.now().month,
+                                                 datumzait.now().day)
     # in case the directories doesn't exist
     if not exists(destination):
       makedirs(destination)
@@ -131,8 +131,8 @@ class FileHandler(GenericHandler):
     attribute.identifier = None
     attribute.definition = (self.def_attributesBroker.getByID(definitionID))
     attribute.def_attribute_id = attribute.definition.identifier
-    attribute.created = datetime.now()
-    attribute.modified = datetime.now()
+    attribute.created = datumzait.utcnow()
+    attribute.modified = datumzait.utcnow()
     attribute.creator = user
     attribute.creator_id = attribute.creator.identifier
     attribute.modifier = user

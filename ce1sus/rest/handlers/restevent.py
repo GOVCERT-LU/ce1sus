@@ -80,7 +80,8 @@ class RestEventController(RestControllerBase):
                        restEvent.last_seen,
                        Risk.getByName(restEvent.risk),
                        Analysis.getByName(restEvent.analysis),
-                       user)
+                       user,
+                       restEvent.uuid)
         event.bitValue.isRestInsert = True
         event.bitValue.isSharable = True
         # flush to DB

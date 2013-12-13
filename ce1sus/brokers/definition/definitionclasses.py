@@ -100,6 +100,7 @@ class ObjectDefinition(BASE):
     result = RestObjectDefinition()
     result.name = self.name
     result.description = self.description
+    result.chksum = self.chksum
 
     return result
 
@@ -292,6 +293,7 @@ class AttributeDefinition(BASE):
     result.name = self.name
     result.regex = self.regex
     result.classIndex = self.classIndex
+    result.handlerIndex = self.handlerIndex
     result.relation = self.relation
-
+    result.chksum = self.chksum
     return result

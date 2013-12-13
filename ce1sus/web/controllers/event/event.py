@@ -175,10 +175,9 @@ class EventController(Ce1susBaseController):
     self.checkIfViewable(event)
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
-    return EventController.__populateTemplate(event, template)
+    return self.__populateTemplate(event, template)
 
-  @staticmethod
-  def __populateTemplate(event, template):
+  def __populateTemplate(self, event, template):
     """
     Fills the the template
     """
@@ -289,7 +288,7 @@ class EventController(Ce1susBaseController):
 
       self.getLogger().debug('Event is invalid')
       return (self.returnAjaxPostError()
-                        + EventController.__populateTemplate(event, template))
+                        + self.__populateTemplate(event, template))
 
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))

@@ -16,7 +16,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, \
 BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
                                               Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
@@ -127,7 +127,7 @@ class ObjectBroker(BrokerBase):
     obj.definition = definition
     if not definition is None:
       obj.def_object_id = obj.definition.identifier
-    obj.created = datetime.now()
+    obj.created = datumzait.utcnow()
     if event is None:
       obj.event = None
       obj.event_id = None

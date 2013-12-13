@@ -24,7 +24,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 
 
@@ -246,7 +246,7 @@ class ValidationController(Ce1susBaseController):
       # update modifier
       event.modifier = self.getUser()
       event.modifier_id = event.modifier.identifier
-      event.modified = datetime.now()
+      event.modified = datumzait.utcnow()
       event.published = 1
       # check if the event has a group
       if event.creatorGroup is None:

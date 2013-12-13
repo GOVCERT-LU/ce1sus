@@ -13,8 +13,7 @@ __license__ = 'GPL v3+'
 
 import re
 import cgi
-from datetime import datetime
-
+import dateutil.parser
 
 class InputException(Exception):
   """
@@ -81,29 +80,10 @@ def stringToDateTime(string):
   """
   Converts a string to a DateTime if the format is known
   """
-  dateFormats = ['%Y-%m-%d',
-             '%Y-%m-%d %H:%M',
-             '%Y-%m-%d %H:%M:%S',
-             '%Y-%m-%d - %H:%M:%S',
-             '%Y-%m-%d - %H:%M',
-             '%d/%m/%Y',
-             '%d/%m/%Y - %H:%M',
-             '%d/%m/%Y - %H:%M:%S',
-             '%d/%m/%Y %H:%M',
-             '%d/%m/%Y %H:%M:%S'
-             ]
-  # loops over the different formats and if the loop ends raise an exception
-  # as no format is applicable
-  dateString = unicode(string)
-  # remove milisecs if there are
-  temp = dateString.split('.')
-  dateString = temp[0]
-  for dateFormat in dateFormats:
-    try:
-      return datetime.strptime(dateString, dateFormat)
-    except ValueError:
-      pass
-  raise InputException('Format of Date "{0}" is unknown'.format(string))
+  try:
+    return dateutil.parser.parse(string)
+  except:
+    raise InputException('Format of Date "{0}" is unknown'.format(string))
 
 def cleanPostValue(value):
   result = None

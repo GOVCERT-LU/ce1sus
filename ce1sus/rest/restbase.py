@@ -21,7 +21,7 @@ from ce1sus.brokers.event.eventclasses import Event
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
 from dagr.db.broker import NothingFoundException
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.event.objectbroker import ObjectBroker
@@ -237,7 +237,7 @@ class RestControllerBase(BaseController):
           fileName = jsonFile[0]
           strData = jsonFile[1]
           value = strData.decode('base64')
-          tmpFolder = '/tmp/' + hashMD5('{0}'.format(datetime.now()))
+          tmpFolder = '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
           os.mkdir(tmpFolder)
           tmpFolder = tmpFolder + '/{0}'.format(fileName)
 
@@ -260,8 +260,8 @@ class RestControllerBase(BaseController):
     dbAttribute.object_id = obj.identifier
     dbAttribute.def_attribute_id = attributeDefinition.identifier
     dbAttribute.definition = attributeDefinition
-    dbAttribute.created = datetime.now()
-    dbAttribute.modified = datetime.now()
+    dbAttribute.created = datumzait.utcnow()
+    dbAttribute.modified = datumzait.utcnow()
     dbAttribute.creator = user
     dbAttribute.creator_id = user.identifier
     dbAttribute.modifier_id = user.identifier

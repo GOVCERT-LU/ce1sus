@@ -16,7 +16,19 @@ import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from dagr.helpers.debug import Log
 from sqlalchemy.orm import joinedload
+from sqlalchemy import DateTime as SdateTime
+from sqlalchemy.types import TypeDecorator
+import dateutil
 
+class DateTime(TypeDecorator):
+  """
+  Used as workaround for MySQL DBs
+  """
+  impl = SdateTime
+  def process_bind_param(self, value, engine):
+    return value
+  def process_result_value(self, value, engine):
+    return value.replace(tzinfo=dateutil.tz.tzutc())
 
 class BrokerException(Exception):
   """Broker Exception"""

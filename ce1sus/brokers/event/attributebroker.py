@@ -18,7 +18,7 @@ import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE, SessionManager
-from sqlalchemy.types import DateTime
+from dagr.db.broker import DateTime
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition

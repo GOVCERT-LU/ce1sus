@@ -77,7 +77,7 @@ class ValueConverter(object):
     """
     try:
       return string.stringToDateTime(value)
-    except ValueError as e:
+    except Exception as e:
       raise ConversionException(e)
 
 

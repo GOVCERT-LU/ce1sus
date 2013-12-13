@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from datetime import datetime
+from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.web.helpers.protection import require, requireReferer
@@ -60,7 +60,7 @@ class EventsController(Ce1susBaseController):
                            cbTLPValues=cbTLPValues,
                            cbAnalysisValues=cbAnalysisValues,
                            cbRiskValues=cbRiskValues,
-                           today=datetime.now()))
+                           today=datumzait.utcnow()))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -78,7 +78,7 @@ class EventsController(Ce1susBaseController):
               {'risk':'Risk'},
               {'status': 'Status'},
               {'tlp':'TLP'},
-              {'Creator Group':'creatorGroup.name'},
+              {'creatorGroup.name':'Creator Group'},
               {'modified':'Last modification'},
               {'last_seen':'Last seen'}]
     # get only the last 200 events to keep the page small

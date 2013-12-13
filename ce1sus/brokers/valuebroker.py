@@ -18,7 +18,7 @@ import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
-from sqlalchemy.types import DateTime
+from dagr.db.broker import DateTime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from importlib import import_module
 from dagr.helpers.converters import ValueConverter

@@ -21,14 +21,18 @@
 
 <%def name="objectToHTML(object,shortenTo=0)">
 <%
-	classname = type(object).__name__
-	string = unicode(object)
-	if shortenTo > 0:
-	  result = string[:shortenTo]
-	if len(string) > shortenTo:
-	  result = result + '...'
-	else:
-	  result = string %>
+classname = type(object).__name__
+
+if hasattr(object,'isoformat'):
+  string = object.isoformat()
+else:
+  string = unicode(object)
+if shortenTo > 0:
+  result = string[:shortenTo]
+if len(string) >= shortenTo:
+  result = result + '...'
+else:
+  result = string %>
 %if "Link" in classname:
     <a href="${object.url}"  target="_blank">${object.identifier}</a>
 %else:
