@@ -71,9 +71,10 @@ class MySqlConnector(Connector):
       self.session = self.getDirectSession()
 
   def getDirectSession(self):
-    self.engine = create_engine(self.connectionString,
+    self.engine = create_engine(self.connectionString + '?charset=utf8',
                                   echo=self.debug,
-                                  echo_pool=self.debug)
+                                  echo_pool=self.debug,
+                                  encoding='utf-8')
     self.sessionClazz = scoped_session(sessionmaker(bind=self.engine,
                                                       autocommit=False,
                                                       autoflush=False))
@@ -110,6 +111,7 @@ class MySqlConnector(Connector):
     self.engine = None
 
   def createEngine(self):
-    return create_engine(self.connectionString,
+    return create_engine(self.connectionString + '?charset=utf8',
                                   echo=self.debug,
-                                  echo_pool=self.debug)
+                                  echo_pool=self.debug,
+                                  encoding='utf-8')

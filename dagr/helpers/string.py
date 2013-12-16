@@ -92,7 +92,7 @@ def cleanPostValue(value):
   else:
     result = value
   if result:
-    result.strip()
+    result.strip().encode('UTF-8', 'ignore')
   return result
 
 def isNotNull(value):

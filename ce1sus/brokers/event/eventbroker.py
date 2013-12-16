@@ -410,7 +410,7 @@ class EventBroker(BrokerBase):
         event.creatorGroup_id = event.creatorGroup.identifier
         event.groups = list()
         event.groups.append(user.defaultGroup)
-        event.bitValue = BitValue('1000', event)
+        event.bitValue = BitValue('1001', event)
         event.created = datumzait.utcnow()
         print event.created.tzname
         event.creator = user

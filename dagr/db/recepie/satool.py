@@ -40,8 +40,9 @@ class SAEnginePlugin(plugins.SimplePlugin):
 
   def start(self):
     """Start the engine"""
-    self.sa_engine = create_engine(self.connectionString,
-                            echo=self.debug, echo_pool=self.debug)
+    self.sa_engine = create_engine(self.connectionString + '?charset=utf8',
+                            echo=self.debug, echo_pool=self.debug,
+                                  encoding='utf-8')
 
   def stop(self):
     """stops the engine"""
