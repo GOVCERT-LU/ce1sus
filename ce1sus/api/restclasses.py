@@ -18,6 +18,7 @@ from dagr.helpers.objects import getFields
 from os.path import basename
 from importlib import import_module
 from types import DictionaryType, ListType
+from dagr.helpers.string import stringToDateTime, InputException
 
 
 def __instantiateClass(className):
@@ -60,6 +61,15 @@ def __populateInstanceByDict(instance, dictionary, makeBinary=True):
           fileName = jsonFile[0]
           strData = jsonFile[1]
           value = strData.decode('base64')
+      else:
+        if stringValue.isdigit():
+          value = eval(stringValue)
+        else:
+          try:
+            # is it a date?
+            value = stringToDateTime(stringValue)
+          except InputException:
+            pass
       setattr(instance, key, value)
 
 def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
@@ -161,8 +171,8 @@ class RestEvent(RestClass):
     result[self.__class__.__name__]['description'] = '{0}'.format(
                                                               self.description)
     result[self.__class__.__name__]['first_seen'] = '{0}'.format(
-                                                              self.first_seen)
-    result[self.__class__.__name__]['last_seen'] = '{0}'.format(self.last_seen)
+                                                              self.first_seen.isoformat())
+    result[self.__class__.__name__]['last_seen'] = '{0}'.format(self.last_seen.isoformat())
     if self.tlp is None:
       tlp = None
     else:

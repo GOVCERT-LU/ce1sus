@@ -125,7 +125,8 @@ class RestController(RestControllerBase):
           except ValueError:
             if parameter not in RestController.REST_Allowed_Parameters:
               Protector.clearRestSession()
-              raise cherrypy.HTTPError(418)
+              self.raiseError('UnknownParameter',
+                              'Parameter {0} is not defined'.format(parameter))
         if (len(pathElements) > 3):
           if self.__checkIfValidUIID(pathElements[3]):
             uuid = possibleUUID.strip()

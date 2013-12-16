@@ -28,7 +28,10 @@ class DateTime(TypeDecorator):
   def process_bind_param(self, value, engine):
     return value
   def process_result_value(self, value, engine):
-    return value.replace(tzinfo=dateutil.tz.tzutc())
+    if value is None:
+      return None
+    else:
+      return value.replace(tzinfo=dateutil.tz.tzutc())
 
 class BrokerException(Exception):
   """Broker Exception"""

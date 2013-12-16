@@ -235,6 +235,14 @@ class ValidationController(Ce1susBaseController):
                         paginator=paginator,
                         objectID=objectID))
 
+  def __validateObjects(self, objects):
+    for obj in objects:
+      obj.bitValue.isValidated = True
+      # perfom validation of object attribtues
+      for attribtue in obj.attributes:
+        attribtue.bitValue.isValidated = True
+      self.__validateObjects(obj.children)
+
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def validateEvent(self, eventID):
@@ -254,11 +262,7 @@ class ValidationController(Ce1susBaseController):
         event.creatorGroup = self.getUser().defaultGroup
 
       # perform validation of objects
-      for obj in event.objects:
-        obj.bitValue.isValidated = True
-        # perfom validation of object attribtues
-        for attribtue in obj.attributes:
-          attribtue.bitValue.isValidated = True
+      self.__validateObjects(event.objects)
       self.eventBroker.update(event)
       return self.returnAjaxOK()
     except BrokerException as e:
