@@ -26,7 +26,11 @@ isModal=False
       <tbody>
         
            % for item in paginator.list:
+           %if paginator.trlink:
+           <tr onclick="${paginator.trlink.replace('identifier','{0}'.format(item.identifier))}">
+           %else:
            <tr>
+           %endif
              % for column in paginator.lables:
                % for key in column.iterkeys():
     <%

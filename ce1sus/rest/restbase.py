@@ -134,15 +134,18 @@ class RestControllerBase(BaseController):
   def raiseError(self, classname, message):
     raise RestAPIException('{0}: {1}'.format(classname, message))
 
-
   def getPostObject(self):
-
+    try:
       cl = cherrypy.request.headers['Content-Length']
       raw = cherrypy.request.body.read(int(cl))
       jsonData = json.loads(raw)
       key, value = getObjectData(jsonData)
       obj = populateClassNamebyDict(key, value, False)
       return obj
+    except Exception as e:
+      self.getLogger().error('An error occurred by getting the post object {0}', e)
+      self.raiseError('UnRecoverableException',
+                      'An unrecoverable error occurred')
 
   def _isEventOwner(self, event):
     user = Protector.getUser()

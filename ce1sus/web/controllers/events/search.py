@@ -98,7 +98,8 @@ class SearchController(Ce1susBaseController):
                                                                  operant)
         # prepare displayItems
 
-        for value in foundValues:
+        for foundValue in foundValues:
+          value = foundValue[0]
           if value.attribute.object.event is None:
             event = value.attribute.object.parentObject.parentObject.event
 
@@ -128,6 +129,7 @@ class SearchController(Ce1susBaseController):
       paginator = Paginator(items=result,
                             labelsAndProperty=labels,
                             paginatorOptions=paginatorOptions)
+      paginator.trlink = "loadNewTab('identifier', 'eventsTabTabContent', '/events/event/view/identifier', true, 'Event #identifier');"
       return self.returnAjaxOK() + self.cleanHTMLCode(template.render(paginator=paginator))
     except InputException as e:
       return '{0}'.format(e)

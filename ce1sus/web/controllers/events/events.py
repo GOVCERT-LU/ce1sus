@@ -79,8 +79,7 @@ class EventsController(Ce1susBaseController):
               {'status': 'Status'},
               {'tlp':'TLP'},
               {'creatorGroup.name':'Creator Group'},
-              {'modified':'Last modification'},
-              {'last_seen':'Last seen'}]
+              {'modified':'Last modification'}]
     # get only the last 200 events to keep the page small
     user = self.getUser()
     lists = self.eventBroker.getAllForUser(user, 200, 0)
@@ -95,6 +94,6 @@ class EventsController(Ce1susBaseController):
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
-    paginator.sortColumn = 'modified'
     paginator.itemsPerPage = 100
+    paginator.trlink = "loadNewTab('identifier', 'eventsTabTabContent', '/events/event/view/identifier', true, 'Event #identifier');"
     return self.cleanHTMLCode(template.render(paginator=paginator))

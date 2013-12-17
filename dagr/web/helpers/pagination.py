@@ -195,6 +195,7 @@ class Paginator(object):
     self.sortColumn = None
     self.sortOrder = "desc"
     self.maxColumnLength = 255
+    self.trlink = None
 
   @property
   def sortColunmID(self):
