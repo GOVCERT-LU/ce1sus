@@ -3,6 +3,8 @@
 *.pyc
 *~
 *.swp
+rtkit
+magic.py
 
 # EclipseGenerated #
 ####################
@@ -16,3 +18,5 @@
 /python-libs
 /reports
 /mysql_backup.sh
+/cover.sh
+/sonar-project.properties
