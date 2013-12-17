@@ -141,7 +141,7 @@ class ObjectBroker(BrokerBase):
     obj.creator = user
     obj.creator_id = obj.creator.identifier
     ObjectConverter.setInteger(obj, 'shared', shared)
-    obj.bitValue = BitValue('1001', obj)
+    obj.bitValue = BitValue('1000', obj)
     return obj
 
   def getCDValuesObjectParents(self, eventID, notObject):
