@@ -29,7 +29,10 @@ class RestEventController(RestControllerBase):
     try:
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
-      obj = self._objectToJSON(event, False, False)
+      obj = self._objectToJSON(event,
+                               self._isEventOwner(event),
+                               False,
+                               False)
       return self._returnMessage(obj)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -42,7 +45,10 @@ class RestEventController(RestControllerBase):
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
       withDefinition = options.get('Full-Definitions', False)
-      obj = self._objectToJSON(event, True, withDefinition)
+      obj = self._objectToJSON(event,
+                               self._isEventOwner(event),
+                               True,
+                               withDefinition)
 
       return self._returnMessage(obj)
     except NothingFoundException as e:
@@ -54,8 +60,9 @@ class RestEventController(RestControllerBase):
   def delete(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByID(identifier)
-      self._checkIfViewable(event, self.getUser(apiKey))
-      self.eventBroker.removeByID(event.identifier)
+      return self.raiseError('NotImplemented',
+                             'The delete method has not been implemented')
+
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -96,7 +103,7 @@ class RestEventController(RestControllerBase):
         self.eventBroker.doCommit(True)
 
         withDefinition = options.get('Full-Definitions', False)
-        obj = self._objectToJSON(event, True, withDefinition)
+        obj = self._objectToJSON(event, True, True, withDefinition)
         return self._returnMessage(obj)
 
       except BrokerException as e:

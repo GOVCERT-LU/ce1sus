@@ -246,7 +246,7 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, isOwner=False):
     result = RestEvent()
     result.tile = self.title
     result.description = self.description
@@ -259,8 +259,9 @@ class Event(BASE):
 
     result.objects = list()
     for obj in self.objects:
-      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-        result.objects.append(obj.toRestObject())
+      # share only the objects which are shareable or are owned by the user
+      if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
+        result.objects.append(obj.toRestObject(isOwner))
     result.comments = list()
 
     return result
@@ -309,7 +310,7 @@ class Comment(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, isOwner=False):
     result = RestComment()
     result.comment = self.comment
 
@@ -406,7 +407,7 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, isOwner=False):
     result = RestObject()
     result.parentObject_id = self.parentObject_id
     result.parentEvent_id = self.parentEvent_id
@@ -414,12 +415,12 @@ class Object(BASE):
 
     result.attributes = list()
     for attribute in self.attributes:
-      if (attribute.bitValue.isValidated and attribute.bitValue.isSharable):
-        result.attributes.append(attribute.toRestObject())
+      if (attribute.bitValue.isSharable and attribute.bitValue.isValidated) or isOwner:
+        result.attributes.append(attribute.toRestObject(isOwner))
     result.children = list()
     for obj in self.children:
-      if (obj.bitValue.isValidated and obj.bitValue.isSharable):
-        result.children.append(obj.toRestObject())
+      if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
+        result.children.append(obj.toRestObject(isOwner))
     return result
 
 

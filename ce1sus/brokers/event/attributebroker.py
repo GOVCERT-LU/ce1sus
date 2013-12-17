@@ -151,12 +151,11 @@ class Attribute(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, isOwner=False):
     result = RestAttribute()
     result.definition = self.definition.toRestObject()
     result.value = self.value
     result.ioc = self.ioc
-
     return result
 
 

@@ -100,15 +100,15 @@ class RestControllerBase(BaseController):
                               + 'RestClass').format(className))
     return instance
 
-  def _toRestObject(self, obj):
+  def _toRestObject(self, obj, isOwner=False):
     className = 'Rest' + obj.__class__.__name__
     instance = RestControllerBase.__instantiateClass(className)
 
-    instance.populate(obj)
+    instance.populate(obj, isOwner)
     return instance
 
-  def _objectToJSON(self, obj, full=False, withDefinition=False):
-    instance = self._toRestObject(obj)
+  def _objectToJSON(self, obj, isOwner=False, full=False, withDefinition=False):
+    instance = self._toRestObject(obj, isOwner)
 
     result = dict(instance.toJSON(full=full,
                              withDefinition=withDefinition).items()
@@ -136,16 +136,23 @@ class RestControllerBase(BaseController):
 
 
   def getPostObject(self):
-    try:
+
       cl = cherrypy.request.headers['Content-Length']
       raw = cherrypy.request.body.read(int(cl))
       jsonData = json.loads(raw)
       key, value = getObjectData(jsonData)
       obj = populateClassNamebyDict(key, value, False)
       return obj
-    except Exception as e:
-      self.raiseError('Aua', '{0}'.format(e))
 
+  def _isEventOwner(self, event):
+    user = Protector.getUser()
+    if user.privileged == 1:
+      return True
+    else:
+      if user.group_id == event.creatorGroup_id:
+        return True
+      else:
+        return False
 
   def _checkIfViewable(self, event, user):
     """

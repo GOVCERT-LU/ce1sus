@@ -32,45 +32,54 @@ def __instantiateClass(className):
                             + 'RestClass').format(className))
   return instance
 
-def __populateInstanceByDict(instance, dictionary, makeBinary=True):
-  for key, value in dictionary.iteritems():
-    if isinstance(value, DictionaryType):
-      subkey, subvalue = getObjectData(value)
-      if hasattr(instance, key):
-        subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
-        setattr(instance, key, subinstance)
-    elif isinstance(value, ListType):
-      lsit = list()
-      if hasattr(instance, key):
-        for item in value:
-          subkey, subvalue = getObjectData(item)
-          subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
-          lsit.append(subinstance)
-        setattr(instance, key, lsit)
-    else:
-      if value == '':
-        value = None
-      stringValue = '{0}'.format(value)
-      if (makeBinary
+def __populateAtomicValue(instance, key, value, makeBinary=True):
+  if value == '':
+    value = None
+  else:
+    stringValue = '{0}'.format(value)
+    if (makeBinary
           and ('{' in stringValue and '}' in stringValue)
           and 'file' in stringValue):
         # decompress file
-        dictionary = eval(value)
-        jsonFile = dictionary.get('file', None)
-        if jsonFile:
-          fileName = jsonFile[0]
-          strData = jsonFile[1]
-          value = strData.decode('base64')
+      dictionary = eval(value)
+      jsonFile = dictionary.get('file', None)
+      if jsonFile:
+        fileName = jsonFile[0]
+        strData = jsonFile[1]
+        value = strData.decode('base64')
+    else:
+      if stringValue.isdigit():
+        value = eval(stringValue)
       else:
-        if stringValue.isdigit():
-          value = eval(stringValue)
-        else:
-          try:
-            # is it a date?
-            value = stringToDateTime(stringValue)
-          except InputException:
-            pass
-      setattr(instance, key, value)
+        try:
+          # is it a date?
+          value = stringToDateTime(stringValue)
+        except InputException:
+          pass
+  setattr(instance, key, value)
+
+def __setDictValue(instance, key, value, makeBinary=True):
+  subkey, subvalue = getObjectData(value)
+  subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+  setattr(instance, key, subinstance)
+
+def __setListValue(instance, key, value, makeBinary=True):
+  result = list()
+  for item in value:
+    subkey, subvalue = getObjectData(item)
+    subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+    result.append(subinstance)
+  setattr(instance, key, result)
+
+def __populateInstanceByDict(instance, dictionary, makeBinary=True):
+
+  for key, value in dictionary.iteritems():
+    if isinstance(value, DictionaryType):
+      __setDictValue(instance, key, value, makeBinary)
+    elif isinstance(value, ListType):
+      __setListValue(instance, key, value, makeBinary)
+    else:
+      __populateAtomicValue(instance, key, value, makeBinary)
 
 def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
   instance = __instantiateClass(clazz)
@@ -117,7 +126,7 @@ class RestClassException(Exception):
 
 class RestClass(object):
 
-  def populate(self, dbObject):
+  def populate(self, dbObject, isOwner=False):
     objFields = getFields(dbObject)
     selfFields = getFields(self)
     for name in selfFields:
@@ -128,13 +137,13 @@ class RestClass(object):
             # if the value is a list call toRestObject on all sub items
             items = list()
             for item in value:
-              items.append(item.toRestObject())
+              items.append(item.toRestObject(isOwner))
             setattr(self, name, items)
           else:
             # if the value is a DB object
             toRestObject = getattr(value, "toRestObject", None)
             if callable(toRestObject):
-                setattr(self, name, value.toRestObject())
+                setattr(self, name, value.toRestObject(isOwner))
             else:
               # if the value is "atomic"
               setattr(self, name, value)
