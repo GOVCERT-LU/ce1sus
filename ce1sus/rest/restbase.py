@@ -239,7 +239,10 @@ class RestControllerBase(BaseController):
     # create the actual attribute
     dbAttribute = Attribute()
     dbAttribute.identifier = None
-    if 'file' in restAttribute.value:
+    # collect definition and check if the handler uses is a filehandler...
+    # TODO.
+    if ((attributeDefinition.handlerIndex == 1)
+        or (attributeDefinition.handlerIndex == 6)):
       try:
         value = eval(restAttribute.value)
         jsonFile = value.get('file', None)
