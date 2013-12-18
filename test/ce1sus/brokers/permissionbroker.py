@@ -6,7 +6,9 @@ Created on Jul 4, 2013
 import unittest
 import os
 from dagr.db.session import SessionManager
-from ce1sus.brokers.permissionbroker import GroupBroker, UserBroker, Group, User
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+from ce1sus.brokers.permission.userbroker import UserBroker
+from ce1sus.brokers.permission.permissionclasses import Group, User
 from dagr.helpers.objects import compareObjects
 from datetime import datetime
 
@@ -16,23 +18,33 @@ class TestPermissionBrokers(unittest.TestCase):
   # The following test have to be ordered
 
   def setUp(self):
-    print os.getcwd()
-    self.sessionManager = SessionManager('../ce1sus.cfg')
+    self.sessionManager = SessionManager('config/ce1sustest.conf')
     self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
 
     self.group = Group()
-    self.group.identifier = 1
+    self.group.identifier = long(666)
     self.group.name = 'TestGroup'
-    self.group.shareTLP = 0
+    self.group.shareTLP = long(0)
+    self.group.canDownload = long(1)
+    self.group.description = 'Description'
+    self.group.email = 'a@a.com'
+    self.group.usermails = long(1)
     self.userBroker = self.sessionManager.brokerFactory(UserBroker)
     self.user = User()
-    self.user.identifier = 1
+    self.user.identifier = 666
     self.user.username = 'testUser'
     self.user.email = 'a@a.com'
     self.user.password = 'fooPwd'
     self.user.privileged = 0
+    self.user.apiKey = None
+    self.user.group_id = self.group.identifier
+    self.user.defaultGroup = self.group
     self.timeStamp = datetime.now()
+    self.user.disabled = long(0)
+    self.user.password = 'Test$123'
+
     self.user.last_login = self.timeStamp
+
 
   def tearDown(self):
     pass

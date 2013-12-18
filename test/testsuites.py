@@ -15,6 +15,7 @@ from test.dagr.helpers.converters import TestConverter
 from test.ce1sus.brokers.definitionbroker import TestDefinitionBrokers
 from test.ce1sus.brokers.permissionbroker import TestPermissionBrokers
 from test.ce1sus.brokers.eventbroker import TestEventBrokers
+from test.ce1sus.helpers.bitdecoder import TestBitDecoder
 
 
 def suite():
@@ -22,6 +23,7 @@ def suite():
   testSuite.addTest(TestDefinitionBrokers())
   testSuite.addTest(TestEventBrokers())
   testSuite.addTest(TestPermissionBrokers())
+  testSuit.addTest(TestBitDecoder())
 
   testSuite.addTest(TestSession())
   testSuite.addTest(TestObjectHelper())

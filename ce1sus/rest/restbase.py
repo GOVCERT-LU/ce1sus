@@ -147,8 +147,8 @@ class RestControllerBase(BaseController):
       self.raiseError('UnRecoverableException',
                       'An unrecoverable error occurred')
 
-  def _isEventOwner(self, event):
-    user = Protector.getUser()
+  def _isEventOwner(self, event, apiKey):
+    user = self.getUser(apiKey)
     if user.privileged == 1:
       return True
     else:

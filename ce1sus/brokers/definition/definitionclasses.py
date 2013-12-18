@@ -119,7 +119,6 @@ class AttributeDefinition(BASE):
                           1: 'filehandler.FileWithHashesHandler',
                           2: 'tickethandler.TicketHandler',
                           3: 'tickethandler.CVEHandler',
-                          4: 'locationhandler.LocationHandler',
                           5: 'multiplegenerichandler.MultipleGenericHandler',
                           6: 'filehandler.FileHandler',
                           7: 'datehandler.DateHandler',

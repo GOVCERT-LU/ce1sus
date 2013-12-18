@@ -16,7 +16,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 
 
 # pylint: disable=R0904
-class Test(unittest.TestCase):
+class TestBitDecoder(unittest.TestCase):
 
     def testRestValidSharable(self):
         test = BitValue('1110')
@@ -59,13 +59,6 @@ class Test(unittest.TestCase):
         assert not test.isValidated
         assert test.isWebInsert
         assert test.isSharable
-
-    def testRest(self):
-        test = BitValue('0010')
-        assert test.isRestInsert
-        assert not test.isValidated
-        assert not test.isWebInsert
-        assert not test.isSharable
 
     def testWebself(self):
         test = BitValue('0001')

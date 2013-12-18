@@ -30,7 +30,7 @@ class RestEventController(RestControllerBase):
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
       obj = self._objectToJSON(event,
-                               self._isEventOwner(event),
+                               self._isEventOwner(event, apiKey),
                                False,
                                False)
       return self._returnMessage(obj)
@@ -46,7 +46,7 @@ class RestEventController(RestControllerBase):
       self._checkIfViewable(event, self.getUser(apiKey))
       withDefinition = options.get('Full-Definitions', False)
       obj = self._objectToJSON(event,
-                               self._isEventOwner(event),
+                               self._isEventOwner(event, apiKey),
                                True,
                                withDefinition)
 

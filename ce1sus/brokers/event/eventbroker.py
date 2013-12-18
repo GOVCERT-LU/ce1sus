@@ -367,7 +367,20 @@ class EventBroker(BrokerBase):
     :returns: Event
     """
     event = Event()
-    if not action == 'insert':
+    if action == 'insert':
+        if uuid is None:
+          event.uuid = unicode(uuidgen.uuid4())
+        else:
+          event.uuid = uuid
+        event.creatorGroup = user.defaultGroup
+        event.creatorGroup_id = event.creatorGroup.identifier
+        event.groups = list()
+        event.groups.append(user.defaultGroup)
+        event.bitValue = BitValue('1000', event)
+        event.created = datumzait.utcnow()
+        event.creator = user
+        event.creator_id = event.creator.identifier
+    else:
       # dont want to change the original in case the user cancel!
       event = self.getByID(identifier)
       # right checks only if there is a change!!!!
@@ -381,7 +394,6 @@ class EventBroker(BrokerBase):
       ObjectConverter.setInteger(event, 'status_id', status)
       ObjectConverter.setInteger(event, 'published', published)
       event.modified = datumzait.utcnow()
-      print event.modified.isoformat()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
 
@@ -401,20 +413,7 @@ class EventBroker(BrokerBase):
         event.last_seen = event.first_seen
       ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
       ObjectConverter.setInteger(event, 'risk_id', risk)
-      if action == 'insert':
-        if uuid is None:
-          event.uuid = unicode(uuidgen.uuid4())
-        else:
-          event.uuid = uuid
-        event.creatorGroup = user.defaultGroup
-        event.creatorGroup_id = event.creatorGroup.identifier
-        event.groups = list()
-        event.groups.append(user.defaultGroup)
-        event.bitValue = BitValue('1000', event)
-        event.created = datumzait.utcnow()
-        print event.created.tzname
-        event.creator = user
-        event.creator_id = event.creator.identifier
+
     return event
 
   def getByUUID(self, identifier):
