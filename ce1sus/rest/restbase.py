@@ -244,7 +244,7 @@ class RestControllerBase(BaseController):
     if ((attributeDefinition.handlerIndex == 1)
         or (attributeDefinition.handlerIndex == 6)):
       try:
-        value = eval(restAttribute.value)
+        value = json.load(restAttribute.value)
         jsonFile = value.get('file', None)
         if jsonFile:
           fileName = jsonFile[0]
