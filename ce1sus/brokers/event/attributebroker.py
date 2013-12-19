@@ -17,7 +17,7 @@ BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from dagr.db.session import BASE, SessionManager
+from dagr.db.session import BASE
 from dagr.db.broker import DateTime
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.validator.objectvalidator import ObjectValidator
@@ -31,6 +31,7 @@ from dagr.db.broker import IntegrityException
 from ce1sus.api.restclasses import RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.string import cleanPostValue
+from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
 
 
 class Attribute(BASE):
@@ -45,10 +46,12 @@ class Attribute(BASE):
                             ForeignKey('DEF_Attributes.def_attribute_id'))
   definition = relationship(AttributeDefinition,
               primaryjoin='AttributeDefinition.identifier==' +
-              'Attribute.def_attribute_id', innerjoin=True)
+              'Attribute.def_attribute_id',
+                        lazy='joined')
   object_id = Column(Integer, ForeignKey('Objects.object_id'))
   object = relationship("Object",
-                        primaryjoin='Object.identifier==Attribute.object_id')
+                        primaryjoin='Object.identifier==Attribute.object_id',
+                        lazy='joined')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
   creator_id = Column('creator_id', Integer,
@@ -60,6 +63,21 @@ class Attribute(BASE):
   modifier = relationship(User,
                           primaryjoin="Attribute.modifier_id==User.identifier")
   ioc = Column('ioc', Integer)
+  # valuerelations
+  stringValue = relationship(StringValue,
+                          primaryjoin="Attribute.identifier==StringValue.attribute_id",
+                          lazy='joined', uselist=False)
+  dateValue = relationship(DateValue,
+                          primaryjoin="Attribute.identifier==DateValue.attribute_id",
+                          lazy='joined', uselist=False)
+  textValue = relationship(TextValue,
+                          primaryjoin="Attribute.identifier==TextValue.attribute_id",
+                          lazy='joined', uselist=False)
+  numberValue = relationship(NumberValue,
+                          primaryjoin="Attribute.identifier==NumberValue.attribute_id",
+                          lazy='joined', uselist=False)
+
+
   __value_id = None
   __value = None
   __valueObject = None
@@ -77,21 +95,6 @@ class Attribute(BASE):
     self.__bitCode = bitvalue
 
   @property
-  def value_id(self):
-    if self.__value_id is None:
-      if self.__value is None:
-        valueBroker = SessionManager.getInstance().brokerFactory(ValueBroker)
-        self.__value = valueBroker.getByAttribute(self)
-      else:
-        self.__value_id = self.__value.identifier
-
-    return self.__value_id
-
-  @value_id.setter
-  def value_id(self, value):
-    self.__value_id = value
-
-  @property
   def key(self):
     """
     returns the name of the definition
@@ -107,18 +110,16 @@ class Attribute(BASE):
 
     :returns: Any
     """
-    if self.__valueObject is None and self.__value is None:
-      # try to get the value some how...
-      try:
-        attributeBroker = SessionManager.getInstance().brokerFactory(
-                                                                AttributeBroker
-                                                                    )
-        attributeBroker.getSetValues(self)
-        return self.__value
-      except BrokerException:
-        return self.__value
-    else:
-      return self.__value
+    if self.__value is None:
+      if not self.stringValue  is None:
+        self.__value = self.stringValue.value
+      elif not self.dateValue  is None:
+        self.__value = self.dateValue.value
+      elif not self.textValue is None:
+        self.__value = self.textValue.value
+      elif not self.numberValue is None:
+        self.__value = self.numberValue.value
+    return self.__value
 
   @value.setter
   def value(self, value):

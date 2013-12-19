@@ -52,9 +52,10 @@ class Event(BASE):
   risk_id = Column('risk_id', Integer)
   analysis_status_id = Column('analysis_status_id', Integer)
   comments = relationship("Comment")
-  groups = relationship(Group, secondary='Groups_has_Events', backref="events")
+  groups = relationship(Group, secondary='Groups_has_Events', backref="events", lazy='joined')
   maingroups = relationship(SubGroup,
-                            secondary='SubGroups_has_Events')
+                            secondary='SubGroups_has_Events',
+                            lazy='joined')
   objects = relationship('Object')
   created = Column('created', DateTime(timezone=True))
   modified = Column('modified', DateTime(timezone=True))
@@ -62,7 +63,8 @@ class Event(BASE):
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
-                         primaryjoin="Event.creator_id==User.identifier")
+                         primaryjoin="Event.creator_id==User.identifier",
+                         lazy='joined')
   modifier_id = Column('modifier_id', Integer,
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
@@ -71,7 +73,8 @@ class Event(BASE):
                             ForeignKey('Groups.group_id'))
   creatorGroup = relationship(Group,
                               primaryjoin="Event.creatorGroup_id==Group.identifier",
-                              backref="createdEvents")
+                              backref="createdEvents",
+                              lazy='joined')
   __tlpObj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
@@ -324,7 +327,7 @@ class Object(BASE):
 
   __tablename__ = "Objects"
   identifier = Column('object_id', Integer, primary_key=True)
-  attributes = relationship('Attribute')
+  attributes = relationship('Attribute', lazy='joined')
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
@@ -332,7 +335,8 @@ class Object(BASE):
 
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
-                       '==Object.event_id')
+                       '==Object.event_id',
+                        lazy='joined')
   created = Column('created', DateTime)
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
@@ -341,12 +345,13 @@ class Object(BASE):
   parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
   parentObject = relationship('Object',
-                      primaryjoin="Object.parentObject_id==Object.identifier")
+                      primaryjoin="Object.parentObject_id==Object.identifier",
+                      lazy='joined')
   # TODO: Fix Me! - FK removed due to errors
   parentEvent_id = Column('parentEvent', Integer)
 
   children = relationship("Object", primaryjoin='Object.identifier' +
-                         '==Object.parentObject_id')
+                         '==Object.parentObject_id', lazy='joined')
   dbcode = Column('code', Integer)
   __bitCode = None
 

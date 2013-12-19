@@ -35,7 +35,7 @@ class StringValue(BASE):
   identifier = Column('StringValue_id', Integer, primary_key=True)
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, innerjoin=True)
+  attribute = relationship("Attribute", uselist=False, lazy='joined')
 
   def validate(self):
     """
@@ -65,7 +65,7 @@ class DateValue(BASE):
   identifier = Column('DateValue_id', Integer, primary_key=True)
   value = Column('value', DateTime)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, innerjoin=True)
+  attribute = relationship("Attribute", uselist=False, lazy='joined')
 
   def validate(self):
     """
@@ -91,7 +91,7 @@ class TextValue(BASE):
   identifier = Column('TextValue_id', Integer, primary_key=True)
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, innerjoin=True)
+  attribute = relationship("Attribute", uselist=False, lazy='joined')
 
   def validate(self):
     """
@@ -121,7 +121,7 @@ class NumberValue(BASE):
   identifier = Column('NumberValue_id', Integer, primary_key=True)
   value = Column('value', Integer)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, innerjoin=True)
+  attribute = relationship("Attribute", uselist=False, lazy='joined')
 
   def validate(self):
     """
