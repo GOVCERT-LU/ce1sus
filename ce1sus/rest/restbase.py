@@ -35,6 +35,7 @@ from ce1sus.web.helpers.handlers.filehandler import FileHandler
 import os
 from dagr.db.session import SessionManager
 from shutil import move
+import re
 
 
 class RestAPIException(Exception):
@@ -241,10 +242,9 @@ class RestControllerBase(BaseController):
     dbAttribute.identifier = None
     # collect definition and check if the handler uses is a filehandler...
     # TODO.
-    if ((attributeDefinition.handlerIndex == 1)
-        or (attributeDefinition.handlerIndex == 6)):
+    if (re.match(r'^\{.*file.*:.*\}$', stringValue)):
       try:
-        value = json.load(restAttribute.value)
+        value = json.loads(restAttribute.value)
         jsonFile = value.get('file', None)
         if jsonFile:
           fileName = jsonFile[0]
