@@ -242,7 +242,7 @@ class RestControllerBase(BaseController):
     dbAttribute.identifier = None
     # collect definition and check if the handler uses is a filehandler...
     # TODO.
-    if (re.match(r'^\{.*file.*:.*\}$', stringValue)):
+    if (re.match(r'^\{.*file.*:.*\}$', restAttribute.value)):
       try:
         value = json.loads(restAttribute.value)
         jsonFile = value.get('file', None)
