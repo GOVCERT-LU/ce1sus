@@ -145,7 +145,7 @@ class ValidationController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for event_rel in self.relationBroker.getRelationsByEvent(event):
+      for event_rel in self.relationBroker.getRelationsByEvent(event, True):
         temp = Relation()
         rel_event = event_rel.rel_event
         try:

@@ -314,33 +314,27 @@ class EventController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for relation in self.__getRelationsObjects(event.objects):
+      for relation in self.relationBroker.getRelationsByEvent(event, False):
         temp = Relation()
         # TODO Check if the event is viewable for the user
-        if relation.sameAttribute.object.event is None:
-          event_rel = relation.sameAttribute.object.parentObject.event
-        else:
-          event_rel = relation.sameAttribute.object.event
-          try:
-            if event_rel.identifier != event.identifier:
-              self.checkIfViewable(event_rel)
-            # check if user can see the object
-            if self.isEventOwner(event) or (
-                (relation.sameAttribute.object.bitValue.isValidated and
-                 relation.sameAttribute.object.isSharable) or
-                              (relation.sameAttribute.bitValue.isValidated and
-                               relation.sameAttribute.bitValue.isSharable)) :
-              temp.eventID = event_rel.identifier
-              temp.identifier = event_rel.identifier
-              temp.eventName = event_rel.title
-              temp.objectID = relation.sameAttribute.object.identifier
-              temp.objectName = relation.sameAttribute.object.definition.name
-              temp.attributeID = relation.sameAttribute.identifier
-              temp.attributeName = relation.sameAttribute.definition.name
-              temp.attributeValue = relation.sameAttribute.value
-              relationPaginator.list.append(temp)
-          except cherrypy.HTTPError:
-            self.getLogger().debug(('User {0} is not '
+        event_rel = relation.rel_event
+        try:
+          self.checkIfViewable(event_rel)
+          # check if user can see the object
+          if (self.isEventOwner(event) or (
+                relation.rel_attribute.bitValue.isValidated and
+                 relation.rel_attribute.isSharable)) :
+            temp.eventID = event_rel.identifier
+            temp.identifier = event_rel.identifier
+            temp.eventName = event_rel.title
+            temp.objectID = relation.rel_attribute.object.identifier
+            temp.objectName = relation.rel_attribute.object.definition.name
+            temp.attributeID = relation.rel_attribute.identifier
+            temp.attributeName = relation.rel_attribute.definition.name
+            temp.attributeValue = relation.rel_attribute.value
+            relationPaginator.list.append(temp)
+        except cherrypy.HTTPError:
+          self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))
 
     except BrokerException as e:

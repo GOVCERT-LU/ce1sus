@@ -21,6 +21,7 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute, Event
 import thread
 from sqlalchemy import or_
+from sqlalchemy import distinct
 
 
 # pylint: disable=R0903,R0902
@@ -36,11 +37,11 @@ class EventRelation(BASE):
                            primaryjoin='Event.identifier' +
                        '==EventRelation.rel_event_id', lazy='joined')
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attriubte = relationship("Attribute", uselist=False,
+  attribute = relationship("Attribute", uselist=False,
                        primaryjoin='Attribute.identifier' +
                        '==EventRelation.attribute_id', lazy='joined')
   rel_attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  rel_attriubte = relationship("Attribute", uselist=False,
+  rel_attribute = relationship("Attribute", uselist=False,
                        primaryjoin='Attribute.identifier' +
                        '==EventRelation.attribute_id', lazy='joined')
   def validate(self):
@@ -98,19 +99,54 @@ class RelationBroker(BrokerBase):
 
 
 
-  def getRelationsByEvent(self, event):
+  def getRelationsByEvent(self, event, uniqueEvents=True):
 
     try:
-      result = self.session.query(EventRelation).filter(
+      relations = self.session.query(EventRelation).filter(
                         or_(EventRelation.event_id == event.identifier,
                             EventRelation.rel_event_id == event.identifier)
                         ).all()
+      # convert to event -> relation
+      results = list()
+      seenEvents = list()
+      for relation in relations:
+
+        match = EventRelation()
+        # check if event-> rel_event
+        if relation.event_id == event.identifier:
+          match.identifier = relation.identifier
+          match.event_id = relation.event_id
+          match.event = relation.event
+          match.rel_event_id = relation.rel_event_id
+          match.rel_event = relation.rel_event
+          match.attribute_id = relation.attribute_id
+          match.attribute = relation.attribute
+          match.rel_attribute_id = relation.rel_attribute_id
+          match.rel_attribute = relation.rel_attribute
+        else:
+          match.identifier = relation.identifier
+          match.event_id = relation.rel_event_id
+          match.event = relation.rel_event
+          match.rel_event_id = relation.event_id
+          match.rel_event = relation.event
+          match.attribute_id = relation.rel_attribute_id
+          match.attribute = relation.rel_attribute
+          match.rel_attribute_id = relation.attribute_id
+          match.rel_attribute = relation.attribute
+        # else flip data
+        if uniqueEvents:
+          if not  relation.rel_event_id in seenEvents:
+            results.append(match)
+            seenEvents.append(match.rel_event_id)
+        else:
+          results.append(match)
+      return results
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       raise BrokerException(e)
-    return result
+
     # convert
 
   def getBrokerClass(self):
