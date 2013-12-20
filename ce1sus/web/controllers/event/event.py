@@ -104,7 +104,6 @@ class EventController(Ce1susBaseController):
     relationPaginator = Paginator(items=list(),
                           labelsAndProperty=relationLabels,
                           paginatorOptions=relationsPaginatorOptions)
-    relationPaginator.itemsPerPage = 3
 
     try:
       # get for each object
