@@ -87,18 +87,6 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-    paginatorOptions = PaginatorOptions('/events/recent',
-                                        'eventsTabTabContent')
-    paginatorOptions.addOption('TAB',
-                          'VIEW',
-                          '/events/event/objects/objects/{0}'.format(eventID),
-                          contentid='',
-                          tabid='eventObjects{0}'.format(eventID))
-
-
-
-
-
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},

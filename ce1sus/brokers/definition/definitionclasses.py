@@ -115,16 +115,6 @@ class AttributeDefinition(BASE):
                  2: 'DateValue',
                  3: 'NumberValue'}
 
-  __handlerDefinitions = {0: 'generichandler.GenericHandler',
-                          1: 'filehandler.FileWithHashesHandler',
-                          2: 'tickethandler.TicketHandler',
-                          3: 'tickethandler.CVEHandler',
-                          5: 'multiplegenerichandler.MultipleGenericHandler',
-                          6: 'filehandler.FileHandler',
-                          7: 'datehandler.DateHandler',
-                          8: 'cbvaluehandler.CBValueHandler',
-                          9: 'texthandler.TextHandler'}
-
   __tablename__ = "DEF_Attributes"
   # table class mapping
   identifier = Column('def_attribute_id', Integer, primary_key=True)
@@ -225,23 +215,6 @@ class AttributeDefinition(BASE):
         key = tableName.replace('Value', '')
       else:
         key = tableName
-      value = index
-      result[key] = value
-    return result
-
-  @staticmethod
-  def getHandlerDefinitions():
-    """ returns the table definitions where the key is the value and value the
-    index of the tables.
-
-    Note: Used for displaying the definitions of the tables in combo boxes
-
-    :returns: Dictionary
-    """
-    result = dict()
-    for index, handlerName in (AttributeDefinition.
-                                        __handlerDefinitions.iteritems()):
-      key = handlerName.split('.')[1]
       value = index
       result[key] = value
     return result

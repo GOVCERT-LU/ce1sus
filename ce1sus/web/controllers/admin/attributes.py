@@ -20,6 +20,7 @@ from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
                           ValidationException, NothingFoundException, \
                           DeletionException, IntegrityException
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 import types as types
 
 
@@ -29,6 +30,7 @@ class AttributeController(Ce1susBaseController):
   def __init__(self):
     Ce1susBaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeDefinitionBroker)
+    self.handlerBroker = self.brokerFactory(AttributeHandlerBroker)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -91,7 +93,7 @@ class AttributeController(Ce1susBaseController):
     return self.cleanHTMLCode(template.render(attributeDetails=attribute,
                            remainingObjects=remainingObjects,
                            attributeObjects=attributeObjects,
-                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions(),
+                  cbHandlerValues=self.handlerBroker.getHandlerDefinitions(),
                            cbValues=cbValues))
 
   @require(privileged(), requireReferer(('/internal')))
@@ -104,7 +106,7 @@ class AttributeController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/attributes/attributeModal.html')
     cbValues = AttributeDefinition.getTableDefinitions()
-    cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
+    cbHandlerValues = self.handlerBroker.getHandlerDefinitions()
     return self.cleanHTMLCode(template.render(attribute=None,
                            errorMsg=None,
                            cbValues=cbValues,
@@ -165,7 +167,7 @@ class AttributeController(Ce1susBaseController):
       self.getLogger().info('Attribute is invalid')
       return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(attribute=attribute,
                   cbValues=AttributeDefinition.getTableDefinitions(),
-                  cbHandlerValues=AttributeDefinition.getHandlerDefinitions()))
+                  cbHandlerValues=self.handlerBroker.getHandlerDefinitions()))
     except IntegrityException:
       self.getLogger().info(('User tried to delete item {0} which is '
                              + 'still referenced.').format(identifier))
@@ -194,7 +196,7 @@ class AttributeController(Ce1susBaseController):
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
     cbValues = AttributeDefinition.getTableDefinitions()
-    cbHandlerValues = AttributeDefinition.getHandlerDefinitions()
+    cbHandlerValues = self.handlerBroker.getHandlerDefinitions()
     return self.cleanHTMLCode(template.render(attribute=attribute,
                            errorMsg=errorMsg,
                            cbValues=cbValues,

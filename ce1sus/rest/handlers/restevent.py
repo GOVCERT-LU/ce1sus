@@ -90,7 +90,10 @@ class RestEventController(RestControllerBase):
                        user,
                        restEvent.uuid)
         event.bitValue.isRestInsert = True
-        event.bitValue.isSharable = True
+        if restEvent.share == 1:
+          event.bitValue.isSharable = True
+        else:
+          event.bitValue.isSharable = False
         # flush to DB
         self.eventBroker.insert(event, commit=False)
 

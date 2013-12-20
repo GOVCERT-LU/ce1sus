@@ -20,6 +20,7 @@ from ce1sus.rest.restbase import RestControllerBase, RestAPIException
 from cherrypy import request
 import json
 from dagr.helpers.validator.valuevalidator import ValueValidator
+from dagr.helpers.validator.objectvalidator import ValidationException
 from dagr.helpers.converters import ValueConverter
 import re
 from ce1sus.web.helpers.protection import Protector
@@ -125,14 +126,18 @@ class RestController(RestControllerBase):
           except ValueError:
             if parameter not in RestController.REST_Allowed_Parameters:
               Protector.clearRestSession()
-              self.raiseError('UnknownParameter',
-                              'Parameter {0} is not defined'.format(parameter))
+              self.raiseError('Invalid ',
+                              'Parameter {0}'.format(parameter))
         if (len(pathElements) > 3):
-          if self.__checkIfValidUIID(pathElements[3]):
-            uuid = possibleUUID.strip()
-          else:
-            Protector.clearRestSession()
-            raise cherrypy.HTTPError(418)
+          try:
+            if self.__checkIfValidUIID(pathElements[3]):
+              uuid = possibleUUID.strip()
+            else:
+              Protector.clearRestSession()
+              raise cherrypy.HTTPError(418)
+          except ValidationException:
+            self.raiseError('Invalid ',
+                              'Parameter {0}'.format(parameter))
     else:
       Protector.clearRestSession()
       raise cherrypy.HTTPError(400)

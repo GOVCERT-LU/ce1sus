@@ -170,6 +170,7 @@ class RestEvent(RestClass):
     self.published = None
     self.status = None
     self.uuid = None
+    self.share = 1
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -209,20 +210,7 @@ class RestEvent(RestClass):
       result[self.__class__.__name__]['comments'] = list()
       for comment in self.comments:
         result[self.__class__.__name__]['comments'].append(comment.toJSON())
-    return result
-
-
-class RestComment(RestClass):
-
-  def __init__(self):
-    RestClass.__init__(self)
-    self.comment = None
-
-  def toJSON(self, full=False, withDefinition=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['comment'] = self.comment
-
+    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
     return result
 
 
@@ -234,6 +222,7 @@ class RestObject(RestClass):
     self.attributes = None
     self.parent = None
     self.children = list()
+    self.share = 1
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -259,6 +248,7 @@ class RestObject(RestClass):
                                                                        )
                                                             )
         pass
+    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
     return result
 
 
@@ -269,6 +259,7 @@ class RestAttribute(RestClass):
     self.definition = None
     self.value = None
     self.ioc = None
+    self.share = 1
 
   def toJSON(self, full=False, withDefinition=False):
     result = dict()
@@ -286,6 +277,7 @@ class RestAttribute(RestClass):
       value = self.value
     result[self.__class__.__name__]['value'] = '{0}'.format(value)
     result[self.__class__.__name__]['ioc'] = '{0}'.format(self.ioc)
+    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
     return result
 
 

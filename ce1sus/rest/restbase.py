@@ -279,7 +279,10 @@ class RestControllerBase(BaseController):
     dbAttribute.modifier_id = user.identifier
     dbAttribute.bitValue = BitValue('0', dbAttribute)
     dbAttribute.bitValue.isRestInsert = True
-    dbAttribute.bitValue.isSharable = True
+    if restAttribute.share == 1:
+      dbAttribute.bitValue.isSharable = True
+    else:
+      dbAttribute.bitValue.isSharable = False
     ObjectConverter.setInteger(dbAttribute,
                                'ioc',
                                restAttribute.ioc)
@@ -341,7 +344,10 @@ class RestControllerBase(BaseController):
       dbObject.parentEvent_id = event.identifier
     # flush to DB
     dbObject.bitValue.isRestInsert = True
-    dbObject.bitValue.isSharable = True
+    if restObject.share == 1:
+      dbObject.bitValue.isSharable = True
+    else:
+      dbObject.bitValue.isSharable = False
     self.objectBroker.insert(dbObject, commit=commit)
 
     return dbObject

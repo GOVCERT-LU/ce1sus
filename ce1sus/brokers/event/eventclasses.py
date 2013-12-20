@@ -21,7 +21,7 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
-from ce1sus.api.restclasses import RestEvent, RestComment, RestObject, RestAttribute
+from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
@@ -266,7 +266,10 @@ class Event(BASE):
       if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
         result.objects.append(obj.toRestObject(isOwner))
     result.comments = list()
-
+    if self.bitValue.isSharable:
+      result.share = 1
+    else:
+      result.share = 0
     return result
 
 
@@ -312,13 +315,6 @@ class Comment(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
-
-  def toRestObject(self, isOwner=False):
-    result = RestComment()
-    result.comment = self.comment
-
-    return result
-
 
 class Object(BASE):
   """This is a container class for the OBJECTS table."""
@@ -424,6 +420,10 @@ class Object(BASE):
     for obj in self.children:
       if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
         result.children.append(obj.toRestObject(isOwner))
+    if self.bitValue.isSharable:
+      result.share = 1
+    else:
+      result.share = 0
     return result
 
 
@@ -548,5 +548,9 @@ class Attribute(BASE):
     result.definition = self.definition.toRestObject()
     result.value = self.value
     result.ioc = self.ioc
+    if self.bitValue.isSharable:
+      result.share = 1
+    else:
+      result.share = 0
     return result
 

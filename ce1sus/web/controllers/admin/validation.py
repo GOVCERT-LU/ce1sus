@@ -112,13 +112,6 @@ class ValidationController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfPriviledged()
-    paginatorOptions = PaginatorOptions('/events/recent',
-                                        'eventsTabTabContent')
-    paginatorOptions.addOption('TAB',
-                          'VIEW',
-                          '/admin/validation/eventObjects/{0}'.format(eventID),
-                          contentid='',
-                          tabid='eventObjects{0}'.format(eventID))
 
 
 
@@ -128,7 +121,7 @@ class ValidationController(Ce1susBaseController):
                       {'eventLastSeen':'Last Seen'}]
 
     relationsPaginatorOptions = PaginatorOptions('/events/recent',
-                                                 'eventsTabTabContent')
+                                                 'validationTabsTabContent')
     relationsPaginatorOptions.addOption('NEWTAB',
                                'VIEW',
                                '/events/event/view/',
