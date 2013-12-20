@@ -211,7 +211,7 @@ class ObjectsController(Ce1susBaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def attachChildObject(self, objectID=None, eventID=None, definition=None):
+  def attachChildObject(self, objectID=None, eventID=None, definition=None, shared=None):
     """
     Inserts an an event object.
 
@@ -238,7 +238,9 @@ class ObjectsController(Ce1susBaseController):
                                   None,
                                   self.def_objectBroker.getByID(definition),
                                   self.getUser(),
-                                  objectID)
+                                  objectID,
+                                  shared)
+    # TODO shared
     try:
       obj.bitValue.isWebInsert = True
       obj.bitValue.isValidated = True

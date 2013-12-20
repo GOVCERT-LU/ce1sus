@@ -92,10 +92,7 @@ class ObjectBroker(BrokerBase):
       obj.event_id = None
     else:
       obj.event_id = event.identifier
-    if parentObjectID is None:
-      obj.parentObject_id = None
-    else:
-      obj.parentObject_id = parentObjectID
+    obj.parentObject_id = parentObjectID
     obj.creator_id = user.identifier
     ObjectConverter.setInteger(obj, 'shared', shared)
     obj.bitValue = BitValue('1000', obj)
