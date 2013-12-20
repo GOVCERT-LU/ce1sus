@@ -13,7 +13,6 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-from ce1sus.brokers.event.attributebroker import Attribute
 from dagr.helpers.datumzait import datumzait
 from os.path import isfile, basename, getsize, exists
 import dagr.helpers.hash as hasher
@@ -35,6 +34,7 @@ from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
 import base64
 from os.path import basename, exists
+from ce1sus.brokers.event.eventclasses import Attribute
 
 
 class FileNotFoundException(HandlerException):

@@ -36,6 +36,8 @@ class StringValue(BASE):
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute", uselist=False, lazy='joined')
+  event_id = Column(Integer, ForeignKey('Events.event_id'))
+  event = relationship("Event", uselist=False)
 
   def validate(self):
     """
@@ -65,7 +67,9 @@ class DateValue(BASE):
   identifier = Column('DateValue_id', Integer, primary_key=True)
   value = Column('value', DateTime)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, lazy='joined')
+  attribute = relationship("Attribute", uselist=False, innerjoin=True, lazy='joined')
+  event_id = Column(Integer, ForeignKey('Events.event_id'))
+  event = relationship("Event", uselist=False)
 
   def validate(self):
     """
@@ -91,7 +95,9 @@ class TextValue(BASE):
   identifier = Column('TextValue_id', Integer, primary_key=True)
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, lazy='joined')
+  attribute = relationship("Attribute", uselist=False, innerjoin=True, lazy='joined')
+  event_id = Column(Integer, ForeignKey('Events.event_id'))
+  event = relationship("Event", uselist=False)
 
   def validate(self):
     """
@@ -121,7 +127,9 @@ class NumberValue(BASE):
   identifier = Column('NumberValue_id', Integer, primary_key=True)
   value = Column('value', Integer)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, lazy='joined')
+  attribute = relationship("Attribute", uselist=False, innerjoin=True, lazy='joined')
+  event_id = Column(Integer, ForeignKey('Events.event_id'))
+  event = relationship("Event", uselist=False)
 
   def validate(self):
     """
@@ -220,6 +228,10 @@ class ValueBroker(BrokerBase):
       valueInstance.identifier = attribute.value_id
     valueInstance.attribute_id = attribute.identifier
     valueInstance.attribute = attribute
+    event_id = attribute.object.event_id
+    if not event_id:
+      event_id = attribute.object.parentObject_id
+    valueInstance.event_id = event_id
     return valueInstance
 
   def getByAttribute(self, attribute):

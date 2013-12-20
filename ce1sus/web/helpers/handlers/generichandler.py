@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.base import HandlerBase
-from ce1sus.brokers.event.attributebroker import Attribute
+from ce1sus.brokers.event.eventclasses import Attribute
 from dagr.helpers.datumzait import datumzait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue

@@ -39,8 +39,7 @@ class ObjectDefinition(BASE):
   description = Column('description', String)
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all',
-                            order_by="AttributeDefinition.name",
-                            lazy='joined')
+                            order_by="AttributeDefinition.name")
   dbchksum = Column('chksum', String)
   share = Column('sharable', Integer)
 
@@ -138,8 +137,7 @@ class AttributeDefinition(BASE):
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
                          back_populates='attributes', cascade='all',
-                            order_by="ObjectDefinition.name",
-                            lazy='joined')
+                            order_by="ObjectDefinition.name")
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
   dbchksum = Column('chksum', String)

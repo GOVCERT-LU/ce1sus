@@ -16,8 +16,7 @@ from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, getObject
 from importlib import import_module
 import cherrypy
 from dagr.web.controllers.base import BaseController
-from ce1sus.brokers.event.attributebroker import Attribute
-from ce1sus.brokers.event.eventclasses import Event
+from ce1sus.brokers.event.eventclasses import Event, Attribute
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
 from dagr.db.broker import NothingFoundException
@@ -219,6 +218,7 @@ class RestControllerBase(BaseController):
         attrDefinition.handlerIndex = 0
         attrDefinition.deletable = 1
         attrDefinition.share = 1
+
         self.attributeDefinitionBroker.insert(attrDefinition, commit=False)
 
         # update objectRelations as the attribute was not set
@@ -271,14 +271,12 @@ class RestControllerBase(BaseController):
     dbAttribute.value = value
     dbAttribute.object = obj
     dbAttribute.object_id = obj.identifier
-    dbAttribute.def_attribute_id = attributeDefinition.identifier
     dbAttribute.definition = attributeDefinition
+    dbAttribute.def_attribute_id = attributeDefinition.identifier
     dbAttribute.created = datumzait.utcnow()
     dbAttribute.modified = datumzait.utcnow()
-    dbAttribute.creator = user
     dbAttribute.creator_id = user.identifier
     dbAttribute.modifier_id = user.identifier
-    dbAttribute.modifier = user
     dbAttribute.bitValue = BitValue('0', dbAttribute)
     dbAttribute.bitValue.isRestInsert = True
     dbAttribute.bitValue.isSharable = True
@@ -321,7 +319,6 @@ class RestControllerBase(BaseController):
       objDefinition.description = restObjectDefinition.description
       objDefinition.share = 1
       self.objectDefinitionBroker.insert(objDefinition, commit=commit)
-
     return objDefinition
 
   def _convertToObject(self, restObject, parent, event, commit=False):
@@ -330,7 +327,6 @@ class RestControllerBase(BaseController):
 
     user = parent.creator
     if isinstance(parent, Event):
-
       dbObject = self.objectBroker.buildObject(None,
                                                parent,
                                                objectDefinition,

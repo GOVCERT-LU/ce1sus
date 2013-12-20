@@ -26,138 +26,11 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                                               AttributeDefinitionBroker
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.web.helpers.handlers.base import HandlerBase
-from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation
 from dagr.db.broker import IntegrityException
 from ce1sus.api.restclasses import RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.string import cleanPostValue
-from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
-
-
-class Attribute(BASE):
-  """This is a container class for the ATTRIBUTES table."""
-
-  def __init__(self):
-    pass
-
-  __tablename__ = "Attributes"
-  identifier = Column('attribute_id', Integer, primary_key=True)
-  def_attribute_id = Column(Integer,
-                            ForeignKey('DEF_Attributes.def_attribute_id'))
-  definition = relationship(AttributeDefinition,
-              primaryjoin='AttributeDefinition.identifier==' +
-              'Attribute.def_attribute_id',
-                        lazy='joined')
-  object_id = Column(Integer, ForeignKey('Objects.object_id'))
-  object = relationship("Object",
-                        primaryjoin='Object.identifier==Attribute.object_id',
-                        lazy='joined')
-  created = Column('created', DateTime)
-  modified = Column('modified', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
-  creator = relationship(User,
-                         primaryjoin="Attribute.creator_id==User.identifier")
-  modifier_id = Column('modifier_id', Integer,
-                            ForeignKey('Users.user_id'))
-  modifier = relationship(User,
-                          primaryjoin="Attribute.modifier_id==User.identifier")
-  ioc = Column('ioc', Integer)
-  # valuerelations
-  stringValue = relationship(StringValue,
-                          primaryjoin="Attribute.identifier==StringValue.attribute_id",
-                          lazy='joined', uselist=False)
-  dateValue = relationship(DateValue,
-                          primaryjoin="Attribute.identifier==DateValue.attribute_id",
-                          lazy='joined', uselist=False)
-  textValue = relationship(TextValue,
-                          primaryjoin="Attribute.identifier==TextValue.attribute_id",
-                          lazy='joined', uselist=False)
-  numberValue = relationship(NumberValue,
-                          primaryjoin="Attribute.identifier==NumberValue.attribute_id",
-                          lazy='joined', uselist=False)
-
-
-  __value_id = None
-  __value = None
-  __valueObject = None
-  dbcode = Column('code', Integer)
-  __bitCode = None
-
-  @property
-  def bitValue(self):
-    if self.__bitCode is None:
-        self.__bitCode = BitValue(self.dbcode, self)
-    return self.__bitCode
-
-  @bitValue.setter
-  def bitValue(self, bitvalue):
-    self.__bitCode = bitvalue
-
-  @property
-  def key(self):
-    """
-    returns the name of the definition
-
-    :returns: String
-    """
-    return getattr(self.definition, 'name')
-
-  @property
-  def value(self):
-    """
-    returns the actual value of the attribute
-
-    :returns: Any
-    """
-    if self.__value is None:
-      if not self.stringValue  is None:
-        self.__value = self.stringValue.value
-      elif not self.dateValue  is None:
-        self.__value = self.dateValue.value
-      elif not self.textValue is None:
-        self.__value = self.textValue.value
-      elif not self.numberValue is None:
-        self.__value = self.numberValue.value
-    return self.__value
-
-  @value.setter
-  def value(self, value):
-    """
-    setter for the attribute value
-
-    :param value: value to set
-    :type value: Any
-    """
-    self.__value = value
-
-  @property
-  def isIOC(self):
-    if self.ioc == 1:
-      return 'Yes'
-    else:
-      return 'No'
-
-  def validate(self):
-    """
-    Checks if the attributes of the class are valid
-
-    :returns: Boolean
-    """
-    ObjectValidator.validateDigits(self, 'def_attribute_id')
-    ObjectValidator.validateDigits(self, 'object_id')
-    ObjectValidator.validateDigits(self, 'creator_id')
-    ObjectValidator.validateDigits(self, 'modifier_id')
-    ObjectValidator.validateDateTime(self, 'created')
-    ObjectValidator.validateDateTime(self, 'modified')
-    return ObjectValidator.isObjectValid(self)
-
-  def toRestObject(self, isOwner=False):
-    result = RestAttribute()
-    result.definition = self.definition.toRestObject()
-    result.value = self.value
-    result.ioc = self.ioc
-    return result
+from ce1sus.brokers.relationbroker import RelationBroker
 
 
 class AttributeBroker(BrokerBase):
@@ -168,6 +41,7 @@ class AttributeBroker(BrokerBase):
     BrokerBase.__init__(self, session)
     self.valueBroker = ValueBroker(session)
     self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
+    self.relationBroker = RelationBroker(session)
 
   def getBrokerClass(self):
     """
@@ -199,51 +73,6 @@ class AttributeBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def createRelations(self, instance, commit=False):
-    clazz = self.valueBroker.getClassByAttribute(instance)
-    # find the same values!
-    sameSalues = self.valueBroker.lookforValue(clazz,
-                                           instance.value)
-
-    # add them to relation table
-    for sameValue in sameSalues:
-      # only consider the events which are not part of the current event and
-      if instance.object.event is None:
-        eventID = instance.object.parentEvent_id
-      else:
-        eventID = instance.object.event.identifier
-      if sameValue.attribute.object.event is None:
-        sameEventID = sameValue.attribute.object.parentEvent_id
-      else:
-        sameEventID = sameValue.attribute.object.event.identifier
-      if ((sameEventID != eventID)
-          and (instance.definition.relation == 1)):
-        # one way
-        relation = ObjectAttributeRelation()
-        relation.ref_object_id = instance.object.identifier
-        relation.object = instance.object
-        relation.attribute_id = instance.identifier
-        relation.attribute = instance
-        relation.sameAttribute_id = sameValue.attribute.identifier
-        relation.sameAttribute = sameValue.attribute
-        try:
-          BrokerBase.insert(self, relation, False)
-        except IntegrityException:
-          self.getLogger().debug('Duplicate found')
-        # the other way
-        relation = ObjectAttributeRelation()
-        relation.ref_object_id = sameValue.attribute.object.identifier
-        relation.object = sameValue.attribute.object
-        relation.attribute_id = sameValue.attribute.identifier
-        relation.attribute = sameValue.attribute
-        relation.sameAttribute_id = instance.identifier
-        relation.sameAttribute = instance
-        try:
-          BrokerBase.insert(self, relation, False)
-        except IntegrityException:
-          self.getLogger().debug('Duplicate found')
-    self.doCommit(commit)
-
   def insert(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
@@ -264,11 +93,13 @@ class AttributeBroker(BrokerBase):
     try:
       # insert value for value table
       BrokerBase.insert(self, instance, False, validate)
+      # insert relations
 
-      self.createRelations(instance)
+      self.relationBroker.generateAttributeRelations(instance, False)
 
       self.valueBroker.inserByAttribute(instance, False)
-      self.doCommit(commit)
+      self.doCommit(True)
+
     except BrokerException as e:
       self.getLogger().fatal(e)
       self.session.rollback()
@@ -334,119 +165,7 @@ class AttributeBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def __lookForValueAndAttribID(self,
-                                clazz,
-                                value,
-                                attributeDefinitionID,
-                                operand='=='):
-    try:
-      if operand == '==':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value == value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value < value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value > value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<=':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value <= value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>=':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value >= value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == 'like':
-        return self.session.query(clazz).join(clazz.attribute).filter(
-                  Attribute.def_attribute_id == attributeDefinitionID,
-                  clazz.value.like('%{0}%'.format(value)),
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def __lookForValue(self, clazz, value, operand='=='):
-    try:
-      if operand == '==':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value == value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value < value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value > value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<=':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value <= value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>=':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value >= value
-                  , Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == 'like':
-        return self.session.query(clazz, Attribute).filter(
-                  clazz.value.like('%{0}%'.format(value)),
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
   def lookforAttributeValue(self, attributeDefinition, value, operand='=='):
-    """
-    returns a list of matching values
-
-    :param attributeDefinition: attribute definition to use for the lookup
-    :type attributeDefinition: AttributeDefinition
-    :param value: Value to look for
-    :type value: String
-
-    :returns: List of clazz
-    """
-    result = list()
-    if attributeDefinition is None:
-      # take all classes into account
-      tables = AttributeDefinition.getTableDefinitions(False)
-      for classname in tables.iterkeys():
-        clazz = ValueBroker.getClassByClassString(classname)
-        try:
-          needle = clazz.convert(cleanPostValue(value))
-          result = result + self.__lookForValue(clazz, needle, operand)
-        except:
-          # either it works or doesn't
-          pass
-
-    else:
-      clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
-      result = self.__lookForValueAndAttribID(clazz,
-                                            value,
-                                            attributeDefinition.identifier,
-                                            operand)
-
-    return result
+    self.relationBroker.lookforAttributeValue(attributeDefinition,
+                                              value,
+                                              operand)

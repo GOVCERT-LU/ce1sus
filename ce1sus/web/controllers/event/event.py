@@ -27,7 +27,7 @@ from ce1sus.web.controllers.base import Ce1susBaseController
 from ce1sus.web.helpers.protection import require, requireReferer
 from dagr.db.broker import ValidationException, BrokerException
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-
+from ce1sus.brokers.relationbroker import RelationBroker
 
 # pylint: disable=R0903,R0902
 class Relation(object):
@@ -58,6 +58,7 @@ class EventController(Ce1susBaseController):
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.commentBroker = self.brokerFactory(CommentBroker)
+    self.relationBroker = self.brokerFactory(RelationBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -121,22 +122,22 @@ class EventController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for event_rel in self.eventBroker.getRelatedEvents(event):
+      for event_rel in self.relationBroker.getRelationsByEvent(event):
         temp = Relation()
+        rel_event = event_rel.rel_event
         try:
-          if event_rel.identifier != event.identifier:
-            self.checkIfViewable(event_rel)
-          temp.eventID = event_rel.identifier
-          temp.identifier = event_rel.identifier
-          temp.eventName = event_rel.title
-          temp.eventFirstSeen = event_rel.first_seen
-          temp.eventLastSeen = event_rel.last_seen
+          if rel_event.identifier != event.identifier:
+            self.checkIfViewable(rel_event)
+          temp.eventID = rel_event.identifier
+          temp.identifier = rel_event.identifier
+          temp.eventName = rel_event.title
+          temp.eventFirstSeen = rel_event.first_seen
+          temp.eventLastSeen = rel_event.last_seen
           if not temp in relationPaginator.list:
             relationPaginator.list.append(temp)
         except cherrypy.HTTPError:
           self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))
-
     except BrokerException as e:
       self.getLogger().error(e)
 
@@ -145,22 +146,6 @@ class EventController(Ce1susBaseController):
                            event=event,
                            comments=event.comments,
                            owner=self.isEventOwner(event)))
-
-  def __getRelationsObjects(self, objects):
-    """
-    Returns the relation of the given objects
-
-    :param objects: list of Objects
-    :type objects: List of Objects
-
-    :returns: List of Relations
-    """
-    objectIDList = list()
-    for obj in objects:
-      objectIDList.append(obj.identifier)
-    relations = self.objectBroker.getRelationsByObjectIDList(objectIDList)
-
-    return relations
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose

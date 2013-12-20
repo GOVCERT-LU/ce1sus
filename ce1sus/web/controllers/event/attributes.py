@@ -28,12 +28,13 @@ from cherrypy.lib.static import serve_file
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker, Attribute
+from ce1sus.brokers.event.attributebroker import AttributeBroker
 from dagr.db.broker import NothingFoundException
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.hash import hashMD5
 from dagr.helpers.datumzait import datumzait
 import os
+from ce1sus.brokers.event.eventclasses import Attribute
 
 
 class AttributesController(Ce1susBaseController):

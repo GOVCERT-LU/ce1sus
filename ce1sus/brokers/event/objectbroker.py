@@ -17,8 +17,7 @@ BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 from dagr.helpers.datumzait import datumzait
-from ce1sus.brokers.event.eventclasses import ObjectAttributeRelation, \
-                                              Object
+from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from sqlalchemy.orm import joinedload_all
 from ce1sus.helpers.bitdecoder import BitValue
@@ -61,46 +60,6 @@ class ObjectBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getRelationsByObjectIDList(self, objectIDList):
-    """
-    returns the relations by the object id
-
-    :param objectID: obect identifier
-    :type objectID: Integer
-
-    :returns: List of ObjectAttributeRelation
-    """
-    if len(objectIDList) == 0:
-      return list()
-    try:
-      result = self.session.query(
-                              ObjectAttributeRelation
-                            ).join(
-                                   ObjectAttributeRelation.sameAttribute
-                                  ).options(
-                                        joinedload_all(
-                                         ObjectAttributeRelation.sameAttribute
-                                                       )
-                                           ).filter(
-                                    ObjectAttributeRelation.ref_object_id.in_(
-                                                                  objectIDList
-                                                                            ),
-                        # only object wich are validated and shared are shown
-                        Object.dbcode.op('&')(12) == 12
-                        ).all()
-
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                objectIDList))
-    except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(objectIDList))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
-
-    return result
-
   @staticmethod
   def buildObject(identifier,
                   event,
@@ -126,20 +85,18 @@ class ObjectBroker(BrokerBase):
     obj.identifier = identifier
     obj.definition = definition
     if not definition is None:
-      obj.def_object_id = obj.definition.identifier
+      obj.def_object_id = definition.identifier
     obj.created = datumzait.utcnow()
     if event is None:
       obj.event = None
       obj.event_id = None
     else:
-      obj.event = event
-      obj.event_id = obj.event.identifier
+      obj.event_id = event.identifier
     if parentObjectID is None:
       obj.parentObject_id = None
     else:
       obj.parentObject_id = parentObjectID
-    obj.creator = user
-    obj.creator_id = obj.creator.identifier
+    obj.creator_id = user.identifier
     ObjectConverter.setInteger(obj, 'shared', shared)
     obj.bitValue = BitValue('1000', obj)
     return obj

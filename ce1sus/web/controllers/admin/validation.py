@@ -17,7 +17,6 @@ from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.web.controllers.event.event import Relation
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.brokers.definition.attributedefinitionbroker import \
@@ -26,6 +25,8 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
 from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.web.controllers.event.event import Relation
 
 
 class ValidationController(Ce1susBaseController):
@@ -37,6 +38,7 @@ class ValidationController(Ce1susBaseController):
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.def_objectBroker = self.brokerFactory(ObjectDefinitionBroker)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
+    self.relationBroker = self.brokerFactory(RelationBroker)
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
@@ -143,16 +145,17 @@ class ValidationController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for event_rel in self.eventBroker.getRelatedEvents(event):
+      for event_rel in self.relationBroker.getRelationsByEvent(event):
         temp = Relation()
+        rel_event = event_rel.rel_event
         try:
-          if event_rel.identifier != event.identifier:
-            self.checkIfViewable(event_rel)
-          temp.eventID = event_rel.identifier
-          temp.identifier = event_rel.identifier
-          temp.eventName = event_rel.title
-          temp.eventFirstSeen = event_rel.first_seen
-          temp.eventLastSeen = event_rel.last_seen
+          if rel_event.identifier != event.identifier:
+            self.checkIfViewable(rel_event)
+          temp.eventID = rel_event.identifier
+          temp.identifier = rel_event.identifier
+          temp.eventName = rel_event.title
+          temp.eventFirstSeen = rel_event.first_seen
+          temp.eventLastSeen = rel_event.last_seen
           if not temp in relationPaginator.list:
             relationPaginator.list.append(temp)
         except cherrypy.HTTPError:

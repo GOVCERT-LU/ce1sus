@@ -21,8 +21,11 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
-from ce1sus.api.restclasses import RestEvent, RestComment, RestObject
+from ce1sus.api.restclasses import RestEvent, RestComment, RestObject, RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
+
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
     Column('event_id', Integer, ForeignKey('Events.event_id')),
@@ -52,10 +55,9 @@ class Event(BASE):
   risk_id = Column('risk_id', Integer)
   analysis_status_id = Column('analysis_status_id', Integer)
   comments = relationship("Comment")
-  groups = relationship(Group, secondary='Groups_has_Events', backref="events", lazy='joined')
+  groups = relationship(Group, secondary='Groups_has_Events', backref="events")
   maingroups = relationship(SubGroup,
-                            secondary='SubGroups_has_Events',
-                            lazy='joined')
+                            secondary='SubGroups_has_Events')
   objects = relationship('Object')
   created = Column('created', DateTime(timezone=True))
   modified = Column('modified', DateTime(timezone=True))
@@ -63,8 +65,7 @@ class Event(BASE):
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
-                         primaryjoin="Event.creator_id==User.identifier",
-                         lazy='joined')
+                         primaryjoin="Event.creator_id==User.identifier")
   modifier_id = Column('modifier_id', Integer,
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
@@ -73,8 +74,7 @@ class Event(BASE):
                             ForeignKey('Groups.group_id'))
   creatorGroup = relationship(Group,
                               primaryjoin="Event.creatorGroup_id==Group.identifier",
-                              backref="createdEvents",
-                              lazy='joined')
+                              backref="createdEvents")
   __tlpObj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
@@ -327,16 +327,15 @@ class Object(BASE):
 
   __tablename__ = "Objects"
   identifier = Column('object_id', Integer, primary_key=True)
-  attributes = relationship('Attribute', lazy='joined')
+  attributes = relationship('Attribute')
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
-                            '==Object.def_object_id', innerjoin=True)
+                            '==Object.def_object_id', lazy='joined')
 
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
-                       '==Object.event_id',
-                        lazy='joined')
+                       '==Object.event_id')
   created = Column('created', DateTime)
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
@@ -345,13 +344,12 @@ class Object(BASE):
   parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
   parentObject = relationship('Object',
-                      primaryjoin="Object.parentObject_id==Object.identifier",
-                      lazy='joined')
+                      primaryjoin="Object.parentObject_id==Object.identifier")
   # TODO: Fix Me! - FK removed due to errors
   parentEvent_id = Column('parentEvent', Integer)
 
   children = relationship("Object", primaryjoin='Object.identifier' +
-                         '==Object.parentObject_id', lazy='joined')
+                         '==Object.parentObject_id')
   dbcode = Column('code', Integer)
   __bitCode = None
 
@@ -429,30 +427,107 @@ class Object(BASE):
     return result
 
 
-# pylint: disable=R0903
-class ObjectAttributeRelation(BASE):
+class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
 
   def __init__(self):
     pass
 
-  __tablename__ = "Attribute_Object_Relations"
-  identifier = Column('AOR_id', Integer, primary_key=True)
-  ref_object_id = Column('ref_object_id',
-                         Integer,
-                         ForeignKey('Objects.object_id'))
-  object = relationship(Object,
-      primaryjoin="ObjectAttributeRelation.ref_object_id==Object.identifier")
-  attribute_id = Column('attribute_id',
-                        Integer,
-                        ForeignKey('Attributes.attribute_id'))
-  attribute = relationship('Attribute',
-    primaryjoin="ObjectAttributeRelation.attribute_id==Attribute.identifier")
-  sameAttribute_id = Column('ref_attribute_id',
-                            Integer,
-                            ForeignKey('Attributes.attribute_id'))
-  sameAttribute = relationship('Attribute',
-  primaryjoin="ObjectAttributeRelation.sameAttribute_id==Attribute.identifier")
+  __tablename__ = "Attributes"
+  identifier = Column('attribute_id', Integer, primary_key=True)
+  def_attribute_id = Column(Integer,
+                            ForeignKey('DEF_Attributes.def_attribute_id'))
+  definition = relationship(AttributeDefinition,
+              primaryjoin='AttributeDefinition.identifier==' +
+              'Attribute.def_attribute_id', lazy='joined')
+  object_id = Column(Integer, ForeignKey('Objects.object_id'))
+  object = relationship("Object",
+                        primaryjoin='Object.identifier==Attribute.object_id')
+  created = Column('created', DateTime)
+  modified = Column('modified', DateTime)
+  creator_id = Column('creator_id', Integer,
+                            ForeignKey('Users.user_id'))
+  creator = relationship(User,
+                         primaryjoin="Attribute.creator_id==User.identifier")
+  modifier_id = Column('modifier_id', Integer,
+                            ForeignKey('Users.user_id'))
+  modifier = relationship(User,
+                          primaryjoin="Attribute.modifier_id==User.identifier")
+  ioc = Column('ioc', Integer)
+  # valuerelations
+  stringValue = relationship(StringValue,
+                          primaryjoin="Attribute.identifier==StringValue.attribute_id",
+                          lazy='joined', uselist=False,)
+  dateValue = relationship(DateValue,
+                          primaryjoin="Attribute.identifier==DateValue.attribute_id",
+                          lazy='joined', uselist=False)
+  textValue = relationship(TextValue,
+                          primaryjoin="Attribute.identifier==TextValue.attribute_id",
+                          lazy='joined', uselist=False)
+  numberValue = relationship(NumberValue,
+                          primaryjoin="Attribute.identifier==NumberValue.attribute_id",
+                          lazy='joined', uselist=False)
+
+
+  __value_id = None
+  __value = None
+  __valueObject = None
+  dbcode = Column('code', Integer)
+  __bitCode = None
+
+  @property
+  def bitValue(self):
+    if self.__bitCode is None:
+        self.__bitCode = BitValue(self.dbcode, self)
+    return self.__bitCode
+
+  @bitValue.setter
+  def bitValue(self, bitvalue):
+    self.__bitCode = bitvalue
+
+  @property
+  def key(self):
+    """
+    returns the name of the definition
+
+    :returns: String
+    """
+    return getattr(self.definition, 'name')
+
+  @property
+  def value(self):
+    """
+    returns the actual value of the attribute
+
+    :returns: Any
+    """
+    if self.__value is None:
+      if not self.stringValue  is None:
+        self.__value = self.stringValue.value
+      elif not self.dateValue  is None:
+        self.__value = self.dateValue.value
+      elif not self.textValue is None:
+        self.__value = self.textValue.value
+      elif not self.numberValue is None:
+        self.__value = self.numberValue.value
+    return self.__value
+
+  @value.setter
+  def value(self, value):
+    """
+    setter for the attribute value
+
+    :param value: value to set
+    :type value: Any
+    """
+    self.__value = value
+
+  @property
+  def isIOC(self):
+    if self.ioc == 1:
+      return 'Yes'
+    else:
+      return 'No'
 
   def validate(self):
     """
@@ -460,7 +535,18 @@ class ObjectAttributeRelation(BASE):
 
     :returns: Boolean
     """
-    ObjectValidator.validateDigits(self, 'attribute_id')
-    ObjectValidator.validateDigits(self, 'ref_object_id')
-    ObjectValidator.validateDigits(self, 'sameAttribute_id')
+    ObjectValidator.validateDigits(self, 'def_attribute_id')
+    ObjectValidator.validateDigits(self, 'object_id')
+    ObjectValidator.validateDigits(self, 'creator_id')
+    ObjectValidator.validateDigits(self, 'modifier_id')
+    ObjectValidator.validateDateTime(self, 'created')
+    ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
+
+  def toRestObject(self, isOwner=False):
+    result = RestAttribute()
+    result.definition = self.definition.toRestObject()
+    result.value = self.value
+    result.ioc = self.ioc
+    return result
+
