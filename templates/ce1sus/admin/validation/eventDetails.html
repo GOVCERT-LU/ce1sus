@@ -29,7 +29,18 @@
                             
                }).fail(function() { alert('Could not perform action: '); });
             }">Validate All</a>
-            
+            <a  class="btn btn-danger" href="#" onclick="if (confirm('Do you want to delete this event')) {
+               $.get('/admin/validation/deleteUnValidatedEvent/${event.identifier}', function(data) {
+                   if (data.match(/^<!--OK--/gi)) {
+                       closeTab('validationTabs','validationTabs${event.identifier}LI');
+                       loadTabLi('unValiEvLI', true);
+                       
+                   } else {
+                       alert('An unexpected error occured.');
+                   }
+                            
+               }).fail(function() { alert('Could not perform action: '); });
+            }">Delete</a>
         </div>
         ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
     </div>

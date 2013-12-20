@@ -286,3 +286,12 @@ class ValidationController(Ce1susBaseController):
                            cbDefinitions=cbDefinitions,
                            errorMsg=None,
                            enabled=False))
+
+  @require(privileged(), requireReferer(('/internal')))
+  @cherrypy.expose
+  def deleteUnValidatedEvent(self, eventID):
+    try:
+      self.eventBroker.removeByID(eventID)
+      return self.returnAjaxOK()
+    except BrokerException as e:
+      return '{0}'.format(e)
