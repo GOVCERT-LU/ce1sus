@@ -70,15 +70,9 @@ class RelationBroker(BrokerBase):
         event = self.session.query(Event).filter(Event.identifier == attribute.object.parentEvent_id)
 
       for relation in relations:
-        # get rel attibute
-        rel_attribute = relation.attribute
-
-        # get rel event
-        rel_event = relation.event
-
 
         # make insert foo
-        if rel_event.identifier != event.identifier:
+        if relation.event_id != event.identifier:
 
           # check if the relation is not already existing
           results = None
@@ -86,9 +80,9 @@ class RelationBroker(BrokerBase):
             # make relation in both ways
             relationEntry = EventRelation()
             relationEntry.event_id = event.identifier
-            relationEntry.rel_event_id = rel_event.identifier
+            relationEntry.rel_event_id = relation.event_id
             relationEntry.attribute_id = attribute.identifier
-            relationEntry.rel_attribute_id = rel_attribute.identifier
+            relationEntry.rel_attribute_id = relation.attribute_id
             try:
               self.insert(relationEntry, False)
             except IntegrityException:

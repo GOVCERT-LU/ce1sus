@@ -97,7 +97,6 @@ class RestEventController(RestControllerBase):
         # flush to DB
         self.eventBroker.insert(event, commit=False)
 
-        event.objects = list()
         for obj in restEvent.objects:
           # create object
           dbObject = self.__convertRestObject(obj, event, event, commit=False)
@@ -106,8 +105,7 @@ class RestEventController(RestControllerBase):
         self.eventBroker.doCommit(True)
 
         withDefinition = options.get('Full-Definitions', False)
-        obj = self._objectToJSON(event, True, True, withDefinition)
-        return self._returnMessage(obj)
+        return self._returnMessage(dict())
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)
@@ -120,7 +118,6 @@ class RestEventController(RestControllerBase):
     # generate Attributes
     dbObject.attributes = self._convertToAttribues(obj.attributes,
                                                           dbObject, commit)
-    dbObject.children = list()
     for child in obj.children:
       childDBObj = self.__convertRestObject(child, dbObject, event, commit)
       dbObject.children.append(childDBObj)
