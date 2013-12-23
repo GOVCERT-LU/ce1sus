@@ -170,16 +170,18 @@ function loadNewTab(pk, id, url, reload, title) {
         .attr("class", 'active');
         var link = $('<a/>')
         .attr("href", '#')
-        .attr("src", url)
+        .attr("src", url);
+        var button1 = $('<button/>')
+        .attr("class","btn btn-link")
         .attr("id", keyValue)
         .html(title);
         
         if (reload) {
-            link.attr("onclick", 'loadTabLi(this.id, true)');
+            button1.attr("onclick", 'loadTabLi(this.id, true)');
         } else {
-            link.attr("onclick", 'loadTabLi(this.id, false)');
+            button1.attr("onclick", 'loadTabLi(this.id, false)');
         }
-        
+        link.append(button1);
         
         if (!reload) {
             var reload = $('<button/>')
