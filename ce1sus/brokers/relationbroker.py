@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 import cherrypy
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, lazyload, joinedload
 from dagr.db.broker import BrokerBase, IntegrityException
 from ce1sus.brokers.valuebroker import ValueBroker
 import sqlalchemy.orm.exc
@@ -22,7 +22,8 @@ from ce1sus.brokers.event.eventclasses import Attribute, Event
 import thread
 from sqlalchemy import or_
 from sqlalchemy import distinct
-
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from dagr.helpers.string import cleanPostValue
 
 # pylint: disable=R0903,R0902
 class EventRelation(BASE):
@@ -59,7 +60,7 @@ class RelationBroker(BrokerBase):
   def generateAttributeRelations(self, attribute, commit=False):
     if attribute.definition.relation == 1:
       clazz = ValueBroker.getClassByAttributeDefinition(attribute.definition)
-      relations = self.__lookForValueAndAttribID(clazz,
+      relations = self.__lookForValueByAttribID(clazz,
                                             attribute.value,
                                             attribute.definition.identifier,
                                             '==',
@@ -150,7 +151,7 @@ class RelationBroker(BrokerBase):
     return EventRelation
 
 
-  def __lookForValueAndAttribID(self,
+  def __lookForValueByAttribID(self,
                                 clazz,
                                 value,
                                 attributeDefinitionID,
@@ -205,35 +206,37 @@ class RelationBroker(BrokerBase):
   def __lookForValue(self, clazz, value, operand='=='):
     try:
       if operand == '==':
-        return self.session.query(clazz, Attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value == value,
                   Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<':
-        return self.session.query(clazz, Attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value < value,
                   Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>':
-        return self.session.query(clazz, Attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value > value,
                   Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '<=':
-        return self.session.query(clazz, Attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value <= value,
                   Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == '>=':
-        return self.session.query(clazz, Attribute).filter(
+        return self.session.query(clazz).filter(
                   clazz.value >= value
                   , Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == 'like':
-        return self.session.query(clazz, Attribute).filter(
+
+        result = self.session.query(clazz).options(lazyload('*')).filter(
                   clazz.value.like('%{0}%'.format(value)),
                   Attribute.dbcode.op('&')(12) == 12
-                        ).all()
+                        )
+        return result.all()
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
@@ -259,13 +262,14 @@ class RelationBroker(BrokerBase):
         try:
           needle = clazz.convert(cleanPostValue(value))
           result = result + self.__lookForValue(clazz, needle, operand)
-        except:
+        except Exception as e:
+          print e
           # either it works or doesn't
           pass
 
     else:
       clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
-      result = RelationBroker.__lookForValueAndAttribID(self.session,
+      result = RelationBroker.__lookForValueByAttribID(self.session,
                                               clazz,
                                             value,
                                             attributeDefinition.identifier,
@@ -273,3 +277,8 @@ class RelationBroker(BrokerBase):
                                             False)
 
     return result
+
+  @staticmethod
+  def getSearchClassByClassString(className):
+    module = import_module('.valuebroker', 'ce1sus.brokers')
+    return getattr(module, className)

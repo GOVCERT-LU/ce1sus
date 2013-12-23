@@ -1,8 +1,8 @@
 <%namespace name="input" file="/dagr/components/input.html"/>
 <%namespace name="baseForms" file="/dagr/components/forms.html"/> 
 
+<form id="searchFormForm" class="form-inline" role="form">
 
-<%call expr="baseForms.genericForm(id='searchForm', url='/events/search/searchResults', refreshContainer='serachResults',horizontal=False)">
 <div class="row">
     <div class="vcol-xs-12 col-sm-12">
 		Search for:
@@ -15,8 +15,17 @@
 		  <div class="form-group">
 		<%call expr="input.editBox(name='needle', value='', enabled=True, validationMsg=None)"/>
 		</div>
-		<input class="btn btn-default" type="submit" value="Search"/>
+		<input class="btn btn-default" type="submit" value="Search"/><div class="form-group" id="searchAni"></div>
     </div>
 </div>
-</%call>
+</form>
 <div id="serachResults"></div>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+    $('#searchFormForm').submit(function(event){
+        searchFormSubmit(this,event,'/events/search/searchResults','searchForm','serachResults');
+        
+    });
+});
+</script>

@@ -24,6 +24,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
 from dagr.helpers.string import InputException
 from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.relationbroker import RelationBroker
 
 
 # pylint:disable=R0903
@@ -32,13 +33,11 @@ class ResultItem(object):
   Container Class for displaying the search results
   """
   # pylint:disable=R0913
-  def __init__(self, identifier, event, objDef, attrDef, attribute, value):
+  def __init__(self, identifier, event, attrDef, attribute):
     self.identifier = identifier
     self.event = event
-    self.objDef = objDef
     self.attrDef = attrDef
     self.attribute = attribute
-    self.value = value
 
 
 class SearchController(Ce1susBaseController):
@@ -52,6 +51,7 @@ class SearchController(Ce1susBaseController):
                                                     AttributeDefinitionBroker)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.eventBroker = self.brokerFactory(EventBroker)
+    self.relationBroker = self.brokerFactory(RelationBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -93,23 +93,19 @@ class SearchController(Ce1susBaseController):
           module = import_module('.valuebroker', 'ce1sus.brokers')
           clazz = getattr(module, className)
           needle = clazz.convert(needle.strip())
-        foundValues = self.attributeBroker.lookforAttributeValue(definition,
+        if len(needle) < 3:
+          return 'Needle has to be larger than 3'
+        foundValues = self.relationBroker.lookforAttributeValue(definition,
                                                                  needle,
                                                                  operant)
         # prepare displayItems
 
         for foundValue in foundValues:
-          value = foundValue[0]
-          if value.attribute.object.event is None:
-            event = value.attribute.object.parentObject.parentObject.event
 
-          else:
-            event = value.attribute.object.event
-          obj = ResultItem(event.identifier,
-                             event,
-                             value.attribute.object.definition,
-                             value.attribute.definition,
-                             value.attribute, value)
+          obj = ResultItem(foundValue.event_id,
+                             foundValue.event,
+                             foundValue.attribute.definition,
+                             foundValue.attribute)
           result.append(obj)
 
       # Prepare paginator
@@ -117,7 +113,7 @@ class SearchController(Ce1susBaseController):
                 {'event.title':'Event Name'},
                 {'objDef.name':'Object'},
                 {'attrDef.name':'Attribute name'},
-                {'value.value':'Attribute value'},
+                {'attribute.value':'Attribute value'},
                 {'event.created':'CreatedOn'}]
       paginatorOptions = PaginatorOptions('/events/recent',
                                           'eventsTabTabContent')

@@ -154,3 +154,63 @@ function enableDisableCB(eventID) {
     }
 }
 
+
+function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) {
+    // setup some local variables
+    form = $(formElement);
+    // let's select and cache all the fields
+    inputs = form.find("input, select, button, textarea");
+    // serialize the data in the form
+    serializedData = form.serialize();
+
+    // magic to get the button value
+    name = event.originalEvent.explicitOriginalTarget.name;
+    if (name) {
+        value = event.originalEvent.explicitOriginalTarget.value;
+        serializedData += '&' + name + '=' + value;
+    }
+
+    // let's disable the inputs for the duration of the ajax request
+    inputs.prop("disabled", true);
+
+    // fire off the request
+    request = $.ajax({
+        url : uri,
+        type : "post",
+        data : serializedData,
+     timeout: 600000 //10 Min
+    });
+    $("#searchAni").html('Searching <img src="/img/ajax-loader.gif" alt="loading"/> ');
+    // callback handler that will be called on success
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
+        if (responseText.match(/^<!--OK--/gi)) {
+            // refrehshPage & container if needed
+            
+            $("#" + refreshContainer + "").html(responseText);
+            
+        } else {
+            if (responseText.match(/^<!--PostError-->/gi)) {
+                resultText = responseText;
+            } else {
+                resultText = getErrorMsg(responseText)
+            }
+            $("#" + refreshContainer + "").html(resultText);
+        }
+    });
+
+    // callback handler that will be called on failure
+    request.fail(function(responseText, textStatus, XMLHttpRequest) {
+        resultText = getErrorMsg(responseText)
+        $('#' + contentid + 'Errors').html(resultText);
+    });
+    // callback handler that will be called regardless
+    // if the request failed or succeeded
+    request.always(function() {
+        $("#searchAni").html('');
+        // reenable the inputs
+        inputs.prop("disabled", false);
+    });
+    // prevent default posting of form
+    event.preventDefault();
+
+}
