@@ -25,6 +25,9 @@ from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from dagr.db.session import SessionManager
+from dagr.helpers.debug import Log
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -430,9 +433,6 @@ class Object(BASE):
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
 
-  def __init__(self):
-    pass
-
   __tablename__ = "Attributes"
   identifier = Column('attribute_id', Integer, primary_key=True)
   def_attribute_id = Column(Integer,
@@ -502,14 +502,26 @@ class Attribute(BASE):
     :returns: Any
     """
     if self.__value is None:
+
       if not self.stringValue  is None:
-        self.__value = self.stringValue.value
+        value = self.stringValue
       elif not self.dateValue  is None:
-        self.__value = self.dateValue.value
+        value = self.dateValue
       elif not self.textValue is None:
-        self.__value = self.textValue.value
+        value = self.textValue
       elif not self.numberValue is None:
-        self.__value = self.numberValue.value
+        value = self.numberValue
+
+      try:
+        sessionMangager = SessionManager.getInstance()
+        handlerBroker = sessionMangager.brokerFactory(AttributeHandlerBroker)
+        handler = handlerBroker.getHandler(self.definition)
+        # Format the value if needed
+        self.__value = handler.convertToAttributeValue(value)
+      except BrokerException as e:
+        Log.getLogger(self.__class__.__name__).error(e)
+        self.__value = value.value
+
     return self.__value
 
   @value.setter

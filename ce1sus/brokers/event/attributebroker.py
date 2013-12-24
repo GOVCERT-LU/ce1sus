@@ -31,7 +31,7 @@ from ce1sus.api.restclasses import RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.string import cleanPostValue
 from ce1sus.brokers.relationbroker import RelationBroker
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+
 
 
 class AttributeBroker(BrokerBase):
@@ -43,37 +43,12 @@ class AttributeBroker(BrokerBase):
     self.valueBroker = ValueBroker(session)
     self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
     self.relationBroker = RelationBroker(session)
-    self.handlerBroker = AttributeHandlerBroker(session)
 
   def getBrokerClass(self):
     """
     overrides BrokerBase.getBrokerClass
     """
     return Attribute
-
-  def getSetValues(self, attribute):
-    """sets the real values for the given attribute"""
-    # execute select for the values
-    try:
-      value = self.valueBroker.getByAttribute(attribute)
-      # value is an object i.e. StringValue and the value of the attribute is
-      # the value of the value object
-      # get handler
-      handler = self.handlerBroker.getHandler(attribute.definition)
-      # convert the attribute with the helper to a single line value
-      attribute.value = handler.convertToAttributeValue(value)
-      attribute.value_id = value.identifier
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No value found for attribute :{0}'.format(
-                                                  attribute.definition.name))
-    except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-            'Too many results found for attribute :{0}'.format(
-                                    attribute.definition.name))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
 
   def insert(self, instance, commit=True, validate=True):
     """
