@@ -269,8 +269,7 @@ class RelationBroker(BrokerBase):
 
     else:
       clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
-      result = RelationBroker.__lookForValueByAttribID(self.session,
-                                              clazz,
+      result = self.__lookForValueByAttribID(clazz,
                                             value,
                                             attributeDefinition.identifier,
                                             operand,

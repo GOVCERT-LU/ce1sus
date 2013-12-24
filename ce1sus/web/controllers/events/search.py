@@ -85,6 +85,9 @@ class SearchController(Ce1susBaseController):
         if isinstance(needle, types.ListType):
           needle = needle[0]
         # GetClass
+        needle = needle.strip()
+        if len(needle) < 2:
+          return 'Needle has to be larger than 2'
         if definitionID == 'Any':
           definition = None
         else:
@@ -92,9 +95,9 @@ class SearchController(Ce1susBaseController):
           className = definition.className
           module = import_module('.valuebroker', 'ce1sus.brokers')
           clazz = getattr(module, className)
-          needle = clazz.convert(needle.strip())
-        if len(needle) < 3:
-          return 'Needle has to be larger than 3'
+          needle = clazz.convert(needle)
+
+
         foundValues = self.relationBroker.lookforAttributeValue(definition,
                                                                  needle,
                                                                  operant)
