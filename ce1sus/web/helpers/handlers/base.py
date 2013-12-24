@@ -16,7 +16,6 @@ from abc import abstractmethod
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
-from importlib import import_module
 
 
 class HandlerException(Exception):
@@ -136,26 +135,4 @@ class HandlerBase(object):
     """
     return Log.getLogger(self.__class__.__name__)
 
-  @staticmethod
-  def getHandler(definition):
-    """
-    Returns the handler instance of the given definition
 
-    :param definition: The definition
-    :type definition: AttributeDefinition
-
-    :returns: Instance extending HandlerBase
-    """
-    # GethandlerClass
-    temp = definition.handlerName.rsplit('.', 1)
-    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
-    clazz = getattr(module, temp[1])
-    # instantiate
-    handler = clazz()
-    # associate definition to handler
-    handler.definition = definition
-    # check if handler base is implemented
-    if not isinstance(handler, HandlerBase):
-      raise HandlerException(('{0} does not implement '
-                              + 'HandlerBase').format(definition.handlerName))
-    return handler

@@ -11,7 +11,8 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 from dagr.db.broker import BrokerBase
-
+from importlib import import_module
+from ce1sus.web.helpers.handlers.base import HandlerBase
 
 class AttributeHandlerBroker(BrokerBase):
 
@@ -47,3 +48,40 @@ class AttributeHandlerBroker(BrokerBase):
       result[key] = value
     return result
 
+  def getHandlerName(self, index):
+    """
+    returns the handler name
+
+    :param index: index of the class name
+    :type index: Integer
+
+    :returns: String
+    """
+    # Test if the index is
+    if index < 0 and index >= len(self.__handlerDefinitions):
+      raise Exception('Invalid input "{0}"'.format(index))
+    return self.__handlerDefinitions[index]
+
+  def getHandler(self, definition):
+    """
+    Returns the handler instance of the given definition
+
+    :param definition: The definition
+    :type definition: AttributeDefinition
+
+    :returns: Instance extending HandlerBase
+    """
+    # GethandlerClass
+    handlerName = self.getHandlerName(definition.handlerIndex)
+    temp = handlerName.rsplit('.', 1)
+    module = import_module('.' + temp[0], 'ce1sus.web.helpers.handlers')
+    clazz = getattr(module, temp[1])
+    # instantiate
+    handler = clazz()
+    # associate definition to handler
+    handler.definition = definition
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+      raise HandlerException(('{0} does not implement '
+                              + 'HandlerBase').format(handlerName))
+    return handler

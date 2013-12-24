@@ -35,6 +35,7 @@ from dagr.helpers.hash import hashMD5
 from dagr.helpers.datumzait import datumzait
 import os
 from ce1sus.brokers.event.eventclasses import Attribute
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 
 class AttributesController(Ce1susBaseController):
@@ -47,6 +48,7 @@ class AttributesController(Ce1susBaseController):
     self.eventBroker = self.brokerFactory(EventBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.valueBroker = self.brokerFactory(ValueBroker)
+    self.handlerBroker = self.brokerFactory(AttributeHandlerBroker)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -159,7 +161,7 @@ class AttributesController(Ce1susBaseController):
       try:
         if action != 'remove':
           definition = self.def_attributesBroker.getByID(definition)
-          handler = HandlerBase.getHandler(definition)
+          handler = self.handlerBroker.getHandler(definition)
           # expect generated attributes back
           if len(params) > 0:
             attributes = handler.populateAttributes(params,
@@ -170,9 +172,10 @@ class AttributesController(Ce1susBaseController):
             return ('Process not completed please complete '
                     + 'the form before saving.')
           if attributes is None:
+            handlerName = self.handlerBroker.getHandlerName(definition.handlerIndex)
             raise HandlerException(('{0}.getAttributes '
                                     + 'does not return attributes ').format(
-                                                      definition.handlerName))
+                                                      handlerName))
           if not isinstance(attributes, types.StringTypes):
             if not isinstance(attributes, types.ListType):
               if isinstance(attributes, Attribute):
@@ -280,7 +283,7 @@ class AttributesController(Ce1susBaseController):
     else:
       definition = attribute.definition
 
-    handler = HandlerBase.getHandler(definition)
+    handler = self.handlerBroker.getHandler(definition)
     if enabled == '1':
       enableView = True
     else:

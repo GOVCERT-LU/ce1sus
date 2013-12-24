@@ -31,6 +31,7 @@ from ce1sus.api.restclasses import RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.string import cleanPostValue
 from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 
 class AttributeBroker(BrokerBase):
@@ -42,6 +43,7 @@ class AttributeBroker(BrokerBase):
     self.valueBroker = ValueBroker(session)
     self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
     self.relationBroker = RelationBroker(session)
+    self.handlerBroker = AttributeHandlerBroker(session)
 
   def getBrokerClass(self):
     """
@@ -57,7 +59,7 @@ class AttributeBroker(BrokerBase):
       # value is an object i.e. StringValue and the value of the attribute is
       # the value of the value object
       # get handler
-      handler = HandlerBase.getHandler(attribute.definition)
+      handler = self.handlerBroker.getHandler(attribute.definition)
       # convert the attribute with the helper to a single line value
       attribute.value = handler.convertToAttributeValue(value)
       attribute.value_id = value.identifier

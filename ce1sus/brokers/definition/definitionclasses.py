@@ -17,7 +17,7 @@ from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.api.restclasses import RestObjectDefinition, \
                                    RestAttributeDefinition
-
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -148,14 +148,6 @@ class AttributeDefinition(BASE):
     else:
       return ''
 
-  @property
-  def handlerName(self):
-    """The name of the handler used"""
-    if not self.handlerIndex is None:
-      return self.findHandlerName(self.handlerIndex)
-    else:
-      return ''
-
   def findClassName(self, index):
     """
     returns the table name
@@ -170,19 +162,7 @@ class AttributeDefinition(BASE):
       raise Exception('Invalid input "{0}"'.format(index))
     return self.__tableDefinitions[index]
 
-  def findHandlerName(self, index):
-    """
-    returns the handler name
 
-    :param index: index of the class name
-    :type index: Integer
-
-    :returns: String
-    """
-    # Test if the index is
-    if index < 0 and index >= len(self.__handlerDefinitions):
-      raise Exception('Invalid input "{0}"'.format(index))
-    return self.__handlerDefinitions[index]
 
   def findTableIndex(self, name):
     """

@@ -18,10 +18,15 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.string import cleanPostValue
-
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
+
+  def __init__(self, session):
+    BrokerBase.__init__(self, session)
+    self.handlerBroker = AttributeHandlerBroker(session)
+
   def getBrokerClass(self):
     """
     overrides BrokerBase.getBrokerClass
@@ -117,8 +122,9 @@ class ObjectDefinitionBroker(BrokerBase):
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
       obj.addAttribute(attribute)
-      if not 'GenericHandler' in attribute.handlerName:
-        handler = HandlerBase.getHandler(attribute)
+      handlerName = self.handlerBroker.getHandlerName(attribute.handlerIndex)
+      if not 'GenericHandler' in handlerName:
+        handler = self.handlerBroker.getHandler(attribute)
         idList = handler.getAttributesIDList()
         # only add attributes if there attributes to be added
         if idList:

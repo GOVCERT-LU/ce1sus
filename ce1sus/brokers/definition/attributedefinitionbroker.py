@@ -21,10 +21,15 @@ from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.string as string
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.string import cleanPostValue
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 
 class AttributeDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
+
+  def __init__(self, session):
+    BrokerBase.__init__(self, session)
+    self.handlerBroker = AttributeHandlerBroker(session)
 
   def getBrokerClass(self):
     """
@@ -123,8 +128,9 @@ class AttributeDefinitionBroker(BrokerBase):
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attrID).one()
       attribute.addObject(obj)
-      if not 'GenericHandler' in attribute.handlerName:
-        handler = HandlerBase.getHandler(attribute)
+      handlerName = self.handlerBroker.getHandlerName(attribute.handlerIndex)
+      if not 'GenericHandler' in handlerName:
+        handler = self.handlerBroker.getHandler(attribute)
         try:
           idList = handler.getAttributesIDList()
         except TypeError:
