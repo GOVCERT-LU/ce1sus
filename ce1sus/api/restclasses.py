@@ -37,7 +37,7 @@ def __populateAtomicValue(instance, key, value, makeBinary=True):
   if value == '':
     value = None
   else:
-    stringValue = '{0}'.format(value)
+    stringValue = u'{0}'.format(value)
     if (makeBinary and re.match(r'^\{.*file.*:.*\}$', stringValue)):
         # decompress file
       dictionary = json.loads(value)

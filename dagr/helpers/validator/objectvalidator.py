@@ -46,7 +46,7 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
   """
   if hasattr(obj, attributeName):
     value = getattr(obj, attributeName, '')
-    stringValue = '{0}'.format(value)
+    stringValue = u'{0}'.format(value)
     stringValue = stringValue.strip()
     result = re.match(regex, stringValue, re.MULTILINE) is not None
     if not result and changeAttribute:
