@@ -15,7 +15,7 @@ from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
-
+from ce1sus.api.restclasses import RestEvent
 
 class RestEventController(RestControllerBase):
 
@@ -102,9 +102,13 @@ class RestEventController(RestControllerBase):
 
         self.eventBroker.doCommit(True)
 
-        # withDefinition = options.get('Full-Definitions', False)
+        withDefinition = options.get('Full-Definitions', False)
         # obj = self._objectToJSON(event, True, True, withDefinition)
-        return self._returnMessage({'event': {'uuid', event.uuid}})
+        restEvent = RestEvent()
+        restEvent.uuid = event.uuid
+        return self._returnMessage(dict(restEvent.toJSON(full=True,
+                             withDefinition=withDefinition).items()
+                 ))
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)

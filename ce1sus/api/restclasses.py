@@ -22,14 +22,6 @@ import json
 import re
 
 
-class ProcessingException(Exception):
-  """
-  Exception base for handler exceptions
-  """
-  def __init__(self, message):
-    Exception.__init__(self, message)
-
-
 def __instantiateClass(className):
   module = import_module('.restclasses', 'ce1sus.api')
   clazz = getattr(module, className)
@@ -114,7 +106,7 @@ def getData(obj):
     return getObjectData(obj)
   else:
     message = response.get('errors', '')[0]
-    raise (message)
+    raise Ce1susAPIException(message)
 
 
 def mapResponseToObject(jsonData):
@@ -122,9 +114,14 @@ def mapResponseToObject(jsonData):
   return populateClassNamebyDict(key, value)
 
 
+
 def mapJSONToObject(jsonData):
-  key, value = getObjectData(jsonData)
-  return populateClassNamebyDict(key, value)
+  print jsonData
+  if jsonData:
+    key, value = getObjectData(jsonData)
+    return populateClassNamebyDict(key, value)
+  else:
+    return None
 
 
 class RestAPIException(Exception):
@@ -197,12 +194,18 @@ class RestEvent(RestClass):
     result[self.__class__.__name__]['title'] = self.title
     result[self.__class__.__name__]['description'] = u'{0}'.format(
                                                               self.description)
-    result[self.__class__.__name__]['first_seen'] = u'{0}'.format(
+    if self.first_seen:
+      result[self.__class__.__name__]['first_seen'] = u'{0}'.format(
                                                   self.first_seen.isoformat())
+    else:
+      result[self.__class__.__name__]['first_seen'] = ''
     if self.last_seen is None:
       self.last_seen = self.first_seen
-    result[self.__class__.__name__]['last_seen'] = u'{0}'.format(
+    if self.last_seen:
+      result[self.__class__.__name__]['last_seen'] = u'{0}'.format(
                                                     self.last_seen.isoformat())
+    else:
+      result[self.__class__.__name__]['last_seen'] = ''
     if self.tlp is None:
       tlp = None
     else:
