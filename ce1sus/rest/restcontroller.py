@@ -24,7 +24,8 @@ from dagr.helpers.validator.objectvalidator import ValidationException
 from dagr.helpers.converters import ValueConverter
 import re
 from ce1sus.web.helpers.protection import Protector
-
+from ce1sus.rest.handlers.restdefinition import RestDefinitionController
+from ce1sus.rest.handlers.restdefinitions import RestDefinitionsController
 
 class RestController(RestControllerBase):
 
@@ -32,7 +33,12 @@ class RestController(RestControllerBase):
        'GET': 'view',
        'POST': 'update'}
 
-  REST_Allowed_Parameters = ['metadata', 'attributes', 'events']
+  REST_Allowed_Parameters = ['metadata',
+                             'attributes',
+                             'events',
+                             'objects',
+                             'attribute',
+                             'object']
   REST_Allowed_Options = ['Full-Definitions',
                           'page',
                           'limit',
@@ -42,7 +48,8 @@ class RestController(RestControllerBase):
                           'Object-Attributes',
                           'attributes',
                           'key',
-                          'UUID']
+                          'UUID',
+                          'chksum']
   def __init__(self, ce1susConfigFile):
     RestControllerBase.__init__(self)
     self.configFile = ce1susConfigFile
@@ -52,6 +59,8 @@ class RestController(RestControllerBase):
     self.instances['event'] = RestEventController()
     self.instances['events'] = RestEventsController()
     self.instances['search'] = RestSearchController()
+    self.instances['definition'] = RestDefinitionController()
+    self.instances['definitions'] = RestDefinitionsController()
     self.sanityChecker = SantityChecker(self.configFile)
 
   def __checkVersion(self, version):
@@ -93,9 +102,17 @@ class RestController(RestControllerBase):
 
   def __checkIfValidUIID(self, string):
     regex = r'^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$'
-    return ValueValidator.validateRegex(string,
+
+    result = ValueValidator.validateRegex(string,
                                         regex,
                                         'Not a valid UUID')
+    if not result:
+      # then it may be a checksum
+      regex = r'^[0-9a-fA-F]{40}$'
+      result = ValueValidator.validateRegex(string,
+                                        regex,
+                                        'Not a valid chksum')
+    return result
 
   def __splitPath(self, vpath):
     # path need at least 2 elements version/controller/....
@@ -129,8 +146,9 @@ class RestController(RestControllerBase):
               self.raiseError('Invalid ',
                               'Parameter {0}'.format(parameter))
         if (len(pathElements) > 3):
+          possibleUUID = pathElements[3]
           try:
-            if self.__checkIfValidUIID(pathElements[3]):
+            if self.__checkIfValidUIID(possibleUUID):
               uuid = possibleUUID.strip()
             else:
               Protector.clearRestSession()
@@ -229,9 +247,9 @@ class RestController(RestControllerBase):
         Protector.clearRestSession()
         return json.dumps(temp)
     except RestAPIException as e:
-          self.getLogger().debug(
-                          'Error occured during {0}'.format(e))
-          temp = dict(self._createStatus('RestException', e.message))
-          Protector.clearRestSession()
-          return json.dumps(temp)
+      self.getLogger().debug(
+                    'Error occured during {0}'.format(e))
+      temp = dict(self._createStatus('RestException', e.message))
+      Protector.clearRestSession()
+      return json.dumps(temp)
 

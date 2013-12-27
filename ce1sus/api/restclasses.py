@@ -177,13 +177,13 @@ class RestEvent(RestClass):
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['uuid'] = self.uuid
     result[self.__class__.__name__]['title'] = self.title
-    result[self.__class__.__name__]['description'] = '{0}'.format(
+    result[self.__class__.__name__]['description'] = u'{0}'.format(
                                                               self.description)
-    result[self.__class__.__name__]['first_seen'] = '{0}'.format(
+    result[self.__class__.__name__]['first_seen'] = u'{0}'.format(
                                                               self.first_seen.isoformat())
     if self.last_seen is None:
       self.last_seen = self.first_seen
-    result[self.__class__.__name__]['last_seen'] = '{0}'.format(self.last_seen.isoformat())
+    result[self.__class__.__name__]['last_seen'] = u'{0}'.format(self.last_seen.isoformat())
     if self.tlp is None:
       tlp = None
     else:
@@ -210,7 +210,21 @@ class RestEvent(RestClass):
       result[self.__class__.__name__]['comments'] = list()
       for comment in self.comments:
         result[self.__class__.__name__]['comments'].append(comment.toJSON())
-    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
+    result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
+    return result
+
+
+class RestComment(RestClass):
+
+  def __init__(self):
+    RestClass.__init__(self)
+    self.comment = None
+
+  def toJSON(self, full=False, withDefinition=False):
+    result = dict()
+    result[self.__class__.__name__] = dict()
+    result[self.__class__.__name__]['comment'] = self.comment
+
     return result
 
 
@@ -248,7 +262,7 @@ class RestObject(RestClass):
                                                                        )
                                                             )
         pass
-    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
+    result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
     return result
 
 
@@ -270,14 +284,14 @@ class RestAttribute(RestClass):
                                                           )
     if isinstance(self.value, file):
       data = self.value.read()
-      binaryASCII = '{0}'.format(data.encode("base64"))
+      binaryASCII = u'{0}'.format(data.encode("base64"))
       fileName = basename(self.value.name)
       value = {'file': (fileName, binaryASCII)}
     else:
       value = self.value
-    result[self.__class__.__name__]['value'] = '{0}'.format(value)
-    result[self.__class__.__name__]['ioc'] = '{0}'.format(self.ioc)
-    result[self.__class__.__name__]['share'] = '{0}'.format(self.share)
+    result[self.__class__.__name__]['value'] = u'{0}'.format(value)
+    result[self.__class__.__name__]['ioc'] = u'{0}'.format(self.ioc)
+    result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
     return result
 
 
@@ -324,10 +338,10 @@ class RestAttributeDefinition(RestClass):
   @property
   def chksum(self):
     if self.dbchksum is None:
-      key = '{0}{1}{2}{3}'.format(attribute.name,
-                             attribute.regex,
-                             attribute.classIndex,
-                             attribute.handlerIndex)
+      key = u'{0}{1}{2}{3}'.format(self.attribute.name,
+                             self.attribute.regex,
+                             self.attribute.classIndex,
+                             self.attribute.handlerIndex)
       self.dbchksum = hashSHA1(key)
     return self.dbchksum
 

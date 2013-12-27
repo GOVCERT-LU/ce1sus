@@ -147,6 +147,12 @@ class RestControllerBase(BaseController):
       self.raiseError('UnRecoverableException',
                       'An unrecoverable error occurred')
 
+  def _checkIfPriviledged(self, apiKey):
+    user = self.getUser(apiKey)
+    if user.privileged != 1:
+      Protector.clearRestSession()
+      raise cherrypy.HTTPError(403)
+
   def _isEventOwner(self, event, apiKey):
     user = self.getUser(apiKey)
     if user.privileged == 1:
