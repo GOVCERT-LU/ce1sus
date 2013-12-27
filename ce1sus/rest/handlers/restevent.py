@@ -106,7 +106,7 @@ class RestEventController(RestControllerBase):
 
         withDefinition = options.get('Full-Definitions', False)
         # obj = self._objectToJSON(event, True, True, withDefinition)
-        return self._returnMessage(dict())
+        return self._returnMessage({'event': {'uuid', event.uuid}})
 
       except BrokerException as e:
         return self.raiseError('BrokerException', e)

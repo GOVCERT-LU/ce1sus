@@ -73,4 +73,3 @@ class RestDefinitionsController(RestControllerBase):
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
-
