@@ -174,8 +174,14 @@ class RestController(RestControllerBase):
       # check if datetime
       if ValueValidator.validateDateTime(value):
         return ValueConverter.setDate(value)
-      if re.match(r'^\[.*\]', value, re.MULTILINE) is not None:
-        return json.load(value)
+      if re.match(r'^\[.*\]$', value, re.MULTILINE) is not None:
+        # remove first last letter
+        text = value[1:-1]
+        if text:
+          array = text.split(',')
+        else:
+          array = list()
+        return array
       return value
     else:
       return None

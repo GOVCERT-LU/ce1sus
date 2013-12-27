@@ -36,6 +36,8 @@ class RestEventsController(RestControllerBase):
       offset = options.get('page', 0)
       limit = options.get('limit', 20)
 
+      user = self.getUser(apiKey)
+
       # limit has to be between 0 and maximum value
       if limit < 0 or limit > RestEventsController.MAX_LIMIT:
         self.raiseError('InvalidArgument',
@@ -48,22 +50,27 @@ class RestEventsController(RestControllerBase):
                                       endDate,
                                       offset,
                                       limit)
-        result = list()
-        for event in events:
-          try:
-            self._checkIfViewable(event, self.getUser(apiKey))
-            result.append(self._objectToJSON(event,
-                                             self._isEventOwner(event, apiKey),
-                                             True,
-                                             withDefinition))
-          except cherrypy.HTTPError:
-            pass
-
-        resultDict = {'Results': result}
-        return self._returnMessage(resultDict)
       else:
-        self.raiseError('InvalidArgument',
-                         'At least one argument has to be specified')
+
+        events = self.eventBroker.getAllForUser(user=user,
+                                                limit=limit,
+                                                offset=offset)
+
+      result = list()
+      for event in events:
+        try:
+          if not user.privileged:
+            self._checkIfViewable(event, self.getUser(apiKey))
+          result.append(self._objectToJSON(event,
+                                           self._isEventOwner(event, apiKey),
+                                           True,
+                                           withDefinition))
+        except cherrypy.HTTPError:
+          pass
+
+      resultDict = {'Results': result}
+      return self._returnMessage(resultDict)
+
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:

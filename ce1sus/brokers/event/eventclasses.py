@@ -345,12 +345,12 @@ class Object(BASE):
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
-  parentObject_id = Column('parentObject_id', Integer,
+  parentObject_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
   parentObject = relationship('Object',
                       primaryjoin="Object.parentObject_id==Object.identifier")
 
-  parentEvent_id = Column('parentEvent_id', Integer, ForeignKey('Events.event_id'))
+  parentEvent_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
   parentEvent = relationship("Event",
                              uselist=False,
                              primaryjoin='Event.identifier' +
