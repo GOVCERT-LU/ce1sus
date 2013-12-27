@@ -75,8 +75,8 @@ class ObjectsController(Ce1susBaseController):
                                ('/events/event/bitValue/setAttribute'
                                         + 'Properties/{0}/%(objectID)s/'
                                         ).format(eventID),
-                               modalTitle='Attribute Properties',
-                               postUrl=('/events/event/bitValue/modifyAttribute'
+                              modalTitle='Attribute Properties',
+                              postUrl=('/events/event/bitValue/modifyAttribute'
                                         + 'Properties'
                                         ).format(eventID),
                                refresh=True)
@@ -138,7 +138,8 @@ class ObjectsController(Ce1susBaseController):
 
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
-    return self.cleanHTMLCode(template.render(cbObjDefinitions=cbObjDefinitions,
+    return self.cleanHTMLCode(template.render(
+                           cbObjDefinitions=cbObjDefinitions,
                            eventID=eventID,
                            object=None,
                            errorMsg=None))
@@ -157,7 +158,8 @@ class ObjectsController(Ce1susBaseController):
 
     template = self.getTemplate('/events/event/objects/childObjectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
-    return self.cleanHTMLCode(template.render(cbObjDefinitions=cbObjDefinitions,
+    return self.cleanHTMLCode(template.render(
+                           cbObjDefinitions=cbObjDefinitions,
                            eventID=eventID,
                            object=None,
                            objectID=objectID,
@@ -211,7 +213,11 @@ class ObjectsController(Ce1susBaseController):
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def attachChildObject(self, objectID=None, eventID=None, definition=None, shared=None):
+  def attachChildObject(self,
+                        objectID=None,
+                        eventID=None,
+                        definition=None,
+                        shared=None):
     """
     Inserts an an event object.
 
@@ -229,11 +235,9 @@ class ObjectsController(Ce1susBaseController):
     self.checkIfViewable(event)
     self.eventBroker.updateEvent(event, commit=False)
 
-
     # Here is an insertion only so the action parameter is not needed, btw.
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
-
     obj = self.objectBroker.buildObject(None,
                                   None,
                                   self.def_objectBroker.getByID(definition),
@@ -266,7 +270,6 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event)
 
-
     # remove object
     try:
       self.objectBroker.removeByID(objectID)
@@ -294,7 +297,6 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event)
 
-
     # get concerned object
     obj = self.objectBroker.getByID(objectID)
 
@@ -304,7 +306,6 @@ class ObjectsController(Ce1susBaseController):
     else:
       isEventParent = False
       selected = obj.parentObject_id
-
 
     eventChildren = self.objectBroker.getCDValuesObjectParents(eventID,
                                                                obj.identifier)
@@ -332,7 +333,6 @@ class ObjectsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfViewable(event)
-
 
     if setEventParent is None and not string.isNotNull(parentObjectID):
       return 'Please select someting before saving.'
@@ -364,4 +364,6 @@ class ObjectsController(Ce1susBaseController):
       defaultShareValue = 1
     else:
       defaultShareValue = 0
-    return self.cleanHTMLCode(template.render(defaultShareValue=defaultShareValue))
+    return self.cleanHTMLCode(
+                        template.render(
+                                defaultShareValue=defaultShareValue))

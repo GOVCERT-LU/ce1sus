@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.helpers.hash import hashSHA1
-from types import ListType
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
 from os.path import basename
@@ -21,6 +20,15 @@ from types import DictionaryType, ListType
 from dagr.helpers.string import stringToDateTime, InputException
 import json
 import re
+
+
+class ProcessingException(Exception):
+  """
+  Exception base for handler exceptions
+  """
+  def __init__(self, message):
+    Exception.__init__(self, message)
+
 
 def __instantiateClass(className):
   module = import_module('.restclasses', 'ce1sus.api')
@@ -33,6 +41,7 @@ def __instantiateClass(className):
                             + 'RestClass').format(className))
   return instance
 
+
 def __populateAtomicValue(instance, key, value, makeBinary=True):
   if value == '':
     value = None
@@ -44,6 +53,7 @@ def __populateAtomicValue(instance, key, value, makeBinary=True):
       jsonFile = dictionary.get('file', None)
       if jsonFile:
         fileName = jsonFile[0]
+        del fileName
         strData = jsonFile[1]
         value = strData.decode('base64')
     else:
@@ -57,10 +67,12 @@ def __populateAtomicValue(instance, key, value, makeBinary=True):
           pass
   setattr(instance, key, value)
 
+
 def __setDictValue(instance, key, value, makeBinary=True):
   subkey, subvalue = getObjectData(value)
   subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
   setattr(instance, key, subinstance)
+
 
 def __setListValue(instance, key, value, makeBinary=True):
   result = list()
@@ -69,6 +81,7 @@ def __setListValue(instance, key, value, makeBinary=True):
     subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
     result.append(subinstance)
   setattr(instance, key, result)
+
 
 def __populateInstanceByDict(instance, dictionary, makeBinary=True):
 
@@ -80,10 +93,12 @@ def __populateInstanceByDict(instance, dictionary, makeBinary=True):
     else:
       __populateAtomicValue(instance, key, value, makeBinary)
 
+
 def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
   instance = __instantiateClass(clazz)
   __populateInstanceByDict(instance, dictionary, makeBinary=makeBinary)
   return instance
+
 
 def getObjectData(dictionary):
   for key, value in dictionary.iteritems():
@@ -92,22 +107,25 @@ def getObjectData(dictionary):
     else:
       return key, value
 
+
 def getData(obj):
   response = obj.get('response', None)
   if response.get('status', None) == 'OK':
     return getObjectData(obj)
   else:
     message = response.get('errors', '')[0]
-    raise Ce1susAPIException(message)
+    raise (message)
 
 
 def mapResponseToObject(jsonData):
   key, value = getData(jsonData)
   return populateClassNamebyDict(key, value)
 
+
 def mapJSONToObject(jsonData):
   key, value = getObjectData(jsonData)
   return populateClassNamebyDict(key, value)
+
 
 class RestAPIException(Exception):
   """
@@ -180,10 +198,11 @@ class RestEvent(RestClass):
     result[self.__class__.__name__]['description'] = u'{0}'.format(
                                                               self.description)
     result[self.__class__.__name__]['first_seen'] = u'{0}'.format(
-                                                              self.first_seen.isoformat())
+                                                  self.first_seen.isoformat())
     if self.last_seen is None:
       self.last_seen = self.first_seen
-    result[self.__class__.__name__]['last_seen'] = u'{0}'.format(self.last_seen.isoformat())
+    result[self.__class__.__name__]['last_seen'] = u'{0}'.format(
+                                                    self.last_seen.isoformat())
     if self.tlp is None:
       tlp = None
     else:

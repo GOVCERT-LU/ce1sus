@@ -95,5 +95,9 @@ class EventsController(Ce1susBaseController):
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     paginator.itemsPerPage = 100
-    paginator.trlink = "loadNewTab('identifier', 'eventsTabTabContent', '/events/event/view/identifier', true, 'Event #identifier');"
+    paginator.trlink = ("loadNewTab('identifier', "
+                        + "'eventsTabTabContent', "
+                        + "'/events/event/view/identifier', "
+                        + "true, "
+                        + "'Event #identifier');")
     return self.cleanHTMLCode(template.render(paginator=paginator))

@@ -27,6 +27,7 @@ from ce1sus.web.helpers.protection import Protector
 from ce1sus.rest.handlers.restdefinition import RestDefinitionController
 from ce1sus.rest.handlers.restdefinitions import RestDefinitionsController
 
+
 class RestController(RestControllerBase):
 
   REST_mapper = {'DELETE': 'remove',
@@ -50,6 +51,7 @@ class RestController(RestControllerBase):
                           'key',
                           'UUID',
                           'chksum']
+
   def __init__(self, ce1susConfigFile):
     RestControllerBase.__init__(self)
     self.configFile = ce1susConfigFile
@@ -72,7 +74,6 @@ class RestController(RestControllerBase):
     except SantityCheckerException as e:
       self.raiseError('VersionMismatch', '{0}'.format(e))
 
-
   def __checkApiKey(self, apiKey):
     try:
       user = self.getUser(apiKey)
@@ -89,7 +90,6 @@ class RestController(RestControllerBase):
 
     # store key in session
     Protector.setRestSession(apiKey)
-
 
   def __getController(self, controllerName):
     if controllerName in self.instances:
@@ -230,16 +230,16 @@ class RestController(RestControllerBase):
         except RestAPIException as e:
           self.getLogger().debug(
                           'Error occured during {0} for {1} due to {2}'.format(
-                                                                     action,
-                                                                     controller,
-                                                                     e))
+                                                                    action,
+                                                                    controller,
+                                                                    e))
           temp = dict(self._createStatus('RestException', e.message))
           Protector.clearRestSession()
           return json.dumps(temp)
       else:
         self.getLogger().debug(
                           'Method {0} is not defined for {0}'.format(action,
-                                                                     controller))
+                                                                  controller))
         # if nothing is found do default
         path = request.script_name + request.path_info
         temp = dict(self._createStatus('RestException',
@@ -252,4 +252,3 @@ class RestController(RestControllerBase):
       temp = dict(self._createStatus('RestException', e.message))
       Protector.clearRestSession()
       return json.dumps(temp)
-

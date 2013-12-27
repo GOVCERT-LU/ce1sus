@@ -19,7 +19,7 @@ from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
 from dagr.helpers.datumzait import datumzait
 from dagr.helpers.converters import ObjectConverter, ConversionException
-from ce1sus.brokers.event.eventclasses import Event, Object, Attribute
+from ce1sus.brokers.event.eventclasses import Event
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid as uuidgen
@@ -463,6 +463,3 @@ class EventBroker(BrokerBase):
     event.modified = datumzait.utcnow()
     self.update(event, False)
     self.doCommit(commit)
-
-
-

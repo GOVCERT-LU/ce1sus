@@ -36,7 +36,9 @@ class Ce1susBaseController(BaseController):
                                                                   )
                            )
     # check if event is pubished valided and shared
-    result = event.published and event.bitValue.isValidated and event.bitValue.isSharable
+    result = (event.published and
+              event.bitValue.isValidated and
+              event.bitValue.isSharable)
 
     if not result:
       # check is the group of the user is the creation group
@@ -58,7 +60,6 @@ class Ce1susBaseController(BaseController):
             if group in groups:
                 result = True
                 break
-
 
     if not result:
       raise cherrypy.HTTPError(403)

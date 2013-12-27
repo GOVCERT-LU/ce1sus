@@ -12,7 +12,8 @@ __license__ = 'GPL v3+'
 
 from ce1sus.brokers.permission.userbroker import UserBroker
 import json
-from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, getObjectData
+from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, \
+                                   getObjectData
 from importlib import import_module
 import cherrypy
 from dagr.web.controllers.base import BaseController
@@ -35,6 +36,7 @@ import os
 from dagr.db.session import SessionManager
 from shutil import move
 import re
+from ce1sus.web.helpers.protection import Protector
 
 
 class RestAPIException(Exception):
@@ -57,8 +59,6 @@ class RestControllerBase(BaseController):
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker
                                                        )
-
-
 
   def brokerFactory(self, clazz):
     """
@@ -107,7 +107,11 @@ class RestControllerBase(BaseController):
     instance.populate(obj, isOwner)
     return instance
 
-  def _objectToJSON(self, obj, isOwner=False, full=False, withDefinition=False):
+  def _objectToJSON(self,
+                    obj,
+                    isOwner=False,
+                    full=False,
+                    withDefinition=False):
     instance = self._toRestObject(obj, isOwner)
 
     result = dict(instance.toJSON(full=full,
@@ -143,7 +147,10 @@ class RestControllerBase(BaseController):
       obj = populateClassNamebyDict(key, value, False)
       return obj
     except Exception as e:
-      self.getLogger().error('An error occurred by getting the post object {0}', e)
+      self.getLogger().error(
+                            'An error occurred by getting the post object {0}',
+                            e
+                             )
       self.raiseError('UnRecoverableException',
                       'An unrecoverable error occurred')
 
@@ -294,8 +301,6 @@ class RestControllerBase(BaseController):
                                restAttribute.ioc)
 
     self.attributeBroker.insert(dbAttribute, commit=commit)
-
-
     return dbAttribute
 
   def _convertToAttribues(self, restAttributes, obj, commit=False):

@@ -97,7 +97,6 @@ class SearchController(Ce1susBaseController):
           clazz = getattr(module, className)
           needle = clazz.convert(needle)
 
-
         foundValues = self.relationBroker.lookforAttributeValue(definition,
                                                                  needle,
                                                                  operant)
@@ -128,7 +127,13 @@ class SearchController(Ce1susBaseController):
       paginator = Paginator(items=result,
                             labelsAndProperty=labels,
                             paginatorOptions=paginatorOptions)
-      paginator.trlink = "loadNewTab('identifier', 'eventsTabTabContent', '/events/event/view/identifier', true, 'Event #identifier');"
-      return self.returnAjaxOK() + self.cleanHTMLCode(template.render(paginator=paginator))
+      paginator.trlink = ("loadNewTab('identifier', "
+                          + "'eventsTabTabContent', "
+                          + "'/events/event/view/identifier', "
+                          + "true, "
+                          + "'Event #identifier');")
+      return self.returnAjaxOK() + self.cleanHTMLCode(
+                                                template.render(
+                                                        paginator=paginator))
     except InputException as e:
       return '{0}'.format(e)

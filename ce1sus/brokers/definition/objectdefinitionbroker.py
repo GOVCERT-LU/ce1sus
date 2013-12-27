@@ -10,15 +10,17 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
+from dagr.db.broker import BrokerBase, NothingFoundException, \
+                           BrokerException, TooManyResultsFoundException
 import sqlalchemy.orm.exc
-from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.string import cleanPostValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                        AttributeHandlerBroker
+
 
 class ObjectDefinitionBroker(BrokerBase):
   """This is the interface between python an the database"""
@@ -185,7 +187,7 @@ class ObjectDefinitionBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getDefintionByCHKSUM(self, chksums):
+  def getDefintionByCHKSUMS(self, chksums):
     """
     Returns the object definition with the given check sum
 

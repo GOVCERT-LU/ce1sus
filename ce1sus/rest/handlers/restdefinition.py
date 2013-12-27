@@ -12,28 +12,33 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from dagr.db.broker import BrokerException, NothingFoundException
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                      AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                                                      ObjectDefinitionBroker
+
 
 class RestDefinitionController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'attribute':'viewAttributeDefinition',
-                      'object':'viewObejctDefinition'}
-  PARAMETER_INSERT_MAPPER = {'attribute':'updateAttributeDefinitions',
-                             'object':'updateObejctDefinitions'}
+  PARAMETER_MAPPER = {'attribute': 'viewAttributeDefinition',
+                      'object': 'viewObejctDefinition'}
+  PARAMETER_INSERT_MAPPER = {'attribute': 'updateAttributeDefinitions',
+                             'object': 'updateObejctDefinitions'}
+
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.attributeDefinitionBroker = self.brokerFactory(AttributeDefinitionBroker)
+    self.attributeDefinitionBroker = self.brokerFactory(
+                                                    AttributeDefinitionBroker
+                                                       )
     self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
 
   def getFunctionName(self, parameter, action):
     if action == 'GET':
       return RestDefinitionController.PARAMETER_MAPPER.get(parameter, None)
     if action == 'PUT':
-      return RestDefinitionsController.PARAMETER_INSERT_MAPPER.get(parameter,
+      return RestDefinitionController.PARAMETER_INSERT_MAPPER.get(parameter,
                                                                    None)
     return None
 
@@ -41,7 +46,9 @@ class RestDefinitionController(RestControllerBase):
     try:
       self._checkIfPriviledged(apiKey)
       fullDefinition = options.get('Full-Definitions', False)
-      attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(identifier)
+      attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(
+                                                                    identifier
+                                                                     )
       obj = self._objectToJSON(attribute,
                                True,
                                fullDefinition,

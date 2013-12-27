@@ -56,7 +56,6 @@ class CommentsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event)
 
-
     comment = self.commentBroker.buildComment(event, self.getUser(), commentID,
                          commentText, action)
     try:
@@ -72,7 +71,9 @@ class CommentsController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().debug('Event is invalid')
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(eventID=eventID,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                      template.render(
+                                                            eventID=eventID,
                              comment=comment))
     except BrokerException as e:
       self.getLogger().fatal(e)

@@ -12,16 +12,17 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, \
                            BrokerException, \
-                           IntegrityException, DeletionException
+                           IntegrityException, DeletionException, \
+                           TooManyResultsFoundException
 import sqlalchemy.orm.exc
-from ce1sus.web.helpers.handlers.base import HandlerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.string as string
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.string import cleanPostValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                        AttributeHandlerBroker
 
 
 class AttributeDefinitionBroker(BrokerBase):
@@ -219,7 +220,7 @@ class AttributeDefinitionBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getDefintionByCHKSUM(self, chksums):
+  def getDefintionByCHKSUMS(self, chksums):
     """
     Returns the attribute definition object with the given name
 
@@ -232,15 +233,14 @@ class AttributeDefinitionBroker(BrokerBase):
     """
     try:
       attributeDefinition = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.dbchksum.in_(chksums)).all()
+                              AttributeDefinition.dbchksum.in_(chksums)).all()
       return attributeDefinition
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute definition not found')
+      raise NothingFoundException('Object definition not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
-
 
   def removeByID(self, identifier, commit=True):
     """

@@ -49,10 +49,9 @@ class GroupBroker(BrokerBase):
           subgroupsIDs.append(subgroup.identifier)
         subgroups = self.session.query(SubGroup).filter(
  ~SubGroup.identifier.in_(
-                                                                  subgroupsIDs
-                                                                            )
-                                                        ).order_by(SubGroup.name
-                                                                   ).all()
+                            subgroupsIDs
+                          )
+                          ).order_by(SubGroup.name).all()
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()

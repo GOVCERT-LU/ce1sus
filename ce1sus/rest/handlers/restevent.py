@@ -10,7 +10,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import cherrypy
+
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
@@ -19,7 +19,7 @@ from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 
 class RestEventController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'metadata':'viewMetaData'}
+  PARAMETER_MAPPER = {'metadata': 'viewMetaData'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
@@ -39,7 +39,6 @@ class RestEventController(RestControllerBase):
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-
   def view(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByUUID(uuid)
@@ -56,10 +55,10 @@ class RestEventController(RestControllerBase):
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-
   def delete(self, uuid, apiKey, **options):
     try:
-      event = self.eventBroker.getByID(identifier)
+      event = self.eventBroker.getByUUID(uuid)
+      self._checkIfViewable(event, self.getUser(apiKey))
       return self.raiseError('NotImplemented',
                              'The delete method has not been implemented')
 
@@ -67,7 +66,6 @@ class RestEventController(RestControllerBase):
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
-
 
   def update(self, uuid, apiKey, **options):
     if not uuid:
@@ -104,7 +102,7 @@ class RestEventController(RestControllerBase):
 
         self.eventBroker.doCommit(True)
 
-        withDefinition = options.get('Full-Definitions', False)
+        # withDefinition = options.get('Full-Definitions', False)
         # obj = self._objectToJSON(event, True, True, withDefinition)
         return self._returnMessage({'event': {'uuid', event.uuid}})
 

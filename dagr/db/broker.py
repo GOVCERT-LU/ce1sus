@@ -15,23 +15,26 @@ __license__ = 'GPL v3+'
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
 from dagr.helpers.debug import Log
-from sqlalchemy.orm import joinedload
 from sqlalchemy import DateTime as SdateTime
 from sqlalchemy.types import TypeDecorator
 import dateutil
+
 
 class DateTime(TypeDecorator):
   """
   Used as workaround for MySQL DBs
   """
   impl = SdateTime
+
   def process_bind_param(self, value, engine):
     return value
+
   def process_result_value(self, value, engine):
     if value is None:
       return None
     else:
       return value.replace(tzinfo=dateutil.tz.tzutc())
+
 
 class BrokerException(Exception):
   """Broker Exception"""
@@ -66,12 +69,6 @@ class TooManyResultsFoundException(BrokerException):
 
 class ValidationException(BrokerException):
   """Invalid Exception"""
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
-
-
-class IntegrityException(BrokerException):
-  """Operation Exception"""
   def __init__(self, message):
     BrokerException.__init__(self, message)
 

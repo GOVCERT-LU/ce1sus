@@ -14,7 +14,6 @@ import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
-from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 from dagr.helpers.datumzait import datumzait
 
 
@@ -25,7 +24,6 @@ class RestEventsController(RestControllerBase):
   def __init__(self):
     RestControllerBase.__init__(self)
     self.eventBroker = self.brokerFactory(EventBroker)
-
 
   def view(self, uuid, apiKey, **options):
     try:
@@ -64,10 +62,8 @@ class RestEventsController(RestControllerBase):
         resultDict = {'Results': result}
         return self._returnMessage(resultDict)
       else:
-         self.raiseError('InvalidArgument',
+        self.raiseError('InvalidArgument',
                          'At least one argument has to be specified')
-
-
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:

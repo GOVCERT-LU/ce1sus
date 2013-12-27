@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import ValidationException
+from dagr.db.broker import ValidationException, BrokerException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
@@ -24,8 +24,10 @@ from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
 from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
+                                       NumberValue
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                       AttributeHandlerBroker
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
 
@@ -38,6 +40,7 @@ _REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', BASE.metadata,
     Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
     Column('event_id', Integer, ForeignKey('Events.event_id'))
 )
+
 
 # pylint: disable=R0902
 class Event(BASE):
@@ -61,7 +64,8 @@ class Event(BASE):
   groups = relationship(Group, secondary='Groups_has_Events', backref="events")
   maingroups = relationship(SubGroup,
                             secondary='SubGroups_has_Events')
-  objects = relationship('Object')
+  objects = relationship('Object', primaryjoin='Event.identifier' +
+                       '==Object.event_id')
   created = Column('created', DateTime(timezone=True))
   modified = Column('modified', DateTime(timezone=True))
   # creators and modifiers will be gorups
@@ -76,8 +80,8 @@ class Event(BASE):
   creatorGroup_id = Column('creatorGroup', Integer,
                             ForeignKey('Groups.group_id'))
   creatorGroup = relationship(Group,
-                              primaryjoin="Event.creatorGroup_id==Group.identifier",
-                              backref="createdEvents")
+                        primaryjoin="Event.creatorGroup_id==Group.identifier",
+                        backref="createdEvents")
   __tlpObj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
@@ -319,6 +323,7 @@ class Comment(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
+
 class Object(BASE):
   """This is a container class for the OBJECTS table."""
   def __init__(self):
@@ -340,13 +345,16 @@ class Object(BASE):
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
-  parentObject_id = Column('parentObject', Integer,
+  parentObject_id = Column('parentObject_id', Integer,
                             ForeignKey('Objects.object_id'))
   parentObject = relationship('Object',
                       primaryjoin="Object.parentObject_id==Object.identifier")
-  # TODO: Fix Me! - FK removed due to errors
-  parentEvent_id = Column('parentEvent', Integer)
 
+  parentEvent_id = Column('parentEvent_id', Integer, ForeignKey('Events.event_id'))
+  parentEvent = relationship("Event",
+                             uselist=False,
+                             primaryjoin='Event.identifier' +
+                             '==Object.parentEvent_id')
   children = relationship("Object", primaryjoin='Object.identifier' +
                          '==Object.parentObject_id')
   dbcode = Column('code', Integer)
@@ -417,7 +425,8 @@ class Object(BASE):
 
     result.attributes = list()
     for attribute in self.attributes:
-      if (attribute.bitValue.isSharable and attribute.bitValue.isValidated) or isOwner:
+      if (attribute.bitValue.isSharable and
+                                    attribute.bitValue.isValidated) or isOwner:
         result.attributes.append(attribute.toRestObject(isOwner))
     result.children = list()
     for obj in self.children:
@@ -456,18 +465,17 @@ class Attribute(BASE):
   ioc = Column('ioc', Integer)
   # valuerelations
   stringValue = relationship(StringValue,
-                          primaryjoin="Attribute.identifier==StringValue.attribute_id",
-                          lazy='joined', uselist=False,)
+                  primaryjoin="Attribute.identifier==StringValue.attribute_id",
+                  lazy='joined', uselist=False,)
   dateValue = relationship(DateValue,
-                          primaryjoin="Attribute.identifier==DateValue.attribute_id",
-                          lazy='joined', uselist=False)
+                  primaryjoin="Attribute.identifier==DateValue.attribute_id",
+                  lazy='joined', uselist=False)
   textValue = relationship(TextValue,
-                          primaryjoin="Attribute.identifier==TextValue.attribute_id",
-                          lazy='joined', uselist=False)
+                  primaryjoin="Attribute.identifier==TextValue.attribute_id",
+                  lazy='joined', uselist=False)
   numberValue = relationship(NumberValue,
-                          primaryjoin="Attribute.identifier==NumberValue.attribute_id",
-                          lazy='joined', uselist=False)
-
+                  primaryjoin="Attribute.identifier==NumberValue.attribute_id",
+                  lazy='joined', uselist=False)
 
   __value_id = None
   __value = None
@@ -565,4 +573,3 @@ class Attribute(BASE):
     else:
       result.share = 0
     return result
-

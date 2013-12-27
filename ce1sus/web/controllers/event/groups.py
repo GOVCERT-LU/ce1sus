@@ -78,7 +78,6 @@ class GroupsController(Ce1susBaseController):
     else:
       self.checkIfViewable(event)
 
-
     try:
       if operation == 'add':
         if not (remainingGroups is None):

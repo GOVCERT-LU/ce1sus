@@ -12,17 +12,14 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, \
-                           TooManyResultsFoundException, \
-BrokerException
+                           BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
-from sqlalchemy.orm import joinedload_all
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.converters import ObjectConverter
-from dagr.helpers.string import cleanPostValue
 
 
 class ObjectBroker(BrokerBase):

@@ -29,6 +29,7 @@ from dagr.db.broker import ValidationException, BrokerException
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.relationbroker import RelationBroker
 
+
 # pylint: disable=R0903,R0902
 class Relation(object):
   """
@@ -310,7 +311,7 @@ class EventController(Ce1susBaseController):
           # check if user can see the object
           if (self.isEventOwner(event) or (
                 relation.rel_attribute.bitValue.isValidated and
-                 relation.rel_attribute.isSharable)) :
+                 relation.rel_attribute.isSharable)):
             temp.eventID = event_rel.identifier
             temp.identifier = event_rel.identifier
             temp.eventName = event_rel.title
@@ -326,4 +327,6 @@ class EventController(Ce1susBaseController):
 
     except BrokerException as e:
       self.getLogger().error(e)
-    return self.cleanHTMLCode(template.render(relationPaginator=relationPaginator, eventID=eventID))
+    return self.cleanHTMLCode(template.render(
+                                          relationPaginator=relationPaginator,
+                                          eventID=eventID))

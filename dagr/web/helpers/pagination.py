@@ -201,9 +201,9 @@ class Paginator(object):
   def sortColunmID(self):
     if self.sortColumn:
       # search index
-      for id, item in enumerate(self.lables):
+      for index, item in enumerate(self.lables):
         for key in item.iterkeys():
           if key == self.sortColumn:
-            return id
+            return index
     else:
       return 0

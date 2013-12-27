@@ -97,7 +97,9 @@ class UserController(Ce1susBaseController):
     cbValues = dict()
     for group in groups:
       cbValues[group.name] = group.identifier
-    return self.cleanHTMLCode(template.render(user=None, errorMsg=None, cbValues=cbValues))
+    return self.cleanHTMLCode(template.render(user=None,
+                                              errorMsg=None,
+                                              cbValues=cbValues))
 
   @require(privileged())
   @cherrypy.expose
@@ -117,7 +119,8 @@ class UserController(Ce1susBaseController):
     lh = LDAPHandler.getInstance()
     ldapPaginator = Paginator(items=lh.getAllUsers(),
                           labelsAndProperty=labels)
-    return self.cleanHTMLCode(template.render(ldapPaginator=ldapPaginator, errorMsg=None))
+    return self.cleanHTMLCode(template.render(ldapPaginator=ldapPaginator,
+                                              errorMsg=None))
 
   # pylint: disable=R0913
   @require(privileged(), requireReferer(('/internal')))
@@ -183,7 +186,9 @@ class UserController(Ce1susBaseController):
       cbValues = dict()
       for group in groups:
         cbValues[group.name] = group.identifier
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(user=user,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                          template.render(
+                                                          user=user,
                                                           cbValues=cbValues))
     except DeletionException as e:
       self.getLogger().info('User tried to delete undeletable user.')
@@ -215,7 +220,9 @@ class UserController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))
       errorMsg = 'An unexpected error occurred: {0}'.format(e)
-    return self.cleanHTMLCode(template.render(user=user, errorMsg=errorMsg, cbValues=cbValues))
+    return self.cleanHTMLCode(template.render(user=user,
+                                              errorMsg=errorMsg,
+                                              cbValues=cbValues))
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose

@@ -135,7 +135,9 @@ class ObjectController(Ce1susBaseController):
       return 'Cannot delete this object. The object is still referenced.'
     except ValidationException:
       self.getLogger().info('Object is invalid')
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(object=obj))
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                        template.render(
+                                                                  object=obj))
     except BrokerException as e:
       self.getLogger().info('An unexpected error occurred: {0}'.format(e))
       return "Error {0}".format(e)

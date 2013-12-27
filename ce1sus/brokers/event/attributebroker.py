@@ -12,26 +12,13 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, ValidationException, \
-NothingFoundException, TooManyResultsFoundException, \
-BrokerException
-import sqlalchemy.orm.exc
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
-from dagr.db.session import BASE
-from dagr.db.broker import DateTime
-from ce1sus.brokers.permission.permissionclasses import User
+                           BrokerException
 from dagr.helpers.validator.objectvalidator import ObjectValidator
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                               AttributeDefinitionBroker
 from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.web.helpers.handlers.base import HandlerBase
-from dagr.db.broker import IntegrityException
-from ce1sus.api.restclasses import RestAttribute
-from ce1sus.helpers.bitdecoder import BitValue
-from dagr.helpers.string import cleanPostValue
 from ce1sus.brokers.relationbroker import RelationBroker
-
+from ce1sus.brokers.event.eventclasses import Attribute
 
 
 class AttributeBroker(BrokerBase):

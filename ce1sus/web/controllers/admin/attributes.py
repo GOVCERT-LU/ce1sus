@@ -20,7 +20,8 @@ from ce1sus.web.helpers.protection import require, privileged, requireReferer
 from dagr.db.broker import BrokerException, \
                           ValidationException, NothingFoundException, \
                           DeletionException, IntegrityException
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                        AttributeHandlerBroker
 import types as types
 
 
@@ -165,7 +166,9 @@ class AttributeController(Ce1susBaseController):
       return self.returnAjaxOK()
     except ValidationException:
       self.getLogger().info('Attribute is invalid')
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(attribute=attribute,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                      template.render(
+                                                      attribute=attribute,
                   cbValues=AttributeDefinition.getTableDefinitions(),
                   cbHandlerValues=self.handlerBroker.getHandlerDefinitions()))
     except IntegrityException:

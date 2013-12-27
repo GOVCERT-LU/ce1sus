@@ -134,7 +134,9 @@ class SubGroupController(Ce1susBaseController):
       return 'Cannot delete this group. The group is still referenced.'
     except ValidationException:
       self.getLogger().debug('Group is invalid')
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(group=group,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                        template.render(
+                                                        group=group,
                            cbTLPValues=TLPLevel.getDefinitions()))
     except BrokerException as e:
       self.getLogger().error('An unexpected error occurred: {0}'.format(e))

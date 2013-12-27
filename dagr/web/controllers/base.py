@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.web.helpers.config import WebConfig
-from dagr.db.session import SessionManager
 import re
 
 
@@ -90,4 +89,3 @@ class BaseController:
   def cleanHTMLCode(self, code):
     code = re.sub(r"[ ]{2,}", " ", code)
     return code
-

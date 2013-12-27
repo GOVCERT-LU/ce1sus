@@ -13,18 +13,12 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.controllers.base import Ce1susBaseController
 import cherrypy
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                  ObjectDefinitionBroker
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                  AttributeDefinitionBroker
 from ce1sus.web.helpers.protection import require, requireReferer
-from dagr.db.broker import ValidationException, \
-BrokerException
-import dagr.helpers.string as string
+from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
+
 
 class BitValueController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
@@ -50,7 +44,6 @@ class BitValueController(Ce1susBaseController):
     return self.cleanHTMLCode(template.render(identifier=instance.identifier,
                            bitValue=instance.bitValue,
                            eventID=eventID))
-
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -109,6 +102,3 @@ class BitValueController(Ce1susBaseController):
     except BrokerException as e:
       self.getLogger().debug(e)
       return '{0}'.format(e)
-
-
-

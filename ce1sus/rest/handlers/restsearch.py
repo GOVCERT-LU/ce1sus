@@ -14,7 +14,6 @@ import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
-from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 from dagr.helpers.datumzait import datumzait
 import json
 
@@ -22,8 +21,8 @@ import json
 class RestSearchController(RestControllerBase):
 
   MAX_LIMIT = 20
-  PARAMETER_MAPPER = {'attributes':'viewAttributes',
-                      'events':'viewEvents'}
+  PARAMETER_MAPPER = {'attributes': 'viewAttributes',
+                      'events': 'viewEvents'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
@@ -45,18 +44,27 @@ class RestSearchController(RestControllerBase):
     orgParentObj = self.objectBroker.getByID(obj.parentObject_id)
     if orgParentObj.bitValue.isValidated and orgParentObj.bitValue.isSharable:
 
-      parentObject = seenEvents[event.identifier][1].get(orgParentObj.identifier, None)
+      parentObject = seenEvents[event.identifier][1].get(
+                                                      orgParentObj.identifier,
+                                                      None
+                                                        )
       if not parentObject:
         # memorize parentObject
         parentObject = orgParentObj.toRestObject(False)
         seenEvents[event.identifier][1][orgParentObj.identifier] = parentObject
         if orgParentObj.parentObject_id:
-          parentParentObject = seenEvents[event.identifier][1].get(orgParentObj.parentObject.identifier, None)
+          parentParentObject = seenEvents[event.identifier][1].get(
+                                          orgParentObj.parentObject.identifier,
+                                          None
+                                                                  )
           if not parentParentObject:
-            parentParentObject = self.getParentObject(event, orgParentObj, seenEvents)
+            parentParentObject = self.getParentObject(event,
+                                                      orgParentObj,
+                                                      seenEvents)
             if parentParentObject:
               restParent = parentParentObject.toRestObject(False)
-              seenEvents[event.identifier][1][orgParentObj.parentObject.identifier] = restParent
+              index = orgParentObj.parentObject.identifier
+              seenEvents[event.identifier][1][index] = restParent
               parentObject.parent = restParent
             else:
               return None
@@ -71,15 +79,16 @@ class RestSearchController(RestControllerBase):
     else:
       return None
 
-  def __checkIfBelongs(self, id, array):
+  def __checkIfBelongs(self, identifier, array):
     if array:
-      return id in array
+      return identifier in array
     else:
       return True
 
   def viewAttributes(self, uuid, apiKey, **options):
     try:
       withDefinition = options.get('Full-Definitions', False)
+      # TODO use these!
       startDate = options.get('startdate', None)
       endDate = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
@@ -89,7 +98,9 @@ class RestSearchController(RestControllerBase):
       performSearch = True
       objectNeedle = options.get('Object-Type', None)
       if objectNeedle:
-        definition = self.objectDefinitionBroker.getDefintionByName(objectNeedle)
+        definition = self.objectDefinitionBroker.getDefintionByName(
+                                                                  objectNeedle
+                                                                   )
         # TODO: search inside textfield
       else:
         performSearch = False
@@ -100,7 +111,9 @@ class RestSearchController(RestControllerBase):
         completeNeedles = dict()
         for needle in needles:
             for key, value in needle.iteritems():
-              definition = self.attributeDefinitionBroker.getDefintionByName(key)
+              definition = self.attributeDefinitionBroker.getDefintionByName(
+                                                                          key
+                                                                            )
               if definition.classIndex != 0:
                 completeNeedles[value] = definition
         if not completeNeedles:
@@ -113,7 +126,8 @@ class RestSearchController(RestControllerBase):
           definition = self.attributeDefinitionBroker.getDefintionByName(item)
           requestedAttributes.append(definition.identifier)
 
-          # Note if no requested attribues are defined return all for the object having the needle
+          # Note if no requested attribues are defined return all for the
+          # object having the needle
 
       if performSearch:
 
@@ -134,7 +148,7 @@ class RestSearchController(RestControllerBase):
           if attribute.bitValue.isValidated and attribute.bitValue.isSharable:
             # check it is one of the requested attributes
             obj = attribute.object
-             # check if object is sharable and validated
+            # check if object is sharable and validated
             if obj.bitValue.isValidated and obj.bitValue.isSharable:
               if requestedAttributes:
                 # append only the requested attributes
@@ -149,7 +163,7 @@ class RestSearchController(RestControllerBase):
               # get the event
               event = obj.event
               if not event:
-                event = self.eventBroker.getByID(obj.parentEvent_id)
+                event = obj.parentEvent
 
               try:
                 # check if the event can be accessed
@@ -166,7 +180,8 @@ class RestSearchController(RestControllerBase):
                   restEvent = restEvent[0]
 
                 # get obj from cache
-                restObject = seenItems[event.identifier][1].get(obj.identifier, None)
+                restObject = seenItems[event.identifier][1].get(obj.identifier,
+                                                                None)
                 if not restObject:
                   restObject = obj.toRestObject(False)
                   if obj.parentObject_id is None:
@@ -175,7 +190,6 @@ class RestSearchController(RestControllerBase):
                     parentObject = self.getParentObject(event, obj, seenItems)
                     if parentObject:
                       parentObject.children.append(restObject)
-
 
                   # append required attributes to the object
                   for item in neededAttributes:
@@ -202,7 +216,6 @@ class RestSearchController(RestControllerBase):
         resultDict = {'Results': result}
         return self._returnMessage(resultDict)
 
-
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
@@ -210,11 +223,11 @@ class RestSearchController(RestControllerBase):
 
   def viewEvents(self, uuid, apiKey, **options):
     try:
+      # TODO use these!
       startDate = options.get('startdate', None)
       endDate = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
       limit = self.__getLimit(options)
-
 
       # serach on objecttype
       objectType = options.get('Object-Type', None)
@@ -245,7 +258,7 @@ class RestSearchController(RestControllerBase):
           try:
             event = needle.attribute.object.event
             if not event:
-              event = self.eventBroker.getByID(needle.attribute.object.parentEvent_id)
+              event = needle.attribute.object.parentEvent
             self._checkIfViewable(event, self.getUser(apiKey))
             result.append(event.uuid)
           except cherrypy.HTTPError:

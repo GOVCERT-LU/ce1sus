@@ -12,7 +12,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 from dagr.db.broker import BrokerBase
 from importlib import import_module
-from ce1sus.web.helpers.handlers.base import HandlerBase
+from ce1sus.web.helpers.handlers.base import HandlerBase, HandlerException
+
 
 class AttributeHandlerBroker(BrokerBase):
 

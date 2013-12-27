@@ -23,19 +23,18 @@ from ce1sus.web.helpers.handlers.base import HandlerException
 import types
 from dagr.web.helpers.pagination import Paginator
 from dagr.helpers.classes.ticketsystem import TicketSystemBase
-from ce1sus.web.helpers.handlers.base import HandlerBase
 from cherrypy.lib.static import serve_file
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from dagr.db.broker import NothingFoundException
-from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.hash import hashMD5
 from dagr.helpers.datumzait import datumzait
 import os
 from ce1sus.brokers.event.eventclasses import Attribute
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                        AttributeHandlerBroker
 
 
 class AttributesController(Ce1susBaseController):
@@ -155,8 +154,6 @@ class AttributesController(Ce1susBaseController):
                                                                 'definition',
                                                                 'action']}
 
-
-
       obj = self.objectBroker.getByID(objectID)
       try:
         if action != 'remove':
@@ -172,7 +169,9 @@ class AttributesController(Ce1susBaseController):
             return ('Process not completed please complete '
                     + 'the form before saving.')
           if attributes is None:
-            handlerName = self.handlerBroker.getHandlerName(definition.handlerIndex)
+            handlerName = self.handlerBroker.getHandlerName(
+                                                      definition.handlerIndex
+                                                           )
             raise HandlerException(('{0}.getAttributes '
                                     + 'does not return attributes ').format(
                                                       handlerName))
@@ -210,7 +209,9 @@ class AttributesController(Ce1susBaseController):
           attribute.value = values
         # store in session
         getattr(cherrypy, 'session')['instertAttribute'] = attribute
-      return self.returnAjaxPostError() + self.cleanHTMLCode(template.render(eventID=eventID,
+      return self.returnAjaxPostError() + self.cleanHTMLCode(
+                                                    template.render(
+                                                        eventID=eventID,
                              objectID=objectID,
                              attribute=attribute,
                              cbDefinitions=cbDefinitions,
@@ -288,7 +289,11 @@ class AttributesController(Ce1susBaseController):
       enableView = True
     else:
       enableView = False
-    return handler.render(enableView, eventID, self.getUser(), definition, attribute)
+    return handler.render(enableView,
+                          eventID,
+                          self.getUser(),
+                          definition,
+                          attribute)
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -321,12 +326,11 @@ class AttributesController(Ce1susBaseController):
     obj = self.objectBroker.getByID(objectID)
     event = obj.event
     if event is None:
-      event = self.eventBroker.getByID(obj.parentEvent_id)
+      event = obj.parentEvent
 
     self.checkIfViewable(event)
     attribute = self.attributeBroker.getByID(attributeID)
     # just for populating the value_id (could also use a broker
-    stringID = attribute.value
     stringID = attribute.value_id
     stringValue = self.valueBroker.getByID(stringID)
     filepath = stringValue.value

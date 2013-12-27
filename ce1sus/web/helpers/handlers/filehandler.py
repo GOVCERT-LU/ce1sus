@@ -14,10 +14,8 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import datumzait
-from os.path import isfile, basename, getsize, exists
+from os.path import isfile, getsize, basename, exists
 import dagr.helpers.hash as hasher
-from urllib import pathname2url
-from mimetypes import MimeTypes
 from ce1sus.web.helpers.handlers.base import HandlerException
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                               AttributeDefinitionBroker
@@ -32,8 +30,6 @@ from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
-import base64
-from os.path import basename, exists
 from ce1sus.brokers.event.eventclasses import Attribute
 
 
@@ -163,7 +159,6 @@ class FileHandler(GenericHandler):
 
     :returns: Boolean
     """
-    canDownload = False
     if user.privileged:
       return True
     try:
@@ -188,7 +183,6 @@ class FileHandler(GenericHandler):
 
     except BrokerException as e:
       self.getLogger().debug(e)
-
 
   def render(self, enabled, eventID, user, definition, attribute=None):
 
@@ -253,8 +247,8 @@ class FileHandler(GenericHandler):
         return '(Not Accessible)'
     else:
       if restUser:
-        with open(value.value, "rb") as file:
-          data = file.read()
+        with open(value.value, "rb") as binaryFile:
+          data = binaryFile.read()
           binaryASCII = '{0}'.format(data.encode("base64"))
         fileName = basename(value.value)
         return {'file': (fileName, binaryASCII)}
@@ -275,7 +269,8 @@ class FileWithHashesHandler(FileHandler):
   def populateAttributes(self, params, obj, definition, user):
     filepath = params.get('value', None)
     if filepath is None:
-      raise FileNotFoundException('No file Uploaded. Upload the file before saving')
+      raise FileNotFoundException('No file Uploaded. Upload '
+                                  + 'the file before saving')
     if isfile(filepath):
       # getNeededAttributeDefinition
       attributes = list()

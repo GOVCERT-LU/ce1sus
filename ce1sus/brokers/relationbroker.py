@@ -11,19 +11,18 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import cherrypy
 from dagr.db.session import BASE
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import relationship, lazyload, joinedload
-from dagr.db.broker import BrokerBase, IntegrityException
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import relationship, lazyload
+from dagr.db.broker import BrokerBase, IntegrityException, BrokerException
 from ce1sus.brokers.valuebroker import ValueBroker
 import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute, Event
-import thread
 from sqlalchemy import or_
-from sqlalchemy import distinct
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from dagr.helpers.string import cleanPostValue
+from importlib import import_module
+
 
 # pylint: disable=R0903,R0902
 class EventRelation(BASE):
@@ -45,14 +44,12 @@ class EventRelation(BASE):
   rel_attribute = relationship("Attribute", uselist=False,
                        primaryjoin='Attribute.identifier' +
                        '==EventRelation.attribute_id', lazy='joined')
+
   def validate(self):
     return True
 
+
 class RelationBroker(BrokerBase):
-
-
-
-
 
   def __init__(self, session):
     BrokerBase.__init__(self, session)
@@ -68,7 +65,7 @@ class RelationBroker(BrokerBase):
       # get own event
       event = attribute.object.event
       if event is None:
-        event = self.session.query(Event).filter(Event.identifier == attribute.object.parentEvent_id)
+        event = attribute.object.parentEvent
 
       for relation in relations:
 
@@ -91,8 +88,6 @@ class RelationBroker(BrokerBase):
               pass
 
       self.doCommit(commit)
-
-
 
   def getRelationsByEvent(self, event, uniqueEvents=True):
 
@@ -149,7 +144,6 @@ class RelationBroker(BrokerBase):
     overrides BrokerBase.getBrokerClass
     """
     return EventRelation
-
 
   def __lookForValueByAttribID(self,
                                 clazz,
@@ -227,8 +221,8 @@ class RelationBroker(BrokerBase):
                         ).all()
       if operand == '>=':
         return self.session.query(clazz).filter(
-                  clazz.value >= value
-                  , Attribute.dbcode.op('&')(12) == 12
+                  clazz.value >= value,
+                  Attribute.dbcode.op('&')(12) == 12
                         ).all()
       if operand == 'like':
 

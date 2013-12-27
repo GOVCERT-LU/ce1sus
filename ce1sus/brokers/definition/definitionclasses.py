@@ -17,7 +17,7 @@ from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.api.restclasses import RestObjectDefinition, \
                                    RestAttributeDefinition
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', BASE.metadata,
@@ -161,8 +161,6 @@ class AttributeDefinition(BASE):
     if index < 0 and index >= len(self.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(index))
     return self.__tableDefinitions[index]
-
-
 
   def findTableIndex(self, name):
     """

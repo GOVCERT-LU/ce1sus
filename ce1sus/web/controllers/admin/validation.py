@@ -83,9 +83,6 @@ class ValidationController(Ce1susBaseController):
     paginator.itemsPerPage = 100
     return self.cleanHTMLCode(template.render(paginator=paginator))
 
-
-
-
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def event(self, eventID):
@@ -95,7 +92,6 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     # right checks
-    event = self.eventBroker.getByID(eventID)
     self.checkIfPriviledged()
     template = self.mako.getTemplate('/admin/validation/eventValBase.html')
     return self.cleanHTMLCode(template.render(eventID=eventID))
@@ -112,8 +108,6 @@ class ValidationController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     self.checkIfPriviledged()
-
-
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -197,7 +191,8 @@ class ValidationController(Ce1susBaseController):
     paginatorOptions.addOption('MODAL',
                                'VIEW',
                                ('/admin/validation/'
-                                + 'viewAttributeDetails/{0}/%(objectID)s/').format(eventID),
+                                + 'viewAttributeDetails/{0}/%(objectID)s/'
+                                ).format(eventID),
                                modalTitle='View Attribute')
     # will be associated in the view!!! only to keep it simple!
     paginator = Paginator(items=list(),
@@ -271,7 +266,6 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     # right checks
-    event = self.eventBroker.getByID(eventID)
     self.checkIfPriviledged()
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )

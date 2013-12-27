@@ -12,21 +12,24 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from dagr.db.broker import BrokerException, NothingFoundException
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import \
+                                                    AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import \
+                                                    ObjectDefinitionBroker
 
 
 class RestDefinitionsController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'attribute':'viewAttributeDefinitions',
-                      'object':'viewObejctDefinitions'}
+  PARAMETER_MAPPER = {'attribute': 'viewAttributeDefinitions',
+                      'object': 'viewObejctDefinitions'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.attributeDefinitionBroker = self.brokerFactory(AttributeDefinitionBroker)
+    self.attributeDefinitionBroker = self.brokerFactory(
+                                                      AttributeDefinitionBroker
+                                                       )
     self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
 
   def getFunctionName(self, parameter, action):
@@ -40,7 +43,9 @@ class RestDefinitionsController(RestControllerBase):
       fullDefinition = options.get('Full-Definitions', False)
       chkSums = options.get('chksum', list())
       if chkSums:
-        attributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(identifier)
+        attributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(
+                                                                        chkSums
+                                                                         )
       else:
         attributes = self.attributeDefinitionBroker.getAll()
 
@@ -60,7 +65,7 @@ class RestDefinitionsController(RestControllerBase):
       fullDefinition = options.get('Full-Definitions', False)
       chkSums = options.get('chksum', list())
       if chkSums:
-        defObjects = self.objectDefinitionBroker.getDefintionByCHKSUMS(identifier)
+        defObjects = self.objectDefinitionBroker.getDefintionByCHKSUMS(chkSums)
       else:
         defObjects = self.objectDefinitionBroker.getAll()
 
