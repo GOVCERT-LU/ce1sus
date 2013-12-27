@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+import json
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import datumzait
 from os.path import isfile, getsize, basename, exists
@@ -251,7 +252,8 @@ class FileHandler(GenericHandler):
           data = binaryFile.read()
           binaryASCII = '{0}'.format(data.encode("base64"))
         fileName = basename(value.value)
-        return {'file': (fileName, binaryASCII)}
+        value = {'file': (fileName, binaryASCII)}
+        return json.dumps(value)
       else:
         return '(Not Provided)'
 
