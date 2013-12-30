@@ -130,6 +130,6 @@ class AttributeBroker(BrokerBase):
       raise BrokerException(e)
 
   def lookforAttributeValue(self, attributeDefinition, value, operand='=='):
-    self.relationBroker.lookforAttributeValue(attributeDefinition,
+    return self.relationBroker.lookforAttributeValue(attributeDefinition,
                                               value,
                                               operand)

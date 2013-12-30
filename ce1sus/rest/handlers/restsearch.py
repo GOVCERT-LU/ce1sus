@@ -94,17 +94,17 @@ class RestSearchController(RestControllerBase):
       offset = options.get('page', 0)
       limit = self.__getLimit(options)
 
-      # object type to look foor
+      # object type to look foor if specified
       performSearch = True
       objectNeedle = options.get('Object-Type', None)
+      objectDefinition = None
       if objectNeedle:
-        definition = self.objectDefinitionBroker.getDefintionByName(
+        objectDefinition = self.objectDefinitionBroker.getDefintionByName(
                                                                   objectNeedle
                                                                    )
-        # TODO: search inside textfield
-      else:
-        performSearch = False
 
+
+      # collect informations about the attribute to look for
       if performSearch:
         # object Attribues to look for
         needles = options.get('Object-Attributes', list())
@@ -112,20 +112,20 @@ class RestSearchController(RestControllerBase):
         for needle in needles:
             for key, value in needle.iteritems():
               definition = self.attributeDefinitionBroker.getDefintionByName(
-                                                                          key
+                                                                          key.strip()
                                                                             )
               if definition.classIndex != 0:
                 completeNeedles[value] = definition
         if not completeNeedles:
           performSearch = False
 
-      # Desired Return Attibutes
+      # Collect informations about the return values
       if performSearch:
+
         requestedAttributes = list()
         for item in options.get('attributes', list()):
-          definition = self.attributeDefinitionBroker.getDefintionByName(item)
+          definition = self.attributeDefinitionBroker.getDefintionByName(item.strip())
           requestedAttributes.append(definition.identifier)
-
           # Note if no requested attribues are defined return all for the
           # object having the needle
 
@@ -144,64 +144,67 @@ class RestSearchController(RestControllerBase):
 
         for item in matchingAttributes:
           attribute = item.attribute
+          # get the event
+          event = attribute.object.event
+          if not event:
+            event = attribute.object.parentEvent
           # check if attribute is sharable and validated
-          if attribute.bitValue.isValidated and attribute.bitValue.isSharable:
+          if (attribute.bitValue.isValidated and attribute.bitValue.isSharable) or self._isEventOwner(event, apiKey):
             # check it is one of the requested attributes
             obj = attribute.object
-            # check if object is sharable and validated
-            if obj.bitValue.isValidated and obj.bitValue.isSharable:
-              if requestedAttributes:
-                # append only the requested attributes
-                neededAttributes = list()
-                for item in obj.attributes:
-                  if item.def_attribute_id in requestedAttributes:
-                    neededAttributes.append(item)
-              else:
-                # append all attributes
-                neededAttributes = obj.attributes
-
-              # get the event
-              event = obj.event
-              if not event:
-                event = obj.parentEvent
-
-              try:
-                # check if the event can be accessed
-                self._checkIfViewable(event, self.getUser(apiKey))
-
-                # get rest from cache
-                restEvent = seenItems.get(event.identifier, None)
-                if not restEvent:
-                  # if not cached put it there
-                  restEvent = event.toRestObject(False)
-                  seenItems[event.identifier] = (restEvent, dict())
+            # check if the object is desired
+            if (not objectDefinition or obj.def_object_id == objectDefinition.identifier):
+              # check if object is sharable and validated
+              if (obj.bitValue.isValidated and obj.bitValue.isSharable) or self._isEventOwner(event, apiKey):
+                if requestedAttributes:
+                  # append only the requested attributes
+                  neededAttributes = list()
+                  for item in obj.attributes:
+                    if item.def_attribute_id in requestedAttributes:
+                      neededAttributes.append(item)
                 else:
-                  # get it from cache
-                  restEvent = restEvent[0]
+                  # append all attributes
+                  neededAttributes = obj.attributes
 
-                # get obj from cache
-                restObject = seenItems[event.identifier][1].get(obj.identifier,
-                                                                None)
-                if not restObject:
-                  restObject = obj.toRestObject(False)
-                  if obj.parentObject_id is None:
-                    restEvent.objects.append(restObject)
+
+
+                try:
+                  # check if the event can be accessed
+                  self._checkIfViewable(event, self.getUser(apiKey))
+
+                  # get rest from cache
+                  restEvent = seenItems.get(event.identifier, None)
+                  if not restEvent:
+                    # if not cached put it there
+                    restEvent = event.toRestObject(self._isEventOwner(event, apiKey), False)
+                    seenItems[event.identifier] = (restEvent, dict())
                   else:
-                    parentObject = self.getParentObject(event, obj, seenItems)
-                    if parentObject:
-                      parentObject.children.append(restObject)
+                    # get it from cache
+                    restEvent = restEvent[0]
 
-                  # append required attributes to the object
-                  for item in neededAttributes:
-                    restObject.attributes.append(item.toRestObject())
+                  # get obj from cache
+                  restObject = seenItems[event.identifier][1].get(obj.identifier,
+                                                                  None)
+                  if not restObject:
+                    restObject = obj.toRestObject(self._isEventOwner(event, apiKey), False)
+                    if obj.parentObject_id is None:
+                      restEvent.objects.append(restObject)
+                    else:
+                      parentObject = self.getParentObject(event, obj, seenItems)
+                      if parentObject:
+                        parentObject.children.append(restObject)
 
-                  seenItems[event.identifier][1][obj.identifier] = restObject
+                    # append required attributes to the object
+                    for item in neededAttributes:
+                      restObject.attributes.append(item.toRestObject())
 
-              except cherrypy.HTTPError:
-                # Do nothing if the user cant see the event
-                pass
+                    seenItems[event.identifier][1][obj.identifier] = restObject
 
-            # make list of results
+                except cherrypy.HTTPError:
+                  # Do nothing if the user cant see the event
+                  pass
+
+              # make list of results
 
         result = list()
         if performSearch:

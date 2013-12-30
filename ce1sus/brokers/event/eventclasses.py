@@ -256,7 +256,7 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False):
+  def toRestObject(self, isOwner=False, full=True):
     result = RestEvent()
     result.tile = self.title
     result.description = self.description
@@ -268,10 +268,11 @@ class Event(BASE):
     result.uuid = self.uuid
 
     result.objects = list()
-    for obj in self.objects:
-      # share only the objects which are shareable or are owned by the user
-      if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
-        result.objects.append(obj.toRestObject(isOwner))
+    if full:
+      for obj in self.objects:
+        # share only the objects which are shareable or are owned by the user
+        if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
+          result.objects.append(obj.toRestObject(isOwner))
     result.comments = list()
     if self.bitValue.isSharable:
       result.share = 1
@@ -417,21 +418,23 @@ class Object(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False):
+  def toRestObject(self, isOwner=False, full=True):
     result = RestObject()
     result.parentObject_id = self.parentObject_id
     result.parentEvent_id = self.parentEvent_id
     result.definition = self.definition.toRestObject()
 
     result.attributes = list()
-    for attribute in self.attributes:
-      if (attribute.bitValue.isSharable and
-                                    attribute.bitValue.isValidated) or isOwner:
-        result.attributes.append(attribute.toRestObject(isOwner))
+    if full:
+      for attribute in self.attributes:
+        if (attribute.bitValue.isSharable and
+                                      attribute.bitValue.isValidated) or isOwner:
+          result.attributes.append(attribute.toRestObject(isOwner))
     result.children = list()
-    for obj in self.children:
-      if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
-        result.children.append(obj.toRestObject(isOwner))
+    if full:
+      for obj in self.children:
+        if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
+          result.children.append(obj.toRestObject(isOwner))
     if self.bitValue.isSharable:
       result.share = 1
     else:

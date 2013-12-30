@@ -124,7 +124,6 @@ def mapResponseToObject(jsonData):
 
 
 def mapJSONToObject(jsonData):
-  print jsonData
   if jsonData:
     key, value = getObjectData(jsonData)
     return populateClassNamebyDict(key, value)

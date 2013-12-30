@@ -26,6 +26,7 @@ import re
 from ce1sus.web.helpers.protection import Protector
 from ce1sus.rest.handlers.restdefinition import RestDefinitionController
 from ce1sus.rest.handlers.restdefinitions import RestDefinitionsController
+import ast
 
 
 class RestController(RestControllerBase):
@@ -174,23 +175,12 @@ class RestController(RestControllerBase):
       # check if datetime
       if ValueValidator.validateDateTime(value):
         return ValueConverter.setDate(value)
-      if re.match(r'^\[.*\]$', value, re.MULTILINE) is not None:
-        # remove first last letter
-        text = value[1:-1]
-        if text:
-          array = text.split(',')
-        else:
-          array = list()
-        result = list()
-        for item in array:
-          value = item.strip()
-          if re.match(r"^'.*'$", value, re.MULTILINE) is not None:
-            result.append(value[1:-1])
-          else:
-            if value.isdigit():
-              result.append(eval(value))
-        return result
-      return value
+      if (re.match(r'^\[.*\]$', value, re.MULTILINE) is not None or
+        re.match(r'^\{.*\}$', value, re.MULTILINE) is not None):
+        value = ast.literal_eval(value)
+        return value
+      else:
+        return value
     else:
       return None
 
@@ -241,6 +231,8 @@ class RestController(RestControllerBase):
           result = method(uuid, apiKey, **options)
           Protector.clearRestSession()
           # The rest handlers should always give json back!
+          if not result:
+            raise RestAPIException('Called function returned Noting')
           return result
         except RestAPIException as e:
           self.getLogger().debug(
