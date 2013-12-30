@@ -50,7 +50,7 @@ class RestController(RestControllerBase):
                           'objectattributes',
                           'attributes',
                           'key',
-                          'uuid',
+                          'uuids',
                           'chksum']
 
   def __init__(self, ce1susConfigFile):
