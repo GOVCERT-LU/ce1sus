@@ -60,9 +60,7 @@ class MySqlConnector(Connector):
                                           port=port
                                         )
     if self.config.get('usecherrypy'):
-      SAEnginePlugin(cherrypy.engine,
-                     self.connectionString,
-                     self.debug).subscribe()
+      SAEnginePlugin(cherrypy.engine, self).subscribe()
       self.saTool = SATool()
       cherrypy.tools.db = self.saTool
       self.session = None
@@ -70,11 +68,13 @@ class MySqlConnector(Connector):
     else:
       self.session = self.getDirectSession()
 
-  def getDirectSession(self):
-    self.engine = create_engine(self.connectionString + '?charset=utf8',
+  def getEngine(self):
+    return create_engine(self.connectionString + '?charset=utf8',
                                   echo=self.debug,
                                   echo_pool=self.debug,
                                   encoding='utf-8')
+  def getDirectSession(self):
+    self.engine = self.getEngine()
     self.sessionClazz = scoped_session(sessionmaker(bind=self.engine,
                                                       autocommit=False,
                                                       autoflush=False))

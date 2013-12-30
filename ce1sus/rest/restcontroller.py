@@ -68,8 +68,8 @@ class RestController(RestControllerBase):
   def __checkVersion(self, version):
 
     try:
-      self.sanityChecker.checkDB()
-      self.sanityChecker.checkRestAPI(version)
+      # self.sanityChecker.checkDB()
+      # self.sanityChecker.checkRestAPI(version)
       pass
     except SantityCheckerException as e:
       self.raiseError('VersionMismatch', '{0}'.format(e))
@@ -143,7 +143,7 @@ class RestController(RestControllerBase):
           except ValueError:
             if parameter not in RestController.REST_Allowed_Parameters:
               Protector.clearRestSession()
-              self.raiseError('Invalid ',
+              self.raiseError('InvalidParameter ',
                               'Parameter {0}'.format(parameter))
         if (len(pathElements) > 3):
           possibleUUID = pathElements[3]
@@ -154,7 +154,7 @@ class RestController(RestControllerBase):
               Protector.clearRestSession()
               raise cherrypy.HTTPError(418)
           except ValidationException:
-            self.raiseError('Invalid ',
+            self.raiseError('InvalidParameter ',
                               'Parameter {0}'.format(parameter))
     else:
       Protector.clearRestSession()
@@ -181,7 +181,15 @@ class RestController(RestControllerBase):
           array = text.split(',')
         else:
           array = list()
-        return array
+        result = list()
+        for item in array:
+          value = item.strip()
+          if re.match(r"^'.*'$", value, re.MULTILINE) is not None:
+            result.append(value[1:-1])
+          else:
+            if value.isdigit():
+              result.append(eval(value))
+        return result
       return value
     else:
       return None
@@ -232,6 +240,7 @@ class RestController(RestControllerBase):
         try:
           result = method(uuid, apiKey, **options)
           Protector.clearRestSession()
+          # The rest handlers should always give json back!
           return result
         except RestAPIException as e:
           self.getLogger().debug(

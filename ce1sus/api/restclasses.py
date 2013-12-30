@@ -111,7 +111,15 @@ def getData(obj):
 
 def mapResponseToObject(jsonData):
   key, value = getData(jsonData)
-  return populateClassNamebyDict(key, value)
+  if key == 'list':
+    result = list()
+    for item in value:
+      subkey, subvalue = getObjectData(item)
+      obj = populateClassNamebyDict(subkey, subvalue)
+      result.append(obj)
+    return obj
+  else:
+    return populateClassNamebyDict(key, value)
 
 
 
@@ -318,7 +326,7 @@ class RestAttribute(RestClass):
 
 
 class RestObjectDefinition(RestClass):
-
+  # TODO: Add relationable
   def __init__(self):
     RestClass.__init__(self)
     self.name = None
@@ -347,7 +355,7 @@ class RestObjectDefinition(RestClass):
 
 
 class RestAttributeDefinition(RestClass):
-
+  # TODO: Add relationable
   def __init__(self):
     RestClass.__init__(self)
     self.name = None

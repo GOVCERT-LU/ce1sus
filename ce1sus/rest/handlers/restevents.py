@@ -49,9 +49,9 @@ class RestEventsController(RestControllerBase):
                                       startDate,
                                       endDate,
                                       offset,
-                                      limit)
+                                      limit,
+                                      user)
       else:
-
         events = self.eventBroker.getAllForUser(user=user,
                                                 limit=limit,
                                                 offset=offset)
@@ -59,8 +59,7 @@ class RestEventsController(RestControllerBase):
       result = list()
       for event in events:
         try:
-          if not user.privileged:
-            self._checkIfViewable(event, self.getUser(apiKey))
+          self._checkIfViewable(event, self.getUser(apiKey))
           result.append(self._objectToJSON(event,
                                            self._isEventOwner(event, apiKey),
                                            True,

@@ -441,7 +441,7 @@ class EventBroker(BrokerBase):
 
     return result
 
-  def getEvents(self, uuids, startDate, endDate, offset, limit):
+  def getEvents(self, uuids, startDate, endDate, offset, limit, user):
     query = self.session.query(Event)
     try:
       if uuids:
@@ -449,9 +449,33 @@ class EventBroker(BrokerBase):
 
       if startDate:
         query = query.filter(Event.created >= startDate)
-      query = query.filter(Event.created <= endDate)
+      if endDate:
+        query = query.filter(Event.created <= endDate)
+      if user.defaultGroup is None:
+        # as the user has no main group it is impossible to see any thing
+        return list()
+      else:
+        tlpLVL = user.defaultGroup.tlpLvl
+        mainGroupID = user.defaultGroup.identifier
+        subGroupsIDs = list()
+        subGroupsIDs.append(mainGroupID)
+        for subgroup in user.defaultGroup.subgroups:
+          subGroupsIDs.append(subgroup.identifier)
+      # Dont forget to consider the permission
+      query.filter(or_(
+                      Event.creatorGroup_id == mainGroupID,
+                      and_(
+                        or_(
+                          Event.tlp_level_id >= tlpLVL,
+                          Event.dbcode.op('&')(12) == 12
+                        ),
+                        Event.published == 1)
+                      )
+                  )
+      query.filter()
       query = query.order_by(Event.created.desc())
       query = query.limit(limit).offset(offset)
+
       return query.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Search did not yield any results.')

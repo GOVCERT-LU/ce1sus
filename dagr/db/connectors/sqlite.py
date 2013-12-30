@@ -60,9 +60,7 @@ class SqliteConnector(Connector):
     self.connetionString = 'sqlite:///{db}'.format(db=dbFile)
 
     if self.config.get('usecherrypy'):
-      SAEnginePlugin(cherrypy.engine,
-                     self.connetionString,
-                     self.debug).subscribe()
+      SAEnginePlugin(cherrypy.engine, self).subscribe()
       self.saTool = SATool()
       cherrypy.tools.db = self.saTool
       self.session = None
@@ -73,12 +71,15 @@ class SqliteConnector(Connector):
   def getSession(self):
     return SqliteSession(self.session)
 
-  def getDirectSession(self):
-    self.engine = create_engine(self.connetionString,
+  def getEngine(self):
+    return create_engine(self.connetionString,
                                   listeners=[ForeignKeysListener()],
                                   echo=self.debug,
                                   echo_pool=self.debug,
                                   strategy='plain')
+
+  def getDirectSession(self):
+    self.engine = self.getEngine()
     self.sessionClazz = sessionmaker(bind=self.engine,
                                      autocommit=False,
                                      autoflush=False)

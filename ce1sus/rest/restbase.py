@@ -119,6 +119,10 @@ class RestControllerBase(BaseController):
                  )
     return result
 
+  def _returnList(self, array):
+    result = {'list':array}
+    return self._returnMessage(result)
+
   def _returnMessage(self, dictionary):
     result = dict(dictionary.items()
                   + self._createStatus().items())

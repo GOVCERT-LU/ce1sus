@@ -20,7 +20,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
                                     sqlalchemy-into-a-cherrypy-application.html
   """
 
-  def __init__(self, bus, connectionString, debug=False):
+  def __init__(self, bus, connector):
     """
     The plugin is registered to the CherryPy engine and therefore
     is part of the bus (the engine *is* a bus) registery.
@@ -35,14 +35,11 @@ class SAEnginePlugin(plugins.SimplePlugin):
     plugins.SimplePlugin.__init__(self, bus)
     self.sa_engine = None
     self.bus.subscribe("bind", self.bind)
-    self.debug = debug
-    self.connectionString = connectionString
+    self.connector = connector
 
   def start(self):
     """Start the engine"""
-    self.sa_engine = create_engine(self.connectionString + '?charset=utf8',
-                            echo=self.debug, echo_pool=self.debug,
-                                  encoding='utf-8')
+    self.sa_engine = self.connector.getEngine()
 
   def stop(self):
     """stops the engine"""

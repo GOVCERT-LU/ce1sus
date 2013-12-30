@@ -32,6 +32,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
 from ce1sus.brokers.event.eventclasses import Attribute
+from os.path import isfile
 
 
 class FileNotFoundException(HandlerException):
@@ -248,12 +249,15 @@ class FileHandler(GenericHandler):
         return '(Not Accessible)'
     else:
       if restUser:
-        with open(value.value, "rb") as binaryFile:
-          data = binaryFile.read()
-          binaryASCII = '{0}'.format(data.encode("base64"))
-        fileName = basename(value.value)
-        value = {'file': (fileName, binaryASCII)}
-        return json.dumps(value)
+        if isfile(value.value):
+          with open(value.value, "rb") as binaryFile:
+            data = binaryFile.read()
+            binaryASCII = '{0}'.format(data.encode("base64"))
+          fileName = basename(value.value)
+          value = {'file': (fileName, binaryASCII)}
+          return json.dumps(value)
+        else:
+          return '(Not Found)'
       else:
         return '(Not Provided)'
 

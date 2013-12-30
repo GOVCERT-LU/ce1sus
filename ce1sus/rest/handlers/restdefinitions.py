@@ -22,8 +22,8 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
 
 class RestDefinitionsController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'attribute': 'viewAttributeDefinitions',
-                      'object': 'viewObejctDefinitions'}
+  PARAMETER_MAPPER = {'attributes': 'viewAttributesDefinitions',
+                      'objects': 'viewObejctsDefinitions'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
@@ -37,29 +37,34 @@ class RestDefinitionsController(RestControllerBase):
       return RestDefinitionsController.PARAMETER_MAPPER.get(parameter, None)
     return None
 
-  def viewAttributeDefinitions(self, identifier, apiKey, **options):
+  def viewAttributesDefinitions(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
       fullDefinition = options.get('Full-Definitions', False)
       chkSums = options.get('chksum', list())
       if chkSums:
-        attributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(
+        defAttributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(
                                                                         chkSums
                                                                          )
       else:
-        attributes = self.attributeDefinitionBroker.getAll()
+        defAttributes = self.attributeDefinitionBroker.getAll()
 
-      obj = self._objectToJSON(attributes,
-                                 True,
-                                 fullDefinition,
-                                 True)
-      return self._returnMessage(obj)
+      result = list()
+      for defAttribute in defAttributes:
+        obj = self._objectToJSON(defAttribute,
+                               True,
+                               fullDefinition,
+                               True)
+        result.append(obj)
+
+      return self._returnList(result)
+
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
 
-  def viewObejctDefinitions(self, identifier, apiKey, **options):
+  def viewObejctsDefinitions(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
       fullDefinition = options.get('Full-Definitions', False)
@@ -69,11 +74,15 @@ class RestDefinitionsController(RestControllerBase):
       else:
         defObjects = self.objectDefinitionBroker.getAll()
 
-      obj = self._objectToJSON(defObjects,
+      result = list()
+      for defObject in defObjects:
+        obj = self._objectToJSON(defObject,
                                True,
                                fullDefinition,
                                True)
-      return self._returnMessage(obj)
+        result.append(obj)
+
+      return self._returnList(result)
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
