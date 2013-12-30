@@ -117,7 +117,7 @@ def mapResponseToObject(jsonData):
       subkey, subvalue = getObjectData(item)
       obj = populateClassNamebyDict(subkey, subvalue)
       result.append(obj)
-    return obj
+    return result
   else:
     return populateClassNamebyDict(key, value)
 
