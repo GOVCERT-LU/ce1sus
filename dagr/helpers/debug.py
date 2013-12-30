@@ -22,6 +22,7 @@ class Log(object):
   instance = None
 
   def __init__(self, configFile=None):
+    self.loggers = dict()
     if configFile:
       self.__config = Configuration(configFile, 'Logger')
       doLog = self.__config.get('log')
@@ -87,11 +88,20 @@ class Log(object):
 
     :returns: Logger
     """
+    wasInitialized = True
     if Log.instance is None:
-      return Log.getInstance().getLogger(className)
-    else:
+      wasInitialized = False
+
+    instance = Log.getInstance()
+
+    # check if logger exists
+    logger = instance.loggers.get(className, None)
+    if not logger:
       logger = logging.getLogger(className)
-      logger.setLevel(Log.getInstance().logLvl)
-      Log.getInstance().setConsoleHandler(logger)
-      Log.getInstance().setLogFile(logger)
-      return logger
+      if wasInitialized:
+        logger.setLevel(Log.getInstance().logLvl)
+        instance.setConsoleHandler(logger)
+        instance.setLogFile(logger)
+      instance.loggers[className] = logger
+
+    return logger
