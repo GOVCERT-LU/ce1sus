@@ -27,7 +27,7 @@ class RestEventsController(RestControllerBase):
 
   def view(self, uuid, apiKey, **options):
     try:
-      uuids = options.get('uuid', list())
+      uuids = options.get('uuids', list())
       withDefinition = options.get('fulldefinitions', False)
 
       startDate = options.get('startdate', None)
