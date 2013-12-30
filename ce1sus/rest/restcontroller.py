@@ -41,16 +41,16 @@ class RestController(RestControllerBase):
                              'objects',
                              'attribute',
                              'object']
-  REST_Allowed_Options = ['Full-Definitions',
+  REST_Allowed_Options = ['fulldefinitions',
                           'page',
                           'limit',
                           'startdate',
                           'enddate',
-                          'Object-Type',
-                          'Object-Attributes',
+                          'objecttype',
+                          'objectattributes',
                           'attributes',
                           'key',
-                          'UUID',
+                          'uuid',
                           'chksum']
 
   def __init__(self, ce1susConfigFile):

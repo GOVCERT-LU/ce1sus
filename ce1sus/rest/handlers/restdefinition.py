@@ -45,7 +45,7 @@ class RestDefinitionController(RestControllerBase):
   def viewAttributeDefinition(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('Full-Definitions', False)
+      fullDefinition = options.get('fulldefinitions', False)
       attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(
                                                                     identifier
                                                                      )
@@ -62,7 +62,7 @@ class RestDefinitionController(RestControllerBase):
   def viewObejctDefinition(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('Full-Definitions', False)
+      fullDefinition = options.get('fulldefinitions', False)
       defObject = self.objectDefinitionBroker.getDefintionByCHKSUM(identifier)
       obj = self._objectToJSON(defObject,
                                True,
@@ -76,7 +76,7 @@ class RestDefinitionController(RestControllerBase):
 
   def updateAttributeDefinitions(self, identifier, apiKey, **options):
     self._checkIfPriviledged(apiKey)
-    fullDefinition = options.get('Full-Definitions', False)
+    fullDefinition = options.get('fulldefinitions', False)
     restDefinition = self.getPostObject()
     try:
       definition = self.attributeDefinitionBroker.buildAttributeDefinition(
@@ -100,7 +100,7 @@ class RestDefinitionController(RestControllerBase):
 
   def updateObejctDefinitions(self, identifier, apiKey, **options):
     self._checkIfPriviledged(apiKey)
-    fullDefinition = options.get('Full-Definitions', False)
+    fullDefinition = options.get('fulldefinitions', False)
     restDefinition = self.getPostObject()
     try:
       definition = self.objectDefinitionBroker.buildObjectDefinition(

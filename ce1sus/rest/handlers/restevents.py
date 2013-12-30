@@ -27,8 +27,8 @@ class RestEventsController(RestControllerBase):
 
   def view(self, uuid, apiKey, **options):
     try:
-      uuids = options.get('UUID', list())
-      withDefinition = options.get('Full-Definitions', False)
+      uuids = options.get('uuid', list())
+      withDefinition = options.get('fulldefinitions', False)
 
       startDate = options.get('startdate', None)
       endDate = options.get('enddate', datumzait.utcnow())

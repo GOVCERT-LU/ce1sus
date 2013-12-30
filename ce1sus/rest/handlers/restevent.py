@@ -43,7 +43,7 @@ class RestEventController(RestControllerBase):
     try:
       event = self.eventBroker.getByUUID(uuid)
       self._checkIfViewable(event, self.getUser(apiKey))
-      withDefinition = options.get('Full-Definitions', False)
+      withDefinition = options.get('fulldefinitions', False)
       obj = self._objectToJSON(event,
                                self._isEventOwner(event, apiKey),
                                True,
@@ -102,7 +102,7 @@ class RestEventController(RestControllerBase):
 
         self.eventBroker.doCommit(True)
 
-        withDefinition = options.get('Full-Definitions', False)
+        withDefinition = options.get('fulldefinitions', False)
         # obj = self._objectToJSON(event, True, True, withDefinition)
         restEvent = RestEvent()
         restEvent.uuid = event.uuid

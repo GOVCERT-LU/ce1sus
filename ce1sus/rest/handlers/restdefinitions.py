@@ -40,7 +40,7 @@ class RestDefinitionsController(RestControllerBase):
   def viewAttributesDefinitions(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('Full-Definitions', False)
+      fullDefinition = options.get('fulldefinitions', False)
       chkSums = options.get('chksum', list())
       if chkSums:
         defAttributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(
@@ -67,7 +67,7 @@ class RestDefinitionsController(RestControllerBase):
   def viewObejctsDefinitions(self, identifier, apiKey, **options):
     try:
       self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('Full-Definitions', False)
+      fullDefinition = options.get('fulldefinitions', False)
       chkSums = options.get('chksum', list())
       if chkSums:
         defObjects = self.objectDefinitionBroker.getDefintionByCHKSUMS(chkSums)

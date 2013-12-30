@@ -87,7 +87,7 @@ class RestSearchController(RestControllerBase):
 
   def viewAttributes(self, uuid, apiKey, **options):
     try:
-      withDefinition = options.get('Full-Definitions', False)
+      withDefinition = options.get('fulldefinitions', False)
       # TODO use these!
       startDate = options.get('startdate', None)
       endDate = options.get('enddate', datumzait.utcnow())
@@ -96,7 +96,7 @@ class RestSearchController(RestControllerBase):
 
       # object type to look foor if specified
       performSearch = True
-      objectNeedle = options.get('Object-Type', None)
+      objectNeedle = options.get('objecttype', None)
       objectDefinition = None
       if objectNeedle:
         objectDefinition = self.objectDefinitionBroker.getDefintionByName(
@@ -107,7 +107,7 @@ class RestSearchController(RestControllerBase):
       # collect informations about the attribute to look for
       if performSearch:
         # object Attribues to look for
-        needles = options.get('Object-Attributes', list())
+        needles = options.get('objectattributes', list())
         completeNeedles = dict()
         for needle in needles:
             for key, value in needle.iteritems():
@@ -233,9 +233,9 @@ class RestSearchController(RestControllerBase):
       limit = self.__getLimit(options)
 
       # serach on objecttype
-      objectType = options.get('Object-Type', None)
+      objectType = options.get('objecttype', None)
       # with the following attribtes type + value
-      objectAttribtues = options.get('Object-Attributes', list())
+      objectAttribtues = options.get('objectattributes', list())
 
       if objectType or objectAttribtues:
         # process needles
