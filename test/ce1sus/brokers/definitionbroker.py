@@ -23,7 +23,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.object.description = 'A description'
     self.object.share = long(1)
 
-    self.sessionManager = SessionManager('config/ce1sustest.conf')
+    self.sessionManager = SessionManager('../config/ce1sustest.conf')
     self.attributebroker = self.sessionManager.brokerFactory(
                                                       AttributeDefinitionBroker)
     self.attribute = AttributeDefinition()

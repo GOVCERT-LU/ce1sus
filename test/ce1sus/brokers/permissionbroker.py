@@ -18,7 +18,7 @@ class TestPermissionBrokers(unittest.TestCase):
   # The following test have to be ordered
 
   def setUp(self):
-    self.sessionManager = SessionManager('config/ce1sustest.conf')
+    self.sessionManager = SessionManager('../config/ce1sustest.conf')
     self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
 
     self.group = Group()
@@ -67,23 +67,6 @@ class TestPermissionBrokers(unittest.TestCase):
     except Exception:
       assert True
 
-  def test_C_InsertUser(self):
-
-    # get actual group
-    group = self.groupbroker.getByID(self.group.identifier)
-
-    # attach group to user
-    self.user.addGroup(group)
-
-    self.userBroker.insert(self.user)
-    assert True
-
-# Test if the user is setup correctly if found
-  def test_D_GetUserByID(self):
-
-    user = self.userBroker.getByID(self.user.identifier)
-    assert True
-    assert compareObjects(user, self.user)
 
   def test_E_DeleteUser(self):
 
@@ -97,7 +80,7 @@ class TestPermissionBrokers(unittest.TestCase):
         assert False
 
   def test_F_DeleteGroup(self):
-    # self.groupbroker.removeByID(self.group.identifier)
+    self.groupbroker.removeByID(self.group.identifier)
     pass
 
 if __name__ == "__main__":

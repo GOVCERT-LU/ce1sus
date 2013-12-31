@@ -5,7 +5,7 @@ Created on Jul 11, 2013
 '''
 import unittest
 from dagr.helpers.objects import compareObjects, printObject, \
-ValueMismatchException, ArrayMismatchException, printDictionary
+ValueMismatchException, ArrayMismatchException, printDictionary, PrintException
 
 
 # pylint: disable =C0111, R0903
@@ -73,14 +73,13 @@ class TestObjectHelper(unittest.TestCase):
     except ValueMismatchException:
       assert(True)
 
-    # boolean result
-    assert not compareObjects(obj1, obj2, raiseExceptions=False)
 
   def testPrint(self):
-    print '---- PrintTest BEGIN ----'
-    printObject(1)
-    print '---- PrintTest END ----'
-    assert True
+    try:
+      printObject(1)
+      assert True
+    except PrintException:
+      assert False
 
   def testPrintDict(self):
     hashmap = {'a': 1, 'b': 2}

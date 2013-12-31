@@ -19,11 +19,11 @@ class TestSession(unittest.TestCase):
     except:
       assert True
 
-      session = SessionManager('config/ce1sustest.conf')
+      session = SessionManager('../config/ce1sustest.conf')
       session.close()
       assert True
 
-      session = SessionManager('config/ce1sustest.conf')
+      session = SessionManager('../config/ce1sustest.conf')
       session.brokerFactory(GroupBroker)
       assert True
 

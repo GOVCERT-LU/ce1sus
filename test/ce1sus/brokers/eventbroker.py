@@ -19,7 +19,7 @@ class TestEventBrokers(unittest.TestCase):
 
   def setUp(self):
 
-    self.sessionManager = SessionManager('config/ce1sustest.conf')
+    self.sessionManager = SessionManager('../config/ce1sustest.conf')
     self.timeStamp = datetime.now()
     # CreateNeeded Users and group
     self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
@@ -101,10 +101,9 @@ class TestEventBrokers(unittest.TestCase):
     self.eventbroker.insert(self.event)
     assert True
 
-
   def test_G_getID(self):
     event = self.eventbroker.getByID(self.event.identifier)
-    printObject(event)
+
     assert True
     # assert helpers.compareObjects(event, self.event)
 
@@ -115,7 +114,6 @@ class TestEventBrokers(unittest.TestCase):
 
     event = self.eventbroker.getByID(self.event.identifier)
 
-    printObject(event)
 
   def test_X_DeleteEvent(self):
     self.eventbroker.removeByID(self.event.identifier)
