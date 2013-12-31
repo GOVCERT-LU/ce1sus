@@ -16,6 +16,7 @@ from test.ce1sus.brokers.definitionbroker import TestDefinitionBrokers
 from test.ce1sus.brokers.permissionbroker import TestPermissionBrokers
 from test.ce1sus.brokers.eventbroker import TestEventBrokers
 from test.ce1sus.helpers.bitdecoder import TestBitDecoder
+from test.ce1sus.api.ce1susapi import TestAPI
 
 
 def suite():
@@ -33,6 +34,7 @@ def suite():
   testSuite.addTest(TestConfiguration())
   testSuite.addTest(TestLog())
   testSuite.addTest(TestConverter())
+  testSuite.addTest(TestAPI())
 
   return testSuite
 
