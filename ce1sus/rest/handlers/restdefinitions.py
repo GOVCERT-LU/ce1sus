@@ -56,8 +56,10 @@ class RestDefinitionsController(RestControllerBase):
                                fullDefinition,
                                True)
         result.append(obj)
-
-      return self._returnList(result)
+      if result:
+        return self._returnList(result)
+      else:
+        raise NothingFoundException('No attribute definitions found')
 
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
@@ -76,13 +78,18 @@ class RestDefinitionsController(RestControllerBase):
 
       result = list()
       for defObject in defObjects:
+
         obj = self._objectToJSON(defObject,
                                True,
                                fullDefinition,
                                True)
         result.append(obj)
 
-      return self._returnList(result)
+      if result:
+        return self._returnList(result)
+      else:
+        raise NothingFoundException('No object definitions found')
+
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:

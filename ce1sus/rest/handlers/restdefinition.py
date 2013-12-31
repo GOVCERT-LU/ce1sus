@@ -18,12 +18,11 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                       AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                                                       ObjectDefinitionBroker
-
+from ce1sus.brokers.definition.handlerdefinitionbroker import \
+                                                      AttributeHandlerBroker
 
 class RestDefinitionController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'attribute': 'viewAttributeDefinition',
-                      'object': 'viewObejctDefinition'}
   PARAMETER_INSERT_MAPPER = {'attribute': 'updateAttributeDefinitions',
                              'object': 'updateObejctDefinitions'}
 
@@ -33,46 +32,13 @@ class RestDefinitionController(RestControllerBase):
                                                     AttributeDefinitionBroker
                                                        )
     self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
+    self.handlerBroker = self.brokerFactory(AttributeHandlerBroker)
 
   def getFunctionName(self, parameter, action):
-    if action == 'GET':
-      return RestDefinitionController.PARAMETER_MAPPER.get(parameter, None)
-    if action == 'PUT':
+    if action == 'POST':
       return RestDefinitionController.PARAMETER_INSERT_MAPPER.get(parameter,
                                                                    None)
     return None
-
-  def viewAttributeDefinition(self, identifier, apiKey, **options):
-    try:
-      self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('fulldefinitions', False)
-      attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(
-                                                                    identifier
-                                                                     )
-      obj = self._objectToJSON(attribute,
-                               True,
-                               fullDefinition,
-                               True)
-      return self._returnMessage(obj)
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
-
-  def viewObejctDefinition(self, identifier, apiKey, **options):
-    try:
-      self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('fulldefinitions', False)
-      defObject = self.objectDefinitionBroker.getDefintionByCHKSUM(identifier)
-      obj = self._objectToJSON(defObject,
-                               True,
-                               fullDefinition,
-                               True)
-      return self._returnMessage(obj)
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
 
   def updateAttributeDefinitions(self, identifier, apiKey, **options):
     self._checkIfPriviledged(apiKey)
@@ -110,7 +76,41 @@ class RestDefinitionController(RestControllerBase):
                                action='insert',
                                share=1,
                                )
-      self.objectDefinitionBroker.insert(definition, True)
+      # check if existing
+      try:
+        # continue
+        definition = self.objectDefinitionBroker.getDefintionByCHKSUM(definition.chksum)
+      except NothingFoundException:
+        # insert
+        self.objectDefinitionBroker.insert(definition, False)
+
+      # insert attributes if there are:
+      for restAttribtue in restDefinition.attributes:
+        attribute = self.attributeDefinitionBroker.buildAttributeDefinition(identifier=None,
+                               name=restAttribtue.name,
+                               description=restAttribtue.description,
+                               regex=restAttribtue.regex,
+                               classIndex=restAttribtue.classIndex,
+                               action='insert',
+                               handlerIndex=restAttribtue.handlerIndex,
+                               share=1,
+                               relation=restAttribtue.relation)
+        # check if attribute exists
+        try:
+          # continue
+          attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(attribute.chksum)
+        except NothingFoundException:
+          # insert
+          # check if handler and class index exist
+          if not attribute.isClassIndexExisting(attribute.classIndex):
+            self.raiseError('UnknownDefinitionException', 'Cannot Insert Attribute as ClassIndex {0} does not exist'.format(attribute.classIndex))
+          if not self.handlerBroker.ishandlerIndexExisting(attribute.handlerIndex):
+            self.raiseError('UnknownDefinitionException', 'Cannot Insert Attribute as HanlderIndex {0} does not exist'.format(attribute.handlerIndex))
+          self.attributeDefinitionBroker.insert(attribute, False)
+
+        definition.attributes.append(attribute)
+
+      self.objectDefinitionBroker.doCommit(True)
       obj = self._objectToJSON(definition,
                                True,
                                fullDefinition,

@@ -100,11 +100,11 @@ class RestControllerBase(BaseController):
                               + 'RestClass').format(className))
     return instance
 
-  def _toRestObject(self, obj, isOwner=False):
+  def _toRestObject(self, obj, isOwner=False, full=True):
     className = 'Rest' + obj.__class__.__name__
     instance = RestControllerBase.__instantiateClass(className)
 
-    instance.populate(obj, isOwner)
+    instance.populate(obj, isOwner, full)
     return instance
 
   def _objectToJSON(self,
@@ -112,9 +112,9 @@ class RestControllerBase(BaseController):
                     isOwner=False,
                     full=False,
                     withDefinition=False):
-    instance = self._toRestObject(obj, isOwner)
+    instance = self._toRestObject(obj, isOwner, full)
 
-    result = dict(instance.toJSON(full=full,
+    result = dict(instance.toDict(full=full,
                              withDefinition=withDefinition).items()
                  )
     return result
@@ -226,15 +226,9 @@ class RestControllerBase(BaseController):
                                                 restAttributeDefinition.chksum
                                                                             )
       except NothingFoundException:
-        # definition does not exist create one
-        attrDefinition = AttributeDefinition()
-        attrDefinition.name = restAttributeDefinition.name
-        attrDefinition.description = restAttributeDefinition.description
-        attrDefinition.regex = restAttributeDefinition.regex
-        attrDefinition.classIndex = restAttributeDefinition.classIndex
-        attrDefinition.handlerIndex = 0
-        attrDefinition.deletable = 1
-        attrDefinition.share = 1
+        self.raiseError('UnknownDefinitionException',
+                      'The attribute definition with CHKSUM {0} is not defined.'.format(
+                                                  restObjectDefinition.chksum))
 
         self.attributeDefinitionBroker.insert(attrDefinition, commit=False)
 
@@ -332,11 +326,9 @@ class RestControllerBase(BaseController):
                                                     restObjectDefinition.chksum
                                                                       )
     except NothingFoundException:
-      objDefinition = ObjectDefinition()
-      objDefinition.name = restObjectDefinition.name
-      objDefinition.description = restObjectDefinition.description
-      objDefinition.share = 1
-      self.objectDefinitionBroker.insert(objDefinition, commit=commit)
+      self.raiseError('UnknownDefinitionException',
+                      'The object definition with CHKSUM {0} is not defined.'.format(
+                                                  restObjectDefinition.chksum))
     return objDefinition
 
   def _convertToObject(self, restObject, parent, event, commit=False):

@@ -96,12 +96,16 @@ class ObjectDefinition(BASE):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self):
+  def toRestObject(self, isOwner=False, full=True):
     result = RestObjectDefinition()
     result.name = self.name
     result.description = self.description
     result.chksum = self.chksum
-
+    result.attributes = list()
+    if full:
+      for attribute in self.attributes:
+        # note just 1 level else there is the possibility to make cycles
+        result.attributes.append(attribute.toRestObject(isOwner, False))
     return result
 
 
@@ -237,7 +241,10 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'remove')
     function(obj)
 
-  def toRestObject(self):
+  def isClassIndexExisting(self, index):
+    return index >= 0 and index <= len(self._AttributeDefinition__tableDefinitions)
+
+  def toRestObject(self, isOwner=False, full=True):
     result = RestAttributeDefinition()
     result.description = self.description
     result.name = self.name
@@ -246,4 +253,10 @@ class AttributeDefinition(BASE):
     result.handlerIndex = self.handlerIndex
     result.relation = self.relation
     result.chksum = self.chksum
+    result.objects = list()
+    result.relation = self.relation
+    if full:
+      for obj in self.objects:
+        # note just 1 level else there is the possibility to make cycles
+        result.objects.append(obj.toRestObject(isOwner, False))
     return result

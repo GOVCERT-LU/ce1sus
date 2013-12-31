@@ -147,7 +147,7 @@ class RestClassException(Exception):
 
 class RestClass(object):
 
-  def populate(self, dbObject, isOwner=False):
+  def populate(self, dbObject, isOwner=False, full=True):
     objFields = getFields(dbObject)
     selfFields = getFields(self)
     for name in selfFields:
@@ -158,19 +158,19 @@ class RestClass(object):
             # if the value is a list call toRestObject on all sub items
             items = list()
             for item in value:
-              items.append(item.toRestObject(isOwner))
+              items.append(item.toRestObject(isOwner, full))
             setattr(self, name, items)
           else:
             # if the value is a DB object
             toRestObject = getattr(value, "toRestObject", None)
             if callable(toRestObject):
-                setattr(self, name, value.toRestObject(isOwner))
+                setattr(self, name, value.toRestObject(isOwner, full))
             else:
               # if the value is "atomic"
               setattr(self, name, value)
 
   @abstractmethod
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     raise RestClassException(('ToJson is not implemented for '
                               + '{0}').format(self.__class__.__name__))
 
@@ -194,7 +194,7 @@ class RestEvent(RestClass):
     self.uuid = None
     self.share = 1
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['uuid'] = self.uuid
@@ -230,7 +230,7 @@ class RestEvent(RestClass):
       result[self.__class__.__name__]['objects'] = list()
       for obj in self.objects:
         result[self.__class__.__name__]['objects'].append(
-                                            obj.toJSON(full=True,
+                                            obj.toDict(full=True,
                                                 withDefinition=withDefinition
                                                 )
                                             )
@@ -238,7 +238,7 @@ class RestEvent(RestClass):
     if full:
       result[self.__class__.__name__]['comments'] = list()
       for comment in self.comments:
-        result[self.__class__.__name__]['comments'].append(comment.toJSON())
+        result[self.__class__.__name__]['comments'].append(comment.toDict())
     result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
     return result
 
@@ -249,7 +249,7 @@ class RestComment(RestClass):
     RestClass.__init__(self)
     self.comment = None
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['comment'] = self.comment
@@ -267,25 +267,25 @@ class RestObject(RestClass):
     self.children = list()
     self.share = 1
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['children'] = list()
 
     for child in self.children:
-      result[self.__class__.__name__]['children'].append(child.toJSON(
+      result[self.__class__.__name__]['children'].append(child.toDict(
                                               full=full,
                                               withDefinition=withDefinition
                                               ))
-    result[self.__class__.__name__]['definition'] = self.definition.toJSON(
-                                              full=full,
+    result[self.__class__.__name__]['definition'] = self.definition.toDict(
+                                              full=False,
                                               withDefinition=withDefinition
                                               )
     if full:
       result[self.__class__.__name__]['attributes'] = list()
       for attribute in self.attributes:
         result[self.__class__.__name__]['attributes'].append(
-                                                       attribute.toJSON(
+                                                       attribute.toDict(
                                                full=True,
                                                withDefinition=withDefinition
                                                                        )
@@ -304,11 +304,11 @@ class RestAttribute(RestClass):
     self.ioc = None
     self.share = 1
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['definition'] = self.definition.toJSON(
-                                                full=True,
+    result[self.__class__.__name__]['definition'] = self.definition.toDict(
+                                                full=False,
                                                 withDefinition=withDefinition
                                                           )
     if isinstance(self.value, file):
@@ -331,6 +331,7 @@ class RestObjectDefinition(RestClass):
     self.name = None
     self.description = None
     self.dbchksum = None
+    self.attributes = list()
 
   @property
   def chksum(self):
@@ -342,7 +343,7 @@ class RestObjectDefinition(RestClass):
   def chksum(self, value):
     self.dbchksum = value
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     if withDefinition:
@@ -350,6 +351,10 @@ class RestObjectDefinition(RestClass):
       result[self.__class__.__name__]['description'] = self.description
 
     result[self.__class__.__name__]['chksum'] = self.chksum
+    if full:
+      result[self.__class__.__name__]['attributes'] = list()
+      for attribute in self.attributes:
+        result[self.__class__.__name__]['attributes'].append(attribute.toDict(full, withDefinition))
     return result
 
 
@@ -363,6 +368,8 @@ class RestAttributeDefinition(RestClass):
     self.classIndex = None
     self.handlerIndex = None
     self.dbchksum = None
+    self.objects = list()
+    self.relation = 0
 
   @property
   def chksum(self):
@@ -378,7 +385,7 @@ class RestAttributeDefinition(RestClass):
   def chksum(self, value):
     self.dbchksum = value
 
-  def toJSON(self, full=False, withDefinition=False):
+  def toDict(self, full=False, withDefinition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
 
@@ -388,6 +395,11 @@ class RestAttributeDefinition(RestClass):
       result[self.__class__.__name__]['regex'] = self.regex
       result[self.__class__.__name__]['classIndex'] = self.classIndex
       result[self.__class__.__name__]['handlerIndex'] = self.handlerIndex
+      result[self.__class__.__name__]['relation'] = self.relation
     result[self.__class__.__name__]['chksum'] = self.chksum
-
+    if full:
+      result[self.__class__.__name__]['objects'] = list()
+      for obj in self.objects:
+        result[self.__class__.__name__]['objects'].append(obj.toDict(full,
+                                                                     withDefinition))
     return result

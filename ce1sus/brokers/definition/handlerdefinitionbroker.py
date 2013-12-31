@@ -49,6 +49,9 @@ class AttributeHandlerBroker(BrokerBase):
       result[key] = value
     return result
 
+  def ishandlerIndexExisting(self, index):
+    return  index >= 0 and index <= len(self._AttributeHandlerBroker__handlerDefinitions)
+
   def getHandlerName(self, index):
     """
     returns the handler name

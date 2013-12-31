@@ -106,7 +106,7 @@ class RestEventController(RestControllerBase):
         # obj = self._objectToJSON(event, True, True, withDefinition)
         restEvent = RestEvent()
         restEvent.uuid = event.uuid
-        return self._returnMessage(dict(restEvent.toJSON(full=True,
+        return self._returnMessage(dict(restEvent.toDict(full=True,
                              withDefinition=withDefinition).items()
                  ))
 

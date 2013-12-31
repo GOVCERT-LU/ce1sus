@@ -210,7 +210,7 @@ class RestSearchController(RestControllerBase):
         if performSearch:
 
           for event, objs in seenItems.itervalues():
-            dictionary = dict(event.toJSON(full=True,
+            dictionary = dict(event.toDict(full=True,
                                withDefinition=withDefinition).items()
                    )
             obj = json.dumps(dictionary)
