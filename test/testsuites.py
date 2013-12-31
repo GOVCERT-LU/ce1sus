@@ -23,7 +23,11 @@ def suite():
   testSuite.addTest(TestDefinitionBrokers())
   testSuite.addTest(TestEventBrokers())
   testSuite.addTest(TestPermissionBrokers())
+<<<<<<< HEAD
   testSuite.addTest(TestBitDecoder())
+=======
+  testSuit.addTest(TestBitDecoder())
+>>>>>>> 01930e5dcd9a04a5d63f5a364dd4301d929dff1e
 
   testSuite.addTest(TestSession())
   testSuite.addTest(TestObjectHelper())
