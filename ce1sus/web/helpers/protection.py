@@ -10,6 +10,7 @@ __license__ = 'GPL v3+'
 import cherrypy
 from dagr.db.session import SessionManager
 from ce1sus.brokers.permission.userbroker import UserBroker
+import thread
 
 import re
 
@@ -119,14 +120,18 @@ class Protector(object):
     username = Protector.getUserName()
     attribute = getattr(cherrypy, 'session')
     attribute[SESSION_KEY_USERNAME] = None
+    attribute[SESSION_KEY_USER] = None
+    attribute[SESSION_KEY_GROUPS] = None
+    attribute[SESSION_KEY_DEFAULTGROUP] = None
+
     if username:
       cherrypy.request.login = None
+
 
   @staticmethod
   def clearRestSession():
     attribute = getattr(cherrypy, 'session')
     attribute[REST_API_KEY] = None
-
 
 # pylint: disable=W0212
 def require(*conditions):

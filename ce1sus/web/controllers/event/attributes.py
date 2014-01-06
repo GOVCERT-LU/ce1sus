@@ -330,5 +330,5 @@ class AttributesController(Ce1susBaseController):
 
     self.checkIfViewable(event)
     attribute = self.attributeBroker.getByID(attributeID)
-    filepath = attribute.stringValue.value
+    filepath = self.getConfigVariable('files') + '/' + attribute.stringValue.value
     return serve_file(filepath, "application/x-download", "attachment")

@@ -37,6 +37,7 @@ from dagr.db.session import SessionManager
 from shutil import move
 import re
 from ce1sus.web.helpers.protection import Protector
+from dagr.web.helpers.config import WebConfig
 
 
 class RestAPIException(Exception):
@@ -272,6 +273,9 @@ class RestControllerBase(BaseController):
           destination = FileHandler.getDestination()
           fileHash = fileHashSHA256(tmpFolder)
           fileName = FileHandler.getFileName(fileHash, hashSHA256(fileName))
+          # Relative position
+          rootDestination = WebConfig.getInstance().get('files')
+
           destination = destination + '/' + fileName
           move(tmpFolder, destination)
           value = destination

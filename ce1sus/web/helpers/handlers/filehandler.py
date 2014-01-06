@@ -33,6 +33,7 @@ from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
 from ce1sus.brokers.event.eventclasses import Attribute
 from os.path import isfile
+from dagr.web.helpers.config import WebConfig
 
 
 class FileNotFoundException(HandlerException):
@@ -51,6 +52,7 @@ class FileHandler(GenericHandler):
     self.def_attributesBroker = self.brokerFactory(AttributeDefinitionBroker)
     self.eventBroker = self.brokerFactory(EventBroker)
     self.userBroker = self.brokerFactory(UserBroker)
+    self.basePath = WebConfig.getInstance().get('files')
 
   # pylint: disable=W0211
   @staticmethod
@@ -69,9 +71,7 @@ class FileHandler(GenericHandler):
   @staticmethod
   def getDestination():
     # move file to destination
-    destination = '{0}/{1}/{2}/{3}/'.format(WebConfig.
-                                              getInstance().get('files'),
-                                                 datumzait.now().year,
+    destination = '{0}/{1}/{2}/'.format(datumzait.now().year,
                                                  datumzait.now().month,
                                                  datumzait.now().day)
     # in case the directories doesn't exist
@@ -98,7 +98,8 @@ class FileHandler(GenericHandler):
       destination = FileHandler.getDestination()
       # add the name to the file
       destination += sha1.value
-      move(filepath, destination)
+
+      move(filepath, self.basePath + '/' + destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                13,
@@ -235,8 +236,9 @@ class FileHandler(GenericHandler):
         eventID = attribute.object.parentEvent_id
       userInGroups = self.__canUserDownload(eventID, user)
       userIsOwner = attribute.creator_id == user.identifier
+      filename = self.basePath + '/' + value.value
       if userInGroups or userIsOwner:
-        if exists(value.value):
+        if exists(filename):
           link = Link(FileHandler.URLSTR.format(
                                               attribute.object.identifier,
                                               attribute.identifier,
@@ -249,11 +251,12 @@ class FileHandler(GenericHandler):
         return '(Not Accessible)'
     else:
       if restUser:
-        if isfile(value.value):
-          with open(value.value, "rb") as binaryFile:
+        filename = self.basePath + '/' + value.value
+        if isfile(filename):
+          with open(filename, "rb") as binaryFile:
             data = binaryFile.read()
             binaryASCII = '{0}'.format(data.encode("base64"))
-          fileName = basename(value.value)
+          fileName = basename(filename)
           value = {'file': (fileName, binaryASCII)}
           return json.dumps(value)
         else:
@@ -341,7 +344,7 @@ class FileWithHashesHandler(FileHandler):
       # add the name to the file
       hashedFileName = hasher.hashSHA256(fileName)
       destination += FileHandler.getFileName(sha256.value, hashedFileName)
-      move(filepath, destination)
+      move(filepath, self.basePath + '/' + destination)
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                12,
