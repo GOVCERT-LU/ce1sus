@@ -84,12 +84,11 @@ class ObjectBroker(BrokerBase):
     if not definition is None:
       obj.def_object_id = definition.identifier
     obj.created = datumzait.utcnow()
-    if event is None:
-      obj.event = None
-      obj.event_id = None
-    else:
+    if parentObjectID is None:
       obj.event_id = event.identifier
-    obj.parentObject_id = parentObjectID
+    else:
+      obj.parentObject_id = parentObjectID
+      obj.parentEvent_id = event.identifier
     obj.creator_id = user.identifier
     ObjectConverter.setInteger(obj, 'shared', shared)
     obj.bitValue = BitValue('1000', obj)

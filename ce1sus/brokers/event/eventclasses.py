@@ -30,6 +30,7 @@ from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                        AttributeHandlerBroker
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
+import importlib
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -542,6 +543,32 @@ class Attribute(BASE):
 
     :param value: value to set
     :type value: Any
+    """
+    """
+    # attribute instance to attribute
+    if self.definition:
+      # instantiate class
+      className = self.definition.className
+      module = importlib.import_module('ce1sus.brokers.valuebroker')
+      instance = getattr(module, className)()
+      instance.value = value
+      # set evetID
+      eventID = self.object.event_id
+      if eventID is None:
+        eventID = self.object.parentEvent_id
+      instance.event_id = eventID
+
+      if className == 'StringValue':
+        self.stringValue = instance
+      elif className == 'DateValue':
+        self.dateValue = instance
+      elif className == 'TextValue':
+        self.textValue = instance
+      elif className == 'NumberValue':
+        self.numberValue = instance
+
+      self.__value = None
+    else:
     """
     self.__value = value
 

@@ -239,7 +239,7 @@ class ValueBroker(BrokerBase):
     valueInstance.attribute = attribute
     event_id = attribute.object.event_id
     if not event_id:
-      event_id = attribute.object.parentObject_id
+      event_id = attribute.object.parentEvent_id
     valueInstance.event_id = event_id
     return valueInstance
 

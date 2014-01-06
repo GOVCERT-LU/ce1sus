@@ -239,7 +239,7 @@ class ObjectsController(Ce1susBaseController):
     # the object has no real editable values since if the definition would
     # change also the attributes have to change as some might be incompatible!!
     obj = self.objectBroker.buildObject(None,
-                                  None,
+                                  event,
                                   self.def_objectBroker.getByID(definition),
                                   self.getUser(),
                                   objectID,
