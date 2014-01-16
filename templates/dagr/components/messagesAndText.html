@@ -21,7 +21,7 @@
 
 
 
-<%def name="objectToHTML(object,shortenTo=0)">
+<%def name="objectToHTML(object,shortenTo=0, usePlainText=False)">
 <%
 classname = type(object).__name__
 
@@ -38,6 +38,10 @@ else:
 %if "Link" in classname:
     <a href="${object.url}"  target="_blank">${object.identifier}</a>
 %else:
-    ${dagr.plaintext2html(text=result)}
+    %if usePlainText: 
+        ${dagr.plaintext2html(text=result)}
+    %else:
+        ${result}
+    %endif
 %endif
 </%def>

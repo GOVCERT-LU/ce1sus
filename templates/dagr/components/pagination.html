@@ -4,7 +4,7 @@
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="forms" file="/dagr/components/forms.html"/>
 
-<%def name="pagination(identifier, paginator,hasSearch=True)">
+<%def name="pagination(identifier, paginator,hasSearch=True, usePlainText=False)">
 <% 
 isModal=False
 %>
@@ -65,7 +65,7 @@ isModal=False
     else:
       primaryKey = 0
     %>                
-             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength)"/></td>
+             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength,usePlainText=usePlainText)"/></td>
            %endfor
     
              %endfor

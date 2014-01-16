@@ -48,6 +48,7 @@ class AttributesController(Ce1susBaseController):
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.valueBroker = self.brokerFactory(ValueBroker)
     self.handlerBroker = self.brokerFactory(AttributeHandlerBroker)
+    self.basePath = self.getConfigVariable('files')
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -100,7 +101,7 @@ class AttributesController(Ce1susBaseController):
       return 'No file selected. Try again.'
     size = 0
     newFolderName = hashMD5('{0}'.format(datumzait.now()))
-    destFolderPath = '/tmp/' + newFolderName
+    destFolderPath = self.basePath + '/tmp/' + newFolderName
     os.mkdir(destFolderPath)
     filepath = destFolderPath + '/' + value.filename
     fileObj = open(filepath, 'a')
