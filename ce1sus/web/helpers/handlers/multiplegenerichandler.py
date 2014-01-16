@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-import dagr.helpers.string as string
+import dagr.helpers.strings as string
 
 
 class MultipleGenericHandler(GenericHandler):

@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 import cherrypy
 import traceback
 from dagr.helpers.config import Configuration
-import dagr.helpers.string as stringHelper
+import dagr.helpers.strings as stringHelper
 from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
 import re

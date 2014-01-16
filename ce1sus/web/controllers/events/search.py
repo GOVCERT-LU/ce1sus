@@ -22,7 +22,7 @@ from importlib import import_module
 from ce1sus.web.helpers.protection import require, requireReferer
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
-from dagr.helpers.string import InputException
+from dagr.helpers.strings import InputException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 

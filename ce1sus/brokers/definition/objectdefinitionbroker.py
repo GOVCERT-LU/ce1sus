@@ -17,7 +17,7 @@ from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
 

@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import dagr.helpers.string as string
+import dagr.helpers.strings as string
 
 
 class ConversionException(Exception):

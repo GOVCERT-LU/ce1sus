@@ -24,7 +24,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid as uuidgen
 from ce1sus.helpers.bitdecoder import BitValue
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 
 
 # pylint: disable=R0904

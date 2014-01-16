@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 
 
 class GroupBroker(BrokerBase):

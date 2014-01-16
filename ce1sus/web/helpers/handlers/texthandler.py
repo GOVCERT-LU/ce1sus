@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-from dagr.helpers.string import plaintext2html
+from dagr.helpers.strings import plaintext2html
 
 
 class TextHandler(GenericHandler):
@@ -34,4 +34,4 @@ class TextHandler(GenericHandler):
     return string
 
   def convertToAttributeValue(self, value):
-    return plaintext2html(value.value)
+    return value.value

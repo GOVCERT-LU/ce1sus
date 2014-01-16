@@ -20,7 +20,7 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute, Event
 from sqlalchemy import or_
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 from importlib import import_module
 
 

@@ -21,7 +21,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.web.helpers.protection import require, requireReferer
 from dagr.db.broker import ValidationException, \
 BrokerException
-import dagr.helpers.string as string
+import dagr.helpers.strings as string
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 

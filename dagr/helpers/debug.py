@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 import logging
 from dagr.helpers.config import Configuration
-from dagr.helpers.string import isNotNull
+from dagr.helpers.strings import isNotNull
 from logging.handlers import RotatingFileHandler
 
 

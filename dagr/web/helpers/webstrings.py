@@ -10,7 +10,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import dagr.helpers.string as strings
+import dagr.helpers.strings as strings
 
 
 # pylint: disable=W0613

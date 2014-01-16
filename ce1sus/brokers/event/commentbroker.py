@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from dagr.helpers.datumzait import datumzait
 from ce1sus.brokers.event.eventclasses import Comment
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 
 
 class CommentBroker(BrokerBase):

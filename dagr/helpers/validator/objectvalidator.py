@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 import re
 from sre_constants import error
-from dagr.helpers.string import stringToDateTime, InputException
+from dagr.helpers.strings import stringToDateTime, InputException
 import datetime
 
 ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'

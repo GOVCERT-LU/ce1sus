@@ -18,9 +18,9 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
-import dagr.helpers.string as string
+import dagr.helpers.strings as string
 from dagr.helpers.hash import hashSHA1
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
 

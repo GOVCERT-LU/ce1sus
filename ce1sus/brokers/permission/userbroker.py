@@ -19,10 +19,10 @@ from dagr.db.broker import BrokerException
 import re
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
-import dagr.helpers.string as string
+import dagr.helpers.strings as string
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
-from dagr.helpers.string import cleanPostValue
+from dagr.helpers.strings import cleanPostValue
 
 
 class UserBroker(BrokerBase):
