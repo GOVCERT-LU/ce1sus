@@ -39,9 +39,9 @@ else:
     <a href="${object.url}"  target="_blank">${object.identifier}</a>
 %else:
     %if usePlainText: 
-        ${dagr.plaintext2html(text=result)}
-    %else:
         ${result}
+    %else:
+        ${dagr.plaintext2html(text=result)}
     %endif
 %endif
 </%def>
