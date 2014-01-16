@@ -74,9 +74,6 @@ class FileHandler(GenericHandler):
     destination = '{0}/{1}/{2}/'.format(datumzait.now().year,
                                                  datumzait.now().month,
                                                  datumzait.now().day)
-    # in case the directories doesn't exist
-    if not exists(destination):
-      makedirs(destination)
     return destination
 
   def populateAttributes(self, params, obj, definition, user):
@@ -96,6 +93,9 @@ class FileHandler(GenericHandler):
                                     '1')
       # move file to destination
       destination = FileHandler.getDestination()
+      # in case the directories doesn't exist
+      if not exists(self.basePath + '/' + destination):
+        makedirs(self.basePath + '/' + destination)
       # add the name to the file
       destination += sha1.value
 
@@ -341,6 +341,8 @@ class FileWithHashesHandler(FileHandler):
                                                '0'))
 
       destination = FileHandler.getDestination()
+      if not exists(self.basePath + '/' + destination):
+        makedirs(self.basePath + '/' + destination)
       # add the name to the file
       hashedFileName = hasher.hashSHA256(fileName)
       destination += FileHandler.getFileName(sha256.value, hashedFileName)
