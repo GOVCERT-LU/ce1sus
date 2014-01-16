@@ -151,10 +151,14 @@ class RestControllerBase(BaseController):
       key, value = getObjectData(jsonData)
       obj = populateClassNamebyDict(key, value, False)
       return obj
+    except AttributeError as e:
+      self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
+      self.raiseError('UnRecoverableException',
+                      'JSON structure error. {0}'.format(e))
     except Exception as e:
       self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
       self.raiseError('UnRecoverableException',
-                      'An unrecoverable error occurred')
+                      'An unrecoverable error occurred. {0}'.format(e))
 
   def _checkIfPriviledged(self, apiKey):
     user = self.getUser(apiKey)
