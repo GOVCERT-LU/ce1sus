@@ -35,6 +35,7 @@ import os
 from ce1sus.brokers.event.eventclasses import Attribute
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
+from os.path import exists
 
 
 class AttributesController(Ce1susBaseController):
@@ -332,4 +333,11 @@ class AttributesController(Ce1susBaseController):
     self.checkIfViewable(event)
     attribute = self.attributeBroker.getByID(attributeID)
     filepath = self.getConfigVariable('files') + '/' + attribute.stringValue.value
-    return serve_file(filepath, "application/x-download", "attachment")
+    # check if file exists
+    if exists(filepath):
+      return serve_file(filepath, "application/x-download", "attachment")
+    else:
+      if exists(attribute.stringValue.value):
+        return serve_file(attribute.stringValue.value, "application/x-download", "attachment")
+      else:
+        return "File is either corrupt or MIA."
