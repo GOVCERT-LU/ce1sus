@@ -29,12 +29,11 @@ if reload:
   reloadButton = ''
 else:
   reloadStr = 'false'
-  reloadButton = '&nbsp;<button id="{0}" class="close" title="Reloads this Tab" type="button" onclick="loadTabLi(\'{0}\', true)" >&#x21bb;</button>'.format(id)
+  reloadButton = '&nbsp;<div id="{0}" class="close" title="Reloads this Tab" type="button" onclick="loadTabLi(\'{0}\', true)" >&#x21bb;</div>'.format(id)
 %>
 <li ${activeString} id="${id}LI">
 <a href="#" src="${url}">
-<button class="btn btn-link" src="${url}" onclick="loadTabLi(this.id, ${reloadStr})" id="${id}">${name} </button>
- 
+<div class="btn btn-link" src="${url}" onclick="loadTabLi(this.id, ${reloadStr})" id="${id}">${name}</div>
 ${reloadButton}
 </a>
 </li>

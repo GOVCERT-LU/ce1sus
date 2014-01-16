@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+<%namespace name="dagr" module="dagr.web.helpers.string"/>
+
 <%def name="error(message=None)">
 %if not message is None:
 	<div class="alert alert-block alert-danger">${message}</div>
@@ -36,6 +38,6 @@ else:
 %if "Link" in classname:
     <a href="${object.url}"  target="_blank">${object.identifier}</a>
 %else:
-    ${result}
+    ${dagr.plaintext2html(text=result)}
 %endif
 </%def>

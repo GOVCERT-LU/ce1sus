@@ -71,9 +71,11 @@ def plaintext2html(text, tabstop=4):
   # convert to text to be compliant
   stringText = unicode(text)
   if len(stringText) > 0:
-    return re.sub(re_string, replacements, stringText)
+    stringText = re.sub(re_string, replacements, stringText)
+    stringText = stringText.replace('\"', '&quot;')
   else:
-    return ''
+    stringText = ''
+  return stringText
 
 
 def stringToDateTime(string):
