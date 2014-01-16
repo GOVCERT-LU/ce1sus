@@ -21,8 +21,9 @@ from ce1sus.web.helpers.handlers.base import HandlerException
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                               AttributeDefinitionBroker
 from dagr.web.helpers.config import WebConfig
-from shutil import move
+from shutil import move, rmtree
 from os import makedirs
+from os.path import dirname
 from dagr.web.helpers.pagination import Link
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
@@ -100,6 +101,9 @@ class FileHandler(GenericHandler):
       destination += sha1.value
 
       move(filepath, self.basePath + '/' + destination)
+      # delete the folder
+      folderName = dirname(filepath)
+      rmtree(folderName)
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                13,
@@ -347,6 +351,9 @@ class FileWithHashesHandler(FileHandler):
       hashedFileName = hasher.hashSHA256(fileName)
       destination += FileHandler.getFileName(sha256.value, hashedFileName)
       move(filepath, self.basePath + '/' + destination)
+      # delete the folder
+      folderName = dirname(filepath)
+      rmtree(folderName)
       attributes.append(self._createAttribute(destination,
                                                obj,
                                                12,
