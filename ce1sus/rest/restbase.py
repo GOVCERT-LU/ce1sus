@@ -152,10 +152,7 @@ class RestControllerBase(BaseController):
       obj = populateClassNamebyDict(key, value, False)
       return obj
     except Exception as e:
-      self.getLogger().error(
-                            'An error occurred by getting the post object {0}',
-                            e
-                             )
+      self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
       self.raiseError('UnRecoverableException',
                       'An unrecoverable error occurred')
 
