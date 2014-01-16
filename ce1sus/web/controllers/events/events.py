@@ -89,7 +89,7 @@ class EventsController(Ce1susBaseController):
                                'VIEW',
                                '/events/event/view/',
                                contentid='',
-                               autoReload=False,
+                               autoReload=True,
                                tabTitle='Event')
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,

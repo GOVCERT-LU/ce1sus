@@ -170,10 +170,11 @@ function loadNewTab(pk, id, url, reload, title) {
         .attr("class", 'active');
         var link = $('<a/>')
         .attr("href", '#')
-        .attr("src", url);
-        var button1 = $('<button/>')
+        
+        var button1 = $('<div/>')
         .attr("class","btn btn-link")
         .attr("id", keyValue)
+        .attr("src", url)
         .html(title);
         
         if (reload) {
@@ -184,7 +185,7 @@ function loadNewTab(pk, id, url, reload, title) {
         link.append(button1);
         
         if (!reload) {
-            var reload = $('<button/>')
+            var reload = $('<div/>')
             .attr("class", 'close')
             .attr("title", 'Reloads this Tab')
             .attr("type", 'button')
@@ -195,7 +196,7 @@ function loadNewTab(pk, id, url, reload, title) {
         }
         
         
-        var button = $('<button/>')
+        var button = $('<div/>')
         .attr("class", 'close')
         .attr("title", 'Remove this Tab')
         .attr("type", 'button')
