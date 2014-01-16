@@ -242,7 +242,7 @@ class FileHandler(GenericHandler):
       userIsOwner = attribute.creator_id == user.identifier
       filename = self.basePath + '/' + value.value
       if userInGroups or userIsOwner:
-        if exists(filename):
+        if exists(filename) or exists(value.value):
           link = Link(FileHandler.URLSTR.format(
                                               attribute.object.identifier,
                                               attribute.identifier,
