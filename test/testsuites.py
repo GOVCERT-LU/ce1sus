@@ -6,7 +6,7 @@ Created on Jul 11, 2013
 import unittest
 from test.dagr.db.session import TestSession
 from test.dagr.helpers.objects import TestObjectHelper
-from test.dagr.helpers.string import TestString
+from test.dagr.helpers.strings import TestString
 from test.dagr.helpers.validator import TestValidator
 from test.dagr.helpers.hash import Testhash
 from test.dagr.helpers.config import TestConfiguration

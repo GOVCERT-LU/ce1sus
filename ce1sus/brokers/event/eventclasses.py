@@ -5,6 +5,7 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
+from ubuntuone.syncdaemon.volume_manager import Share
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -486,6 +487,14 @@ class Attribute(BASE):
   __valueObject = None
   dbcode = Column('code', Integer)
   __bitCode = None
+
+
+  @property
+  def shared(self):
+    if self.bitValue.isSharable:
+      return 0
+    else:
+      return 1
 
   @property
   def bitValue(self):

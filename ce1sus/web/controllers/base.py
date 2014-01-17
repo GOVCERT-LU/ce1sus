@@ -26,23 +26,19 @@ class Ce1susBaseController(BaseController):
     self.userBroker = self.brokerFactory(UserBroker)
 
   def __internalCheck(self, event):
+    result = False
     userDefaultGroup = Protector.getUserDefaultGroup()
     # if the user has no default group he has no rights
     if userDefaultGroup is None:
       raise cherrypy.HTTPError(403)
     user = Protector.getUser()
-    self.getLogger().debug("Checked if it is viewable for user {0}".format(
-                                                                  user.username
-                                                                  )
-                           )
+
     # check if event is pubished valided and shared
-    result = (event.published and
+    viewable = (event.published and
               event.bitValue.isValidated and
               event.bitValue.isSharable)
-
-    if not result:
-      # check is the group of the user is the creation group
-      result = event.creatorGroup.identifier == userDefaultGroup.identifier
+    # check if the event
+    if viewable:
       if not result:
         # check tlp
         result = event.tlp.identifier >= userDefaultGroup.tlpLvl
@@ -60,10 +56,21 @@ class Ce1susBaseController(BaseController):
             if group in groups:
                 result = True
                 break
+    else:
+      if not viewable:
+        # check is the group of the user is the creation group
+        result = event.creatorGroup.identifier == userDefaultGroup.identifier
 
     if not result:
+
+      self.getLogger().debug("Event {0} is not viewable for user {1}".format(event.identifier,
+                                                                  user.username
+                                                                  ))
       raise cherrypy.HTTPError(403)
 
+    self.getLogger().debug("Event {0} is viewable for user {1}".format(event.identifier,
+                                                                  user.username
+                                                                  ))
     return result
 
   def isAdminArea(self):

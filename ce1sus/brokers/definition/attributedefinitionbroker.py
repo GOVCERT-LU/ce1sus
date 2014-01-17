@@ -18,7 +18,7 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
-import dagr.helpers.strings as string
+import dagr.helpers.strings as strings
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
@@ -282,17 +282,17 @@ class AttributeDefinitionBroker(BrokerBase):
                        is only used in case the action is edit or remove
     :type identifier: Integer
     :param name: The name of the attribute
-    :type name: String
+    :type name: strings
     :param description: The description of this attribute
-    :type description: String
+    :type description: strings
     :param regex: The regular expression to use to verify if the value is
                   correct
-    :type regex: String
+    :type regex: strings
     :param classIndex: The index of the table to use for storing or getting the
                        attribute actual value
-    :type classIndex: String
+    :type classIndex: strings
     :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
+    :type action: strings
 
     :returns: AttributeDefinition
     """
@@ -315,7 +315,7 @@ class AttributeDefinitionBroker(BrokerBase):
                              attribute.handlerIndex)
     attribute.dbchksum = hashSHA1(key)
     trimmedRegex = cleanPostValue(regex)
-    if string.isNotNull(trimmedRegex):
+    if strings.isNotNull(trimmedRegex):
       attribute.regex = trimmedRegex
     else:
       attribute.regex = '^.*$'

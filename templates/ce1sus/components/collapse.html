@@ -74,6 +74,10 @@
                     	$('#menu${object.identifier}Link').parent().attr('class', ''); 
                     });
                     </script>
+                    <%
+                     paginator.trcolor = '#FFFF00'
+                     paginator.conditionAttribute = 'shared'
+                    %>
                     <%call expr="pagination.pagination('attributesTable{0}'.format(object.identifier),paginator,hasSearch=False)"/>
                 </div>
 

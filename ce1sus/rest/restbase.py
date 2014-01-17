@@ -230,7 +230,7 @@ class RestControllerBase(BaseController):
       except NothingFoundException:
         self.raiseError('UnknownDefinitionException',
                       'The attribute definition with CHKSUM {0} is not defined.'.format(
-                                                  restObjectDefinition.chksum))
+                                                  restAttributeDefinition.chksum))
 
         self.attributeDefinitionBroker.insert(attrDefinition, commit=False)
 

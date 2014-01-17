@@ -103,12 +103,16 @@ class SearchController(Ce1susBaseController):
         # prepare displayItems
 
         for foundValue in foundValues:
+          try:
+            self.checkIfViewable(foundValue.event)
 
-          obj = ResultItem(foundValue.event_id,
+            obj = ResultItem(foundValue.event_id,
                              foundValue.event,
                              foundValue.attribute.definition,
                              foundValue.attribute)
-          result.append(obj)
+            result.append(obj)
+          except cherrypy.HTTPError:
+            pass
 
       # Prepare paginator
       labels = [{'event.identifier':'Event #'},

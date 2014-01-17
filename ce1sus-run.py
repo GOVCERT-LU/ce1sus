@@ -29,6 +29,8 @@ from ce1sus.rest.restcontroller import RestController
 from ce1sus.web.controllers.admin.subgroups import SubGroupController
 from ce1sus.web.controllers.admin.validation import ValidationController
 from ce1sus.web.controllers.event.bitvalue import BitValueController
+from dagr.helpers.mailer import Mailer
+
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -61,6 +63,7 @@ def bootstrap():
   Log(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Session")
   SessionManager(ce1susConfigFile)
+  Mailer(ce1susConfigFile)
 
 
   Log.getLogger("run").debug("Loading Mako")

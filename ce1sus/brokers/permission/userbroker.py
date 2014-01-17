@@ -19,7 +19,7 @@ from dagr.db.broker import BrokerException
 import re
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.ldaphandling import LDAPHandler
-import dagr.helpers.strings as string
+import dagr.helpers.strings as strings
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
@@ -159,15 +159,15 @@ class UserBroker(BrokerBase):
                        is only used in case the action is edit or remove
     :type identifier: Integer
     :param username: The username of the user
-    :type username: String
+    :type username: strings
     :param password: The password of the user
-    :type password: String
+    :type password: strings
     :param email: The email of the user
-    :type email: String
+    :type email: strings
     :param priv: Is the user privileged to access the administration section
     :type priv: Integer
     :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
+    :type action: strings
 
     :returns: generated HTML
     """
@@ -178,11 +178,11 @@ class UserBroker(BrokerBase):
       user.email = cleanPostValue(email)
       user.password = cleanPostValue(password)
       user.username = cleanPostValue(username)
-    if string.isNotNull(disabled):
+    if strings.isNotNull(disabled):
       ObjectConverter.setInteger(user, 'disabled', disabled)
-    if string.isNotNull(priv):
+    if strings.isNotNull(priv):
       ObjectConverter.setInteger(user, 'privileged', priv)
-    if string.isNotNull(maingroup):
+    if strings.isNotNull(maingroup):
       ObjectConverter.setInteger(user, 'group_id', maingroup)
     if action == 'insertLDAP':
       user.identifier = None

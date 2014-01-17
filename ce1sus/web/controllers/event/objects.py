@@ -21,7 +21,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.web.helpers.protection import require, requireReferer
 from dagr.db.broker import ValidationException, \
 BrokerException
-import dagr.helpers.strings as string
+import dagr.helpers.strings as strings
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 
@@ -334,7 +334,7 @@ class ObjectsController(Ce1susBaseController):
     # right checks
     self.checkIfViewable(event)
 
-    if setEventParent is None and not string.isNotNull(parentObjectID):
+    if setEventParent is None and not strings.isNotNull(parentObjectID):
       return 'Please select someting before saving.'
     obj = self.objectBroker.getByID(objectID)
     if setEventParent is None:

@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
-import dagr.helpers.strings as string
+import dagr.helpers.strings as strings
 
 
 class MultipleGenericHandler(GenericHandler):
@@ -25,7 +25,7 @@ class MultipleGenericHandler(GenericHandler):
     values = params.get('value').split('\n')
     for value in values:
       stringValue = value.replace('\r', '')
-      if (string.isNotNull(stringValue)):
+      if (strings.isNotNull(stringValue)):
         params['value'] = stringValue
         attribute = GenericHandler.populateAttributes(self,
                                                     params,

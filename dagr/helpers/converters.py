@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import dagr.helpers.strings as string
+import dagr.helpers.strings as strings
 
 
 class ConversionException(Exception):
@@ -26,14 +26,14 @@ class ValueConverter(object):
   @staticmethod
   def setString(value):
     """
-    Returns a string value of the value
+    Returns a strings value of the value
 
     Note: If it is not possible to set the value returned value is None
 
     :param value: The value to be set
-    :type value: String (at least should be)
+    :type value: strings (at least should be)
 
-    :returns: String
+    :returns: strings
     """
     try:
       return unicode(value, 'utf-8', errors='replace')
@@ -76,7 +76,7 @@ class ValueConverter(object):
     :returns: DateTime
     """
     try:
-      return string.stringToDateTime(value)
+      return strings.stringToDateTime(value)
     except Exception as e:
       raise ConversionException(e)
 
@@ -87,16 +87,16 @@ class ObjectConverter(object):
   @staticmethod
   def setString(instance, attribtue, value):
     """
-    Sets a string attribute
+    Sets a strings attribute
 
     Note: If it is not possible to set the value the attribute is set to None
 
     :param instance: The instance which attribute has to be set
     :type instance: object
     :param attribute: The name of the attribute to set
-    :type: attribute: String
+    :type: attribute: strings
     :param value: The value to be set
-    :type value: String (at least should be)
+    :type value: strings (at least should be)
     """
     setattr(instance, attribtue, ValueConverter.setString(value))
 
@@ -128,6 +128,6 @@ class ObjectConverter(object):
     :param attribute: The name of the attribute to set
     :type: attribute: Datetime
     :param value: The value to be set
-    :type value: DateTime string (at least should be)
+    :type value: DateTime strings (at least should be)
     """
     setattr(instance, attribtue, ValueConverter.setDate(value))
