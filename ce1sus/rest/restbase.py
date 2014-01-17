@@ -33,11 +33,14 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
 from dagr.helpers.hash import fileHashSHA256, hashMD5, hashSHA256
 from ce1sus.web.helpers.handlers.filehandler import FileHandler
 import os
+from os.path import exists, dirname
 from dagr.db.session import SessionManager
-from shutil import move
+from shutil import move, rmtree
 import re
 from ce1sus.web.helpers.protection import Protector
 from dagr.web.helpers.config import WebConfig
+import base64
+from os import makedirs
 
 
 class RestAPIException(Exception):
@@ -60,6 +63,7 @@ class RestControllerBase(BaseController):
     self.attributeDefinitionBroker = self.brokerFactory(
                                                     AttributeDefinitionBroker
                                                        )
+    self.basePath = WebConfig.getInstance().get('files')
 
   def brokerFactory(self, clazz):
     """
@@ -253,34 +257,45 @@ class RestControllerBase(BaseController):
     # create the actual attribute
     dbAttribute = Attribute()
     dbAttribute.identifier = None
-    # collect definition and check if the handler uses is a filehandler...
-    # TODO.
+    # TODO: collect definition and check if the handler uses is a filehandler...
+    fileName = ''
     if (re.match(r'^\{.*file.*:.*\}$', restAttribute.value)):
       try:
-        value = json.loads(restAttribute.value)
+        strValue = restAttribute.value
+        value = json.loads(strValue)
+
         jsonFile = value.get('file', None)
         if jsonFile:
           fileName = jsonFile[0]
           strData = jsonFile[1]
-          value = strData.decode('base64')
-          tmpFolder = '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
+          value = base64.b64decode(strData)
+          # Relative position
+          tmpFolder = self.basePath + '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
           os.mkdir(tmpFolder)
           tmpFolder = tmpFolder + '/{0}'.format(fileName)
 
           fh = open(tmpFolder, "wb")
           fh.write(value)
+          fh.close()
 
           # filename
           destination = FileHandler.getDestination()
+          # in case the directories doesn't exist
+          if not exists(self.basePath + '/' + destination):
+            makedirs(self.basePath + '/' + destination)
+
           fileHash = fileHashSHA256(tmpFolder)
           fileName = FileHandler.getFileName(fileHash, hashSHA256(fileName))
-          # Relative position
-          rootDestination = WebConfig.getInstance().get('files')
 
-          destination = destination + '/' + fileName
-          move(tmpFolder, destination)
+          destination = destination + fileName
+          move(tmpFolder, self.basePath + '/' + destination)
+          # delete the folder
+          folderName = dirname(tmpFolder)
+          rmtree(folderName)
+
           value = destination
-      except:
+      except Exception as e:
+        self.getLogger().error('Error occured while saving file:{0}'.format(e))
         value = '(Corrupted File)'
     else:
       value = restAttribute.value
@@ -303,7 +318,8 @@ class RestControllerBase(BaseController):
                                'ioc',
                                restAttribute.ioc)
 
-    self.attributeBroker.insert(dbAttribute, commit=commit)
+    self.attributeBroker.insert(dbAttribute, commit=False)
+
     return dbAttribute
 
   def _convertToAttribues(self, restAttributes, obj, commit=False):
@@ -319,6 +335,36 @@ class RestControllerBase(BaseController):
                                            attrDefinition,
                                            obj,
                                            commit)
+        if (dbAttribute.definition.identifier == 12
+              or dbAttribute.definition.identifier == 13):
+          value = json.loads(attribute.value)
+          jsonFile = value.get('file', None)
+          if jsonFile:
+            fileName = jsonFile[0]
+            # Add the same for the filename attribute
+            dbAttrFileName = Attribute()
+            dbAttrFileName.identifier = None
+            dbAttrFileName.value = fileName
+            dbAttrFileName.object = obj
+            dbAttrFileName.object_id = obj.identifier
+            attrDef = self.attributeDefinitionBroker.getByID(7)
+            dbAttrFileName.definition = attrDef
+            dbAttrFileName.def_attribute_id = attrDef.identifier
+            dbAttrFileName.created = datumzait.utcnow()
+            dbAttrFileName.modified = datumzait.utcnow()
+            dbAttrFileName.creator_id = obj.creator.identifier
+            dbAttrFileName.modifier_id = obj.creator.identifier
+            dbAttrFileName.bitValue = BitValue('0', dbAttrFileName)
+            dbAttrFileName.bitValue.isRestInsert = True
+            if attribute.share == 1:
+              dbAttrFileName.bitValue.isSharable = True
+            else:
+              dbAttrFileName.bitValue.isSharable = False
+            ObjectConverter.setInteger(dbAttrFileName,
+                                       'ioc',
+                                       attribute.ioc)
+            self.attributeBroker.insert(dbAttrFileName, commit=commit)
+            result.append(dbAttrFileName)
         result.append(dbAttribute)
     return result
 

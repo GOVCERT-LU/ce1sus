@@ -226,7 +226,7 @@ function closeTab(tabulatorID, tabToCloseID) {
 
     $('#' + tabToCloseID).remove();
     //empty contents of pane
-    var conentID = id+"TabContent";
+    var conentID = tabulatorID+"TabContent";
     var hiddenDiv = getHiddenDivID(conentID, conentID);
     hiddenDiv.html("");
     // goback to first tab

@@ -23,7 +23,6 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from dagr.web.helpers.config import WebConfig
 from shutil import move, rmtree
 from os import makedirs
-from os.path import dirname
 from dagr.web.helpers.pagination import Link
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
@@ -33,7 +32,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
 from ce1sus.brokers.event.eventclasses import Attribute
-from os.path import isfile
+from os.path import isfile, dirname
 from dagr.web.helpers.config import WebConfig
 
 
