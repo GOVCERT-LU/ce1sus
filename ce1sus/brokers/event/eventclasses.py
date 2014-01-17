@@ -5,8 +5,6 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
-from ubuntuone.syncdaemon.volume_manager import Share
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
