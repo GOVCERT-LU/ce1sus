@@ -16,6 +16,9 @@ environment=LOCAL_DEV
 
 [ErrorHandler]
 debug=no
+useMailer=No
+subject=ErrorOccureredForCelsus
+receiver=
 
 [Logger]
 log=Yes
@@ -45,3 +48,9 @@ server=
 usetls=True
 users_dn=
 
+[Mailer]
+from=ce1sus
+smtp=
+port=25
+user=
+password=
