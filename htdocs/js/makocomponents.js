@@ -228,13 +228,20 @@ function closeTab(tabulatorID, tabToCloseID) {
     //empty contents of pane
     var conentID = tabulatorID+"TabContent";
     var hiddenDiv = getHiddenDivID(conentID, conentID);
-    hiddenDiv.html("");
+    $('#'+hiddenDiv).html("");
     // goback to first tab
-    $('#' + tabulatorID).find("a").each(function() {
+    $('#' + tabulatorID).find('a').each(function() {
         // loadfirst tab
         url = $(this).attr('src');
-        loadTab(url, this.id);
+        var firstID = ''
+        $(this).find('div').each(function(){
+            firstID = this.id;
+            return;
+        });
+        loadTab(url,firstID);
         return false;
+
+
     });
 }
 
