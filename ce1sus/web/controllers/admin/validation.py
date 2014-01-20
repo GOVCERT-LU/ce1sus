@@ -131,6 +131,7 @@ class ValidationController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
+      seenEvents = list()
       relations = self.relationBroker.getRelationsByEvent(event, True, True)
       for event_rel in relations:
         temp = Relation()
@@ -142,7 +143,9 @@ class ValidationController(Ce1susBaseController):
           temp.eventFirstSeen = rel_event.first_seen
           temp.eventLastSeen = rel_event.last_seen
           if not temp in relationPaginator.list:
-            relationPaginator.list.append(temp)
+            if temp.eventID not in seenEvents:
+              relationPaginator.list.append(temp)
+              seenEvents.append(temp.eventID)
         except cherrypy.HTTPError:
           self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))

@@ -114,7 +114,7 @@ class FileHandler(GenericHandler):
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
   # pylint: disable=R0913
-  def _createAttribute(self, value, obj, definitionID, user, ioc):
+  def _createAttribute(self, value, obj, definitionID, user):
     """
     Creates an attribue obj
 
@@ -131,6 +131,7 @@ class FileHandler(GenericHandler):
     """
     params = dict()
     params['value'] = value
+
     params['ioc'] = ioc
     definition = self.def_attributesBroker.getByID(definitionID)
     return GenericHandler.populateAttributes(self,

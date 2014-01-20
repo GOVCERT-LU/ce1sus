@@ -110,6 +110,7 @@ class EventController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
+      seenEvents = list()
       for event_rel in self.relationBroker.getRelationsByEvent(event):
         temp = Relation()
         rel_event = event_rel.rel_event
@@ -122,7 +123,9 @@ class EventController(Ce1susBaseController):
           temp.eventFirstSeen = rel_event.first_seen
           temp.eventLastSeen = rel_event.last_seen
           if not temp in relationPaginator.list:
-            relationPaginator.list.append(temp)
+            if temp.eventID not in seenEvents:
+              relationPaginator.list.append(temp)
+              seenEvents.append(temp.eventID)
         except cherrypy.HTTPError:
           self.getLogger().debug(('User {0} is not '
                                     + 'authorized').format(self.getUser(True)))
