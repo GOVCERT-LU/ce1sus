@@ -252,7 +252,7 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid')
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
     # an elo den update
     try:
       self.session.merge(instance)
