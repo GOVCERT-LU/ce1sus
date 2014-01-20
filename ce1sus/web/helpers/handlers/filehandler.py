@@ -115,7 +115,7 @@ class FileHandler(GenericHandler):
       raise FileNotFoundException('Could not find file {0}'.format(filepath))
 
   # pylint: disable=R0913
-  def _createAttribute(self, value, obj, definitionID, user):
+  def _createAttribute(self, value, obj, definitionID, user, ioc):
     """
     Creates an attribue obj
 
