@@ -11,6 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+from sqlalchemy.sql.expression import and_
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, lazyload
@@ -22,6 +23,7 @@ from sqlalchemy import or_
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from dagr.helpers.strings import cleanPostValue
 from importlib import import_module
+from sqlalchemy import distinct
 
 
 # pylint: disable=R0903,R0902
@@ -89,31 +91,24 @@ class RelationBroker(BrokerBase):
 
       self.doCommit(commit)
 
-  def getRelationsByEvent(self, event, uniqueEvents=True):
+  def getRelationsByEvent(self, event, uniqueEvents=True, adminArea=False):
 
     try:
-      relations = self.session.query(EventRelation).filter(
+      relations = self.session.query(EventRelation).options(lazyload('*')).filter(
                         or_(EventRelation.event_id == event.identifier,
                             EventRelation.rel_event_id == event.identifier)
                         ).all()
+
       # convert to event -> relation
       results = list()
       seenEvents = list()
       for relation in relations:
-
         match = EventRelation()
         # check if event-> rel_event
         if relation.event_id == event.identifier:
-          match.identifier = relation.identifier
-          match.event_id = relation.event_id
-          match.event = relation.event
-          match.rel_event_id = relation.rel_event_id
-          match.rel_event = relation.rel_event
-          match.attribute_id = relation.attribute_id
-          match.attribute = relation.attribute
-          match.rel_attribute_id = relation.rel_attribute_id
-          match.rel_attribute = relation.rel_attribute
+          match = relation
         else:
+          # else flip data
           match.identifier = relation.identifier
           match.event_id = relation.rel_event_id
           match.event = relation.rel_event
@@ -123,7 +118,7 @@ class RelationBroker(BrokerBase):
           match.attribute = relation.rel_attribute
           match.rel_attribute_id = relation.attribute_id
           match.rel_attribute = relation.attribute
-        # else flip data
+
         if uniqueEvents:
           if not  relation.rel_event_id in seenEvents:
             results.append(match)

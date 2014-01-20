@@ -75,7 +75,7 @@ class ValidationController(Ce1susBaseController):
                                'VIEW',
                                '/admin/validation/event/',
                                contentid='',
-                               autoReload=False,
+                               autoReload=True,
                                tabTitle='Event')
     paginator = Paginator(items=lists,
                           labelsAndProperty=labels,
@@ -120,7 +120,7 @@ class ValidationController(Ce1susBaseController):
                                'VIEW',
                                '/events/event/view/',
                                contentid='',
-                               autoReload=False,
+                               autoReload=True,
                                tabTitle='Event')
 
     relationPaginator = Paginator(items=list(),
@@ -131,12 +131,11 @@ class ValidationController(Ce1susBaseController):
       # get for each object
       # prepare list
       #
-      for event_rel in self.relationBroker.getRelationsByEvent(event, True):
+      relations = self.relationBroker.getRelationsByEvent(event, True, True)
+      for event_rel in relations:
         temp = Relation()
         rel_event = event_rel.rel_event
         try:
-          if rel_event.identifier != event.identifier:
-            self.checkIfViewable(rel_event)
           temp.eventID = rel_event.identifier
           temp.identifier = rel_event.identifier
           temp.eventName = rel_event.title

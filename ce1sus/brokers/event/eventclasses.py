@@ -362,6 +362,13 @@ class Object(BASE):
   __bitCode = None
 
   @property
+  def shared(self):
+    if self.bitValue.isSharable:
+      return 0
+    else:
+      return 1
+
+  @property
   def bitValue(self):
     if self.__bitCode is None:
         self.__bitCode = BitValue(self.dbcode, self)
@@ -487,12 +494,6 @@ class Attribute(BASE):
   __bitCode = None
 
 
-  @property
-  def shared(self):
-    if self.bitValue.isSharable:
-      return 0
-    else:
-      return 1
 
   @property
   def bitValue(self):
@@ -580,11 +581,18 @@ class Attribute(BASE):
     self.__value = value
 
   @property
-  def isIOC(self):
+  def iocIcon(self):
     if self.ioc == 1:
-      return 'Yes'
+      return '<span class="glyphicon glyphicon-record"></span>'
     else:
-      return 'No'
+      return ''
+
+  @property
+  def sharedIcon(self):
+    if self.bitValue.isSharable:
+      return ''
+    return '<span class="glyphicon glyphicon-ban-circle"></span>'
+
 
   def validate(self):
     """

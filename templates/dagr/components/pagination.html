@@ -14,12 +14,19 @@ isModal=False
       <thead>
         <tr>
           % for column in paginator.lables:
-            % for value in column.itervalues():
-                <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting">${value}</th>
+            % for key,value in column.iteritems():
+                <%
+                    tdOption=paginator.tdOptions.get(key,None)
+                    if tdOption:
+                        tdcss = tdOption.css
+                    else:
+                        tdcss = ''
+                %>
+                <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" style="${tdcss}">${value}</th>
             %endfor
           %endfor
           %if paginator.options.isSet:
-            <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" sytle="width: 60px">Options</th>
+            <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" style="width: 30px">Options</th>
           %endif
         </tr>
       </thead>
@@ -46,8 +53,6 @@ if paginator.conditionAttribute:
              % for column in paginator.lables:
                % for key in column.iterkeys():
     <%
-    
-    
     if hasattr(item,key):
       value = getattr(item,key)
       if hasattr(value,'color'):
@@ -76,8 +81,14 @@ if paginator.conditionAttribute:
       primaryKey = getattr(item,'identifier')
     else:
       primaryKey = 0
+      
+    tdOption=paginator.tdOptions.get(key,None)
+    if tdOption:
+      useRawHTML = tdOption.useRawHTML
+    else:
+      useRawHTML = usePlainText
     %>                
-             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength,usePlainText=usePlainText)"/></td>
+             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength,usePlainText=useRawHTML)"/></td>
            %endfor
     
              %endfor
@@ -95,7 +106,7 @@ if paginator.conditionAttribute:
                         		alert('An unexpected error occured.');
                         	}
                         	
-						}).fail(function() { alert('Could not perform action: '); });
+                        }).fail(function() { alert('Could not perform action: '); });
                         
                        
                         }"><i class="${option.icon}" title="${option.title}"></i></a>
@@ -156,6 +167,7 @@ if paginator.conditionAttribute:
           "iDisplayLength": ${paginator.itemsPerPage},
           %if not hasSearch:
           "sDom": '<"top"i>rt<"bottom"flp><"clear">',
+          "bAutoWidth" :false,
           %endif
           "aaSorting": [[ ${paginator.sortColunmID}, "${paginator.sortOrder}" ]],
          });

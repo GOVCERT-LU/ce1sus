@@ -56,14 +56,18 @@ class ObjectsController(Ce1susBaseController):
     # if event has objects
 
     labels = [{'identifier':'#'},
+              {'sharedIcon':'S'},
               {'key':'Type'},
               {'value':'Value'},
-              {'isIOC': 'Is an IOC'}]
+              {'iocIcon': 'IOC'}]
+
+
     # mako will append the missing url part
     paginatorOptions = PaginatorOptions(('/events/event/objects/'
                                          + 'objects/{0}/%(objectID)s/').format(
                                                                       eventID),
                                       'eventTabs{0}TabContent'.format(eventID))
+
     # mako will append the missing url part
     paginatorOptions.addOption('MODAL',
                                'VIEW',
@@ -91,7 +95,9 @@ class ObjectsController(Ce1susBaseController):
     paginator = Paginator(items=list(),
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
-    paginator.maxColumnLength = 100
+    paginator.addTDStyle('sharedIcon', css='width: 5px;', useRawHTML=True)
+    paginator.addTDStyle('iocIcon', css='width: 5px;', useRawHTML=True)
+    paginator.maxColumnLength = 90
     # fill dictionary of attribute definitions but only the needed ones
 
     try:

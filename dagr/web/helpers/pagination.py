@@ -30,6 +30,12 @@ class Link(object):
     """
     return '{0}{1}'.format(self.urlBase, self.identifier)
 
+class PaginatorTDStyle(object):
+
+  def __init__(self, css='', useRawHTML=False):
+    self.css = css
+    self.useRawHTML = useRawHTML
+
 
 class PaginatorOptions(object):
   """
@@ -198,6 +204,10 @@ class Paginator(object):
     self.trlink = None
     self.trcolor = None
     self.conditionAttribute = None
+    self.tdOptions = dict()
+
+  def addTDStyle(self, columnKey, css='', useRawHTML=False):
+    self.tdOptions[columnKey] = PaginatorTDStyle(css, useRawHTML)
 
   @property
   def sortColunmID(self):

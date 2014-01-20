@@ -61,6 +61,10 @@ class BitValue(object):
     self.__setValue(BitValue.WEB_INSERT, value)
 
   @property
+  def isValidatedShared(self):
+    return self.isValidated and self.isSharable
+
+  @property
   def isValidated(self):
     return self.__getValue(BitValue.VALIDATED)
 
