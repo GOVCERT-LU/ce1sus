@@ -17,7 +17,6 @@ from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 from dagr.db.session import SessionManager
 
-
 class HandlerException(Exception):
   """
   Exception base for handler exceptions

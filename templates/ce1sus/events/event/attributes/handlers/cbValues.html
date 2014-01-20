@@ -9,7 +9,7 @@
 %else:
 	%if attribute is None:
 	  <%call expr="labeledInput.labeledComboBox(label='Value',name='value',values=cbValues,enabled=enabled,hasEmpty=False)"/>
-	  <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enabled)"/>
+	  <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enableShare)"/>
 	%else:
 	  <%call expr="labeledInput.labeledComboBox(label='Value',name='value',values=cbValues,enabled=enabled,hasEmpty=False,selected=attribute.value)"/>
 	%endif

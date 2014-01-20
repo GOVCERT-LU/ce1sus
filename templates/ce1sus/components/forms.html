@@ -231,7 +231,7 @@ $(document).ready(function(){
         $("#${id} select#definitionID").change(function(event){
             value = $(this).val();
             if (value) {
-                loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+$(this).val()+'/${eventID}/${enabledStr}');
+                loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+$(this).val()+'/${eventID}/${objectID}/${enabledStr}');
             } else {
                 $('#${id} #'+getHiddenID).html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9"><div id="editBox"><div id="editBoxHidden">Please select something</div></div></div></div>');
             }
@@ -239,7 +239,7 @@ $(document).ready(function(){
 
         %if not attribute is None:
         	value = $("#${id} input#definitionID:last").val();
-            loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+value+'/${eventID}/${enabledStr}/${attribute.identifier}');
+            loadContent(getHiddenID,'/events/event/attribute/inputHandler/'+value+'/${eventID}/${objectID}/${enabledStr}/${attribute.identifier}');
         %endif
     %endif
     
@@ -265,10 +265,13 @@ $(document).ready(function(){
 </%def>
 
 <%def name="bitValueForm(bitValue, defaultShareValue=0, enabled=True)">
-
-
 % if bitValue is None:
-<%call expr="labeledInput.labeledYesNoComboBox(label='Shared',name='shared',enabled=enabled,hasEmpty=False,selected=defaultShareValue)"/>
+<% if not enabled:
+  shared = 0
+else:
+  shared = defaultShareValue
+%>
+<%call expr="labeledInput.labeledYesNoComboBox(label='Shared',name='shared',enabled=enabled,hasEmpty=False,selected=shared)"/>
 %else:
 <%
 if bitValue.isRestInsert and not bitValue.isWebInsert:

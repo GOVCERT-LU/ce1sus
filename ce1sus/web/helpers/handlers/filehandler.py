@@ -129,30 +129,15 @@ class FileHandler(GenericHandler):
 
     :returns: Attribute
     """
-    attribute = Attribute()
-    attribute.identifier = None
-    attribute.definition = (self.def_attributesBroker.getByID(definitionID))
-    attribute.def_attribute_id = attribute.definition.identifier
-    attribute.created = datumzait.utcnow()
-    attribute.modified = datumzait.utcnow()
-    attribute.creator = user
-    attribute.creator_id = attribute.creator.identifier
-    attribute.modifier = user
-    attribute.modifier_id = attribute.modifier.identifier
-    attribute.object = obj
-    attribute.object_id = attribute.object.identifier
-    attribute.value = value.strip()
-    ObjectConverter.setInteger(attribute,
-                               'ioc',
-                               ioc.strip())
-    attribute.bitValue = BitValue('0', attribute)
-    attribute.bitValue.isWebInsert = True
-    attribute.bitValue.isValidated = True
-    if attribute.definition.share == 1:
-      attribute.bitValue.isSharable = True
-    else:
-      attribute.bitValue.isSharable = False
-    return attribute
+    params = dict()
+    params['value'] = value
+    params['ioc'] = ioc
+    definition = self.def_attributesBroker.getByID(definitionID)
+    return GenericHandler.populateAttributes(self,
+                                     params,
+                                     obj,
+                                     definition,
+                                     user)
 
   def __canUserDownload(self, eventID, user):
     """
@@ -190,7 +175,7 @@ class FileHandler(GenericHandler):
     except BrokerException as e:
       self.getLogger().debug(e)
 
-  def render(self, enabled, eventID, user, definition, attribute=None):
+  def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
 
     template = self.getTemplate('/events/event/attributes/handlers/file.html')
     try:
@@ -213,7 +198,8 @@ class FileHandler(GenericHandler):
                              enabled=enabled,
                              canDownload=canDownload,
                              eventID=eventID,
-                             defaultShareValue=defaultShareValue)
+                             defaultShareValue=defaultShareValue,
+                             enableShare=enableShare)
     return string
 
   def convertToAttributeValue(self, value):

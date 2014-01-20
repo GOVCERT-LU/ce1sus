@@ -250,7 +250,7 @@ class AttributesController(Ce1susBaseController):
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
-  def inputHandler(self, defattribID, eventID, enabled, attributeID=None):
+  def inputHandler(self, defattribID, eventID, objectID, enabled, attributeID=None):
     """
     renders the form or input of the requested handler
 
@@ -291,8 +291,10 @@ class AttributesController(Ce1susBaseController):
       enableView = True
     else:
       enableView = False
+    obj = self.objectBroker.getByID(objectID)
     return handler.render(enableView,
                           eventID,
+                          obj.bitValue.isSharable,
                           self.getUser(),
                           definition,
                           attribute)

@@ -53,12 +53,17 @@ class GenericHandler(HandlerBase):
       attribute.bitValue.isSharable = True
     else:
       attribute.bitValue.isSharable = False
+      # check if parent is sharable
+    if obj.bitValue.isSharable:
+      attribute.bitValue.isSharable = True
+    else:
+      attribute.bitValue.isSharable = False
     return attribute
 
   def getAttributesIDList(self):
     return list()
 
-  def render(self, enabled, eventID, user, definition, attribute=None):
+  def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
     template = (self.
                   getTemplate('/events/event/attributes/handlers/generic.html')
                   )
@@ -68,7 +73,8 @@ class GenericHandler(HandlerBase):
       defaultShareValue = 0
     string = template.render(attribute=attribute,
                              enabled=enabled,
-                             defaultShareValue=defaultShareValue)
+                             defaultShareValue=defaultShareValue,
+                             enableShare=enableShare)
     return string
 
   def convertToAttributeValue(self, value):

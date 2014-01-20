@@ -20,7 +20,7 @@ class TextHandler(GenericHandler):
   def __init__(self):
     GenericHandler.__init__(self)
 
-  def render(self, enabled, eventID, user, definition, attribute=None):
+  def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
     template = (self.
                 getTemplate('/events/event/attributes/handlers/text.html')
                 )
@@ -30,7 +30,8 @@ class TextHandler(GenericHandler):
       defaultShareValue = 0
     string = template.render(attribute=attribute,
                              enabled=enabled,
-                             defaultShareValue=defaultShareValue)
+                             defaultShareValue=defaultShareValue,
+                             enableShare=enableShare)
     return string
 
   def convertToAttributeValue(self, value):

@@ -39,11 +39,12 @@ class BitValueController(Ce1susBaseController):
     else:
       instance.bitValue.isValidated = False
 
-  def __generateTemplate(self, eventID, instance):
+  def __generateTemplate(self, eventID, instance, parentDisabled):
     template = self.getTemplate('/events/event/bitvalue/bitvalueModal.html')
     return self.cleanHTMLCode(template.render(identifier=instance.identifier,
                            bitValue=instance.bitValue,
-                           eventID=eventID))
+                           eventID=eventID,
+                           enabled=parentDisabled))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -53,7 +54,7 @@ class BitValueController(Ce1susBaseController):
     self.checkIfViewable(event)
 
     obj = self.objectBroker.getByID(objectID)
-    return self.__generateTemplate(eventID, obj)
+    return self.__generateTemplate(eventID, obj, True)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -83,11 +84,12 @@ class BitValueController(Ce1susBaseController):
     self.checkIfViewable(event)
 
     attribute = self.attributeBroker.getByID(attributeID)
-    return self.__generateTemplate(eventID, attribute)
+    obj = self.objectBroker.getByID(objectID)
+    return self.__generateTemplate(eventID, attribute, obj.bitValue.isSharable)
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
-  def modifyAttributeProperties(self, eventID, identifier, shared):
+  def modifyAttributeProperties(self, eventID, identifier, shared='0'):
     try:
       event = self.eventBroker.getByID(eventID)
       # right checks
