@@ -23,6 +23,7 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class AttributeDefinitionBroker(BrokerBase):

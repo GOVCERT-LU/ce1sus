@@ -23,6 +23,7 @@ import dagr.helpers.strings as strings
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class UserBroker(BrokerBase):

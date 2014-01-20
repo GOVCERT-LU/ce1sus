@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 from dagr.db.broker import BrokerBase
 from importlib import import_module
 from ce1sus.web.helpers.handlers.base import HandlerBase, HandlerException
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class AttributeHandlerBroker(BrokerBase):

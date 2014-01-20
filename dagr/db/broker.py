@@ -18,6 +18,7 @@ from dagr.helpers.debug import Log
 from sqlalchemy import DateTime as SdateTime
 from sqlalchemy.types import TypeDecorator
 import dateutil
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class DateTime(TypeDecorator):
@@ -223,7 +224,7 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid')
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
 
     try:
       self.session.add(instance)
