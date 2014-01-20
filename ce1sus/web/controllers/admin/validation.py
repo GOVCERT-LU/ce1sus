@@ -178,9 +178,10 @@ class ValidationController(Ce1susBaseController):
     # if event has objects
 
     labels = [{'identifier':'#'},
+              {'sharedIcon':'S'},
               {'key':'Type'},
               {'value':'Value'},
-              {'isIOC': 'Is an IOC'}]
+              {'iocIcon': 'IOC'}]
     # mako will append the missing url part
     paginatorOptions = PaginatorOptions(('/events/event/objects/'
                                          + 'objects/{0}/%(objectID)s/').format(
@@ -198,7 +199,9 @@ class ValidationController(Ce1susBaseController):
                           labelsAndProperty=labels,
                           paginatorOptions=paginatorOptions)
     # fill dictionary of attribute definitions but only the needed ones
-
+    paginator.addTDStyle('sharedIcon', css='width: 5px;', useRawHTML=True)
+    paginator.addTDStyle('iocIcon', css='width: 5px;', useRawHTML=True)
+    paginator.maxColumnLength = 90
     try:
       if len(event.objects) > 0:
         for obj in event.objects:
