@@ -90,6 +90,9 @@ class Event(BASE):
   @property
   def bitValue(self):
     if self.__bitCode is None:
+      if self.dbcode is None:
+        self.__bitCode = BitValue('0', self)
+      else:
         self.__bitCode = BitValue(self.dbcode, self)
     return self.__bitCode
 
@@ -106,7 +109,7 @@ class Event(BASE):
     """
     errors = not obj.validate()
     if errors:
-      raise ValidationException('Object to be added is invalid')
+      raise ValidationException('Invalid Object:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
     function = getattr(self.objects, 'append')
     function(obj)
 
@@ -193,7 +196,7 @@ class Event(BASE):
     """
     errors = not group.validate()
     if errors:
-      raise ValidationException('Group to be added is invalid')
+      raise ValidationException('Invalid Group:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
     function = getattr(self.groups, 'append')
     function(group)
 
@@ -368,9 +371,19 @@ class Object(BASE):
     else:
       return 1
 
+  @shared.setter
+  def shared(self, value):
+    if value == 1:
+      self.bitValue.isSharable = True
+    else:
+      self.bitValue.isSharable = False
+
   @property
   def bitValue(self):
     if self.__bitCode is None:
+      if self.dbcode is None:
+        self.__bitCode = BitValue('0', self)
+      else:
         self.__bitCode = BitValue(self.dbcode, self)
     return self.__bitCode
 
@@ -388,7 +401,7 @@ class Object(BASE):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException('Attribute to be added is invalid')
+      raise ValidationException(ValidationException(ObjectValidator.getFirstValidationError(instance)))
     function = getattr(self.attributes, 'append')
     function(attribute)
 
@@ -494,10 +507,26 @@ class Attribute(BASE):
   __bitCode = None
 
 
+  @property
+  def shared(self):
+    if self.bitValue.isSharable:
+      return 0
+    else:
+      return 1
+
+  @shared.setter
+  def shared(self, value):
+    if value == 1:
+      self.bitValue.isSharable = True
+    else:
+      self.bitValue.isSharable = False
 
   @property
   def bitValue(self):
     if self.__bitCode is None:
+      if self.dbcode is None:
+        self.__bitCode = BitValue('0', self)
+      else:
         self.__bitCode = BitValue(self.dbcode, self)
     return self.__bitCode
 

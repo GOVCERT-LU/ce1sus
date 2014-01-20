@@ -25,6 +25,7 @@ from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid as uuidgen
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.strings import cleanPostValue
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 # pylint: disable=R0904
@@ -43,7 +44,7 @@ class EventBroker(BrokerBase):
     """
     errors = not instance.validate()
     if errors:
-      raise ValidationException('Event to be inserted is invalid')
+      raise ValidationException('Invalid Event:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
     try:
       BrokerBase.insert(self, instance, False)
       # insert value for value table

@@ -20,6 +20,7 @@ from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class ObjectBroker(BrokerBase):

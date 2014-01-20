@@ -52,7 +52,7 @@ class AttributeBroker(BrokerBase):
                                   True)
     errors = not instance.validate()
     if errors:
-      raise ValidationException('Attribute to be inserted is invalid')
+      raise ValidationException(ObjectValidator.getFirstValidationError(instance))
 
     try:
       # insert value for value table
@@ -83,7 +83,7 @@ class AttributeBroker(BrokerBase):
                                   False)
     errors = not instance.validate()
     if errors:
-      raise ValidationException('Attribute to be updated is invalid')
+      raise ValidationException(ObjectValidator.getFirstValidationError(instance))
     try:
       BrokerBase.update(self, instance, False, validate)
       # updates the value of the value table

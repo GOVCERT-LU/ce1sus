@@ -114,7 +114,10 @@ class ObjectConverter(object):
     :param value: The value to be set
     :type value: Integer (at least should be)
     """
-    setattr(instance, attribtue, ValueConverter.setInteger(value))
+    try:
+      setattr(instance, attribtue, ValueConverter.setInteger(value))
+    except AttributeError as e:
+      pass
 
   @staticmethod
   def setDate(instance, attribtue, value):

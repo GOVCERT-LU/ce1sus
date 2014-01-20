@@ -135,6 +135,13 @@ class ObjectValidator:
     return True
 
   @staticmethod
+  def getFirstValidationError(obj):
+    for key, value in vars(obj).iteritems():
+      if type(value) == FailedValidation:
+        return 'Attribute "{0}" is invalid due to: '.format(key, value.error)
+    return ''
+
+  @staticmethod
   def validateAlNum(obj,
                     attributeName,
                     minLength=0,
