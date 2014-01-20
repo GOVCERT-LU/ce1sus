@@ -85,12 +85,13 @@ class FileHandler(GenericHandler):
                                                obj,
                                                7,
                                                user,
-                                               '1'))
+                                               '0'))
       sha1 = self._createAttribute(hasher.fileHashSHA1(filepath),
                                     obj,
                                     2,
                                     user,
-                                    '1')
+                                    '0')
+      attributes.append(sha1)
       # move file to destination
       destination = FileHandler.getDestination()
       # in case the directories doesn't exist
