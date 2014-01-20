@@ -138,7 +138,8 @@ class ObjectValidator:
   def getFirstValidationError(obj):
     for key, value in vars(obj).iteritems():
       if type(value) == FailedValidation:
-        return 'Attribute "{0}" is invalid due to: '.format(key, value.error)
+        attributeName = key[key.rfind('_') + 1:]
+        return 'Attribute "{0}" is invalid due to: {1}'.format(attributeName, value.error)
     return ''
 
   @staticmethod
