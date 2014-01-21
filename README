@@ -1,23 +1,32 @@
 Requirements
 ---------
-* python (2.7+)
-* mysql (5.1+)
-** mysqldb (1.2.3)
-* mako (0.7+)
-* webtest (1.2.1+)
-* sqlalchemy (0.7+)
-** sqlalchemy-ext (0.7+)
-* python-magic (0.4.6+)
-* python-ldap (optional)
-* rtkit (optional)
+- python
+  * python (2.7+)
+  * mako (0.7+)
+  * sqlalchemy (0.7+)
+  * sqlalchemy-ext (0.7+)
+  * mysqldb (1.2.3)
+  * python-magic (0.4.6+)
+    ** https://github.com/ahupp/python-magic
+  * python-ldap (optional)
+  * rtkit (optional)
+  * webtest (1.2.1+, optional)
+  * dateutil
+  * cherrypy3
+  * memcache
 
-** https://github.com/ahupp/python-magic
+- mysql (5.1+)
+- libmagic1
+- uwsgi
+- uwsgi-plugin-python
+- nginx (v1.4+)
+
 
 
 Webserver
 ---------
 There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
-* nginx (1.2.1+)
+* nginx (1.4+)
 * uwsgi (1.2.3+, with python-2 support)
 
 
@@ -27,8 +36,22 @@ _______________________________________
 uid = www-data
 gid = www-data
 pythonpath = /path/to/ce1sus
-ini-paste = /path/to/ce1sus/production.ini
 plugins = python27
+module = ce1sus-run
+workers = 2
+vacuum = True
+max-requests = 1000000
+harakiri = 120
+harakiri-verbose = true
+need-app = true
+buffer-size = 32768
+listen = 200
+
+master-as-root = true
+max-fd = 10240
+#memory-report = true
+#stats = /tmp/stats.socket
+chown-socket = www-data
 _______________________________________
 
 
@@ -52,6 +75,22 @@ server {
   ssl_prefer_server_ciphers on;
   ssl_session_cache    shared:SSL:10m;
   ssl_session_timeout  5m;
+
+  location /css {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /images {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /img {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /js {
+    root /path/to/ce1sus/ce1sus/public;
+  }
 
   location / {
     uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
