@@ -191,18 +191,20 @@ class RestControllerBase(BaseController):
     """
     userDefaultGroup = user.defaultGroup
     # if the user has no default group he has no rights
-    if userDefaultGroup is None or not event.published:
+    if userDefaultGroup is None:
       Protector.clearRestSession()
       raise cherrypy.HTTPError(403)
-    if (not event.bitValue.isValidated and not event.bitValue.isSharable):
-      Protector.clearRestSession()
-      raise cherrypy.HTTPError(403)
-    self.getLogger().debug("Checked if it is viewable for user {0}".format(
-                                                                  user.username
-                                                                  )
-                           )
+    # check if user is priviledged
+    result = user.privileged
+    if not result:
+      # check if the user created the event
+      result = event.creatorGroup.identifier == userDefaultGroup.identifier
+    if not result:
+      # check if the user belongs to a group in context
+      if not (event.bitValue.isValidated and event.bitValue.isSharable and event.published):
+        Protector.clearRestSession()
+        raise cherrypy.HTTPError(403)
     # check is the group of the user is the creation group
-    result = event.creatorGroup.identifier == userDefaultGroup.identifier
     if not result:
       # check tlp
       result = event.tlp.identifier >= userDefaultGroup.tlpLvl
