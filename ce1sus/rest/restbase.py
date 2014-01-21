@@ -210,11 +210,11 @@ class RestControllerBase(BaseController):
       result = event.tlp.identifier >= userDefaultGroup.tlpLvl
       # check if the user belong to one of the common maingroups
       if not result:
-          result = userDefaultGroup in event.maingroups
+          result = userDefaultGroup in event.groups
       # check if the user belong to one of the common groups
       if not result:
         groups = user.defaultGroup.subgroups
-        for group in event.groups:
+        for group in event.maingroups:
           if group in groups:
               result = True
               break
