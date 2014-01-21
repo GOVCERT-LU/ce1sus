@@ -102,3 +102,12 @@ class CVEHandler(GenericHandler):
   def convertToAttributeValue(self, value):
     link = Link(self.url, value.value)
     return link
+
+class LinkHander(GenericHandler):
+  """Handler for handling Links"""
+  def __init__(self):
+    GenericHandler.__init__(self)
+
+  def convertToAttributeValue(self, value):
+    link = Link('', value.value)
+    return link

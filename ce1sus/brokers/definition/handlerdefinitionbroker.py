@@ -26,7 +26,8 @@ class AttributeHandlerBroker(BrokerBase):
                           6: 'filehandler.FileHandler',
                           7: 'datehandler.DateHandler',
                           8: 'cbvaluehandler.CBValueHandler',
-                          9: 'texthandler.TextHandler'}
+                          9: 'texthandler.TextHandler',
+                          10: 'tickethandler.LinkHander'}
 
   def getBrokerClass(self):
     """
