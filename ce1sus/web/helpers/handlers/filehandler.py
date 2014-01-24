@@ -56,7 +56,7 @@ class FileHandler(GenericHandler):
 
   # pylint: disable=W0211
   @staticmethod
-  def getAttributesIDList(self):
+  def getAttributesIDList():
     return ('file_name',
             'hash_sha1')
 
@@ -263,7 +263,7 @@ class FileWithHashesHandler(FileHandler):
 
   # pylint: disable=W0211
   @staticmethod
-  def getAttributesIDList(self):
+  def getAttributesIDList():
     return (7, 1, 2, 3, 4, 5, 8, 9, 88, 111)
 
   def populateAttributes(self, params, obj, definition, user):
