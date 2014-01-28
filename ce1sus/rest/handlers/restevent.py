@@ -28,9 +28,9 @@ class RestEventController(RestControllerBase):
   def viewMetaData(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByUUID(uuid)
-      self._checkIfViewable(event, self.getUser(apiKey))
+      self.checkIfViewable(event, self.getUser(apiKey), False)
       obj = self._objectToJSON(event,
-                               self._isEventOwner(event, apiKey),
+                               self.isEventOwner(event, self.getUserByAPIKey(apiKey)),
                                False,
                                False)
       return self._returnMessage(obj)
@@ -42,10 +42,10 @@ class RestEventController(RestControllerBase):
   def view(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByUUID(uuid)
-      self._checkIfViewable(event, self.getUser(apiKey))
+      self.checkIfViewable(event, self.getUser(apiKey), False)
       withDefinition = options.get('fulldefinitions', False)
       obj = self._objectToJSON(event,
-                               self._isEventOwner(event, apiKey),
+                               self.isEventOwner(event, self.getUserByAPIKey(apiKey)),
                                True,
                                withDefinition)
 
@@ -58,7 +58,7 @@ class RestEventController(RestControllerBase):
   def delete(self, uuid, apiKey, **options):
     try:
       event = self.eventBroker.getByUUID(uuid)
-      self._checkIfViewable(event, self.getUser(apiKey))
+      self.checkIfViewable(event, self.getUser(apiKey), False)
       return self.raiseError('NotImplemented',
                              'The delete method has not been implemented')
 

@@ -36,9 +36,9 @@ class GroupsController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     if self.isAdminArea():
-      self.checkIfPriviledged()
+      self.checkIfPriviledged(self.getUser(True))
     else:
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
     remainingGroups = self.eventBroker.getGroupsOfEvent(event.identifier,
                                                         False)
     remainingSubGroups = self.eventBroker.getSubGroupsOfEvent(event.identifier,
@@ -49,7 +49,7 @@ class GroupsController(Ce1susBaseController):
                            eventGroups=event.groups,
                            remainingSubGroups=remainingSubGroups,
                            eventSubGroups=event.maingroups,
-                           owner=self.isEventOwner(event)))
+                           owner=self.isEventOwner(event, self.getUser(True))))
 
   @cherrypy.expose
   @require(requireReferer(('/internal')))
@@ -74,9 +74,9 @@ class GroupsController(Ce1susBaseController):
     # right checks
     event = self.eventBroker.getByID(eventID)
     if self.isAdminArea():
-      self.checkIfPriviledged()
+      self.checkIfPriviledged(self.getUser(True))
     else:
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
 
     try:
       if operation == 'add':
@@ -122,7 +122,7 @@ class GroupsController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     try:
       if operation == 'add':

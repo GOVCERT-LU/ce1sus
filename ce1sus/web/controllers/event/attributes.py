@@ -73,7 +73,7 @@ class AttributesController(Ce1susBaseController):
     getattr(cherrypy, 'session')['instertAttribute'] = None
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )
@@ -96,7 +96,7 @@ class AttributesController(Ce1susBaseController):
 
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     if value.file is None:
       return 'No file selected. Try again.'
@@ -136,7 +136,7 @@ class AttributesController(Ce1susBaseController):
     if not eventID is None:
       # right checks
       event = self.eventBroker.getByID(eventID)
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
       self.eventBroker.updateEvent(event, commit=False)
       if action == 'remove':
         self.attributeBroker.removeByID(attributeID, commit=False)
@@ -233,7 +233,7 @@ class AttributesController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )
@@ -265,7 +265,7 @@ class AttributesController(Ce1susBaseController):
     """
 
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     # get Definition
     attribute = None
@@ -332,7 +332,7 @@ class AttributesController(Ce1susBaseController):
     if event is None:
       event = obj.parentEvent
 
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     attribute = self.attributeBroker.getByID(attributeID)
     filepath = self.getConfigVariable('files') + '/' + attribute.stringValue.value
     # check if file exists

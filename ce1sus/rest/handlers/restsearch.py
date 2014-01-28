@@ -149,13 +149,15 @@ class RestSearchController(RestControllerBase):
           if not event:
             event = attribute.object.parentEvent
           # check if attribute is sharable and validated
-          if (attribute.bitValue.isValidated and attribute.bitValue.isSharable) or self._isEventOwner(event, apiKey):
+          if (attribute.bitValue.isValidated and attribute.bitValue.isSharable) or self.isEventOwner(event,
+                                                             self.getUserByAPIKey(apiKey)):
             # check it is one of the requested attributes
             obj = attribute.object
             # check if the object is desired
             if (not objectDefinition or obj.def_object_id == objectDefinition.identifier):
               # check if object is sharable and validated
-              if (obj.bitValue.isValidated and obj.bitValue.isSharable) or self._isEventOwner(event, apiKey):
+              if (obj.bitValue.isValidated and obj.bitValue.isSharable) or self.isEventOwner(event,
+                                                             self.getUserByAPIKey(apiKey)):
                 if requestedAttributes:
                   # append only the requested attributes
                   neededAttributes = list()
@@ -170,13 +172,14 @@ class RestSearchController(RestControllerBase):
 
                 try:
                   # check if the event can be accessed
-                  self._checkIfViewable(event, self.getUser(apiKey))
+                  self.checkIfViewable(event, self.getUser(apiKey), False)
 
                   # get rest from cache
                   restEvent = seenItems.get(event.identifier, None)
                   if not restEvent:
                     # if not cached put it there
-                    restEvent = event.toRestObject(self._isEventOwner(event, apiKey), False)
+                    restEvent = event.toRestObject(self.isEventOwner(event,
+                                                             self.getUserByAPIKey(apiKey)), False)
                     seenItems[event.identifier] = (restEvent, dict())
                   else:
                     # get it from cache
@@ -186,7 +189,8 @@ class RestSearchController(RestControllerBase):
                   restObject = seenItems[event.identifier][1].get(obj.identifier,
                                                                   None)
                   if not restObject:
-                    restObject = obj.toRestObject(self._isEventOwner(event, apiKey), False)
+                    restObject = obj.toRestObject(self.isEventOwner(event,
+                                                             self.getUserByAPIKey(apiKey)), False)
                     if obj.parentObject_id is None:
                       restEvent.objects.append(restObject)
                     else:
@@ -262,7 +266,7 @@ class RestSearchController(RestControllerBase):
             event = needle.attribute.object.event
             if not event:
               event = needle.attribute.object.parentEvent
-            self._checkIfViewable(event, self.getUser(apiKey))
+            self.checkIfViewable(event, self.getUser(apiKey), False)
             result.append(event.uuid)
           except cherrypy.HTTPError:
             pass

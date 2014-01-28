@@ -49,14 +49,14 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     template = self.getTemplate('/admin/validation/validationBase.html')
-    self.checkIfPriviledged()
+
     return self.cleanHTMLCode(template.render())
 
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def unvalidated(self):
     template = self.mako.getTemplate('/admin/validation/recent.html')
-    self.checkIfPriviledged()
+
     labels = [{'identifier':'#'},
               {'title':'Title'},
               {'analysis': 'Analysis'},
@@ -92,7 +92,7 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     # right checks
-    self.checkIfPriviledged()
+
     template = self.mako.getTemplate('/admin/validation/eventValBase.html')
     return self.cleanHTMLCode(template.render(eventID=eventID))
 
@@ -107,7 +107,7 @@ class ValidationController(Ce1susBaseController):
     template = self.mako.getTemplate('/admin/validation/eventDetails.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfPriviledged()
+
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -176,7 +176,7 @@ class ValidationController(Ce1susBaseController):
     """
     template = self.getTemplate('/admin/validation/eventValobjects.html')
     event = self.eventBroker.getByID(eventID)
-    self.checkIfPriviledged()
+
 
     # if event has objects
 
@@ -241,7 +241,7 @@ class ValidationController(Ce1susBaseController):
   @require(privileged(), requireReferer(('/internal')))
   @cherrypy.expose
   def validateEvent(self, eventID):
-    self.checkIfPriviledged()
+
     try:
       event = self.eventBroker.getByID(eventID)
       # perfom validation of event
@@ -271,7 +271,7 @@ class ValidationController(Ce1susBaseController):
     :returns: generated HTML
     """
     # right checks
-    self.checkIfPriviledged()
+
     template = self.getTemplate('/events/event/attributes/attributesModal.html'
                                 )
     obj = self.objectBroker.getByID(objectID)

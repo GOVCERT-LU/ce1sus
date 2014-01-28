@@ -25,44 +25,48 @@ class Ce1susBaseController(BaseController):
     self.sessionManager = SessionManager.getInstance()
     self.userBroker = self.brokerFactory(UserBroker)
 
-  def __internalCheck(self, event):
-    result = False
-    userDefaultGroup = Protector.getUserDefaultGroup()
+
+  def __internalCheckIfViewable(self, event, user):
+    """
+    Checks if the page if viewable for the given group
+
+    :param grous: A list of strings contrianing the group names
+    :type groups: list
+
+    :returns: Boolean
+    """
+    userDefaultGroup = user.defaultGroup
     # if the user has no default group he has no rights
     if userDefaultGroup is None:
-      raise cherrypy.HTTPError(403)
-    user = Protector.getUser()
-
-    # check if event is pubished valided and shared
-    viewable = (event.published and
-              event.bitValue.isValidated and
-              event.bitValue.isSharable)
-    # check if the event
-    if viewable:
-      if not result:
-        # check tlp
-        result = event.tlp.identifier >= userDefaultGroup.tlpLvl
-        # check if the user belong to one of the common maingroups
-        if not result:
-          for group in event.maingroups:
-            result = userDefaultGroup.identifier == group.identifier
-            if result:
-              break
-
-        # check if the user belong to one of the common groups
-        if not result:
-          groups = Protector.getUserGroups()
-          for group in event.groups:
-            if group in groups:
-                result = True
-                break
-    else:
-      if not viewable:
-        # check is the group of the user is the creation group
-        result = event.creatorGroup.identifier == userDefaultGroup.identifier
-
+      return False
+    # check if user is priviledged
+    result = user.privileged
     if not result:
+      # check if the user created the event
+      result = event.creatorGroup.identifier == userDefaultGroup.identifier
+    if not result:
+      # check if the user belongs to a group in context
+      if not (event.bitValue.isValidated and event.bitValue.isSharable and event.published):
+        return False
+    # check is the group of the user is the creation group
+    if not result:
+      # check tlp
+      result = event.tlp.identifier >= userDefaultGroup.tlpLvl
+      # check if the user belong to one of the common maingroups
+      if not result:
+          result = userDefaultGroup in event.groups
+      # check if the user belong to one of the common groups
+      if not result:
+        groups = user.defaultGroup.subgroups
+        for group in event.maingroups:
+          if group in groups:
+              return True
 
+    return result
+
+  def __internalCheck(self, event, user):
+    result = self.__internalCheckIfViewable(event, user)
+    if not result:
       self.getLogger().debug("Event {0} is not viewable for user {1}".format(event.identifier,
                                                                   user.username
                                                                   ))
@@ -81,12 +85,11 @@ class Ce1susBaseController(BaseController):
     attribute = getattr(cherrypy, 'session')
     attribute['isAdminArea'] = value
 
-  def checkIfPriviledged(self):
-    user = self.getUser()
+  def checkIfPriviledged(self, user):
     if not user.privileged:
       raise cherrypy.HTTPError(403)
 
-  def checkIfViewable(self, event):
+  def checkIfViewable(self, event, user, useCache=True):
     """
     Checks if the page if viewable for the given group
 
@@ -96,24 +99,24 @@ class Ce1susBaseController(BaseController):
     :returns: Boolean
     """
     # get eventfrom session
-    attribute = getattr(cherrypy, 'session')
-    eventDict = attribute.get('ViewableEventsDict', None)
-    if eventDict:
+    if useCache:
+      attribute = getattr(cherrypy, 'session')
+      eventDict = attribute.get('ViewableEventsDict', None)
+      if not eventDict:
+        attribute['ViewableEventsDict'] = dict()
+
       viewable = eventDict.get(event.identifier, None)
-      if viewable:
-        return viewable
+      if viewable == True:
+        return True
       else:
         # set in session
-        self.getLogger().debug('Found rights in session')
-        result = self.__internalCheck(event)
+        result = self.__internalCheck(event, user)
         attribute['ViewableEventsDict'][event.identifier] = result
         return result
+
     else:
-      attribute['ViewableEventsDict'] = dict()
-      # set in session
-      result = self.__internalCheck(event)
-      attribute['ViewableEventsDict'][event.identifier] = result
-      return result
+      return self.__internalCheck(event, user)
+
 
   def getUser(self, cached=False):
     """
@@ -126,6 +129,18 @@ class Ce1susBaseController(BaseController):
       return Protector.getUser()
     else:
       return self.userBroker.getUserByUserName(self.getUserName())
+
+  def getUserByAPIKey(self, apiKey):
+    """
+    Returns the api user
+
+    :returns: User
+    """
+    if self.userBroker is None:
+      self.userBroker = self.brokerFactory(UserBroker)
+    user = self.userBroker.getUserByApiKey(apiKey)
+    self.getLogger().debug("Returned user")
+    return user
 
   def getUserName(self):
     """
@@ -143,8 +158,7 @@ class Ce1susBaseController(BaseController):
     self.getLogger().debug("Cleared session")
     Protector.clearSession()
 
-  def isEventOwner(self, event):
-    user = Protector.getUser()
+  def isEventOwner(self, event, user):
     if user.privileged == 1:
       return True
     else:

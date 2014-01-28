@@ -59,7 +59,7 @@ class RestDefinitionsController(RestControllerBase):
       return self.raiseError('BrokerException', e)
 
   def viewAttributesDefinitions(self, identifier, apiKey, **options):
-    self._checkIfPriviledged(apiKey)
+    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
     fullDefinition = options.get('fulldefinitions', False)
     chkSums = options.get('chksum', list())
     return self.__getDefinition(self.attributeDefinitionBroker,
@@ -67,7 +67,7 @@ class RestDefinitionsController(RestControllerBase):
                                 fullDefinition)
 
   def viewObejctsDefinitions(self, identifier, apiKey, **options):
-    self._checkIfPriviledged(apiKey)
+    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
     fullDefinition = options.get('fulldefinitions', False)
     chkSums = options.get('chksum', list())
     return self.__getDefinition(self.objectDefinitionBroker,

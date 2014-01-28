@@ -51,7 +51,7 @@ class ObjectsController(Ce1susBaseController):
     template = self.getTemplate('/events/event/objects/objectsBase.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     # if event has objects
 
@@ -110,7 +110,7 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException:
       cbAttributeDefintiionsDict = dict()
 
-    if self.isEventOwner(event):
+    if self.isEventOwner(event, self.getUser(True)):
       objectList = (self.objectBroker.getObjectsOfEvent(eventID))
     else:
       objectList = (self.objectBroker.getViewableOfEvent(eventID))
@@ -128,7 +128,7 @@ class ObjectsController(Ce1susBaseController):
                         cbAttributeDefintiionsDict=cbAttributeDefintiionsDict,
                         paginator=paginator,
                         objectID=objectID,
-                        owner=self.isEventOwner(event)))
+                        owner=self.isEventOwner(event, self.getUser(True))))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -140,7 +140,7 @@ class ObjectsController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     template = self.getTemplate('/events/event/objects/objectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
@@ -160,7 +160,7 @@ class ObjectsController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     template = self.getTemplate('/events/event/objects/childObjectModal.html')
     cbObjDefinitions = self.def_objectBroker.getCBValues()
@@ -188,7 +188,7 @@ class ObjectsController(Ce1susBaseController):
     template = self.getTemplate('/events/event/objects/objectModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     self.eventBroker.updateEvent(event, commit=False)
 
     # Here is an insertion only so the action parameter is not needed, btw.
@@ -238,7 +238,7 @@ class ObjectsController(Ce1susBaseController):
     template = self.getTemplate('/events/event/objects/objectModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     self.eventBroker.updateEvent(event, commit=False)
 
     # Here is an insertion only so the action parameter is not needed, btw.
@@ -274,7 +274,7 @@ class ObjectsController(Ce1susBaseController):
     """
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     # remove object
     try:
@@ -301,7 +301,7 @@ class ObjectsController(Ce1susBaseController):
     template = self.getTemplate('/events/event/objects/parentModal.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     # get concerned object
     obj = self.objectBroker.getByID(objectID)
@@ -338,7 +338,7 @@ class ObjectsController(Ce1susBaseController):
     """
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     if setEventParent is None and not strings.isNotNull(parentObjectID):
       return 'Please select someting before saving.'
@@ -364,7 +364,7 @@ class ObjectsController(Ce1susBaseController):
     template = self.getTemplate('/events/event/objects/properties.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     definition = self.def_objectBroker.getByID(definitionID)
     if definition.share:
       defaultShareValue = 1

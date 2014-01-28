@@ -71,10 +71,10 @@ class EventController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     template = self.mako.getTemplate('/events/event/eventBase.html')
     return self.cleanHTMLCode(template.render(eventID=eventID,
-                           owner=self.isEventOwner(event)))
+                           owner=self.isEventOwner(event, self.getUser(True))))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -87,7 +87,7 @@ class EventController(Ce1susBaseController):
     template = self.mako.getTemplate('/events/event/view.html')
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -136,7 +136,7 @@ class EventController(Ce1susBaseController):
                            relationPaginator=relationPaginator,
                            event=event,
                            comments=event.comments,
-                           owner=self.isEventOwner(event)))
+                           owner=self.isEventOwner(event, self.getUser(True))))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
@@ -148,7 +148,7 @@ class EventController(Ce1susBaseController):
     """
     # right checks
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     template = self.getTemplate('/events/event/eventModal.html')
     event = self.eventBroker.getByID(eventID)
     return self.__populateTemplate(event, template)
@@ -172,20 +172,20 @@ class EventController(Ce1susBaseController):
   @cherrypy.expose
   def details(self, eventID):
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
     template = self.mako.getTemplate('/events/event/details.html')
     return self.cleanHTMLCode(template.render(event=event,
                            cbStatusValues=Status.getDefinitions(),
                            cbTLPValues=TLPLevel.getDefinitions(),
                            cbAnalysisValues=Analysis.getDefinitions(),
                            cbRiskValues=Risk.getDefinitions(),
-                           owner=self.isEventOwner(event)))
+                           owner=self.isEventOwner(event, self.getUser(True))))
 
   @require(requireReferer(('/internal')))
   @cherrypy.expose
   def editDetails(self, eventID):
     event = self.eventBroker.getByID(eventID)
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     template = self.mako.getTemplate('/events/event/editDetails.html')
     return self.cleanHTMLCode(template.render(event=event,
@@ -247,7 +247,7 @@ class EventController(Ce1susBaseController):
         template = self.getTemplate('/events/event/editDetails.html')
 
         # right checks only if there is a change!!!!
-        self.checkIfViewable(event)
+        self.checkIfViewable(event, self.getUser(True))
       if action == 'insert':
         template = self.getTemplate('/events/addEvent.html')
         event.bitValue.isWebInsert = True
@@ -278,9 +278,9 @@ class EventController(Ce1susBaseController):
     event = self.eventBroker.getByID(eventID)
     # right checks
     if self.isAdminArea():
-      self.checkIfPriviledged()
+      self.checkIfPriviledged(self.getUser(True))
     else:
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
 
     relationLabels = [{'eventID':'Event #'},
                       {'eventName':'Event Name'},
@@ -312,7 +312,7 @@ class EventController(Ce1susBaseController):
         try:
           self.checkIfViewable(event_rel)
           # check if user can see the object
-          if (self.isEventOwner(event) or (
+          if (self.isEventOwner(event, self.getUser(True)) or (
                 relation.rel_attribute.bitValue.isValidated and
                  relation.rel_attribute.isSharable)):
             temp.eventID = event_rel.identifier

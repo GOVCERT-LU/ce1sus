@@ -51,7 +51,7 @@ class BitValueController(Ce1susBaseController):
   def setObjectProperties(self, eventID, objectID):
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     obj = self.objectBroker.getByID(objectID)
     return self.__generateTemplate(eventID, obj, True)
@@ -62,7 +62,7 @@ class BitValueController(Ce1susBaseController):
     try:
       event = self.eventBroker.getByID(eventID)
       # right checks
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
 
       obj = self.objectBroker.getByID(identifier)
       self.__setBitValues(obj, shared)
@@ -77,11 +77,11 @@ class BitValueController(Ce1susBaseController):
   def setAttributeProperties(self, eventID, objectID, attributeID):
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     event = self.eventBroker.getByID(eventID)
     # right checks
-    self.checkIfViewable(event)
+    self.checkIfViewable(event, self.getUser(True))
 
     attribute = self.attributeBroker.getByID(attributeID)
     obj = self.objectBroker.getByID(objectID)
@@ -93,7 +93,7 @@ class BitValueController(Ce1susBaseController):
     try:
       event = self.eventBroker.getByID(eventID)
       # right checks
-      self.checkIfViewable(event)
+      self.checkIfViewable(event, self.getUser(True))
 
       attribute = self.attributeBroker.getByID(identifier)
       self.__setBitValues(attribute, shared)

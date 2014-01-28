@@ -16,7 +16,7 @@ from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, \
                                    getObjectData
 from importlib import import_module
 import cherrypy
-from dagr.web.controllers.base import BaseController
+from ce1sus.web.controllers.base import Ce1susBaseController
 from ce1sus.brokers.event.eventclasses import Event, Attribute
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
@@ -51,12 +51,10 @@ class RestAPIException(Exception):
     Exception.__init__(self, message)
 
 
-class RestControllerBase(BaseController):
+class RestControllerBase(Ce1susBaseController):
 
   def __init__(self):
-    BaseController.__init__(self)
-    self.sessionManager = SessionManager.getInstance()
-    self.userBroker = self.brokerFactory(UserBroker)
+    Ce1susBaseController.__init__(self)
     self.attributeBroker = self.brokerFactory(AttributeBroker)
     self.objectBroker = self.brokerFactory(ObjectBroker)
     self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
@@ -64,33 +62,6 @@ class RestControllerBase(BaseController):
                                                     AttributeDefinitionBroker
                                                        )
     self.basePath = WebConfig.getInstance().get('files')
-
-  def brokerFactory(self, clazz):
-    """
-    Instantiates a broker.
-
-    Note: In short sets up the broker in a correct manner with all the
-    required settings
-
-    :param clazz: The BrokerClass to be instantiated
-    :type clazz: Extension of brokerbase
-
-    :returns: Instance of a broker
-    """
-    self.logger.debug('Create broker for {0}'.format(clazz))
-    return self.sessionManager.brokerFactory(clazz)
-
-  def getUser(self, apiKey):
-    """
-    Returns the api user
-
-    :returns: User
-    """
-    if self.userBroker is None:
-      self.userBroker = self.brokerFactory(UserBroker)
-    user = self.userBroker.getUserByApiKey(apiKey)
-    self.getLogger().debug("Returned user")
-    return user
 
   @staticmethod
   def __instantiateClass(className):
@@ -163,66 +134,6 @@ class RestControllerBase(BaseController):
       self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
       self.raiseError('UnRecoverableException',
                       'An unrecoverable error occurred. {0}'.format(e))
-
-  def _checkIfPriviledged(self, apiKey):
-    user = self.getUser(apiKey)
-    if user.privileged != 1:
-      Protector.clearRestSession()
-      raise cherrypy.HTTPError(403)
-
-  def _isEventOwner(self, event, apiKey):
-    user = self.getUser(apiKey)
-    if user.privileged == 1:
-      return True
-    else:
-      if user.group_id == event.creatorGroup_id:
-        return True
-      else:
-        return False
-
-  def _checkIfViewable(self, event, user):
-    """
-    Checks if the page if viewable for the given group
-
-    :param grous: A list of strings contrianing the group names
-    :type groups: list
-
-    :returns: Boolean
-    """
-    userDefaultGroup = user.defaultGroup
-    # if the user has no default group he has no rights
-    if userDefaultGroup is None:
-      Protector.clearRestSession()
-      raise cherrypy.HTTPError(403)
-    # check if user is priviledged
-    result = user.privileged
-    if not result:
-      # check if the user created the event
-      result = event.creatorGroup.identifier == userDefaultGroup.identifier
-    if not result:
-      # check if the user belongs to a group in context
-      if not (event.bitValue.isValidated and event.bitValue.isSharable and event.published):
-        Protector.clearRestSession()
-        raise cherrypy.HTTPError(403)
-    # check is the group of the user is the creation group
-    if not result:
-      # check tlp
-      result = event.tlp.identifier >= userDefaultGroup.tlpLvl
-      # check if the user belong to one of the common maingroups
-      if not result:
-          result = userDefaultGroup in event.groups
-      # check if the user belong to one of the common groups
-      if not result:
-        groups = user.defaultGroup.subgroups
-        for group in event.maingroups:
-          if group in groups:
-              result = True
-              break
-    if not result:
-      Protector.clearRestSession()
-      raise cherrypy.HTTPError(403)
-
-    return result
 
   def _convertToAttributeDefinition(self,
                                    restAttributeDefinition,

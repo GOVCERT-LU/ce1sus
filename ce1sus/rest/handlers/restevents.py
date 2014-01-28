@@ -59,9 +59,10 @@ class RestEventsController(RestControllerBase):
       result = list()
       for event in events:
         try:
-          self._checkIfViewable(event, self.getUser(apiKey))
+          self.checkIfViewable(event, self.getUser(apiKey), False)
           result.append(self._objectToJSON(event,
-                                           self._isEventOwner(event, apiKey),
+                                           self.isEventOwner(event,
+                                                             self.getUserByAPIKey(apiKey)),
                                            True,
                                            withDefinition))
         except cherrypy.HTTPError:

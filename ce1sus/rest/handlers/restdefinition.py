@@ -41,7 +41,7 @@ class RestDefinitionController(RestControllerBase):
     return None
 
   def updateAttributeDefinitions(self, identifier, apiKey, **options):
-    self._checkIfPriviledged(apiKey)
+    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
     fullDefinition = options.get('fulldefinitions', False)
     restDefinition = self.getPostObject()
     try:
@@ -65,7 +65,7 @@ class RestDefinitionController(RestControllerBase):
         return self.raiseError('BrokerException', e)
 
   def updateObejctDefinitions(self, identifier, apiKey, **options):
-    self._checkIfPriviledged(apiKey)
+    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
     fullDefinition = options.get('fulldefinitions', False)
     restDefinition = self.getPostObject()
     try:
