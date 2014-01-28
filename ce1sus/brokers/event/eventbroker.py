@@ -207,6 +207,25 @@ class EventBroker(BrokerBase):
                                                  limit,
                                                  offset)
 
+  def __groupToEvent(self, eventID, groupID, commit=True, insert=True):
+
+    try:
+      group = self.session.query(Group).filter(Group.identifier ==
+                                               groupID).one()
+      event = self.session.query(Event).filter(Event.identifier ==
+                                               eventID).one()
+      if insert:
+        event.addGroup(group)
+      else:
+        event.removeGroup(group)
+      self.doCommit(commit)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Group or event not found')
+    except sqlalchemy.exc.SQLAlchemyError as e:
+      self.getLogger().fatal(e)
+      self.session.rollback()
+      raise BrokerException(e)
+
   def addGroupToEvent(self, eventID, groupID, commit=True):
     """
     Add a group to an event
@@ -216,19 +235,7 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
-    try:
-      group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
-      event = self.session.query(Event).filter(Event.identifier ==
-                                               eventID).one()
-      event.addGroup(group)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or event not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
+    self.__groupToEvent(eventID, groupID, commit, True)
 
   def removeGroupFromEvent(self, eventID, groupID, commit=True):
     """
@@ -239,15 +246,22 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
+    self.__groupToEvent(eventID, groupID, commit, False)
+
+  def __subGroupToEvent(self, eventID, groupID, commit=True, insert=True):
+
     try:
-      group = self.session.query(Group).filter(Group.identifier ==
+      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
                                                groupID).one()
       event = self.session.query(Event).filter(Event.identifier ==
                                                eventID).one()
-      event.removeGroup(group)
+      if insert:
+        event.maingroups.append(group)
+      else:
+        event.maingroups.remove(group)
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or user not found')
+      raise NothingFoundException('Group or event not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
@@ -262,19 +276,8 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
-    try:
-      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
-                                               groupID).one()
-      event = self.session.query(Event).filter(Event.identifier ==
-                                               eventID).one()
-      event.maingroups.append(group)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or event not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
+    self.__subGroupToEvent(eventID, groupID, commit, True)
+
 
   def removeSubGroupFromEvent(self, eventID, groupID, commit=True):
     """
@@ -285,19 +288,7 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
-    try:
-      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
-                                               groupID).one()
-      event = self.session.query(Event).filter(Event.identifier ==
-                                               eventID).one()
-      event.maingroups.remove(group)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or user not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
+    self.__subGroupToEvent(eventID, groupID, commit, False)
 
   # pylint: disable=R0913
   def buildEvent(self,

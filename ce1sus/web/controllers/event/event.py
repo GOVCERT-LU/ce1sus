@@ -90,9 +90,7 @@ class EventController(Ce1susBaseController):
     self.checkIfViewable(event, self.getUser(True))
 
     relationLabels = [{'eventID':'Event #'},
-                      {'eventName':'Event Name'},
-                      {'eventFirstSeen':'First Seen'},
-                      {'eventLastSeen':'Last Seen'}]
+                      {'eventName':'Event Name'}]
 
     relationsPaginatorOptions = PaginatorOptions('/events/recent',
                                                  'eventsTabTabContent')
@@ -116,7 +114,7 @@ class EventController(Ce1susBaseController):
         rel_event = event_rel.rel_event
         try:
           if rel_event.identifier != event.identifier:
-            self.checkIfViewable(rel_event)
+            self.checkIfViewable(rel_event, self.getUser(True))
           temp.eventID = rel_event.identifier
           temp.identifier = rel_event.identifier
           temp.eventName = rel_event.title
@@ -310,7 +308,7 @@ class EventController(Ce1susBaseController):
         # TODO Check if the event is viewable for the user
         event_rel = relation.rel_event
         try:
-          self.checkIfViewable(event_rel)
+          self.checkIfViewable(event_rel, self.getUser(True))
           # check if user can see the object
           if (self.isEventOwner(event, self.getUser(True)) or (
                 relation.rel_attribute.bitValue.isValidated and

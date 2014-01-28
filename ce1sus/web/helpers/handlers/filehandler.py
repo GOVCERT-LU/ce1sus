@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 
 
 import json
+import cherrypy
 from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import datumzait
 from os.path import isfile, getsize, basename, exists
@@ -77,7 +78,11 @@ class FileHandler(GenericHandler):
     return destination
 
   def populateAttributes(self, params, obj, definition, user):
-    filepath = params.get('value', None)
+    filepathHash = params.get('value', None)
+    # get real path from session
+    attribute = getattr(cherrypy, 'session')
+    filepath = attribute[filepathHash]
+
     if isfile(filepath):
       # getNeededAttributeDefinition
       attributes = list()
@@ -267,7 +272,10 @@ class FileWithHashesHandler(FileHandler):
     return (7, 1, 2, 3, 4, 5, 8, 9, 88, 111)
 
   def populateAttributes(self, params, obj, definition, user):
-    filepath = params.get('value', None)
+    filepathHash = params.get('value', None)
+    # get real path from session
+    attribute = getattr(cherrypy, 'session')
+    filepath = attribute[filepathHash]
     if filepath is None:
       raise FileNotFoundException('No file Uploaded. Upload '
                                   + 'the file before saving')

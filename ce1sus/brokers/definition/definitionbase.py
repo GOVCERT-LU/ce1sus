@@ -87,3 +87,13 @@ class DefinitionBrokerBase(BrokerBase):
       self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
+
+  def getAll(self):
+    try:
+        result = self.session.query(self.getBrokerClass()).order_by(self.getBrokerClass().name.asc()).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError, e:
+        self.getLogger().fatal(e)
+        raise BrokerException(e)
+    return result

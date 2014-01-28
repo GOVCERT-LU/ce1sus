@@ -36,15 +36,9 @@ class MultipleGenericHandler(GenericHandler):
     return attributes
 
   def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
+    return self.renderTemplate('/events/event/attributes/handlers/multGeneric.html',
+                               attribute,
+                               definition,
+                               enabled,
+                               enableShare)
 
-    template = (self.
-            getTemplate('/events/event/attributes/handlers/multGeneric.html'))
-    if definition.share:
-      defaultShareValue = 1
-    else:
-      defaultShareValue = 0
-
-    return template.render(attribute=attribute,
-                             enabled=enabled,
-                             defaultShareValue=defaultShareValue,
-                             enableShare=enableShare)

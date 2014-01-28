@@ -79,6 +79,22 @@ class HandlerBase(object):
                                    attribute,
                                    eventID,
                                    user))
+  def renderTemplate(self,
+                     templateFile,
+                     attribute,
+                     definition,
+                     enabled,
+                     enableShare):
+    template = (self.getTemplate(templateFile))
+    if definition.share:
+      defaultShareValue = 1
+    else:
+      defaultShareValue = 0
+    string = template.render(attribute=attribute,
+                             enabled=enabled,
+                             defaultShareValue=defaultShareValue,
+                             enableShare=enableShare)
+    return string
 
   @abstractmethod
   def convertToAttributeValue(self, value):

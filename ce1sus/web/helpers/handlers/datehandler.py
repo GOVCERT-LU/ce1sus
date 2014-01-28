@@ -16,19 +16,10 @@ from ce1sus.web.helpers.handlers.generichandler import GenericHandler
 
 class DateHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
-  def __init__(self):
-    GenericHandler.__init__(self)
 
   def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
-    template = (self.
-                getTemplate('/events/event/attributes/handlers/datetime.html')
-                )
-    if definition.share:
-      defaultShareValue = 1
-    else:
-      defaultShareValue = 0
-    string = template.render(attribute=attribute,
-                             enabled=enabled,
-                             defaultShareValue=defaultShareValue,
-                             enableShare=enableShare)
-    return string
+    return self.renderTemplate('/events/event/attributes/handlers/datetime.html',
+                               attribute,
+                               definition,
+                               enabled,
+                               enableShare)

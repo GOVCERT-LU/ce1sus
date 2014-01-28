@@ -9,14 +9,18 @@
         <div class="panel panel-default" >
         <div class="panel-heading">
             <div class="row">
-                <div class="col-xs-7 col-sm-7">
-                     %if not object.bitValue.isSharable:
-                        <span class="glyphicon glyphicon-ban-circle"></span>
-                     %endif
+                <div class="col-xs-6 col-sm-6">
+
                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}" >
                      
                         ${object.definition.name} - ${object.identifier} 
                     </a>
+
+                </div>
+                <div class="col-xs-1 col-sm-1">
+                     %if not object.bitValue.isSharable:
+                        <span class="glyphicon glyphicon-lock"></span>
+                     %endif
                 </div>
                 <div class="col-xs-5 col-sm-5" style="text-align: right;">
                     <div class="btn-group">

@@ -619,8 +619,8 @@ class Attribute(BASE):
   @property
   def sharedIcon(self):
     if self.bitValue.isSharable:
-      return ''
-    return '<span class="glyphicon glyphicon-ban-circle"></span>'
+      return '<span class="glyphicon glyphicon-ok"></span>'
+    return '<span class="glyphicon glyphicon-remove"></span>'
 
 
   def validate(self):

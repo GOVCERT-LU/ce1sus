@@ -103,7 +103,7 @@ class Ce1susBaseController(BaseController):
       attribute = getattr(cherrypy, 'session')
       eventDict = attribute.get('ViewableEventsDict', None)
       if not eventDict:
-        attribute['ViewableEventsDict'] = dict()
+        eventDict = attribute['ViewableEventsDict'] = dict()
 
       viewable = eventDict.get(event.identifier, None)
       if viewable == True:

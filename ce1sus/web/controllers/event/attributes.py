@@ -116,8 +116,11 @@ class AttributesController(Ce1susBaseController):
     if size == 0:
       self.getLogger().fatal('Upload of the given file failed.')
     # make hash folder of timestamp
-
-    return self.returnAjaxOK() + '*{0}*'.format(filepath)
+    filepathHash = hashMD5(filepath)
+    # set real path from session
+    attribute = getattr(cherrypy, 'session')
+    attribute[filepathHash] = filepath
+    return self.returnAjaxOK() + '*{0}*'.format(filepathHash)
 
   # pylint: disable=R0914,R0912,R0911
   @cherrypy.expose
@@ -139,6 +142,8 @@ class AttributesController(Ce1susBaseController):
       self.checkIfViewable(event, self.getUser(True))
       self.eventBroker.updateEvent(event, commit=False)
       if action == 'remove':
+        if not self.isEventOwner(self, event, self.getUser(True)):
+          raise cherrypy.HTTPError(403)
         self.attributeBroker.removeByID(attributeID, commit=False)
         self.attributeBroker.doCommit(True)
         return self.returnAjaxOK()
@@ -185,6 +190,7 @@ class AttributesController(Ce1susBaseController):
                 attributes.append(temp)
         # doAction for all attributes
         if action == 'insert':
+          # TODO: set frag of propose
           for attribute in attributes:
             self.attributeBroker.insert(attribute, commit=False)
             getattr(cherrypy, 'session')['instertedObject'] = obj.identifier

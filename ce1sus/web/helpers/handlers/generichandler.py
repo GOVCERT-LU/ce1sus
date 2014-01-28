@@ -64,18 +64,11 @@ class GenericHandler(HandlerBase):
     return list()
 
   def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
-    template = (self.
-                  getTemplate('/events/event/attributes/handlers/generic.html')
-                  )
-    if definition.share:
-      defaultShareValue = 1
-    else:
-      defaultShareValue = 0
-    string = template.render(attribute=attribute,
-                             enabled=enabled,
-                             defaultShareValue=defaultShareValue,
-                             enableShare=enableShare)
-    return string
+    return self.renderTemplate('/events/event/attributes/handlers/generic.html',
+                               attribute,
+                               definition,
+                               enabled,
+                               enableShare)
 
   def convertToAttributeValue(self, value):
     return value.value
