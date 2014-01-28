@@ -6,6 +6,7 @@
 %if attribute is None:
     <%call expr="labeledInput.labeledDateTimePicker(label='Value',name='value',value='',enabled=enabled)"/>
     <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enableShare)"/>
+    <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=0)"/>
 %else:
   <%call expr="labeledInput.labeledDateTimePicker(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
 %endif

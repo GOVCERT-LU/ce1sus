@@ -29,7 +29,7 @@ class RestSearchController(RestControllerBase):
     self.eventBroker = self.brokerFactory(EventBroker)
 
   def __getLimit(self, options):
-    limit = options.get('limit', 20)
+    limit = options.get('limit', MAX_LIMIT / 2)
 
     # limit has to be between 0 and maximum value
     if limit < 0 or limit > RestSearchController.MAX_LIMIT:

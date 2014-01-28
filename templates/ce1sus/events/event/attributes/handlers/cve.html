@@ -4,12 +4,13 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
 
 %if enabled:
-%if attribute is None:
-   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
-   <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enableShare)"/>
-%else:
-  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
-%endif
+	%if attribute is None:
+	   <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value='',enabled=enabled)"/>
+	   <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enableShare)"/>
+	   <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=0)"/>
+	%else:
+	  <%call expr="labeledInput.labeledEditBox(label='Value',name='value',value=attribute.value.identifier,enabled=enabled)"/>
+	%endif
 %else:
   <%call expr="labeledInput.genericLabeler('Value', enabled)">
   <div style="padding: 5px;">

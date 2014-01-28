@@ -98,7 +98,11 @@
 	    <input class="form-control" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
 	%else:
 	    <div style="text-align:left;">
+	    %if hasattr(value,'url'):
+	       <a href="${value.url}"  target="_blank">${value.identifier}</a>
+	    %else:
 	      ${dagr.plaintext2html(text=value)}
+	    %endif
 	    </div>
 	%endif
 	% if (not (validationMsg is None)) and enabled:

@@ -28,6 +28,7 @@ class GenericHandler(HandlerBase):
     attribute = Attribute()
     attribute.identifier = None
     value = params.get('value')
+    share = params.get('shared')
     if isinstance(value, list):
       value = value[0]
     attribute.value = value.strip()
@@ -49,13 +50,12 @@ class GenericHandler(HandlerBase):
     attribute.bitValue = BitValue('0', attribute)
     attribute.bitValue.isWebInsert = True
     attribute.bitValue.isValidated = True
-    if definition.share == 1:
-      attribute.bitValue.isSharable = True
-    else:
-      attribute.bitValue.isSharable = False
-      # check if parent is sharable
+    # check if parent is sharable
     if obj.bitValue.isSharable:
-      attribute.bitValue.isSharable = True
+      if share == '1':
+        attribute.bitValue.isSharable = True
+      else:
+        attribute.bitValue.isSharable = False
     else:
       attribute.bitValue.isSharable = False
     return attribute

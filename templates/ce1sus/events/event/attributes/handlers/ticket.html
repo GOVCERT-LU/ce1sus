@@ -14,6 +14,7 @@
    </div>
    </%call>
    <%call expr="forms.bitValueForm(bitValue=None, defaultShareValue=defaultShareValue, enabled=enableShare)"/>
+   <%call expr="labeledInput.labeledYesNoComboBox(label='Is an IOC',name='ioc',enabled=enabled,hasEmpty=False, selected=0)"/>
    </div>
   
 %else:

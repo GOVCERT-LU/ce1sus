@@ -57,7 +57,7 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def __GroupsOfEvent(self, clazz, joinRelation, identifier, belongIN=True):
+  def __GroupsOfEvent(self, clazz, joinRelation, identifier, belongIn=True):
     try:
         groups = self.session.query(clazz).join(joinRelation).filter(Event.identifier == identifier).all()
         if not belongIn:

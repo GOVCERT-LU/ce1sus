@@ -6,7 +6,7 @@
 for ticket in rtPaginator.list:
   selector =  '<label class="checkbox"><input id="ID{0}" type="checkbox" name="tickets" value="{0}" onclick="setValue(this)"></label>'.format(ticket.identifier)
   setattr(ticket,'selector',selector)
-  idLink = '<a href="{0}" target="_blank">{1}</a> '.format(rtUrl, ticket.identifier)
+  idLink = '<a href="{0}{1}" target="_blank">{1}</a> '.format(rtUrl, ticket.identifier)
   setattr(ticket,'idLink',idLink)
   
 rtLabels = [{'idLink':'#'},
