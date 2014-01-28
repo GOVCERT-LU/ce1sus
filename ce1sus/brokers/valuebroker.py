@@ -27,8 +27,6 @@ from dagr.helpers.converters import ValueConverter
 # pylint: disable=R0903
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
-  def __init__(self):
-    pass
 
   __tablename__ = "StringValues"
 
@@ -59,8 +57,6 @@ class StringValue(BASE):
 # pylint: disable=R0903
 class DateValue(BASE):
   """This is a container class for the DATEVALES table."""
-  def __init__(self):
-    pass
 
   __tablename__ = "DateValues"
 
@@ -90,8 +86,6 @@ class DateValue(BASE):
 # pylint: disable=R0903
 class TextValue(BASE):
   """This is a container class for the TEXTVALUES table."""
-  def __init__(self):
-    pass
 
   __tablename__ = "TextValues"
 
@@ -126,8 +120,6 @@ class TextValue(BASE):
 # pylint: disable=R0903
 class NumberValue(BASE):
   """This is a container class for the NUMBERVALUES table."""
-  def __init__(self):
-    pass
 
   __tablename__ = "NumberValues"
   identifier = Column('NumberValue_id', Integer, primary_key=True)

@@ -21,6 +21,7 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute, Event
 from sqlalchemy import or_
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from dagr.helpers.strings import cleanPostValue
 from importlib import import_module
 from sqlalchemy import distinct
@@ -55,6 +56,7 @@ class RelationBroker(BrokerBase):
 
   def __init__(self, session):
     BrokerBase.__init__(self, session)
+    self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
 
   def generateAttributeRelations(self, attribute, commit=False):
     if attribute.definition.relation == 1:
@@ -204,45 +206,6 @@ class RelationBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def __lookForValue(self, clazz, value, operand='=='):
-    try:
-      if operand == '==':
-        return self.session.query(clazz).filter(
-                  clazz.value == value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<':
-        return self.session.query(clazz).filter(
-                  clazz.value < value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>':
-        return self.session.query(clazz).filter(
-                  clazz.value > value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '<=':
-        return self.session.query(clazz).filter(
-                  clazz.value <= value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == '>=':
-        return self.session.query(clazz).filter(
-                  clazz.value >= value,
-                  Attribute.dbcode.op('&')(12) == 12
-                        ).all()
-      if operand == 'like':
-
-        result = self.session.query(clazz).options(lazyload('*')).filter(
-                  clazz.value.like('%{0}%'.format(value)),
-                  Attribute.dbcode.op('&')(12) == 12
-                        )
-        return result.all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
   def lookforAttributeValue(self, attributeDefinition, value, operand='=='):
     """
     returns a list of matching values
@@ -256,18 +219,18 @@ class RelationBroker(BrokerBase):
     """
     result = list()
     if attributeDefinition is None:
-      # take all classes into account
-      tables = AttributeDefinition.getTableDefinitions(False)
-      for classname in tables.iterkeys():
-        clazz = ValueBroker.getClassByClassString(classname)
+      # take all definitions into account
+      definitions = self.attributeDefinitionBroker.getAll()
+      for definition in definitions:
+        clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
         try:
-          needle = clazz.convert(cleanPostValue(value))
-          result = result + self.__lookForValue(clazz, needle, operand)
-        except Exception as e:
-          print e
-          # either it works or doesn't
+          result = result + self.__lookForValueByAttribID(clazz,
+                                                          value,
+                                                          definition.identifier,
+                                                          operand,
+                                                          False)
+        except BrokerException:
           pass
-
     else:
       clazz = ValueBroker.getClassByAttributeDefinition(attributeDefinition)
       result = self.__lookForValueByAttribID(clazz,

@@ -37,60 +37,39 @@ class RestDefinitionsController(RestControllerBase):
       return RestDefinitionsController.PARAMETER_MAPPER.get(parameter, None)
     return None
 
-  def viewAttributesDefinitions(self, identifier, apiKey, **options):
+  def __getDefinition(self, broker, chksums, fullDefinition):
     try:
-      self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('fulldefinitions', False)
-      chkSums = options.get('chksum', list())
       if chkSums:
-        defAttributes = self.attributeDefinitionBroker.getDefintionByCHKSUMS(
-                                                                        chkSums
-                                                                         )
+        definitions = broker.getDefintionByCHKSUMS(chkSums)
       else:
-        defAttributes = self.attributeDefinitionBroker.getAll()
+        definitions = broker.getAll()
 
       result = list()
-      for defAttribute in defAttributes:
-        obj = self._objectToJSON(defAttribute,
+      for definition in definitions:
+        obj = self._objectToJSON(definition,
                                True,
                                fullDefinition,
                                True)
         result.append(obj)
       if result:
         return self._returnList(result)
-      else:
-        raise NothingFoundException('No attribute definitions found')
-
     except NothingFoundException as e:
       return self.raiseError('NothingFoundException', e)
     except BrokerException as e:
       return self.raiseError('BrokerException', e)
+
+  def viewAttributesDefinitions(self, identifier, apiKey, **options):
+    self._checkIfPriviledged(apiKey)
+    fullDefinition = options.get('fulldefinitions', False)
+    chkSums = options.get('chksum', list())
+    return self.__getDefinition(self.attributeDefinitionBroker,
+                                chkSums,
+                                fullDefinition)
 
   def viewObejctsDefinitions(self, identifier, apiKey, **options):
-    try:
-      self._checkIfPriviledged(apiKey)
-      fullDefinition = options.get('fulldefinitions', False)
-      chkSums = options.get('chksum', list())
-      if chkSums:
-        defObjects = self.objectDefinitionBroker.getDefintionByCHKSUMS(chkSums)
-      else:
-        defObjects = self.objectDefinitionBroker.getAll()
-
-      result = list()
-      for defObject in defObjects:
-
-        obj = self._objectToJSON(defObject,
-                               True,
-                               fullDefinition,
-                               True)
-        result.append(obj)
-
-      if result:
-        return self._returnList(result)
-      else:
-        raise NothingFoundException('No object definitions found')
-
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+    self._checkIfPriviledged(apiKey)
+    fullDefinition = options.get('fulldefinitions', False)
+    chkSums = options.get('chksum', list())
+    return self.__getDefinition(self.objectDefinitionBroker,
+                                chkSums,
+                                fullDefinition)

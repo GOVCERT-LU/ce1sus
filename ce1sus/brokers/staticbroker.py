@@ -11,6 +11,29 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+def invertDict(dictionary):
+  result = dict()
+  for key, value in dictionary.iteritems():
+    result[value] = key
+  return result
+
+
+def getDictElementByID(dictionary, identifier):
+  identifier = int(identifier)
+  if (identifier < 0) and (identifier > len(dictionary)):
+    raise Exception('Invalid input "{0}"'.format(identifier))
+  return dictionary[identifier]
+
+def getDictElementByValue(dictionary, value):
+  formattedInput = unicode(value).title()
+  result = None
+  for key, value in dictionary.items():
+    if formattedInput == value:
+      result = key
+      break
+  if result is None:
+    raise Exception('Invalid input "{0}"'.format(value))
+  return result
 
 class Status(object):
   """Static class defining the status of an event"""
@@ -26,10 +49,7 @@ class Status(object):
 
     :returns: Dictionary
     """
-    result = dict()
-    for key, value in Status.__tableDefinitions.iteritems():
-      result[value] = key
-    return result
+    return invertDict(Status.__tableDefinitions)
 
   @staticmethod
   def getByID(identifier):
@@ -38,10 +58,8 @@ class Status(object):
 
     :returns: String
     """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > len(Status.__tableDefinitions):
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return Status.__tableDefinitions[identifier]
+    return getDictElementByID(Status.__tableDefinitions, identifier)
+
 
   @staticmethod
   def getByName(name):
@@ -50,15 +68,8 @@ class Status(object):
 
     :returns: Integer
     """
-    formatedName = unicode(name).title()
-    result = None
-    for key, value in Status.__tableDefinitions.items():
-      if formatedName == value:
-        result = key
-        break
-    if result is None:
-      raise Exception('Invalid input "{0}"'.format(name))
-    return result
+    return getDictElementByValue(Status.__tableDefinitions, name)
+
 
 
 class Analysis(object):
@@ -75,10 +86,8 @@ class Analysis(object):
 
     :returns: Dictionary
     """
-    result = dict()
-    for key, value in Analysis.__tableDefinitions.iteritems():
-      result[value] = key
-    return result
+    return invertDict(Analysis.__tableDefinitions)
+
 
   @staticmethod
   def getByID(identifier):
@@ -87,10 +96,7 @@ class Analysis(object):
 
     :returns: String
     """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > len(Analysis.__tableDefinitions):
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return Analysis.__tableDefinitions[identifier]
+    return getDictElementByID(Analysis.__tableDefinitions, identifier)
 
   @staticmethod
   def getByName(name):
@@ -99,15 +105,7 @@ class Analysis(object):
 
     :returns: Integer
     """
-    formattedInput = unicode(name).title()
-    result = None
-    for key, value in Analysis.__tableDefinitions.items():
-      if formattedInput == value:
-        result = key
-        break
-    if result is None:
-      raise Exception('Invalid input "{0}"'.format(name))
-    return result
+    return getDictElementByValue(Analysis.__tableDefinitions, name)
 
 
 class Risk(object):
@@ -124,10 +122,7 @@ class Risk(object):
 
     :returns: Dictionary
     """
-    result = dict()
-    for key, value in Risk.__tableDefinitions.iteritems():
-      result[value] = key
-    return result
+    return invertDict(Risk.__tableDefinitions)
 
   @staticmethod
   def getByID(identifier):
@@ -136,10 +131,7 @@ class Risk(object):
 
     :returns: String
     """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > len(Risk.__tableDefinitions):
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return Risk.__tableDefinitions[identifier]
+    return getDictElementByID(Risk.__tableDefinitions, identifier)
 
   @staticmethod
   def getByName(name):
@@ -148,15 +140,7 @@ class Risk(object):
 
     :returns: Integer
     """
-    formatedName = unicode(name).title()
-    result = None
-    for key, value in Risk.__tableDefinitions.items():
-      if formatedName == value:
-        result = key
-        break
-    if result is None:
-      raise Exception('Invalid input "{0}"'.format(name))
-    return result
+    return getDictElementByValue(Risk.__tableDefinitions, name)
 
 
 class TLPLevel(object):
@@ -190,10 +174,7 @@ class TLPLevel(object):
 
     :returns: String
     """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > 3:
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return TLPLevel.__tlp_levels[identifier]
+    return getDictElementByID(TLPLevel.__tlp_levels, identifier)
 
   @staticmethod
   def getDefinitions():
@@ -202,10 +183,7 @@ class TLPLevel(object):
 
     :returns: Dictionary
     """
-    result = dict()
-    for key, value in TLPLevel.__tlp_levels.iteritems():
-      result[value] = key
-    return result
+    return invertDict(TLPLevel.__tlp_levels)
 
   @staticmethod
   def getByName(name):
@@ -214,15 +192,7 @@ class TLPLevel(object):
 
     :returns: Integer
     """
-    formatedName = unicode(name).title()
-    result = None
-    for key, value in TLPLevel.__tlp_levels.items():
-      if formatedName == value:
-        result = key
-        break
-    if result is None:
-      raise Exception('Invalid input "{0}"'.format(name))
-    return result
+    return getDictElementByValue(TLPLevel.__tlp_levels, name)
 
   @staticmethod
   def getColorByID(identifier):
@@ -231,7 +201,4 @@ class TLPLevel(object):
 
     :returns: String
     """
-    identifier = int(identifier)
-    if identifier < 0 and identifier > 3:
-      raise Exception('Invalid input "{0}"'.format(identifier))
-    return TLPLevel.__tlp_colors[identifier]
+    return getDictElementByID(TLPLevel.__tlp_colors, identifier)

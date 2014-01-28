@@ -57,7 +57,22 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(e)
 
-  def getGroupsByEvent(self, identifier, belongIn=True):
+  def __GroupsOfEvent(self, clazz, joinRelation, identifier, belongIN=True):
+    try:
+        groups = self.session.query(clazz).join(joinRelation).filter(Event.identifier == identifier).all()
+        if not belongIn:
+            groupIDs = list()
+            for group in groups:
+                groupIDs.append(group.identifier)
+            groups = self.session.query(clazz).filter(not_(clazz.identifier.in_(groupIDs)))
+
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise NothingFoundException('Nothing found for ID: {0}', format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError, e:
+        raise BrokerException(e)
+    return groups
+
+  def getGroupsOfEvent(self, identifier, belongIn=True):
     """
     Returns the groups of the given event
 
@@ -73,25 +88,9 @@ class EventBroker(BrokerBase):
 
     :returns: Groups
     """
-    try:
-      groups = self.session.query(Group).join(Event.groups).filter(
-                                          Event.identifier == identifier).all()
-      if not belongIn:
-        groupIDs = list()
-        for group in groups:
-          groupIDs.append(group.identifier)
-        groups = self.session.query(Group).filter(not_(Group.identifier.in_(
-                                                                    groupIDs)))
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for ID: {0}',
-                                  format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-    return groups
+    return self.__GroupsOfEvent(Group, Event.groups, identifier, belongIn)
 
-  def getSubGroupsByEvent(self, identifier, belongIn=True):
+  def getSubGroupsOfEvent(self, identifier, belongIn=True):
     """
     Returns the groups of the given event
 
@@ -107,27 +106,7 @@ class EventBroker(BrokerBase):
 
     :returns: Groups
     """
-    try:
-      groups = self.session.query(SubGroup).join(Event.maingroups).filter(
-                                          Event.identifier == identifier).all()
-      if not belongIn:
-        groupIDs = list()
-        for group in groups:
-          groupIDs.append(group.identifier)
-        groups = self.session.query(SubGroup).filter(not_(
-                                                      SubGroup.identifier.in_(
-                                                                    groupIDs
-                                                                             )
-                                                          )
-                                                     )
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for ID: {0}',
-                                  format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-    return groups
+    return self.__GroupsOfEvent(SubGroup, Event.maingroups, identifier, belongIn)
 
   def getBrokerClass(self):
     """

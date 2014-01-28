@@ -10,10 +10,11 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, \
+from dagr.db.broker import NothingFoundException, \
                            BrokerException, \
                            IntegrityException, DeletionException, \
                            TooManyResultsFoundException
+from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 import sqlalchemy.orm.exc
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
@@ -26,11 +27,11 @@ from ce1sus.brokers.definition.handlerdefinitionbroker import \
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
-class AttributeDefinitionBroker(BrokerBase):
+class AttributeDefinitionBroker(DefinitionBrokerBase):
   """This is the interface between python an the database"""
 
   def __init__(self, session):
-    BrokerBase.__init__(self, session)
+    DefinitionBrokerBase.__init__(self, session)
     self.handlerBroker = AttributeHandlerBroker(session)
 
   def getBrokerClass(self):
@@ -169,75 +170,6 @@ class AttributeDefinitionBroker(BrokerBase):
       self.doCommit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def getDefintionByName(self, name):
-    """
-    Returns the attribute definition object with the given name
-
-    Note: raises a NothingFoundException or a TooManyResultsFound Exception
-
-    :param identifier: the id of the requested user object
-    :type identifier: integer
-
-    :returns: Object
-    """
-    try:
-      attributeDefinition = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.name == name).one()
-      return attributeDefinition
-    except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for name :{0}'.format(name))
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute definition not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def getDefintionByCHKSUM(self, chksum):
-    """
-    Returns the attribute definition object with the given name
-
-    Note: raises a NothingFoundException or a TooManyResultsFound Exception
-
-    :param identifier: the id of the requested user object
-    :type identifier: integer
-
-    :returns: Object
-    """
-    try:
-      attributeDefinition = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.dbchksum == chksum).one()
-      return attributeDefinition
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute definition not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def getDefintionByCHKSUMS(self, chksums):
-    """
-    Returns the attribute definition object with the given name
-
-    Note: raises a NothingFoundException or a TooManyResultsFound Exception
-
-    :param identifier: the id of the requested user object
-    :type identifier: integer
-
-    :returns: Object
-    """
-    try:
-      attributeDefinition = self.session.query(AttributeDefinition).filter(
-                              AttributeDefinition.dbchksum.in_(chksums)).all()
-      return attributeDefinition
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Object definition not found')
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()

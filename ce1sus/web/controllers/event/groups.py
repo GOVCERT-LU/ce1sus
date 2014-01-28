@@ -39,9 +39,9 @@ class GroupsController(Ce1susBaseController):
       self.checkIfPriviledged()
     else:
       self.checkIfViewable(event)
-    remainingGroups = self.eventBroker.getGroupsByEvent(event.identifier,
+    remainingGroups = self.eventBroker.getGroupsOfEvent(event.identifier,
                                                         False)
-    remainingSubGroups = self.eventBroker.getSubGroupsByEvent(event.identifier,
+    remainingSubGroups = self.eventBroker.getSubGroupsOfEvent(event.identifier,
                                                            False)
 
     return self.cleanHTMLCode(template.render(eventID=event.identifier,
