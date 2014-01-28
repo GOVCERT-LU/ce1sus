@@ -25,6 +25,7 @@ class LDAPUser(object):
     self.mail = None
     self.password = 'EXTERNALAUTH'
     self.displayName = None
+    self.dn = None
 
 
 class LDAPException(Exception):
@@ -127,7 +128,7 @@ class LDAPHandler(object):
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
-  def __mapUser(self, user):
+  def __mapUser(self, ldapUser):
     """
     Maps the response from the LDAP server to userobject container
 
@@ -136,22 +137,16 @@ class LDAPHandler(object):
 
     :returns:
     """
-    for attributes in user:
-      if isinstance(attributes, types.DictType):
-        user = LDAPUser()
-        for key, value in attributes.iteritems():
-          if hasattr(user, key):
-            # Foo to prevent ascii errors as ldap module returns strings!
-            try:
-              setattr(user, key, unicode(value[0]))
-            except UnicodeDecodeError:
-              setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
-    if user.mail is None:
-      # Try a secondtime just to get the email
-      try:
-        user.mail = self.getUserAttribute(user.uid, 'mail')
-      except ServerErrorException:
-        pass
+    attributes = ldapUser[1]
+    user = LDAPUser()
+    user.dn = ldapUser[0]
+    for key, value in attributes.iteritems():
+      if hasattr(user, key):
+      # Foo to prevent ascii errors as ldap module returns strings!
+        try:
+          setattr(user, key, unicode(value[0]))
+        except UnicodeDecodeError:
+          setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
     return user
 
   def getAllUsers(self):
@@ -212,38 +207,6 @@ class LDAPHandler(object):
       Log.getLogger(self.__class__.__name__).fatal(e)
       raise ServerErrorException('LDAP error: {0}'.format(e))
 
-  def getUserAttribute(self, uid, attributeName):
-    """
-    Returns the attribute value
-
-    :param uid:
-    :type uid: String
-    :param attributeName:
-    :type attributeName: String
-
-    :returns: String
-    """
-    filter_ = '(uid=' + uid + ')'
-    userdn = self.__getUserDN(uid)
-    try:
-      connection = self.__getConnection()
-      result = connection.search_s(userdn, ldap.SCOPE_SUBTREE,
-                               filter_, [attributeName])
-      self.__closeConnection(connection)
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: {0}'.format(e))
-    attribute = None
-    # dierft nemmen 1 sinn
-    for resultTuple in result:
-      for item in resultTuple:
-        if isinstance(item, types.DictType):
-          try:
-            attribute = item[attributeName][0]
-          except KeyError:
-            return None
-    return attribute
-
   def __getUserDN(self, uid):
     """
     Returns the User domain name string
@@ -253,7 +216,8 @@ class LDAPHandler(object):
 
     :returns: String
     """
-    return 'uid=' + uid + ',' + self.__users_dn
+    user = self.getUser(uid)
+    return user.dn
 
   def __closeConnection(self, connection):
     """

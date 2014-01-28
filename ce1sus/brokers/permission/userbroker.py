@@ -192,6 +192,10 @@ class UserBroker(BrokerBase):
       user.username = ldapUser.uid
       user.password = ldapUser.password
       user.email = ldapUser.mail
+      # TODO: Fix this workaround with the empty mail
+      if user.email is None:
+        ldapUser = lh.getUser(identifier)
+        user.email = ldapUser.mail
       user.disabled = 1
       user.privileged = 0
       user.group_id = 1
