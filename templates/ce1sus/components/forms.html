@@ -121,7 +121,7 @@
 </%def>
 
 <%def name="eventForm(event,enabled,cbStatusValues,cbTLPValues,today=None)">
-
+%if enabled:
 % if event is None:
   
   <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value='', enabled=enabled)"/>
@@ -159,6 +159,28 @@
   <%call expr="labeledInput.labeledDateTimePicker(label='Last seen',name='last_seen',value=event.last_seen,enabled=enabled)"/>
   
   
+% endif
+%else:
+<div class="row">
+  <div class="col-xs-6 col-md-6">
+  <%call expr="labeledInput.labeledEditBox(label='Identifier',name='EVentID',value=event.identifier,enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='UUID',name='',value=event.uuid, enabled=False)"/>
+  <%call expr="labeledInput.labeledEditBox(label='Title',name='name',value=event.title, enabled=enabled)"/>
+  <%call expr="labeledInput.labeledYesNoComboBox(label='Published',name='published',enabled=enabled,hasEmpty=True,selected=event.published)"/>
+  <%call expr="labeledInput.labeledTextBox(label='Description',name='description',message=event.description,enabled=enabled)"/>
+  </div>
+  <div class="col-xs-6 col-md-6">
+  <%call expr="labeledInput.labeledComboBox(label='Status',name='status',values=cbStatusValues,enabled=enabled,hasEmpty=True,selected=event.status_id)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Analysis',name='analysis',values=cbAnalysisValues,enabled=enabled,hasEmpty=True,selected=event.analysis_status_id)"/>
+  <%call expr="labeledInput.labeledComboBox(label='Risk',name='risk',values=cbRiskValues,enabled=enabled,hasEmpty=True,selected=event.risk_id)"/>
+  <%call expr="labeledInput.labeledComboBox(label='TLP',name='tlp_index',values=cbTLPValues,enabled=enabled,hasEmpty=True,selected=event.tlp_level_id)"/>
+  
+  <%call expr="labeledInput.labeledDateTimePicker(label='Created',name='created',value=event.created,enabled=False)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='First seen',name='first_seen',value=event.first_seen,enabled=enabled)"/>
+  <%call expr="labeledInput.labeledDateTimePicker(label='Last seen',name='last_seen',value=event.last_seen,enabled=enabled)"/>
+  
+  </div>
+</div>
 % endif
 </%def>
 
