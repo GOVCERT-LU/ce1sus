@@ -97,6 +97,9 @@ class IndexController(Ce1susBaseController):
     # Verifies credentials for username and password.
     # Returns None on success or a string describing the error on failure
     # Adapt to your needs
+
+    # TODO: chech username and password, length valid
+
     try:
       if not self.getConfigVariable('useldap'):
         raise NothingFoundException('LDAP support disabled')

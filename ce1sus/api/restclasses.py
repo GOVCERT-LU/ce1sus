@@ -15,7 +15,6 @@ import ce1sus.api.exceptions
 from dagr.helpers.hash import hashSHA1
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
-from os.path import basename
 from importlib import import_module
 from types import DictionaryType, ListType
 from dagr.helpers.strings import stringToDateTime, InputException

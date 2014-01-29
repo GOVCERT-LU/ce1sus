@@ -11,6 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+
 class Ce1susAPIException(Exception):
   pass
 
@@ -37,4 +38,3 @@ class Ce1susInvalidParameter(Ce1susAPIException):
 
 class Ce1susAPIConnectionException(Ce1susAPIException):
   pass
-
