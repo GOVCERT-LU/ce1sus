@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 from dagr.helpers.config import Configuration
 from dagr.helpers.debug import Log
 import ldap
-import types
 
 
 # pylint:disable=R0903
@@ -30,32 +29,27 @@ class LDAPUser(object):
 
 class LDAPException(Exception):
   """LDAP Error"""
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 class NothingFoundException(LDAPException):
   """Invalid Error"""
-  def __init__(self, message):
-    LDAPException.__init__(self, message)
+  pass
 
 
 class InvalidCredentialsException(LDAPException):
   """Invalid Error"""
-  def __init__(self, message):
-    LDAPException.__init__(self, message)
+  pass
 
 
 class ServerErrorException(LDAPException):
   """Server Error"""
-  def __init__(self, message):
-    LDAPException.__init__(self, message)
+  pass
 
 
 class NotInitializedException(LDAPException):
   """Server Error"""
-  def __init__(self, message):
-    LDAPException.__init__(self, message)
+  pass
 
 
 class LDAPHandler(object):
@@ -67,23 +61,23 @@ class LDAPHandler(object):
     self.__config = Configuration(configFile, 'LDAP')
     self.__users_dn = self.__config.get('users_dn')
     self.__tls = self.__config.get('usetls')
-    self.__connection = None
     LDAPHandler.instance = self
 
   def __getConnection(self):
     """
     Open the connection to the LDAP server
     """
-    if self.__connection is None:
-      try:
-        connection = ldap.initialize(self.__config.get('server'))
-        if self.__tls:
-          connection.start_tls_s()
-          return connection
-      except ldap.LDAPError as e:
-        Log.getLogger(self.__class__.__name__).fatal(e)
-        raise ServerErrorException('LDAP error: ' + unicode(e))
-    return self.__connection
+    connection = None
+    
+    try:
+      connection = ldap.initialize(self.__config.get('server'))
+      if self.__tls:
+        connection.start_tls_s()
+    except ldap.LDAPError as e:
+      Log.getLogger(self.__class__.__name__).fatal(e)
+      raise ServerErrorException('LDAP error: ' + unicode(e))
+    
+    return connection
 
 
   def isUserValid(self, uid, password):
@@ -99,9 +93,10 @@ class LDAPHandler(object):
     """
     try:
       self.__bindUser(uid, password)
-      return True
     except LDAPException:
       return False
+    
+    return True
 
   def __bindUser(self, uid, password):
     """
@@ -191,17 +186,16 @@ class LDAPHandler(object):
     """
     filter_ = '(uid={0})'.format(uid)
     attributes = ["uid", "displayName", "mail", "dc"]
+
     try:
-      user = None
       connection = self.__getConnection()
       result = connection.search_s(self.__users_dn,
                                           ldap.SCOPE_SUBTREE,
                                           filter_,
                                           attributes)
       self.__closeConnection(connection)
-      # dierft nemmen 1 sinn
-      for user in result:
-        user = self.__mapUser(user)
+      # forcibly take only first user
+      user = self.__mapUser(result[0])
       return user
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
@@ -224,8 +218,7 @@ class LDAPHandler(object):
     close the connection
     """
     try:
-      # connection.unbind_s()
-      pass
+      connection.unbind_s()
     except ldap.LDAPError as e:
       Log.getLogger(self.__class__.__name__).fatal(e)
 
@@ -236,7 +229,7 @@ class LDAPHandler(object):
 
       :returns: LDAPHandler
     """
-    if LDAPHandler.instance == None:
+    if LDAPHandler.instance is None:
       raise NotInitializedException('LDAPHandler has not been initialized')
     else:
       return LDAPHandler.instance
