@@ -11,7 +11,9 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase
+from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
+import sqlalchemy.orm.exc
+
 
 class DefinitionBrokerBase(BrokerBase):
   """This is the interface between python an the database"""
@@ -57,7 +59,7 @@ class DefinitionBrokerBase(BrokerBase):
                               self.getBrokerClass().dbchksum.in_(chksums)).all()
       return definitions
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.getBrokerClass().__class__.__name__, chksum))
+      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.getBrokerClass().__class__.__name__, chksums))
     except sqlalchemy.exc.SQLAlchemyError as e:
       self.getLogger().fatal(e)
       self.session.rollback()
