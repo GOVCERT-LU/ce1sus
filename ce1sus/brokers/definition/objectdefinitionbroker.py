@@ -11,9 +11,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, \
-                           BrokerException, TooManyResultsFoundException
+                           BrokerException
 import sqlalchemy.orm.exc
-from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
                                               AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
@@ -21,7 +20,6 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class ObjectDefinitionBroker(BrokerBase):

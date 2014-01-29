@@ -16,7 +16,6 @@ import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from dagr.helpers.strings import cleanPostValue
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class SubGroupBroker(BrokerBase):
