@@ -51,7 +51,7 @@ class BitValueController(Ce1susBaseController):
   def setObjectProperties(self, eventID, objectID):
     event = self.eventBroker.getByID(eventID)
     # right checks
-    if not self.isEventOwner(self.event, self.getUser(True)):
+    if not self.isEventOwner(event, self.getUser(True)):
       raise cherrypy.HTTPError(403)
 
     obj = self.objectBroker.getByID(objectID)
@@ -63,7 +63,7 @@ class BitValueController(Ce1susBaseController):
     try:
       event = self.eventBroker.getByID(eventID)
       # right checks
-      if not self.isEventOwner(self.event, self.getUser(True)):
+      if not self.isEventOwner(event, self.getUser(True)):
         raise cherrypy.HTTPError(403)
 
       obj = self.objectBroker.getByID(identifier)
@@ -79,7 +79,7 @@ class BitValueController(Ce1susBaseController):
   def setAttributeProperties(self, eventID, objectID, attributeID):
     event = self.eventBroker.getByID(eventID)
     # right checks
-    if not self.isEventOwner(self.event, self.getUser(True)):
+    if not self.isEventOwner(event, self.getUser(True)):
           raise cherrypy.HTTPError(403)
 
     attribute = self.attributeBroker.getByID(attributeID)
@@ -92,7 +92,7 @@ class BitValueController(Ce1susBaseController):
     try:
       event = self.eventBroker.getByID(eventID)
       # right checks
-      if not self.isEventOwner(self.event, self.getUser(True)):
+      if not self.isEventOwner(event, self.getUser(True)):
           raise cherrypy.HTTPError(403)
       attribute = self.attributeBroker.getByID(identifier)
       self.__setBitValues(attribute, shared)

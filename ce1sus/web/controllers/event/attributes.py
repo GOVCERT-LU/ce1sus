@@ -142,7 +142,7 @@ class AttributesController(Ce1susBaseController):
       self.checkIfViewable(event, self.getUser(True))
       self.eventBroker.updateEvent(event, commit=False)
       if action == 'remove':
-        if not self.isEventOwner(self.event, self.getUser(True)):
+        if not self.isEventOwner(event, self.getUser(True)):
           raise cherrypy.HTTPError(403)
         self.attributeBroker.removeByID(attributeID, commit=False)
         self.attributeBroker.doCommit(True)
