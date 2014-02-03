@@ -43,16 +43,16 @@ class Mailer(object):
 
   instance = None
 
-  def __init__(self, configFile):
-    self.__config = Configuration(configFile, 'Mailer')
-    self.sender = self.__config.get('from')
+  def __init__(self, config_file):
+    self.__config_section = Configuration(config_file, 'Mailer')
+    self.sender = self.__config_section.get('from')
     Mailer.instance = self
 
 
   def sendMail(self, mail):
     try:
-      server = self.__config.get('smtp')
-      port = self.__config.get('port')
+      server = self.__config_section.get('smtp')
+      port = self.__config_section.get('port')
       smtpObj = SMTP(server, port)
       # smtpObj.set_debuglevel(1)
       smtpObj.ehlo()
@@ -74,7 +74,7 @@ class Mailer(object):
 
 
   @classmethod
-  def getInstance(cls):
+  def get_instance(cls):
     """
       Returns an instance
 

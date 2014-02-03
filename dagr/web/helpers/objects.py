@@ -9,7 +9,7 @@ import copy
 
 
 # pylint: disable=W0613
-def copyObject(context, obj):
+def copy_object(context, obj):
   """
   returns a copy of the obj
   """

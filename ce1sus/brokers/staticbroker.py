@@ -11,29 +11,49 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-def invertDict(dictionary):
+
+def invert_dict(dictionary):
+  """
+  Inverts Key value of a dictionary
+
+  Returns: dictionary
+  """
   result = dict()
   for key, value in dictionary.iteritems():
     result[value] = key
   return result
 
 
-def getDictElementByID(dictionary, identifier):
-  identifier = int(identifier)
-  if (identifier < 0) and (identifier > len(dictionary)):
-    raise Exception('Invalid input "{0}"'.format(identifier))
-  return dictionary[identifier]
+def get_dict_element_by_id(dictionary, identifier):
+  """
+  Returns an element of a dictionary by identifier if existing.
 
-def getDictElementByValue(dictionary, value):
-  formattedInput = unicode(value).title()
+  Note: identifier has to be an integer
+
+  return object
+  """
+  identifier = int(identifier)
+  if identifier in dictionary.keys():
+    return dictionary[identifier]
+  raise Exception('Invalid input "{0}"'.format(identifier))
+
+
+def get_dict_element_by_value(dictionary, value):
+  """
+  Returns they key of a dictionary by value if existing.
+
+  return object
+  """
+  formatted_input = unicode(value).title()
   result = None
   for key, value in dictionary.items():
-    if formattedInput == value:
+    if formatted_input == value:
       result = key
       break
   if result is None:
     raise Exception('Invalid input "{0}"'.format(value))
   return result
+
 
 class Status(object):
   """Static class defining the status of an event"""
@@ -42,34 +62,40 @@ class Status(object):
                      2: 'Deleted',
                      3: 'Expired'}
 
+  def __init__(self, identifier):
+    self.identifier = identifier
+
+  @property
+  def text(self):
+    """Gets the name of the TLP level"""
+    return Status.get_by_id(self.identifier)
+
   @staticmethod
-  def getDefinitions():
+  def get_definitions():
     """
     Returns all definitions where the key is the index and the value the key
 
     :returns: Dictionary
     """
-    return invertDict(Status.__tableDefinitions)
+    return invert_dict(Status.__tableDefinitions)
 
   @staticmethod
-  def getByID(identifier):
+  def get_by_id(identifier):
     """
     returns the status by the given id
 
     :returns: String
     """
-    return getDictElementByID(Status.__tableDefinitions, identifier)
-
+    return get_dict_element_by_id(Status.__tableDefinitions, identifier)
 
   @staticmethod
-  def getByName(name):
+  def get_by_name(name):
     """
     returns the index by the given name
 
     :returns: Integer
     """
-    return getDictElementByValue(Status.__tableDefinitions, name)
-
+    return get_dict_element_by_value(Status.__tableDefinitions, name)
 
 
 class Analysis(object):
@@ -79,33 +105,40 @@ class Analysis(object):
                      2: 'Stalled',
                      3: 'Completed'}
 
+  def __init__(self, identifier):
+    self.identifier = identifier
+
+  @property
+  def text(self):
+    """Gets the name of the TLP level"""
+    return Analysis.get_by_id(self.identifier)
+
   @staticmethod
-  def getDefinitions():
+  def get_definitions():
     """
     Returns all definitions where the key is the index and the value the key
 
     :returns: Dictionary
     """
-    return invertDict(Analysis.__tableDefinitions)
-
+    return invert_dict(Analysis.__tableDefinitions)
 
   @staticmethod
-  def getByID(identifier):
+  def get_by_id(identifier):
     """
     returns the status by the given id
 
     :returns: String
     """
-    return getDictElementByID(Analysis.__tableDefinitions, identifier)
+    return get_dict_element_by_id(Analysis.__tableDefinitions, identifier)
 
   @staticmethod
-  def getByName(name):
+  def get_by_name(name):
     """
     returns the index by the given name
 
     :returns: Integer
     """
-    return getDictElementByValue(Analysis.__tableDefinitions, name)
+    return get_dict_element_by_value(Analysis.__tableDefinitions, name)
 
 
 class Risk(object):
@@ -115,32 +148,40 @@ class Risk(object):
                      2: 'Medium',
                      3: 'High'}
 
+  def __init__(self, identifier):
+    self.identifier = identifier
+
+  @property
+  def text(self):
+    """Gets the name of the TLP level"""
+    return Risk.get_by_id(self.identifier)
+
   @staticmethod
-  def getDefinitions():
+  def get_definitions():
     """
     Returns all definitions where the key is the index and the value the key
 
     :returns: Dictionary
     """
-    return invertDict(Risk.__tableDefinitions)
+    return invert_dict(Risk.__tableDefinitions)
 
   @staticmethod
-  def getByID(identifier):
+  def get_by_id(identifier):
     """
     returns the status by the given id
 
     :returns: String
     """
-    return getDictElementByID(Risk.__tableDefinitions, identifier)
+    return get_dict_element_by_id(Risk.__tableDefinitions, identifier)
 
   @staticmethod
-  def getByName(name):
+  def get_by_name(name):
     """
     returns the index by the given name
 
     :returns: Integer
     """
-    return getDictElementByValue(Risk.__tableDefinitions, name)
+    return get_dict_element_by_value(Risk.__tableDefinitions, name)
 
 
 class TLPLevel(object):
@@ -160,45 +201,45 @@ class TLPLevel(object):
   @property
   def text(self):
     """Gets the name of the TLP level"""
-    return TLPLevel.getByID(self.identifier)
+    return TLPLevel.get_by_id(self.identifier)
 
   @property
   def color(self):
     """Gets the color of the TLP level"""
-    return TLPLevel.getColorByID(self.identifier)
+    return TLPLevel.get_color_by_id(self.identifier)
 
   @staticmethod
-  def getByID(identifier):
+  def get_by_id(identifier):
     """
     returns the tlp level by the given id
 
     :returns: String
     """
-    return getDictElementByID(TLPLevel.__tlp_levels, identifier)
+    return get_dict_element_by_id(TLPLevel.__tlp_levels, identifier)
 
   @staticmethod
-  def getDefinitions():
+  def get_definitions():
     """
     Returns all definitions where the key is the index and the value the key
 
     :returns: Dictionary
     """
-    return invertDict(TLPLevel.__tlp_levels)
+    return invert_dict(TLPLevel.__tlp_levels)
 
   @staticmethod
-  def getByName(name):
+  def get_by_name(name):
     """
     returns the index by the given name
 
     :returns: Integer
     """
-    return getDictElementByValue(TLPLevel.__tlp_levels, name)
+    return get_dict_element_by_value(TLPLevel.__tlp_levels, name)
 
   @staticmethod
-  def getColorByID(identifier):
+  def get_color_by_id(identifier):
     """
     returns the tlp level color by the given id
 
     :returns: String
     """
-    return getDictElementByID(TLPLevel.__tlp_colors, identifier)
+    return get_dict_element_by_id(TLPLevel.__tlp_colors, identifier)

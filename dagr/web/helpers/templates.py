@@ -11,30 +11,31 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.config import Configuration
 from tempfile import gettempdir
 from mako.lookup import TemplateLookup
 
 
 class MakoHandler(object):
   """Helper class for MAKO templates"""
-  instance = None
 
-  def __init__(self, configFile):
+  def __init__(self, config):
+    """
+    Creator for the Mako handler
 
-    config = Configuration(configFile, 'Mako')
-    templateRoot = config.get('templateroot')
-    projectRoot = config.get('projectroot')
-    collectionSize = config.get('collectionsize')
-    outputEncoding = config.get('outputencoding')
-    self.__mylookup = TemplateLookup(directories=[templateRoot, projectRoot],
-                              module_directory=gettempdir() + '/mako_modules',
-                              collection_size=collectionSize,
-                              output_encoding=outputEncoding,
-                              encoding_errors='replace')
-    MakoHandler.instance = self
+    :param config: The configuration for this module
+    :type config: Configuration
 
-  def getTemplate(self, templatename):
+    :returns: MakoHandler
+    """
+    config_section = config.get_section('Mako')
+    self.__mylookup = TemplateLookup(directories=[config_section.get('templateroot'),
+                                                  config_section.get('projectroot')],
+                                     module_directory=gettempdir() + '/mako_modules',
+                                     collection_size=config_section.get('collectionsize'),
+                                     output_encoding=config_section.get('outputencoding'),
+                                     encoding_errors='replace')
+
+  def get_template(self, templatename):
     """
     Returns the template by the given name
 
@@ -45,22 +46,11 @@ class MakoHandler(object):
     """
     return self.__mylookup.get_template(templatename)
 
-  def renderTemplate(self, templatename, **kwargs):
+  def render_template(self, templatename, **args):
     """
     Gets the template and renders it directly with the given arguments
 
     :returns: generated HTML
     """
     mytemplate = self.__mylookup.get_template(templatename)
-    return mytemplate.render_unicode(**kwargs)
-
-  @classmethod
-  def getInstance(cls):
-    """
-    Returns the instance of the template handler.
-
-    :returns: MakoHandler
-    """
-    if MakoHandler.instance is None:
-      raise IndentationError('No MakoHandler present')
-    return MakoHandler.instance
+    return mytemplate.render_unicode(**args)

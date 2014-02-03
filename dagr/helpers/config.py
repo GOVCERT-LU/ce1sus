@@ -14,85 +14,99 @@ __license__ = 'GPL v3+'
 from ConfigParser import ConfigParser, Error, ParsingError
 from os.path import isfile
 from os import getcwd
+from dagr.helpers.strings import convert_to_value
 
 
 class ConfigException(Exception):
   """Configuration Exception"""
-
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 class ConfigParsingException(ConfigException):
   """ConfigFileNotFoundException Exception"""
-
-  def __init__(self, message):
-    ConfigException.__init__(self, message)
+  pass
 
 
 class ConfigFileNotFoundException(ConfigException):
   """ConfigFileNotFoundException Exception"""
-
-  def __init__(self, message):
-    ConfigException.__init__(self, message)
+  pass
 
 
 class ConfigSectionNotFoundException(ConfigException):
   """ConfigFileNotFoundException Exception"""
-
-  def __init__(self, message):
-    ConfigException.__init__(self, message)
+  pass
 
 
 class ConfigKeyNotFoundException(ConfigException):
   """ConfigFileNotFoundException Exception"""
-
-  def __init__(self, message):
-    ConfigException.__init__(self, message)
+  pass
 
 
 # pylint: disable=C0111, R0903
 class Configuration(object):
   """Configuration class"""
 
-  def __init__(self, configFile, section):
-    self.configDict = dict()
-    config = ConfigParser()
-    if not isfile(configFile):
+  def __init__(self, config_file):
+    self.config_parser = ConfigParser()
+    self.config_file = config_file
+    if not isfile(config_file):
       raise ConfigFileNotFoundException('Could not find config file ' +
-                            configFile + ' in ' + getcwd())
+                            config_file + ' in ' + getcwd())
     try:
-      config.read(configFile)
-    except ParsingError as e:
-      raise ConfigParsingException(e)
+      self.config_parser.read(config_file)
+    except ParsingError as error:
+      raise ConfigParsingException(error)
+    self.__seen_sections = dict()
 
-    if config.has_section(section):
-      options = config.options(section)
-      for option in options:
-        try:
-          string = config.get(section, option)
-          function = getattr(string, 'upper')
-          if function() in ['YES', 'NO', 'TRUE', 'FALSE']:
-            self.configDict[option] = config.getboolean(section, option)
-          else:
-            function = getattr(string, 'isdigit')
-            if function():
-              self.configDict[option] = config.getint(section, option)
-            else:
-              self.configDict[option] = string
-        except Error as e:
-          raise ConfigException(e)
+  def __process_section(self, section):
+    """
+    Process the items of the section an converts it to the correct values
+
+    :param section: name of the section
+    :type section: String
+
+    :returns: Dictionary
+    """
+    options = self.config_parser.options(section)
+    result = dict()
+    for option in options:
+      try:
+        string = self.config_parser.get(section, option)
+        result[option] = convert_to_value(string)
+      except Error as error:
+        raise ConfigException(error)
+    return result
+
+  def get_section(self, section):
+    """
+    Returns the values of the section
+
+    :param section: name of the section
+    :type section: String
+
+    :returns: Dictionary
+    """
+    # check if section was not already seen
+    if section in self.__seen_sections.keys():
+      return self.__seen_sections.get(section)
+    elif self.config_parser.has_section(section):
+      items = self.__process_section(section)
+      # store items
+      self.__seen_sections[section] = items
+      return items
     else:
       raise ConfigSectionNotFoundException('Section ' + section +
-                                           ' is not found in ' + configFile)
+                                             ' is not found in ' + self.config_file)
 
-  def get(self, identifier):
+  def get(self, section, key, default_value=None):
     """
-    Returns the value for the given identifier
+    Returns the value for the given section key pair
 
-    :returns: Any
     """
-    try:
-      return self.configDict[identifier.lower()]
-    except KeyError:
-      raise ConfigKeyNotFoundException('Key ' + identifier + ' not found.')
+    section = self.get_section(section)
+    if key in section.keys():
+      return section.get(key)
+    elif default_value is None:
+      raise ConfigKeyNotFoundException('Key ' + key + ' not found.')
+    else:
+      return default_value

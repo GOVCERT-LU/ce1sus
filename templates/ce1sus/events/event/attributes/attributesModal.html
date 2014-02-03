@@ -9,4 +9,4 @@ identifier = 'eventAttributeFromNone'
 if not attribute is None:
   identifier = 'eventAttributeFrom{0}'.format(attribute.identifier)
 %>
-<%call expr="forms.eventAttributeForm(identifier,eventID,objectID,attribute,enabled,cbDefinitions)"/>
+<%call expr="forms.event_attribute_form(identifier,event_id,object_id,attribute,enabled,cb_definitions)"/>

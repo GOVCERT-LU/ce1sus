@@ -35,12 +35,17 @@ class ForeignKeysListener(PoolListener):
 
 
 class SqliteSession(SessionObject):
-
+  """
+  Session wrapper
+  """
   def __init__(self, session=None):
     SessionObject.__init__(self)
     self.__session = session
 
-  def getSession(self):
+  def get_session(self):
+    """
+    Returns a session
+    """
     if self.__session:
       return self.__session
     else:
@@ -48,50 +53,71 @@ class SqliteSession(SessionObject):
 
 
 class SqliteConnector(Connector):
-
+  """
+  Connector for sqlite dbs
+  """
   def __init__(self, config):
     Connector.__init__(self, config)
-    dbFile = self.config.get('db')
-    if not isfile(dbFile):
-      raise ConnectorException('Cannot find file {0} in {1}'.format(dbFile,
+    db_file = self.config.get('db')
+    self.engine = None
+    if not isfile(db_file):
+      raise ConnectorException('Cannot find file {0} in {1}'.format(db_file,
                                                                     getcwd()
                                                                     )
                                )
-    self.connetionString = 'sqlite:///{db}'.format(db=dbFile)
+    self.connetion_string = 'sqlite:///{db}'.format(db=db_file)
 
     if self.config.get('usecherrypy'):
       SAEnginePlugin(cherrypy.engine, self).subscribe()
-      self.saTool = SATool()
-      cherrypy.tools.db = self.saTool
+      self.sa_tool = SATool()
+      cherrypy.tools.db = self.sa_tool
       self.session = None
       cherrypy.config.update({'tools.db.on': 'True'})
     else:
-      self.session = self.getDirectSession()
+      self.session = self.get_direct_session()
 
-  def getSession(self):
+  def get_session(self):
+    """
+    Returns the session
+
+    :returns: SqliteSession
+    """
     return SqliteSession(self.session)
 
-  def getEngine(self):
-    return create_engine(self.connetionString,
+  def get_engine(self):
+    """
+    Returns the engine
+    """
+    return create_engine(self.connetion_string,
                                   listeners=[ForeignKeysListener()],
                                   echo=self.debug,
                                   echo_pool=self.debug,
                                   strategy='plain')
 
-  def getDirectSession(self):
-    self.engine = self.getEngine()
-    self.sessionClazz = sessionmaker(bind=self.engine,
-                                     autocommit=False,
-                                     autoflush=False)
-    return self.sessionClazz()
+  def get_direct_session(self):
+    """
+    Returns the session from the engine
+    """
+    self.engine = self.get_engine()
+    session = sessionmaker(bind=self.engine,
+                        autocommit=False,
+                        autoflush=False)()
+    return SqliteSession(session)
 
   def close(self):
+    """
+    Closes the session
+    """
     self.session = None
-    self.engine.dispose()
-    self.engine = None
+    if self.engine:
+      self.engine.dispose()
+      self.engine = None
 
-  def createEngine(self):
-        return create_engine(self.connetionString,
+  def create_engine(self):
+    """
+    Returns a new engine
+    """
+    return create_engine(self.connetion_string,
                                   listeners=[ForeignKeysListener()],
                                   echo=self.debug,
                                   echo_pool=self.debug,

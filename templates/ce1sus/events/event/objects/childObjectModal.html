@@ -1,17 +1,32 @@
 # -*- coding: utf-8 -*-
 
 
-
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
-<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/>
 
-<%call expr="messagesAndText.error(errorMsg)"/>
-<%
-if objectID is None:
-  objectIDValue = ''
-else:
-  objectIDValue = objectID
-%>
-<input type="hidden" name="objectID" value="${objectIDValue}"/>
-<%call expr="forms.eventObjectForm(eventID,object,True,cbObjDefinitions)"/>
+%if object is None:
+  <input type="hidden" name="object_id" value="${object_id}"/>
+%endif
+<div id="objectModal">
+<%call expr="forms.eventObjectForm(event_id,object,True,obj_definitions)"/>
+  <div id="editBox">
+  <div id="editBoxHidden">
+  <%call expr="labeled_input.generic_labeler('')">
+  Please select something
+  </%call>
+  </div>
+  </div>
+  </div>
+<script type="text/javascript">
+$(document).ready(function(){
+        $("#objectModal select#definitionID").change(function(event){
+            value = $(this).val();
+            if (value) {
+                loadContent('editBox','/events/event/objects/render_properties/'+$(this).val()+'/${event_id}');
+            } else {
+                $('#objectModal #editBox').html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9">Please select something</div></div>');
+            }
+        });
+});
 
+</script>

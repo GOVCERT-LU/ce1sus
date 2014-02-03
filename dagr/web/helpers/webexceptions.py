@@ -12,7 +12,6 @@ __license__ = 'GPL v3+'
 
 import cherrypy
 import traceback
-from dagr.helpers.config import Configuration
 import dagr.helpers.strings as stringHelper
 from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
@@ -27,9 +26,9 @@ class ErrorHandler(object):
 
     Note: Expects templates
   """
-  def __init__(self, configFile):
-    config = Configuration(configFile, 'ErrorHandler')
-    ErrorHandler.__debug = config.get('debug')
+  def __init__(self, config):
+    config_section = config.get_section('ErrorHandler')
+    ErrorHandler.__debug = config_section.get('debug')
     cherrypy.config.update({'error_page.400': ErrorHandler.error_page_400})
     cherrypy.config.update({'error_page.401': ErrorHandler.error_page_401})
     cherrypy.config.update({'error_page.403': ErrorHandler.error_page_403})
@@ -37,12 +36,18 @@ class ErrorHandler(object):
     cherrypy.config.update({'error_page.500': ErrorHandler.error_page_500})
     cherrypy.config.update({'request.error_response':
                             ErrorHandler.handle_error})
-    ErrorHandler.__sendMail = config.get('useMailer')
-    ErrorHandler.__receiver = config.get('receiver')
-    ErrorHandler.__subject = config.get('subject')
+    ErrorHandler.__sendMail = config_section.get('useMailer')
+    ErrorHandler.__receiver = config_section.get('receiver')
+    ErrorHandler.__subject = config_section.get('subject')
+    ErrorHandler.__mako = MakoHandler(config)
+    ErrorHandler.__logger = Log(config)
 
   @staticmethod
-  def blueScreen(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
+  def _get_logger():
+    return ErrorHandler.__logger.get_logger('ErrorHandler')
+
+  @staticmethod
+  def blue_screen(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
     """
     Renders the blue screen error page
 
@@ -54,11 +59,10 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return (MakoHandler.getInstance().
-                              renderTemplate("/dagr/errors/blueScreen.html",
+    return ErrorHandler.__mako.render_template("/dagr/errors/blue_screen.html",
                                                     title=title,
                                                     error=error,
-                                                    text=text))
+                                                    text=text)
 
   @staticmethod
   def commodore(title='500',
@@ -76,12 +80,11 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return (MakoHandler.getInstance().
-                                renderTemplate("/dagr/errors/errorC64.html",
+    return ErrorHandler.__mako.render_template("/dagr/errors/errorC64.html",
                                                     title=title,
                                                     error=error,
                                                     version=version,
-                                                    text=text))
+                                                    text=text)
 
   @staticmethod
   def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2', sendMail=True, message='Default Error'):
@@ -111,10 +114,10 @@ class ErrorHandler(object):
         mailMessage.subject = 'An error Occured'
       mailMessage.reciever = ErrorHandler.__receiver
       try:
-        mailer = Mailer.getInstance()
+        mailer = Mailer.get_instance()
         mailer.sendMail(mailMessage)
       except MailerException as e:
-         Log.getLogger(__name__).critical('Could not send mail Mailer not instantiated:{0}', e)
+        ErrorHandler._get_logger().critical('Could not send mail Mailer not instantiated:{0}', e)
 
     # TODO: random error screen
     return ErrorHandler.commodore(title, stringHelper.plaintext2html(error), stringHelper.plaintext2html(restext), version)
@@ -127,7 +130,7 @@ class ErrorHandler(object):
     # this error handling works different than the others
     cherrypy.response.status = 500
     # Default
-    Log.getLogger(__name__).critical('Default error: '
+    ErrorHandler._get_logger().critical('Default error: '
                                         + traceback.format_exc())
     cherrypy.response.body = ErrorHandler.show(title='500',
                                               error='2^255*8-2^1024\n'
@@ -143,7 +146,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Bad Request
-    Log.getLogger(__name__).error(message)
+    ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='400', error=message + '\n?SYNTAX ERROR.'
                              + '\n\n', text=traceback,
                              version=version,
@@ -157,7 +160,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Unauthorized
-    Log.getLogger(__name__).error(message)
+    ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='401', error=message + '\n?SYNTAX ERROR.'
                              + '\n\n', text=
                                                                     traceback,
@@ -172,7 +175,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Forbiden
-    Log.getLogger(__name__).error(message)
+    ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='403', error=message + '\n?SYNTAX ERROR.'
                              + '\n\n', text=
                                                                     traceback,
@@ -186,7 +189,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Not Found
-    Log.getLogger(__name__).error(message)
+    ErrorHandler._get_logger().error(message)
 
     matchObj = re.match(r".*'(.*)'.*", message, re.M | re.I)
     fileName = matchObj.group(1)
@@ -204,7 +207,7 @@ class ErrorHandler(object):
     handle_error
     """
     # Internal Error
-    Log.getLogger(__name__).error(message)
+    ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='500', error=message + '\nFORMULA TOO '
                             + 'COMPLEX\n', text=
                                                                    traceback,

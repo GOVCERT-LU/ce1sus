@@ -25,7 +25,7 @@ class TestLog(unittest.TestCase):
     testFile.write("backups=1000\n")
     testFile.close()
 
-  def removeFile(self, name):
+  def remove_file(self, name):
     basedir = os.path.dirname(name)
     if not os.path.exists(basedir):
       os.remove(name)
@@ -33,7 +33,7 @@ class TestLog(unittest.TestCase):
   def testSetup(self):
 
     # load without config
-    Log.getInstance()
+    Log.get_instance()
     assert True
 
     # load with config
@@ -41,13 +41,13 @@ class TestLog(unittest.TestCase):
     try:
       self.generateConfig(name)
       Log(name)
-      Log.getLogger('TestLog').debug('haha')
+      Log._get_logger('TestLog').debug('haha')
       assert True
     except:
       assert False
     finally:
-      self.removeFile(name)
-      self.removeFile('logger.txt')
+      self.remove_file(name)
+      self.remove_file('logger.txt')
 
     # load with no file config
     name = 'test2.cfg'
@@ -66,7 +66,7 @@ class TestLog(unittest.TestCase):
     except ConfigParsingException:
       assert True
     finally:
-      self.removeFile(name)
+      self.remove_file(name)
 
       # load with no erronous file config
     name = 'test.cfg'
@@ -77,4 +77,4 @@ class TestLog(unittest.TestCase):
     except ConfigParsingException:
       assert True
     finally:
-      self.removeFile(name)
+      self.remove_file(name)

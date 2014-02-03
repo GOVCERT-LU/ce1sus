@@ -19,6 +19,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 from ce1sus.brokers.event.eventclasses import Attribute
+from dagr.helpers.datumzait import datumzait
 
 
 class AttributeBroker(BrokerBase):
@@ -27,13 +28,13 @@ class AttributeBroker(BrokerBase):
   """
   def __init__(self, session):
     BrokerBase.__init__(self, session)
-    self.valueBroker = ValueBroker(session)
-    self.attributeDefinitionBroker = AttributeDefinitionBroker(session)
-    self.relationBroker = RelationBroker(session)
+    self.value_broker = ValueBroker(session)
+    self.attribute_definition_broker = AttributeDefinitionBroker(session)
+    self.relation_broker = RelationBroker(session)
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return Attribute
 
@@ -45,7 +46,7 @@ class AttributeBroker(BrokerBase):
     # get the definition containing the definition how to validate an attribute
     definition = instance.definition
     ObjectValidator.validateRegex(instance,
-                                  'value',
+                                  'plain_value',
                                   definition.regex,
                                   'The value does not match {0}'.format(
                                                             definition.regex),
@@ -59,13 +60,12 @@ class AttributeBroker(BrokerBase):
       BrokerBase.insert(self, instance, False, validate)
       # insert relations
 
-      self.relationBroker.generateAttributeRelations(instance, False)
+      self.relation_broker.generate_attribute_relations(instance, False)
 
-      self.valueBroker.inserByAttribute(instance, False)
-      self.doCommit(True)
+      self.value_broker.inser_by_attribute(instance, False)
+      self.do_commit(True)
 
     except BrokerException as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
@@ -76,7 +76,7 @@ class AttributeBroker(BrokerBase):
     # validation of the value of the attribute first
     definition = instance.definition
     ObjectValidator.validateRegex(instance,
-                                  'value',
+                                  'plain_value',
                                   definition.regex,
                                   'The value does not match {0}'.format(
                                                           definition.regex),
@@ -87,31 +87,29 @@ class AttributeBroker(BrokerBase):
     try:
       BrokerBase.update(self, instance, False, validate)
       # updates the value of the value table
-      self.doCommit(False)
-      self.valueBroker.updateByAttribute(instance, False)
-      self.doCommit(commit)
+      self.do_commit(False)
+      self.value_broker.update_by_attribute(instance, False)
+      self.do_commit(commit)
     except BrokerException as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-  def removeByID(self, identifier, commit=True):
+  def remove_by_id(self, identifier, commit=True):
     try:
-      attribute = self.getByID(identifier)
-      self.valueBroker.removeByAttribute(attribute, False)
+      attribute = self.get_by_id(identifier)
+      self.value_broker.remove_by_attribute(attribute, False)
         # first remove values
-      self.doCommit(False)
+      self.do_commit(False)
         # remove attribute
-      BrokerBase.removeByID(self,
+      BrokerBase.remove_by_id(self,
                             identifier=attribute.identifier,
                             commit=False)
-      self.doCommit(commit)
+      self.do_commit(commit)
     except BrokerException as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-  def removeAttributeList(self, attributes, commit=True):
+  def remove_attribute_list(self, attributes, commit=True):
     """
       Removes all the attributes of the list
 
@@ -121,15 +119,28 @@ class AttributeBroker(BrokerBase):
     try:
       for attribute in attributes:
         # remove attributes
-        self.removeByID(attribute.identifier, False)
-        self.doCommit(False)
-      self.doCommit(commit)
-    except BrokerException as e:
-      self.getLogger().fatal(e)
+        self.remove_by_id(attribute.identifier, False)
+        self.do_commit(False)
+      self.do_commit(commit)
+    except BrokerException as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def lookforAttributeValue(self, attributeDefinition, value, operand='=='):
-    return self.relationBroker.lookforAttributeValue(attributeDefinition,
+  def look_for_attribute_value(self, attribute_definition, value, operand='=='):
+    return self.relation_broker.look_for_attribute_value(attribute_definition,
                                               value,
                                               operand)
+
+  def update_attribute(self, user, attribute, commit=True):
+    """
+    updates an object
+
+    If it is invalid the event is returned
+
+    :param event:
+    :type event: Event
+    """
+    attribute.modifier = user
+    attribute.modified = datumzait.utcnow()
+    self.update(attribute, False)
+    self.do_commit(commit)

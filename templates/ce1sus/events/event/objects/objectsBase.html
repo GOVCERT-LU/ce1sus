@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="collapse" file="/components/collapse.html"/>
 <%namespace name="nav" file="/dagr/components/navigation.html"/> 
 
 
 
 
-<%call expr="baseForms.genericModalForm(modalID='addObjectModal',url='/events/event/objects/attachObject',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-    <%call expr="modals.saveButtonModal(id='addObjectModal',title='Add object',contentUrl='/events/event/objects/addObject/{0}'.format(eventID))"/>
+<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal',url='/events/event/objects/modify_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
+    <%call expr="modals.save_button_modal(id='addObjectModal',title='Add object',content_url='/events/event/objects/add_object/{0}'.format(event_id))"/>
 </%call>
 <div class="row">
     <div class="col-xs-3 col-sm-3">
@@ -25,9 +25,9 @@
               <div class="col-xs-12 col-sm-12">
               <legend>Objects</legend>
 
-              <%call expr="nav.leftMenu('leftMenu')">
+              <%call expr="nav.left_menu('leftMenu')">
               <ul class="nav nav-pills nav-stacked" style="max-width: 300px;" >
-                  <%call expr="collapse.menuItem(objectList=objectList,owner=owner)"/>
+                  <%call expr="collapse.menu_item(object_list=object_list,owner=owner)"/>
                </ul>
                </%call>
             </div>
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div class="panel-group" id="accordion">
-              <%call expr="collapse.node(eventID, objectList, paginator, owner=owner)"/>
+              <%call expr="collapse.node(event_id, object_list, owner=owner)"/>
             </div>
         </div>
     </div>
@@ -51,7 +51,7 @@
 
 <script type="text/javascript">
 $( document ).ready(function() {
-    openAllColapses('${objectID}');
+    openAllColapses('${object_id}');
     
 });
 </script>

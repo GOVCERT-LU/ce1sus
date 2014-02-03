@@ -15,7 +15,7 @@ __license__ = 'GPL v3+'
 class BitValue(object):
 
   """
-  The __bitValue is defined as follows:
+  The __bit_value is defined as follows:
   [0] : Web insert
   [1] : Rest insert
   [2] : Is validated
@@ -27,85 +27,85 @@ class BitValue(object):
   VALIDATED = 2
   SHARABLE = 3
 
-  def __init__(self, bitValue, parentObj=None):
+  def __init__(self, bit_value, parentObj=None):
     # TODO make an intvalue and check if between 0 and 15
-    value = int('{0}'.format(bitValue))
+    value = int('{0}'.format(bit_value))
     if (value >= 0) and (value <= 20):
       bits = value
     else:
-      bits = int('{0}'.format(bitValue), 2)
+      bits = int('{0}'.format(bit_value), 2)
 
-    self.__parentObj = parentObj
-    self.__bitValue = bits
-    if hasattr(self.__parentObj, 'dbcode'):
-        self.__parentObj.dbcode = self.bitCode
-
-  @property
-  def bitCode(self):
-    return self.__bitValue
+    self.__parent_object = parentObj
+    self.__bit_value = bits
+    if hasattr(self.__parent_object, 'dbcode'):
+        self.__parent_object.dbcode = self.bit_code
 
   @property
-  def isRestInsert(self):
-    return self.__getValue(BitValue.REST_INSERT)
-
-  @isRestInsert.setter
-  def isRestInsert(self, value):
-    self.__setValue(BitValue.REST_INSERT, value)
+  def bit_code(self):
+    return self.__bit_value
 
   @property
-  def isWebInsert(self):
-    return self.__getValue(BitValue.WEB_INSERT)
+  def is_rest_instert(self):
+    return self.__get_value(BitValue.REST_INSERT)
 
-  @isWebInsert.setter
-  def isWebInsert(self, value):
-    self.__setValue(BitValue.WEB_INSERT, value)
-
-  @property
-  def isValidatedShared(self):
-    return self.isValidated and self.isSharable
+  @is_rest_instert.setter
+  def is_rest_instert(self, value):
+    self.__set_value(BitValue.REST_INSERT, value)
 
   @property
-  def isValidated(self):
-    return self.__getValue(BitValue.VALIDATED)
+  def is_web_insert(self):
+    return self.__get_value(BitValue.WEB_INSERT)
 
-  @isValidated.setter
-  def isValidated(self, value):
-    self.__setValue(BitValue.VALIDATED, value)
+  @is_web_insert.setter
+  def is_web_insert(self, value):
+    self.__set_value(BitValue.WEB_INSERT, value)
 
   @property
-  def isSharable(self):
-    return self.__getValue(BitValue.SHARABLE)
+  def is_validated_and_shared(self):
+    return self.is_validated and self.is_shareable
 
-  @isSharable.setter
-  def isSharable(self, value):
-    self.__setValue(BitValue.SHARABLE, value)
+  @property
+  def is_validated(self):
+    return self.__get_value(BitValue.VALIDATED)
 
-  def __getBit(self, offset):
+  @is_validated.setter
+  def is_validated(self, value):
+    self.__set_value(BitValue.VALIDATED, value)
+
+  @property
+  def is_shareable(self):
+    return self.__get_value(BitValue.SHARABLE)
+
+  @is_shareable.setter
+  def is_shareable(self, value):
+    self.__set_value(BitValue.SHARABLE, value)
+
+  def __get_bit(self, offset):
     mask = 1 << offset
-    return self.__bitValue & mask
+    return self.__bit_value & mask
 
-  def __setBit(self, offset):
+  def __set_bit(self, offset):
     mask = 1 << offset
-    self.__bitValue = self.__bitValue | mask
+    self.__bit_value = self.__bit_value | mask
 
-  def __unsetBit(self, offset):
+  def __unset_bit(self, offset):
     mask = ~(1 << offset)
-    self.__bitValue = self.__bitValue & mask
+    self.__bit_value = self.__bit_value & mask
 
-  def __setValue(self, offset, value):
+  def __set_value(self, offset, value):
     if value:
-      self.__setBit(offset)
+      self.__set_bit(offset)
     else:
-      self.__unsetBit(offset)
-    if not self.__parentObj is None:
+      self.__unset_bit(offset)
+    if not self.__parent_object is None:
       # check if parent has the correct attribute
-      if hasattr(self.__parentObj, 'dbcode'):
-        self.__parentObj.dbcode = self.bitCode
+      if hasattr(self.__parent_object, 'dbcode'):
+        self.__parent_object.dbcode = self.bit_code
 
-  def __countBits(self, value):
+  def __count_set_bits(self, value):
     return bin(value).count('1')
 
-  def __getValue(self, offset):
-    value = self.__getBit(offset)
-    length = self.__countBits(value)
+  def __get_value(self, offset):
+    value = self.__get_bit(offset)
+    length = self.__count_set_bits(value)
     return length > 0

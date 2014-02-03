@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+
+%if enabled:
+%if attribute is None:
+    <div id="RTTable">
+   <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value='',enabled=enabled)"/>
+   <%call expr="labeled_input.generic_labeler('',enabled)">
+   <div class="btn-group">
+    <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/getTickets')">Reference Ticket</a>
+   </div>
+   </%call>
+   <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+   <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
+   </div>
+  
+%else:
+  <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value=attribute.gui_value.identifier,enabled=enabled)"/>
+%endif
+%else:
+  <%call expr="labeled_input.generic_labeler('Value',enabled)">
+  <div style="padding: 5px;">
+    <a href="${attribute.gui_value.url}"  target="_blank">${attribute.gui_value.identifier}</a>
+  </div>
+  </%call>
+%endif

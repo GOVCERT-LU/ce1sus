@@ -21,100 +21,101 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                       AttributeHandlerBroker
 
+
 class RestDefinitionController(RestControllerBase):
 
-  PARAMETER_INSERT_MAPPER = {'attribute': 'updateAttributeDefinitions',
-                             'object': 'updateObejctDefinitions'}
+  PARAMETER_INSERT_MAPPER = {'attribute': 'update_attribute_definitions',
+                             'object': 'update_object_definitions'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.attributeDefinitionBroker = self.brokerFactory(
+    self.attribute_definition_broker = self.broker_factory(
                                                     AttributeDefinitionBroker
                                                        )
-    self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.handlerBroker = self.brokerFactory(AttributeHandlerBroker)
+    self.object_definition_broker = self.broker_factory(ObjectDefinitionBroker)
+    self.handler_broker = self.broker_factory(AttributeHandlerBroker)
 
-  def getFunctionName(self, parameter, action):
+  def get_function_name(self, parameter, action):
     if action == 'POST':
       return RestDefinitionController.PARAMETER_INSERT_MAPPER.get(parameter,
                                                                    None)
     return None
 
-  def updateAttributeDefinitions(self, identifier, apiKey, **options):
-    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
-    fullDefinition = options.get('fulldefinitions', False)
-    restDefinition = self.getPostObject()
+  def update_attribute_definitions(self, identifier, api_key, **options):
+    self.checkIfPriviledged(self.getUserByAPIKey(api_key))
+    full_definition = options.get('fulldefinitions', False)
+    rest_definition = self.get_post_object()
     try:
-      definition = self.attributeDefinitionBroker.buildAttributeDefinition(
+      definition = self.attribute_definition_broker.build_attribute_definition(
                                identifier=None,
-                               name=restDefinition.name,
-                               description=restDefinition.description,
-                               regex=restDefinition.regex,
-                               classIndex=restDefinition.classIndex,
+                               name=rest_definition.name,
+                               description=rest_definition.description,
+                               regex=rest_definition.regex,
+                               class_index=rest_definition.class_index,
                                action='insert',
-                               handlerIndex=restDefinition.handlerIndex,
+                               handler_index=rest_definition.handler_index,
                                share=1,
                                relation=1)
-      self.attributeDefinitionBroker.insert(definition, True)
-      obj = self._objectToJSON(definition,
+      self.attribute_definition_broker.insert(definition, True)
+      obj = self._object_to_json(definition,
                                True,
-                               fullDefinition,
+                               full_definition,
                                False)
-      return self._returnMessage(obj)
-    except BrokerException as e:
-        return self.raiseError('BrokerException', e)
+      return self._return_message(obj)
+    except BrokerException as error:
+        return self.raise_error('BrokerException', error)
 
-  def updateObejctDefinitions(self, identifier, apiKey, **options):
-    self.checkIfPriviledged(self.getUserByAPIKey(apiKey))
-    fullDefinition = options.get('fulldefinitions', False)
-    restDefinition = self.getPostObject()
+  def update_object_definitions(self, identifier, api_key, **options):
+    self.checkIfPriviledged(self.getUserByAPIKey(api_key))
+    full_definition = options.get('fulldefinitions', False)
+    rest_definition = self.get_post_object()
     try:
-      definition = self.objectDefinitionBroker.buildObjectDefinition(
+      definition = self.object_definition_broker.build_object_definition(
                                identifier=None,
-                               name=restDefinition.name,
-                               description=restDefinition.description,
+                               name=rest_definition.name,
+                               description=rest_definition.description,
                                action='insert',
                                share=1,
                                )
       # check if existing
       try:
         # continue
-        definition = self.objectDefinitionBroker.getDefintionByCHKSUM(definition.chksum)
+        definition = self.object_definition_broker.get_defintion_by_chksum(definition.chksum)
       except NothingFoundException:
         # insert
-        self.objectDefinitionBroker.insert(definition, False)
+        self.object_definition_broker.insert(definition, False)
 
       # insert attributes if there are:
-      for restAttribtue in restDefinition.attributes:
-        attribute = self.attributeDefinitionBroker.buildAttributeDefinition(identifier=None,
-                               name=restAttribtue.name,
-                               description=restAttribtue.description,
-                               regex=restAttribtue.regex,
-                               classIndex=restAttribtue.classIndex,
+      for rest_attribtue in rest_definition.attributes:
+        attribute = self.attribute_definition_broker.build_attribute_definition(identifier=None,
+                               name=rest_attribtue.name,
+                               description=rest_attribtue.description,
+                               regex=rest_attribtue.regex,
+                               class_index=rest_attribtue.class_index,
                                action='insert',
-                               handlerIndex=restAttribtue.handlerIndex,
+                               handler_index=rest_attribtue.handler_index,
                                share=1,
-                               relation=restAttribtue.relation)
+                               relation=rest_attribtue.relation)
         # check if attribute exists
         try:
           # continue
-          attribute = self.attributeDefinitionBroker.getDefintionByCHKSUM(attribute.chksum)
+          attribute = self.attribute_definition_broker.get_defintion_by_chksum(attribute.chksum)
         except NothingFoundException:
           # insert
           # check if handler and class index exist
-          if not attribute.isClassIndexExisting(attribute.classIndex):
-            self.raiseError('UnknownDefinitionException', 'Cannot Insert Attribute as ClassIndex {0} does not exist'.format(attribute.classIndex))
-          if not self.handlerBroker.ishandlerIndexExisting(attribute.handlerIndex):
-            self.raiseError('UnknownDefinitionException', 'Cannot Insert Attribute as HanlderIndex {0} does not exist'.format(attribute.handlerIndex))
-          self.attributeDefinitionBroker.insert(attribute, False)
+          if not attribute.is_class_index_existing(attribute.class_index):
+            self.raise_error('UnknownDefinitionException', 'Cannot Insert Attribute as ClassIndex {0} does not exist'.format(attribute.class_index))
+          if not self.handler_broker.is_handler_index_existing(attribute.handler_index):
+            self.raise_error('UnknownDefinitionException', 'Cannot Insert Attribute as HanlderIndex {0} does not exist'.format(attribute.handler_index))
+          self.attribute_definition_broker.insert(attribute, False)
 
         definition.attributes.append(attribute)
 
-      self.objectDefinitionBroker.doCommit(True)
-      obj = self._objectToJSON(definition,
+      self.object_definition_broker.do_commit(True)
+      obj = self._object_to_json(definition,
                                True,
-                               fullDefinition,
+                               full_definition,
                                False)
-      return self._returnMessage(obj)
-    except BrokerException as e:
-        return self.raiseError('BrokerException', e)
+      return self._return_message(obj)
+    except BrokerException as error:
+        return self.raise_error('BrokerException', error)

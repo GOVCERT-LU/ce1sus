@@ -39,7 +39,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
 
   def start(self):
     """Start the engine"""
-    self.sa_engine = self.connector.getEngine()
+    self.sa_engine = self.connector.get_engine()
 
   def stop(self):
     """stops the engine"""

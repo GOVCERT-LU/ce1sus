@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="ce1sus"" module="ce1sus.web.helpers.protection"/>
 <%namespace name="toolbars" file="/dagr/components/toolbars.html"/>
 <!-- NavBar -->
-<%call expr="toolbars.menu(id='menuBar',contentid='mainContent',loadSelected=ce1sus.isAuthenticated())"> 
-    %if ce1sus.isAuthenticated():
+<%call expr="toolbars.menu(id='menuBar',contentid='mainContent',loadSelected=is_authenticated)"> 
+    %if is_authenticated:
     <%call expr="toolbars.menuitem(id='eventsMenu',url='/events',name='Events',contentid='mainContent' ,active=True)"/> 
     <%call expr="toolbars.menuitem(id='adminMenu',url='/admin', name='Administration',contentid='mainContent')"/> 
     <%call expr="toolbars.menuitem(id='logout',url='/logout', name='Logout',contentid='mainContent')"/> 

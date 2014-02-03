@@ -10,6 +10,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+
 from dagr.db.broker import ValidationException, BrokerException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
@@ -29,7 +30,6 @@ from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                        AttributeHandlerBroker
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
-import importlib
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -45,8 +45,6 @@ _REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', BASE.metadata,
 # pylint: disable=R0902
 class Event(BASE):
   """This is a container class for the EVENTS table."""
-  def __init__(self):
-    pass
 
   __tablename__ = "Events"
   identifier = Column('event_id', Integer, primary_key=True)
@@ -61,8 +59,8 @@ class Event(BASE):
   risk_id = Column('risk_id', Integer)
   analysis_status_id = Column('analysis_status_id', Integer)
   comments = relationship("Comment")
-  groups = relationship(Group, secondary='Groups_has_Events', backref="events")
-  maingroups = relationship(SubGroup,
+  maingroups = relationship(Group, secondary='Groups_has_Events', backref="events")
+  subgroups = relationship(SubGroup,
                             secondary='SubGroups_has_Events')
   objects = relationship('Object', primaryjoin='Event.identifier' +
                        '==Object.event_id')
@@ -77,30 +75,30 @@ class Event(BASE):
                             ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Event.modifier_id==User.identifier")
-  creatorGroup_id = Column('creatorGroup', Integer,
+  creator_group_id = Column('creatorGroup', Integer,
                             ForeignKey('Groups.group_id'))
-  creatorGroup = relationship(Group,
-                        primaryjoin="Event.creatorGroup_id==Group.identifier",
-                        backref="createdEvents")
-  __tlpObj = None
+  creator_group = relationship(Group,
+                        primaryjoin="Event.creator_group_id==Group.identifier",
+                        backref="created_events")
+  __tlp_obj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
-  __bitCode = None
+  __bit_code = None
 
   @property
-  def bitValue(self):
-    if self.__bitCode is None:
+  def bit_value(self):
+    if self.__bit_code is None:
       if self.dbcode is None:
-        self.__bitCode = BitValue('0', self)
+        self.__bit_code = BitValue('0', self)
       else:
-        self.__bitCode = BitValue(self.dbcode, self)
-    return self.__bitCode
+        self.__bit_code = BitValue(self.dbcode, self)
+    return self.__bit_code
 
-  @bitValue.setter
-  def bitValue(self, bitvalue):
-    self.__bitCode = bitvalue
+  @bit_value.setter
+  def bit_value(self, bitvalue):
+    self.__bit_code = bitvalue
 
-  def addObject(self, obj):
+  def add_dbject(self, obj):
     """
     Add an object to this event
 
@@ -109,7 +107,7 @@ class Event(BASE):
     """
     errors = not obj.validate()
     if errors:
-      raise ValidationException('Invalid Object:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
+      raise ValidationException('Invalid Object:' + ValidationException(ObjectValidator.getFirstValidationError(obj)))
     function = getattr(self.objects, 'append')
     function(obj)
 
@@ -120,16 +118,16 @@ class Event(BASE):
 
     :returns: String
     """
-    return Status.getByID(self.status_id)
+    return Status.get_by_id(self.status_id)
 
   @status.setter
-  def setStatus(self, statusText):
+  def set_status(self, status_text):
     """
     returns the status
 
     :returns: String
     """
-    self.status_id = Status.getByName(statusText)
+    self.status_id = Status.get_by_name(status_text)
 
   @property
   def risk(self):
@@ -138,16 +136,16 @@ class Event(BASE):
 
     :returns: String
     """
-    return Risk.getByID(self.risk_id)
+    return Risk.get_by_id(self.risk_id)
 
   @risk.setter
-  def risk(self, riskText):
+  def risk(self, risk_text):
     """
     returns the status
 
     :returns: String
     """
-    self.risk_id = Risk.getByName(riskText)
+    self.risk_id = Risk.get_by_name(risk_text)
 
   @property
   def analysis(self):
@@ -156,7 +154,7 @@ class Event(BASE):
 
     :returns: String
     """
-    return Analysis.getByID(self.analysis_status_id)
+    return Analysis.get_by_id(self.analysis_status_id)
 
   @analysis.setter
   def analysis(self, text):
@@ -165,7 +163,7 @@ class Event(BASE):
 
     :returns: String
     """
-    self.analysis_status_id = Analysis.getByName(text)
+    self.analysis_status_id = Analysis.get_by_name(text)
 
   @property
   def tlp(self):
@@ -174,9 +172,9 @@ class Event(BASE):
 
       :returns: String
     """
-    if self.__tlpObj is None:
-      self.__tlpObj = TLPLevel(self.tlp_level_id)
-    return self.__tlpObj
+    if self.__tlp_obj is None:
+      self.__tlp_obj = TLPLevel(self.tlp_level_id)
+    return self.__tlp_obj
 
   @tlp.setter
   def tlp(self, text):
@@ -187,7 +185,7 @@ class Event(BASE):
     """
     pass
 
-  def addGroup(self, group):
+  def add_group(self, group):
     """
     Add a group to this event
 
@@ -196,18 +194,18 @@ class Event(BASE):
     """
     errors = not group.validate()
     if errors:
-      raise ValidationException('Invalid Group:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
-    function = getattr(self.groups, 'append')
+      raise ValidationException('Invalid Group:' + ValidationException(ObjectValidator.getFirstValidationError(group)))
+    function = getattr(self.maingroups, 'append')
     function(group)
 
-  def removeGroup(self, group):
+  def remove_group_from_event(self, group):
     """
     Remove a group to this event
 
     :param group: Group to be removes
     :type group: Group
     """
-    function = getattr(self.groups, 'remove')
+    function = getattr(self.maingroups, 'remove')
     function(group)
 
   def validate(self):
@@ -259,7 +257,7 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False, full=True):
+  def to_rest_object(self, is_owner=False, full=True):
     result = RestEvent()
     result.tile = self.title
     result.description = self.description
@@ -274,10 +272,10 @@ class Event(BASE):
     if full:
       for obj in self.objects:
         # share only the objects which are shareable or are owned by the user
-        if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
-          result.objects.append(obj.toRestObject(isOwner))
+        if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or is_owner:
+          result.objects.append(obj.to_rest_object(is_owner))
     result.comments = list()
-    if self.bitValue.isSharable:
+    if self.bit_value.is_shareable:
       result.share = 1
     else:
       result.share = 0
@@ -349,24 +347,24 @@ class Object(BASE):
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
-  parentObject_id = Column('parentObject', Integer,
+  parent_object_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
-  parentObject = relationship('Object',
-                      primaryjoin="Object.parentObject_id==Object.identifier")
+  parent_object = relationship('Object',
+                      primaryjoin="Object.parent_object_id==Object.identifier")
 
-  parentEvent_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
-  parentEvent = relationship("Event",
+  parent_event_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
+  parent_event = relationship("Event",
                              uselist=False,
                              primaryjoin='Event.identifier' +
-                             '==Object.parentEvent_id')
+                             '==Object.parent_event_id')
   children = relationship("Object", primaryjoin='Object.identifier' +
-                         '==Object.parentObject_id')
+                         '==Object.parent_object_id')
   dbcode = Column('code', Integer)
-  __bitCode = None
+  __bit_code = None
 
   @property
   def shared(self):
-    if self.bitValue.isSharable:
+    if self.bit_value.is_shareable:
       return 0
     else:
       return 1
@@ -374,25 +372,25 @@ class Object(BASE):
   @shared.setter
   def shared(self, value):
     if value == 1:
-      self.bitValue.isSharable = True
+      self.bit_value.is_shareable = True
     else:
-      self.bitValue.isSharable = False
+      self.bit_value.is_shareable = False
 
   @property
-  def bitValue(self):
-    if self.__bitCode is None:
+  def bit_value(self):
+    if self.__bit_code is None:
       if self.dbcode is None:
-        self.__bitCode = BitValue('0', self)
+        self.__bit_code = BitValue('0', self)
       else:
-        self.__bitCode = BitValue(self.dbcode, self)
-    return self.__bitCode
+        self.__bit_code = BitValue(self.dbcode, self)
+    return self.__bit_code
 
-  @bitValue.setter
-  def bitValue(self, bitvalue):
-    self.__bitCode = bitvalue
-    self.dbcode = bitvalue.bitCode
+  @bit_value.setter
+  def bit_value(self, bitvalue):
+    self.__bit_code = bitvalue
+    self.dbcode = bitvalue.bit_code
 
-  def addAttribute(self, attribute):
+  def add_attribute(self, attribute):
     """
     Add an attribute to this event
 
@@ -401,11 +399,11 @@ class Object(BASE):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException(ValidationException(ObjectValidator.getFirstValidationError(instance)))
+      raise ValidationException(ValidationException(ObjectValidator.getFirstValidationError(attribute)))
     function = getattr(self.attributes, 'append')
     function(attribute)
 
-  def removeAttribute(self, attribute):
+  def remove_attribute(self, attribute):
     """
     remove this attribute
 
@@ -431,36 +429,47 @@ class Object(BASE):
     ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDigits(self, 'def_object_id')
-    if not self.parentObject_id is None:
-      ObjectValidator.validateDigits(self, 'parentObject_id')
+    if not self.parent_object_id is None:
+      ObjectValidator.validateDigits(self, 'parent_object_id')
     if not self.event_id is None:
       ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False, full=True):
+  def to_rest_object(self, is_owner=False, full=True):
     result = RestObject()
-    result.parentObject_id = self.parentObject_id
-    result.parentEvent_id = self.parentEvent_id
-    result.definition = self.definition.toRestObject()
+    result.parent_object_id = self.parent_object_id
+    result.parent_event_id = self.parent_event_id
+    result.definition = self.definition.to_rest_object()
 
     result.attributes = list()
     if full:
       for attribute in self.attributes:
-        if (attribute.bitValue.isSharable and
-                                      attribute.bitValue.isValidated) or isOwner:
-          result.attributes.append(attribute.toRestObject(isOwner))
+        if (attribute.bit_value.is_shareable and
+                                      attribute.bit_value.is_validated) or is_owner:
+          result.attributes.append(attribute.to_rest_object(is_owner))
     result.children = list()
     if full:
       for obj in self.children:
-        if (obj.bitValue.isSharable and obj.bitValue.isValidated) or isOwner:
-          result.children.append(obj.toRestObject(isOwner))
-    if self.bitValue.isSharable:
+        if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or is_owner:
+          result.children.append(obj.to_rest_object(is_owner))
+    if self.bit_value.is_shareable:
       result.share = 1
     else:
       result.share = 0
     return result
 
+  def get_parent_event(self):
+    if self.event:
+      return self.event
+    else:
+      return self.parent_event
+
+  def get_parent_event_id(self):
+    if self.event:
+      return self.event_id
+    else:
+      return self.parent_event_id
 
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
@@ -487,29 +496,33 @@ class Attribute(BASE):
                           primaryjoin="Attribute.modifier_id==User.identifier")
   ioc = Column('ioc', Integer)
   # valuerelations
-  stringValue = relationship(StringValue,
+  string_value = relationship(StringValue,
                   primaryjoin="Attribute.identifier==StringValue.attribute_id",
                   lazy='joined', uselist=False,)
-  dateValue = relationship(DateValue,
+  date_value = relationship(DateValue,
                   primaryjoin="Attribute.identifier==DateValue.attribute_id",
                   lazy='joined', uselist=False)
-  textValue = relationship(TextValue,
+  text_value = relationship(TextValue,
                   primaryjoin="Attribute.identifier==TextValue.attribute_id",
                   lazy='joined', uselist=False)
-  numberValue = relationship(NumberValue,
+  number_value = relationship(NumberValue,
                   primaryjoin="Attribute.identifier==NumberValue.attribute_id",
                   lazy='joined', uselist=False)
-
+  attr_parent_id = Column('parent_attr_id', ForeignKey('Attributes.attribute_id'))
+  # monkey-patch because you cannot make self-references within a class definition
+  # children = relationship('Attribute',
+  #                        primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
   __value_id = None
   __value = None
-  __valueObject = None
+  __value_obj = None
+  __handler_class = None
   dbcode = Column('code', Integer)
-  __bitCode = None
-
+  __bit_code = None
+  config = None
 
   @property
   def shared(self):
-    if self.bitValue.isSharable:
+    if self.bit_value.is_shareable:
       return 0
     else:
       return 1
@@ -517,22 +530,22 @@ class Attribute(BASE):
   @shared.setter
   def shared(self, value):
     if value == 1:
-      self.bitValue.isSharable = True
+      self.bit_value.is_shareable = True
     else:
-      self.bitValue.isSharable = False
+      self.bit_value.is_shareable = False
 
   @property
-  def bitValue(self):
-    if self.__bitCode is None:
+  def bit_value(self):
+    if self.__bit_code is None:
       if self.dbcode is None:
-        self.__bitCode = BitValue('0', self)
+        self.__bit_code = BitValue('0', self)
       else:
-        self.__bitCode = BitValue(self.dbcode, self)
-    return self.__bitCode
+        self.__bit_code = BitValue(self.dbcode, self)
+    return self.__bit_code
 
-  @bitValue.setter
-  def bitValue(self, bitvalue):
-    self.__bitCode = bitvalue
+  @bit_value.setter
+  def bit_value(self, bitvalue):
+    self.__bit_code = bitvalue
 
   @property
   def key(self):
@@ -543,85 +556,76 @@ class Attribute(BASE):
     """
     return getattr(self.definition, 'name')
 
+  def __get_value(self):
+    if self.__value_obj is None:
+      if not self.string_value  is None:
+        value = self.string_value
+      elif not self.date_value  is None:
+        value = self.date_value
+      elif not self.text_value is None:
+        value = self.text_value
+      elif not self.number_value is None:
+        value = self.number_value
+      else:
+        value = None
+      self.__value_obj = value
+      if value is None:
+        return self.__value
+    else:
+      return self.__value_obj.value
+
+  @property
+  def value_id(self):
+    value = self.__get_value()
+    if value is None:
+      return None
+    else:
+      if self.__value_obj is None:
+        return None
+      else:
+        return getattr(self.__value_obj, 'identifier')
+
+  @property
+  def plain_value(self):
+    value = self.__get_value()
+    if value:
+      return value
+    else:
+      return self.__value_obj.value
+
+  @property
+  def gui_value(self):
+    value = self.__get_value()
+    if value is None:
+      handler_instance = self.__get_handler_instance()
+      value = handler_instance.convert_to_gui_value(self)
+      return value
+    return None
+
+  @property
+  def rest_value(self):
+    value = self.__get_value()
+    if value is None:
+      handler_instance = self.__get_handler_instance()
+      value = handler_instance.convert_to_rest_value(self)
+      return value
+    return None
+
   @property
   def value(self):
-    """
-    returns the actual value of the attribute
-
-    :returns: Any
-    """
-    if self.__value is None:
-
-      if not self.stringValue  is None:
-        value = self.stringValue
-      elif not self.dateValue  is None:
-        value = self.dateValue
-      elif not self.textValue is None:
-        value = self.textValue
-      elif not self.numberValue is None:
-        value = self.numberValue
-
-      try:
-        sessionMangager = SessionManager.getInstance()
-        handlerBroker = sessionMangager.brokerFactory(AttributeHandlerBroker)
-        handler = handlerBroker.getHandler(self.definition)
-        # Format the value if needed
-        self.__value = handler.convertToAttributeValue(value)
-      except BrokerException as e:
-        Log.getLogger(self.__class__.__name__).error(e)
-        self.__value = value.value
-
-    return self.__value
+    raise Exception('Illegal access {0}'.format(self.__class__.__name__))
 
   @value.setter
   def value(self, value):
-    """
-    setter for the attribute value
-
-    :param value: value to set
-    :type value: Any
-    """
-    """
-    # attribute instance to attribute
-    if self.definition:
-      # instantiate class
-      className = self.definition.className
-      module = importlib.import_module('ce1sus.brokers.valuebroker')
-      instance = getattr(module, className)()
-      instance.value = value
-      # set evetID
-      eventID = self.object.event_id
-      if eventID is None:
-        eventID = self.object.parentEvent_id
-      instance.event_id = eventID
-
-      if className == 'StringValue':
-        self.stringValue = instance
-      elif className == 'DateValue':
-        self.dateValue = instance
-      elif className == 'TextValue':
-        self.textValue = instance
-      elif className == 'NumberValue':
-        self.numberValue = instance
-
-      self.__value = None
-    else:
-    """
     self.__value = value
 
-  @property
-  def iocIcon(self):
-    if self.ioc == 1:
-      return '<span class="glyphicon glyphicon-record"></span>'
-    else:
-      return ''
+  def __get_handler_instance(self):
+    """
+    returns the actual value of the attribute and its handler
 
-  @property
-  def sharedIcon(self):
-    if self.bitValue.isSharable:
-      return '<span class="glyphicon glyphicon-ok"></span>'
-    return '<span class="glyphicon glyphicon-remove"></span>'
-
+    :returns: Object, instance of HandlerBase
+    """
+    return getattr(self.definition, 'handler')
 
   def validate(self):
     """
@@ -637,12 +641,12 @@ class Attribute(BASE):
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False):
+  def to_rest_object(self, is_owner=False):
     result = RestAttribute()
-    result.definition = self.definition.toRestObject()
+    result.definition = self.definition.to_rest_object()
     result.value = self.value
     result.ioc = self.ioc
-    if self.bitValue.isSharable:
+    if self.bit_value.is_shareable:
       result.share = 1
     else:
       result.share = 0

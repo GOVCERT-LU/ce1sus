@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
 
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
-<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 
 <legend>Edit Details</legend>
 
-<%call expr="baseForms.genericForm(id='editEventForm', url='/events/event/modifyEvent',refreshUrl='/events/event/details/{0}'.format(event.identifier),refreshContainer='eventEdit')">
+<%call expr="base_forms.generic_form(id='editEventForm', url='/events/event/modify_event',refresh_url='/events/event/details/{0}'.format(event.identifier),refresh_container='eventEdit')">
     <input type="hidden" name="action" value="update"/>
-    ${forms.eventForm(event=event,enabled=True,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+    ${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
     <div class="row">
         <div class="col-xs-12 col-sm-12" style="text-align:left">
             <div class="btn-group">

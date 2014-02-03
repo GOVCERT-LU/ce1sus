@@ -4,44 +4,39 @@
 
 <%def name="error(message=None)">
 %if not message is None:
-	<div class="alert alert-block alert-danger">${message}</div>
+<div class="alert alert-block alert-danger">${message}</div>
 %endif
 </%def>
 
-<%def name="errorDialog(message=None)">
-%if not errorMsg is None:
-	<div class="alert alert-block alert-danger fade in">
-		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-		<h4 class="alert-heading">An unexpected Error occurred!</h4>
-		<p>${errorMsg}</p>
-	</div>
+<%def name="error_dialog(message=None)">
+%if not message is None:
+<div class="alert alert-block alert-danger fade in">
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+	<h4 class="alert-heading">Error occurred</h4>
+	<p>${message}</p>
+</div>
 %endif
 </%def>
 
 
 
 
-<%def name="objectToHTML(object,shortenTo=0, usePlainText=False)">
-<%
+<%def name="object_to_html(object,shorten_to=0, use_plain_text=False)"><%
 classname = type(object).__name__
 
 if hasattr(object,'isoformat'):
   string = object.isoformat()
 else:
   string = unicode(object)
-if shortenTo > 0:
-  result = string[:shortenTo]
-if len(string) >= shortenTo:
+if shorten_to > 0:
+  result = string[:shorten_to]
+if len(string) >= shorten_to:
   result = result + '...'
 else:
-  result = string %>
-%if "Link" in classname:
-    <a href="${object.url}"  target="_blank">${object.identifier}</a>
-%else:
-    %if usePlainText: 
-        ${result}
-    %else:
-        ${dagr.plaintext2html(text=result)}
-    %endif
-%endif
-</%def>
+  result = string
+if 'Link' in object.__class__.__name__:
+  result = '<a href="{0}" target="_blank">{1}</a>'.format(object.url, object.identifier)
+else:
+  if not use_plain_text: 
+    result = dagr.plaintext2html(text=result)
+%>${result}</%def>

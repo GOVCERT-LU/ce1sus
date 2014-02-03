@@ -101,7 +101,7 @@ class BrokerBase(object):
     return self.__session.session
 
   @abstractmethod
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
     Returns the used class
 
@@ -109,7 +109,7 @@ class BrokerBase(object):
     """
     return self.__class__
 
-  def getByID(self, identifier):
+  def get_by_id(self, identifier):
     """
     Returns the object by the given identifier
 
@@ -122,8 +122,8 @@ class BrokerBase(object):
     """
     try:
 
-      result = self.session.query(self.getBrokerClass()).filter(
-                        getattr(self.getBrokerClass(),
+      result = self.session.query(self.get_broker_class()).filter(
+                        getattr(self.get_broker_class(),
                                 'identifier') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
@@ -133,61 +133,60 @@ class BrokerBase(object):
       raise TooManyResultsFoundException(
                     'Too many results found for ID :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       raise BrokerException(e)
 
     return result
 
-  def getAll(self):
+  def get_all(self):
     """
-    Returns all getBrokerClass() instances
+    Returns all get_broker_class() instances
 
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()).all()
+      result = self.session.query(self.get_broker_class()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       raise BrokerException(e)
 
     return result
 
-  def removeByID(self, identifier, commit=True):
+  def remove_by_id(self, identifier, commit=True):
     """
-    Removes the <<getBrokerClass()>> with the given identifier
+    Removes the <<get_broker_class()>> with the given identifier
 
     :param identifier:  the id of the requested user object
     :type identifier: integer
     """
     try:
-      self.session.query(self.getBrokerClass()).filter(
-                      getattr(self.getBrokerClass(),
+      self.session.query(self.get_broker_class()).filter(
+                      getattr(self.get_broker_class(),
                                 'identifier') == identifier
                       ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.IntegrityError as e:
       self.session.rollback()
       raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
-    self.doCommit(commit)
+    self.do_commit(commit)
 
-  def doRollBack(self):
+  def do_rollback(self):
+    """
+    Performs a rollback
+    """
     try:
       self.session.rollback()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-  def doCommit(self, commit=True):
+  def do_commit(self, commit=True):
     """
-    General commit, or rollback in case of an esception
+    General commit, or rollback in case of an exception
 
     :param commit: If set a commit is done else a flush
     :type commit: Boolean
@@ -198,24 +197,21 @@ class BrokerBase(object):
         self.session.commit()
       else:
         self.session.flush()
-    except sqlalchemy.exc.IntegrityError as e:
+    except sqlalchemy.exc.IntegrityError as error:
       self.session.rollback()
-      self.getLogger().critical(e)
-      raise IntegrityException(e)
-    except sqlalchemy.exc.DatabaseError as e:
+      raise IntegrityException(error)
+    except sqlalchemy.exc.DatabaseError as error:
       self.session.rollback()
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise BrokerException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   def insert(self, instance, commit=True, validate=True):
     """
-    Insert a <<getBrokerClass()>>
+    Insert a <<get_broker_class()>>
 
-    :param instance: The getBrokerClass() to be inserted
+    :param instance: The get_broker_class() to be inserted
     :type instance: extension of Base
 
     Note: handles the commit and the identifier of the user is taken
@@ -225,27 +221,23 @@ class BrokerBase(object):
       errors = not instance.validate()
       if errors:
         raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
-
     try:
       self.session.add(instance)
-      self.doCommit(commit)
-    except sqlalchemy.exc.IntegrityError as e:
-      self.getLogger().critical(e)
-      raise IntegrityException(e)
-    except sqlalchemy.exc.DatabaseError as e:
-      self.getLogger().error(e)
+      self.do_commit(commit)
+    except sqlalchemy.exc.IntegrityError as error:
+      raise IntegrityException(error)
+    except sqlalchemy.exc.DatabaseError as error:
       self.session.rollback()
-      raise BrokerException(e)
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise BrokerException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   def update(self, instance, commit=True, validate=True):
     """
-    updates an <<getBrokerClass()>>
+    updates an <<get_broker_class()>>
 
-    :param instance: The getBrokerClass() to be updated
+    :param instance: The get_broker_class() to be updated
     :type instance: extension of Base
 
     """
@@ -256,27 +248,16 @@ class BrokerBase(object):
     # an elo den update
     try:
       self.session.merge(instance)
-      self.doCommit(commit)
-    except sqlalchemy.exc.IntegrityError as e:
-      self.getLogger().critical(e)
-      raise IntegrityException(e)
+      self.do_commit(commit)
+    except sqlalchemy.exc.IntegrityError as error:
+      raise IntegrityException(error)
 
-    except sqlalchemy.exc.DatabaseError as e:
-      self.getLogger().error(e)
+    except sqlalchemy.exc.DatabaseError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-    self.doCommit(commit)
-
-  def getLogger(self):
-    """
-    Returns the logger
-
-    :returns: Logger
-    """
-    return Log.getLogger(self.__class__.__name__)
+    self.do_commit(commit)

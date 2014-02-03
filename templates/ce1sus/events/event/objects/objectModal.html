@@ -3,12 +3,15 @@
 
 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
-<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
+%if object is None:
+  <input type="hidden" name="action" value="insert"/>
+%endif
 <div id="objectModal">
-<%call expr="forms.eventObjectForm(eventID,object,True,cbObjDefinitions)"/>
+<%call expr="forms.eventObjectForm(event_id,object,True,obj_definitions)"/>
   <div id="editBox">
   <div id="editBoxHidden">
-  <%call expr="labeledInput.genericLabeler('')">
+  <%call expr="labeled_input.generic_labeler('')">
   Please select something
   </%call>
   </div>
@@ -19,7 +22,7 @@ $(document).ready(function(){
         $("#objectModal select#definitionID").change(function(event){
             value = $(this).val();
             if (value) {
-                loadContent('editBox','/events/event/objects/renderProperties/'+$(this).val()+'/${eventID}');
+                loadContent('editBox','/events/event/objects/render_properties/'+$(this).val()+'/${event_id}');
             } else {
                 $('#objectModal #editBox').html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9">Please select something</div></div>');
             }

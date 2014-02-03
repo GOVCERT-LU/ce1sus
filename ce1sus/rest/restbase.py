@@ -10,16 +10,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.brokers.permission.userbroker import UserBroker
 import json
-from ce1sus.api.restclasses import RestClass, populateClassNamebyDict, \
-                                   getObjectData
+from ce1sus.api.restclasses import RestClass, populate_classname_by_dict, \
+                                   get_object_data
 from importlib import import_module
 import cherrypy
-from ce1sus.web.controllers.base import Ce1susBaseController
+from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.brokers.event.eventclasses import Event, Attribute
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
-                                                        ObjectDefinition
 from dagr.db.broker import NothingFoundException
 from dagr.helpers.datumzait import datumzait
 from dagr.helpers.converters import ObjectConverter
@@ -31,14 +28,12 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                                                         ObjectDefinitionBroker
 from dagr.helpers.hash import fileHashSHA256, hashMD5, hashSHA256
-from ce1sus.web.helpers.handlers.filehandler import FileHandler
+from ce1sus.common.handlers.filehandler import FileHandler
 import os
 from os.path import exists, dirname
-from dagr.db.session import SessionManager
 from shutil import move, rmtree
 import re
 from ce1sus.web.helpers.protection import Protector
-from dagr.web.helpers.config import WebConfig
 import base64
 from os import makedirs
 
@@ -55,56 +50,56 @@ class RestControllerBase(Ce1susBaseController):
 
   def __init__(self):
     Ce1susBaseController.__init__(self)
-    self.attributeBroker = self.brokerFactory(AttributeBroker)
-    self.objectBroker = self.brokerFactory(ObjectBroker)
-    self.objectDefinitionBroker = self.brokerFactory(ObjectDefinitionBroker)
-    self.attributeDefinitionBroker = self.brokerFactory(
+    self.attribute_broker = self.broker_factory(AttributeBroker)
+    self.object_broker = self.broker_factory(ObjectBroker)
+    self.object_definition_broker = self.broker_factory(ObjectDefinitionBroker)
+    self.attribute_definition_broker = self.broker_factory(
                                                     AttributeDefinitionBroker
                                                        )
-    self.basePath = WebConfig.getInstance().get('files')
+    self.base_path = WebConfig.get_instance().get('files')
 
   @staticmethod
-  def __instantiateClass(className):
+  def __instantiate_class(classname):
     module = import_module('.restclasses', 'ce1sus.api')
-    clazz = getattr(module, className)
+    clazz = getattr(module, classname)
     # instantiate
     instance = clazz()
     # check if handler base is implemented
     if not isinstance(instance, RestClass):
       Protector.clearRestSession()
       raise RestAPIException(('{0} does not implement '
-                              + 'RestClass').format(className))
+                              + 'RestClass').format(classname))
     return instance
 
-  def _toRestObject(self, obj, isOwner=False, full=True):
-    className = 'Rest' + obj.__class__.__name__
-    instance = RestControllerBase.__instantiateClass(className)
+  def _to_rest_object(self, obj, is_owner=False, full=True):
+    classname = 'Rest' + obj.__class__.__name__
+    instance = RestControllerBase.__instantiate_class(classname)
 
-    instance.populate(obj, isOwner, full)
+    instance.populate(obj, is_owner, full)
     return instance
 
-  def _objectToJSON(self,
+  def _object_to_json(self,
                     obj,
-                    isOwner=False,
+                    is_owner=False,
                     full=False,
-                    withDefinition=False):
-    instance = self._toRestObject(obj, isOwner, full)
+                    with_definition=False):
+    instance = self._to_rest_object(obj, is_owner, full)
 
-    result = dict(instance.toDict(full=full,
-                             withDefinition=withDefinition).items()
+    result = dict(instance.to_dict(full=full,
+                             with_definition=with_definition).items()
                  )
     return result
 
-  def _returnList(self, array):
-    result = {'list':array}
-    return self._returnMessage(result)
+  def _return_list(self, array):
+    result = {'list': array}
+    return self._return_message(result)
 
-  def _returnMessage(self, dictionary):
+  def _return_message(self, dictionary):
     result = dict(dictionary.items()
-                  + self._createStatus().items())
+                  + self._create_status().items())
     return json.dumps(result)
 
-  def _createStatus(self, classname=None, message=None):
+  def _create_status(self, classname=None, message=None):
     result = dict()
     result['response'] = dict()
     result['response']['errors'] = list()
@@ -115,210 +110,209 @@ class RestControllerBase(Ce1susBaseController):
       result['response']['errors'].append({classname: '{0}'.format(message)})
     return result
 
-  def raiseError(self, classname, message):
+  def raise_error(self, classname, message):
     raise RestAPIException('{0}: {1}'.format(classname, message))
 
-  def getPostObject(self):
+  def get_post_object(self):
     try:
-      cl = cherrypy.request.headers['Content-Length']
-      raw = cherrypy.request.body.read(int(cl))
-      jsonData = json.loads(raw)
-      key, value = getObjectData(jsonData)
-      obj = populateClassNamebyDict(key, value, False)
+      content_length = cherrypy.request.headers['Content-Length']
+      raw = cherrypy.request.body.read(int(content_length))
+      json_data = json.loads(raw)
+      key, value = get_object_data(json_data)
+      obj = populate_classname_by_dict(key, value, False)
       return obj
-    except AttributeError as e:
-      self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
-      self.raiseError('UnRecoverableException',
-                      'JSON structure error. {0}'.format(e))
-    except Exception as e:
-      self.getLogger().error('An error occurred by getting the post object {0}'.format(e))
-      self.raiseError('UnRecoverableException',
-                      'An unrecoverable error occurred. {0}'.format(e))
+    except AttributeError as error:
+      self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
+      self.raise_error('UnRecoverableException',
+                      'JSON structure error. {0}'.format(error))
+    except Exception as error:
+      self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
+      self.raise_error('UnRecoverableException',
+                      'An unrecoverable error occurred. {0}'.format(error))
 
-  def _convertToAttributeDefinition(self,
-                                   restAttributeDefinition,
-                                   objectDefinition,
+  def _convert_to_attribute_definition(self,
+                                   rest_attribute_definition,
+                                   object_definition,
                                    commit=False):
     # get definition if existing
       try:
-        attrDefinition = self.attributeDefinitionBroker.getDefintionByCHKSUM(
-                                                restAttributeDefinition.chksum
+        attr_definition = self.attribute_definition_broker.get_defintion_by_chksum(
+                                                rest_attribute_definition.chksum
                                                                             )
       except NothingFoundException:
-        self.raiseError('UnknownDefinitionException',
+        self.raise_error('UnknownDefinitionException',
                       'The attribute definition with CHKSUM {0} is not defined.'.format(
-                                                  restAttributeDefinition.chksum))
+                                                  rest_attribute_definition.chksum))
 
-        self.attributeDefinitionBroker.insert(attrDefinition, commit=False)
+        self.attribute_definition_broker.insert(attr_definition, commit=False)
 
         # update objectRelations as the attribute was not set
-        objectDefinition.attributes.append(attrDefinition)
-        self.objectBroker.update(attrDefinition, commit=False)
+        object_definition.attributes.append(attr_definition)
+        self.object_broker.update(attr_definition, commit=False)
+        self.object_broker.do_commit(commit)
 
-        self.doCommit(commit)
+      return attr_definition
 
-      return attrDefinition
-
-  def _createAttribute(self,
-                        restAttribute,
-                        attributeDefinition,
+  def _create_attribute(self,
+                        rest_attribute,
+                        attribute_definition,
                         obj,
                         commit=False):
 
     user = obj.creator
 
     # create the actual attribute
-    dbAttribute = Attribute()
-    dbAttribute.identifier = None
+    db_attribute = Attribute()
+    db_attribute.identifier = None
     # TODO: collect definition and check if the handler uses is a filehandler...
-    fileName = ''
-    if (re.match(r'^\{.*file.*:.*\}$', restAttribute.value)):
+    filename = ''
+    if (re.match(r'^\{.*file.*:.*\}$', rest_attribute.value)):
       try:
-        strValue = restAttribute.value
-        value = json.loads(strValue)
+        str_value = rest_attribute.value
+        value = json.loads(str_value)
 
-        jsonFile = value.get('file', None)
-        if jsonFile:
-          fileName = jsonFile[0]
-          strData = jsonFile[1]
-          value = base64.b64decode(strData)
+        json_file = value.get('file', None)
+        if json_file:
+          filename = json_file[0]
+          str_data = json_file[1]
+          value = base64.b64decode(str_data)
           # Relative position
-          tmpFolder = self.basePath + '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
-          os.mkdir(tmpFolder)
-          tmpFolder = tmpFolder + '/{0}'.format(fileName)
+          tmp_folder = self.base_path + '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
+          os.mkdir(tmp_folder)
+          tmp_folder = tmp_folder + '/{0}'.format(filename)
 
-          fh = open(tmpFolder, "wb")
-          fh.write(value)
-          fh.close()
+          file_object = open(tmp_folder, "wb")
+          file_object.write(value)
+          file_object.close()
 
           # filename
           destination = FileHandler.getDestination()
           # in case the directories doesn't exist
-          if not exists(self.basePath + '/' + destination):
-            makedirs(self.basePath + '/' + destination)
+          if not exists(self.base_path + '/' + destination):
+            makedirs(self.base_path + '/' + destination)
 
-          fileHash = fileHashSHA256(tmpFolder)
-          fileName = FileHandler.getFileName(fileHash, hashSHA256(fileName))
+          file_hash = fileHashSHA256(tmp_folder)
+          filename = FileHandler.getFileName(file_hash, hashSHA256(filename))
 
-          destination = destination + fileName
-          move(tmpFolder, self.basePath + '/' + destination)
+          destination = destination + filename
+          move(tmp_folder, self.base_path + '/' + destination)
           # delete the folder
-          folderName = dirname(tmpFolder)
-          rmtree(folderName)
+          foldername = dirname(tmp_folder)
+          rmtree(foldername)
 
           value = destination
-      except Exception as e:
-        self.getLogger().error('Error occured while saving file:{0}'.format(e))
+      except Exception as error:
+        self._get_logger().error('Error occured while saving file:{0}'.format(error))
         value = '(Corrupted File)'
     else:
-      value = restAttribute.value
-    dbAttribute.value = value
-    dbAttribute.object = obj
-    dbAttribute.object_id = obj.identifier
-    dbAttribute.definition = attributeDefinition
-    dbAttribute.def_attribute_id = attributeDefinition.identifier
-    dbAttribute.created = datumzait.utcnow()
-    dbAttribute.modified = datumzait.utcnow()
-    dbAttribute.creator_id = user.identifier
-    dbAttribute.modifier_id = user.identifier
-    dbAttribute.bitValue = BitValue('0', dbAttribute)
-    dbAttribute.bitValue.isRestInsert = True
-    if restAttribute.share == 1:
-      dbAttribute.bitValue.isSharable = True
+      value = rest_attribute.value
+    db_attribute.value = value
+    db_attribute.object = obj
+    db_attribute.object_id = obj.identifier
+    db_attribute.definition = attribute_definition
+    db_attribute.def_attribute_id = attribute_definition.identifier
+    db_attribute.created = datumzait.utcnow()
+    db_attribute.modified = datumzait.utcnow()
+    db_attribute.creator_id = user.identifier
+    db_attribute.modifier_id = user.identifier
+    db_attribute.bit_value = BitValue('0', db_attribute)
+    db_attribute.bit_value.is_rest_instert = True
+    if rest_attribute.share == 1:
+      db_attribute.bit_value.is_shareable = True
     else:
-      dbAttribute.bitValue.isSharable = False
-    ObjectConverter.setInteger(dbAttribute,
+      db_attribute.bit_value.is_shareable = False
+    ObjectConverter.setInteger(db_attribute,
                                'ioc',
-                               restAttribute.ioc)
+                               rest_attribute.ioc)
 
-    self.attributeBroker.insert(dbAttribute, commit=False)
+    self.attribute_broker.insert(db_attribute, commit=False)
 
-    return dbAttribute
+    return db_attribute
 
-  def _convertToAttribues(self, restAttributes, obj, commit=False):
+  def _convert_to_attribues(self, rest_attributes, obj, commit=False):
 
     result = list()
-    for attribute in restAttributes:
+    for attribute in rest_attributes:
       if attribute.value != '(Not Provided)':
-        attrDefinition = self._convertToAttributeDefinition(
+        attr_definition = self._convert_to_attribute_definition(
                                                          attribute.definition,
                                                          obj.definition,
                                                          commit)
-        dbAttribute = self._createAttribute(attribute,
-                                           attrDefinition,
+        db_attribute = self._create_attribute(attribute,
+                                           attr_definition,
                                            obj,
                                            commit)
-        if (dbAttribute.definition.identifier == 12
-              or dbAttribute.definition.identifier == 13):
+        if (db_attribute.definition.identifier == 12
+              or db_attribute.definition.identifier == 13):
           value = json.loads(attribute.value)
-          jsonFile = value.get('file', None)
-          if jsonFile:
-            fileName = jsonFile[0]
+          json_file = value.get('file', None)
+          if json_file:
+            filename = json_file[0]
             # Add the same for the filename attribute
-            dbAttrFileName = Attribute()
-            dbAttrFileName.identifier = None
-            dbAttrFileName.value = fileName
-            dbAttrFileName.object = obj
-            dbAttrFileName.object_id = obj.identifier
-            attrDef = self.attributeDefinitionBroker.getByID(7)
-            dbAttrFileName.definition = attrDef
-            dbAttrFileName.def_attribute_id = attrDef.identifier
-            dbAttrFileName.created = datumzait.utcnow()
-            dbAttrFileName.modified = datumzait.utcnow()
-            dbAttrFileName.creator_id = obj.creator.identifier
-            dbAttrFileName.modifier_id = obj.creator.identifier
-            dbAttrFileName.bitValue = BitValue('0', dbAttrFileName)
-            dbAttrFileName.bitValue.isRestInsert = True
+            db_attr_filename = Attribute()
+            db_attr_filename.identifier = None
+            db_attr_filename.value = filename
+            db_attr_filename.object = obj
+            db_attr_filename.object_id = obj.identifier
+            attr_def = self.attribute_definition_broker.get_by_id(7)
+            db_attr_filename.definition = attr_def
+            db_attr_filename.def_attribute_id = attr_def.identifier
+            db_attr_filename.created = datumzait.utcnow()
+            db_attr_filename.modified = datumzait.utcnow()
+            db_attr_filename.creator_id = obj.creator.identifier
+            db_attr_filename.modifier_id = obj.creator.identifier
+            db_attr_filename.bit_value = BitValue('0', db_attr_filename)
+            db_attr_filename.bit_value.is_rest_instert = True
             if attribute.share == 1:
-              dbAttrFileName.bitValue.isSharable = True
+              db_attr_filename.bit_value.is_shareable = True
             else:
-              dbAttrFileName.bitValue.isSharable = False
-            ObjectConverter.setInteger(dbAttrFileName,
+              db_attr_filename.bit_value.is_shareable = False
+            ObjectConverter.setInteger(db_attr_filename,
                                        'ioc',
                                        attribute.ioc)
-            self.attributeBroker.insert(dbAttrFileName, commit=commit)
-            result.append(dbAttrFileName)
-        result.append(dbAttribute)
+            self.attribute_broker.insert(db_attr_filename, commit=commit)
+            result.append(db_attr_filename)
+        result.append(db_attribute)
     return result
 
-  def _convertToObjectDefinition(self, restObjectDefinition, commit=False):
+  def _convert_to_object_definition(self, rest_object_definition, commit=False):
     # create object
 
     # get definition if existing
     try:
-      objDefinition = self.objectDefinitionBroker.getDefintionByCHKSUM(
-                                                    restObjectDefinition.chksum
+      obj_definition = self.object_definition_broker.get_defintion_by_chksum(
+                                                    rest_object_definition.chksum
                                                                       )
     except NothingFoundException:
-      self.raiseError('UnknownDefinitionException',
+      self.raise_error('UnknownDefinitionException',
                       'The object definition with CHKSUM {0} is not defined.'.format(
-                                                  restObjectDefinition.chksum))
-    return objDefinition
+                                                  rest_object_definition.chksum))
+    return obj_definition
 
-  def _convertToObject(self, restObject, parent, event, commit=False):
-    objectDefinition = self._convertToObjectDefinition(restObject.definition,
+  def _convert_to_object(self, rest_object, parent, event, commit=False):
+    object_definition = self._convert_to_object_definition(rest_object.definition,
                                                         commit)
 
     user = parent.creator
     if isinstance(parent, Event):
-      dbObject = self.objectBroker.buildObject(None,
+      db_object = self.object_broker.build_object(None,
                                                parent,
-                                               objectDefinition,
+                                               object_definition,
                                                user,
                                                None)
     else:
-      dbObject = self.objectBroker.buildObject(None,
+      db_object = self.object_broker.build_object(None,
                                                None,
-                                               objectDefinition,
+                                               object_definition,
                                                user,
                                                parent.identifier)
-      dbObject.parentEvent_id = event.identifier
+      db_object.parent_event_id = event.identifier
     # flush to DB
-    dbObject.bitValue.isRestInsert = True
-    if restObject.share == 1:
-      dbObject.bitValue.isSharable = True
+    db_object.bit_value.is_rest_instert = True
+    if rest_object.share == 1:
+      db_object.bit_value.is_shareable = True
     else:
-      dbObject.bitValue.isSharable = False
-    self.objectBroker.insert(dbObject, commit=commit)
+      db_object.bit_value.is_shareable = False
+    self.object_broker.insert(db_object, commit=commit)
 
-    return dbObject
+    return db_object

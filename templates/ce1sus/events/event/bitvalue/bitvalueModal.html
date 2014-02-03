@@ -7,11 +7,11 @@
 
 <%
 if identifier is None:
-  identifierValue = ''
+  identifier_value = ''
 else:
-  identifierValue = identifier
+  identifier_value = identifier
 %>
-<input type="hidden" name="identifier" value="${identifierValue}"/>
-<input type="hidden" name="eventID" value="${eventID}"/>
-<%call expr="forms.bitValueForm(bitValue,enabled=enabled)"/>
+<input type="hidden" name="identifier" value="${identifier_value}"/>
+<input type="hidden" name="event_id" value="${event_id}"/>
+<%call expr="forms.bit_value_form(bit_value,enabled=enabled)"/>
 

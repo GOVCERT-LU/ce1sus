@@ -2,7 +2,7 @@
 
 <%namespace name="forms" file="/dagr/components/forms.html"/>
 
-<%def name="genericModal(id, title, contentUrl, big=False)">
+<%def name="generic_modal(id, title, content_url, big=False)">
 <%
 if big:
   style='style="width: 80%;"'
@@ -39,9 +39,9 @@ $(document).ready(function() {
       }
     });
   });
-%if not contentUrl is None:
+%if not content_url is None:
     $("#${id}").on("show.bs.modal", function() {
-        loadContent('${id}body','${contentUrl}')
+        loadContent('${id}body','${content_url}')
     });
     $("#${id}").on("hide.bs.modal", function() {
     	$("#${id}body").empty();
@@ -55,7 +55,7 @@ $(document).ready(function() {
 <!-- END GenericModal -->
 </%def>
 
-<%def name="genericDialogModal(id, title, big=False)">
+<%def name="generic_dialog_modal(id, title, big=False)">
 <%
 if big:
   style='style="width: 80%;margin-left:-40%;"'
@@ -94,10 +94,10 @@ $(document).ready(function() {
 </%def>
 
 
-<%def name="saveButtonModal(id,title,contentUrl,enabled=True)">
-    <%call expr="genericModal(id=id,title=title,contentUrl=contentUrl)">
+<%def name="save_button_modal(id,title,content_url,enabled=True,big=False)">
+    <%call expr="generic_modal(id=id,title=title,content_url=content_url,big=big)">
       %if enabled:
-       <input id="${id}ModalFooterSubmit" class="btn btn-primary" type="submit" value="Save changes"/>
+       <input id="${id}ModalFooterSubmit" class="btn btn-primary" type="submit" value="Save"/>
       %endif
     </%call>
     

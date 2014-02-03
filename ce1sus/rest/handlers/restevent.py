@@ -17,116 +17,117 @@ from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 from ce1sus.api.restclasses import RestEvent
 
+
 class RestEventController(RestControllerBase):
 
-  PARAMETER_MAPPER = {'metadata': 'viewMetaData'}
+  PARAMETER_MAPPER = {'metadata': 'view_metadata'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.eventBroker = self.brokerFactory(EventBroker)
+    self.event_broker = self.broker_factory(EventBroker)
 
-  def viewMetaData(self, uuid, apiKey, **options):
+  def view_metadata(self, uuid, api_key, **options):
     try:
-      event = self.eventBroker.getByUUID(uuid)
-      self.checkIfViewable(event, self.getUser(apiKey), False)
-      obj = self._objectToJSON(event,
-                               self.isEventOwner(event, self.getUserByAPIKey(apiKey)),
+      event = self.event_broker.get_by_uuid(uuid)
+      self.checkIfViewable(event, self.get_user(api_key), False)
+      obj = self._object_to_json(event,
+                               self.is_event_owner(event, self.getUserByAPIKey(api_key)),
                                False,
                                False)
-      return self._returnMessage(obj)
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+      return self._return_message(obj)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def view(self, uuid, apiKey, **options):
+  def view(self, uuid, api_key, **options):
     try:
-      event = self.eventBroker.getByUUID(uuid)
-      self.checkIfViewable(event, self.getUser(apiKey), False)
-      withDefinition = options.get('fulldefinitions', False)
-      obj = self._objectToJSON(event,
-                               self.isEventOwner(event, self.getUserByAPIKey(apiKey)),
+      event = self.event_broker.get_by_uuid(uuid)
+      self.checkIfViewable(event, self.get_user(api_key), False)
+      with_definition = options.get('fulldefinitions', False)
+      obj = self._object_to_json(event,
+                               self.is_event_owner(event, self.getUserByAPIKey(api_key)),
                                True,
-                               withDefinition)
+                               with_definition)
 
-      return self._returnMessage(obj)
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+      return self._return_message(obj)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def delete(self, uuid, apiKey, **options):
+  def delete(self, uuid, api_key, **options):
     try:
-      event = self.eventBroker.getByUUID(uuid)
-      self.checkIfViewable(event, self.getUser(apiKey), False)
-      return self.raiseError('NotImplemented',
+      event = self.event_broker.get_by_uuid(uuid)
+      self.checkIfViewable(event, self.get_user(api_key), False)
+      return self.raise_error('NotImplemented',
                              'The delete method has not been implemented')
 
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def update(self, uuid, apiKey, **options):
+  def update(self, uuid, api_key, **options):
     if not uuid:
       try:
-        restEvent = self.getPostObject()
-        # map restEvent on event
-        user = self.getUser(apiKey)
-        event = self.eventBroker.buildEvent(
+        rest_event = self.get_post_object()
+        # map rest_event on event
+        user = self.get_user(api_key)
+        event = self.event_broker.build_event(
                        None,
                        'insert',
-                       Status.getByName(restEvent.status),
-                       TLPLevel.getByName(restEvent.tlp),
-                       restEvent.description,
-                       restEvent.title,
-                       restEvent.published,
-                       restEvent.first_seen,
-                       restEvent.last_seen,
-                       Risk.getByName(restEvent.risk),
-                       Analysis.getByName(restEvent.analysis),
+                       Status.get_by_name(rest_event.status),
+                       TLPLevel.get_by_name(rest_event.tlp),
+                       rest_event.description,
+                       rest_event.title,
+                       rest_event.published,
+                       rest_event.first_seen,
+                       rest_event.last_seen,
+                       Risk.get_by_name(rest_event.risk),
+                       Analysis.get_by_name(rest_event.analysis),
                        user,
-                       restEvent.uuid)
-        event.bitValue.isRestInsert = True
-        if restEvent.share == 1:
-          event.bitValue.isSharable = True
+                       rest_event.uuid)
+        event.bit_value.is_rest_instert = True
+        if rest_event.share == 1:
+          event.bit_value.is_shareable = True
         else:
-          event.bitValue.isSharable = False
+          event.bit_value.is_shareable = False
         # flush to DB
-        self.eventBroker.insert(event, commit=False)
+        self.event_broker.insert(event, commit=False)
 
-        for obj in restEvent.objects:
+        for obj in rest_event.objects:
           # create object
-          dbObject = self.__convertRestObject(obj, event, event, commit=False)
-          event.objects.append(dbObject)
+          db_object = self.__convert_rest_object(obj, event, event, commit=False)
+          event.objects.append(db_object)
 
-        self.eventBroker.doCommit(True)
+        self.event_broker.do_commit(True)
 
-        withDefinition = options.get('fulldefinitions', False)
-        # obj = self._objectToJSON(event, True, True, withDefinition)
-        restEvent = RestEvent()
-        restEvent.uuid = event.uuid
-        return self._returnMessage(dict(restEvent.toDict(full=True,
-                             withDefinition=withDefinition).items()
+        with_definition = options.get('fulldefinitions', False)
+        # obj = self._object_to_json(event, True, True, with_definition)
+        rest_event = RestEvent()
+        rest_event.uuid = event.uuid
+        return self._return_message(dict(rest_event.to_dict(full=True,
+                             with_definition=with_definition).items()
                  ))
 
-      except BrokerException as e:
-        return self.raiseError('BrokerException', e)
+      except BrokerException as error:
+        return self.raise_error('BrokerException', error)
 
     else:
-      return self.raiseError('Exception', 'Not Implemented')
+      return self.raise_error('Exception', 'Not Implemented')
 
-  def __convertRestObject(self, obj, parent, event, commit=False):
-    dbObject = self._convertToObject(obj, parent, event, commit=commit)
+  def __convert_rest_object(self, obj, parent, event, commit=False):
+    db_object = self._convert_to_object(obj, parent, event, commit=commit)
     # generate Attributes
-    dbObject.attributes = self._convertToAttribues(obj.attributes,
-                                                          dbObject, commit)
+    db_object.attributes = self._convert_to_attribues(obj.attributes,
+                                                          db_object, commit)
     for child in obj.children:
-      childDBObj = self.__convertRestObject(child, dbObject, event, commit)
-      dbObject.children.append(childDBObj)
-    return dbObject
+      child_db_obj = self.__convert_rest_object(child, db_object, event, commit)
+      db_object.children.append(child_db_obj)
+    return db_object
 
-  def getFunctionName(self, parameter, action):
+  def get_function_name(self, parameter, action):
     if action == 'GET':
       return RestEventController.PARAMETER_MAPPER.get(parameter, None)
     return None

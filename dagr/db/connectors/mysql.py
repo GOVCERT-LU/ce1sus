@@ -22,12 +22,18 @@ import cherrypy
 
 
 class MySqlSession(SessionObject):
+  """
+  Session wrapper
+  """
 
   def __init__(self, session=None):
     SessionObject.__init__(self)
     self.__session = session
 
-  def getSession(self):
+  def get_session(self):
+    """
+    Returns a session
+    """
     if self.__session:
       return self.__session
     else:
@@ -35,22 +41,25 @@ class MySqlSession(SessionObject):
 
 
 class MySqlConnector(Connector):
-
+  """
+  Connector for mysql dbs
+  """
   def __init__(self, config):
     Connector.__init__(self, config)
     hostname = self.config.get('host')
     port = self.config.get('port')
     # check if host is available
     response = os.system("ping -c 1 " + hostname)
+    self.engine = None
     if response != 0:
       raise SessionManagerException('Host "{hostname}" not ' +
                                      'available'.format(hostname=hostname))
     # check if socket available
-    if not MySqlConnector.isServiceExisting(hostname, port):
+    if not self.is_service_existing(hostname, port):
       raise SessionManagerException('Service on "{hostname}:{port}"' +
                                     ' not available'.format(hostname=hostname,
                                                             port=port))
-    self.connectionString = ('{prot}://{user}:{password}@'
+    self.connection_string = ('{prot}://{user}:{password}@'
                              + '{host}:{port}/{db}').format(
                                           prot=self.protocol,
                                           user=self.config.get('username'),
@@ -61,27 +70,33 @@ class MySqlConnector(Connector):
                                         )
     if self.config.get('usecherrypy'):
       SAEnginePlugin(cherrypy.engine, self).subscribe()
-      self.saTool = SATool()
-      cherrypy.tools.db = self.saTool
+      self.sa_tool = SATool()
+      cherrypy.tools.db = self.sa_tool
       self.session = None
       cherrypy.config.update({'tools.db.on': 'True'})
     else:
-      self.session = self.getDirectSession()
+      self.session = self.get_direct_session()
 
-  def getEngine(self):
-    return create_engine(self.connectionString + '?charset=utf8',
+  def get_engine(self):
+    """
+    Returns the engine
+    """
+    return create_engine(self.connection_string + '?charset=utf8',
                                   echo=self.debug,
                                   echo_pool=self.debug,
                                   encoding='utf-8')
-  def getDirectSession(self):
-    self.engine = self.getEngine()
-    self.sessionClazz = scoped_session(sessionmaker(bind=self.engine,
-                                                      autocommit=False,
-                                                      autoflush=False))
-    return self.sessionClazz()
 
-  @staticmethod
-  def isServiceExisting(host, port):
+  def get_direct_session(self):
+    """
+    Returns the session from the engine
+    """
+    self.engine = self.get_engine()
+    session = scoped_session(sessionmaker(bind=self.engine,
+                                       autocommit=False,
+                                       autoflush=False))()
+    return MySqlSession(session)
+
+  def is_service_existing(self, host, port):
     """
     Checks if the service port on the host is opened
 
@@ -93,25 +108,37 @@ class MySqlConnector(Connector):
       host_addr = socket.gethostbyname(host)
       if (captive_dns_addr == host_addr):
         return False
-      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      s.settimeout(1)
-      s.connect((host, port))
-      s.close()
-    except socket.error as e:
-      Log.getLogger("SessionManager").info(e)
+      socket_obj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      socket_obj.settimeout(1)
+      socket_obj.connect((host, port))
+      socket_obj.close()
+    except socket.error as error:
+      self.get_logger().critical(error)
       return False
     return True
 
-  def getSession(self):
+  def get_session(self):
+    """
+    Returns the session
+
+    :returns: SqliteSession
+    """
     return MySqlSession(self.session)
 
   def close(self):
+    """
+    Closes the session
+    """
     self.session = None
-    self.engine.dispose()
-    self.engine = None
+    if self.engine:
+      self.engine.dispose()
+      self.engine = None
 
-  def createEngine(self):
-    return create_engine(self.connectionString + '?charset=utf8',
+  def create_engine(self):
+    """
+    Returns the engine
+    """
+    return create_engine(self.connection_string + '?charset=utf8',
                                   echo=self.debug,
                                   echo_pool=self.debug,
                                   encoding='utf-8')

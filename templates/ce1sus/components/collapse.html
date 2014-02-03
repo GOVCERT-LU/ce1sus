@@ -1,24 +1,26 @@
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 <%namespace name="pagination" file="/dagr/components/pagination.html"/>
 <%namespace name="objectsHelper" module="dagr.web.helpers.objects"/>
+<%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 
-<%def name="objectCollapseItem(id, parentID, eventID, object, paginator, indent=0, showMenu=True, owner=False)">
-% if (not object is None) or ((object.bitValue.isValidated and object.bitValue.isSharable) or owner): 
+
+<%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False)">
+% if (not object is None):
         <div class="panel panel-default" >
         <div class="panel-heading">
             <div class="row">
                 <div class="col-xs-6 col-sm-6">
 
-                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parentID}" href="#${id}" >
+                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#${parent_id}" href="#${id}" >
                      
                         ${object.definition.name} - ${object.identifier} 
                     </a>
 
                 </div>
                 <div class="col-xs-1 col-sm-1">
-                     %if not object.bitValue.isSharable:
+                     %if not object.bit_value.is_shareable:
                         <span class="glyphicon glyphicon-lock"></span>
                      %endif
                 </div>
@@ -27,45 +29,45 @@
                     <%
                    
                     if len(object.definition.attributes) == 0:
-                      disabledStr = ' disabled" '
+                      disabled_str = ' disabled" '
                     else:
-                      disabledStr = '" data-toggle="modal"'
+                      disabled_str = '" data-toggle="modal"'
                     %> 
-                    %if showMenu:
+                    %if show_menu:
                         %if owner:
-                       <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabledStr}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
-                       <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-tags"></span></a>
-                       <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add parent object"><span class="glyphicon glyphicon-tag"></span></a>
-                       <a href="#setPropertiesModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify properties"><span class="glyphicon glyphicon-wrench"></span></a>
+                       <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+                       <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                       <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify object"><span class="glyphicon glyphicon-edit"></span></a>
+                       <a href="#setPropertiesModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify properties"><span class="glyphicon glyphicon-fullscreen"></span></a>
                        %endif
-                       <a  class="btn btn-default" href="#infoModal${object.identifier}" role="button" data-toggle="modal" title="additional information"><span class="glyphicon glyphicon-question-sign"></span></a>
+                       <a  class="btn btn-default" href="#infoModal${object.identifier}" role="button" data-toggle="modal" title="View details"><span class="glyphicon glyphicon-eye-open"></span></a>
                        %if owner:
                        <a href="#" class="btn btn-danger" role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
-                                dialogCall('/events/event/objects/removeObject?eventID=${eventID}&objectID=${object.identifier}',
-                                           'eventTabs${eventID}TabContent',
-                                           '/events/event/objects/objects/${eventID}')}" title="delete"><i class="glyphicon glyphicon-remove-circle"></i></a>
+                                dialogCall('/events/event/objects/remove_object?event_id=${event_id}&object_id=${object.identifier}',
+                                           'eventTabs${event_id}TabContent',
+                                           '/events/event/objects/objects/${event_id}')}" title="delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
                         <!--  dont remove this -->
-			                <%call expr="baseForms.genericModalForm(modalID='addObjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/modifyAttribute',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
+			                <%call expr="base_forms.generic_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
 			                  <input type="hidden" name="action" value="insert">
-			                  <%call expr="modals.saveButtonModal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',contentUrl='/events/event/attribute/addAttribute/{0}/{1}'.format(eventID, object.identifier))"/>
+			                  <%call expr="modals.save_button_modal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',content_url='/events/event/attribute/add_attribute/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
 			           %endif
-			                <%call expr="modals.genericDialogModal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
-			                  <%call expr="forms.eventObjectForm(eventID,object, False,cbObjDefinitions)"/>
+			                <%call expr="modals.generic_dialog_modal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
+			                  <%call expr="forms.eventObjectForm(event_id,object, False,obj_definitions)"/>
 			                </%call>
 			           %if owner:
-			                <%call expr="baseForms.genericModalForm(modalID='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attachChildObject',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-			                    <%call expr="modals.saveButtonModal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',contentUrl='/events/event/objects/addChildObject/{0}/{1}'.format(eventID, object.identifier))"/>
+			                <%call expr="base_forms.generic_modal_form(modal_id='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attach_child_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
+			                    <%call expr="modals.save_button_modal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',content_url='/events/event/objects/add_child_object/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
-			                <%call expr="baseForms.genericModalForm(modalID='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modifyParentRelation',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-			                    <%call expr="modals.saveButtonModal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',contentUrl='/events/event/objects/setObjectParent/{0}/{1}'.format(eventID, object.identifier))"/>
+			                <%call expr="base_forms.generic_modal_form(modal_id='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modify_parent',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
+			                    <%call expr="modals.save_button_modal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',content_url='/events/event/objects/set_parent/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
-			                <%call expr="baseForms.genericModalForm(modalID='setPropertiesModal{0}'.format(object.identifier),url='/events/event/bitValue/modifyObjectProperties',refreshUrl='/events/event/objects/objects/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-                                <%call expr="modals.saveButtonModal(id='setPropertiesModal{0}'.format(object.identifier),title='Set Object Properties',contentUrl='/events/event/bitValue/setObjectProperties/{0}/{1}'.format(eventID, object.identifier))"/>
+			                <%call expr="base_forms.generic_modal_form(modal_id='setPropertiesModal{0}'.format(object.identifier),url='/events/event/bit_value/modify_object_properties',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
+                                <%call expr="modals.save_button_modal(id='setPropertiesModal{0}'.format(object.identifier),title='Set Object Properties',content_url='/events/event/bit_value/set_object_properties/{0}/{1}'.format(event_id, object.identifier))"/>
                             </%call>
                        %endif
-		                 <!--  dont remove this -->
+		                 <!--  dont remove this --> 
 		            %endif
                     </div>
                 </div>
@@ -82,58 +84,116 @@
                     	$('#menu${object.identifier}Link').parent().attr('class', ''); 
                     });
                     </script>
-                    <%call expr="pagination.pagination('attributesTable{0}'.format(object.identifier),paginator,hasSearch=False)"/>
+                    <div>
+                      <table class="table table-striped table-bordered table-hover table-condensed" id="objectsTable_${id}">
+                      <thead>
+                        <tr>
+                          <th caria-controls="objectsTable_${id}" tabindex="0" role="columnheader" class="sorting">#</th>
+                          <th caria-controls="objectsTable_${id}" tabindex="1" role="columnheader" class="sorting">S</th>
+                          <th caria-controls="objectsTable_${id}" tabindex="2" role="columnheader" class="sorting">Type</th>
+                          <th caria-controls="objectsTable_${id}" tabindex="2" role="columnheader" class="sorting">Value</th>
+                          <th caria-controls="objectsTable_${id}" tabindex="3" role="columnheader" class="sorting">IOC</th>
+                          <th caria-controls="objectsTable_${id}" tabindex="4" role="columnheader" class="sorting">Options</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      %for attribute in object.attributes:
+                        <%
+                        if attribute.ioc == 1:
+                          iocicon = '<span class="glyphicon glyphicon-screenshot"></span>'
+                        else:
+                            iocicon = ''
+                        if attribute.bit_value.is_shareable:
+                          shareicon = '<span class="glyphicon glyphicon-ok"></span>'
+                        else:
+                           shareicon = '<span class="glyphicon glyphicon-remove"></span>'
+                        %>
+                        %if attribute.bit_value.is_validated_and_shared or owner:
+                        <tr>
+                        <td><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
+                        <td>${shareicon}</td>
+                        <td><%call expr="messages_and_text.object_to_html(attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
+                        <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
+                        <td>${iocicon}</td>
+                        <td style="width: 60px;">
+                          <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}');">
+                             <span class="glyphicon glyphicon-eye-open" title="View details"></span>
+                          </a>
+                          
+                          <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}/');">
+                             <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
+                          </a>
+                          <a href="#" role="button"
+                            onclick="if (confirm('Are you sure you want to delete?')) {
+                                dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
+                                           'eventTabs${event_id}TabContent',
+                                           '/events/event/objects/objects/${event_id}')}" title="delete">
+                             <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
+                          </a>
+                          <!-- modals -->
+                          </td>
+                        </tr>
+                        %endif
+                      %endfor
+                      </tbody>
+                      </table>
+                      <script type="text/javascript">
+                      $('#objectsTable_${id}').dataTable( {
+                          "iDisplayLength": 100,
+                          "aaSorting": [[ 0, "desc" ]],
+                        });
+                      </script>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>
-    
   %endif
 </%def>
 
-<%def name="node(eventID, objectList, paginator,ident=1, showMenu=True, owner=False)">
-    %if not objectList is None:
+<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False)">
+    %if not object_list is None:
 	<%
     spana = ident
     spanb = 12 - spana
 	%>
-            %for object in objectList:
-	            <%
-	            newPaginator = objectsHelper.copyObject(paginator)
-	            values = list()
-	            for item in object.attributes:
-	               if (item.bitValue.isSharable and item.bitValue.isValidated) or owner:
-	                 values.append(item)
-	            newPaginator.list = values
-	            #replace the %(objectID)s tag
-	            newPaginator.options.reloadUrl = newPaginator.options.reloadUrl % dict(objectID=object.identifier)
-	            for option in newPaginator.options.options:
-	               option.url = option.url % dict(objectID=object.identifier)
-	            %>
-		        <%call expr="objectCollapseItem('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),eventID, object, newPaginator, ident, showMenu, owner)"/>
+            %for object in object_list:
+		        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner)"/>
 	            <div class="row">
 	            %if spana > 0:
 	            <div class="col-xs-${spana} col-sm-${spana}">&nbsp;</div>
 	            %endif
 	            <div class="col-xs-${spanb} col-sm-${spanb}">
-	               <%call expr="node(eventID, object.children, paginator,ident+1, showMenu, owner)"/>
+	               <%call expr="node(event_id, object.children,ident+1, show_menu, owner)"/>
 	            </div>
 	            </div>
             %endfor
     %endif
+    %if ident == 1:
+    <form id="paginatorModalAttributeForm">
+    <%call expr="modals.generic_modal(id='paginatorModalAttribute',title='No Title',content_url=None)">
+    </%call>
+    </form>
+    <script type="text/javascript">
+      jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+      };
+       
+      jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+        return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+      };
+    </script>
+    %endif
 </%def>
 
-<%def name="menuItem(objectList,owner,ident=0)">
-%if not objectList is None:
+<%def name="menu_item(object_list,owner,ident=0)">
+%if not object_list is None:
   <%
-   identString = 20 * ident
+   ident_string = 20 * ident
   %>
-  %for object in objectList:
-     %if (object.bitValue.isValidated and object.bitValue.isSharable) or owner:
-     <li id="menu${object.identifier}LI" style="margin-left:${identString}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
-     <%call expr="menuItem(object.children,owner, ident+1)"/>
-     %endif
+  %for object in object_list:
+     <li id="menu${object.identifier}LI" style="margin-left:${ident_string}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
+     <%call expr="menu_item(object.children,owner, ident+1)"/>
   %endfor
 %endif
 </%def>

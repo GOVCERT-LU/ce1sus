@@ -24,7 +24,7 @@ class TestSession(unittest.TestCase):
       assert True
 
       session = SessionManager('../config/ce1sustest.conf')
-      session.brokerFactory(GroupBroker)
+      session.broker_factory(GroupBroker)
       assert True
 
 

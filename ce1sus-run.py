@@ -5,32 +5,29 @@ import cherrypy
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
-from ce1sus.web.controllers.index import IndexController
-from ce1sus.web.controllers.admin.index import AdminController
-from ce1sus.web.controllers.events.events import EventsController
-from ce1sus.web.controllers.admin.user import UserController
-from ce1sus.web.controllers.admin.groups import GroupController
-from ce1sus.web.controllers.admin.objects import ObjectController
-from ce1sus.web.helpers.protection import Protector
 from dagr.web.helpers.webexceptions import ErrorHandler
+from ce1sus.common.system import System
+
 from dagr.helpers.ldaphandling import LDAPHandler
 from dagr.helpers.rt import RTTickets
-from dagr.web.helpers.config import WebConfig
-from ce1sus.web.controllers.admin.attributes import AttributeController
-from ce1sus.web.controllers.event.event import EventController
-from ce1sus.web.controllers.event.objects import ObjectsController
-
-from ce1sus.web.controllers.event.groups import GroupsController
-from ce1sus.web.controllers.events.search import SearchController
-from ce1sus.web.controllers.event.attributes import AttributesController
-from ce1sus.web.controllers.event.comments import CommentsController
-from ce1sus.sanity import SantityChecker
-from ce1sus.rest.restcontroller import RestController
-from ce1sus.web.controllers.admin.subgroups import SubGroupController
-from ce1sus.web.controllers.admin.validation import ValidationController
-from ce1sus.web.controllers.event.bitvalue import BitValueController
+# from ce1sus.sanity import SantityChecker
 from dagr.helpers.mailer import Mailer
 
+
+
+from ce1sus.web.views.index import IndexView
+from ce1sus.web.views.events.events import EventsView
+from ce1sus.web.views.event.event import EventView
+from ce1sus.web.views.events.search import SearchView
+from ce1sus.web.views.event.objects import ObjectsView
+from ce1sus.web.views.event.comments import CommentsView
+from ce1sus.web.views.common.bitvalue import BitValueView
+from ce1sus.web.views.event.attributes import AttributesView
+
+from dagr.helpers.config import Configuration
+from ce1sus.web.views.common.decorators import require, check_auth
+
+from ce1sus.brokers.system.ce1susbroker import Ce1susBroker
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -48,25 +45,45 @@ def bootstrap():
       cherrypy.config.update(cherrypyConfigFile)
     else:
       raise ConfigException('Could not find config file ' + cherrypyConfigFile)
-  except cherrypy._cperror as e:
-    raise ConfigException(e)
+  except cherrypy._cperror as error:
+    raise ConfigException(error)
 
-  sanityChecker = SantityChecker(ce1susConfigFile)
-  sanityChecker.checkDB()
-  # sanityChecker.checkApplication()
-  sanityChecker.close()
-  sanityChecker = None
+  # instantiate auth module
+  cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 
+  # load config file
+  config = Configuration(ce1susConfigFile)
+
+  # Setup logger
+  logger = Log(config)
+  logger.get_logger("run").debug("Loading System...")
+
+  system = System(config)
+  system.perform_web_checks()
+
+  logger.get_logger("run").debug("Loading ErrorHandler...")
+  ErrorHandler(config)
+
+
+
+  logger.get_logger("run").debug("Loading Views...")
   # Load 'Modules'
+  cherrypy.tree.mount(IndexView(config), '/')
+  cherrypy.tree.mount(EventsView(config), '/events')
+  cherrypy.tree.mount(SearchView(config), '/events/search')
+  cherrypy.tree.mount(EventView(config), '/events/event')
+  cherrypy.tree.mount(ObjectsView(config), '/events/event/objects')
+  cherrypy.tree.mount(CommentsView(config), '/events/event/comment')
+  cherrypy.tree.mount(BitValueView(config), '/events/event/bit_value')
+  cherrypy.tree.mount(AttributesView(config), '/events/event/attribute')
 
-  ErrorHandler(ce1susConfigFile)
-  Log(ce1susConfigFile)
-  Log.getLogger("run").debug("Loading Session")
-  SessionManager(ce1susConfigFile)
+  """
   Mailer(ce1susConfigFile)
 
 
-  Log.getLogger("run").debug("Loading Mako")
+  Log.getLogger("run").debug("Loading Configuration file")
+  config =
+
   MakoHandler(ce1susConfigFile)
   Log.getLogger("run").debug("Loading Protector")
   Protector(ce1susConfigFile)
@@ -110,6 +127,8 @@ def bootstrap():
   cherrypy.tree.mount(BitValueController(), '/events/event/bitValue')
   # RESTFoo
   cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
+  """
+
 if __name__ == '__main__':
 
   bootstrap()

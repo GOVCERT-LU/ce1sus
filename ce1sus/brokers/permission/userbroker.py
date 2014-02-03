@@ -42,9 +42,8 @@ class UserBroker(BrokerBase):
                                              instance.username)
     try:
       BrokerBase.insert(self, instance, commit, validate=False)
-      self.doCommit(commit)
+      self.do_commit(commit)
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
@@ -67,9 +66,8 @@ class UserBroker(BrokerBase):
                                                instance.username)
     try:
       BrokerBase.update(self, instance, commit, validate=False)
-      self.doCommit(commit)
+      self.do_commit(commit)
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
@@ -85,9 +83,9 @@ class UserBroker(BrokerBase):
     else:
       return False
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return User
 
@@ -109,7 +107,6 @@ class UserBroker(BrokerBase):
       raise TooManyResultsFoundException('Too many results found for' +
                                          'ID :{0}'.format(username))
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
     return user
@@ -142,7 +139,6 @@ class UserBroker(BrokerBase):
       raise TooManyResultsFoundException('Too many results found for ID ' +
                                          ':{0}'.format(username))
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
     return user
@@ -186,14 +182,14 @@ class UserBroker(BrokerBase):
       ObjectConverter.setInteger(user, 'group_id', maingroup)
     if action == 'insertLDAP':
       user.identifier = None
-      lh = LDAPHandler.getInstance()
-      ldapUser = lh.getUser(identifier)
+      lh = LDAPHandler.get_instance()
+      ldapUser = lh.get_user(identifier)
       user.username = ldapUser.uid
       user.password = ldapUser.password
       user.email = ldapUser.mail
       # TODO: Fix this workaround with the empty mail
       if user.email is None:
-        ldapUser = lh.getUser(identifier)
+        ldapUser = lh.get_user(identifier)
         user.email = ldapUser.mail
       user.disabled = 1
       user.privileged = 0
@@ -216,24 +212,22 @@ class UserBroker(BrokerBase):
       raise TooManyResultsFoundException(
                     'Too many results found for apikey :{0}'.format(apiKey))
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       raise BrokerException(e)
 
-  def getAll(self):
+  def get_all(self):
     """
-    Returns all getBrokerClass() instances
+    Returns all get_broker_class() instances
 
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()
+      result = self.session.query(self.get_broker_class()
                                   ).order_by(User.username.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
       raise BrokerException(e)
 
     return result

@@ -21,12 +21,12 @@ from dagr.helpers.classes.ticketsystem import TicketSystemBase, Ticket, \
 
 class RTTickets(TicketSystemBase):
   """Container class for RTTickets"""
-  def __init__(self, configFile):
+  def __init__(self, config_file):
     TicketSystemBase.__init__(self)
-    self.__config = Configuration(configFile, 'RTHelper')
-    self.__rtUser = self.__config.get('username')
-    self.__rtPwd = self.__config.get('password')
-    self.__rtUrl = self.__config.get('url')
+    self.__config_section = Configuration(config_file, 'RTHelper')
+    self.__rtUser = self.__config_section.get('username')
+    self.__rtPwd = self.__config_section.get('password')
+    self.__rtUrl = self.__config_section.get('url')
     self.__resource = RTResource(self.__rtUrl + 'REST/1.0/',
                                  self.__rtUser,
                                  self.__rtPwd,

@@ -113,7 +113,7 @@ class TicketSystemBase(object):
                                                      self.__class__.__name__))
 
   @classmethod
-  def getInstance(cls):
+  def get_instance(cls):
     """
     Returns the instance if there is one
 

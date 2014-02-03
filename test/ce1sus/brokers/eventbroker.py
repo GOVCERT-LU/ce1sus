@@ -19,10 +19,10 @@ class TestEventBrokers(unittest.TestCase):
 
   def setUp(self):
 
-    self.sessionManager = SessionManager('../config/ce1sustest.conf')
+    self.session_manager = SessionManager('../config/ce1sustest.conf')
     self.timeStamp = datetime.now()
     # CreateNeeded Users and group
-    self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
+    self.groupbroker = self.session_manager.broker_factory(GroupBroker)
     self.group = Group()
     self.group.identifier = long(666)
     self.group.name = 'TestGroup'
@@ -31,7 +31,7 @@ class TestEventBrokers(unittest.TestCase):
     self.group.description = 'Description'
     self.group.email = 'a@a.com'
     self.group.usermails = long(1)
-    self.userBroker = self.sessionManager.brokerFactory(UserBroker)
+    self.user_broker = self.session_manager.broker_factory(UserBroker)
     self.user = User()
     self.user.identifier = 666
     self.user.username = 'testUser'
@@ -40,13 +40,13 @@ class TestEventBrokers(unittest.TestCase):
     self.user.privileged = 0
     self.user.apiKey = None
     self.user.group_id = self.group.identifier
-    self.user.defaultGroup = self.group
+    self.user.default_group = self.group
     self.timeStamp = datetime.now()
     self.user.disabled = long(0)
     self.user.password = 'Test$123'
 
     self.user.last_login = self.timeStamp
-    self.eventbroker = self.sessionManager.brokerFactory(EventBroker)
+    self.eventbroker = self.session_manager.broker_factory(EventBroker)
     self.event = Event()
     # self.event.creator = self.user
     self.event.description = 'Description'
@@ -72,20 +72,20 @@ class TestEventBrokers(unittest.TestCase):
   def test_0_initOnce(self):
     # this is done to populate the DB for the tests
     # create user and group
-    self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
+    self.groupbroker = self.session_manager.broker_factory(GroupBroker)
     self.groupbroker.insert(self.group)
 
-    self.userBroker.insert(self.user)
+    self.user_broker.insert(self.user)
     assert True
 
   def test_Z_lastOnce(self):
     # remove created user & group
-    self.userBroker.removeByID(self.user.identifier)
-    self.groupbroker.removeByID(self.group.identifier)
+    self.user_broker.remove_by_id(self.user.identifier)
+    self.groupbroker.remove_by_id(self.group.identifier)
     assert True
 
   def test_C_InsertEvent(self):
-    user = self.userBroker.getByID(self.user.identifier)
+    user = self.user_broker.get_by_id(self.user.identifier)
 
     self.event.creator_id = user.identifier
     self.creator = user
@@ -94,29 +94,29 @@ class TestEventBrokers(unittest.TestCase):
     self.event.modifier_id = user.identifier
     self.modfier = user
 
-    group = self.groupbroker.getByID(self.group.identifier)
+    group = self.groupbroker.get_by_id(self.group.identifier)
 
-    self.event.creatorGroup = group
+    self.event.creator_group = group
 
     self.eventbroker.insert(self.event)
     assert True
 
   def test_G_getID(self):
-    event = self.eventbroker.getByID(self.event.identifier)
+    event = self.eventbroker.get_by_id(self.event.identifier)
 
     assert True
     # assert helpers.compareObjects(event, self.event)
 
   def test_H_updateEvent(self):
-    event = self.eventbroker.getByID(self.event.identifier)
+    event = self.eventbroker.get_by_id(self.event.identifier)
     event.description = 'FOO LOO'
     self.eventbroker.update(event)
 
-    event = self.eventbroker.getByID(self.event.identifier)
+    event = self.eventbroker.get_by_id(self.event.identifier)
 
 
   def test_X_DeleteEvent(self):
-    self.eventbroker.removeByID(self.event.identifier)
+    self.eventbroker.remove_by_id(self.event.identifier)
 
 
 if __name__ == "__main__":

@@ -44,8 +44,8 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     // let's select and cache all the fields
     inputs = form.find("input, select, button, textarea");
     // serialize the data in the form
-    serializedData = form.serialize();
-
+    //serializedData = form.serialize();
+    formData = new FormData(form[0]);
     // magic to get the button value
     name = event.originalEvent.explicitOriginalTarget.name;
     if (name) {
@@ -60,7 +60,9 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     request = $.ajax({
         url : uri,
         type : "post",
-        data : serializedData,
+        data : formData,
+        contentType: false,
+        processData: false,
      timeout: 30000 //3secs
     });
 

@@ -4,9 +4,9 @@
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="forms" file="/dagr/components/forms.html"/>
 
-<%def name="pagination(identifier, paginator,hasSearch=True, usePlainText=False)">
+<%def name="pagination(identifier, paginator,has_search=True, use_plain_text=False)">
 <% 
-isModal=False
+is_modal=False
 %>
     <!-- BEGIN pagination -->
     <div style="margin-bottom:35px">
@@ -16,16 +16,16 @@ isModal=False
           % for column in paginator.lables:
             % for key,value in column.iteritems():
                 <%
-                    tdOption=paginator.tdOptions.get(key,None)
-                    if tdOption:
-                        tdcss = tdOption.css
+                    td_option=paginator.td_options.get(key,None)
+                    if td_option:
+                        tdcss = td_option.css
                     else:
                         tdcss = ''
                 %>
                 <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" style="${tdcss}">${value}</th>
             %endfor
           %endfor
-          %if paginator.options.isSet:
+          %if paginator.options.is_set:
             <th caria-controls="${identifier}" tabindex="0" role="columnheader" class="sorting" style="width: 30px">Options</th>
           %endif
         </tr>
@@ -33,22 +33,22 @@ isModal=False
       <tbody>
         
            % for item in paginator.list:
-<%
-trStyle = ''
-if paginator.trcolor:
-   trcolor = 'background-color:{0};'.format(paginator.trcolor)
-#get attriubute condition value
-if paginator.conditionAttribute:
-	condVal = getattr(item, paginator.conditionAttribute)
-	if condVal and condVal == 1:
-	    trStyle = 'style="{0}"'.format(trcolor)
-	else:
-	    trStyle = ''
-%>
+			<%
+			tr_style = ''
+			if paginator.trcolor:
+			   trcolor = 'background-color:{0};'.format(paginator.trcolor)
+			#get attriubute condition value
+			if paginator.condition_attribute:
+				condVal = getattr(item, paginator.condition_attribute)
+				if condVal and condVal == 1:
+				    tr_style = 'style="{0}"'.format(trcolor)
+				else:
+				    tr_style = ''
+			%>
            %if paginator.trlink:
-           <tr ${trStyle} onclick="${paginator.trlink.replace('identifier','{0}'.format(item.identifier))}">
+           <tr ${tr_style} onclick="${paginator.trlink.replace('identifier','{0}'.format(item.identifier))}">
            %else:
-           <tr ${trStyle}>
+           <tr ${tr_style}>
            %endif
              % for column in paginator.lables:
                % for key in column.iterkeys():
@@ -78,29 +78,29 @@ if paginator.conditionAttribute:
     
     
     if hasattr(item,'identifier'):
-      primaryKey = getattr(item,'identifier')
+      primary_key = getattr(item,'identifier')
     else:
-      primaryKey = 0
+      primary_key = 0
       
-    tdOption=paginator.tdOptions.get(key,None)
-    if tdOption:
-      useRawHTML = tdOption.useRawHTML
+    td_option=paginator.td_options.get(key,None)
+    if td_option:
+      user_raw_html = td_option.use_raw_html
     else:
-      useRawHTML = usePlainText
+      user_raw_html = use_plain_text
     %>                
-             <td ${style}><%call expr="messagesAndText.objectToHTML(value, shortenTo=paginator.maxColumnLength,usePlainText=useRawHTML)"/></td>
+             <td ${style}><%call expr="messagesAndText.object_to_html(value, shorten_to=paginator.max_column_length,use_plain_text=user_raw_html)"/></td>
            %endfor
     
              %endfor
-             %if paginator.options.isSet:
+             %if paginator.options.is_set:
                <td style="width: 60px;">
                   % for option in paginator.options.options:
                     %if option.mode =='DIALOG':
                         <a href="#" onclick="if (confirm('${option.message}')) {
-                        $.get('${option.url}${primaryKey}', function(data) {
+                        $.get('${option.url}${primary_key}', function(data) {
                         	if (data.match(/^<!--OK--/gi)) {
                         		%if option.refresh:
-                                    loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
+                                    loadContent('${paginator.options.contentid}','${paginator.options.reload_url}');
                                 %endif
                         	} else {
                         		alert('An unexpected error occured.');
@@ -112,20 +112,20 @@ if paginator.conditionAttribute:
                         }"><i class="${option.icon}" title="${option.title}"></i></a>
                     %elif option.mode =='MODAL':
                         <% 
-                        isModal=True
+                        is_modal=True
                         %>
-                        <a href="#" onclick="showPaginatorModal('paginatorModal${identifier}','${option.modalTitle}','${option.url}/${primaryKey}','${option.postUrl}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reloadUrl}');">
+                        <a href="#" onclick="showPaginatorModal('paginatorModal${identifier}','${option.modal_title}','${option.url}/${primary_key}','${option.post_url}','${option.refresh}','${paginator.options.contentid}','${paginator.options.reload_url}');">
         
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'LINK':
-                        <a href="${option.url}/${primaryKey}"><i class="${option.icon}" title="${option.title}"></i></a>
+                        <a href="${option.url}/${primary_key}"><i class="${option.icon}" title="${option.title}"></i></a>
                     %elif option.mode == 'CONTENT':
                         <% 
                         isContent=True
                         %>
-                        <a href="#" onclick="loadContent('${paginator.options.contentid}','${option.url}/${primaryKey}');">
+                        <a href="#" onclick="loadContent('${paginator.options.contentid}','${option.url}/${primary_key}');">
                         %if option.refresh:
-                            loadContent('${paginator.options.contentid}','${paginator.options.reloadUrl}');
+                            loadContent('${paginator.options.contentid}','${paginator.options.reload_url}');
                         %endif  
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'NEWTAB':
@@ -134,10 +134,10 @@ if paginator.conditionAttribute:
                         if option.reload:
                           enabledStr = 'true'
                         %>
-                        <a href="#" onclick="loadNewTab('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}',${enabledStr}, '${option.tabTitle} #${primaryKey}' );">
+                        <a href="#" onclick="loadNewTab('${primary_key}','${paginator.options.contentid}','${option.url}/${primary_key}',${enabledStr}, '${option.tab_title} #${primary_key}' );">
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %elif option.mode == 'TAB':
-                        <a href="#" onclick="loadTabFromPaginator('${primaryKey}','${paginator.options.contentid}','${option.url}/${primaryKey}','${option.tabid}');">
+                        <a href="#" onclick="loadTabFromPaginator('${primary_key}','${paginator.options.contentid}','${option.url}/${primary_key}','${option.tabid}');">
                         <span class="${option.icon}" title="${option.title}"></span></a>
                     %endif
                     
@@ -164,21 +164,21 @@ if paginator.conditionAttribute:
     
     $(document).ready(function() {
         $('#${identifier}').dataTable( {
-          "iDisplayLength": ${paginator.itemsPerPage},
-          %if not hasSearch:
+          "iDisplayLength": ${paginator.items_per_page},
+          %if not has_search:
           "sDom": '<"top"i>rt<"bottom"flp><"clear">',
           "bAutoWidth" :false,
           %endif
-          "aaSorting": [[ ${paginator.sortColunmID}, "${paginator.sortOrder}" ]],
+          "aaSorting": [[ ${paginator.sort_colunm_id}, "${paginator.sort_order}" ]],
          });
     } );
 
     </script>
 
     <!-- END pagination -->
-% if isModal:
+% if is_modal:
 <form id="paginatorModal${identifier}Form">
-    <%call expr="modals.genericModal(id='paginatorModal{0}'.format(identifier),title='No Title',contentUrl=None)">
+    <%call expr="modals.generic_modal(id='paginatorModal{0}'.format(identifier),title='No Title',content_url=None)">
     </%call>
 </form>
 %endif

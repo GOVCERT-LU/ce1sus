@@ -1,0 +1,84 @@
+# -*- coding: utf-8 -*-
+
+"""
+(Description)
+
+Created on Jan 30, 2014
+"""
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
+from ce1sus.web.views.base import Ce1susBaseView
+from ce1sus.controllers.events.search import SearchController, SearchControllerException
+import cherrypy
+from ce1sus.web.views.common.decorators import require, require_referer
+from dagr.web.helpers.pagination import Paginator, PaginatorOptions
+from dagr.helpers.strings import InputException
+
+
+class SearchView(Ce1susBaseView):
+  """
+  View handler for searches
+  """
+
+  def __init__(self, config):
+    Ce1susBaseView.__init__(self, config)
+    self.search_controller = SearchController(config)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def index(self):
+    """
+    renders the events page
+
+    :returns: generated HTML
+    """
+    cb_definitions = self.search_controller.get_cb_definitions_values_for_all()
+    cb_definitions['Any'] = 'Any'
+    return self._render_template('/events/search/index.html', cb_definitions=cb_definitions)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def search_results(self, definition_id, needle, operant):
+    """
+    Generates the page with the search results
+
+    :param definitionID: The Id of the selected attribute definition
+    :type definitionID: Integer
+    :param needle: The needle to search for
+    :type needle: String
+    """
+    try:
+      user = self._get_user()
+      cache = self._get_authorized_events_cache()
+      results = self.search_controller.search_results(needle, definition_id, operant, user, cache)
+      # Prepare paginator
+      labels = [{'event.identifier':'Event #'},
+                  {'event.title':'Event Name'},
+                  {'objDef.name':'Object'},
+                  {'attr_def.name':'Attribute name'},
+                  {'attribute.value':'Attribute value'},
+                  {'event.created':'CreatedOn'}]
+      paginator_options = PaginatorOptions('/events/recent',
+                                            'eventsTabTabContent')
+      paginator_options.add_option('NEWTAB',
+                                   'VIEW',
+                                   '/events/event/view/',
+                                   contentid='',
+                                   tab_title='Event')
+      paginator = Paginator(items=results,
+                              labels_and_property=labels,
+                              paginator_options=paginator_options)
+      paginator.trlink = ("loadNewTab('identifier', "
+                            + "'eventsTabTabContent', "
+                            + "'/events/event/view/identifier', "
+                            + "true, "
+                            + "'Event #identifier');")
+      return self._return_ajax_ok() + self._render_template('/events/search/results.html',
+                                                              paginator=paginator
+                                                              )
+    except (InputException, SearchControllerException) as error:
+      return '{0}'.format(error)

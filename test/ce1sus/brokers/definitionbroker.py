@@ -23,8 +23,8 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.object.description = 'A description'
     self.object.share = long(1)
 
-    self.sessionManager = SessionManager('../config/ce1sustest.conf')
-    self.attributebroker = self.sessionManager.brokerFactory(
+    self.session_manager = SessionManager('../config/ce1sustest.conf')
+    self.attributebroker = self.session_manager.broker_factory(
                                                       AttributeDefinitionBroker)
     self.attribute = AttributeDefinition()
     self.attribute.description = 'Description'
@@ -33,13 +33,13 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.attribute.regex = 'Regex'
     self.attribute.valuetable = long(1)
     self.attribute.share = long(1)
-    self.attribute.classIndex = long(0)
-    self.attribute.handlerIndex = long(0)
+    self.attribute.class_index = long(0)
+    self.attribute.handler_index = long(0)
     self.attribute.deletable = long(1)
     self.attribute.relation = long(1)
     self.attribute.objects = list()
 
-    self.objectbroker = self.sessionManager.brokerFactory(
+    self.objectbroker = self.session_manager.broker_factory(
                                                       ObjectDefinitionBroker)
 
 
@@ -59,7 +59,7 @@ class TestDefinitionBrokers(unittest.TestCase):
 
   def testNothingFound2(self):
     try:
-      user = self.userBroker.getUserByID('test')
+      user = self.user_broker.getUserByID('test')
       # just to prevent the warning
       print user
       assert False
@@ -74,7 +74,7 @@ class TestDefinitionBrokers(unittest.TestCase):
 # Test if the user is setup correctly if found
   def test_D_GetObjectByID(self):
 
-    obj = self.objectbroker.getByID(self.object.identifier)
+    obj = self.objectbroker.get_by_id(self.object.identifier)
     assert True
     obj.attributes[0].objects = list()
     self.object.attributes[0].objects = list()
@@ -82,12 +82,12 @@ class TestDefinitionBrokers(unittest.TestCase):
 
   def test_E_DeleteObject(self):
 
-    self.objectbroker.removeByID(self.object.identifier)
+    self.objectbroker.remove_by_id(self.object.identifier)
     assert True
 
 
   def test_F_DeleteAttribute(self):
-    self.attributebroker.removeByID(self.attribute.identifier)
+    self.attributebroker.remove_by_id(self.attribute.identifier)
     assert True
 
 if __name__ == "__main__":

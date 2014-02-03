@@ -37,32 +37,31 @@ class CommentBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with event ID :{0}'.format(
                                                                   eventID))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return result
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return Comment
 
   # pylint: disable=R0913
-  def buildComment(self, event, user, commentID=None,
-                         commentText=None, action=None):
+  def build_comment(self, event, user, comment_id=None,
+                         comment_text=None, action=None):
     """
     Modifications of a comment
     """
     comment = Comment()
     if not action == 'insert':
-      comment = self.getByID(commentID)
+      comment = self.get_by_id(comment_id)
     comment.modified = datumzait.utcnow()
     comment.modifier = user
     comment.modifier_id = comment.modifier.identifier
+    comment.comment = cleanPostValue(comment_text)
     if action == 'insert':
-      comment.comment = cleanPostValue(commentText)
       comment.creator = user
       comment.creator_id = comment.creator.identifier
       comment.event = event

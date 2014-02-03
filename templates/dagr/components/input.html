@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 <%namespace name="dagr" module="dagr.web.helpers.webstrings"/>
-<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/>
+<%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 
 
-<%def name="textBox(name, message, cols=40, rows=5 ,enabled=True, validationMsg=None)">
+<%def name="textbox(name, message, cols=40, rows=5 ,enabled=True, validation_msg=None)">
 	<!-- BEGIN textBox --><%
 	if message is None:
 	  message = ''
@@ -15,7 +15,7 @@
 	  enabledStr =  ' disabled ' 
 	
 	if hasattr(message,'error'):
-	  validationMsg = getattr(message,'error')
+	  validation_msg = getattr(message,'error')
 	%>
 	<% if message == 'None':
 	     message = ''
@@ -28,8 +28,8 @@
 	    </div>
 	%endif
 	
-	% if (not (validationMsg is None)):
-	  <%call expr="messagesAndText.error(validationMsg)"/>
+	% if (not (validation_msg is None)):
+	  <%call expr="messages_and_text.error(validation_msg)"/>
 	% endif
 	<!-- END textBox -->
 </%def>
@@ -37,7 +37,7 @@
 
 
 
-<%def name="passowdBox(name, value, enabled=True, validationMsg=None)">
+<%def name="passowdBox(name, value, enabled=True, validation_msg=None)">
 	<!-- BEGIN passowdBox --><%
 	if (enabled):
 	  enabledStr = ''
@@ -45,7 +45,7 @@
 	  enabledStr =  ' disabled ' 
 	
 	if hasattr(value,'error'):
-	  validationMsg = getattr(value,'error')
+	  validation_msg = getattr(value,'error')
 	
 	if value is None:
 	  value = ''
@@ -61,8 +61,8 @@
 	      %endif
 	    </div>
 	%endif
-	% if (not (validationMsg is None)) and enabled:
-	  <%call expr="messagesAndText.error(validationMsg)"/>
+	% if (not (validation_msg is None)) and enabled:
+	  <%call expr="messages_and_text.error(validation_msg)"/>
 	% endif
 	<!-- END passowdBox -->
     <script type="text/javascript">
@@ -80,7 +80,7 @@
 
 
 
-<%def name="editBox(name, value, enabled=True, validationMsg=None)">
+<%def name="editbox(name, value, enabled=True, validation_msg=None)">
 	<!-- BEGIN editBox --><%
 	if (enabled):
 	  enabledStr = ''
@@ -88,7 +88,7 @@
 	  enabledStr =  ' disabled ' 
 	
 	if hasattr(value,'error'):
-	  validationMsg = getattr(value,'error')
+	  validation_msg = getattr(value,'error')
 	
 	if value is None:
 	  value = ''
@@ -105,8 +105,8 @@
 	    %endif
 	    </div>
 	%endif
-	% if (not (validationMsg is None)) and enabled:
-	  <%call expr="messagesAndText.error(validationMsg)"/>
+	% if (not (validation_msg is None)) and enabled:
+	  <%call expr="messages_and_text.error(validation_msg)"/>
 	% endif
 	<!-- END editBox -->
 	    <script type="text/javascript">
@@ -124,7 +124,7 @@
 
 
 
-<%def name="comboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False, sorted=True)">
+<%def name="combobox(name, values, enabled=True, selected=None, validation_msg=None, has_empty=False, sorted=True)">
 	<!-- BEGIN comboBox --><%
 	if (enabled):
 	  enabledStr = ''
@@ -132,7 +132,7 @@
 	  enabledStr =  ' disabled ' 
 	
 	if not selected is None and hasattr(selected,'error'):
-	  validationMsg = getattr(selected,'error')
+	  validation_msg = getattr(selected,'error')
 	
 	hasDataContent=False
 	dataToggle=''
@@ -143,7 +143,7 @@
 	%if enabled:
 	 <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
 	  %if not values is None:
-	    %if hasEmpty:
+	    %if has_empty:
 	        %if not selected:
 	        <option value="" data-toggle="tooltip" title="Empty Value. Please Select one." selected></option>
 	        %else:
@@ -188,8 +188,8 @@
 	        %endfor
 	    </div>
 	%endif
-	% if (not (validationMsg is None)) and enabled:
-	  <%call expr="messagesAndText.error(validationMsg)"/>
+	% if (not (validation_msg is None)) and enabled:
+	  <%call expr="messages_and_text.error(validation_msg)"/>
 	% endif
 	<!-- END comboBox -->
 </%def>
@@ -201,12 +201,12 @@
 
 
 
-<%def name="dateTimePicker(name, value, enabled=True, validationMsg=None)">
+<%def name="datetime_picker(name, value, enabled=True, validation_msg=None)">
 <%
     
     dateTime = '' 
     if hasattr(value,'error'):
-      validationMsg = getattr(value,'error')
+      validation_msg = getattr(value,'error')
       dateTime = getattr(value,'value')
     else:
       if value is None:
@@ -223,13 +223,9 @@
 	        else:
 	            dateTime = unicode(value)
 %>
-
-
-
-   
             %if enabled:
             <div>
-	            <div class="form-group" style="padding-left:15px;padding-right:15px">
+	            <div class="form-group" >
 	              <input class="form-control" type='text' id="${name}ID" name="${name}" value="${dateTime}"/>
 	              Format must be: 'yyyy-MM-dd HH:mm:ss' UTC
 	            </div>
@@ -242,8 +238,8 @@
                     </div>
             %endif
 
-    % if (not (validationMsg is None)):
-      <%call expr="messagesAndText.error(validationMsg)"/>
+    % if (not (validation_msg is None)):
+      <%call expr="messages_and_text.error(validation_msg)"/>
     % endif
         <script type="text/javascript">
        $(document).ready(function() {

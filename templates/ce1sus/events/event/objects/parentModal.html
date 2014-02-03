@@ -2,37 +2,37 @@
 
 
 
-<%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
 <%
- if isEventParent: 
+ if is_event_parent: 
    checkStr = 'checked'
  else:
    checkStr = ''
 %>
-<input type="hidden" name="objectID" value="${objectID}">
-<input type="hidden" name="eventID" value="${eventID}">
-<%call expr="labeledInput.genericLabeler('Is parent event',isEventParent)">
+<input type="hidden" name="object_id" value="${object_id}">
+<input type="hidden" name="event_id" value="${event_id}">
+<%call expr="labeled_input.generic_labeler('Is parent event',is_event_parent)">
     <input onclick="enableDisableCB(this.id);" id ="eventCheckBox" type="checkbox" name="setEventParent" value="1" ${checkStr}/>
 </%call>
-<%call expr="labeledDisabledComboBox(label='Parent object',name='parentObjectID',values=cbValues,enabled=(not isEventParent),hasEmpty=True,selected=selected)"/>
+<%call expr="labeled_disabled_combobox(label='Parent object',name='parent_object_id',values=cb_values,enabled=(not is_event_parent),has_empty=True,selected=selected)"/>
 
-<%def name="labeledDisabledComboBox(label, name, values, enabled=True, validationMsg=None, selected=None, hasEmpty=False)">
+<%def name="labeled_disabled_combobox(label, name, values, enabled=True, validation_msg=None, selected=None, has_empty=False)">
     <!-- BEGIN labeledComboBox -->
-    <%call expr="labeledInput.genericLabeler(label,enabled)">
-      <%call expr="diabledcomboBox(name, values, enabled, selected, validationMsg, hasEmpty)"/>
+    <%call expr="labeled_input.generic_labeler(label,enabled)">
+      <%call expr="diabled_combobox(name, values, enabled, selected, validation_msg, has_empty)"/>
     </%call>
     <!-- END labeledComboBox -->
 </%def>
 
-<%def name="diabledcomboBox(name, values, enabled=True, selected=None, validationMsg=None, hasEmpty=False, sorted=True)">
+<%def name="diabled_combobox(name, values, enabled=True, selected=None, validation_msg=None, has_empty=False, sorted=True)">
     <!-- BEGIN comboBox --><%
     if (enabled):
-      enabledStr = ''
+      enabled_str = ''
     else:
-      enabledStr =  ' disabled ' 
+      enabled_str =  ' disabled ' 
     
     if not selected is None and hasattr(selected,'error'):
-      validationMsg = getattr(selected,'error')
+      validation_msg = getattr(selected,'error')
     
     hasDataContent=False
     dataToggle=''
@@ -40,9 +40,9 @@
     if sorted:
        keys.sort()
      %>
-     <select class="form-control" id="${name}ID" name="${name}" ${enabledStr}>
+     <select class="form-control" id="${name}ID" name="${name}" ${enabled_str}>
       %if not values is None:
-        %if hasEmpty:
+        %if has_empty:
             %if not selected:
             <option value="" data-toggle="tooltip" title="Empty Value. Please Select one." selected></option>
             %else:
@@ -71,8 +71,8 @@
         %endif
       %endif
     </select> 
-    % if (not (validationMsg is None)) and enabled:
-      <%call expr="messagesAndText.error(validationMsg)"/>
+    % if (not (validation_msg is None)) and enabled:
+      <%call expr="messagesAndText.error(validation_msg)"/>
     % endif
     <!-- END comboBox -->
 </%def>

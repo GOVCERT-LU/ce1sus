@@ -17,6 +17,9 @@ from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.api.restclasses import RestObjectDefinition, \
                                    RestAttributeDefinition
+from ce1sus.common.handlers.base import HandlerBase, HandlerException
+from importlib import import_module
+import json
 
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
@@ -27,11 +30,61 @@ _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     )
 
 
+class AttributeHandler(BASE):
+  """
+  TODO: Description
+  """
+  def __init__(self):
+    pass
+  __tablename__ = "AttributeHandlers"
+  identifier = Column('AttributeHandler_id', Integer, primary_key=True)
+  module_classname = Column('moduleClassName', String)
+  description = Column('description', String)
+  attributes = relationship('AttributeDefinition', primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index')
+  ce1sus_id = Column('config', Integer, ForeignKey('ce1sus.ce1sus_id'))
+  configuration = relationship('Ce1susConfig')
+  __config = None
+
+  @property
+  def config(self):
+    if self.__config is None:
+      config_str = getattr(self.configuration, 'value')
+      self.__config = json.loads(config_str)
+    return self.__config
+
+  @property
+  def classname(self):
+    """
+    Returns the classname
+    """
+    return unicode(self.module_classname).rsplit('.')[1]
+
+  @property
+  def module(self):
+    """
+    Returns the module
+    """
+    return unicode(self.module_classname).rsplit('.')[0]
+
+  def create_instance(self):
+    """
+    creates an instantiated object
+    """
+    module = import_module('.' + self.module, 'ce1sus.common.handlers')
+    clazz = getattr(module, self.classname)
+    # instantiate
+    handler = clazz(self.config)
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+      raise HandlerException(('{0} does not implement '
+                              + 'HandlerBase').format(self.module_classname))
+    return handler
+
+
 class ObjectDefinition(BASE):
   """This is a container class for the DEF_Objects table."""
   def __init__(self):
     pass
-
   __tablename__ = "DEF_Objects"
   # table class mapping
   identifier = Column('def_object_id', Integer, primary_key=True)
@@ -51,7 +104,7 @@ class ObjectDefinition(BASE):
   def chksum(self, chksum):
     self.dbchksum = chksum
 
-  def addAttribute(self, attribute):
+  def add_attribute(self, attribute):
     """
     Add an attribute to this object
 
@@ -64,7 +117,7 @@ class ObjectDefinition(BASE):
     function = getattr(self.attributes, 'append')
     function(attribute)
 
-  def removeAttribute(self, attribute):
+  def remove_attribute(self, attribute):
     """
     Removes an attribute from this object
 
@@ -96,7 +149,7 @@ class ObjectDefinition(BASE):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def toRestObject(self, isOwner=False, full=True):
+  def to_rest_object(self, isOwner=False, full=True):
     result = RestObjectDefinition()
     result.name = self.name
     result.description = self.description
@@ -105,7 +158,7 @@ class ObjectDefinition(BASE):
     if full:
       for attribute in self.attributes:
         # note just 1 level else there is the possibility to make cycles
-        result.attributes.append(attribute.toRestObject(isOwner, False))
+        result.attributes.append(attribute.to_rest_object(isOwner, False))
     return result
 
 
@@ -125,8 +178,13 @@ class AttributeDefinition(BASE):
   name = Column('name', String)
   description = Column('description', String)
   regex = Column('regex', String)
-  classIndex = Column(Integer)
-  handlerIndex = Column(Integer)
+  class_index = Column('classIndex', Integer)
+  handler_index = Column('handlerIndex', ForeignKey(AttributeHandler.identifier))
+  attribute_handler = relationship(AttributeHandler,
+                         back_populates='attributes',
+                         primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
+                         cascade='all',
+                         order_by="AttributeDefinition.name")
   deletable = Column('deletable', Integer)
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
@@ -135,6 +193,13 @@ class AttributeDefinition(BASE):
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
   dbchksum = Column('chksum', String)
+  __handler = None
+
+  @property
+  def handler(self):
+    if self.__handler is None:
+      self.__handler = getattr(self.attribute_handler, 'create_instance')()
+    return self.__handler
 
   @property
   def chksum(self):
@@ -145,14 +210,14 @@ class AttributeDefinition(BASE):
     self.dbchksum = chksum
 
   @property
-  def className(self):
+  def classname(self):
     """The name for the class used for storing the attribute value"""
-    if not self.classIndex is None:
-      return self.findClassName(self.classIndex)
+    if not self.class_index is None:
+      return self.find_classname(self.class_index)
     else:
       return ''
 
-  def findClassName(self, index):
+  def find_classname(self, index):
     """
     returns the table name
 
@@ -166,7 +231,7 @@ class AttributeDefinition(BASE):
       raise Exception('Invalid input "{0}"'.format(index))
     return self.__tableDefinitions[index]
 
-  def findTableIndex(self, name):
+  def find_table_index(self, name):
     """
     searches for the index for the given table name
 
@@ -176,14 +241,14 @@ class AttributeDefinition(BASE):
     :returns: Integer
     """
     result = None
-    for index, tableName in self.__tableDefinitions.iteritems():
-      if tableName == name:
+    for index, tablename in self.__tableDefinitions.iteritems():
+      if tablename == name:
         result = index
         break
     return result
 
   @staticmethod
-  def getTableDefinitions(simple=True):
+  def get_table_definitions(simple=True):
     """ returns the table definitions where the key is the value and value the
     index of the tables.
 
@@ -192,11 +257,11 @@ class AttributeDefinition(BASE):
     :returns: Dictionary
     """
     result = dict()
-    for index, tableName in AttributeDefinition.__tableDefinitions.iteritems():
+    for index, tablename in AttributeDefinition.__tableDefinitions.iteritems():
       if simple:
-        key = tableName.replace('Value', '')
+        key = tablename.replace('Value', '')
       else:
-        key = tableName
+        key = tablename
       value = index
       result[key] = value
     return result
@@ -217,11 +282,11 @@ class AttributeDefinition(BASE):
                                   minLength=3,
                                   withSymbols=True)
     ObjectValidator.validateRegularExpression(self, 'regex')
-    ObjectValidator.validateDigits(self, 'classIndex')
-    ObjectValidator.validateDigits(self, 'handlerIndex')
+    ObjectValidator.validateDigits(self, 'class_index')
+    ObjectValidator.validateDigits(self, 'handler_index')
     return ObjectValidator.isObjectValid(self)
 
-  def addObject(self, obj):
+  def add_object(self, obj):
     """
     Add an object to this attribute$
 
@@ -231,7 +296,7 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'append')
     function(obj)
 
-  def removeObject(self, obj):
+  def remove_object(self, obj):
     """
     Removes an object from this attribute$
 
@@ -241,16 +306,16 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'remove')
     function(obj)
 
-  def isClassIndexExisting(self, index):
+  def is_class_index_existing(self, index):
     return index >= 0 and index <= len(self._AttributeDefinition__tableDefinitions)
 
-  def toRestObject(self, isOwner=False, full=True):
+  def to_rest_object(self, is_owner=False, full=True):
     result = RestAttributeDefinition()
     result.description = self.description
     result.name = self.name
     result.regex = self.regex
-    result.classIndex = self.classIndex
-    result.handlerIndex = self.handlerIndex
+    result.class_index = self.class_index
+    result.handler_index = self.handler_index
     result.relation = self.relation
     result.chksum = self.chksum
     result.objects = list()
@@ -258,5 +323,5 @@ class AttributeDefinition(BASE):
     if full:
       for obj in self.objects:
         # note just 1 level else there is the possibility to make cycles
-        result.objects.append(obj.toRestObject(isOwner, False))
+        result.objects.append(obj.to_rest_object(is_owner, False))
     return result

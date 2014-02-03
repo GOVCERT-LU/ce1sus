@@ -18,8 +18,8 @@ class TestPermissionBrokers(unittest.TestCase):
   # The following test have to be ordered
 
   def setUp(self):
-    self.sessionManager = SessionManager('../config/ce1sustest.conf')
-    self.groupbroker = self.sessionManager.brokerFactory(GroupBroker)
+    self.session_manager = SessionManager('../config/ce1sustest.conf')
+    self.groupbroker = self.session_manager.broker_factory(GroupBroker)
 
     self.group = Group()
     self.group.identifier = long(666)
@@ -29,7 +29,7 @@ class TestPermissionBrokers(unittest.TestCase):
     self.group.description = 'Description'
     self.group.email = 'a@a.com'
     self.group.usermails = long(1)
-    self.userBroker = self.sessionManager.brokerFactory(UserBroker)
+    self.user_broker = self.session_manager.broker_factory(UserBroker)
     self.user = User()
     self.user.identifier = 666
     self.user.username = 'testUser'
@@ -38,7 +38,7 @@ class TestPermissionBrokers(unittest.TestCase):
     self.user.privileged = 0
     self.user.apiKey = None
     self.user.group_id = self.group.identifier
-    self.user.defaultGroup = self.group
+    self.user.default_group = self.group
     self.timeStamp = datetime.now()
     self.user.disabled = long(0)
     self.user.password = 'Test$123'
@@ -55,12 +55,12 @@ class TestPermissionBrokers(unittest.TestCase):
     assert True
 
   def test_B_GetGroupByID(self):
-      group = self.groupbroker.getByID(self.group.identifier)
+      group = self.groupbroker.get_by_id(self.group.identifier)
       assert compareObjects(group, self.group)
 
   def testNothingFound(self):
     try:
-      user = self.userBroker.getUserByID('test')
+      user = self.user_broker.getUserByID('test')
       # just to prevent the warning
       print user
       assert False
@@ -70,9 +70,9 @@ class TestPermissionBrokers(unittest.TestCase):
 
   def test_E_DeleteUser(self):
 
-      # self.userBroker.removeByID(self.user.identifier)
+      # self.user_broker.remove_by_id(self.user.identifier)
       # Check if group is still existing
-      group = self.groupbroker.getByID(self.group.identifier)
+      group = self.groupbroker.get_by_id(self.group.identifier)
 
       if compareObjects(group, self.group):
         assert True
@@ -80,7 +80,7 @@ class TestPermissionBrokers(unittest.TestCase):
         assert False
 
   def test_F_DeleteGroup(self):
-    self.groupbroker.removeByID(self.group.identifier)
+    self.groupbroker.remove_by_id(self.group.identifier)
     pass
 
 if __name__ == "__main__":

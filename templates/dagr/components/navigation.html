@@ -1,10 +1,10 @@
-<%def name="leftMenu(id)">
+<%def name="left_menu(id)">
 <ul id="${id}" class="nav nav-pills nav-stacked" style="max-width: 300px;">
   ${caller.body()}
 </ul>
 </%def>
 
-<%def name="leftMenuItem(id,onclick,name,active=False)">
+<%def name="left_menu_item(id,onclick,name,active=False)">
 <%
 if active:
   activeString=' class="active"'

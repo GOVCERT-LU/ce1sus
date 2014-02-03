@@ -138,14 +138,14 @@ function buttonClick(){
 function enableDisableCB(eventID) {
     checked = $("#eventCheckBox").prop("checked");
     if (checked) {
-        $('#parentObjectIDID').prop('disabled', true);
-        $('select#parentObjectIDID option').filter(
+        $('#parent_object_idID').prop('disabled', true);
+        $('select#parent_object_idID option').filter(
                 function() {
                     this.selected = (this.text == '');
                 });
     } else {
-        $('#parentObjectIDID').prop('disabled', false);
-        $('select#parentObjectIDID option')
+        $('#parent_object_idID').prop('disabled', false);
+        $('select#parent_object_idID option')
                 .filter(
                         function() {
                             this.selected = ($(this)
@@ -213,4 +213,25 @@ function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) 
     // prevent default posting of form
     event.preventDefault();
 
+}
+
+function loadAttributesProcess(element, formID, containerID, eventID, objectID, attributeID, enabled) {
+    //clear container
+    $('#'+containerID).html('');
+    if (element == null){
+        value = $('#'+formID+' input#definitionID:last').val();
+        if (enabled) {
+            loadContent(containerID,'/events/event/attribute/render_handler_edit/'+value+'/'+eventID+'/'+objectID+'/'+attributeID);
+        } else {
+            loadContent(containerID,'/events/event/attribute/render_handler_view/'+eventID+'/'+attributeID);
+        }
+        
+    } else {
+        value = $(element).val();
+        if (value) {
+            loadContent(containerID,'/events/event/attribute/render_handler_input/'+$(element).val()+'/'+eventID+'/'+objectID);
+        } else {
+            $('#'+formID+' #'+containerID).html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9"><div id="editBox"><div id="editBoxHidden">Please select something</div></div></div></div>');
+        }
+    }
 }

@@ -17,8 +17,8 @@ class Link(object):
   """
   Container class for links
   """
-  def __init__(self, urlBase, identifier):
-    self.urlBase = urlBase
+  def __init__(self, url_base=None, identifier=None):
+    self.url_base = url_base
     self.identifier = identifier
 
   @property
@@ -28,13 +28,14 @@ class Link(object):
 
     :returns: String
     """
-    return '{0}{1}'.format(self.urlBase, self.identifier)
+    return '{0}{1}'.format(self.url_base, self.identifier)
+
 
 class PaginatorTDStyle(object):
 
-  def __init__(self, css='', useRawHTML=False):
+  def __init__(self, css='', raw_html=False):
     self.css = css
-    self.useRawHTML = useRawHTML
+    self.raw_html = raw_html
 
 
 class PaginatorOptions(object):
@@ -58,12 +59,11 @@ class PaginatorOptions(object):
                 'REMOVE': 'Are you sure you want to delete?',
                 'CONFIG': ''}
 
-  # pylint: disable=R0902
+
   class Option(object):
     """
     Option container class
     """
-    # pylint: disable=R0913
     def __init__(self,
                  option,
                  mode,
@@ -72,10 +72,10 @@ class PaginatorOptions(object):
                  contentid='',
                  refresh=False,
                  tabid='',
-                 modalTitle='',
-                 postUrl='',
-                 autoReload=True,
-                 tabTitle=''):
+                 modal_title='',
+                 post_url='',
+                 auto_reload=True,
+                 tab_title=''):
       self.option = option
       self.mode = mode
       self.url = url
@@ -83,10 +83,10 @@ class PaginatorOptions(object):
       self.contentid = contentid
       self.refresh = refresh
       self.tabid = tabid
-      self.modalTitle = modalTitle
-      self.postUrl = postUrl
-      self.reload = autoReload
-      self.tabTitle = tabTitle
+      self.modal_title = modal_title
+      self.post_url = post_url
+      self.reload = auto_reload
+      self.tab_title = tab_title
 
     @property
     def icon(self):
@@ -119,13 +119,13 @@ class PaginatorOptions(object):
       else:
         return self.text
 
-  def __init__(self, reloadUrl='', contentid=''):
+  def __init__(self, reload_url='', contentid=''):
     self.options = list()
-    self.reloadUrl = reloadUrl
+    self.reload_url = reload_url
     self.contentid = contentid
 
   # pylint: disable=R0913
-  def addOption(self,
+  def add_option(self,
                 mode,
                 option,
                 url,
@@ -133,10 +133,10 @@ class PaginatorOptions(object):
                 contentid='',
                 refresh=False,
                 tabid='',
-                modalTitle='',
-                postUrl='',
-                tabTitle='',
-                autoReload=True):
+                modal_title='',
+                post_url='',
+                tab_title='',
+                auto_reload=True):
     """
     Adds an option
 
@@ -158,10 +158,10 @@ class PaginatorOptions(object):
     :type refresh: Boolean
     :param tabid: The id of the tab
     :type tabid: String
-    :param modalTitle: The title of the modal window
-    :type modalTitle: String
-    :param postUrl: The url to post to
-    :type postUrl: String
+    :param modal_title: The title of the modal window
+    :type modal_title: String
+    :param post_url: The url to post to
+    :type post_url: String
     """
     option = PaginatorOptions.Option(option,
                                      mode,
@@ -170,14 +170,14 @@ class PaginatorOptions(object):
                                      contentid,
                                      refresh,
                                      tabid,
-                                     modalTitle,
-                                     postUrl,
-                                     autoReload,
-                                     tabTitle)
+                                     modal_title,
+                                     post_url,
+                                     auto_reload,
+                                     tab_title)
     self.options.append(option)
 
   @property
-  def isSet(self):
+  def is_set(self):
     """
     Checks if there are options set
 
@@ -191,31 +191,31 @@ class Paginator(object):
 
   def __init__(self,
                items,
-               labelsAndProperty,
-               paginatorOptions=PaginatorOptions(),
-               itemsPerPage=10):
-    self.lables = labelsAndProperty
+               labels_and_property,
+               paginator_options=PaginatorOptions(),
+               items_per_page=10):
+    self.lables = labels_and_property
     self.list = items
-    self.options = paginatorOptions
-    self.itemsPerPage = itemsPerPage
-    self.sortColumn = None
-    self.sortOrder = "desc"
-    self.maxColumnLength = 255
+    self.options = paginator_options
+    self.items_per_page = items_per_page
+    self.sort_column = None
+    self.sort_order = "desc"
+    self.max_column_length = 255
     self.trlink = None
     self.trcolor = None
-    self.conditionAttribute = None
-    self.tdOptions = dict()
+    self.condition_attribute = None
+    self.td_options = dict()
 
-  def addTDStyle(self, columnKey, css='', useRawHTML=False):
-    self.tdOptions[columnKey] = PaginatorTDStyle(css, useRawHTML)
+  def add_td_style(self, column_key, css='', use_raw_html=False):
+    self.td_options[column_key] = PaginatorTDStyle(css, use_raw_html)
 
   @property
-  def sortColunmID(self):
-    if self.sortColumn:
+  def sort_colunm_id(self):
+    if self.sort_column:
       # search index
       for index, item in enumerate(self.lables):
         for key in item.iterkeys():
-          if key == self.sortColumn:
+          if key == self.sort_column:
             return index
     else:
       return 0

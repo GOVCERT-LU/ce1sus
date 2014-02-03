@@ -42,8 +42,9 @@ class User(BASE):
   disabled = Column('disabled', Integer)
   apiKey = Column('apikey', String)
   group_id = Column('group_id', Integer, ForeignKey('Groups.group_id'))
-  defaultGroup = relationship('Group',
-                              primaryjoin='User.group_id==Group.identifier')
+  default_group = relationship('Group',
+                              primaryjoin='User.group_id==Group.identifier',
+                              lazy='joined')
 
   @property
   def hasAPIKey(self):
@@ -92,7 +93,8 @@ class Group(BASE):
   tlpLvl = Column('tlplvl', Integer)
   subgroups = relationship('SubGroup', secondary='Subgroups_has_Groups',
                        back_populates='groups', cascade='all',
-                            order_by="SubGroup.name")
+                            order_by="SubGroup.name",
+                              lazy='joined')
 
   def validate(self):
     """

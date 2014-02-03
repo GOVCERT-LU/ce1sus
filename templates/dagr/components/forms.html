@@ -2,46 +2,46 @@
 
 <%namespace name="labeledInput" file="/dagr/components/labeledInput.html"/>
 
-<%def name="genericForm(id, url, refreshUrl=None,refreshContainer=None,horizontal=True)">
+<%def name="generic_form(id, url, refresh_url=None,refresh_container=None,horizontal=True)">
 <%
 if horizontal:
-   formClass='class="form-horizontal"'
+   form_class='class="form-horizontal"'
 else:
-   formClass='class="form-inline"'
+   form_class='class="form-inline"'
 %>
 <div id="${id}Errors"></div>
-<form id="${id}Form" ${formClass} role="form">
+<form id="${id}Form" ${form_class} role="form">
     ${caller.body()}
 </form>
 <script type="text/javascript">
 $( document ).ready(function() {
 	$('#${id}Form').submit(function(event){
 		<%
-		if not (refreshUrl is None and refreshContainer is None):
+		if not (refresh_url is None and refresh_container is None):
 			refresh = 'true'
 		else:
 			refresh = 'false'	
 		%>
-		formEvent(this,event,'${url}','${id}','${refresh}','${refreshContainer}','${refreshUrl}');
+		formEvent(this,event,'${url}','${id}','${refresh}','${refresh_container}','${refresh_url}');
 	});
 });
 </script>
 </%def>
 
-<%def name="genericModalForm(modalID, url, refreshUrl=None, refreshContainer=None)">
-<form id="${modalID}Form" class="form-horizontal" role="form">
+<%def name="generic_modal_form(modal_id, url, refresh_url=None, refresh_container=None)">
+<form id="${modal_id}Form" name="${modal_id}FormName" method="POST" action="${url}" class="form-horizontal" enctype="multipart/form-data">
     ${caller.body()}
 </form>
 <script type="text/javascript">
 $( document ).ready(function() {
-	$("#${modalID}Form").submit(function(event){
+	$("#${modal_id}Form").submit(function(event){
 	    <%
-	    if not (refreshUrl is None and refreshContainer is None):
+	    if not (refresh_url is None and refresh_container is None):
 	        refresh = 'true'
 	    else:
-	        refresh = 'false'   
+	        refresh = 'false'
 	    %>
-		formSubmit(this,event,'${modalID}' , '${url}','${refresh}','${refreshContainer}','${refreshUrl}')
+		formSubmit(this,event,'${modal_id}' , '${url}','${refresh}','${refresh_container}','${refresh_url}')
 	});
 });
 </script>

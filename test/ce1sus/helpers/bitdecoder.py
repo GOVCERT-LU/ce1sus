@@ -20,56 +20,56 @@ class TestBitDecoder(unittest.TestCase):
 
     def testRestValidSharable(self):
         test = BitValue('1110')
-        assert test.isRestInsert
-        assert test.isValidated
-        assert not test.isWebInsert
-        assert test.isSharable
+        assert test.is_rest_instert
+        assert test.is_validated
+        assert not test.is_web_insert
+        assert test.is_shareable
 
     def testWebValidSharable(self):
         test = BitValue('1101')
-        assert not test.isRestInsert
-        assert test.isValidated
-        assert test.isWebInsert
-        assert test.isSharable
+        assert not test.is_rest_instert
+        assert test.is_validated
+        assert test.is_web_insert
+        assert test.is_shareable
 
     def testRestValid(self):
         test = BitValue('0110')
-        assert test.isRestInsert
-        assert test.isValidated
-        assert not test.isWebInsert
-        assert not test.isSharable
+        assert test.is_rest_instert
+        assert test.is_validated
+        assert not test.is_web_insert
+        assert not test.is_shareable
 
     def testWebValid(self):
         test = BitValue('0101')
-        assert not test.isRestInsert
-        assert test.isValidated
-        assert test.isWebInsert
-        assert not test.isSharable
+        assert not test.is_rest_instert
+        assert test.is_validated
+        assert test.is_web_insert
+        assert not test.is_shareable
 
     def testRestSharable(self):
         test = BitValue('1010')
-        assert test.isRestInsert
-        assert not test.isValidated
-        assert not test.isWebInsert
-        assert test.isSharable
+        assert test.is_rest_instert
+        assert not test.is_validated
+        assert not test.is_web_insert
+        assert test.is_shareable
 
     def testWebSharable(self):
         test = BitValue('1001')
-        assert not test.isRestInsert
-        assert not test.isValidated
-        assert test.isWebInsert
-        assert test.isSharable
+        assert not test.is_rest_instert
+        assert not test.is_validated
+        assert test.is_web_insert
+        assert test.is_shareable
 
     def testWebself(self):
         test = BitValue('0001')
-        assert not test.isRestInsert
-        assert not test.isValidated
-        assert test.isWebInsert
-        assert not test.isSharable
+        assert not test.is_rest_instert
+        assert not test.is_validated
+        assert test.is_web_insert
+        assert not test.is_shareable
 
     def testToString(self):
       test = BitValue(5)
-      print test.bitCode
+      print test.bit_code
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

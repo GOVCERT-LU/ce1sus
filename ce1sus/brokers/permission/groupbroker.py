@@ -16,27 +16,26 @@ import sqlalchemy.orm.exc
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from dagr.helpers.strings import cleanPostValue
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class GroupBroker(BrokerBase):
   """This is the interface between python an the database"""
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return Group
 
-  def getSubGroupsByGroup(self, identifier, belongIn=True):
+  def get_subgroups_by_group(self, identifier, belong_in=True):
     """
     get all users in a given group
 
     :param identifier: identifier of the group
     :type identifier: Integer
-    :param belongIn: If set returns all the attributes of the object else
+    :param belong_in: If set returns all the attributes of the object else
                      all the attributes not belonging to the object
-    :type belongIn: Boolean
+    :type belong_in: Boolean
 
     :returns: list of Users
     """
@@ -44,77 +43,77 @@ class GroupBroker(BrokerBase):
       subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(
                                         Group.identifier == identifier
                                         ).order_by(SubGroup.name).all()
-      if not belongIn:
-        subgroupsIDs = list()
+      if not belong_in:
+        subgroups_ids = list()
         for subgroup in subgroups:
-          subgroupsIDs.append(subgroup.identifier)
+          subgroups_ids.append(subgroup.identifier)
         subgroups = self.session.query(SubGroup).filter(
  ~SubGroup.identifier.in_(
-                            subgroupsIDs
+                            subgroups_ids
                           )
                           ).order_by(SubGroup.name).all()
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def addSubGroupToGroup(self, subGroupID, groupID, commit=True):
+  def add_subgroup_to_group(self, subgroup_id, group_id, commit=True):
     """
     Add a user to a group
 
     :param userID: Identifier of the user
     :type userID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
     try:
       group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
+                                               group_id).one()
       subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
-                                                     == subGroupID).one()
+                                                     == subgroup_id).one()
       group.subgroups.append(subgroup)
-      self.doCommit(commit)
+      self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or subgroup not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def removeSubGroupFromGroup(self, subGroupID, groupID, commit=True):
+  def remove_subgroup_from_group(self, subgroup_id, group_id, commit=True):
     """
     Removes a user to a group
 
     :param userID: Identifier of the user
     :type userID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
     try:
       group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
+                                               group_id).one()
       subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
-                                                     == subGroupID).one()
+                                                     == subgroup_id).one()
       group.subgroups.remove(subgroup)
-      self.doCommit(commit)
+      self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   # pylint: disable=R0903,R0913
   @staticmethod
-  def buildGroup(identifier=None,
+  def build_group(identifier=None,
                  name=None,
                  description=None,
                  download=None,
                  action='insert',
-                 tlpLvl=None,
+                 tlp_lvl=None,
                  email=None,
                  usermails=None):
     """
@@ -139,26 +138,26 @@ class GroupBroker(BrokerBase):
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
       ObjectConverter.setInteger(group, 'canDownload', download)
-      ObjectConverter.setInteger(group, 'tlpLvl', tlpLvl)
+      ObjectConverter.setInteger(group, 'tlp_lvl', tlp_lvl)
       ObjectConverter.setInteger(group, 'usermails', usermails)
       group.description = cleanPostValue(description)
     return group
 
-  def getAll(self):
+  def get_all(self):
     """
-    Returns all getBrokerClass() instances
+    Returns all get_broker_class() instances
 
     Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.getBrokerClass()
+      result = self.session.query(self.get_broker_class()
                                   ).order_by(Group.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
+      raise BrokerException(error)
 
     return result

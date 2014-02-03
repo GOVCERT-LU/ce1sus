@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import ce1sus.api.exceptions
+from ce1sus.api.exceptions import Ce1susAPIException, Ce1susInvalidParameter
 from dagr.helpers.hash import hashSHA1
 from abc import abstractmethod
 from dagr.helpers.objects import getFields
@@ -21,79 +21,80 @@ from dagr.helpers.strings import stringToDateTime, InputException
 import json
 import re
 import base64
+from os.path import basename
 
 
-def __instantiateClass(className):
+def __instantiate_class(classname):
   module = import_module('.restclasses', 'ce1sus.api')
-  clazz = getattr(module, className)
+  clazz = getattr(module, classname)
   # instantiate
   instance = clazz()
   # check if handler base is implemented
   if not isinstance(instance, RestClass):
     raise RestAPIException(('{0} does not implement '
-                            + 'RestClass').format(className))
+                            + 'RestClass').format(classname))
   return instance
 
 
-def __populateAtomicValue(instance, key, value, makeBinary=True):
+def __populate_atomic_value(instance, key, value, make_binary=True):
   if value == '':
     value = None
   else:
-    stringValue = u'{0}'.format(value)
-    if (makeBinary and re.match(r'^\{.*file.*:.*\}$', stringValue)):
+    string_value = u'{0}'.format(value)
+    if (make_binary and re.match(r'^\{.*file.*:.*\}$', string_value)):
         # decompress file
       dictionary = json.loads(value)
-      jsonFile = dictionary.get('file', None)
-      if jsonFile:
-        fileName = jsonFile[0]
-        del fileName
-        strData = jsonFile[1]
-        value = base64.b64decode(strData)
+      json_file = dictionary.get('file', None)
+      if json_file:
+        filename = json_file[0]
+        del filename
+        str_data = json_file[1]
+        value = base64.b64decode(str_data)
     else:
-      if stringValue.isdigit():
-        value = eval(stringValue)
+      if string_value.isdigit():
+        value = eval(string_value)
       else:
         try:
           # is it a date?
-          value = stringToDateTime(stringValue)
+          value = stringToDateTime(string_value)
         except InputException:
           pass
   setattr(instance, key, value)
 
 
-def __setDictValue(instance, key, value, makeBinary=True):
-  subkey, subvalue = getObjectData(value)
-  subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+def __set_dict_value(instance, key, value, make_binary=True):
+  subkey, subvalue = get_object_data(value)
+  subinstance = populate_classname_by_dict(subkey, subvalue, make_binary)
   setattr(instance, key, subinstance)
 
 
-def __setListValue(instance, key, value, makeBinary=True):
+def __set_list_value(instance, key, value, make_binary=True):
   result = list()
   for item in value:
-    subkey, subvalue = getObjectData(item)
-    subinstance = populateClassNamebyDict(subkey, subvalue, makeBinary)
+    subkey, subvalue = get_object_data(item)
+    subinstance = populate_classname_by_dict(subkey, subvalue, make_binary)
     result.append(subinstance)
   setattr(instance, key, result)
 
 
-def __populateInstanceByDict(instance, dictionary, makeBinary=True):
+def __populate_instance_by_dict(instance, dictionary, make_binary=True):
 
   for key, value in dictionary.iteritems():
     if isinstance(value, DictionaryType):
-      __setDictValue(instance, key, value, makeBinary)
+      __set_dict_value(instance, key, value, make_binary)
     elif isinstance(value, ListType):
-      __setListValue(instance, key, value, makeBinary)
+      __set_list_value(instance, key, value, make_binary)
     else:
-      __populateAtomicValue(instance, key, value, makeBinary)
+      __populate_atomic_value(instance, key, value, make_binary)
 
 
-def populateClassNamebyDict(clazz, dictionary, makeBinary=True):
-  instance = __instantiateClass(clazz)
-  __populateInstanceByDict(instance, dictionary, makeBinary=makeBinary)
+def populate_classname_by_dict(clazz, dictionary, make_binary=True):
+  instance = __instantiate_class(clazz)
+  __populate_instance_by_dict(instance, dictionary, make_binary=make_binary)
   return instance
 
 
-def getObjectData(dictionary):
+def get_object_data(dictionary):
   for key, value in dictionary.iteritems():
     if key == 'response':
       continue
@@ -101,33 +102,32 @@ def getObjectData(dictionary):
       return key, value
 
 
-def getData(obj):
+def get_data(obj):
   response = obj.get('response', None)
   if response.get('status', None) == 'OK':
-    return getObjectData(obj)
+    return get_object_data(obj)
   else:
     message = response.get('errors', '')[0]
     raise Ce1susAPIException(message)
 
 
-def mapResponseToObject(jsonData):
-  key, value = getData(jsonData)
+def map_response_to_object(json_data):
+  key, value = get_data(json_data)
   if key == 'list':
     result = list()
     for item in value:
-      subkey, subvalue = getObjectData(item)
-      obj = populateClassNamebyDict(subkey, subvalue)
+      subkey, subvalue = get_object_data(item)
+      obj = populate_classname_by_dict(subkey, subvalue)
       result.append(obj)
     return result
   else:
-    return populateClassNamebyDict(key, value)
+    return populate_classname_by_dict(key, value)
 
 
-
-def mapJSONToObject(jsonData):
-  if jsonData:
-    key, value = getObjectData(jsonData)
-    return populateClassNamebyDict(key, value)
+def map_json_to_object(json_data):
+  if json_data:
+    key, value = get_object_data(json_data)
+    return populate_classname_by_dict(key, value)
   else:
     return None
 
@@ -148,30 +148,32 @@ class RestClassException(Exception):
 
 class RestClass(object):
 
-  def populate(self, dbObject, isOwner=False, full=True):
-    objFields = getFields(dbObject)
-    selfFields = getFields(self)
-    for name in selfFields:
+  def populate(self, db_object, is_owner=False, full=True):
+    obj_fields = getFields(db_object)
+    self_fields = getFields(self)
+    for name in self_fields:
       if not name.startswith('_'):
-        if name in objFields:
-          value = getattr(dbObject, name)
+        if name in obj_fields:
+          value = getattr(db_object, name)
           if isinstance(value, ListType):
-            # if the value is a list call toRestObject on all sub items
+            # if the value is a list call to_rest_object_method on all sub items
             items = list()
             for item in value:
-              items.append(item.toRestObject(isOwner, full))
+              items.append(item.to_rest_object(is_owner, full))
             setattr(self, name, items)
           else:
             # if the value is a DB object
-            toRestObject = getattr(value, "toRestObject", None)
-            if callable(toRestObject):
-                setattr(self, name, value.toRestObject(isOwner, full))
+            to_rest_object_method = getattr(value,
+                                            "to_rest_object_method",
+                                            None)
+            if callable(to_rest_object_method):
+                setattr(self, name, value.to_rest_object(is_owner, full))
             else:
               # if the value is "atomic"
               setattr(self, name, value)
 
   @abstractmethod
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     raise RestClassException(('ToJson is not implemented for '
                               + '{0}').format(self.__class__.__name__))
 
@@ -195,7 +197,7 @@ class RestEvent(RestClass):
     self.uuid = None
     self.share = 1
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['uuid'] = self.uuid
@@ -231,15 +233,15 @@ class RestEvent(RestClass):
       result[self.__class__.__name__]['objects'] = list()
       for obj in self.objects:
         result[self.__class__.__name__]['objects'].append(
-                                            obj.toDict(full=True,
-                                                withDefinition=withDefinition
+                                            obj.to_dict(full=True,
+                                                with_definition=with_definition
                                                 )
                                             )
     result[self.__class__.__name__]['comments'] = None
     if full:
       result[self.__class__.__name__]['comments'] = list()
       for comment in self.comments:
-        result[self.__class__.__name__]['comments'].append(comment.toDict())
+        result[self.__class__.__name__]['comments'].append(comment.to_dict())
     result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
     return result
 
@@ -250,7 +252,7 @@ class RestComment(RestClass):
     RestClass.__init__(self)
     self.comment = None
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['comment'] = self.comment
@@ -268,27 +270,27 @@ class RestObject(RestClass):
     self.children = list()
     self.share = 1
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
     result[self.__class__.__name__]['children'] = list()
 
     for child in self.children:
-      result[self.__class__.__name__]['children'].append(child.toDict(
+      result[self.__class__.__name__]['children'].append(child.to_dict(
                                               full=full,
-                                              withDefinition=withDefinition
+                                              with_definition=with_definition
                                               ))
-    result[self.__class__.__name__]['definition'] = self.definition.toDict(
+    result[self.__class__.__name__]['definition'] = self.definition.to_dict(
                                               full=False,
-                                              withDefinition=withDefinition
+                                              with_definition=with_definition
                                               )
     if full:
       result[self.__class__.__name__]['attributes'] = list()
       for attribute in self.attributes:
         result[self.__class__.__name__]['attributes'].append(
-                                                       attribute.toDict(
+                                                       attribute.to_dict(
                                                full=True,
-                                               withDefinition=withDefinition
+                                               with_definition=with_definition
                                                                        )
                                                             )
         pass
@@ -305,12 +307,12 @@ class RestAttribute(RestClass):
     self.ioc = None
     self.share = 1
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['definition'] = self.definition.toDict(
+    result[self.__class__.__name__]['definition'] = self.definition.to_dict(
                                                 full=False,
-                                                withDefinition=withDefinition
+                                                with_definition=with_definition
                                                           )
     if isinstance(self.value, Ce1susWrappedFile):
       value = self.value.get_api_wrapped_value()
@@ -342,18 +344,17 @@ class RestObjectDefinition(RestClass):
   def chksum(self, value):
     self.dbchksum = value
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
-    if withDefinition:
+    if with_definition:
       result[self.__class__.__name__]['name'] = self.name
       result[self.__class__.__name__]['description'] = self.description
-
     result[self.__class__.__name__]['chksum'] = self.chksum
     if full:
       result[self.__class__.__name__]['attributes'] = list()
       for attribute in self.attributes:
-        result[self.__class__.__name__]['attributes'].append(attribute.toDict(full, withDefinition))
+        result[self.__class__.__name__]['attributes'].append(attribute.to_dict(full, with_definition))
     return result
 
 
@@ -364,8 +365,8 @@ class RestAttributeDefinition(RestClass):
     self.name = None
     self.description = None
     self.regex = None
-    self.classIndex = None
-    self.handlerIndex = None
+    self.class_index = None
+    self.handler_index = None
     self.dbchksum = None
     self.objects = list()
     self.relation = 0
@@ -374,9 +375,9 @@ class RestAttributeDefinition(RestClass):
   def chksum(self):
     if self.dbchksum is None:
       key = u'{0}{1}{2}{3}'.format(self.attribute.name,
-                             self.attribute.regex,
-                             self.attribute.classIndex,
-                             self.attribute.handlerIndex)
+                                   self.attribute.regex,
+                                   self.attribute.class_index,
+                                   self.attribute.handler_index)
       self.dbchksum = hashSHA1(key)
     return self.dbchksum
 
@@ -384,37 +385,37 @@ class RestAttributeDefinition(RestClass):
   def chksum(self, value):
     self.dbchksum = value
 
-  def toDict(self, full=False, withDefinition=False):
+  def to_dict(self, full=False, with_definition=False):
     result = dict()
     result[self.__class__.__name__] = dict()
 
-    if withDefinition:
+    if with_definition:
       result[self.__class__.__name__]['name'] = self.name
       result[self.__class__.__name__]['description'] = self.description
       result[self.__class__.__name__]['regex'] = self.regex
-      result[self.__class__.__name__]['classIndex'] = self.classIndex
-      result[self.__class__.__name__]['handlerIndex'] = self.handlerIndex
+      result[self.__class__.__name__]['class_index'] = self.class_index
+      result[self.__class__.__name__]['handler_index'] = self.handler_index
       result[self.__class__.__name__]['relation'] = self.relation
     result[self.__class__.__name__]['chksum'] = self.chksum
     if full:
       result[self.__class__.__name__]['objects'] = list()
       for obj in self.objects:
-        result[self.__class__.__name__]['objects'].append(obj.toDict(full,
-                                                                     withDefinition))
+        result[self.__class__.__name__]['objects'].append(obj.to_dict(full, with_definition))
     return result
 
 
 class Ce1susWrappedFile(object):
   def __init__(self, stream=None, str_=None, name=''):
-    if (stream is None and str_ is None) or (not stream is None and not str_ is None):
-      raise ce1sus.api.exceptions.Ce1susInvalidParameter()
+    if ((stream is None and str_ is None)
+            or (not stream is None and not str_ is None)):
+      raise Ce1susInvalidParameter()
     elif not stream is None:
       self.value = stream.read()
 
       if name and not name == '':
         self.name = name
       else:
-        self.name = os.path.basename(stream.name)
+        self.name = basename(stream.name)
     elif not str_ is None:
       self.value = str_
 
@@ -428,4 +429,3 @@ class Ce1susWrappedFile(object):
 
   def get_api_wrapped_value(self):
     return json.dumps({'file': (self.name, self.get_base64())})
-

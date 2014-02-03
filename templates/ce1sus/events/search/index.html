@@ -7,13 +7,13 @@
     <div class="vcol-xs-12 col-sm-12">
 		Search for:
 		<div class="form-group">
-		<%call expr="input.comboBox(name='definitionID',values=cbDefinitions,enabled=True,hasEmpty=False,selected='Any')"/>
+		<%call expr="input.combobox(name='definition_id',values=cb_definitions,enabled=True,has_empty=False,selected='Any')"/>
 		</div>
 		<div class="form-group">
-        <%call expr="input.comboBox(name='operant',values={'=':'==','<':'<','>':'>','<=':'<=','>=':'>=','like':'like'},enabled=True,hasEmpty=False,selected='==')"/>
+        <%call expr="input.combobox(name='operant',values={'=':'==','<':'<','>':'>','<=':'<=','>=':'>=','like':'like'},enabled=True,has_empty=False,selected='==')"/>
         </div>
 		  <div class="form-group">
-		<%call expr="input.editBox(name='needle', value='', enabled=True, validationMsg=None)"/>
+		<%call expr="input.editbox(name='needle', value='', enabled=True, validation_msg=None)"/>
 		</div>
 		<input class="btn btn-default" type="submit" value="Search"/><div class="form-group" id="searchAni"></div>
     </div>
@@ -24,7 +24,7 @@
 <script type="text/javascript">
 $( document ).ready(function() {
     $('#searchFormForm').submit(function(event){
-        searchFormSubmit(this,event,'/events/search/searchResults','searchForm','serachResults');
+        searchFormSubmit(this,event,'/events/search/search_results','searchForm','serachResults');
         
     });
 });

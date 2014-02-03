@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+
+%if enabled:
+<div class="row">
+	<div class="col-xs-3 col-sm-3">
+		<div style="padding: 5px; text-align: right">
+			<label> Value:</label>
+		</div>
+	</div>
+	<div class="col-xs-9 col-sm-9">
+		<input class="btn-file btn-default" name="value" type="file" />
+	</div>
+	
+</div>
+<div style="text-align: left;">
+<b>Note 1:</b> The shared values are set to the default values of the respective definitions.<br/>
+</div>
+%else:
+  <%call expr="labeled_input.generic_labeler('Location',enabled)">
+  <div style="padding: 5px;">
+    %if can_download:
+        <a href="${url}"  target="_blank">Download</a>
+    %else:
+        (Not Accessible)
+    %endif
+  </div>
+  </%call>
+%endif

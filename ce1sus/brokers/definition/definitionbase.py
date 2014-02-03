@@ -21,7 +21,7 @@ class DefinitionBrokerBase(BrokerBase):
   def __init__(self, session):
     BrokerBase.__init__(self, session)
 
-  def getDefintionByCHKSUM(self, chksum):
+  def get_defintion_by_chksum(self, chksum):
     """
     Returns the attribute definition object with the given name
 
@@ -33,17 +33,17 @@ class DefinitionBrokerBase(BrokerBase):
     :returns: Object
     """
     try:
-      definition = self.session.query(self.getBrokerClass()).filter(
-                                self.getBrokerClass().dbchksum == chksum).one()
+      definition = self.session.query(self.get_broker_class()).filter(
+                                self.get_broker_class().dbchksum == chksum).one()
       return definition
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for CHKSUM {1}'.format(self.getBrokerClass().__class__.__name__, chksum))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise NothingFoundException('No {0} not found for CHKSUM {1}'.format(self.get_broker_class().__class__.__name__, chksum))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def getDefintionByCHKSUMS(self, chksums):
+  def get_defintion_by_chksums(self, chksums):
     """
     Returns the attribute definition object with the given name
 
@@ -55,17 +55,17 @@ class DefinitionBrokerBase(BrokerBase):
     :returns: Object
     """
     try:
-      definitions = self.session.query(self.getBrokerClass()).filter(
-                              self.getBrokerClass().dbchksum.in_(chksums)).all()
+      definitions = self.session.query(self.get_broker_class()).filter(
+                              self.get_broker_class().dbchksum.in_(chksums)).all()
       return definitions
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.getBrokerClass().__class__.__name__, chksums))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.get_broker_class().__class__.__name__, chksums))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def getDefintionByName(self, name):
+  def get_defintion_by_name(self, name):
     """
     Returns the attribute definition object with the given name
 
@@ -77,25 +77,25 @@ class DefinitionBrokerBase(BrokerBase):
     :returns: Object
     """
     try:
-      definition = self.session.query(self.getBrokerClass()).filter(
-                                self.getBrokerClass().name == name).one()
+      definition = self.session.query(self.get_broker_class()).filter(
+                                self.get_broker_class().name == name).one()
       return definition
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for name :{0}'.format(name))
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for {1}'.format(self.getBrokerClass().__class__.__name__, name))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise NothingFoundException('No {0} not found for {1}'.format(self.get_broker_class().__class__.__name__, name))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def getAll(self):
+  def get_all(self):
     try:
-        result = self.session.query(self.getBrokerClass()).order_by(self.getBrokerClass().name.asc()).all()
+        result = self.session.query(self.get_broker_class()).order_by(self.get_broker_class().name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError, e:
-        self.getLogger().fatal(e)
-        raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+        self._get_logger().fatal(error)
+        raise BrokerException(error)
     return result

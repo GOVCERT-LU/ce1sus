@@ -12,96 +12,82 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import logging
-from dagr.helpers.config import Configuration
-from dagr.helpers.strings import isNotNull
 from logging.handlers import RotatingFileHandler
 
 
 class Log(object):
   """Log class"""
-  instance = None
 
-  def __init__(self, configFile=None):
+  def __init__(self, config=None):
     self.loggers = dict()
-    if configFile:
-      self.__config = Configuration(configFile, 'Logger')
-      doLog = self.__config.get('log')
-      self.logLvl = getattr(logging, self.__config.get('level').upper())
-    else:
-      doLog = True
-      self.logLvl = logging.INFO
-    if doLog:
-      # create logger
-      if configFile:
-        self.logFileSize = self.__config.get('size')
-        self.nbrOfBackups = self.__config.get('backups')
-        self.logToConsole = self.__config.get('logconsole')
-        self.logfile = self.__config.get('logfile')
-      else:
-        self.logFileSize = 100000
-        self.nbrOfBackups = 2
-        self.logToConsole = True
-        self.logfile = ''
-      # create formatter
-      stringFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-      datefmt = '%m/%d/%Y %I:%M:%S %p'
-      self.__formatter = logging.Formatter(fmt=stringFormat, datefmt=datefmt)
-    Log.instance = self
 
-  def setConsoleHandler(self, logger):
+    if config:
+      self.__config_section = config.get_section('Logger')
+      do_log = self.__config_section.get('log')
+      self.log_lvl = getattr(logging, self.__config_section.get('level').upper())
+      self.log_console = self.__config_section.get('logconsole')
+      self.log_file = self.__config_section.get('log_file')
+    else:
+      self.__config_section = None
+      do_log = True
+      self.log_lvl = logging.INFO
+      self.log_console = True
+      self.log_file = ''
+
+    if do_log:
+      # create formatter
+      log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+      datefmt = '%m/%d/%Y %I:%M:%S %p'
+      self.__formatter = logging.Formatter(fmt=log_format, datefmt=datefmt)
+
+  def __set_console_handler(self, logger):
     """
     Sets the console handler with the parameters to the given logger
     """
-    if self.logToConsole:
-      consoleHandler = logging.StreamHandler()
-      consoleHandler.setLevel(self.logLvl)
-      consoleHandler.setFormatter(self.__formatter)
-      logger.addHandler(consoleHandler)
+    if self.log_console:
+      console_handler = logging.StreamHandler()
+      console_handler.setLevel(self.log_lvl)
+      console_handler.setFormatter(self.__formatter)
+      logger.addHandler(console_handler)
 
-  def setLogFile(self, logger):
+  def __set_logfile(self, logger):
     """
     Sets the file loggerwith the parameters to the given logger
     """
-    if isNotNull(self.logfile):
-      maxBytes = getattr(logger, "rot_maxBytes", self.logFileSize)
-      backupCount = getattr(logger, "rot_backupCount", self.nbrOfBackups)
-      fileRotater = RotatingFileHandler(self.logfile, 'a', maxBytes,
-                                        backupCount)
-      fileRotater.setLevel(self.logLvl)
-      fileRotater.setFormatter(self.__formatter)
-      logger.addHandler(fileRotater)
+    if self.__config_section:
+      log_file_size = self.__config_section.get('size')
+      nbr_backups = self.__config_section.get('backups')
+    else:
+      log_file_size = 100000
+      nbr_backups = 2
+    if self.log_file:
+      max_bytes = getattr(logger, "rot_maxBytes", log_file_size)
+      backup_count = getattr(logger, "rot_backupCount", nbr_backups)
+      file_rotater = RotatingFileHandler(self.log_file, 'a', max_bytes,
+                                        backup_count)
+      file_rotater.setLevel(self.log_lvl)
+      file_rotater.setFormatter(self.__formatter)
+      logger.addHandler(file_rotater)
 
-  @classmethod
-  def getInstance(cls):
-    """
-    Returns the instance of the logger
-    """
-    if Log.instance is None:
-      Log.instance = Log()
-      Log.instance.getLogger('Log').error('No configuration loaded')
-    return Log.instance
-
-  @staticmethod
-  def getLogger(className):
+  def get_logger(self, classname):
     """
     Returns the instance for of the logger for the given class
 
     :returns: Logger
     """
-    wasInitialized = True
-    if Log.instance is None:
-      wasInitialized = False
-
-    instance = Log.getInstance()
-
     # check if logger exists
-    logger = instance.loggers.get(className, None)
+    logger = self.loggers.get(classname, None)
     if not logger:
-      logger = logging.getLogger(className)
-      if wasInitialized:
-        logger.setLevel(Log.getInstance().logLvl)
-        instance.setConsoleHandler(logger)
-        instance.setLogFile(logger)
-      instance.loggers[className] = logger
-
+      logger = logging.getLogger(classname)
+      logger.setLevel(self.log_lvl)
+      if self.__config_section:
+        self.__set_console_handler(logger)
+        self.__set_logfile(logger)
+      self.loggers[classname] = logger
     return logger
+
+  def is_logger_cached(self, classname):
+    """
+    Checks is the logger for the given class is cached
+    """
+    return not (self.loggers.get(classname, None) is None)

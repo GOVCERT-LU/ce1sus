@@ -12,8 +12,7 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import NothingFoundException, \
                            BrokerException, \
-                           IntegrityException, DeletionException, \
-                           TooManyResultsFoundException
+                           IntegrityException, DeletionException
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 import sqlalchemy.orm.exc
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
@@ -24,7 +23,6 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class AttributeDefinitionBroker(DefinitionBrokerBase):
@@ -32,15 +30,15 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
 
   def __init__(self, session):
     DefinitionBrokerBase.__init__(self, session)
-    self.handlerBroker = AttributeHandlerBroker(session)
+    self.handler_broker = AttributeHandlerBroker(session)
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return AttributeDefinition
 
-  def getObjectsByAttribute(self, identifier, belongIn=True):
+  def get_objects_by_attribute(self, identifier, belong_in=True):
     """
     returns all objects belonging to an attribute with the given identifier
 
@@ -48,9 +46,9 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
 
     :param identifier: identifier of the object
     :type identifier: Integer
-    :param belongIn: If set returns all the attributes of the object else
+    :param belong_in: If set returns all the attributes of the object else
                      all the attributes not belonging to the object
-    :type belongIn: Boolean
+    :type belong_in: Boolean
 
     :returns: list of ObjectDefinitons
     """
@@ -63,27 +61,27 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                         identifier).order_by(
                                                     ObjectDefinition.name.asc()
                                                     ).all()
-      if not belongIn:
-        objIDs = list()
+      if not belong_in:
+        obj_ids = list()
         for obj in objects:
-          objIDs.append(obj.identifier)
+          obj_ids.append(obj.identifier)
         objects = self.session.query(ObjectDefinition).filter(
- ~ObjectDefinition.identifier.in_(objIDs)).order_by(ObjectDefinition.name.asc()
+ ~ObjectDefinition.identifier.in_(obj_ids)).order_by(ObjectDefinition.name.asc()
                                                     ).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return objects
 
-  def getCBValuesForAll(self):
+  def get_cb_values_for_all(self):
     """
     Returns all the values the combobox can use
     """
-    definitions = self.getAll()
+    definitions = self.get_all()
     result = dict()
     for definition in definitions:
       if definition.name != 'File':
@@ -91,7 +89,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                    definition.description)
     return result
 
-  def getCBValues(self, objIdentifier):
+  def get_cb_values(self, obj_identifier):
     """
     returns the values for a combo box where the key is the name of the
     attribute and the value is the identifier.
@@ -104,80 +102,80 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                               AttributeDefinition.objects
                                               ).filter(
                                         ObjectDefinition.identifier ==
-                                        objIdentifier).order_by(
+                                        obj_identifier).order_by(
                                         AttributeDefinition.name).all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().debug(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().debug(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
     result = dict()
     for definition in definitions:
       result[definition.name] = (definition.identifier, definition.description)
     return result
 
-  def addObjectToAttribute(self, objID, attrID, commit=True):
+  def add_object_to_attribute(self, obj_id, attr_id, commit=True):
     """
     Add an attribute to an object
 
-    :param objID: Identifier of the object
-    :type objID: Integer
-    :param attrID: Identifier of the attribute
-    :type attrID: Integer
+    :param obj_id: Identifier of the object
+    :type obj_id: Integer
+    :param attr_id: Identifier of the attribute
+    :type attr_id: Integer
     """
     try:
       obj = self.session.query(ObjectDefinition).filter(
-                                ObjectDefinition.identifier == objID).one()
+                                ObjectDefinition.identifier == obj_id).one()
       attribute = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.identifier == attrID).one()
-      attribute.addObject(obj)
-      handlerName = self.handlerBroker.getHandlerName(attribute.handlerIndex)
-      if not 'GenericHandler' in handlerName:
-        handler = self.handlerBroker.getHandler(attribute)
+                                AttributeDefinition.identifier == attr_id).one()
+      attribute.add_dbject(obj)
+      handler_name = self.handler_broker.get_handlername(attribute.handler_index)
+      if not 'GenericHandler' in handler_name:
+        handler = self.handler_broker.get_handler(attribute)
         try:
-          idList = handler.getAttributesIDList()
+          id_list = handler.get_used_attribute_ids()
         except TypeError:
-          idList = list()
+          id_list = list()
         # only add the attributes if there are attributes to be added
-        if idList:
+        if id_list:
           attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.name.in_(idList))
+                AttributeDefinition.name.in_(id_list))
           for attribute in attributes:
-            attribute.addObject(obj)
-      self.doCommit(commit)
-    except sqlalchemy.orm.exc.NoResultFound as e:
+            attribute.add_dbject(obj)
+      self.do_commit(commit)
+    except sqlalchemy.orm.exc.NoResultFound as error:
       raise NothingFoundException('Attribute or Object not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def removeObjectFromAttribute(self, objID, attrID, commit=True):
+  def remove_object_from_attribute(self, obj_id, attr_id, commit=True):
     """
     Removes an attribute from an object
 
-    :param objID: Identifier of the object
-    :type objID: Integer
-    :param attrID: Identifier of the attribute
-    :type attrID: Integer
+    :param obj_id: Identifier of the object
+    :type obj_id: Integer
+    :param attr_id: Identifier of the attribute
+    :type attr_id: Integer
     """
     try:
       obj = self.session.query(ObjectDefinition).filter(
-                                ObjectDefinition.identifier == objID).one()
+                                ObjectDefinition.identifier == obj_id).one()
       attribute = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.identifier == attrID).one()
-      attribute.removeObject(obj)
-      self.doCommit(commit)
+                                AttributeDefinition.identifier == attr_id).one()
+      attribute.remove_object(obj)
+      self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def removeByID(self, identifier, commit=True):
+  def remove_by_id(self, identifier, commit=True):
     """
-    Removes the <<getBrokerClass()>> with the given identifier
+    Removes the <<get_broker_class()>> with the given identifier
 
     :param identifier:  the id of the requested user object
     :type identifier: integer
@@ -187,25 +185,25 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                             identifier == identifier,
                                             AttributeDefinition.deletable == 1
                       ).delete(synchronize_session='fetch')
-    except sqlalchemy.exc.OperationalError as e:
+    except sqlalchemy.exc.OperationalError as error:
       self.session.rollback()
-      raise IntegrityException(e)
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-    self.doCommit(commit)
+    self.do_commit(commit)
 
   # pylint: disable=R0913
-  def buildAttributeDefinition(self,
+  def build_attribute_definition(self,
                                identifier=None,
                                name=None,
                                description='',
                                regex='^.*$',
-                               classIndex=0,
+                               class_index=0,
                                action='insert',
-                               handlerIndex=0,
+                               handler_index=0,
                                share=None,
                                relation=None):
     """
@@ -221,9 +219,9 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     :param regex: The regular expression to use to verify if the value is
                   correct
     :type regex: strings
-    :param classIndex: The index of the table to use for storing or getting the
+    :param class_index: The index of the table to use for storing or getting the
                        attribute actual value
-    :type classIndex: strings
+    :type class_index: strings
     :param action: action which is taken (i.e. edit, insert, remove)
     :type action: strings
 
@@ -231,7 +229,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     """
     attribute = AttributeDefinition()
     if not action == 'insert':
-      attribute = self.getByID(identifier)
+      attribute = self.get_by_id(identifier)
       if attribute.deletable == 0:
         raise DeletionException('Attribute cannot be edited or deleted')
     if not action == 'remove':
@@ -239,21 +237,20 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
         name = name[0]
       attribute.name = cleanPostValue(name)
       attribute.description = cleanPostValue(description)
-    ObjectConverter.setInteger(attribute, 'classIndex', classIndex)
-    ObjectConverter.setInteger(attribute, 'handlerIndex', handlerIndex)
+    ObjectConverter.setInteger(attribute, 'class_index', class_index)
+    ObjectConverter.setInteger(attribute, 'handler_index', handler_index)
     ObjectConverter.setInteger(attribute, 'relation', relation)
     key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,
-                             attribute.classIndex,
-                             attribute.handlerIndex)
+                             attribute.class_index,
+                             attribute.handler_index)
     attribute.dbchksum = hashSHA1(key)
-    trimmedRegex = cleanPostValue(regex)
-    if strings.isNotNull(trimmedRegex):
-      attribute.regex = trimmedRegex
+    trimmed_regex = cleanPostValue(regex)
+    if strings.isNotNull(trimmed_regex):
+      attribute.regex = trimmed_regex
     else:
       attribute.regex = '^.*$'
     ObjectConverter.setInteger(attribute, 'share', share)
     if action == 'insert':
       attribute.deletable = 1
     return attribute
-

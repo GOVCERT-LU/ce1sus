@@ -23,58 +23,58 @@ class RestEventsController(RestControllerBase):
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.eventBroker = self.brokerFactory(EventBroker)
+    self.event_broker = self.broker_factory(EventBroker)
 
-  def view(self, uuid, apiKey, **options):
+  def view(self, uuid, api_key, **options):
     try:
       uuids = options.get('uuids', list())
-      withDefinition = options.get('fulldefinitions', False)
+      with_definition = options.get('fulldefinitions', False)
 
-      startDate = options.get('startdate', None)
-      endDate = options.get('enddate', datumzait.utcnow())
+      start_date = options.get('startdate', None)
+      end_date = options.get('enddate', datumzait.utcnow())
 
       offset = options.get('page', 0)
       limit = options.get('limit', 20)
 
-      user = self.getUser(apiKey)
+      user = self.get_user(api_key)
 
       # limit has to be between 0 and maximum value
       if limit < 0 or limit > RestEventsController.MAX_LIMIT:
-        self.raiseError('InvalidArgument',
+        self.raise_error('InvalidArgument',
                         'The limit value has to be between 0 and 20')
 
       # search only if something was specified
-      if startDate or uuids:
-        events = self.eventBroker.getEvents(uuids,
-                                      startDate,
-                                      endDate,
+      if start_date or uuids:
+        events = self.event_broker.get_events(uuids,
+                                      start_date,
+                                      end_date,
                                       offset,
                                       limit,
                                       user)
       else:
-        events = self.eventBroker.getAllForUser(user=user,
+        events = self.event_broker.get_all_for_user(user=user,
                                                 limit=limit,
                                                 offset=offset)
 
       result = list()
       for event in events:
         try:
-          self.checkIfViewable(event, self.getUser(apiKey), False)
-          result.append(self._objectToJSON(event,
-                                           self.isEventOwner(event,
-                                                             self.getUserByAPIKey(apiKey)),
+          self.checkIfViewable(event, self.get_user(api_key), False)
+          result.append(self._object_to_json(event,
+                                           self.is_event_owner(event,
+                                                             self.getUserByAPIKey(api_key)),
                                            True,
-                                           withDefinition))
+                                           with_definition))
         except cherrypy.HTTPError:
           pass
 
-      resultDict = {'Results': result}
-      return self._returnMessage(resultDict)
+      result_dict = {'Results': result}
+      return self._return_message(result_dict)
 
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def getFunctionName(self, parameter, action):
+  def get_function_name(self, parameter, action):
     return None

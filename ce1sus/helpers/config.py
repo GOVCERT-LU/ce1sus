@@ -17,9 +17,9 @@ class WebConfig(object):
 
   instance = None
 
-  def __init__(self, configFile):
+  def __init__(self, config_file):
     WebConfig.instance = self
-    self.__config = Configuration(configFile, 'ce1sus')
+    self.__config_section = Configuration(config_file, 'ce1sus')
 
   def get(self, identifier):
     """
@@ -30,10 +30,10 @@ class WebConfig(object):
 
     :returns:
     """
-    return self.__config.get(identifier)
+    return self.__config_section.get(identifier)
 
   @classmethod
-  def getInstance(cls):
+  def get_instance(cls):
     """
     Returns the instance (Singleton pattern)
 

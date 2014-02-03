@@ -21,188 +21,184 @@ import json
 class RestSearchController(RestControllerBase):
 
   MAX_LIMIT = 20
-  PARAMETER_MAPPER = {'attributes': 'viewAttributes',
+  PARAMETER_MAPPER = {'attributes': 'view_attributes',
                       'events': 'viewEvents'}
 
   def __init__(self):
     RestControllerBase.__init__(self)
-    self.eventBroker = self.brokerFactory(EventBroker)
+    self.event_broker = self.broker_factory(EventBroker)
 
-  def __getLimit(self, options):
-    limit = options.get('limit', MAX_LIMIT / 2)
+  def __get_limit(self, options):
+    limit = options.get('limit', RestSearchController.MAX_LIMIT / 2)
 
     # limit has to be between 0 and maximum value
     if limit < 0 or limit > RestSearchController.MAX_LIMIT:
-      self.raiseError('InvalidArgument',
+      self.raise_error('InvalidArgument',
                       'The limit value has to be between 0 and 20')
     return limit
 
-  def getParentObject(self, event, obj, seenEvents):
-    if not obj.parentObject_id:
+  def get_parent_object(self, event, obj, seen_events):
+    if not obj.parent_object_id:
       return None
 
-    orgParentObj = self.objectBroker.getByID(obj.parentObject_id)
-    if orgParentObj.bitValue.isValidated and orgParentObj.bitValue.isSharable:
+    org_parent_obj = self.object_broker.get_by_id(obj.parent_object_id)
+    if org_parent_obj.bit_value.is_validated and org_parent_obj.bit_value.is_shareable:
 
-      parentObject = seenEvents[event.identifier][1].get(
-                                                      orgParentObj.identifier,
+      parent_object = seen_events[event.identifier][1].get(
+                                                      org_parent_obj.identifier,
                                                       None
                                                         )
-      if not parentObject:
-        # memorize parentObject
-        parentObject = orgParentObj.toRestObject(False)
-        seenEvents[event.identifier][1][orgParentObj.identifier] = parentObject
-        if orgParentObj.parentObject_id:
-          parentParentObject = seenEvents[event.identifier][1].get(
-                                          orgParentObj.parentObject.identifier,
+      if not parent_object:
+        # memorize parent_object
+        parent_object = org_parent_obj.to_rest_object(False)
+        seen_events[event.identifier][1][org_parent_obj.identifier] = parent_object
+        if org_parent_obj.parent_object_id:
+          parent_parent_object = seen_events[event.identifier][1].get(
+                                          org_parent_obj.parent_object.identifier,
                                           None
                                                                   )
-          if not parentParentObject:
-            parentParentObject = self.getParentObject(event,
-                                                      orgParentObj,
-                                                      seenEvents)
-            if parentParentObject:
-              restParent = parentParentObject.toRestObject(False)
-              index = orgParentObj.parentObject.identifier
-              seenEvents[event.identifier][1][index] = restParent
-              parentObject.parent = restParent
+          if not parent_parent_object:
+            parent_parent_object = self.get_parent_object(event,
+                                                      org_parent_obj,
+                                                      seen_events)
+            if parent_parent_object:
+              rest_parent = parent_parent_object.to_rest_object(False)
+              index = org_parent_obj.parent_object.identifier
+              seen_events[event.identifier][1][index] = rest_parent
+              parent_object.parent = rest_parent
             else:
               return None
           else:
-            parentObject.parent = restParent
+            parent_object.parent = rest_parent
 
         else:
-          restEvent = seenEvents[event.identifier][0]
-          restEvent.objects.append(parentObject)
+          rest_event = seen_events[event.identifier][0]
+          rest_event.objects.append(parent_object)
 
-      return parentObject
+      return parent_object
     else:
       return None
 
-  def __checkIfBelongs(self, identifier, array):
+  def __check_if_belongs(self, identifier, array):
     if array:
       return identifier in array
     else:
       return True
 
-  def viewAttributes(self, uuid, apiKey, **options):
+  def view_attributes(self, uuid, api_key, **options):
     try:
-      withDefinition = options.get('fulldefinitions', False)
+      with_definition = options.get('fulldefinitions', False)
       # TODO use these!
-      startDate = options.get('startdate', None)
-      endDate = options.get('enddate', datumzait.utcnow())
+      start_date = options.get('startdate', None)
+      end_date = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
-      limit = self.__getLimit(options)
+      limit = self.__get_limit(options)
 
       # object type to look foor if specified
-      performSearch = True
-      objectNeedle = options.get('objecttype', None)
-      objectDefinition = None
-      if objectNeedle:
-        objectDefinition = self.objectDefinitionBroker.getDefintionByName(
-                                                                  objectNeedle
+      perform_search = True
+      object_needle = options.get('objecttype', None)
+      object_definition = None
+      if object_needle:
+        object_definition = self.object_definition_broker.get_defintion_by_name(
+                                                                  object_needle
                                                                    )
 
-
       # collect informations about the attribute to look for
-      if performSearch:
+      if perform_search:
         # object Attribues to look for
         needles = options.get('objectattributes', list())
-        completeNeedles = dict()
+        complete_needles = dict()
         for needle in needles:
             for key, value in needle.iteritems():
-              definition = self.attributeDefinitionBroker.getDefintionByName(
+              definition = self.attribute_definition_broker.get_defintion_by_name(
                                                                           key.strip()
                                                                             )
-              if definition.classIndex != 0:
-                completeNeedles[value] = definition
-        if not completeNeedles:
-          performSearch = False
+              if definition.class_index != 0:
+                complete_needles[value] = definition
+        if not complete_needles:
+          perform_search = False
 
       # Collect informations about the return values
-      if performSearch:
-
-        requestedAttributes = list()
+      if perform_search:
+        requested_attributes = list()
         for item in options.get('attributes', list()):
-          definition = self.attributeDefinitionBroker.getDefintionByName(item.strip())
-          requestedAttributes.append(definition.identifier)
+          definition = self.attribute_definition_broker.get_defintion_by_name(item.strip())
+          requested_attributes.append(definition.identifier)
           # Note if no requested attribues are defined return all for the
           # object having the needle
 
-      if performSearch:
+      if perform_search:
 
         # find Matching attribtues
-        matchingAttributes = list()
-        for definition, needle in completeNeedles.iteritems():
-          foundValues = self.attributeBroker.lookforAttributeValue(needle,
+        matching_attributes = list()
+        for definition, needle in complete_needles.iteritems():
+          found_values = self.attribute_broker.lookforAttributeValue(needle,
                                                                  definition,
                                                                  '==')
-          matchingAttributes = matchingAttributes + foundValues
+          matching_attributes = matching_attributes + found_values
 
         # cache
-        seenItems = dict()
+        seen_items = dict()
 
-        for item in matchingAttributes:
+        for item in matching_attributes:
           attribute = item.attribute
           # get the event
           event = attribute.object.event
           if not event:
-            event = attribute.object.parentEvent
+            event = attribute.object.parent_event
           # check if attribute is sharable and validated
-          if (attribute.bitValue.isValidated and attribute.bitValue.isSharable) or self.isEventOwner(event,
-                                                             self.getUserByAPIKey(apiKey)):
+          if (attribute.bit_value.is_validated and attribute.bit_value.is_shareable) or self.is_event_owner(event,
+                                                             self.getUserByAPIKey(api_key)):
             # check it is one of the requested attributes
             obj = attribute.object
             # check if the object is desired
-            if (not objectDefinition or obj.def_object_id == objectDefinition.identifier):
+            if (not object_definition or obj.def_object_id == object_definition.identifier):
               # check if object is sharable and validated
-              if (obj.bitValue.isValidated and obj.bitValue.isSharable) or self.isEventOwner(event,
-                                                             self.getUserByAPIKey(apiKey)):
-                if requestedAttributes:
+              if (obj.bit_value.is_validated and obj.bit_value.is_shareable) or self.is_event_owner(event,
+                                                             self.getUserByAPIKey(api_key)):
+                if requested_attributes:
                   # append only the requested attributes
                   neededAttributes = list()
                   for item in obj.attributes:
-                    if item.def_attribute_id in requestedAttributes:
+                    if item.def_attribute_id in requested_attributes:
                       neededAttributes.append(item)
                 else:
                   # append all attributes
                   neededAttributes = obj.attributes
 
-
-
                 try:
                   # check if the event can be accessed
-                  self.checkIfViewable(event, self.getUser(apiKey), False)
+                  self.checkIfViewable(event, self.get_user(api_key), False)
 
                   # get rest from cache
-                  restEvent = seenItems.get(event.identifier, None)
-                  if not restEvent:
+                  rest_event = seen_items.get(event.identifier, None)
+                  if not rest_event:
                     # if not cached put it there
-                    restEvent = event.toRestObject(self.isEventOwner(event,
-                                                             self.getUserByAPIKey(apiKey)), False)
-                    seenItems[event.identifier] = (restEvent, dict())
+                    rest_event = event.to_rest_object(self.is_event_owner(event,
+                                                             self.getUserByAPIKey(api_key)), False)
+                    seen_items[event.identifier] = (rest_event, dict())
                   else:
                     # get it from cache
-                    restEvent = restEvent[0]
+                    rest_event = rest_event[0]
 
                   # get obj from cache
-                  restObject = seenItems[event.identifier][1].get(obj.identifier,
+                  rest_object = seen_items[event.identifier][1].get(obj.identifier,
                                                                   None)
-                  if not restObject:
-                    restObject = obj.toRestObject(self.isEventOwner(event,
-                                                             self.getUserByAPIKey(apiKey)), False)
-                    if obj.parentObject_id is None:
-                      restEvent.objects.append(restObject)
+                  if not rest_object:
+                    rest_object = obj.to_rest_object(self.is_event_owner(event,
+                                                             self.getUserByAPIKey(api_key)), False)
+                    if obj.parent_object_id is None:
+                      rest_event.objects.append(rest_object)
                     else:
-                      parentObject = self.getParentObject(event, obj, seenItems)
-                      if parentObject:
-                        parentObject.children.append(restObject)
+                      parent_object = self.get_parent_object(event, obj, seen_items)
+                      if parent_object:
+                        parent_object.children.append(rest_object)
 
                     # append required attributes to the object
                     for item in neededAttributes:
-                      restObject.attributes.append(item.toRestObject())
+                      rest_object.attributes.append(item.to_rest_object())
 
-                    seenItems[event.identifier][1][obj.identifier] = restObject
+                    seen_items[event.identifier][1][obj.identifier] = rest_object
 
                 except cherrypy.HTTPError:
                   # Do nothing if the user cant see the event
@@ -211,77 +207,78 @@ class RestSearchController(RestControllerBase):
               # make list of results
 
         result = list()
-        if performSearch:
+        if perform_search:
 
-          for event, objs in seenItems.itervalues():
-            dictionary = dict(event.toDict(full=True,
-                               withDefinition=withDefinition).items()
+          for event, objs in seen_items.itervalues():
+            del objs
+            dictionary = dict(event.to_dict(full=True,
+                               with_definition=with_definition).items()
                    )
             obj = json.dumps(dictionary)
             result.append(obj)
 
-        resultDict = {'Results': result}
-        return self._returnMessage(resultDict)
+        result_dict = {'Results': result}
+        return self._return_message(result_dict)
 
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def viewEvents(self, uuid, apiKey, **options):
+  def viewEvents(self, uuid, api_key, **options):
     try:
       # TODO use these!
-      startDate = options.get('startdate', None)
-      endDate = options.get('enddate', datumzait.utcnow())
+      start_date = options.get('startdate', None)
+      end_date = options.get('enddate', datumzait.utcnow())
       offset = options.get('page', 0)
-      limit = self.__getLimit(options)
+      limit = self.__get_limit(options)
 
       # serach on objecttype
-      objectType = options.get('objecttype', None)
+      object_type = options.get('objecttype', None)
       # with the following attribtes type + value
-      objectAttribtues = options.get('objectattributes', list())
+      object_attribtues = options.get('objectattributes', list())
 
-      if objectType or objectAttribtues:
+      if object_type or object_attribtues:
         # process needles
-        valuesToLookFor = dict()
+        values_to_look_for = dict()
 
-        for item in objectAttribtues:
+        for item in object_attribtues:
           for key, value in item.iteritems():
-            definition = self.attributeDefinitionBroker.getDefintionByName(key)
+            definition = self.attribute_definition_broker.get_defintion_by_name(key)
             # TODO: search inside textfield
-            if definition.classIndex != 0:
-              valuesToLookFor[value] = definition
+            if definition.class_index != 0:
+              values_to_look_for[value] = definition
 
-        matchingAttributes = list()
+        matching_attributes = list()
         # find results
-        for value, key in valuesToLookFor.iteritems():
-          foundValues = self.attributeBroker.lookforAttributeValue(key,
+        for value, key in values_to_look_for.iteritems():
+          foundValues = self.attribute_broker.lookforAttributeValue(key,
                                                                  value,
                                                                  '==')
-          matchingAttributes = matchingAttributes + foundValues
+          matching_attributes = matching_attributes + foundValues
 
         result = list()
-        for needle in matchingAttributes:
+        for needle in matching_attributes:
           try:
             event = needle.attribute.object.event
             if not event:
-              event = needle.attribute.object.parentEvent
-            self.checkIfViewable(event, self.getUser(apiKey), False)
+              event = needle.attribute.object.parent_event
+            self.checkIfViewable(event, self.get_user(api_key), False)
             result.append(event.uuid)
           except cherrypy.HTTPError:
             pass
-        resultDict = {'Results': result}
-        return self._returnMessage(resultDict)
+        result_dict = {'Results': result}
+        return self._return_message(result_dict)
       else:
-        self.raiseError('InvalidArgument',
+        self.raise_error('InvalidArgument',
                          'At least one argument has to be specified')
 
-    except NothingFoundException as e:
-      return self.raiseError('NothingFoundException', e)
-    except BrokerException as e:
-      return self.raiseError('BrokerException', e)
+    except NothingFoundException as error:
+      return self.raise_error('NothingFoundException', error)
+    except BrokerException as error:
+      return self.raise_error('BrokerException', error)
 
-  def getFunctionName(self, parameter, action):
+  def get_function_name(self, parameter, action):
     if action == 'GET':
       return RestSearchController.PARAMETER_MAPPER.get(parameter, None)
     return None

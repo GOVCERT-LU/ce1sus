@@ -14,37 +14,37 @@ from dagr.helpers.config import Configuration, ConfigException, \
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903
 class TestConfiguration(unittest.TestCase):
 
-  def generateWorkingFile(self, name):
+  def generate_working_file(self, name):
     # generate file
-    testFile = open(name, "w")
-    testFile.write("[Section]\n")
-    testFile.write("name=Test\n")
-    testFile.write("UpperCase=Test\n")
-    testFile.write("Boolean=True\n")
-    testFile.write("Number=1\n")
-    testFile.close()
+    test_file = open(name, "w")
+    test_file.write("[Section]\n")
+    test_file.write("name=Test\n")
+    test_file.write("UpperCase=Test\n")
+    test_file.write("Boolean=True\n")
+    test_file.write("Number=1\n")
+    test_file.close()
 
-  def generateFailingFile(self, name):
+  def generate_failing_file(self, name):
     # generate file
-    testFile = open(name, "w")
-    testFile.write("[Section]\n")
-    testFile.write("nameTest\n")
-    testFile.write("UpperCase=Test\n")
-    testFile.close()
+    test_file = open(name, "w")
+    test_file.write("[Section]\n")
+    test_file.write("nameTest\n")
+    test_file.write("UpperCase=Test\n")
+    test_file.close()
 
-  def removeFile(self, name):
+  def remove_file(self, name):
     basedir = os.path.dirname(name)
     if not os.path.exists(basedir):
       os.remove(name)
 
   # pylint: disable=R0912
-  def testLoadIngFile(self):
+  def test_loadIng_file(self):
     try:
       name = 'test.cfg'
-      self.generateWorkingFile(name)
-      config = Configuration(name, 'Section')
+      self.generate_working_file(name)
+      config = Configuration(name)
       del config
-      self.removeFile(name)
+      self.remove_file(name)
       assert True
     except ConfigException:
       assert False
@@ -52,8 +52,8 @@ class TestConfiguration(unittest.TestCase):
     try:
       # missing file
       name = 'test.cfg'
-      self.generateWorkingFile(name)
-      config = Configuration(name + 'foo', 'Section')
+      self.generate_working_file(name)
+      config = Configuration(name + 'foo')
       del config
       assert False
     except ConfigFileNotFoundException:
@@ -61,12 +61,12 @@ class TestConfiguration(unittest.TestCase):
     except ConfigException:
       assert False
     finally:
-      self.removeFile(name)
+      self.remove_file(name)
 
     try:
       # missing section
       name = 'test.cfg'
-      self.generateWorkingFile(name)
+      self.generate_working_file(name)
       config = Configuration(name, 'Section2')
       del config
       assert False
@@ -75,13 +75,13 @@ class TestConfiguration(unittest.TestCase):
     except ConfigException:
       assert False
     finally:
-      self.removeFile(name)
+      self.remove_file(name)
 
     try:
       # missing section
       name = 'test.cfg'
-      self.generateFailingFile(name)
-      config = Configuration(name, 'Section')
+      self.generate_failing_file(name)
+      config = Configuration(name)
       del config
       assert False
     except ConfigParsingException:
@@ -89,35 +89,63 @@ class TestConfiguration(unittest.TestCase):
     except ConfigException:
       assert False
     finally:
-      self.removeFile(name)
+      self.remove_file(name)
 
-  def testKeys(self):
+  def test_existing_section(self):
     try:
       name = 'test.cfg'
-      self.generateWorkingFile(name)
-      config = Configuration(name, 'Section')
-      key = config.get('name')
+      self.generate_working_file(name)
+      config = Configuration(name)
+      section = config.get_section('Section')
+      del section
+      assert True
+    except ConfigException:
+      assert False
+    finally:
+      self.remove_file(name)
+
+  def test_nonexisting_section(self):
+    try:
+      name = 'test.cfg'
+      self.generate_working_file(name)
+      config = Configuration(name)
+      section = config.get_section('Section2')
+      del section
+      assert False
+    except ConfigException:
+      assert True
+    finally:
+      self.remove_file(name)
+
+  def test_keys(self):
+    try:
+      name = 'test.cfg'
+      self.generate_working_file(name)
+      config = Configuration(name)
+      section = config.get_section('Section')
+      key = section.get('name')
       assert key == 'Test'
-      key = config.get('UpperCase')
+      key = section.get('UpperCase')
       assert key == 'Test'
-      key = config.get('Boolean')
+      key = section.get('Boolean')
       assert key
-      key = config.get('Number')
+      key = section.get('Number')
       assert key == 1
     except ConfigException:
       assert False
     finally:
-      self.removeFile(name)
+      self.remove_file(name)
 
     try:
       name = 'test.cfg'
-      self.generateWorkingFile(name)
-      config = Configuration(name, 'Section')
-      key = config.get('name2')
+      self.generate_working_file(name)
+      config = Configuration(name)
+      section = config.get_section('Section')
+      key = section.get('name2')
       assert False
     except ConfigKeyNotFoundException:
       assert True
     except ConfigException:
       assert False
     finally:
-      self.removeFile(name)
+      self.remove_file(name)

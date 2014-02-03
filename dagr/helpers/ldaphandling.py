@@ -11,7 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.config import Configuration
 from dagr.helpers.debug import Log
 import ldap
 
@@ -23,8 +22,8 @@ class LDAPUser(object):
     self.uid = None
     self.mail = None
     self.password = 'EXTERNALAUTH'
-    self.displayName = None
-    self.dn = None
+    self.display_name = None
+    self.dn_string = None
 
 
 class LDAPException(Exception):
@@ -55,32 +54,38 @@ class NotInitializedException(LDAPException):
 class LDAPHandler(object):
   "LDAP Handler"
 
-  instance = None
+  def __init__(self, config):
 
-  def __init__(self, configFile):
-    self.__config = Configuration(configFile, 'LDAP')
-    self.__users_dn = self.__config.get('users_dn')
-    self.__tls = self.__config.get('usetls')
-    LDAPHandler.instance = self
+    self.__config_section = config.get_section('LDAP')
+    self.__users_dn = self.__config_section.get('users_dn')
+    self.__tls = self.__config_section.get('usetls')
+    self.logger = Log(config)
 
-  def __getConnection(self):
+  def _get_logger(self):
+    """
+    Returns the logger
+
+    :returns: Logger
+    """
+    return self.logger._get_logger(self.__class__.__name__)
+
+  def __get_connection(self):
     """
     Open the connection to the LDAP server
     """
     connection = None
-    
+
     try:
-      connection = ldap.initialize(self.__config.get('server'))
+      connection = ldap.initialize(self.__config_section.get('server'))
       if self.__tls:
         connection.start_tls_s()
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: ' + unicode(e))
-    
+    except ldap.LDAPError as error:
+      self._get_logger().fatal(error)
+      raise ServerErrorException('LDAP error: {0}'.format(error))
+
     return connection
 
-
-  def isUserValid(self, uid, password):
+  def is_valid_user(self, uid, password):
     """
     Checks if the user is valid
 
@@ -92,13 +97,13 @@ class LDAPHandler(object):
     :returns: Boolean
     """
     try:
-      self.__bindUser(uid, password)
+      self.__bind_user(uid, password)
     except LDAPException:
       return False
-    
+
     return True
 
-  def __bindUser(self, uid, password):
+  def __bind_user(self, uid, password):
     """
     Bind/authenticate with a user with appropriate rights to add objects
 
@@ -110,31 +115,30 @@ class LDAPHandler(object):
     try:
       try:
         if not (uid is None or password is None):
-          connection = self.__getConnection()
-          connection.simple_bind_s(self.__getUserDN(uid), password)
-          self.__closeConnection(connection)
+          connection = self.__get_connection()
+          connection.simple_bind_s(self.__get_user_dn(uid), password)
+          self.__close_connection(connection)
       except ldap.INVALID_CREDENTIALS:
-        Log.getLogger(self.__class__.__name__
-                        ).info(
-                              'Username or password is invalid for {0}'.format(
+        self._get_logger().info('Username or password is invalid for {0}'.format(
                                                                           uid))
         raise InvalidCredentialsException('Username or password is invalid.')
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: {0}'.format(e))
+    except ldap.LDAPError as error:
+      self._get_logger().fatal(error)
+      raise ServerErrorException('LDAP error: {0}'.format(error))
 
-  def __mapUser(self, ldapUser):
+  @staticmethod
+  def __map_user(ldap_user):
     """
     Maps the response from the LDAP server to userobject container
 
-    :param user: list of attributes of the ldap user
-    :type user: List
+    :param ldap_user: list of attributes of the ldap user
+    :type ldap_user: List
 
-    :returns:
+    :returns: LDAPUser
     """
-    attributes = ldapUser[1]
+    attributes = ldap_user[1]
     user = LDAPUser()
-    user.dn = ldapUser[0]
+    user.dn_string = ldap_user[0]
     for key, value in attributes.iteritems():
       if hasattr(user, key):
       # Foo to prevent ascii errors as ldap module returns strings!
@@ -144,7 +148,7 @@ class LDAPHandler(object):
           setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
     return user
 
-  def getAllUsers(self):
+  def get_all_users(self):
     """
     Returns the attribute value
 
@@ -156,24 +160,24 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid=*)'
-    attributes = ["uid", "displayName", "mail"]
+    attributes = ["uid", "display_name", "mail"]
     try:
-      connection = self.__getConnection()
+      connection = self.__get_connection()
       result = connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
                                filter_, attributes)
-      self.__closeConnection(connection)
-      userList = list()
+      self.__close_connection(connection)
+      user_list = list()
       for user in result:
-        user = self.__mapUser(user)
-        userList.append(user)
-      if len(userList) < 1:
+        user = LDAPHandler.__map_user(user)
+        user_list.append(user)
+      if len(user_list) < 1:
         raise NothingFoundException('No  users were found')
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: {0}'.format(e))
-    return userList
+    except ldap.LDAPError as error:
+      self._get_logger().fatal(error)
+      raise ServerErrorException('LDAP error: {0}'.format(error))
+    return user_list
 
-  def getUser(self, uid):
+  def get_user(self, uid):
     """
     Returns the attribute value
 
@@ -185,23 +189,23 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid={0})'.format(uid)
-    attributes = ["uid", "displayName", "mail", "dc"]
+    attributes = ["uid", "display_name", "mail", "dc"]
 
     try:
-      connection = self.__getConnection()
+      connection = self.__get_connection()
       result = connection.search_s(self.__users_dn,
                                           ldap.SCOPE_SUBTREE,
                                           filter_,
                                           attributes)
-      self.__closeConnection(connection)
+      self.__close_connection(connection)
       # forcibly take only first user
-      user = self.__mapUser(result[0])
+      user = LDAPHandler.__map_user(result[0])
       return user
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-      raise ServerErrorException('LDAP error: {0}'.format(e))
+    except ldap.LDAPError as error:
+      self._get_logger().fatal(error)
+      raise ServerErrorException('LDAP error: {0}'.format(error))
 
-  def __getUserDN(self, uid):
+  def __get_user_dn(self, uid):
     """
     Returns the User domain name string
 
@@ -210,26 +214,14 @@ class LDAPHandler(object):
 
     :returns: String
     """
-    user = self.getUser(uid)
-    return user.dn
+    user = self.get_user(uid)
+    return user.dn_string
 
-  def __closeConnection(self, connection):
+  def __close_connection(self, connection):
     """
     close the connection
     """
     try:
       connection.unbind_s()
-    except ldap.LDAPError as e:
-      Log.getLogger(self.__class__.__name__).fatal(e)
-
-  @classmethod
-  def getInstance(cls):
-    """
-      Returns an instance
-
-      :returns: LDAPHandler
-    """
-    if LDAPHandler.instance is None:
-      raise NotInitializedException('LDAPHandler has not been initialized')
-    else:
-      return LDAPHandler.instance
+    except ldap.LDAPError as error:
+      self._get_logger().fatal(error)

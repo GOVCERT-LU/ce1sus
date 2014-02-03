@@ -35,8 +35,8 @@ class EventBroker(BrokerBase):
   """
   def __init__(self, session):
     BrokerBase.__init__(self, session)
-    self.attributeBroker = AttributeBroker(session)
-    self.objectBroker = ObjectBroker(session)
+    self.attribute_broker = AttributeBroker(session)
+    self.object_broker = ObjectBroker(session)
 
   def insert(self, instance, commit=True, validate=True):
     """
@@ -44,35 +44,34 @@ class EventBroker(BrokerBase):
     """
     errors = not instance.validate()
     if errors:
-      raise ValidationException('Invalid Event:' + ValidationException(ObjectValidator.getFirstValidationError(instance)))
+      raise ValidationException('Invalid Event:' + ObjectValidator.getFirstValidationError(instance))
     try:
       BrokerBase.insert(self, instance, False)
       # insert value for value table
       for obj in instance.objects:
         for attribute in obj.attributes:
-          self.attributeBroker.insert(attribute, False, validate)
-      self.doCommit(commit)
-    except BrokerException as e:
-      self.getLogger().fatal(e)
+          self.attribute_broker.insert(attribute, False, validate)
+      self.do_commit(commit)
+    except BrokerException as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def __GroupsOfEvent(self, clazz, joinRelation, identifier, belongIn=True):
+  def __event_groups(self, clazz, join_relation, identifier, belong_in=True):
     try:
-        groups = self.session.query(clazz).join(joinRelation).filter(Event.identifier == identifier).all()
-        if not belongIn:
-            groupIDs = list()
+        groups = self.session.query(clazz).join(join_relation).filter(Event.identifier == identifier).all()
+        if not belong_in:
+            group_ids = list()
             for group in groups:
-                groupIDs.append(group.identifier)
-            groups = self.session.query(clazz).filter(not_(clazz.identifier.in_(groupIDs)))
+                group_ids.append(group.identifier)
+            groups = self.session.query(clazz).filter(not_(clazz.identifier.in_(group_ids)))
 
     except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found for ID: {0}', format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError, e:
-        raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+        raise BrokerException(error)
     return groups
 
-  def getGroupsOfEvent(self, identifier, belongIn=True):
+  def get_event_groups(self, identifier, belong_in=True):
     """
     Returns the groups of the given event
 
@@ -80,17 +79,17 @@ class EventBroker(BrokerBase):
 
     :param identifier: identifier of the event
     :type identifier: Integer
-    :param belongIn: If set returns all the groups of the event else
+    :param belong_in: If set returns all the groups of the event else
                      all the groups not belonging to the event
-    :type belongIn: Boolean
+    :type belong_in: Boolean
 
     :returns: list of Groups
 
     :returns: Groups
     """
-    return self.__GroupsOfEvent(Group, Event.groups, identifier, belongIn)
+    return self.__event_groups(Group, Event.maingroups, identifier, belong_in)
 
-  def getSubGroupsOfEvent(self, identifier, belongIn=True):
+  def get_event_subgroups(self, identifier, belong_in=True):
     """
     Returns the groups of the given event
 
@@ -98,60 +97,59 @@ class EventBroker(BrokerBase):
 
     :param identifier: identifier of the event
     :type identifier: Integer
-    :param belongIn: If set returns all the groups of the event else
+    :param belong_in: If set returns all the groups of the event else
                      all the groups not belonging to the event
-    :type belongIn: Boolean
+    :type belong_in: Boolean
 
     :returns: list of Groups
 
     :returns: Groups
     """
-    return self.__GroupsOfEvent(SubGroup, Event.maingroups, identifier, belongIn)
+    return self.__event_groups(SubGroup, Event.subgroups, identifier, belong_in)
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return Event
 
-  def getAllLimited(self, limit, offset):
+  def get_all_limited(self, limit, offset):
     """Returns only a subset of entries"""
     try:
-      result = self.session.query(self.getBrokerClass()
+      result = self.session.query(self.get_broker_class()
                         ).filter(Event.dbcode.op('&')(4) == 4).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return result
 
-  def __getAllAccordingToPermissions(self,
+  def __get_all_according_permissions(self,
                                      user,
                                      limit,
                                      offset):
-    if user.defaultGroup is None:
+    if user.default_group is None:
       # as the user has no main group it is impossible to see any thing
       result = list()
     else:
-      tlpLVL = user.defaultGroup.tlpLvl
-      mainGroupID = user.defaultGroup.identifier
+      tlp_lvl = user.default_group.tlpLvl
+      mainGroupID = user.default_group.identifier
       subGroupsIDs = list()
-      for subgroup in user.defaultGroup.subgroups:
+      for subgroup in user.default_group.subgroups:
         subGroupsIDs.append(subgroup.identifier)
       try:
         if len(subGroupsIDs) > 0:
           result = self.session.query(Event).filter(
                                         or_(
-                                          Event.creatorGroup_id == mainGroupID,
+                                          Event.creator_group_id == mainGroupID,
                                           and_(
                                             or_(
-                                            Event.groups.identifier.in_(
+                                            Event.maingroups.identifier.in_(
                                                                   subGroupsIDs
                                                                        ),
-                                            Event.tlp_level_id >= tlpLVL,
+                                            Event.tlp_level_id >= tlp_lvl,
                                             Event.dbcode.op('&')(12) == 12
                                             ),
                                             Event.published == 1)
@@ -161,9 +159,9 @@ class EventBroker(BrokerBase):
         else:
           result = self.session.query(Event).filter(
                                       or_(
-                                        Event.creatorGroup_id == mainGroupID,
+                                        Event.creator_group_id == mainGroupID,
                                         and_(
-                                            Event.tlp_level_id >= tlpLVL,
+                                            Event.tlp_level_id >= tlp_lvl,
                                             Event.published == 1,
                                             Event.dbcode.op('&')(12) == 12
                                             )
@@ -176,98 +174,99 @@ class EventBroker(BrokerBase):
           result = result.limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException('Nothing found')
-      except sqlalchemy.exc.SQLAlchemyError as e:
-        self.getLogger().fatal(e)
+      except sqlalchemy.exc.SQLAlchemyError as error:
         self.session.rollback()
-        raise BrokerException(e)
+        raise BrokerException(error)
     return result
 
-  def getAllUnvalidated(self, limit=None, offset=None):
+  def get_all_unvalidated(self, limit=None, offset=None):
+    """
+    Returns all unvalidated events
+    """
     try:
       result = self.session.query(Event).filter(
                                             Event.dbcode.op('&')(4) != 4
                                                ).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return result
 
-  def getAllForUser(self, user, limit=None, offset=None):
+  def get_all_for_user(self, user, limit=None, offset=None):
     """Returns all the events that the user can see"""
     if user.privileged:
       if limit is None or offset is None:
         limit = 200
         offset = 0
-      return self.getAllLimited(limit, offset)
+      return self.get_all_limited(limit, offset)
     else:
-      return self.__getAllAccordingToPermissions(user,
+      return self.__get_all_according_permissions(user,
                                                  limit,
                                                  offset)
 
-  def __groupToEvent(self, eventID, groupID, commit=True, insert=True):
-
+  def __modify_event_groups(self, event_id, group_id, commit=True, insert=True):
+    """
+    Modifies group events
+    """
     try:
       group = self.session.query(Group).filter(Group.identifier ==
-                                               groupID).one()
+                                               group_id).one()
       event = self.session.query(Event).filter(Event.identifier ==
-                                               eventID).one()
+                                               event_id).one()
       if insert:
-        event.addGroup(group)
+        event.add_group(group)
       else:
-        event.removeGroup(group)
-      self.doCommit(commit)
+        event.remove_group_from_event(group)
+      self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or event not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def addGroupToEvent(self, eventID, groupID, commit=True):
+  def add_group_to_event(self, event_id, group_id, commit=True):
     """
     Add a group to an event
 
-    :param eventID: Identifier of the event
-    :type eventID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param event_id: Identifier of the event
+    :type event_id: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
-    self.__groupToEvent(eventID, groupID, commit, True)
+    self.__modify_event_groups(event_id, group_id, commit, True)
 
-  def removeGroupFromEvent(self, eventID, groupID, commit=True):
+  def remove_group_from_event(self, event_id, group_id, commit=True):
     """
     removes a group to an event
 
-    :param eventID: Identifier of the event
-    :type eventID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param event_id: Identifier of the event
+    :type event_id: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
-    self.__groupToEvent(eventID, groupID, commit, False)
+    self.__modify_event_groups(event_id, group_id, commit, False)
 
-  def __subGroupToEvent(self, eventID, groupID, commit=True, insert=True):
+  def __modify_event_subgroups(self, event_id, group_id, commit=True, insert=True):
 
     try:
       group = self.session.query(SubGroup).filter(SubGroup.identifier ==
-                                               groupID).one()
+                                               group_id).one()
       event = self.session.query(Event).filter(Event.identifier ==
-                                               eventID).one()
+                                               event_id).one()
       if insert:
-        event.maingroups.append(group)
+        event.subgroups.append(group)
       else:
-        event.maingroups.remove(group)
-      self.doCommit(commit)
+        event.subgroups.remove(group)
+      self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or event not found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def addSubGroupToEvent(self, eventID, groupID, commit=True):
+  def add_subgroup_to_event(self, eventID, groupID, commit=True):
     """
     Add a group to an event
 
@@ -276,10 +275,9 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
-    self.__subGroupToEvent(eventID, groupID, commit, True)
+    self.__modify_event_subgroups(eventID, groupID, commit, True)
 
-
-  def removeSubGroupFromEvent(self, eventID, groupID, commit=True):
+  def remove_subgroup_from_event(self, eventID, groupID, commit=True):
     """
     removes a group to an event
 
@@ -288,10 +286,9 @@ class EventBroker(BrokerBase):
     :param groupID: Identifier of the group
     :type groupID: Integer
     """
-    self.__subGroupToEvent(eventID, groupID, commit, False)
+    self.__modify_event_subgroups(eventID, groupID, commit, False)
 
-  # pylint: disable=R0913
-  def buildEvent(self,
+  def build_event(self,
                  identifier,
                  action,
                  status,
@@ -342,15 +339,17 @@ class EventBroker(BrokerBase):
           event.uuid = unicode(uuidgen.uuid4())
         else:
           event.uuid = uuid
-        event.creatorGroup_id = user.defaultGroup.identifier
-        event.groups = list()
-        event.groups.append(user.defaultGroup)
-        event.bitValue = BitValue('1000', event)
+        event.creator_group_id = user.default_group.identifier
+        event.maingroups = list()
+        event.maingroups.append(user.default_group)
+        event.bit_value = BitValue('1000', event)
         event.created = datumzait.utcnow()
         event.creator_id = user.identifier
+        event.creator = user
+        event.creator_group = user.default_group
     else:
       # dont want to change the original in case the user cancel!
-      event = self.getByID(identifier)
+      event = self.get_by_id(identifier)
       # right checks only if there is a change!!!!
 
     if not action == 'remove':
@@ -384,7 +383,7 @@ class EventBroker(BrokerBase):
 
     return event
 
-  def getByUUID(self, identifier):
+  def get_by_uuid(self, identifier):
     """
     Returns the object by the given identifier
 
@@ -406,38 +405,40 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for uuid :{0}'.format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
     return result
 
-  def getEvents(self, uuids, startDate, endDate, offset, limit, user):
+  def get_events(self, uuids, start_date, end_date, offset, limit, user):
+    """
+    returns all the event
+    """
     query = self.session.query(Event)
     try:
       if uuids:
         query = query.filter(Event.uuid.in_(uuids))
 
-      if startDate:
-        query = query.filter(Event.created >= startDate)
-      if endDate:
-        query = query.filter(Event.created <= endDate)
-      if user.defaultGroup is None:
+      if start_date:
+        query = query.filter(Event.created >= start_date)
+      if end_date:
+        query = query.filter(Event.created <= end_date)
+      if user.default_group is None:
         # as the user has no main group it is impossible to see any thing
         return list()
       else:
-        tlpLVL = user.defaultGroup.tlpLvl
-        mainGroupID = user.defaultGroup.identifier
-        subGroupsIDs = list()
-        subGroupsIDs.append(mainGroupID)
-        for subgroup in user.defaultGroup.subgroups:
-          subGroupsIDs.append(subgroup.identifier)
+        tlp_lvl = user.default_group.tlpLvl
+        main_group_id = user.default_group.identifier
+        subgroups_ids = list()
+        subgroups_ids.append(main_group_id)
+        for subgroup in user.default_group.subgroups:
+          subgroups_ids.append(subgroup.identifier)
       # Dont forget to consider the permission
       query.filter(or_(
-                      Event.creatorGroup_id == mainGroupID,
+                      Event.creator_group_id == main_group_id,
                       and_(
                         or_(
-                          Event.tlp_level_id >= tlpLVL,
+                          Event.tlp_level_id >= tlp_lvl,
                           Event.dbcode.op('&')(12) == 12
                         ),
                         Event.published == 1)
@@ -450,11 +451,19 @@ class EventBroker(BrokerBase):
       return query.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Search did not yield any results.')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-  def updateEvent(self, event, commit=True):
+  def update_event(self, user, event, commit=True):
+    """
+    updates an event
+
+    If it is invalid the event is returned
+
+    :param event:
+    :type event: Event
+    """
+    event.modifier = user
     event.modified = datumzait.utcnow()
     self.update(event, False)
-    self.doCommit(commit)
+    self.do_commit(commit)

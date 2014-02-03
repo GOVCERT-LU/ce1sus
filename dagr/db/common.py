@@ -17,20 +17,17 @@ from abc import abstractmethod
 
 class SessionManagerException(Exception):
   """sessionClazz Manager Exception"""
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 class ConnectorException(SessionManagerException):
   """Broker Instantiation Exception"""
-  def __init__(self, message):
-    SessionManagerException.__init__(self, message)
+  pass
 
 
 class BrokerInstantiationException(Exception):
   """Broker Instantiation Exception"""
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 # pylint: disable=R0903
@@ -45,15 +42,22 @@ class SessionObject(object):
     """
     returns the session object
     """
-    return self.getSession()
+    return self.get_session()
 
   @abstractmethod
-  def getSession(self):
+  def get_session(self):
+    """
+    Returns the session
+
+    :returns: SessionObject
+    """
     raise ConnectorException('Not Implemented')
 
 
 class Connector(object):
-
+  """
+  base class fir connector classes
+  """
   def __init__(self, config):
     self.config = config
     self.debug = self.config.get('debug')
@@ -62,25 +66,22 @@ class Connector(object):
     self.protocol = self.config.get('protocol')
 
   @abstractmethod
-  def open(self):
-    raise ConnectorException('Not implemented')
-
-  @abstractmethod
   def close(self):
-    raise ConnectorException('Not implemented')
+    """
+    Closes the session
+    """
+    raise ConnectorException('Not implemented in {0}'.format(self.__class__.__name__))
 
   @abstractmethod
-  def createEngine(self):
-    raise ConnectorException('Not implemented')
+  def create_engine(self):
+    """
+    Returns a new engine
+    """
+    raise ConnectorException('Not implemented in {0}'.format(self.__class__.__name__))
 
   @abstractmethod
-  def getDirectSession(self):
-    raise ConnectorException('Not implemented')
-
-  def getLogger(self):
+  def get_direct_session(self):
     """
-    Returns the logger
-
-    :returns: Logger
+    Returns the session from the engine
     """
-    return Log.getLogger(self.__class__.__name__)
+    raise ConnectorException('Not implemented in {0}'.format(self.__class__.__name__))

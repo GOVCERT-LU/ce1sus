@@ -173,37 +173,43 @@ class ValueBroker(BrokerBase):
     """
     self.__clazz = clazz
 
-  def getBrokerClass(self):
+  def get_broker_class(self):
     """
-    overrides BrokerBase.getBrokerClass
+    overrides BrokerBase.get_broker_class
     """
     return self.__clazz
 
   @staticmethod
-  def getClassByAttribute(attribute):
+  def get_class_by_attribute(attribute):
     """
     returns class for the attribute
 
     :param attribute: the attribute in context
-    :type attribute: Attribute
+    :type attribute: Class
     """
-    return ValueBroker.getClassByAttributeDefinition(
+    return ValueBroker.get_class_by_attribute_definition(
                                                 attribute.definition)
 
   @staticmethod
-  def getClassByClassString(className):
+  def get_class_by_string(classname):
+    """
+    returns class for the attribute
+
+    :param classname: the name of the class
+    :type classname: Class
+    """
     module = import_module('.valuebroker', 'ce1sus.brokers')
-    return getattr(module, className)
+    return getattr(module, classname)
 
   @staticmethod
-  def getClassByAttributeDefinition(attributeDefinition):
+  def get_class_by_attribute_definition(definition):
     """
     returns class for the attribute
 
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    return ValueBroker.getClassByClassString(attributeDefinition.className)
+    return ValueBroker.get_class_by_string(definition.classname)
 
   def __setClassByAttribute(self, attribute):
     """
@@ -212,7 +218,7 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    self.__clazz = self.getClassByAttribute(attribute)
+    self.__clazz = self.get_class_by_attribute(attribute)
 
   def __convertAttriuteValueToValue(self, attribute, isInsert=True):
     """
@@ -224,18 +230,15 @@ class ValueBroker(BrokerBase):
     :returns: XXXXXValue
     """
     valueInstance = self.__clazz()
-    valueInstance.value = attribute.value
+    valueInstance.value = attribute.plain_value
     if not isInsert:
       valueInstance.identifier = attribute.value_id
     valueInstance.attribute_id = attribute.identifier
     valueInstance.attribute = attribute
-    event_id = attribute.object.event_id
-    if not event_id:
-      event_id = attribute.object.parentEvent_id
-    valueInstance.event_id = event_id
+    valueInstance.event_id = attribute.object.get_parent_event_id()
     return valueInstance
 
-  def getByAttribute(self, attribute):
+  def get_by_attribute(self, attribute):
     """
     fetches one XXXXXValue instance with the information of the given attribute
 
@@ -248,24 +251,24 @@ class ValueBroker(BrokerBase):
     self.__setClassByAttribute(attribute)
 
     try:
-      clazz = self.getBrokerClass()
+      clazz = self.get_broker_class()
       result = self.session.query(clazz).filter(
               clazz.attribute_id == attribute.identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No value found with ID :{0} in {1}'.format(
-                                  attribute.identifier, self.getBrokerClass()))
+                                  attribute.identifier, self.get_broker_class()))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
         'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
-           self.getBrokerClass()))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
-      raise BrokerException(e)
+           self.get_broker_class()))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self._get_logger().fatal(error)
+      raise BrokerException(error)
 
     return result
 
-  def inserByAttribute(self, attribute, commit=True):
+  def inser_by_attribute(self, attribute, commit=True):
     """
     Inserts one XXXXXValue instance with the information of the given attribute
 
@@ -283,7 +286,7 @@ class ValueBroker(BrokerBase):
     value.identifier = None
     BrokerBase.insert(self, value, commit)
 
-  def updateByAttribute(self, attribute, commit=True):
+  def update_by_attribute(self, attribute, commit=True):
     """
     updates one XXXXXValue instance with the information of the given attribute
 
@@ -300,7 +303,7 @@ class ValueBroker(BrokerBase):
     value = self.__convertAttriuteValueToValue(attribute, False)
     BrokerBase.update(self, value, commit)
 
-  def removeByAttribute(self, attribute, commit):
+  def remove_by_attribute(self, attribute, commit):
     """
     Removes one XXXXXValue with the information given by the attribtue
 
@@ -312,16 +315,16 @@ class ValueBroker(BrokerBase):
     self.__setClassByAttribute(attribute)
 
     try:
-      self.session.query(self.getBrokerClass()).filter(
-                    self.getBrokerClass().attribute_id == attribute.identifier
+      self.session.query(self.get_broker_class()).filter(
+                    self.get_broker_class().attribute_id == attribute.identifier
                       ).delete(synchronize_session='fetch')
-      self.doCommit(commit)
+      self.do_commit(commit)
     except sqlalchemy.exc.OperationalError as e:
-      self.getLogger().error(e)
+      self._get_logger().error(e)
       self.session.rollback()
       raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      self._get_logger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
@@ -341,6 +344,6 @@ class ValueBroker(BrokerBase):
                       clazz.value == value
                       ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self.getLogger().fatal(e)
+      self._get_logger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
