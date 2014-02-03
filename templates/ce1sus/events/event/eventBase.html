@@ -7,4 +7,5 @@
     <%call expr="tabulator.tab(id='eventObjects{0}'.format(event_id),url='/events/event/objects/objects/{0}'.format(event_id), name='Objects',reload=True)"/>
     <%call expr="tabulator.tab(id='eventRelations{0}'.format(event_id),url='/events/event/relations/{0}'.format(event_id), name='Relations',reload=True)"/>
     <%call expr="tabulator.tab(id='eventGroups{0}'.format(event_id),url='/events/event/groups/groups/{0}'.format(event_id), name='Groups',reload=True)"/> 
+    <%call expr="tabulator.tab(id='flatView{0}'.format(event_id),url='/events/event/groups/groups/{0}'.format(event_id), name='Flat View',reload=True)"/>
 </%call>

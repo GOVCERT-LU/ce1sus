@@ -1,81 +1,35 @@
 # -*- coding: utf-8 -*-
 
-<%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="tables" file="/ce1sus/components/tables.html"/> 
+
 
 <h4>Groupmanagment:</h4>
 %if owner:
-<%call expr="baseForms.genericForm(id='groupEventForm', url='/events/event/groups/modifyGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-            <input type="hidden" name="eventID"
-                value="${eventID}">
-            <div class="row">
-            <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
-            <table border="0" cellpadding="5">
-                <tr>
-                    <td>Event is <b>not</b> part of these groups:<BR /> <select class="form-control"  name="remainingGroups"
-                        size="10" multiple="multiple" tabindex="1"> 
-                        %if not remainingGroups is None:
-                            % for group in remainingGroups:
-                                <option value="${group.identifier}">${group.name}</option> 
-                            % endfor
-                        %endif
-                    </select>
-                    </td>
-                    <td>
-                        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-                        <BR />
-                        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-                    </td>
-                    <td>Event is part of these groups:<BR /> <select class="form-control"  name="eventGroups" size="10"
-                        multiple> 
-                        %if not eventGroups is None:
-                            % for group in eventGroups:
-                                <option value="${group.identifier}">${group.name}</option> 
-                            % endfor
-                        %endif
-                    </select>
-                    </td>
-                </tr>
-            </table>
-            </div>
-            </div>
-</%call>
+<%call expr="tables.add_remove_tables(id='groupEvent',
+                                      identifier=event.identifier,
+                                      identifier_name='Event',
+                                      moving_name='groups',
+                                      remaining=remaining_groups,
+                                      existing=event.maingroups,
+                                      attribute_name='name',
+                                      post_action='/events/event/groups/modify_groups',
+                                      refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
+                                      refresh_container='eventTabs{0}TabContent'.format(event.identifier),
+                                      enabled=enabled
+                                      )"/>
 
-<%call expr="baseForms.genericForm(id='subGroupEventForm', url='/events/event/groups/modifySubGroups',refreshUrl='/events/event/groups/groups/{0}'.format(eventID),refreshContainer='eventTabs{0}TabContent'.format(eventID))">
-            <input type="hidden" name="eventID"
-                value="${eventID}">
-            <div class="row">
-            <div class="col-sd-4 col-sd-offset-4 col-md-4 col-md-offset-4">
-            <table border="0" cellpadding="5">
-                <tr>
-                    <td>Event is <b>not</b> part of these Subgroups:<BR /> <select class="form-control"  name="remainingGroups"
-                        size="10" multiple="multiple" tabindex="1"> 
-                        %if not remainingSubGroups is None:
-                            % for group in remainingSubGroups:
-                                <option value="${group.identifier}">${group.name}</option> 
-                            % endfor
-                        %endif
-                    </select>
-                    </td>
-                    <td>
-                        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-                        <BR />
-                        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-                    </td>
-                    <td>Event is part of these Subgroups:<BR /> <select class="form-control"  name="eventGroups" size="10"
-                        multiple> 
-                        %if not eventSubGroups is None:
-                            % for group in eventSubGroups:
-                                <option value="${group.identifier}">${group.name}</option> 
-                            % endfor
-                        %endif
-                    </select>
-                    </td>
-                </tr>
-            </table>
-            </div>
-            </div>
-</%call>
+<%call expr="tables.add_remove_tables(id='subgroupEvent',
+                                      identifier=event.identifier,
+                                      identifier_name='Event',
+                                      moving_name='subgroups',
+                                      remaining=remaining_subgroups,
+                                      existing=event.subgroups,
+                                      attribute_name='name',
+                                      post_action='/events/event/groups/modify_subgroups',
+                                      refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
+                                      refresh_container='eventTabs{0}TabContent'.format(event.identifier),
+                                      enabled=enabled
+                                      )"/>
 %else:
 Not available
 %endif

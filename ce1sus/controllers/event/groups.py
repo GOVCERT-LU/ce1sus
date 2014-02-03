@@ -11,9 +11,8 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.controllers.base import Ce1susBaseController
+from ce1sus.controllers.base import Ce1susBaseController
 import cherrypy
-from ce1sus.web.helpers.protection import require, require_referer
 import types
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
@@ -22,126 +21,60 @@ from ce1sus.brokers.event.eventbroker import EventBroker
 class GroupsController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self):
-    Ce1susBaseController.__init__(self)
+  def __init__(self, config):
+    Ce1susBaseController.__init__(self, config)
     self.event_broker = self.broker_factory(EventBroker)
 
-  @cherrypy.expose
-  @require(require_referer(('/internal')))
-  def maingroups(self, eventID):
+  def get_available_groups(self, event):
+    try:
+      return self.event_broker.get_event_groups(event.identifier, False)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_available_subgroups(self, event):
+    try:
+      return self.event_broker.get_event_subgroups(event.identifier, False)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_event_by_id(self, event_id):
     """
-    Event page listing
+    Returns an event with the given ID
+
+    :param event_id: identifer of the event
+    :type event_id: Integer
+
+    :returns: Event
     """
-    template = self.mako._get_template('/events/event/groups/groups.html')
-    event = self.event_broker.get_by_id(eventID)
-    # right checks
-    if self.isAdminArea():
-      self.checkIfPriviledged(self.get_user(True))
+    try:
+      return self.event_broker.get_by_id(event_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  @staticmethod
+  def __handle_post(add_function, event_id, post_value):
+    if isinstance(post_value, types.StringTypes):
+      add_function(event_id, post_value, False)
     else:
-      self.checkIfViewable(event, self.get_user(True))
-    remainingGroups = self.event_broker.get_event_groups(event.identifier,
-                                                        False)
-    remainingSubGroups = self.event_broker.get_event_subgroups(event.identifier,
-                                                           False)
+      for groupID in post_value:
+        add_function(event_id, groupID, False)
 
-    return self.clean_html_code(template.render(event_id=event.identifier,
-                           remainingGroups=remainingGroups,
-                           eventGroups=event.maingroups,
-                           remainingSubGroups=remainingSubGroups,
-                           eventSubGroups=event.subgroups,
-                           owner=self.is_event_owner(event, self.get_user(True))))
-
-  @cherrypy.expose
-  @require(require_referer(('/internal')))
-  def modifyGroups(self, eventID, operation, remainingGroups=None,
-                     eventGroups=None):
-    """
-    modifies the relation between a user and his groups
-
-    :param eventID: The eventID of the event
-    :type eventID: Integer
-    :param operation: the operation used in the context (either add or remove)
-    :type operation: String
-    :param remainingGroups: The identifiers of the groups which the event is
-                            not attributed to
-    :type remainingGroups: Integer array
-    :param eventGroups: The identifiers of the groups which the event is
-                       attributed to
-    :type eventGroups: Integer array
-
-    :returns: generated HTML
-    """
-    # right checks
-    event = self.event_broker.get_by_id(eventID)
-    if self.isAdminArea():
-      self.checkIfPriviledged(self.get_user(True))
-    else:
-      self.checkIfViewable(event, self.get_user(True))
-
+  def modify_groups(self, operation, event_id, remaining_groups, event_groups):
     try:
       if operation == 'add':
-        if not (remainingGroups is None):
-          if isinstance(remainingGroups, types.StringTypes):
-            self.event_broker.add_group_to_event(eventID, remainingGroups)
-          else:
-            for groupID in remainingGroups:
-              self.event_broker.add_group_to_event(eventID, groupID, False)
-            self.event_broker.do_commit(True)
+        GroupsController.__handle_post(self.event_broker.add_group_to_event, event_id, remaining_groups)
       else:
-        if not (eventGroups is None):
-          if isinstance(eventGroups, types.StringTypes):
-            self.event_broker.remove_group_from_event(eventID, eventGroups)
-          else:
-            for groupID in eventGroups:
-              self.event_broker.remove_group_from_event(eventID, groupID, False)
-            self.event_broker.do_commit(True)
-      return self._return_ajax_ok()
-    except BrokerException as e:
-      self._get_logger().fatal(e)
-      return "Error {0}".format(e)
+        GroupsController.__handle_post(self.event_broker.remove_group_from_event, event_id, event_groups)
+      self.event_broker.do_commit(True)
+    except BrokerException as error:
+      self._raise_exception(error)
 
-  @cherrypy.expose
-  @require(require_referer(('/internal')))
-  def modifySubGroups(self, eventID, operation, remainingGroups=None,
-                     eventGroups=None):
-    """
-    modifies the relation between a user and his groups
-
-    :param eventID: The eventID of the event
-    :type eventID: Integer
-    :param operation: the operation used in the context (either add or remove)
-    :type operation: String
-    :param remainingGroups: The identifiers of the groups which the event is
-                            not attributed to
-    :type remainingGroups: Integer array
-    :param eventGroups: The identifiers of the groups which the event is
-                       attributed to
-    :type eventGroups: Integer array
-
-    :returns: generated HTML
-    """
-    # right checks
-    event = self.event_broker.get_by_id(eventID)
-    self.checkIfViewable(event, self.get_user(True))
-
+  def modify_subgroups(self, operation, event_id, remaining_subgroups, event_subgroups):
     try:
       if operation == 'add':
-        if not (remainingGroups is None):
-          if isinstance(remainingGroups, types.StringTypes):
-            self.event_broker.add_subgroup_to_event(eventID, remainingGroups)
-          else:
-            for groupID in remainingGroups:
-              self.event_broker.add_subgroup_to_event(eventID, groupID, False)
-            self.event_broker.do_commit(True)
+        GroupsController.__handle_post(self.event_broker.add_subgroup_to_event, event_id, remaining_subgroups)
       else:
-        if not (eventGroups is None):
-          if isinstance(eventGroups, types.StringTypes):
-            self.event_broker.remove_subgroup_from_event(eventID, eventGroups)
-          else:
-            for groupID in eventGroups:
-              self.event_broker.remove_subgroup_from_event(eventID, groupID, False)
-            self.event_broker.do_commit(True)
-      return self._return_ajax_ok()
-    except BrokerException as e:
-      self._get_logger().fatal(e)
-      return "Error {0}".format(e)
+        GroupsController.__handle_post(self.event_broker.remove_subgroup_from_event, event_id, event_subgroups)
+      self.event_broker.do_commit(True)
+    except BrokerException as error:
+      self._raise_exception(error)

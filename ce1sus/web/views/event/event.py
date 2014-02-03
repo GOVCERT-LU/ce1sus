@@ -58,24 +58,12 @@ class EventView(Ce1susBaseView):
     :returns: generated HTML
     """
     # relations table
-    labels = [{'event_id':'Event #'},
-             {'event_title':'Event Name'}]
-    paginator_options = PaginatorOptions('/events/recent',
-                                                 'eventsTabTabContent')
-    paginator_options.add_option('NEWTAB',
-                                'VIEW',
-                                '/events/event/view/',
-                                contentid='',
-                                auto_reload=True)
     user = self._get_user()
     cache = self._get_authorized_events_cache()
     try:
       event = self.event_controller.get_by_id(event_id)
       self._check_if_event_is_viewable(event)
       relations = self.event_controller.get_related_events(event, user, cache)
-      paginator = Paginator(items=relations,
-                            labels_and_property=labels,
-                            paginator_options=paginator_options)
       return self._render_template('/events/event/view.html',
                                    event=event,
                                    owner=self._is_event_owner(event),
@@ -206,28 +194,10 @@ class EventView(Ce1susBaseView):
     try:
       event = self.event_controller.get_by_id(event_id)
       self._check_if_event_is_viewable(event)
-      labels = [{'event_id':'Event #'},
-                {'event_title':'Event Name'},
-                {'object_id':'Object #'},
-                {'object_name':'Object Name'},
-                {'attribute_id':'Attribute #'},
-                {'attribute_name':'Attribute Name'},
-                {'attribute_value':'Attribute Value'}]
-      paginator_options = PaginatorOptions('/events/recent',
-                                                   'eventsTabTabContent')
-      paginator_options.add_option('NEWTAB',
-                                 'VIEW',
-                                 '/events/event/view/',
-                                 contentid='')
       user = self._get_user()
       cache = self._get_authorized_events_cache()
-      relations = self.event_controller.get_event_relations_4_paginator(event, user, cache)
-      paginator = Paginator(items=relations,
-                            labels_and_property=labels,
-                            paginator_options=paginator_options)
-
+      relations = self.event_controller.get_full_event_relations(event, user, cache)
       return self._render_template('/events/event/relations.html',
-                                       paginator=paginator,
-                                       event_id=event_id)
+                                   relations=relations)
     except ControllerException as error:
       self._get_logger().error(error)

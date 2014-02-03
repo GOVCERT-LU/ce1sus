@@ -46,12 +46,6 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     // serialize the data in the form
     //serializedData = form.serialize();
     formData = new FormData(form[0]);
-    // magic to get the button value
-    name = event.originalEvent.explicitOriginalTarget.name;
-    if (name) {
-        value = event.originalEvent.explicitOriginalTarget.value;
-        serializedData += '&' + name + '=' + value;
-    }
 
     // let's disable the inputs for the duration of the ajax request
     inputs.prop("disabled", true);

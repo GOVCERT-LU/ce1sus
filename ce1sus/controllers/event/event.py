@@ -25,23 +25,7 @@ from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
 from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.relationbroker import RelationBroker
-
-
-# pylint: disable=R0903,R0902
-class Relation(object):
-  """
-  Relation container used for displaying the relations
-  """
-  def __init__(self):
-    self.identifier = 0
-    self.event_id = 0
-    self.event_title = 0
-    self.object_id = 0
-    self.object_name = 0
-    self.attribute_id = 0
-    self.attribute_name = 0
-    self.attribute_value = 0
+from ce1sus.brokers.relationbroker import RelationBroker, EventRelation
 
 
 class EventController(Ce1susBaseController):
@@ -91,15 +75,11 @@ class EventController(Ce1susBaseController):
       # prepare list
       #
       relations = self.relation_broker.get_relations_by_event(event, True)
-      for event_rel in relations:
-        temp = Relation()
-        rel_event = event_rel.rel_event
+      for relation in relations:
+        rel_event = relation.rel_event
         if rel_event.identifier != event.identifier:
           if self._is_event_viewable_for_user(event, user, cache):
-            temp.event_id = rel_event.identifier
-            temp.identifier = rel_event.identifier
-            temp.event_title = rel_event.title
-            result.append(temp)
+            result.append(rel_event)
     except BrokerException as error:
       self._get_logger().error(error)
 
@@ -194,27 +174,15 @@ class EventController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_event_relations_4_paginator(self, event, user, cache):
-
+  def get_full_event_relations(self, event, user, cache):
     try:
       result = list()
       relations = self.relation_broker.get_relations_by_event(event, False)
       for relation in relations:
-
-          event_rel = relation.rel_event
+          rel_event = relation.rel_event
           # check if is viewable for user
-          if self._is_event_viewable_for_user(event_rel, user, cache):
-            # att the converted event
-            temp = Relation()
-            temp.event_id = event_rel.identifier
-            temp.identifier = event_rel.identifier
-            temp.event_title = event_rel.title
-            temp.object_id = relation.rel_attribute.object.identifier
-            temp.object_name = relation.rel_attribute.object.definition.name
-            temp.attribute_id = relation.rel_attribute.identifier
-            temp.attribute_name = relation.rel_attribute.definition.name
-            temp.attribute_value = relation.rel_attribute.value
-            result.append(temp)
+          if self._is_event_viewable_for_user(rel_event, user, cache):
+            result.append(relation)
       return result
     except BrokerException as error:
       self._raise_exception(error)

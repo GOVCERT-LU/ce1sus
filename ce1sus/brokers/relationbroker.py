@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from sqlalchemy.sql.expression import and_
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, lazyload
+from sqlalchemy.orm import relationship
 from dagr.db.broker import BrokerBase, IntegrityException, BrokerException
 from ce1sus.brokers.valuebroker import ValueBroker
 import sqlalchemy.orm.exc

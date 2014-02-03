@@ -82,12 +82,17 @@ class BitValueController(Ce1susBaseController):
     else:
       instance.bit_value.is_validated = False
 
+  def __unshare_object(self, obj):
+    obj = self.object_broker.get_by_id(obj_id)
+    BitValueController.__set_shared(obj, share, validated)
+
   def set_object_values(self, user, event, obj_id, share, validated='1'):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, False)
       obj = self.object_broker.get_by_id(obj_id)
       BitValueController.__set_shared(obj, share, validated)
+
       self.object_broker.update_object(user, obj, commit=False)
       self.object_broker.do_commit(True)
     except BrokerException as error:

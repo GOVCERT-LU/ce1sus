@@ -1,0 +1,71 @@
+
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
+
+<%def name="add_remove_tables(id, 
+                              identifier, 
+                              identifier_name='Default', 
+                              moving_name='Default', 
+                              remaining=list(), 
+                              existing=list(), 
+                              attribute_name='Default', 
+                              post_action='Default', 
+                              refresh_url='Default', 
+                              refresh_container='Default', 
+                              enabled=True)">
+%if enabled:
+  <div id="${id}Errors"></div>
+  <form id="${id}Form" class="form-horizontal role="form">
+    <input type="hidden" name="identifier" value="${identifier}">
+    <input id="${id}Operation" type="hidden" name="operation" value="">
+    <div class="row">
+      <div class="col-sd-3 col-md-3 ">
+      </div>
+      <div class="col-sd-5 col-md-5 ">
+        <table border="0" cellpadding="5" width="100%">
+            <tr>
+                <td>
+                  <label>${identifier_name} is <b>not</b> part of these ${moving_name}:</label>
+                    <select class="form-control"  name="remaining" size="10" multiple="multiple" tabindex="1"> 
+                          %if not remaining is None:
+                              % for item in remaining:
+                                  <option value="${getattr(item, 'identifier')}">${getattr(item, attribute_name)}</option> 
+                              % endfor
+                          %endif
+                   </select>
+                 </td>
+                 <td align="center">
+                   <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
+                   <br/>
+                   <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
+                 </td>
+                 <td>
+                   <label>${identifier_name} is <b>not</b> part of these ${moving_name}:</label>
+                   <select class="form-control"  name="existing" size="10" multiple="multiple" tabindex="1"> 
+                          %if not existing is None:
+                              % for item in existing:
+                                  <option value="${getattr(item, 'identifier')}">${getattr(item, attribute_name)}</option> 
+                              % endfor
+                          %endif
+                   </select>
+                 </td>
+            </tr>
+        </table>
+      </div>
+    </div>
+  </form>
+    
+  <script type="text/javascript">
+  $( document ).ready(function() {
+      $('#${id}Form').submit(function(event){
+          // magic to get the button value
+          value = event.originalEvent.explicitOriginalTarget.value;
+          $('#${id}Operation').val(value);
+          formEvent(this,event,'${post_action}','${id}',true,'${refresh_container}','${refresh_url}');
+      });
+  });
+  </script>
+    
+%else:
+  Not enabled
+%endif
+</%def>

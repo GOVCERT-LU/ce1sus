@@ -23,6 +23,8 @@ from ce1sus.web.views.event.objects import ObjectsView
 from ce1sus.web.views.event.comments import CommentsView
 from ce1sus.web.views.common.bitvalue import BitValueView
 from ce1sus.web.views.event.attributes import AttributesView
+from ce1sus.web.views.event.groups import GroupsView
+
 
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
@@ -76,6 +78,7 @@ def bootstrap():
   cherrypy.tree.mount(CommentsView(config), '/events/event/comment')
   cherrypy.tree.mount(BitValueView(config), '/events/event/bit_value')
   cherrypy.tree.mount(AttributesView(config), '/events/event/attribute')
+  cherrypy.tree.mount(GroupsView(config), '/events/event/groups')
 
   """
   Mailer(ce1susConfigFile)

@@ -36,7 +36,7 @@
     </tr>
   </thead>
   <tbody>
-  <% counter=1%>
+  <% counter=0%>
   %for relation in relations:
     <%
     if event.published == 0:
@@ -45,15 +45,16 @@
       style = ''
     counter = counter +1
     %>
-    <tr onclick="loadNewTab('${event.identifier}', 'eventsTabTabContent', '/events/event/view/${event.identifier}', true, 'Event #${event.identifier}');">
+    <tr onclick="loadNewTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', true, 'Event #${relation.identifier}');">
     <td style="${style}"><%call expr="messages_and_text.object_to_html(counter, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(relation.event_id, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(relation.event_title, shorten_to=100,use_plain_text=False)"/></td>
+    <td><%call expr="messages_and_text.object_to_html(relation.identifier, shorten_to=100,use_plain_text=False)"/></td>
+    <td><%call expr="messages_and_text.object_to_html(relation.title, shorten_to=100,use_plain_text=False)"/></td>
     
     <td style="width: 60px;">
       <a href="#">
          <span class="glyphicon glyphicon-eye-open" title="View event"></span>
       </a>
+    </td>
     </tr>
   %endfor
   </tbody>

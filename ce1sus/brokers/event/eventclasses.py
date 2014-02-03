@@ -590,12 +590,12 @@ class Attribute(BASE):
     if value:
       return value
     else:
-      return self.__value_obj.value
+      return getattr(self.__value_obj, 'value')
 
   @property
   def gui_value(self):
-    value = self.__get_value()
-    if value is None:
+    value = self.plain_value
+    if value:
       handler_instance = self.__get_handler_instance()
       value = handler_instance.convert_to_gui_value(self)
       return value
@@ -603,8 +603,8 @@ class Attribute(BASE):
 
   @property
   def rest_value(self):
-    value = self.__get_value()
-    if value is None:
+    value = self.plain_value
+    if value:
       handler_instance = self.__get_handler_instance()
       value = handler_instance.convert_to_rest_value(self)
       return value
