@@ -509,9 +509,8 @@ class Attribute(BASE):
                   primaryjoin="Attribute.identifier==NumberValue.attribute_id",
                   lazy='joined', uselist=False)
   attr_parent_id = Column('parent_attr_id', ForeignKey('Attributes.attribute_id'))
-  # monkey-patch because you cannot make self-references within a class definition
-  # children = relationship('Attribute',
-  #                        primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
+  children = relationship('Attribute',
+                          primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
   __value_id = None
   __value = None
   __value_obj = None

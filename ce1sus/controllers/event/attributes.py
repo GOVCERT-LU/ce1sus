@@ -127,6 +127,7 @@ class AttributesController(Ce1susBaseController):
       if not additional_attributes is None:
         for additional_attribute in additional_attributes:
           try:
+            additional_attribute.attr_parent_id = attribute.identifier
             self.attribute_broker.insert(additional_attribute, commit=False)
           except ValidationException:
             valid = False

@@ -38,7 +38,7 @@ def sytem_version(context):
 class System(object):
 
   APP_REL = '1.0.0'
-  DB_REL = '0.5.0'
+  DB_REL = '0.7.0'
   REST_REL = '2.0.0'
 
   def __init__(self, config):

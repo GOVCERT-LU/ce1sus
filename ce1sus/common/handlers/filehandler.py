@@ -119,7 +119,8 @@ class FileHandler(GenericHandler):
     if base_path and rel_path:
       filepath = base_path + '/' + rel_path
       if isfile(filepath):
-        return serve_file(filepath, "application/x-download", "attachment")
+        filename = FileHandler.__get_orig_filename(attribute)
+        return serve_file(filepath, "application/x-download", "attachment", name=filename)
       else:
         raise  HandlerException('The was not found in "{0}"'.format(filepath))
     else:
@@ -226,6 +227,13 @@ class FileHandler(GenericHandler):
     if action == 'insert':
       return self.insert(obj, definitions, user, params)
 
+  @staticmethod
+  def __get_orig_filename(attribtue):
+    for child in attribtue.children:
+      if child.definition.chksum == CHK_SUM_FILE_NAME:
+        return child.plain_value
+    return None
+
   def convert_to_gui_value(self, attribute):
     # Note this is not as it should be !!
     session = getattr(cherrypy, 'session')
@@ -239,7 +247,8 @@ class FileHandler(GenericHandler):
           url = FileHandler.URLSTR.format('download',
                                           attribute.object.get_parent_event_id(),
                                           attribute.identifier)
-          return Link(url, 'Download file')
+          filename = FileHandler.__get_orig_filename(attribute)
+          return Link(url, 'Download file "{0}"'.format(filename))
         else:
           return '(File is MIA or is corrupt)'
       else:

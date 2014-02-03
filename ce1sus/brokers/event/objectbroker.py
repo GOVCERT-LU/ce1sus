@@ -48,9 +48,6 @@ class ObjectBroker(BrokerBase):
         raise BrokerException('Object has children. '
                 + 'The object cannot be removed if there are still children.')
       else:
-        # remove attributes
-        self.attribute_broker.remove_attribute_list(obj.attributes, False)
-        self.do_commit(False)
         BrokerBase.remove_by_id(self, obj.identifier, False)
         self.do_commit(commit)
     except BrokerException as error:
