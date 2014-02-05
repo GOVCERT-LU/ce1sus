@@ -137,7 +137,7 @@ class BrokerBase(object):
 
     return result
 
-  def get_all(self):
+  def get_all(self, order=None):
     """
     Returns all get_broker_class() instances
 
@@ -146,7 +146,10 @@ class BrokerBase(object):
     :returns: list of instances
     """
     try:
-      result = self.session.query(self.get_broker_class()).all()
+      result = self.session.query(self.get_broker_class())
+      if not order is None:
+        result = result.order_by(order)
+      return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as e:

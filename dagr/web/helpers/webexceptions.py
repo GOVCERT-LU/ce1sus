@@ -36,11 +36,12 @@ class ErrorHandler(object):
     cherrypy.config.update({'error_page.500': ErrorHandler.error_page_500})
     cherrypy.config.update({'request.error_response':
                             ErrorHandler.handle_error})
-    ErrorHandler.__sendMail = config_section.get('useMailer')
+    ErrorHandler.__sendMail = config_section.get('usemailer')
     ErrorHandler.__receiver = config_section.get('receiver')
     ErrorHandler.__subject = config_section.get('subject')
     ErrorHandler.__mako = MakoHandler(config)
     ErrorHandler.__logger = Log(config)
+    ErrorHandler.__mailer = Mailer(config)
 
   @staticmethod
   def _get_logger():
@@ -104,8 +105,8 @@ class ErrorHandler(object):
       restext = text
     else:
       restext = None
-
-    if (ErrorHandler.__sendMail and ErrorHandler.__receiver and sendMail):
+    config_settings = ErrorHandler.__sendMail and ErrorHandler.__receiver
+    if  config_settings and sendMail:
       # create mail
       mailMessage = Mail()
       mailMessage.body = 'Error: {0}\n\nOccured On:{1}\n\nStackTrace:\n{2}'.format(message, datetime.now(), text)
@@ -114,8 +115,7 @@ class ErrorHandler(object):
         mailMessage.subject = 'An error Occured'
       mailMessage.reciever = ErrorHandler.__receiver
       try:
-        mailer = Mailer.get_instance()
-        mailer.sendMail(mailMessage)
+        ErrorHandler.__mailer.sendMail(mailMessage)
       except MailerException as e:
         ErrorHandler._get_logger().critical('Could not send mail Mailer not instantiated:{0}', e)
 
@@ -135,9 +135,8 @@ class ErrorHandler(object):
     cherrypy.response.body = ErrorHandler.show(title='500',
                                               error='2^255*8-2^1024\n'
                                               + 'FORMULA TOO COMPLEX',
-                                              text=
-                                                      traceback.format_exc(),
-                                                      message='Unkown Error')
+                                              text=traceback.format_exc(),
+                                              message='Unkown Error')
 
   # pylint: disable=W0621
   @staticmethod

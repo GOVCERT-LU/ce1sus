@@ -13,16 +13,26 @@ __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
-from dagr.helpers.classes.ticketsystem import TicketSystemBase
+from dagr.helpers.rt import RTTickets
 from dagr.web.helpers.pagination import Link
 from ce1sus.common.handlers.base import HandlerException
 
 
-class TicketHandler(GenericHandler):
+class RTHandler(GenericHandler):
   """Handler for handling tickets"""
   def __init__(self, config):
     GenericHandler.__init__(self, config)
-    self.url = self.config.get('ticketsurl')
+    self.rt = RTTickets(self.config.get('rt_url'),
+                        self.config.get('rt_user'),
+                        self.config.get('rt_password'))
+
+  def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
+    return template_renderer('/common/handlers/ticket.html',
+                             attribute=None,
+                             enabled=True,
+                             default_share_value=0,
+                             enable_share=False,
+                             definition_id=definition.identifier)
 
   def process_gui_post(self, obj, definitions, user, params):
     # check if params contains value
@@ -66,11 +76,27 @@ class TicketHandler(GenericHandler):
                              attribute=attribute,
                              enabled=False,
                              default_share_value=0,
-                             enable_share=False)
+                             enable_share=False,
+                             definition_id=attribute.definition.identifier)
+
+  def render_gui_get(self, template_renderer, action, attribute, user):
+    """
+    renders the file for displaying the tickets out of RT
+
+    :returns: generated HTML
+    """
+
+    labels = [{'idLink':'#'},
+              {'title':'Title'},
+              {'selector':'Options'}]
+    tickets = self.rt.getAllTickets()
+    return template_renderer('/common/handlers/RTtickets.html',
+                             tickets=tickets,
+                             rt_url=self.rt.getBaseTicketUrl())
 
   def convert_to_gui_value(self, attribute):
     link = Link()
-    link.url_base = self.url
+    link.url_base = self.rt.getBaseTicketUrl()
     link.identifier = attribute.plain_value
     return link
 

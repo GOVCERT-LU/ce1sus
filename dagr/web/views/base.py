@@ -134,9 +134,9 @@ class BaseView:
     """
     Returns the session
     """
-    attribute = getattr(cherrypy, 'session')
+    session = getattr(cherrypy, 'session')
     self._get_logger().debug('Session returned')
-    return attribute
+    return session
 
   def _get_template(self, template_name):
     """Returns the template
@@ -174,12 +174,20 @@ class BaseView:
 
     :returns: String
     """
-    return '<!--OK--' + self.__class__.__name__
+    return '<!--OK--><!-{0}-->'.format(self.__class__.__name__)
 
-  def _return_ajax_post_error(self):
+  def _return_ajax_post_error(self, message):
     """
     Returns the string of an postError for the javascript
 
     :returns: String
     """
-    return '<!--PostError--><!--' + self.__class__.__name__ + '-->'
+    return '<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, message)
+
+  def _return_ajax_error(self, message):
+    """
+    Returns the string of an postError for the javascript
+
+    :returns: String
+    """
+    return '<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, message)

@@ -31,3 +31,5 @@ class AttributeHandlerBroker(BrokerBase):
     for definition in definitions:
       result[definition.classname] = definition.identifier
 
+    return result
+

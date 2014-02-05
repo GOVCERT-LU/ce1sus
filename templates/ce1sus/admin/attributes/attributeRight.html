@@ -2,23 +2,24 @@
 
 <%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/> 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_form" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="tables" file="/ce1sus/components/tables.html"/> 
 
-</div>
+
 
 <!-- group details -->
 <h3>Attribute details:</h3>
-<%call expr="forms.attributeForm(attributeDetails, False, cbValues, cbHandlerValues)"/>
+<%call expr="forms.attribute_form(attribute, False, cb_values, cb_handler_values)"/>
 <div class="row">
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
-		% if not attributeDetails is None:
+		% if not attribute is None:
 		<div class="btn-group">
 			<a href="#editAttributeModal" role="button" class="btn btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
 				onclick="if (confirm('Are you sure you want to delete?')) {
-					dialogCall('/admin/attributes/modifyAttribute?identifier=${attributeDetails.identifier}&action=remove',
+					dialogCall('/admin/attributes/modify_attribute?identifier=${attribute.identifier}&action=remove',
 				               'adminTabsTabContent',
 				               '/admin/attributes')}">
 			Delete
@@ -29,49 +30,29 @@
 </div>
 <br/>
 <h4>Objectmanagment of this attribute:</h4>
-% if not attributeDetails is None:
-<%call expr="baseForms.genericForm(id='editObjectAttributes',
-                url='/admin/attributes/editObjectAttributes',
-                refreshUrl='/admin/attributes/rightContent?attributeid={0}'.format(attributeDetails.identifier),
-                refreshContainer='attributeRight')">
-<input type="hidden" name="attributeid" value="${attributeDetails.identifier}">
-<table border="0" cellpadding="5">
-<tr>
-    <td>Objects <b>not</b> using this attribute:<BR /> <select class="form-control"  name="remainingObjects"
-        size="10" multiple="multiple" tabindex="1"> 
-        %if not remainingObjects is None:
-            % for object in remainingObjects:
-                <option value="${object.identifier}">${object.name}</option> 
-            % endfor
-        %endif
-    </select>
-    </td>
-    <td>
-        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-        <BR />
-        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-    </td>
-    <td>Objects using this attribute:<BR /> <select class="form-control" name="attributeObjects" size="10"
-        multiple> 
-        %if not attributeObjects is None:
-            % for object in attributeObjects:
-                <option value="${object.identifier}">${object.name}</option> 
-            % endfor
-        %endif
-    </select>
-    </td>
-</tr>
-</table>
-</%call>
+% if not attribute is None:
+<%call expr="tables.add_remove_tables(id='editObjectAttriutes',
+                                      identifier=attribute.identifier,
+                                      identifier_name='Attribute',
+                                      moving_name='Objects',
+                                      remaining=remaining_objects,
+                                      existing=attribute.objects,
+                                      attribute_name='name',
+                                      post_action='/admin/attributes/edit_attribute_attributes',
+                                      refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
+                                      refresh_container='{0}RightContent'.format(id),
+                                      enabled=True,
+                                      width=7
+                                      )"/>
 %endif
-%if not attributeDetails is None:
-	<%call expr="baseForms.genericModalForm(modalID='editAttributeModal',
-	                                    url='/admin/attributes/modifyAttribute',
-	                                    refreshUrl='/admin/attributes/rightContent?attributeid={0}'.format(attributeDetails.identifier),
-	                                    refreshContainer='attributeRight')">
+%if not attribute is None:
+	<%call expr="base_form.generic_modal_form(modal_id='editAttributeModal',
+	                                    url='/admin/attributes/modify_attribute',
+	                                    refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
+	                                    refresh_container='AttributeRightContent')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.saveButtonModal(id='editAttributeModal',
+	<%call expr="modals.save_button_modal(id='editAttributeModal',
 	                              title='Edit attribute',
-	                              contentUrl='/admin/attributes/editAttribute/{0}'.format(attributeDetails.identifier))"/>
+	                              content_url='/admin/attributes/edit_attribute/{0}'.format(attribute.identifier))"/>
 	</%call>
 %endif

@@ -74,16 +74,14 @@ class CommentsView(Ce1susBaseView):
         comment, valid = self.comments_controller.insert_comment(user, event, comment)
         if not valid:
           self._get_logger().info('Comment is invalid')
-          return (self._return_ajax_post_error()
-                            + self._render_template('/events/event/comments/commentModal.html',
+          return self._return_ajax_post_error(self._render_template('/events/event/comments/commentModal.html',
                                                           event_id=event_id,
                                                           comment=comment))
       if action == 'update':
         comment, valid = self.comments_controller.update_comment(user, event, comment)
         if not valid:
           self._get_logger().info('Comment is invalid')
-          return (self._return_ajax_post_error()
-                            + self._render_template('/events/event/comments/commentModal.html',
+          return self._return_ajax_post_error(self._render_template('/events/event/comments/commentModal.html',
                                                           event_id=event_id,
                                                           comment=comment))
       if action == 'remove':

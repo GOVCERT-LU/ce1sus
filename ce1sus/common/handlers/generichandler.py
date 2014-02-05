@@ -63,8 +63,6 @@ class GenericHandler(HandlerBase):
                                'ioc',
                                params.get('ioc', '0').strip())
     attribute.bit_value = BitValue('0', attribute)
-    attribute.bit_value.is_web_insert = True
-    attribute.bit_value.is_validated = True
     # check if parent is sharable
     if obj.bit_value.is_shareable:
       if share == '1':

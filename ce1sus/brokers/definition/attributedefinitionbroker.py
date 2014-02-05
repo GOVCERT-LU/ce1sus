@@ -72,7 +72,6 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       raise NothingFoundException('Nothing found for ID: {0}',
                                   format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
     return objects
@@ -105,7 +104,6 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                         obj_identifier).order_by(
                                         AttributeDefinition.name).all()
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().debug(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -114,7 +112,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       result[definition.name] = (definition.identifier, definition.description)
     return result
 
-  def add_object_to_attribute(self, obj_id, attr_id, commit=True):
+  def add_object_to_attribute(self, attr_id, obj_id, commit=True):
     """
     Add an attribute to an object
 
@@ -128,29 +126,35 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                 ObjectDefinition.identifier == obj_id).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attr_id).one()
-      attribute.add_dbject(obj)
-      handler_name = self.handler_broker.get_handlername(attribute.handler_index)
-      if not 'GenericHandler' in handler_name:
-        handler = self.handler_broker.get_handler(attribute)
-        try:
-          id_list = handler.get_used_attribute_ids()
-        except TypeError:
-          id_list = list()
-        # only add the attributes if there are attributes to be added
-        if id_list:
-          attributes = self.session.query(AttributeDefinition).filter(
-                AttributeDefinition.name.in_(id_list))
-          for attribute in attributes:
-            attribute.add_dbject(obj)
+      attribute.add_object(obj)
+      additional_attribtues_chksums = attribute.handler.get_additinal_attribute_chksums()
+      if additional_attribtues_chksums:
+        # collect all required attributes and add them
+        additional_attribtues = self.get_defintion_by_chksums(additional_attribtues_chksums)
+        for additional_attribtue in additional_attribtues:
+          obj.add_attribute(additional_attribtue)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound as error:
       raise NothingFoundException('Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
-  def remove_object_from_attribute(self, obj_id, attr_id, commit=True):
+  def _findallchksums(self, obj):
+    result = dict()
+    for attribute in obj.attributes:
+      chksums = attribute.handler.get_additinal_attribute_chksums()
+      if chksums:
+        if isinstance(chksums, list):
+          for chksum in chksums:
+            ref_attribute = self.get_defintion_by_chksum(chksum)
+            result[chksum] = (attribute.name, ref_attribute.name)
+        else:
+          attribute = self.get_defintion_by_chksum(chksums)
+          result[chksums] = (attribute.name, ref_attribute.name)
+    return result
+
+  def remove_object_from_attribute(self, attr_id, obj_id, commit=True):
     """
     Removes an attribute from an object
 
@@ -164,12 +168,19 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                 ObjectDefinition.identifier == obj_id).one()
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attr_id).one()
-      attribute.remove_object(obj)
-      self.do_commit(commit)
+      # check if chksum is not required
+      required_chksums = self._findallchksums(obj)
+      # remove self
+      existing = required_chksums.get(attribute.chksum, None)
+      if existing:
+        raise IntegrityException(('Attribute {0} is still required by attribute {1}.'
+                                  + ' Please remove {1} first.').format(existing[1], existing[0]))
+      else:
+        attribute.remove_object(obj)
+        self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -189,7 +200,6 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise IntegrityException(error)
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -203,7 +213,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                                regex='^.*$',
                                class_index=0,
                                action='insert',
-                               handler_index=0,
+                               handler_index=1,
                                share=None,
                                relation=None):
     """
@@ -240,10 +250,12 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     ObjectConverter.setInteger(attribute, 'class_index', class_index)
     ObjectConverter.setInteger(attribute, 'handler_index', handler_index)
     ObjectConverter.setInteger(attribute, 'relation', relation)
+    # TODO: recompute chksums
+    handler = self.handler_broker.get_by_id(attribute.handler_index)
     key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,
                              attribute.class_index,
-                             attribute.handler_index)
+                             handler.uuid)
     attribute.dbchksum = hashSHA1(key)
     trimmed_regex = cleanPostValue(regex)
     if strings.isNotNull(trimmed_regex):

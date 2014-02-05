@@ -12,27 +12,17 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                   AttributeDefinitionBroker
 from dagr.db.broker import ValidationException, \
 BrokerException
 from ce1sus.common.handlers.base import HandlerException
-import types
-from dagr.web.helpers.pagination import Paginator
-from dagr.helpers.classes.ticketsystem import TicketSystemBase
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
-from dagr.db.broker import NothingFoundException
-from dagr.helpers.hash import hashMD5
-from dagr.helpers.datumzait import datumzait
-import os
-from ce1sus.brokers.event.eventclasses import Attribute
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
-from os.path import exists
 
 
 class AttributesController(Ce1susBaseController):

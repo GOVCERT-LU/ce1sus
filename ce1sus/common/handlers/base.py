@@ -55,7 +55,7 @@ class HandlerBase(object):
     :param attribute: The attribute to be displayed
     :type attribute: Attribute
 
-    :returns: List of Attribute
+    :returns: Attribute, [List of Attribute]
     """
     raise HandlerException(('process_gui_post not defined for {0} with parameters '
                            + '{1},{2},{3},{4}').format(self.__class__.__name__,

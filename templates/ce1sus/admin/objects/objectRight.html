@@ -2,25 +2,25 @@
 
 <%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/> 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_form" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="tables" file="/ce1sus/components/tables.html"/> 
 
 
 
-</div>
 
 <!-- group details -->
 <h3>Object details:</h3>
-<%call expr="forms.objectForm(objectDetails, False)"/>
+<%call expr="forms.objectForm(object, False)"/>
 <div class="row">
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
-		% if not objectDetails is None:
+		% if not object is None:
 		<div class="btn-group">
 			<a href="#editObjectModal" role="button" class="btn  btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
-                    dialogCall('/admin/objects/modifyObject?identifier=${objectDetails.identifier}&action=remove',
+                    dialogCall('/admin/objects/modify_object?identifier=${object.identifier}&action=remove',
                                'adminTabsTabContent',
                                '/admin/objects')}">
             Delete
@@ -31,49 +31,29 @@
 </div>
 <br/>
 <h4>Attributemanagment of this object:</h4>
-% if not objectDetails is None:
-<%call expr="baseForms.genericForm(id='editObjectAttriutes',
-                               url='/admin/objects/editObjectAttributes',
-                               refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),
-                               refreshContainer='objectRight')">
-<input type="hidden" name="objectid" value="${objectDetails.identifier}">
-<table border="0" cellpadding="5">
-<tr>
-    <td>Attributes <b>not</b> part of this object:<BR /> <select class="form-control" name="remainingAttributes"
-        size="10" multiple="multiple" tabindex="1"> 
-        %if not remainingAttributes is None:
-            % for attribute in remainingAttributes:
-        <option value="${attribute.identifier}">${attribute.name}</option> 
-            % endfor
-        %endif
-    </select>
-    </td>
-    <td>
-        <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-        <BR />
-        <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-    </td>
-    <td>Attributes part of this object:<BR /> <select class="form-control"  name="objectAttributes" size="10"
-        multiple> 
-        %if not objectAttributes is None:
-            % for attribute in objectAttributes:
-                <option value="${attribute.identifier}">${attribute.name}</option> 
-            % endfor
-        %endif
-    </select>
-    </td>
-</tr>
-</table>
-</%call>
+% if not object is None:
+<%call expr="tables.add_remove_tables(id='editObjectAttriutes',
+                                      identifier=object.identifier,
+                                      identifier_name='Object',
+                                      moving_name='Attibutes',
+                                      remaining=remaining_attributes,
+                                      existing=object.attributes,
+                                      attribute_name='name',
+                                      post_action='/admin/objects/edit_object_attributes',
+                                      refresh_url='/admin/objects/right_content/{0}'.format(object.identifier),
+                                      refresh_container='{0}RightContent'.format(id),
+                                      enabled=True,
+                                      width=7
+                                      )"/>
 %endif
-%if not objectDetails is None:
-	<%call expr="baseForms.genericModalForm(modalID='editObjectModal',
-	                                    url='/admin/objects/modifyObject',
-	                                    refreshUrl='/admin/objects/rightContent?objectid={0}'.format(objectDetails.identifier),
-	                                    refreshContainer='objectRight')">
+%if not object is None:
+	<%call expr="base_form.generic_modal_form(modal_id='editObjectModal',
+	                                    url='/admin/objects/modify_object',
+	                                    refresh_url='/admin/objects/right_content/{0}'.format(object.identifier),
+	                                    refresh_container='ObjectRightContent')">
 	<input type="hidden" name="action" value="update">
-	<%call expr="modals.saveButtonModal(id='editObjectModal',
+	<%call expr="modals.save_button_modal(id='editObjectModal',
 	                              title='Edit Object',
-	                              contentUrl='/admin/objects/editObject/{0}'.format(objectDetails.identifier))"/>
+	                              content_url='/admin/objects/edit_object/{0}'.format(object.identifier))"/>
 	</%call>
 %endif

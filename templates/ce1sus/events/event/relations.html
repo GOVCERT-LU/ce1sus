@@ -12,8 +12,6 @@
     <tr>
     <th caria-controls="relationsDetailsTable" tabindex="1" role="columnheader" class="sorting">Event #</th>
     <th caria-controls="relationsDetailsTable" tabindex="2" role="columnheader" class="sorting">Event Title</th>
-    <th caria-controls="relationsDetailsTable" tabindex="3" role="columnheader" class="sorting">Object #</th>
-    <th caria-controls="relationsDetailsTable" tabindex="4" role="columnheader" class="sorting">Object Type</th>
     <th caria-controls="relationsDetailsTable" tabindex="5" role="columnheader" class="sorting">Attribute #</th>
     <th caria-controls="relationsDetailsTable" tabindex="6" role="columnheader" class="sorting">Attribute type</th>
     <th caria-controls="relationsDetailsTable" tabindex="7" role="columnheader" class="sorting">Attribute value</th>
@@ -31,8 +29,6 @@
     <tr>
     <td style="${style}"><%call expr="messages_and_text.object_to_html(relation.rel_event.identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_event.title, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.object.identifier, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.object.definition.name, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>

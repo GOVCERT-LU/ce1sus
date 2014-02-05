@@ -12,18 +12,19 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 from smtplib import SMTPException, SMTP
 from email.mime.text import MIMEText
-
-from dagr.helpers.config import Configuration
 from dagr.helpers.debug import Log
+
 
 class MailerException(Exception):
   def __init__(self, message):
     Exception.__init__(self, message)
 
+
 class NotInitializedException(MailerException):
   """Server Error"""
   def __init__(self, message):
     MailerException.__init__(self, message)
+
 
 class Mail(object):
 
@@ -36,18 +37,16 @@ class Mail(object):
   @property
   def message(self):
     return """From: {0}\nTo: {1}\nSubject:{2}\n\n {3}""".format(self.sender,
-                                                                self.recievers,
+                                                                self.reciever,
                                                                 self.body)
+
 
 class Mailer(object):
 
-  instance = None
-
-  def __init__(self, config_file):
-    self.__config_section = Configuration(config_file, 'Mailer')
+  def __init__(self, config):
+    self.__config_section = config.get_section('Mailer')
     self.sender = self.__config_section.get('from')
-    Mailer.instance = self
-
+    self.logger = Log(config)
 
   def sendMail(self, mail):
     try:
@@ -69,19 +68,9 @@ class Mailer(object):
 
       smtpObj.sendmail(sender, mail.reciever, message.as_string())
       smtpObj.quit()
-    except SMTPException as e:
-      raise MailerException(e)
+    except SMTPException as error:
+      self.get_logger().critical(error)
+      raise MailerException(error)
 
-
-  @classmethod
-  def get_instance(cls):
-    """
-      Returns an instance
-
-      :returns: LDAPHandler
-    """
-    if Mailer.instance == None:
-      raise NotInitializedException('Mailer has not been initialized')
-    else:
-      return Mailer.instance
-
+  def get_logger(self):
+    return self.logger.get_logger(self.__class__.__name__)

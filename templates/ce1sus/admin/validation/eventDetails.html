@@ -2,120 +2,104 @@
 
 <%namespace name="input" file="/dagr/components/input.html"/>
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 <%namespace name="dagr" module="dagr.web.helpers.webstrings"/>
 <%namespace name="pagination" file="/dagr/components/pagination.html"/>
 <%namespace name="tabulator" file="/dagr/components/tabs.html"/>
-
-<div id="deleteAnswer" style="display: none;">
-</div>
+<%namespace name="collapse" file="/components/collapse.html"/>
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
+<%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 
 
 <div class="row">
-  <div class="col-xs-12 col-sm-12" style="text-align:left">
+  <div class="col-xs-12 col-sm-12">
+    
     <div id="eventEdit">
-        <legend>Details</legend>
-        <div class="btn-group">
-            <a  class="btn btn-default" href="#" onclick="if (confirm('Do you want to validate this event')) {
-               $.get('/admin/validation/validateEvent/${event.identifier}', function(data) {
-	               if (data.match(/^<!--OK--/gi)) {
-	            	   closeTab('validationTabs','validationTabs${event.identifier}LI');
-	            	   loadTabLi('unValiEvLI', true);
-	            	   
-	               } else {
-	                   alert('An unexpected error occured.');
-	               }
-                            
-               }).fail(function() { alert('Could not perform action: '); });
-            }">Validate All</a>
-            <a  class="btn btn-danger" href="#" onclick="if (confirm('Do you want to delete this event')) {
-               $.get('/admin/validation/deleteUnValidatedEvent/${event.identifier}', function(data) {
-                   if (data.match(/^<!--OK--/gi)) {
-                       closeTab('validationTabs','validationTabs${event.identifier}LI');
-                       loadTabLi('unValiEvLI', true);
-                       
-                   } else {
-                       alert('An unexpected error occured.');
-                   }
-                            
-               }).fail(function() { alert('Could not perform action: '); });
-            }">Delete</a>
-        </div>
-        ${forms.eventForm(event=event,enabled=False,cbStatusValues=cbStatusValues,cbTLPValues=cbTLPValues)}
+      <legend>Details</legend>
+      
+      <div class="row">
+          <div class="col-xs-12 col-sm-12" style="text-align:left">
+              <div class="btn-group">
+                 <button class="btn btn-default"
+                  onclick="if (confirm('Are you sure you want to validate ?')) {
+                      dialogCloseTabCall('/admin/validation/validate_event/${event.identifier}',
+                                 'validationTabs',
+                                 'validationTabs${event.identifier}')}">
+                  Validate Event
+                  </button>
+                  <button class="btn btn-danger"
+                   onclick="if (confirm('Are you sure you want to delete ?')) {
+                       dialogCloseTabCall('/admin/validation/delete_unvalidated_event/${event.identifier}',
+                                  'validationTabs',
+                                  'validationTabs${event.identifier}')}">
+                   Delete Event
+                  </button>
+              </div>
+              ${forms.event_form(event=event,enabled=False, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
+          </div>
+      </div>
     </div>
-  </div>
-  
-<br/><br/>
+ 
 <legend>Relations</legend>
-<%call expr="pagination.pagination('relationsTable',relationPaginator,hasSearch=False)"/>
-<br/><br/>
-
-<legend>Comments</legend>
-<table class="table table-striped table-hover table-condensed">
+<div style="margin-bottom:35px">
+  <table class="table table-striped table-bordered table-hover table-condensed" id="relationsTable">
   <thead>
     <tr>
-      <th>#</th>
-      <th>Comment</th>
-      <th>Date</th>
-      <th>User</th>
-      <th width="150px">Options</th>
+    <th caria-controls="relationsTable" tabindex="0" role="columnheader" class="sorting">#</th>
+    <th caria-controls="relationsTable" tabindex="1" role="columnheader" class="sorting">Event #</th>
+    <th caria-controls="relationsTable" tabindex="2" role="columnheader" class="sorting">Event Title</th>
+    <th caria-controls="relationsTable" tabindex="3" role="columnheader" class="sorting">Options</th>
     </tr>
   </thead>
   <tbody>
-    %if comments is None:
-    <tr>
-      <td></td>
-      <td></td>
-      <td><div style="text-align:center">No data available in table</div></td>
-      <td></td>
+  <% counter=0%>
+  %for relation in relations:
+    <%
+    if event.published == 0:
+      style = 'background-color: #ff0000'
+    else:
+      style = ''
+    counter = counter +1
+    %>
+    <tr onclick="loadNewTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', true, 'Event #${relation.identifier}');">
+    <td style="${style}"><%call expr="messages_and_text.object_to_html(counter, shorten_to=100,use_plain_text=False)"/></td>
+    <td><%call expr="messages_and_text.object_to_html(relation.identifier, shorten_to=100,use_plain_text=False)"/></td>
+    <td><%call expr="messages_and_text.object_to_html(relation.title, shorten_to=100,use_plain_text=False)"/></td>
+    
+    <td style="width: 60px;">
+      <a href="#">
+         <span class="glyphicon glyphicon-eye-open" title="View event"></span>
+      </a>
+    </td>
     </tr>
-    %else:
-      %for comment in comments:
-        <tr>
-          <td>${comment.identifier}</td>
-          <td>${dagr.plaintext2html(text=comment.comment)}</td>
-          <td>${comment.created}</td>
-          <td>${comment.creator.username}</td>
-          <td>
-              <div class="btn-group">
-                  <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="glyphicon glyphicon-pencil" title="Edit"/></i></a>  
-                    <a href="#"  role="button"
-                    onclick="if (confirm('Are you sure you want to delete?')) {
-                        dialogCall('/events/event/comment/modifyComment?commentID=${comment.identifier}&eventID=${event.identifier}&action=remove',
-                                   'eventsTabTabContent',
-                                   '/events/event/view/${event.identifier}')}"><i class="glyphicon glyphicon-remove" title="Remove"/></a>
-              </div>
-          </td>
-        </tr>
-      %endfor
-    %endif
+  %endfor
   </tbody>
-</table>
+  </table>
+</div>
+
+
 
 </div>
 </div>
 
-<div class="btn-group">
-<a href="#addCommentModal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add
-                new Comment</a>
-</div>
-
-<%call expr="baseForms.genericModalForm(modalID='addCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
-    <input type="hidden" name="action" value="insert">
-    <%call expr="modals.saveButtonModal(id='addCommentModal',title='Add a comment',contentUrl='/events/event/comment/addComment/{0}'.format(event.identifier))"/>
-</%call>
-
-<%call expr="baseForms.genericModalForm(modalID='editCommentModal',url='/events/event/comment/modifyComment',refreshUrl='/events/event/view/{0}'.format(event.identifier),refreshContainer='eventTabs{0}TabContent'.format(event.identifier))">
-    <input type="hidden" name="action" value="update">
-    <%call expr="modals.saveButtonModal(id='editCommentModal',title='Add a comment',contentUrl=None)"/>
-</%call>
 
 <script type="text/javascript">
 
-function editComment(eventID,commentID) {   
-    loadContent('editCommentModalbody','/events/event/comment/viewComment/'+eventID+'/'+commentID)
-}
 
 
+jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+  return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+};
+ 
+jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+  return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+};
+$(document).ready(function() {
+  $('#relationsTable').dataTable( {
+    "iDisplayLength": 10,
+    "aaSorting": [[ 0, "asc" ]],
+  });
+});
 </script>
+

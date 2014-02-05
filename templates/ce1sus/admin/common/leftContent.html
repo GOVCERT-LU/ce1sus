@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
+
+<div class="btn-group">
+    <a href="#add${id}Modal" role="button" class="btn btn-default" data-toggle="modal">Add new ${id}</a>
+</div>
+<div style="height:15px"/>
+<% 
+found=False 
+fistID=0
+selected = True
+%>
+<!--list of objects -->
+<script type="text/javascript">
+function loadItem(itemID){
+    loadContent('${id}RightContent','${url_right_content}/'+itemID);
+}
+</script>
+<div id="pannelDiv" style="overflow:auto;height:800px;width:100%;padding-bottom:5px"> 
+<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
+    %if not items is None: 
+        % for item in items:
+          <%call expr="nav.left_menu_item(item.identifier, 'loadItem({0})'.format(item.identifier),item.name,selected)"/>
+          <%
+          if not foundObject:
+              fistID = item.identifier
+              found=True
+              selected = False
+          %>
+        % endfor 
+    %endif
+    
+</ul>
+</div>
+<!-- AddObjectForm -->
+<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal',
+                                    url=action_url,
+                                    refresh_url=refresh_url, 
+                                    refresh_container='adminTabsTabContent')">
+<input type="hidden" name="action" value="insert">
+<%call expr="modals.save_button_modal(id='addObjectModal',
+                                    title='Add object',
+                                    content_url=modal_content_url)"/>
+</%call>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    loadItem(${fistID});
+    resizeScrollPannel('pannelDiv');
+});
+</script>

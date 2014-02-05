@@ -40,6 +40,7 @@ class AttributeHandler(BASE):
   identifier = Column('AttributeHandler_id', Integer, primary_key=True)
   module_classname = Column('moduleClassName', String)
   description = Column('description', String)
+  description = Column('uuid', String)
   attributes = relationship('AttributeDefinition', primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index')
   ce1sus_id = Column('config', Integer, ForeignKey('ce1sus.ce1sus_id'))
   configuration = relationship('Ce1susConfig')
@@ -184,7 +185,7 @@ class AttributeDefinition(BASE):
                          back_populates='attributes',
                          primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
                          cascade='all',
-                         order_by="AttributeDefinition.name")
+                         order_by="AttributeDefinition.name", lazy='joined')
   deletable = Column('deletable', Integer)
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
@@ -248,7 +249,7 @@ class AttributeDefinition(BASE):
     return result
 
   @staticmethod
-  def get_table_definitions(simple=True):
+  def get_cb_values(simple=True):
     """ returns the table definitions where the key is the value and value the
     index of the tables.
 

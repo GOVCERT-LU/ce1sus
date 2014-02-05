@@ -52,19 +52,19 @@ class GroupsController(Ce1susBaseController):
       self._raise_exception(error)
 
   @staticmethod
-  def __handle_post(add_function, event_id, post_value):
+  def __handle_input(add_function, event_id, post_value):
     if isinstance(post_value, types.StringTypes):
       add_function(event_id, post_value, False)
     else:
-      for groupID in post_value:
-        add_function(event_id, groupID, False)
+      for group_id in post_value:
+        add_function(event_id, group_id, False)
 
   def modify_groups(self, operation, event_id, remaining_groups, event_groups):
     try:
       if operation == 'add':
-        GroupsController.__handle_post(self.event_broker.add_group_to_event, event_id, remaining_groups)
+        GroupsController.__handle_input(self.event_broker.add_group_to_event, event_id, remaining_groups)
       else:
-        GroupsController.__handle_post(self.event_broker.remove_group_from_event, event_id, event_groups)
+        GroupsController.__handle_input(self.event_broker.remove_group_from_event, event_id, event_groups)
       self.event_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)
@@ -72,9 +72,9 @@ class GroupsController(Ce1susBaseController):
   def modify_subgroups(self, operation, event_id, remaining_subgroups, event_subgroups):
     try:
       if operation == 'add':
-        GroupsController.__handle_post(self.event_broker.add_subgroup_to_event, event_id, remaining_subgroups)
+        GroupsController.__handle_input(self.event_broker.add_subgroup_to_event, event_id, remaining_subgroups)
       else:
-        GroupsController.__handle_post(self.event_broker.remove_subgroup_from_event, event_id, event_subgroups)
+        GroupsController.__handle_input(self.event_broker.remove_subgroup_from_event, event_id, event_subgroups)
       self.event_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)

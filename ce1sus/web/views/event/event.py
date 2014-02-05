@@ -150,8 +150,7 @@ class EventView(Ce1susBaseView):
         event, valid = self.event_controller.insert_event(user, event)
         if not valid:
           self._get_logger().info('Event is invalid')
-          return (self._return_ajax_post_error()
-                            + self.__render_event_details('/events/event/addEvent.html',
+          return self._return_ajax_post_error(self.__render_event_details('/events/event/addEvent.html',
                                                           event))
       if action == 'remove':
         self.event_controller.remove_event(user, event)
@@ -160,8 +159,7 @@ class EventView(Ce1susBaseView):
         event, valid = self.event_controller.update_event(user, event)
         if not valid:
           self._get_logger().info('Event is invalid')
-          return (self._return_ajax_post_error()
-                            + self.__render_event_details('/events/event/editDetails.html',
+          return self._return_ajax_post_error(self.__render_event_details('/events/event/editDetails.html',
                                                           event))
       return self._return_ajax_ok()
     except ControllerException as error:

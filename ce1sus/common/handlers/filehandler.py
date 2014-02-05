@@ -11,27 +11,18 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.views.base import Ce1susBaseView
+from ce1sus.web.views.base import SESSION_USER
 from cherrypy.lib.static import serve_file
 from dagr.helpers.config import ConfigException
 import cherrypy
 from ce1sus.common.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import datumzait
-from os.path import isfile, getsize, basename, exists
+from os.path import isfile, getsize, basename, exists, dirname
 import dagr.helpers.hash as hasher
 from ce1sus.common.handlers.base import HandlerException
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                              AttributeDefinitionBroker
 from shutil import move, rmtree
 from os import makedirs
-from ce1sus.brokers.event.eventbroker import EventBroker
-from dagr.db.broker import BrokerException
-from dagr.helpers.converters import ObjectConverter
-from ce1sus.helpers.bitdecoder import BitValue
-from ce1sus.brokers.permission.userbroker import UserBroker
 import magic
-from ce1sus.brokers.event.eventclasses import Attribute
-from os.path import isfile, dirname
 from ce1sus.common.checks import can_user_download
 
 
@@ -47,6 +38,7 @@ CHK_SUM_FILE_ID = 'e81cdce63d1c4fd020c929b2ff91da92f5ce14c3'
 CHK_SUM_HASH_MD5 = 'fed503f9b506cf9636497f5423aef9e68a1bd107'
 
 
+# pylint: disable=R0903,R0902
 class Link(object):
   """
   Container class for links
@@ -62,7 +54,7 @@ class FileHandler(GenericHandler):
   URLSTR = '/events/event/attribute/call_handler_get/{0}/{1}/{2}'
 
   def get_additinal_attribute_chksums(self):
-    return (CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1)
+    return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
 
   @staticmethod
   def _get_dest_filename(file_hash, file_name):
@@ -159,7 +151,8 @@ class FileHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
-  def _get_dest_folder(self):
+  @staticmethod
+  def _get_dest_folder():
     dest_path = '{0}/{1}/{2}'.format(datumzait.now().year,
                                      datumzait.now().month,
                                      datumzait.now().day)
@@ -206,7 +199,7 @@ class FileHandler(GenericHandler):
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
                                                    user,
                                                    '0'))
-    destination_path = self._get_dest_folder() + '/' + sha1
+    destination_path = FileHandler._get_dest_folder() + '/' + sha1
     move(uploaded_file_path, self._get_base_path() + '/' + destination_path)
 
     # remove temp folder
@@ -237,7 +230,7 @@ class FileHandler(GenericHandler):
   def convert_to_gui_value(self, attribute):
     # Note this is not as it should be !!
     session = getattr(cherrypy, 'session')
-    user = session.get(Ce1susBaseView.SESSION_USER, None)
+    user = session.get(SESSION_USER, None)
     if user:
       event = attribute.object.get_parent_event()
       can_download = can_user_download(event, user)
@@ -255,66 +248,13 @@ class FileHandler(GenericHandler):
         return '(Not Provided)'
     else:
       return '(Not Provided)'
-  """
-
-  def convertToAttributeValue(self, value):
-    attribute = value.attribute
-    user = Protector.get_user()
-    restUser = False
-    if user is None:
-      # check if not a rest user
-      apiKey = Protector.getRestAPIKey()
-      # if there is a key in the session then the user has logged in via REST
-      if apiKey:
-        try:
-          user = self.user_broker.getUserByApiKey(apiKey)
-          restUser = True
-        except BrokerException:
-          return '(Not Provided)'
-      else:
-        return '(Not Provided)'
-
-    if not user is None and not restUser:
-      eventID = attribute.object.event_id
-      if eventID is None:
-        eventID = attribute.object.parentEvent_id
-      userInGroups = self.__canUserDownload(eventID, user)
-      userIsOwner = attribute.creator_id == user.identifier
-      filename = self.base_path + '/' + value.value
-      if userInGroups or userIsOwner:
-        if exists(filename) or exists(value.value):
-          link = Link(FileHandler.URLSTR.format(
-                                              attribute.object.identifier,
-                                              attribute.identifier,
-                                              ''),
-                    'Download')
-        else:
-          return '(File vanished or is corrupt)'
-        return link
-      else:
-        return '(Not Accessible)'
-    else:
-      if restUser:
-        filename = self.base_path + '/' + value.value
-        if isfile(filename):
-          with open(filename, "rb") as binaryFile:
-            data = binaryFile.read()
-            binaryASCII = '{0}'.format(data.encode("base64"))
-          fileName = basename(filename)
-          value = {'file': (fileName, binaryASCII)}
-          return json.dumps(value)
-        else:
-          return '(Not Found)'
-      else:
-        return '(Not Provided)'
-  """
 
 
 class FileWithHashesHandler(FileHandler):
 
   @staticmethod
   def get_additinal_attribute_chksums():
-    return (CHK_SUM_FILE_NAME,
+    return [CHK_SUM_FILE_NAME,
             CHK_SUM_HASH_SHA1,
             CHK_SUM_HASH_SHA256,
             CHK_SUM_HASH_SHA384,
@@ -323,7 +263,7 @@ class FileWithHashesHandler(FileHandler):
             CHK_SUM_MAGIC_NUMBER,
             CHK_SUM_MIME_TYPE,
             CHK_SUM_FILE_ID,
-            CHK_SUM_HASH_MD5)
+            CHK_SUM_HASH_MD5]
 
   def insert(self, obj, definitions, user, params):
     main_definition = self._get_main_definition(definitions)
@@ -387,7 +327,7 @@ class FileWithHashesHandler(FileHandler):
                                                    user,
                                                    '0'))
 
-    destination_path = self._get_dest_folder() + '/' + sha1
+    destination_path = FileHandler._get_dest_folder() + '/' + sha1
     move(uploaded_file_path, self._get_base_path() + '/' + destination_path)
 
     # remove temp folder

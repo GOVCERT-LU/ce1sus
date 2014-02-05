@@ -2,11 +2,7 @@
 
 <%namespace name="layout" file="/dagr/layout/base.html"/>
 
-<script type="text/javascript" src="/js/ce1sus.js"></script>
-<link href="/css/ce1sus.css" rel="stylesheet" media="screen" type="text/css" />
-
-<%call expr="layout.base()">
-    <script type="text/javascript" src="/js/ce1sus.js" charset="UTF-8"></script>
+<%call expr="layout.base(js_files=['/js/ce1sus.js'], css_files=['/css/ce1sus.css'])">
 	<div >
 		<div >
 			<div class="col-xs-12 col-sm-12">

@@ -6,22 +6,56 @@ $.fn.scrollView = function() {
     });
 }
 
-function getErrorMsg(resonseText) {
-    resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-    if (typeof (resonseText.status) !== 'undefined') {
-        resultText += '<h4 class="alert-heading">Error: ' + resonseText.status
+function getResponseConent(response) {
+    if ((response.status == 403) || (response.status == 404)) {
+        var message = getErrorMsg(response)
+        return message
+    } else {
+        
+        var message = response.responseText
+        document.write(message); 
+        return;
+    }
+}
+
+function getResonseTextContent(responseText) {
+    if (responseText.match(/(<html)/i)) {
+        document.write(responseText); 
+        return;
+    } else {
+        if (responseText.match(/^<!--Error-->/gi)) {
+            return resultText = createErrorsMsg(null, responseText);
+        }
+        return responseText;
+    }
+}
+
+function createErrorsMsg(code, message) {
+    var resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
+    if (code != null) {
+        resultText += '<h4 class="alert-heading" style="text-align:left">Error: ' + code
                 + '</h4><p><div style="text-align:left">'
     } else {
-        resultText += '<h4 class="alert-heading">Error occurred!</h4><p>'
+        resultText += '<h4 class="alert-heading" style="text-align:left">Error occurred!</h4><p><div style="text-align:left">'
     }
-
-    if (typeof (resonseText.statusText) !== 'undefined') {
-        resultText += resonseText.statusText;
-    } else {
-        resultText += resonseText;
-    }
+    resultText += message;
     resultText += '</div></p></div>';
     return resultText
+}
+
+function getErrorMsg(resonseText) {
+
+    if (typeof (resonseText.statusText) !== 'undefined') {
+        var message = resonseText.statusText;
+    } else {
+        var message = resonseText;
+    }
+    if (typeof (resonseText.status) !== 'undefined') {
+        var code = resonseText.status
+    } else {
+        var code = null
+    }
+    return createErrorsMsg(resonseText.status,message);
 }
 
 function formEvent(element, event, uri, contentid, doRefresh, refreshContainer,
@@ -39,19 +73,14 @@ function formSubmit(formElement, event, modalID, uri, doRefresh,
 
 function genericFormSubmit(formElement, event, modalID, contentid, uri,
         doRefresh, refreshContainer, refreshUrl) {
-    // setup some local variables
-    form = $(formElement);
-    // let's select and cache all the fields
-    inputs = form.find("input, select, button, textarea");
-    // serialize the data in the form
-    //serializedData = form.serialize();
-    formData = new FormData(form[0]);
+    var form = $(formElement);
+    var inputs = form.find("input, select, button, textarea");
+    var formData = new FormData(form[0]);
 
-    // let's disable the inputs for the duration of the ajax request
+    //disable the inputs
     inputs.prop("disabled", true);
 
-    // fire off the request
-    request = $.ajax({
+    var request = $.ajax({
         url : uri,
         type : "post",
         data : formData,
@@ -60,8 +89,18 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
      timeout: 30000 //3secs
     });
 
-    // callback handler that will be called on success
-    request.done(function(responseText, textStatus, XMLHttpRequest) {
+    request.error(function(response, textStatus, XMLHttpRequest) {
+        var message = getResponseConent(response);
+        if (modalID) {
+            $('#' + modalID + 'body').html(resultText);
+        } else {
+
+            $('#' + contentid + 'Errors').html(resultText);
+        }
+    });
+    
+    request.success(function(responseText, textStatus, XMLHttpRequest) {
+        var message = getResonseTextContent(responseText);
         if (responseText.match(/^<!--OK--/gi)) {
             if (modalID) {
                 $("#" + modalID).modal('hide');
@@ -77,31 +116,25 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
 
             }
         } else {
-            if (responseText.match(/^<!--PostError-->/gi)) {
-                resultText = responseText;
+            if (responseText.match(/^<!--Error-->/gi)) {
+                var resultText = createErrorsMsg(null, responseText);
+                form.prepend(resultText);
+                
             } else {
-                resultText = getErrorMsg(responseText)
-            }
-            if (modalID) {
-                $("#" + modalID + "body").html(resultText);
-            } else {
-                $("#" + refreshContainer + "").html(resultText);
+                if (responseText.match(/^<!--PostError-->/gi)) {
+                    var resultText = responseText;
+                } else {
+                    var resultText = getErrorMsg(responseText);
+                } 
+                if (modalID) {
+                    $("#" + modalID + "body").html(resultText);
+                } else {
+                    $("#" + refreshContainer + "").html(resultText);
+                }
             }
         }
     });
 
-    // callback handler that will be called on failure
-    request.fail(function(responseText, textStatus, XMLHttpRequest) {
-        resultText = getErrorMsg(responseText)
-        if (modalID) {
-            $('#' + modalID + 'body').html(resultText);
-        } else {
-
-            $('#' + contentid + 'Errors').html(resultText);
-        }
-    });
-    // callback handler that will be called regardless
-    // if the request failed or succeeded
     request.always(function() {
         // reenable the inputs
         inputs.prop("disabled", false);
@@ -114,103 +147,89 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
 function loadContent(contentid, url) {
     //Append new div to content
     if (contentid.match(/Hidden$/)) {
-        hiddenDiv = contentid;
+        var hiddenDiv = contentid;
     } else {
-        hiddenDiv = getHiddenDivID(contentid, contentid);
+        var hiddenDiv = getHiddenDivID(contentid, contentid);
     }
     if ((hiddenDiv) && (url)) {
         $("#" + hiddenDiv).html(
                 '<img src="/img/ajax-loader.gif" alt="loading"/> ');
         // load Content
-        $.ajax({
-                    url : url,
-                     timeout: 30000, //3secs
-                    success : function(response) {
-                        if (response.match(/^(<HTML>)|(<html>)/)) {
-                            $("#main").html(response);
-                        } else {
-                            $("#" + hiddenDiv).html(response);
-                        }
-
-                    },
-                    error : function(response, type, message) {
-                        $("#" + hiddenDiv)
-                                .html(
-                                        '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">'
-                                                + type
-                                                + '</h4><p>'
-                                                + message
-                                                + '</p></div>');
-                    }
-
-                });
+        var request = $.ajax({
+            url : url,
+         timeout: 30000 //3secs
+        });
+        
+        request.error(function(response, textStatus, XMLHttpRequest) {
+            var message = getResponseConent(response);
+            $("#" + hiddenDiv).html(message);
+        });
+        request.success(function(responseText, textStatus, XMLHttpRequest) {
+            var message = getResonseTextContent(responseText);
+            $("#" + hiddenDiv).html(message);
+        });
     }
 }
 
 function loadNewTab(pk, id, url, reload, title) {
     // getTabID
-    tabID = id.replace("TabContent", "");
+    var tabID = id.replace("TabContent", "");
     // deactivate Tabs
     // deactivateActiveOne
     $('#' + tabID).find("li").each(function() {
-        $(this).attr('class', '');
+        $(this).attr('class', 'dropdown');
     });
     // check if element exists
     if ($('#' + tabID + pk + 'LI').length) {
-        $('#' + tabID + pk + 'LI').attr('class', 'active');
+        $('#' + tabID + pk + 'LI').attr('class', 'dropdown active');
     } else {
         // createTab
         var keyValue = tabID+pk
         var tab = $("<li/>")
         .attr("id", keyValue +'LI')
-        .attr("class", 'active');
+        .attr("class", 'dropdown active');
         var link = $('<a/>')
         .attr("href", '#')
-        
-        var button1 = $('<div/>')
-        .attr("class","btn btn-link")
-        .attr("id", keyValue)
+        .attr("class", 'dropdown-toggle active')
+        .attr("data-toggle", 'dropdown')
         .attr("src", url)
-        .html(title);
-        
+        .attr("onclick", '#')
+        .attr("id", keyValue)
+        .html(title+'<span class="caret"></span>');
         if (reload) {
-            button1.attr("onclick", 'loadTabLi(this.id, true)');
+            link.attr("onclick", 'loadTabLi(this.id, true)');
         } else {
-            button1.attr("onclick", 'loadTabLi(this.id, false)');
+              link.attr("onclick", 'loadTabLi(this.id, false)');
         }
-        link.append(button1);
-        
+        var dropdown = $('<ul/>')
+            .attr("class", 'dropdown-menu')
+            .attr("role", 'menu');
         if (!reload) {
-            var reload = $('<div/>')
-            .attr("class", 'close')
-            .attr("title", 'Reloads this Tab')
-            .attr("type", 'button')
-            .attr("onclick", 'loadTabLi("'+keyValue+'", true);')
-            .html('&nbsp;&#x21bb;');
-            link.append(reload);
-            
+            var menuItem = $('<li/>')
+            var reload =  $('<a/>')
+            .attr("href", '#')
+            .attr("tabindex", '-1')
+            .attr("onclick", "loadTabLi('"+keyValue+"', true);")
+            .html('Reload');
+            menuItem.append(reload);
+            dropdown.append(menuItem);
         }
-        
-        
-        var button = $('<div/>')
-        .attr("class", 'close')
-        .attr("title", 'Remove this Tab')
-        .attr("type", 'button')
+        var menuItem2 = $('<li/>')
+        var close = $('<a/>')
+        .attr("href", '#')
+        .attr("tabindex", '-1')
         .attr("onclick", 'closeTab(\'' + tabID + '\',\'' + tabID + pk + 'LI\');')
-        .html('&nbsp;&times;');
-        link.append(button);
+        .html('Close');
+        menuItem2.append(close);
+        dropdown.append(menuItem2);
+
         tab.append(link);
+        tab.append(dropdown);
         
         $("#" + tabID).append(tab);
     }
     // load Content
     loadContent(id, url);
-}
-
-function loadTabFromPaginator(pk, id, url, tabid) {
-    // Not done yet
-    // TODO: jojo do ass nach fill
-    loadTab(url, tabid);
 }
 
 function closeTab(tabulatorID, tabToCloseID) {
@@ -228,7 +247,7 @@ function closeTab(tabulatorID, tabToCloseID) {
     // goback to first tab
     $('#' + tabulatorID).find('a').each(function() {
         // loadfirst tab
-        url = $(this).attr('src');
+        var url = $(this).attr('src');
         var firstID = ''
         $(this).find('div').each(function(){
             firstID = this.id;
@@ -244,26 +263,29 @@ function closeTab(tabulatorID, tabToCloseID) {
 function activateLi(id) {
     // deactivateActiveOne
     $('#' + id + 'LI').parent().find("li").each(function() {
-        $(this).attr('class', '');
+        $(this).attr('class', 'dropdown');
     });
     // activate tab
-    $('#' + id + 'LI').attr('class', 'active');
+    $('#' + id + 'LI').attr('class', 'dropdown active');
 }
 
 function loadTab(url, id) {
     activateLi(id);
-    parentName = $('#' + id + 'LI').parent().attr('id');
+    var parentName = $('#' + id + 'LI').parent().attr('id');
     loadContent(parentName + 'TabContent', url);
 }
 
 function findAndLoadActiveLi(id, contentID) {
     $('#' + id).find("li").each(function() {
-        var className = $(this).attr('class');
-        if (className == 'active') {
-            $(this).find("a").each(function() {
-                url = $(this).attr('src');
-                loadContent(contentID, url);
-            });
+        var item = $(this);
+        var className = item.attr('class');
+        if (className) {
+            if (className.match(/active/i)) {
+                item.find("a").each(function() {
+                    url = $(this).attr('src');
+                    return loadContent(contentID, url);
+                });
+            }
         }
     })
 }
@@ -271,7 +293,7 @@ function findAndLoadActiveLi(id, contentID) {
 function hideHidden(contentID) {
     $('#' + contentID).children('div').each(function() {
         if (this.id.match(/Hidden$/)) {
-            $(this).css("display", "none");
+            return $(this).css("display", "none");
         }
     });
 }
@@ -282,7 +304,7 @@ function getHiddenDivID(id, contentID) {
     hideHidden(contentID);
     var hiddenID =   id + 'Hidden';
     var parentDiv = $('#' + contentID);
-    parentParend = parentDiv.parent();
+    var parentParend = parentDiv.parent();
     //heck if one is existing and then show it else
     parentDiv.children('div').each(function() {
         if (this.id == hiddenID) {
@@ -308,7 +330,7 @@ function getHiddenDivID(id, contentID) {
 function loadToolbarLi(id, contentID, reload) {
 
     activateLi(id);
-    url = $('#' + id).attr('src');
+    var url = $('#' + id).attr('src');
     hideHidden(contentID + 'Hidden');
     if (reload) {
         loadContent(contentID, url);
@@ -325,125 +347,46 @@ function loadToolbarLi(id, contentID, reload) {
 }
 
 function loadTabLi(id, reload) {
-    obj = $("#" + id + "LI");
-    ul = obj.closest('ul');
-    parentName = ul.get(0).id;
+    var obj = $("#" + id + "LI");
+    var ul = obj.closest('ul');
+    var parentName = ul.get(0).id;
     parentName = parentName.replace(/\uFFFD/g, '');
     loadToolbarLi(id, parentName + "TabContent", reload);
 }
 
-function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
-        refreshContentID, refreshContentUrl) {
-    $('#' + id).modal('show');
-    loadContent('' + id + 'body', contentUrl);
-    $('#' + id + 'Label').html(title);
-    if (postUrl) {
-        $("#" + id + "Form").unbind('submit');
-        $("#" + id + "Form").submit(function(event) {
-
-            // setup some local variables
-            form = $('#' + id + 'Form');
-            // let's select and cache all the fields
-            inputs = form.find("input, select, button, textarea");
-            // serialize the data in the form
-            serializedData = form.serialize();
-
-            // magic to get the button value
-            name = event.originalEvent.explicitOriginalTarget.name;
-            if (name) {
-                value = event.originalEvent.explicitOriginalTarget.value;
-                serializedData += '&' + name + '=' + value;
-            }
-
-            // let's disable the inputs for the duration of the ajax request
-            inputs.prop("disabled", true);
-
-            // fire off the request
-            request = $.ajax({
-                url : postUrl,
-                type : "post",
-                data : serializedData
-            });
-
-            // callback handler that will be called on success
-            request.done(function(responseText, textStatus, XMLHttpRequest) {
-                if (responseText.match(/^<!--OK--/gi)) {
-                    $('#' + id).modal("hide");
-                    // refrehshPage & container if needed
-                    if (refresh) {
-                        loadContent(refreshContentID, refreshContentUrl);
-                    }
-                    // workaround---
-                    $('.modal-backdrop').remove();
-                    document.documentElement.style.overflow = "auto";
-                    document.body.style.marginRight = '0px';
-                } else {
-                    if (responseText.match(/^<!--PostError-->/gi)) {
-                        resultText = responseText;
-                    } else {
-                        resultText = getErrorMsg(responseText)
-                    }
-                    $("#'+id+'body").html(resultText);
-                }
-            });
-
-            // callback handler that will be called on failure
-            request.fail(function(responseText, textStatus, XMLHttpRequest) {
-                resultText = getErrorMsg(responseText)
-                $("#" + id + "body").html(resultText);
-            });
-            // callback handler that will be called regardless
-            // if the request failed or succeeded
-            request.always(function() {
-                // reenable the inputs
-                inputs.prop("disabled", false);
-            });
-            // prevent default posting of form
-            event.preventDefault();
-        });
-        $('#' + id + 'Footer')
-                .html(
-                        '<input class="btn btn-primary" value="'
-                                + 'Save changes" type="submit"><button class="btn btn-default" data-'
-                                + 'dismiss="modal">Close</button>');
-    } else {
-        $('#' + id + 'Footer').html(
-                '<button class="btn btn-default" data-dismiss="'
-                        + 'modal">Close</button>');
-    }
-}
 
 function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
         doCloseTab, tabID, tabToClose) {
-    $.ajax({
+
+    
+    var request = $.ajax({
         url : url,
-        error : function(response) {
-            if (response.match(/^(<HTML>)|(<html>)/)) {
-                $("#main").html(response);
-            } else {
-                alert(response.responseText);
-            }
-        },
-        success : function(response) {
-            if (response.match(/^(<HTML>)|(<html>)/)) {
-                $("#main").html(response);
-            } else {
-                if (response.match(/^<!--OK--/gi)) {
-                    // do refresh
-                    if (refreshContent) {
-                        loadContent(refreshContainer, refreshUrl);
-                    } else {
-                        if (doCloseTab) {
-                            closeTab(tabID, tabToClose);
-                        }
-                    }
-                } else {
-                    alert('An error occured:\n' + response);
-                }
-            }
-        },
      timeout: 30000 //3secs
     });
+    request.error(function(response, textStatus, XMLHttpRequest) {
+        var message = getResponseConent(response);
+        alert(message);
+    });
+    request.success(function(responseText, textStatus, XMLHttpRequest) {
+        var message = getResonseTextContent(responseText);
+        if (message.match(/^<!--OK--/gi)) {
+            // do refresh
+            if (refreshContent) {
+                loadContent(refreshContainer, refreshUrl);
+            } else {
+                if (doCloseTab) {
+                    closeTab(tabID, tabToClose);
+                }
+            }
+        } else {
+            if (message.match(/^<!--Error-->/gi)) {
+                var startPos = message.lastIndexOf('>');
+                message = message.substring(startPos+1);
+            }
+            alert('Error:\n' + message);
+        }
+    });
+
 }
 
 function dialogCall(url, refreshContainer, refreshUrl) {

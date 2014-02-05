@@ -42,49 +42,6 @@ class ObjectsView(Ce1susBaseView):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
-      # if event has objects
-      labels = [{'identifier':'#'},
-                {'shared_icon':'S'},
-                {'key':'Type'},
-                {'gui_value':'Value'},
-                {'ioc_icon': 'IOC'}]
-
-      # mako will append the missing url part
-      paginator_options = PaginatorOptions(('/events/event/objects/'
-                                           + 'objects/{0}/%(object_id)s/').format(
-                                                                        event_id),
-                                        'eventTabs{0}TabContent'.format(event_id))
-
-      # mako will append the missing url part
-      paginator_options.add_option('MODAL',
-                                 'VIEW',
-                                 ('/events/event/attribute/'
-                                  + 'view/{0}/%(object_id)s/').format(event_id),
-                                 modal_title='View Attribute')
-      paginator_options.add_option('MODAL',
-                                 'CONFIG',
-                                 ('/events/event/bit_value/set_attribute_'
-                                          + 'properties/{0}/%(object_id)s/'
-                                          ).format(event_id),
-                                modal_title='Attribute Properties',
-                                post_url=('/events/event/bit_value/modify_attribute_'
-                                          + 'properties'
-                                          ).format(event_id),
-                                 refresh=True)
-      # mako will append the missing url part
-      paginator_options.add_option('DIALOG',
-                                 'REMOVE',
-                                 ('/events/event/attribute/remove_attribute?'
-                                + 'event_id={0}&attribute_id=').format(event_id),
-                                 refresh=True)
-      # will be associated in the view!!! only to keep it simple!
-      paginator = Paginator(items=list(),
-                            labels_and_property=labels,
-                            paginator_options=paginator_options)
-
-      paginator.add_td_style('sharedIcon', css='width: 5px;', use_raw_html=True)
-      paginator.add_td_style('iocIcon', css='width: 5px;', use_raw_html=True)
-      paginator.max_column_length = 90
       # fill dictionary of attribute definitions but only the needed ones
 
       try:
@@ -173,8 +130,7 @@ class ObjectsView(Ce1susBaseView):
       if not valid:
           self._get_logger().info('Event is invalid')
           obj_definitions = self.objects_controller.get_cb_object_definitions()
-          return (self._return_ajax_post_error()
-                            + self._render_template('/events/event/objects/objectModal.html',
+          return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
                                                     obj_definitions=obj_definitions,
                                                     event_id=event_id,
                                                     object=obj))
@@ -228,8 +184,7 @@ class ObjectsView(Ce1susBaseView):
       if not valid:
           self._get_logger().info('Event is invalid')
           obj_definitions = self.objects_controller.get_cb_object_definitions()
-          return (self._return_ajax_post_error()
-                            + self._render_template('/events/event/objects/objectModal.html',
+          return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
                                                     obj_definitions=obj_definitions,
                                                     event_id=event_id,
                                                     object=obj))
@@ -282,7 +237,7 @@ class ObjectsView(Ce1susBaseView):
                     set_event_parent=None):
     try:
       if set_event_parent is None and not parent_object_id:
-        return self._return_ajax_post_error() + 'Please select someting before saving.'
+        return self._return_ajax_error('Please select someting before saving.')
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       obj = self.objects_controller.get_by_id(object_id)
@@ -301,7 +256,7 @@ class ObjectsView(Ce1susBaseView):
     """
     try:
       event = self.objects_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
+      self._check_if_event_owner(event)
       user = self._get_user()
       obj = self.objects_controller.get_by_id(object_id)
       self.objects_controller.remove_object(user, event, obj)

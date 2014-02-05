@@ -15,6 +15,7 @@ from ce1sus.web.views.base import Ce1susBaseView
 from ce1sus.controllers.events.events import EventsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
+from dagr.controllers.base import ControllerException
 
 
 class EventsView(Ce1susBaseView):
@@ -43,6 +44,13 @@ class EventsView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    user = self._get_user()
-    events = self.events_controller.get_user_events(user, limit, offset)
-    return self._render_template('/events/recent.html', events=events)
+
+    try:
+      user = self._get_user()
+      events = self.events_controller.get_user_events(user, limit, offset)
+      return self._render_template('/events/recent.html',
+                                   events=events,
+                                   url='/events/event/view',
+                                   tab_id='eventsTabTabContent')
+    except ControllerException as error:
+      return self._render_error_page(error)

@@ -24,7 +24,7 @@
     else:
       style = ''
     %>
-    <tr onclick="loadNewTab('${event.identifier}', 'eventsTabTabContent', '/events/event/view/${event.identifier}', true, 'Event #${event.identifier}');">
+    <tr onclick="loadNewTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', true, 'Event #${event.identifier}');">
     <td style="${style}"><%call expr="messages_and_text.object_to_html(event.identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(event.title, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(event.analysis, shorten_to=100,use_plain_text=False)"/></td>

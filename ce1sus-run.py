@@ -7,10 +7,6 @@ from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
 from dagr.web.helpers.webexceptions import ErrorHandler
 from ce1sus.common.system import System
-
-from dagr.helpers.ldaphandling import LDAPHandler
-from dagr.helpers.rt import RTTickets
-# from ce1sus.sanity import SantityChecker
 from dagr.helpers.mailer import Mailer
 
 
@@ -24,7 +20,13 @@ from ce1sus.web.views.event.comments import CommentsView
 from ce1sus.web.views.common.bitvalue import BitValueView
 from ce1sus.web.views.event.attributes import AttributesView
 from ce1sus.web.views.event.groups import GroupsView
-
+from ce1sus.web.views.admin.index import AdminView
+from ce1sus.web.views.admin.attributes import AdminAttributeView
+# from ce1sus.web.views.admin.groups import AdminGroupView
+from ce1sus.web.views.admin.objects import AdminObjectsView
+# from ce1sus.web.views.admin.subgroups import AdminSubGroupView
+# from ce1sus.web.views.admin.user import AdminUserView
+from ce1sus.web.views.admin.validation import AdminValidationView
 
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
@@ -55,20 +57,26 @@ def bootstrap():
 
   # load config file
   config = Configuration(ce1susConfigFile)
+  load_rest_api = config.get('ce1sus', 'enablerestapi', default_value=False)
 
   # Setup logger
   logger = Log(config)
-  logger.get_logger("run").debug("Loading System...")
+  logger.get_logger('BootStrap').debug("Loading System...")
 
   system = System(config)
+  logger.get_logger('BootStrap').debug("Performing System checks...")
   system.perform_web_checks()
+  if load_rest_api:
+    logger.get_logger('BootStrap').debug("Performing REST API checks...")
+    system.perform_rest_api_startup_checks()
+  system.close()
 
-  logger.get_logger("run").debug("Loading ErrorHandler...")
+  logger.get_logger('BootStrap').debug("Loading ErrorHandler...")
   ErrorHandler(config)
 
 
 
-  logger.get_logger("run").debug("Loading Views...")
+  logger.get_logger('BootStrap').debug("Loading Views...")
   # Load 'Modules'
   cherrypy.tree.mount(IndexView(config), '/')
   cherrypy.tree.mount(EventsView(config), '/events')
@@ -79,58 +87,19 @@ def bootstrap():
   cherrypy.tree.mount(BitValueView(config), '/events/event/bit_value')
   cherrypy.tree.mount(AttributesView(config), '/events/event/attribute')
   cherrypy.tree.mount(GroupsView(config), '/events/event/groups')
+  cherrypy.tree.mount(AdminView(config), '/admin')
+  # cherrypy.tree.mount(AdminUserView(config), '/admin/users')
+  # cherrypy.tree.mount(AdminGroupView(config), '/admin/groups')
+  cherrypy.tree.mount(AdminObjectsView(config), '/admin/objects')
+  cherrypy.tree.mount(AdminAttributeView(config), '/admin/attributes')
+  # cherrypy.tree.mount(AdminSubGroupView(config), '/admin/subgroups')
+  cherrypy.tree.mount(AdminValidationView(config), '/admin/validation')
 
-  """
-  Mailer(ce1susConfigFile)
-
-
-  Log.getLogger("run").debug("Loading Configuration file")
-  config =
-
-  MakoHandler(ce1susConfigFile)
-  Log.getLogger("run").debug("Loading Protector")
-  Protector(ce1susConfigFile)
-  Log.getLogger("run").debug("Loading RT")
-  RTTickets(ce1susConfigFile)
-  Log.getLogger("run").debug("Loading WebCfg")
-  WebConfig(ce1susConfigFile, 'ce1sus')
-  Log.getLogger("run").debug("Loading Ldap")
-  LDAPHandler(ce1susConfigFile)
-
-  # add controllers
-  Log.getLogger("run").debug("Adding controllers")
-  Log.getLogger("run").debug("Adding index")
-  cherrypy.tree.mount(IndexController(), '/')
-  Log.getLogger("run").debug("Adding admin")
-  cherrypy.tree.mount(AdminController(), '/admin')
-  Log.getLogger("run").debug("Adding admin/users")
-  cherrypy.tree.mount(UserController(), '/admin/users')
-  Log.getLogger("run").debug("Adding admin groups")
-  cherrypy.tree.mount(GroupController(), '/admin/groups')
-  Log.getLogger("run").debug("Adding admin objects")
-  cherrypy.tree.mount(ObjectController(), '/admin/objects')
-  Log.getLogger("run").debug("Adding admin attributes")
-  cherrypy.tree.mount(AttributeController(), '/admin/attributes')
-  Log.getLogger("run").debug("Adding events")
-  cherrypy.tree.mount(EventsController(), '/events')
-  Log.getLogger("run").debug("Adding events event")
-  cherrypy.tree.mount(EventController(), '/events/event')
-  Log.getLogger("run").debug("Adding events search")
-  cherrypy.tree.mount(SearchController(), '/events/search')
-  Log.getLogger("run").debug("Adding events event object")
-  cherrypy.tree.mount(ObjectsController(), '/events/event/objects')
-  Log.getLogger("run").debug("Adding events event groups")
-  cherrypy.tree.mount(GroupsController(), '/events/event/groups')
-  Log.getLogger("run").debug("Adding events event attribute")
-  cherrypy.tree.mount(AttributesController(), '/events/event/attribute')
-  Log.getLogger("run").debug("Adding events event comment")
-  cherrypy.tree.mount(CommentsController(), '/events/event/comment')
-  cherrypy.tree.mount(SubGroupController(), '/admin/subgroups')
-  cherrypy.tree.mount(ValidationController(), '/admin/validation')
-  cherrypy.tree.mount(BitValueController(), '/events/event/bitValue')
-  # RESTFoo
-  cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
-  """
+  if load_rest_api:
+    logger.get_logger('BootStrap').debug("Loading Rest...")
+    # cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
+  else:
+    logger.get_logger('BootStrap').debug("Loading Rest skipped. Disabled in config")
 
 if __name__ == '__main__':
 

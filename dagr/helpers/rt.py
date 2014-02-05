@@ -11,25 +11,44 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.config import Configuration
 from rtkit.resource import RTResource
 from rtkit.authenticators import CookieAuthenticator
 from rtkit.errors import RTResourceError
-from dagr.helpers.classes.ticketsystem import TicketSystemBase, Ticket, \
-                                    NoResponseException
 
 
-class RTTickets(TicketSystemBase):
+class NoResponseException(Exception):
+  """
+  No response exception
+  """
+  pass
+
+
+# pylint: disable=R0903,R0902
+class Ticket(object):
+  """
+  Ticket container class.
+  """
+  def __init__(self, identifier):
+    self.identifier = identifier
+    self.title = None
+    self.url = None
+    self.queue = None
+    self.owner = None
+    self.creator = None
+    self.status = None
+    self.requestors = None
+    self.created = None
+    self.lastUpdated = None
+    self.resolved = 'Definitely not resolved'
+
+
+class RTTickets(object):
   """Container class for RTTickets"""
-  def __init__(self, config_file):
-    TicketSystemBase.__init__(self)
-    self.__config_section = Configuration(config_file, 'RTHelper')
-    self.__rtUser = self.__config_section.get('username')
-    self.__rtPwd = self.__config_section.get('password')
-    self.__rtUrl = self.__config_section.get('url')
-    self.__resource = RTResource(self.__rtUrl + 'REST/1.0/',
-                                 self.__rtUser,
-                                 self.__rtPwd,
+  def __init__(self, url, usr, pwd):
+    self.__url = url
+    self.__resource = RTResource(url + 'REST/1.0/',
+                                 usr,
+                                 pwd,
                                  CookieAuthenticator)
 
   def getAllTickets(self):
@@ -43,7 +62,7 @@ class RTTickets(TicketSystemBase):
         for textList in response.parsed:
           for ticketID, ticketTitle in textList:
             ticket = Ticket(ticketID)
-            ticket.url = (self.__rtUrl + 'Ticket/Display.html?id='
+            ticket.url = (self.__url + '/Ticket/Display.html?id='
                                 + unicode(ticketID, 'utf-8', errors='replace'))
             ticket.title = unicode(ticketTitle, 'utf-8', errors='replace')
             ticketList.append(ticket)
@@ -55,14 +74,14 @@ class RTTickets(TicketSystemBase):
 
   def getTicketByID(self, identifier):
     try:
-      response = self.__resource.get(path='ticket/' + identifier + '/show')
+      response = self.__resource.get(path='/ticket/' + identifier + '/show')
       if len(response.parsed) > 0:
         rsp_dict = {}
         for r in response.parsed:
           for t in r:
             rsp_dict[t[0]] = unicode(t[1], 'utf-8', errors='replace')
         ticket = Ticket(identifier)
-        ticket.url = self.__rtUrl + 'Ticket/Display.html?id=' + identifier
+        ticket.url = self.__url + '/Ticket/Display.html?id=' + identifier
         ticket.title = unicode(rsp_dict['Subject'], 'utf-8', errors='replace')
         ticket.queue = unicode(rsp_dict['Queue'], 'utf-8', errors='replace')
         ticket.owner = unicode(rsp_dict['Owner'], 'utf-8', errors='replace')
@@ -84,4 +103,4 @@ class RTTickets(TicketSystemBase):
       raise NoResponseException(e)
 
   def getBaseTicketUrl(self):
-    return self.__rtUrl + '/Ticket/Display.html?id='
+    return self.__url + '/Ticket/Display.html?id='

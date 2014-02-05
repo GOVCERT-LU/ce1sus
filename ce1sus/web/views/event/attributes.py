@@ -102,18 +102,32 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
-  def call_handler_get(self, action, event_id, attribute_id):
+  def call_handler_get(self, action, event_id=None, attribute_id=None, definition_id=None):
     """
     Renders the view for and additional handler get handler method
     """
     try:
       # Clear Session variable
-      event = self.attributes_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
-      attribute = self.attributes_controller.get_by_id(attribute_id)
-      user = self._get_user()
-      handler = attribute.definition.handler
-      return handler.render_gui_get(self._render_template, action, attribute, user)
+      attribute = None
+      definition = None
+      if event_id:
+        event = self.attributes_controller.get_event_by_id(event_id)
+        self._check_if_event_is_viewable(event)
+        if attribute_id:
+          attribute = self.attributes_controller.get_by_id(attribute_id)
+      if definition_id:
+        definition = self.attributes_controller.get_attribute_definition_by_id(definition_id)
+      else:
+        if attribute:
+          definition = attribute.definition
+      if definition:
+        user = self._get_user()
+        try:
+          return definition.handler.render_gui_get(self._render_template, action, attribute, user)
+        except HandlerException as error:
+          return self._return_ajax_error(self._get_error_message(error))
+      else:
+        raise ControllerException('Definition cannot be determined as attribute_id is empty and definition_id')
     except (ControllerException, HandlerException) as error:
       return self._render_error_page(error)
 
@@ -149,8 +163,7 @@ class AttributesView(Ce1susBaseView):
         if not valid:
           self._get_logger().info('Attributes are invalid')
           handler = attribute.definition.handler
-          return (self._return_ajax_post_error()
-                              + handler.render_gui_edit(self._render_template,
+          return self._return_ajax_post_error(handler.render_gui_edit(self._render_template,
                                                               attribute,
                                                               additional_attributes,
                                                               obj.bit_value.is_shareable))
@@ -188,9 +201,8 @@ class AttributesView(Ce1susBaseView):
       self._put_to_session('instertAttribute', None)
 
       event = self.attributes_controller.get_event_by_id(event_id)
-      # TODO: rethink who can delete
-      self._check_if_event_is_viewable(event)
+      self._check_if_event_owner(event)
       self.attributes_controller.remove_by_id(attribute_id)
       return self._return_ajax_ok()
     except ControllerException as error:
-      return self._return_ajax_post_error() + self._get_error_message(error)
+      return self._return_ajax_post_error(self._get_error_message(error))

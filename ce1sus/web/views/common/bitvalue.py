@@ -38,7 +38,7 @@ class BitValueView(Ce1susBaseView):
   def set_object_properties(self, event_id, object_id):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
+      self._check_if_event_owner(event)
       obj = self.bit_value_controller.get_object_by_id(object_id)
       return self.__generate_template(event_id, obj, True)
     except ControllerException as error:

@@ -11,200 +11,92 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.controllers.base import Ce1susBaseController
-import cherrypy
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                                                      ObjectDefinitionBroker
-from ce1sus.web.helpers.protection import require, privileged, require_referer
-from dagr.db.broker import IntegrityException, BrokerException, \
-  ValidationException, NothingFoundException
+from ce1sus.controllers.base import Ce1susBaseController
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
+from dagr.db.broker import IntegrityException, BrokerException, ValidationException
 import types
+from dagr.controllers.base import ControllerException, SpecialControllerException
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 
 
 class ObjectController(Ce1susBaseController):
   """Controller handling all the requests for objects"""
 
-  def __init__(self):
-    Ce1susBaseController.__init__(self)
+  def __init__(self, config):
+    Ce1susBaseController.__init__(self, config)
     self.object_broker = self.broker_factory(ObjectDefinitionBroker)
 
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def index(self):
-    """
-    renders the object page
-
-    :returns: generated HTML
-    """
-
-    template = self._get_template('/admin/objects/objectBase.html')
-
-    return self.clean_html_code(template.render())
-
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def left_content(self):
-    """
-    renders the left content of the object index page
-
-    :returns: generated HTML
-    """
-    template = self._get_template('/admin/objects/objectLeft.html')
-    objects = self.object_broker.get_all()
-    return self.clean_html_code(template.render(objects=objects))
-
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def right_content(self, objectid=0, obj=None):
-    """
-    renders the right content of the object index page
-
-    :param objectid: The object id of the desired displayed object
-    :type objectid: Integer
-    :param obj: Similar to the previous attribute but prevents
-                      additional loadings
-    :type obj: ObjectDefinition
-
-    :returns: generated HTML
-    """
-    template = self._get_template('/admin/objects/objectRight.html')
-    if obj is None:
-      try:
-        obj = self.object_broker.get_by_id(objectid)
-      except NothingFoundException:
-        obj = None
-
-    else:
-      obj = obj
-    remaining_attributes = None
-    attributes = None
-    if not obj is None:
-      remaining_attributes = self.object_broker.get_attributes_by_object(
-                                                obj.identifier, False)
-      attributes = obj.attributes
-    return self.clean_html_code(template.render(objectDetails=obj,
-                           remaining_attributes=remaining_attributes,
-                           objectAttributes=attributes))
-
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def add_object(self):
-    """
-    renders the add an object page
-
-    :returns: generated HTML
-    """
-    template = self._get_template('/admin/objects/objectModal.html')
-    return self.clean_html_code(template.render(object=None, errorMsg=None))
-
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def modify_object(self, identifier=None, name=None,
-                  description=None, action='insert', share=None):
-    """
-    modifies or inserts a object with the data of the post
-
-    :param identifier: The identifier of the object,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param name: The name of the object
-    :type name: String
-    :param description: The description of this object
-    :type description: String
-    :param action: action which is taken (i.error. edit, insert, remove)
-    :type action: String
-
-    :returns: generated HTML
-    """
-    template = self._get_template('/admin/objects/objectModal.html')
-    obj = self.object_broker.build_object_definition(identifier,
-                                                  name,
-                                                  description,
-                                                  action,
-                                                  share)
+  def get_all_object_definitions(self):
     try:
-      if action == 'insert':
-        self.object_broker.insert(obj)
-      if action == 'update':
-        self.object_broker.update(obj)
-      if action == 'remove':
-        self.object_broker.remove_by_id(obj.identifier)
-      return self._return_ajax_ok()
-    except IntegrityException as error:
-      self._get_logger().info('OperationError occurred: {0}'.format(error))
-      return 'Cannot delete this object. The object is still referenced.'
-    except ValidationException:
-      self._get_logger().info('Object is invalid')
-      return self._return_ajax_post_error() + self.clean_html_code(
-                                                        template.render(
-                                                                  object=obj))
+      return self.object_broker.get_all(ObjectDefinition.name.asc())
     except BrokerException as error:
-      self._get_logger().info('An unexpected error occurred: {0}'.format(error))
-      return "Error {0}".format(error)
+      self._raise_exception(error)
 
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def edit_object(self, objectid):
-    """
-    renders the edit an object page
-
-    :param objectid: The object id of the desired displayed object
-    :type objectid: Integer
-
-    :returns: generated HTML
-    """
-    template = self._get_template('/admin/objects/objectModal.html')
-    error_msg = None
+  def get_object_definitions_by_id(self, object_id):
     try:
-      obj = self.object_broker.get_by_id(objectid)
-    except BrokerException as e:
-      obj = None
-      self._get_logger().error('An unexpected error occurred: {0}'.format(e))
-      error_msg = 'An unexpected error occurred: {0}'.format(e)
-    return self.clean_html_code(template.render(object=obj, error_msg=error_msg))
+      return self.object_broker.get_by_id(object_id)
+    except BrokerException as error:
+      self._raise_exception(error)
 
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def edit_object_attributes(self, objectid, operation,
-                     object_attributes=None, remaining_attributes=None):
-    """
-    modifies the relation between a object and its attributes
+  def get_available_attributes(self, obj):
+    try:
+      return self.object_broker.get_attributes_by_object(obj.identifier, False)
+    except BrokerException as error:
+      self._raise_exception(error)
 
-    :param objectID: The objectID of the object
-    :type objectID: Integer
-    :param operation: the operation used in the context (either add or remove)
-    :type operation: String
-    :param remainingUsers: The identifiers of the users which the object is not
-                            attributed to
-    :type remainingUsers: Integer array
-    :param objectUsers: The identifiers of the users which the object is
-                       attributed to
-    :type objectUsers: Integer array
+  @staticmethod
+  def __handle_input(add_function, object_id, value):
+    if isinstance(value, types.StringTypes):
+      add_function(object_id, value, False)
+    else:
+      for attribute_id in value:
+        add_function(object_id, attribute_id, False)
 
-    :returns: generated HTML
-    """
+  def modify_object_attribute_relations(self, operation, object_id, remaining_attributes, object_attributes):
     try:
       if operation == 'add':
-        if not (remaining_attributes is None):
-          if isinstance(remaining_attributes, types.StringTypes):
-            self.object_broker.add_attribute_to_object(remaining_attributes,
-                                                   objectid)
-          else:
-            for attribute in remaining_attributes:
-              self.object_broker.add_attribute_to_object(attribute,
-                                                     objectid,
-                                                     False)
-            self.object_broker.do_commit()
+        ObjectController.__handle_input(self.object_broker.add_attribute_to_object, object_id, remaining_attributes)
       else:
-        #Note object_attributes may be a string or an array!!!
-        if not (object_attributes is None):
-          if isinstance(object_attributes, types.StringTypes):
-            self.object_broker.remove_attribute_from_object(object_attributes,
-                                                        objectid)
-          else:
-            for attribute in object_attributes:
-              self.object_broker.remove_attribute_from_object(attribute, objectid)
-            self.object_broker.do_commit()
-      return self._return_ajax_ok()
+        ObjectController.__handle_input(self.object_broker.remove_attribute_from_object, object_id, object_attributes)
+      self.object_broker.do_commit(True)
+    except IntegrityException as error:
+      raise SpecialControllerException(error)
     except BrokerException as error:
-      return "Error {0}".format(error)
+      self._raise_exception(error)
+
+  def populate_object(self, identifier, name, description, action, share):
+    try:
+      return self.object_broker.build_object_definition(identifier,
+                                                        name,
+                                                        description,
+                                                        action,
+                                                        share)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def insert_object_definition(self, obj):
+    try:
+      obj = self.object_broker.insert(obj)
+      return obj, True
+    except ValidationException as error:
+      return obj, False
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def update_object_definition(self, obj):
+    try:
+      obj = self.object_broker.update(obj)
+      return obj, True
+    except ValidationException as error:
+      return obj, False
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def remove_object_definition(self, obj):
+    try:
+      obj = self.object_broker.remove_by_id(obj.identifier)
+      return obj, True
+    except IntegrityException as error:
+      raise SpecialControllerException('Cannot delete this object. The object is still referenced.')
+    except BrokerException as error:
+      self._raise_exception(error)

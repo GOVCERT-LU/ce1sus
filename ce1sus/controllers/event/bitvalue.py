@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
@@ -71,28 +70,39 @@ class BitValueController(Ce1susBaseController):
       self._raise_exception(error)
 
   @staticmethod
-  def __set_shared(instance, share, validated='1'):
+  def __set_shared(instance, share):
 
     if share == '1':
       instance.bit_value.is_shareable = True
     else:
       instance.bit_value.is_shareable = False
+
+  @staticmethod
+  def __set_validated(instance, validated):
     if validated == '1':
       instance.bit_value.is_validated = True
     else:
       instance.bit_value.is_validated = False
 
-  def __unshare_object(self, obj):
-    obj = self.object_broker.get_by_id(obj_id)
-    BitValueController.__set_shared(obj, share, validated)
+  @staticmethod
+  def __set_share_object(obj, share):
+    BitValueController.__set_shared(obj, share)
+
+    if (obj.bit_value.is_shareable):
+      # TODO: If selected set all the attribute values to default
+      pass
+    else:
+      # if the value changed change also all share values of its attributes
+      for attribute in obj.attributes:
+        BitValueController.__set_shared(attribute, share)
 
   def set_object_values(self, user, event, obj_id, share, validated='1'):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, False)
       obj = self.object_broker.get_by_id(obj_id)
-      BitValueController.__set_shared(obj, share, validated)
-
+      BitValueController.__set_share_object(obj, share)
+      BitValueController.__set_validated(obj, validated)
       self.object_broker.update_object(user, obj, commit=False)
       self.object_broker.do_commit(True)
     except BrokerException as error:
@@ -104,7 +114,8 @@ class BitValueController(Ce1susBaseController):
       self.event_broker.update_event(user, event, False)
       attribute = self.attribute_broker.get_by_id(attr_id)
       self.object_broker.update_object(user, attribute.object, commit=False)
-      BitValueController.__set_shared(attribute, share, validated)
+      BitValueController.__set_shared(attribute, share)
+      BitValueController.__set_validated(attribute, validated)
       self.attribute_broker.update_attribute(user, attribute, False)
       self.attribute_broker.do_commit(True)
     except BrokerException as error:

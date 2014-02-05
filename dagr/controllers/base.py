@@ -18,8 +18,11 @@ class ControllerException(Exception):
   """
   Base exception for the controller api
   """
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
+
+
+class SpecialControllerException(ControllerException):
+  pass
 
 
 class NotImplementedException(ControllerException):

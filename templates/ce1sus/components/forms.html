@@ -91,7 +91,7 @@
 </div>
 </%def>
 
-<%def name="attributeForm(attribute,enabled,cbValues, cbHandlerValues)">
+<%def name="attribute_form(attribute,enabled,cb_values, cb_handler_values)">
 
 % if attribute is None:
   
@@ -99,8 +99,8 @@
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value='', enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Regular expression',name='regex',value='^.+$',enabled=enabled)"/>
-  <%call expr="labeled_input.labeled_combobox(label='ValueTable',name='classIndex',values=cbValues,enabled=enabled,has_empty=False,selected=1)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,has_empty=False,selected=0)"/>
+  <%call expr="labeled_input.labeled_combobox(label='ValueTable',name='class_index',values=cb_values,enabled=enabled,has_empty=False,selected=1)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Handler',name='handler_index',values=cb_handler_values,enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Relationable',name='relation',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Default Shareable',name='share',enabled=enabled,has_empty=False,selected=0)"/>
 % else:
@@ -112,8 +112,8 @@
   <%call expr="labeled_input.labeled_editbox(label='Checksum',name='',value=attribute.chksum,enabled=False)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=attribute.description,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Regular expression',name='regex',value=attribute.regex, enabled=enabled)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Value type',name='classIndex',values=cbValues,enabled=enabled,selected=attribute.classIndex,has_empty=False)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Handler',name='handlerIndex',values=cbHandlerValues,enabled=enabled,has_empty=False,selected=attribute.handlerIndex)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Value type',name='class_index',values=cb_values,enabled=enabled,selected=attribute.class_index,has_empty=False)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Handler',name='handler_index',values=cb_handler_values,enabled=enabled,has_empty=False,selected=attribute.handler_index)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Relationable',name='relation',enabled=enabled,has_empty=False,selected=attribute.relation)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Default Shareable',name='share',enabled=enabled,has_empty=False,selected=attribute.share)"/>
 % endif

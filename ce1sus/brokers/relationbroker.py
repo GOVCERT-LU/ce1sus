@@ -112,7 +112,11 @@ class RelationBroker(BrokerBase):
     """
     try:
       if unique_events:
-        querry = self.session.query(EventRelation).distinct(EventRelation.event_id, EventRelation.rel_event_id).filter(
+        querry = self.session.query(EventRelation).distinct(EventRelation.event_id,
+                                                            EventRelation.rel_event_id
+                                                            ).group_by(EventRelation.event_id,
+                                                                       EventRelation.rel_event_id
+                                                                       ).filter(
                         or_(EventRelation.event_id == event.identifier,
                             EventRelation.rel_event_id == event.identifier)
                         )

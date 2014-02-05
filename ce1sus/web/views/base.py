@@ -16,11 +16,33 @@ from dagr.web.views.base import BaseView
 from ce1sus.common.checks import check_if_event_is_viewable, check_viewable_message, is_event_owner
 
 
+SESSION_USER = '_cp_user'
+
+
+def privileged():
+  """
+  Condition that verifies if the user has the privileged right set
+
+  Note: Should only be used as condition for the require decorator
+  """
+  def check():
+    """
+      Checks if the user has the privileged right
+    """
+    # should not be done like this :P
+    session = getattr(cherrypy, 'session')
+    user = session.get(SESSION_USER, None)
+    if user:
+      return user.privileged
+    else:
+      return False
+  return check
+
+
 class Ce1susBaseView(BaseView):
   """
   Base class for ce1sus views
   """
-  SESSION_USER = '_cp_user'
 
   def __init__(self, config):
     BaseView.__init__(self, config)
@@ -56,7 +78,7 @@ class Ce1susBaseView(BaseView):
     :type user: User
 
     """
-    self._put_to_session(Ce1susBaseView.SESSION_USER, user)
+    self._put_to_session(SESSION_USER, user)
 
   def _get_user(self):
     """
@@ -64,7 +86,7 @@ class Ce1susBaseView(BaseView):
 
     :returns: User
     """
-    return self._get_from_session(Ce1susBaseView.SESSION_USER)
+    return self._get_from_session(SESSION_USER)
 
   def _get_authorized_events_cache(self):
     """
