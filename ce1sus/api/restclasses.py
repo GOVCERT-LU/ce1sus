@@ -24,7 +24,7 @@ import base64
 from os.path import basename
 
 
-def __instantiate_class(classname):
+def instantiate_class(classname):
   module = import_module('.restclasses', 'ce1sus.api')
   clazz = getattr(module, classname)
   # instantiate
@@ -89,7 +89,7 @@ def __populate_instance_by_dict(instance, dictionary, make_binary=True):
 
 
 def populate_classname_by_dict(clazz, dictionary, make_binary=True):
-  instance = __instantiate_class(clazz)
+  instance = instantiate_class(clazz)
   __populate_instance_by_dict(instance, dictionary, make_binary=make_binary)
   return instance
 
@@ -246,20 +246,6 @@ class RestEvent(RestClass):
     return result
 
 
-class RestComment(RestClass):
-
-  def __init__(self):
-    RestClass.__init__(self)
-    self.comment = None
-
-  def to_dict(self, full=False, with_definition=False):
-    result = dict()
-    result[self.__class__.__name__] = dict()
-    result[self.__class__.__name__]['comment'] = self.comment
-
-    return result
-
-
 class RestObject(RestClass):
 
   def __init__(self):
@@ -293,7 +279,6 @@ class RestObject(RestClass):
                                                with_definition=with_definition
                                                                        )
                                                             )
-        pass
     result[self.__class__.__name__]['share'] = u'{0}'.format(self.share)
     return result
 
