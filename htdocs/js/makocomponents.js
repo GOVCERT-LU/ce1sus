@@ -245,18 +245,18 @@ function closeTab(tabulatorID, tabToCloseID) {
     var hiddenDiv = getHiddenDivID(conentID, conentID);
     $('#'+hiddenDiv).html("");
     // goback to first tab
-    $('#' + tabulatorID).find('a').each(function() {
+    $('#' + tabulatorID).find('li').each(function() {
         // loadfirst tab
-        var url = $(this).attr('src');
-        var firstID = ''
-        $(this).find('div').each(function(){
-            firstID = this.id;
-            return;
+        var firstID = this.id;
+        //RemovesLI
+        var identifier = firstID.substr(0,firstID.length-2);
+        activateLi(identifier);
+        $(this).find('a').each(function(){
+            var url = $(this).attr('src');
+            return loadTab(url, identifier)
         });
-        loadTab(url,firstID);
+        
         return false;
-
-
     });
 }
 
