@@ -15,7 +15,6 @@ from ce1sus.web.views.base import Ce1susBaseView
 from ce1sus.controllers.event.event import EventController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from dagr.helpers.datumzait import datumzait
 from dagr.controllers.base import ControllerException

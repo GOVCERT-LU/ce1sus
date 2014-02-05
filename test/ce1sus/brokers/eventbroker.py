@@ -27,7 +27,7 @@ class TestEventBrokers(unittest.TestCase):
     self.group.identifier = long(666)
     self.group.name = 'TestGroup'
     self.group.shareTLP = long(0)
-    self.group.canDownload = long(1)
+    self.group.can_download = long(1)
     self.group.description = 'Description'
     self.group.email = 'a@a.com'
     self.group.usermails = long(1)
@@ -38,7 +38,7 @@ class TestEventBrokers(unittest.TestCase):
     self.user.email = 'a@a.com'
     self.user.password = 'fooPwd'
     self.user.privileged = 0
-    self.user.apiKey = None
+    self.user.api_key = None
     self.user.group_id = self.group.identifier
     self.user.default_group = self.group
     self.timeStamp = datetime.now()

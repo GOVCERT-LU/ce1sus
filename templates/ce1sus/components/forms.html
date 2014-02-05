@@ -1,43 +1,43 @@
 
 <%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
 
-<%def name="groupForm(group,enabled)">
+<%def name="group_form(group, cb_values, enabled)">
 % if group is None:
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Download files',name='download',enabled=enabled,has_empty=False)"/>
-  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,has_empty=True,selected=3)"/>
+  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_lvl',values=cb_values,enabled=enabled,has_empty=True,selected=3)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Send mails to users',name='usermails',enabled=enabled,has_empty=False)"/>
 % else:
   <input type="hidden" name="identifier" value="${group.identifier}">
   %if not group.identifier is None:
-    <%call expr="labeled_input.labeled_editbox(label='Identifier',name='groupID',value=group.identifier,enabled=False)"/>
+    <%call expr="labeled_input.labeled_editbox(label='Identifier',name='',value=group.identifier,enabled=False)"/>
   %endif
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=group.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=group.description,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Download files',name='download',enabled=enabled,has_empty=False,selected=group.can_download)"/>
-  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlpLvl',values=cbTLPValues,enabled=enabled,has_empty=True,selected=group.tlp_lvl)"/>
+  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_lvl',values=cb_values,enabled=enabled,has_empty=True,selected=group.tlp_lvl)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',enabled=enabled,value=group.email)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Send mails to users',name='usermails',enabled=enabled,has_empty=False,selected=group.usermails)"/>
 % endif
 </%def>
 
-<%def name="subgroupForm(subgroup,enabled)">
+<%def name="subgroup_form(subgroup,enabled)">
 % if subgroup is None:
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
 % else:
   <input type="hidden" name="identifier" value="${subgroup.identifier}">
   %if not subgroup.identifier is None:
-    <%call expr="labeled_input.labeled_editbox(label='Identifier',name='groupID',value=subgroup.identifier,enabled=False)"/>
+    <%call expr="labeled_input.labeled_editbox(label='Identifier',name='',value=subgroup.identifier,enabled=False)"/>
   %endif
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=subgroup.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=subgroup.description,enabled=enabled)"/> 
 % endif
 </%def>
 
-<%def name="objectForm(object,enabled)">
+<%def name="object_form(object,enabled)">
 % if object is None:
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value='', enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
@@ -78,10 +78,10 @@
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Priviledged',name='priv',enabled=enabled,has_empty=True,selected=user.privileged)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Disabled',name='disabled',enabled=enabled,has_empty=True,selected=user.disabled)"/>
   
-  %if user.hasAPIKey and not enabled:
-    <%call expr="labeled_input.labeled_editbox(label='APIKey',name='',value=user.apiKey,enabled=False)"/>
+  %if user.has_api_key and not enabled:
+    <%call expr="labeled_input.labeled_editbox(label='APIKey',name='',value=user.api_key,enabled=False)"/>
   %else:
-    <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=user.hasAPIKey)"/>
+    <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=user.has_api_key)"/>
   %endif
   <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cb_values,enabled=enabled,has_empty=False, selected=user.group_id)"/>
   <%call expr="labeled_input.labeled_editbox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>

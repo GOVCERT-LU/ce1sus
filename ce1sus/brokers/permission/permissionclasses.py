@@ -40,15 +40,15 @@ class User(BASE):
   last_login = Column('last_login', DateTime)
   email = Column('email', String)
   disabled = Column('disabled', Integer)
-  apiKey = Column('apikey', String)
+  api_key = Column('apikey', String)
   group_id = Column('group_id', Integer, ForeignKey('Groups.group_id'))
   default_group = relationship('Group',
                               primaryjoin='User.group_id==Group.identifier',
                               lazy='joined')
 
   @property
-  def hasAPIKey(self):
-    if self.apiKey is None:
+  def has_api_key(self):
+    if self.api_key is None:
       return 0
     else:
       return 1
@@ -87,10 +87,10 @@ class Group(BASE):
   identifier = Column('group_id', Integer, primary_key=True)
   name = Column('name', String)
   description = Column('description', String)
-  canDownload = Column('canDownlad', Integer)
+  can_download = Column('canDownlad', Integer)
   usermails = Column('usermails', Integer)
   email = Column('email', String)
-  tlpLvl = Column('tlplvl', Integer)
+  tlp_lvl = Column('tlplvl', Integer)
   subgroups = relationship('SubGroup', secondary='Subgroups_has_Groups',
                        back_populates='groups', cascade='all',
                             order_by="SubGroup.name",
@@ -111,7 +111,7 @@ class Group(BASE):
                                   withSpaces=True,
                                   withNonPrintableCharacters=True,
                                   withSymbols=True)
-    ObjectValidator.validateDigits(self, 'canDownload', minimal=0, maximal=1)
+    ObjectValidator.validateDigits(self, 'can_download', minimal=0, maximal=1)
     ObjectValidator.validateDigits(self, 'usermails', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
     return ObjectValidator.isObjectValid(self)

@@ -182,14 +182,14 @@ class UserBroker(BrokerBase):
 
     if apikey == '1':
       # generate key
-      user.apiKey = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))
+      user.api_key = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))
     return user
 
   def getUserByApiKey(self, apiKey):
     # check if api key exists
     try:
       result = self.session.query(User).filter(
-                       User.apiKey == apiKey).one()
+                       User.api_key == api_key).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with apikey :{0}'.format(

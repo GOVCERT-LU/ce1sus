@@ -22,9 +22,9 @@ from ce1sus.web.views.event.attributes import AttributesView
 from ce1sus.web.views.event.groups import GroupsView
 from ce1sus.web.views.admin.index import AdminView
 from ce1sus.web.views.admin.attributes import AdminAttributeView
-# from ce1sus.web.views.admin.groups import AdminGroupView
+from ce1sus.web.views.admin.groups import AdminGroupView
 from ce1sus.web.views.admin.objects import AdminObjectsView
-# from ce1sus.web.views.admin.subgroups import AdminSubGroupView
+from ce1sus.web.views.admin.subgroups import AdminSubGroupView
 from ce1sus.web.views.admin.user import AdminUserView
 from ce1sus.web.views.admin.validation import AdminValidationView
 
@@ -39,8 +39,6 @@ def bootstrap():
 
   # setup cherrypy
   #
-  # CherryPyHandler(basePath + '/config/cherrypy.conf')
-
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   cherrypyConfigFile = basePath + '/config/cherrypy.conf'
 
@@ -89,10 +87,10 @@ def bootstrap():
   cherrypy.tree.mount(GroupsView(config), '/events/event/groups')
   cherrypy.tree.mount(AdminView(config), '/admin')
   cherrypy.tree.mount(AdminUserView(config), '/admin/users')
-  # cherrypy.tree.mount(AdminGroupView(config), '/admin/groups')
+  cherrypy.tree.mount(AdminGroupView(config), '/admin/groups')
   cherrypy.tree.mount(AdminObjectsView(config), '/admin/objects')
   cherrypy.tree.mount(AdminAttributeView(config), '/admin/attributes')
-  # cherrypy.tree.mount(AdminSubGroupView(config), '/admin/subgroups')
+  cherrypy.tree.mount(AdminSubGroupView(config), '/admin/subgroups')
   cherrypy.tree.mount(AdminValidationView(config), '/admin/validation')
 
   if load_rest_api:

@@ -13,14 +13,14 @@ function getResponseConent(response) {
     } else {
         
         var message = response.responseText
-        //document.write(message); 
+        document.write(message); 
         return message;
     }
 }
 
 function getResonseTextContent(responseText) {
     if (responseText.match(/(<html)/i)) {
-        //document.write(responseText); 
+        document.write(responseText); 
         return responseText;
     } else {
         if (responseText.match(/^<!--Error-->/gi)) {

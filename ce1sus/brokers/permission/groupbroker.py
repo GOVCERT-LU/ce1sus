@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
+from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, IntegrityException
 import sqlalchemy.orm.exc
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
@@ -56,7 +56,6 @@ class GroupBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -79,7 +78,6 @@ class GroupBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -102,7 +100,6 @@ class GroupBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or user not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -137,27 +134,13 @@ class GroupBroker(BrokerBase):
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
-      ObjectConverter.setInteger(group, 'canDownload', download)
+      ObjectConverter.setInteger(group, 'can_download', download)
       ObjectConverter.setInteger(group, 'tlp_lvl', tlp_lvl)
       ObjectConverter.setInteger(group, 'usermails', usermails)
       group.description = cleanPostValue(description)
     return group
 
-  def get_all(self):
-    """
-    Returns all get_broker_class() instances
-
-    Note: raises a NothingFoundException or a TooManyResultsFound Exception
-
-    :returns: list of instances
-    """
-    try:
-      result = self.session.query(self.get_broker_class()
-                                  ).order_by(Group.name.asc()).all()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
-      raise BrokerException(error)
-
-    return result
+  def remove_by_id(self, group_id):
+    if group_id == 1 or group_id == '1':
+      raise IntegrityException('Cannot delete this group. The group is essential to '
+                  + 'the application.')

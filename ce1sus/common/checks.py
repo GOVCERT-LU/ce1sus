@@ -37,7 +37,7 @@ def __is_viewable(event, user):
 
   if not result:
     # check tlp level, this level is more priority
-    result = event.tlp.identifier >= user_default_group.tlpLvl
+    result = event.tlp.identifier >= user_default_group.tlp_lvl
     # check if the user belong to one of the common maingroups
     if not result:
         result = user_default_group in event.maingroups

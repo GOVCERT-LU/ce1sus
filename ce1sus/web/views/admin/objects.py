@@ -142,7 +142,6 @@ class AdminObjectsView(Ce1susBaseView):
     :returns: generated HTML
     """
 
-    template = self._get_template('/admin/objects/objectModal.html')
     try:
       obj = self.object_controller.populate_object(identifier,
                                                    name,
@@ -160,8 +159,8 @@ class AdminObjectsView(Ce1susBaseView):
       if valid:
         return self._return_ajax_ok()
       else:
-        return self._render_template('/admin/objects/objectModal.html',
-                                 object=obj)
+        return self._return_ajax_post_error(self._render_template('/admin/objects/objectModal.html',
+                                 object=obj))
     except SpecialControllerException as error:
       return self._return_ajax_error(error.message)
     except ControllerException as error:

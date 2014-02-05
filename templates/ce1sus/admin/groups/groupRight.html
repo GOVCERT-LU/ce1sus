@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*- 
 
-<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/> 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_form" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="tables" file="/ce1sus/components/tables.html"/> 
+
 
 </div>
 
 <!-- group details -->
 <h3>Group details:</h3>
-<%call expr="forms.groupForm(groupDetails, False)"/>
+<%call expr="forms.group_form(group, cb_values, False)"/>
 <div class="row">
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
-		% if not groupDetails is None:
+		% if not group is None:
 		<div class="btn-group">
 			<a href="#editGroupModal" role="button" class="btn  btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
-                    dialogCall('/admin/groups/modifyGroup?identifier=${groupDetails.identifier}&action=remove',
+                    dialogCall('/admin/groups/modify_group?identifier=${group.identifier}&action=remove',
                                'adminTabsTabContent',
                                '/admin/groups')}">
             Delete
@@ -29,52 +30,31 @@
 </div>
 <br/>
 <h4>SubGroupmanagment of this group:</h4>
-% if not groupDetails is None:
-<%call expr="baseForms.genericForm(id='editGroupUsers',url='/admin/groups/editGroupSubGroup',
-                               refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
-                               refreshContainer='groupRight')">
-<input type="hidden" name="groupID" value="${groupDetails.identifier}">
-<table border="0" cellpadding="5">
-  <tr>
-     <td>SubGroups <b>not</b> having this group:<BR /> 
-	     <select class="form-control" name="remainingSubGroups"
-	                  size="10" multiple="multiple"> 
-	     %if not remainingSubGroups is None:
-	       % for remsubgroup in remainingSubGroups:
-	           <option value="${remsubgroup.identifier}">${remsubgroup.name}</option> 
-	       % endfor
-	     %endif
-	     </select>
-     </td>
-     <td>
-       <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
-       <BR />
-       <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
-
-     </td>
-     <td>
-       Subgroups having this group:
-       <BR /> 
-       <select name="groupSubGroups" class="form-control"  size="10" multiple> 
-       %if not subgroups is None:
-         % for subgroup in subgroups:
-           <option value="${subgroup.identifier}">${subgroup.name}</option> 
-         % endfor
-       %endif
-       </select>
-     </td>
-  </tr>
-</table>
-</%call>
+% if not group is None:
+<%call expr="tables.add_remove_tables(id='editGroupSubgroups',
+                                      identifier=group.identifier,
+                                      identifier_name='Subgroup',
+                                      moving_name='Groups',
+                                      remaining=remaining_groups,
+                                      existing=group.subgroups,
+                                      attribute_name='name',
+                                      post_action='/admin/groups/edit_group_subgroups',
+                                      refresh_url='/admin/groups/right_content/{0}'.format(group.identifier),
+                                      refresh_container='{0}RightContent'.format(id),
+                                      enabled=True,
+                                      width=7
+                                      )"/>
 %endif
-%if not groupDetails is None:
-	<%call expr="baseForms.genericModalForm(modalID='editGroupModal',
-	                                    url='/admin/groups/modifyGroup',
-	                                    refreshUrl='/admin/groups/rightContent?groupid={0}'.format(groupDetails.identifier),
-	                                    refreshContainer='groupRight')">
-	<input type="hidden" name="action" value="update">
-	<%call expr="modals.saveButtonModal(id='editGroupModal',
-	                              title='Edit Group',
-	                              contentUrl='/admin/groups/editGroup/{0}'.format(groupDetails.identifier))"/>
-	</%call>
+
+
+%if not group is None:
+<%call expr="base_form.generic_modal_form(modal_id='editGroupModal',
+                                    url='/admin/groups/modify_group',
+                                    refresh_url='/admin/groups/right_content/{0}'.format(group.identifier),
+                                    refresh_container='GroupRightContent')">
+<input type="hidden" name="action" value="update">
+<%call expr="modals.save_button_modal(id='editGroupModal',
+                              title='Edit group',
+                              content_url='/admin/groups/edit_group/{0}'.format(group.identifier))"/>
+</%call>
 %endif

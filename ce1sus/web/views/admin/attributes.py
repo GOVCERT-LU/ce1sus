@@ -52,7 +52,7 @@ class AdminAttributeView(Ce1susBaseView):
       return self._render_template('/admin/common/leftContent.html',
                                    id=AdminAttributeView.ID,
                                    url_right_content='/admin/attributes/right_content',
-                                   action_url='/admin/attributes/modify_object',
+                                   action_url='/admin/attributes/modify_attribute',
                                    refresh_url='/admin/attributes',
                                    modal_content_url='/admin/attributes/add_attribute',
                                    items=attributes)
@@ -150,7 +150,6 @@ class AdminAttributeView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    template = self._get_template('/admin/attributes/attributeModal.html')
     try:
       attribute = self.attribute_controller.populate_object(identifier,
                                                               name,
@@ -172,8 +171,8 @@ class AdminAttributeView(Ce1susBaseView):
       if valid:
         return self._return_ajax_ok()
       else:
-        return self._render_template('/admin/attributes/attributeModal.html',
-                                 attribute=attribute)
+        return self._return_ajax_post_error(self._render_template('/admin/attributes/attributeModal.html',
+                                 attribute=attribute))
     except SpecialControllerException as error:
       return self._return_ajax_error(error.message)
     except ControllerException as error:

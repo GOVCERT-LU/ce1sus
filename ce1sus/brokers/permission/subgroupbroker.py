@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException
+from dagr.db.broker import BrokerBase, NothingFoundException, IntegrityException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
@@ -40,7 +40,7 @@ class SubGroupBroker(BrokerBase):
     :returns: list of Users
     """
     try:
-      groups = self.session.query(Group).join(SubGroup.maingroups).filter(
+      groups = self.session.query(Group).join(SubGroup.groups).filter(
                                               SubGroup.identifier == identifier
                                                   ).order_by(Group.name).all()
       if not belong_in:
@@ -55,7 +55,6 @@ class SubGroupBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -73,16 +72,15 @@ class SubGroupBroker(BrokerBase):
                                                group_id).one()
       subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
                                                      == subgroup_id).one()
-      subgroup.maingroups.append(group)
+      subgroup.groups.append(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
-  def remove_subgroup_from_group(self, group_id, subgroup_id, commit=True):
+  def remove_group_from_subgroup(self, group_id, subgroup_id, commit=True):
     """
     Removes a user to a group
 
@@ -96,12 +94,11 @@ class SubGroupBroker(BrokerBase):
                                                group_id).one()
       subgroup = self.session.query(SubGroup).filter(SubGroup.identifier
                                                      == subgroup_id).one()
-      subgroup.maingroups.remove(group)
+      subgroup.groups.remove(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -134,22 +131,7 @@ class SubGroupBroker(BrokerBase):
       subgroup.description = cleanPostValue(description)
     return subgroup
 
-  def get_all(self):
-    """
-    Returns all get_broker_class() instances
-
-    Note: raises a NothingFoundException or a TooManyResultsFound Exception
-
-    :returns: list of instances
-    """
-    try:
-      result = self.session.query(self.get_broker_class()).order_by(
-                                                            SubGroup.name.asc()
-                                                                 ).all()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
-      raise BrokerException(error)
-
-    return result
+  def remove_by_id(self, subgroup_id):
+    if subgroup_id == 1 or subgroup_id == '1':
+      raise IntegrityException('Cannot delete this subgroup. The subgroup is essential to '
+                  + 'the application.')

@@ -20,6 +20,7 @@ from dagr.controllers.base import ControllerException
 
 class AdminSubGroupView(Ce1susBaseView):
   """index view handling all display in the index section"""
+
   ID = 'Subgroup'
 
   def __init__(self, config):
@@ -42,15 +43,18 @@ class AdminSubGroupView(Ce1susBaseView):
   @cherrypy.expose
   def left_content(self):
     """
-    renders the left content of the subgroup index page
+    renders the left content of the group index page
 
     :returns: generated HTML
     """
     try:
-      subgroups = self.subgroup_controller.get_all_subgroup_definitions()
+      subgroups = self.subgroup_controller.get_all_subgroups()
       return self._render_template('/admin/common/leftContent.html',
                                    id=AdminSubGroupView.ID,
                                    url_right_content='/admin/subgroups/right_content',
+                                   action_url='/admin/subgroups/modify_subgroup',
+                                   refresh_url='/admin/subgroups',
+                                   modal_content_url='/admin/subgroups/add_subgroup',
                                    items=subgroups)
     except ControllerException as error:
       return self._render_error_page(error)
@@ -59,23 +63,27 @@ class AdminSubGroupView(Ce1susBaseView):
   @cherrypy.expose
   def right_content(self, subgroup_id):
     """
-    renders the right content of the subgroup index page
+    renders the right content of the group index page
 
-    :param subgroupid: The subgroup id of the desired displayed subgroup
-    :type subgroupid: Integer
-    :param subgroup: Similar to the previous subgroup but prevents
+    :param groupid: The group id of the desired displayed group
+    :type groupid: Integer
+    :param group: Similar to the previous group but prevents
                       additional loadings
-    :type subgroup: subgroupDefinition
+    :type group: groupDefinition
 
     :returns: generated HTML
     """
+
     try:
-      subgroup = self.subgroup_controller.get_subgroup_definitions_by_id(subgroup_id)
+      subgroup = self.subgroup_controller.get_subgroup_by_id(subgroup_id)
       remaining_subgroups = self.subgroup_controller.get_available_subgroups(subgroup)
+      cb_values = self.subgroup_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/subgroups/subgroupRight.html',
                                    id=AdminSubGroupView.ID,
                                    remaining_subgroups=remaining_subgroups,
-                                   subgroup=subgroup)
+                                   subgroup=subgroup,
+                                   cb_values=cb_values)
+
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -83,35 +91,37 @@ class AdminSubGroupView(Ce1susBaseView):
   @cherrypy.expose
   def add_subgroup(self):
     """
-    renders the add an subgroup page
+    renders the add an group page
 
     :returns: generated HTML
     """
+    cb_values = self.subgroup_controller.get_cb_tlp_lvls()
     return self._render_template('/admin/subgroups/subgroupModal.html',
-                                 subgroup=None)
+                                 subgroup=None,
+                                 cb_values=cb_values)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  def edit_subgroup_subgroups(self, identifier, operation,
+  def edit_subgroup_groups(self, identifier, operation,
                      existing=None, remaining=None):
     """
-    modifies the relation between a subgroup and its subgroups
+    modifies the relation between a group and its subgroups
 
-    :param subgroupID: The subgroupID of the subgroup
-    :type subgroupID: Integer
+    :param groupID: The groupID of the group
+    :type groupID: Integer
     :param operation: the operation used in the context (either add or remove)
     :type operation: String
-    :param remainingUsers: The identifiers of the users which the subgroup is not
-                            subgroupd to
+    :param remainingUsers: The identifiers of the users which the group is not
+                            groupd to
     :type remainingUsers: Integer array
-    :param subgroupUsers: The identifiers of the users which the subgroup is
-                       subgroupd to
-    :type subgroupUsers: Integer array
+    :param groupUsers: The identifiers of the users which the group is
+                       groupd to
+    :type groupUsers: Integer array
 
     :returns: generated HTML
     """
     try:
-      self.subgroup_controller.modify_subgroup_object_relations(operation, identifier, remaining, existing)
+      self.subgroup_controller.modify_subgroup_group_relations(operation, identifier, remaining, existing)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
@@ -119,59 +129,61 @@ class AdminSubGroupView(Ce1susBaseView):
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
   def modify_subgroup(self, identifier=None, name=None,
-                  description=None, action='insert', share=None):
+                  description=None, action='insert'):
     """
-    modifies or inserts a subgroup with the data of the post
+    modifies or inserts a group with the data of the post
 
-    :param identifier: The identifier of the subgroup,
+    :param identifier: The identifier of the group,
                        is only used in case the action is edit or remove
     :type identifier: Integer
-    :param name: The name of the subgroup
+    :param name: The name of the group
     :type name: String
-    :param description: The description of this subgroup
+    :param description: The description of this group
     :type description: String
     :param action: action which is taken (i.error. edit, insert, remove)
     :type action: String
 
     :returns: generated HTML
     """
-    template = self._get_template('/admin/subgroups/subgroupModal.html')
     try:
       subgroup = self.subgroup_controller.populate_subgroup(identifier,
-                                                   name,
-                                                   description,
-                                                   action,
-                                                   share)
+                                                      name,
+                                                      description,
+                                                      action)
 
       if action == 'insert':
-        subgroup, valid = self.subgroup_controller.insert_subgroup_definition(subgroup)
+        subgroup, valid = self.subgroup_controller.insert_group(subgroup)
       if action == 'update':
-        subgroup, valid = self.subgroup_controller.insert_subgroup_definition(subgroup)
+        subgroup, valid = self.subgroup_controller.update_group(subgroup)
       if action == 'remove':
-        subgroup, valid = self.subgroup_controller.insert_subgroup_definition(subgroup)
+        subgroup, valid = self.subgroup_controller.remove_group(subgroup)
 
       if valid:
         return self._return_ajax_ok()
       else:
-        return self._render_template('/admin/subgroups/subgroupModal.html',
-                                 subgroup=subgroup)
+        cb_values = self.subgroup_controller.get_cb_tlp_lvls()
+        return self._return_ajax_post_error(self._render_template('/admin/subgroups/subgroupModal.html',
+                                 subgroup=subgroup,
+                                 cb_values=cb_values))
     except ControllerException as error:
       return self._render_error_page(error)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  def edit_subgroup(self, subgroupid):
+  def edit_subgroup(self, subgroup_id):
     """
-    renders the edit an subgroup page
+    renders the edit an group page
 
-    :param subgroupid: The subgroup id of the desired displayed subgroup
-    :type subgroupid: Integer
+    :param groupid: The group id of the desired displayed group
+    :type groupid: Integer
 
     :returns: generated HTML
     """
     try:
-      subgroup = self.subgroup_controller.get_subgroup_definitions_by_id(subgroupid)
+      subgroup = self.subgroup_controller.get_subgroup_by_id(subgroup_id)
+      cb_values = self.subgroup_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/subgroups/subgroupModal.html',
-                                 subgroup=subgroup)
+                                 subgroup=subgroup,
+                                 cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)

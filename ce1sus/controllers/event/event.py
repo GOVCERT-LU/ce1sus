@@ -186,3 +186,9 @@ class EventController(Ce1susBaseController):
       return result
     except BrokerException as error:
       self._raise_exception(error)
+
+  def get_cb_tlp_lvls(self):
+    try:
+      return TLPLevel.get_definitions()
+    except BrokerException as error:
+      self._raise_exception(error)

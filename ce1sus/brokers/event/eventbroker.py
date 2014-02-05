@@ -134,7 +134,7 @@ class EventBroker(BrokerBase):
       # as the user has no main group it is impossible to see any thing
       result = list()
     else:
-      tlp_lvl = user.default_group.tlpLvl
+      tlp_lvl = user.default_group.tlp_lvl
       mainGroupID = user.default_group.identifier
       subGroupsIDs = list()
       for subgroup in user.default_group.subgroups:
@@ -427,7 +427,7 @@ class EventBroker(BrokerBase):
         # as the user has no main group it is impossible to see any thing
         return list()
       else:
-        tlp_lvl = user.default_group.tlpLvl
+        tlp_lvl = user.default_group.tlp_lvl
         main_group_id = user.default_group.identifier
         subgroups_ids = list()
         subgroups_ids.append(main_group_id)

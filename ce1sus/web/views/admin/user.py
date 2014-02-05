@@ -130,7 +130,6 @@ class AdminUserView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    template = self._get_template('/admin/users/userModal.html')
     try:
       if action == 'insertLDAP':
         user = self.user_controller.get_ldap_user(identifier)

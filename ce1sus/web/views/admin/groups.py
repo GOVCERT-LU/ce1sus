@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.views.base import Ce1susBaseView, privileged
-from ce1sus.controllers.admin.groups import GroupsController
+from ce1sus.controllers.admin.groups import GroupController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
@@ -20,11 +20,12 @@ from dagr.controllers.base import ControllerException
 
 class AdminGroupView(Ce1susBaseView):
   """index view handling all display in the index section"""
-  ID = 'group'
+
+  ID = 'Group'
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
-    self.group_controller = GroupsController(config)
+    self.group_controller = GroupController(config)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
@@ -47,10 +48,13 @@ class AdminGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      groups = self.group_controller.get_all_group_definitions()
+      groups = self.group_controller.get_all_groups()
       return self._render_template('/admin/common/leftContent.html',
                                    id=AdminGroupView.ID,
                                    url_right_content='/admin/groups/right_content',
+                                   action_url='/admin/groups/modify_group',
+                                   refresh_url='/admin/groups',
+                                   modal_content_url='/admin/groups/add_group',
                                    items=groups)
     except ControllerException as error:
       return self._render_error_page(error)
@@ -70,12 +74,15 @@ class AdminGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      group = self.group_controller.get_group_definitions_by_id(group_id)
-      remaining_groups = self.group_controller.get_available_groups(group)
+      group = self.group_controller.get_group_by_id(group_id)
+      remaining_groups = self.group_controller.get_available_subgroups(group)
+      cb_values = self.group_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/groups/groupRight.html',
                                    id=AdminGroupView.ID,
                                    remaining_groups=remaining_groups,
-                                   group=group)
+                                   group=group,
+                                   cb_values=cb_values)
+
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -87,8 +94,10 @@ class AdminGroupView(Ce1susBaseView):
 
     :returns: generated HTML
     """
+    cb_values = self.group_controller.get_cb_tlp_lvls()
     return self._render_template('/admin/groups/groupModal.html',
-                                 group=None)
+                                 group=None,
+                                 cb_values=cb_values)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
@@ -111,7 +120,7 @@ class AdminGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      self.group_controller.modify_group_object_relations(operation, identifier, remaining, existing)
+      self.group_controller.modify_group_subgroup_relations(operation, identifier, remaining, existing)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
@@ -119,7 +128,8 @@ class AdminGroupView(Ce1susBaseView):
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
   def modify_group(self, identifier=None, name=None,
-                  description=None, action='insert', share=None):
+                  description=None, download=None, action='insert',
+                  tlp_lvl=None, email=None, usermails=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -135,32 +145,36 @@ class AdminGroupView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    template = self._get_template('/admin/groups/groupModal.html')
     try:
       group = self.group_controller.populate_group(identifier,
-                                                   name,
-                                                   description,
-                                                   action,
-                                                   share)
+                                                  name,
+                                                  description,
+                                                  download,
+                                                  action,
+                                                  tlp_lvl,
+                                                  email,
+                                                  usermails)
 
       if action == 'insert':
-        group, valid = self.group_controller.insert_group_definition(group)
+        group, valid = self.group_controller.insert_group(group)
       if action == 'update':
-        group, valid = self.group_controller.insert_group_definition(group)
+        group, valid = self.group_controller.update_group(group)
       if action == 'remove':
-        group, valid = self.group_controller.insert_group_definition(group)
+        group, valid = self.group_controller.remove_group(group)
 
       if valid:
         return self._return_ajax_ok()
       else:
-        return self._render_template('/admin/groups/groupModal.html',
-                                 group=group)
+        cb_values = self.group_controller.get_cb_tlp_lvls()
+        return self._return_ajax_post_error(self._render_template('/admin/groups/groupModal.html',
+                                 group=group,
+                                 cb_values=cb_values))
     except ControllerException as error:
       return self._render_error_page(error)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  def edit_group(self, groupid):
+  def edit_group(self, group_id):
     """
     renders the edit an group page
 
@@ -170,8 +184,10 @@ class AdminGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      group = self.group_controller.get_group_definitions_by_id(groupid)
+      group = self.group_controller.get_group_by_id(group_id)
+      cb_values = self.group_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/groups/groupModal.html',
-                                 group=group)
+                                 group=group,
+                                 cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)
