@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 
 from ce1sus.brokers.definition.attributedefinitionbroker import \
   AttributeDefinitionBroker

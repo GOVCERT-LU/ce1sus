@@ -8,7 +8,6 @@ Created 12 Sept 2013
 
 
 from cherrypy.process import plugins
-from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import cherrypy
 

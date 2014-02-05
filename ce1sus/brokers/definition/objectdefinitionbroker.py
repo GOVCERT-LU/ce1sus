@@ -196,6 +196,6 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
     if not action == 'remove':
       obj.name = cleanPostValue(name)
       obj.description = cleanPostValue(description)
-      ObjectConverter.setInteger(obj, 'share', share)
+      ObjectConverter.set_integer(obj, 'share', share)
       obj.dbchksum = hashSHA1(obj.name)
     return obj

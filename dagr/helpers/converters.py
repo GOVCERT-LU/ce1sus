@@ -16,15 +16,13 @@ import dagr.helpers.strings as strings
 
 class ConversionException(Exception):
   """Configuration Exception"""
-
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 class ValueConverter(object):
   """Converter for single values"""
   @staticmethod
-  def setString(value):
+  def set_string(value):
     """
     Returns a strings value of the value
 
@@ -37,11 +35,11 @@ class ValueConverter(object):
     """
     try:
       return unicode(value, 'utf-8', errors='replace')
-    except ValueError as e:
-      raise ConversionException(e)
+    except ValueError as error:
+      raise ConversionException(error)
 
   @staticmethod
-  def setInteger(value):
+  def set_integer(value):
     """
     Returns an Integer value of the value
 
@@ -55,16 +53,16 @@ class ValueConverter(object):
     try:
       if value is None:
         return None
-      strValue = '{0}'.format(value)
-      if strValue:
-        return int(strValue)
+      str_value = '{0}'.format(value)
+      if str_value:
+        return int(str_value)
       else:
         return None
-    except ValueError as e:
-      raise ConversionException(e)
+    except ValueError as error:
+      raise ConversionException(error)
 
   @staticmethod
-  def setDate(value):
+  def set_date(value):
     """
     Returns an DateTime value of the value
 
@@ -77,15 +75,15 @@ class ValueConverter(object):
     """
     try:
       return strings.stringToDateTime(value)
-    except Exception as e:
-      raise ConversionException(e)
+    except Exception as error:
+      raise ConversionException(error)
 
 
 class ObjectConverter(object):
   """Converter for objects"""
 
   @staticmethod
-  def setString(instance, attribtue, value):
+  def set_string(instance, attribtue, value):
     """
     Sets a strings attribute
 
@@ -98,10 +96,10 @@ class ObjectConverter(object):
     :param value: The value to be set
     :type value: strings (at least should be)
     """
-    setattr(instance, attribtue, ValueConverter.setString(value))
+    setattr(instance, attribtue, ValueConverter.set_string(value))
 
   @staticmethod
-  def setInteger(instance, attribtue, value):
+  def set_integer(instance, attribtue, value):
     """
     Sets a Integer attribute
 
@@ -115,12 +113,12 @@ class ObjectConverter(object):
     :type value: Integer (at least should be)
     """
     try:
-      setattr(instance, attribtue, ValueConverter.setInteger(value))
-    except AttributeError as e:
+      setattr(instance, attribtue, ValueConverter.set_integer(value))
+    except AttributeError:
       pass
 
   @staticmethod
-  def setDate(instance, attribtue, value):
+  def set_date(instance, attribtue, value):
     """
     Sets a date time attribute
 
@@ -133,4 +131,4 @@ class ObjectConverter(object):
     :param value: The value to be set
     :type value: DateTime strings (at least should be)
     """
-    setattr(instance, attribtue, ValueConverter.setDate(value))
+    setattr(instance, attribtue, ValueConverter.set_date(value))

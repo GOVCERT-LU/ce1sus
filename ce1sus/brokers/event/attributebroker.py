@@ -19,7 +19,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 from ce1sus.brokers.event.eventclasses import Attribute
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 
 
 class AttributeBroker(BrokerBase):
@@ -141,6 +141,6 @@ class AttributeBroker(BrokerBase):
     :type event: Event
     """
     attribute.modifier = user
-    attribute.modified = datumzait.utcnow()
+    attribute.modified = DatumZait.utcnow()
     self.update(attribute, False)
     self.do_commit(commit)

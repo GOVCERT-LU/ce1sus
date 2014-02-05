@@ -80,7 +80,7 @@ class DateValue(BASE):
 
   @staticmethod
   def convert(value):
-    return ValueConverter.setDate(value)
+    return ValueConverter.set_date(value)
 
 
 # pylint: disable=R0903

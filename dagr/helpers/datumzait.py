@@ -14,16 +14,21 @@ __license__ = 'GPL v3+'
 from datetime import datetime
 import dateutil.tz
 
-class datumzait(datetime):
+
+class DatumZait(datetime):
+  """Wrapper for datetime"""
 
   @staticmethod
   def utcnow():
+    """same as in datetime"""
     return datetime.utcnow().replace(tzinfo=dateutil.tz.tzutc())
 
   @staticmethod
   def now():
+    """same as in datetime"""
     return datetime.now()
 
   @staticmethod
-  def strptime(dateString, dateFormat):
-    return datetime.strptime(dateString, dateFormat)
+  def strptime(date_string, date_format):
+    """same as in datetime"""
+    return datetime.strptime(date_string, date_format)

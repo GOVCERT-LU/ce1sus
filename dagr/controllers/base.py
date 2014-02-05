@@ -22,6 +22,9 @@ class ControllerException(Exception):
 
 
 class SpecialControllerException(ControllerException):
+  """
+  SpecialControllerException
+  """
   pass
 
 

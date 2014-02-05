@@ -22,31 +22,31 @@ class TestConverter(unittest.TestCase):
   def testConversions(self):
     testObj = TestObj()
     try:
-      ObjectConverter.setString(testObj, 'str', 'Test')
+      ObjectConverter.set_string(testObj, 'str', 'Test')
       assert testObj.str == 'Test'
     except ConversionException:
       assert False
 
     try:
-      ObjectConverter.setString(testObj, 'str', '125Das')
+      ObjectConverter.set_string(testObj, 'str', '125Das')
       assert testObj.str == '125Das'
     except ConversionException:
       assert False
 
     try:
-      ObjectConverter.setString(testObj, 'str', '125')
+      ObjectConverter.set_string(testObj, 'str', '125')
       assert testObj.str == '125'
     except ConversionException:
       assert False
 
     try:
-      ObjectConverter.setInteger(testObj, 'int', 'Test')
+      ObjectConverter.set_integer(testObj, 'int', 'Test')
       assert False
     except ConversionException:
       assert True
 
     try:
-      ObjectConverter.setInteger(testObj, 'int', '55')
+      ObjectConverter.set_integer(testObj, 'int', '55')
       assert testObj.int == 55
     except ConversionException:
       assert True

@@ -16,7 +16,7 @@ from ce1sus.controllers.event.event import EventController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from dagr.controllers.base import ControllerException
 
 
@@ -40,7 +40,7 @@ class EventView(Ce1susBaseView):
     """
     return self._render_template(template_name,
                                  event=event,
-                                 today=datumzait.utcnow(),
+                                 today=DatumZait.utcnow(),
                                  status_values=Status.get_definitions(),
                                  tlp_values=TLPLevel.get_definitions(),
                                  analysis_values=Analysis.get_definitions(),

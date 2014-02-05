@@ -11,7 +11,7 @@ from datetime import datetime
 from ce1sus.brokers.permission.permissionclasses import  Group, User
 from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.groupbroker import GroupBroker
-from dagr.helpers.objects import printObject
+from dagr.helpers.objects import print_object
 from ce1sus.helpers.bitdecoder import BitValue
 
 

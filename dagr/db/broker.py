@@ -14,13 +14,13 @@ __license__ = 'GPL v3+'
 
 import sqlalchemy.orm.exc
 from abc import ABCMeta, abstractmethod
-from dagr.helpers.debug import Log
 from sqlalchemy import DateTime as SdateTime
 from sqlalchemy.types import TypeDecorator
 import dateutil
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
+# pylint: disable=W0223
 class DateTime(TypeDecorator):
   """
   Used as workaround for MySQL DBs
@@ -28,9 +28,13 @@ class DateTime(TypeDecorator):
   impl = SdateTime
 
   def process_bind_param(self, value, engine):
+    if engine:
+      pass
     return value
 
   def process_result_value(self, value, engine):
+    if engine:
+      pass
     if value is None:
       return None
     else:
@@ -39,47 +43,39 @@ class DateTime(TypeDecorator):
 
 class BrokerException(Exception):
   """Broker Exception"""
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 class IntegrityException(BrokerException):
   """Broker Exception"""
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 
 class InstantiationException(BrokerException):
   """Instantiation Exception"""
-
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 
 class NothingFoundException(BrokerException):
   """NothingFound Exception"""
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 
 class TooManyResultsFoundException(BrokerException):
   """Too many results found Exception"""
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 
 class ValidationException(BrokerException):
   """Invalid Exception"""
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 
 class DeletionException(BrokerException):
   """
   Deletion Exception
   """
-  def __init__(self, message):
-    BrokerException.__init__(self, message)
+  pass
 
 # Created on Jul 4, 2013
 
@@ -132,8 +128,8 @@ class BrokerBase(object):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for ID :{0}'.format(identifier))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
     return result
 
@@ -152,8 +148,8 @@ class BrokerBase(object):
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
     return result
 
@@ -169,12 +165,12 @@ class BrokerBase(object):
                       getattr(self.get_broker_class(),
                                 'identifier') == identifier
                       ).delete(synchronize_session='fetch')
-    except sqlalchemy.exc.IntegrityError as e:
+    except sqlalchemy.exc.IntegrityError as error:
       self.session.rollback()
-      raise IntegrityException(e)
-    except sqlalchemy.exc.SQLAlchemyError as e:
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
     self.do_commit(commit)
 
@@ -223,7 +219,12 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(
+                                                                        ObjectValidator.getFirstValidationError(
+                                                                                                            instance
+                                                                                                            )
+                                                                                  )
+                                  )
     try:
       self.session.add(instance)
       self.do_commit(commit)
@@ -247,7 +248,12 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(
+                                                                        ObjectValidator.getFirstValidationError(
+                                                                                                              instance
+                                                                                                              )
+                                                                                  )
+                                  )
     # an elo den update
     try:
       self.session.merge(instance)

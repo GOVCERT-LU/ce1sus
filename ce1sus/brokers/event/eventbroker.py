@@ -17,7 +17,7 @@ BrokerException
 import sqlalchemy.orm.exc
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from dagr.helpers.converters import ObjectConverter, ConversionException
 from ce1sus.brokers.event.eventclasses import Event
 from ce1sus.brokers.event.attributebroker import AttributeBroker
@@ -343,7 +343,7 @@ class EventBroker(BrokerBase):
         event.maingroups = list()
         event.maingroups.append(user.default_group)
         event.bit_value = BitValue('1000', event)
-        event.created = datumzait.utcnow()
+        event.created = DatumZait.utcnow()
         event.creator_id = user.identifier
         event.creator = user
         event.creator_group = user.default_group
@@ -357,29 +357,29 @@ class EventBroker(BrokerBase):
       event.description = cleanPostValue(description)
       if not event.description:
         event.description = 'no description'
-      ObjectConverter.setInteger(event, 'tlp_level_id', tlp_index)
-      ObjectConverter.setInteger(event, 'status_id', status)
-      ObjectConverter.setInteger(event, 'published', published)
-      event.modified = datumzait.utcnow()
+      ObjectConverter.set_Integer(event, 'tlp_level_id', tlp_index)
+      ObjectConverter.set_Integer(event, 'status_id', status)
+      ObjectConverter.set_Integer(event, 'published', published)
+      event.modified = DatumZait.utcnow()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
 
       if first_seen:
         try:
-          ObjectConverter.setDate(event, 'first_seen', first_seen)
+          ObjectConverter.set_date(event, 'first_seen', first_seen)
         except ConversionException:
           event.first_seen = first_seen
       else:
-        event.first_seen = datumzait.utcnow()
+        event.first_seen = DatumZait.utcnow()
       if last_seen:
         try:
-          ObjectConverter.setDate(event, 'last_seen', last_seen)
+          ObjectConverter.set_date(event, 'last_seen', last_seen)
         except ConversionException:
           event.last_seen = last_seen
       else:
         event.last_seen = event.first_seen
-      ObjectConverter.setInteger(event, 'analysis_status_id', analysis)
-      ObjectConverter.setInteger(event, 'risk_id', risk)
+      ObjectConverter.set_Integer(event, 'analysis_status_id', analysis)
+      ObjectConverter.set_Integer(event, 'risk_id', risk)
 
     return event
 
@@ -464,6 +464,6 @@ class EventBroker(BrokerBase):
     :type event: Event
     """
     event.modifier = user
-    event.modified = datumzait.utcnow()
+    event.modified = DatumZait.utcnow()
     self.update(event, False)
     self.do_commit(commit)

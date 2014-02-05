@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase
-from dagr.helpers.debug import Log
 from sqlalchemy.ext.declarative import declarative_base
 from dagr.db.connectors.mysql import MySqlConnector
 from dagr.db.connectors.sqlite import SqliteConnector
@@ -35,7 +34,6 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
     try:
         cursor.execute("SELECT 1")
     except:
-        Log._get_logger('PingConnection').debug('Connection gone stale')
         raise exc.DisconnectionError()
     cursor.close()
 
@@ -87,9 +85,3 @@ class SessionManager:
     Closes the connections
     """
     self.connector.close()
-
-  def get_session(self):
-    """
-    Returns a session
-    """
-    return self.get_connector().get_session()

@@ -17,7 +17,6 @@ import os
 import socket
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from dagr.helpers.debug import Log
 import cherrypy
 
 

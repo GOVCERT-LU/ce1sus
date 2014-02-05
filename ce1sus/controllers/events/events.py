@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 import cherrypy
 
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 

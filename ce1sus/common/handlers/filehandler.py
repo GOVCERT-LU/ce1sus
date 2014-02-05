@@ -16,7 +16,7 @@ from cherrypy.lib.static import serve_file
 from dagr.helpers.config import ConfigException
 import cherrypy
 from ce1sus.common.handlers.generichandler import GenericHandler
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from os.path import isfile, getsize, basename, exists, dirname
 import dagr.helpers.hash as hasher
 from ce1sus.common.handlers.base import HandlerException
@@ -63,7 +63,7 @@ class FileHandler(GenericHandler):
     """
     hashed_file_name = hasher.hashSHA256(file_name)
     key = '{0}{1}{2}'.format(file_hash,
-                                     datumzait.now(),
+                                     DatumZait.now(),
                                      hashed_file_name)
     return hasher.hashSHA256(key)
 
@@ -144,7 +144,7 @@ class FileHandler(GenericHandler):
 
   def _get_tmp_folder(self):
     try:
-      tmp_path = self._get_base_path() + '/tmp/' + hasher.hashSHA1('{0}'.format(datumzait.now()))
+      tmp_path = self._get_base_path() + '/tmp/' + hasher.hashSHA1('{0}'.format(DatumZait.now()))
       if not exists(tmp_path):
         makedirs(tmp_path)
       return tmp_path
@@ -153,9 +153,9 @@ class FileHandler(GenericHandler):
 
   @staticmethod
   def _get_dest_folder():
-    dest_path = '{0}/{1}/{2}'.format(datumzait.now().year,
-                                     datumzait.now().month,
-                                     datumzait.now().day)
+    dest_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
+                                     DatumZait.now().month,
+                                     DatumZait.now().day)
     if not exists(dest_path):
       makedirs(dest_path)
     return dest_path

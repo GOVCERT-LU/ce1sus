@@ -60,8 +60,7 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
 
 class ValidationException(Exception):
   """Validation Exception"""
-  def __init__(self, message):
-    Exception.__init__(self, message)
+  pass
 
 
 # pylint: disable=R0903

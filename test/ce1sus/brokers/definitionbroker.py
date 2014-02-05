@@ -78,7 +78,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     assert True
     obj.attributes[0].objects = list()
     self.object.attributes[0].objects = list()
-    assert helpers.compareObjects(obj, self.object)
+    assert helpers.compare_objects(obj, self.object)
 
   def test_E_DeleteObject(self):
 

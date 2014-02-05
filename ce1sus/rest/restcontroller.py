@@ -171,10 +171,10 @@ class RestController(RestControllerBase):
       if value == 'False':
         return False
       if value.isdigit():
-        return ValueConverter.setInteger(value)
+        return ValueConverter.set_integer(value)
       # check if datetime
       if ValueValidator.validateDateTime(value):
-        return ValueConverter.setDate(value)
+        return ValueConverter.set_date(value)
       if (re.match(r'^\[.*\]$', value, re.MULTILINE) is not None or
         re.match(r'^\{.*\}$', value, re.MULTILINE) is not None):
         value = ast.literal_eval(value)

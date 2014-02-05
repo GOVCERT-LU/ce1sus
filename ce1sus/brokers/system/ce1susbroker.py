@@ -16,7 +16,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, T
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, String
 import sqlalchemy.orm.exc
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventclasses import Comment
 from dagr.helpers.strings import cleanPostValue
 

@@ -14,7 +14,7 @@ import cherrypy
 from ce1sus.rest.restbase import RestControllerBase
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 import json
 
 
@@ -90,7 +90,7 @@ class RestSearchController(RestControllerBase):
       with_definition = options.get('fulldefinitions', False)
       # TODO use these!
       start_date = options.get('startdate', None)
-      end_date = options.get('enddate', datumzait.utcnow())
+      end_date = options.get('enddate', DatumZait.utcnow())
       offset = options.get('page', 0)
       limit = self.__get_limit(options)
 
@@ -229,7 +229,7 @@ class RestSearchController(RestControllerBase):
     try:
       # TODO use these!
       start_date = options.get('startdate', None)
-      end_date = options.get('enddate', datumzait.utcnow())
+      end_date = options.get('enddate', DatumZait.utcnow())
       offset = options.get('page', 0)
       limit = self.__get_limit(options)
 

@@ -15,7 +15,7 @@ from dagr.db.broker import BrokerBase, NothingFoundException, \
                            BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.helpers.bitdecoder import BitValue
@@ -82,7 +82,7 @@ class ObjectBroker(BrokerBase):
       obj.definition = definition
       if not definition is None:
         obj.def_object_id = definition.identifier
-    obj.created = datumzait.utcnow()
+    obj.created = DatumZait.utcnow()
     if parent_object_id is None:
       obj.event_id = event_id
     else:
@@ -219,6 +219,6 @@ class ObjectBroker(BrokerBase):
     :type event: Event
     """
     obj.modifier = user
-    obj.modified = datumzait.utcnow()
+    obj.modified = DatumZait.utcnow()
     self.update(obj, False)
     self.do_commit(commit)

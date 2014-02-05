@@ -17,7 +17,7 @@ import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 
 
 class AdminValidationView(Ce1susBaseView):
@@ -83,7 +83,7 @@ class AdminValidationView(Ce1susBaseView):
       relations = self.validation_controller.get_related_events(event)
       return self._render_template('/admin/validation/eventDetails.html',
                                    event=event,
-                                   today=datumzait.utcnow(),
+                                   today=DatumZait.utcnow(),
                                    status_values=Status.get_definitions(),
                                    tlp_values=TLPLevel.get_definitions(),
                                    analysis_values=Analysis.get_definitions(),

@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.api.exceptions import Ce1susAPIException, Ce1susInvalidParameter
 from dagr.helpers.hash import hashSHA1
 from abc import abstractmethod
-from dagr.helpers.objects import getFields
+from dagr.helpers.objects import get_fields
 from importlib import import_module
 from types import DictionaryType, ListType
 from dagr.helpers.strings import stringToDateTime, InputException
@@ -149,8 +149,8 @@ class RestClassException(Exception):
 class RestClass(object):
 
   def populate(self, db_object, is_owner=False, full=True):
-    obj_fields = getFields(db_object)
-    self_fields = getFields(self)
+    obj_fields = get_fields(db_object)
+    self_fields = get_fields(self)
     for name in self_fields:
       if not name.startswith('_'):
         if name in obj_fields:

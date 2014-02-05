@@ -9,7 +9,7 @@ from dagr.db.session import SessionManager
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.permissionclasses import Group, User
-from dagr.helpers.objects import compareObjects
+from dagr.helpers.objects import compare_objects
 from datetime import datetime
 
 
@@ -56,7 +56,7 @@ class TestPermissionBrokers(unittest.TestCase):
 
   def test_B_GetGroupByID(self):
       group = self.groupbroker.get_by_id(self.group.identifier)
-      assert compareObjects(group, self.group)
+      assert compare_objects(group, self.group)
 
   def testNothingFound(self):
     try:
@@ -74,7 +74,7 @@ class TestPermissionBrokers(unittest.TestCase):
       # Check if group is still existing
       group = self.groupbroker.get_by_id(self.group.identifier)
 
-      if compareObjects(group, self.group):
+      if compare_objects(group, self.group):
         assert True
       else:
         assert False

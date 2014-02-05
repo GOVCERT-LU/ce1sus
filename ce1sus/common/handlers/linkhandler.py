@@ -14,8 +14,17 @@ __license__ = 'GPL v3+'
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
 from dagr.helpers.rt import RTTickets
-from dagr.web.helpers.pagination import Link
 from ce1sus.common.handlers.base import HandlerException
+
+
+# pylint: disable=R0903
+class Link(object):
+  """
+  Container class for links
+  """
+  def __init__(self, url_base=None, identifier=None):
+    self.url_base = url_base
+    self.identifier = identifier
 
 
 class RTHandler(GenericHandler):
@@ -89,14 +98,14 @@ class RTHandler(GenericHandler):
     labels = [{'idLink':'#'},
               {'title':'Title'},
               {'selector':'Options'}]
-    tickets = self.rt.getAllTickets()
+    tickets = self.rt.get_all_tickets()
     return template_renderer('/common/handlers/RTtickets.html',
                              tickets=tickets,
-                             rt_url=self.rt.getBaseTicketUrl())
+                             rt_url=self.rt.get_base_ticket_url())
 
   def convert_to_gui_value(self, attribute):
     link = Link()
-    link.url_base = self.rt.getBaseTicketUrl()
+    link.url_base = self.rt.get_base_ticket_url()
     link.identifier = attribute.plain_value
     return link
 

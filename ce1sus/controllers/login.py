@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.brokers.permission.userbroker import UserBroker
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from dagr.db.broker import BrokerException, NothingFoundException
 from dagr.helpers.ldaphandling import LDAPHandler
 
@@ -87,6 +87,6 @@ class LoginController(Ce1susBaseController):
     :returns: User
     """
     user = self.user_broker.getUserByUserName(username)
-    user.last_login = datumzait.utcnow()
+    user.last_login = DatumZait.utcnow()
     self.user_broker.update(user)
     return user

@@ -18,7 +18,7 @@ import cherrypy
 from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.brokers.event.eventclasses import Event, Attribute
 from dagr.db.broker import NothingFoundException
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.event.objectbroker import ObjectBroker
@@ -177,7 +177,7 @@ class RestControllerBase(Ce1susBaseController):
           str_data = json_file[1]
           value = base64.b64decode(str_data)
           # Relative position
-          tmp_folder = self.base_path + '/tmp/' + hashMD5('{0}'.format(datumzait.now()))
+          tmp_folder = self.base_path + '/tmp/' + hashMD5('{0}'.format(DatumZait.now()))
           os.mkdir(tmp_folder)
           tmp_folder = tmp_folder + '/{0}'.format(filename)
 
@@ -211,8 +211,8 @@ class RestControllerBase(Ce1susBaseController):
     db_attribute.object_id = obj.identifier
     db_attribute.definition = attribute_definition
     db_attribute.def_attribute_id = attribute_definition.identifier
-    db_attribute.created = datumzait.utcnow()
-    db_attribute.modified = datumzait.utcnow()
+    db_attribute.created = DatumZait.utcnow()
+    db_attribute.modified = DatumZait.utcnow()
     db_attribute.creator_id = user.identifier
     db_attribute.modifier_id = user.identifier
     db_attribute.bit_value = BitValue('0', db_attribute)
@@ -221,7 +221,7 @@ class RestControllerBase(Ce1susBaseController):
       db_attribute.bit_value.is_shareable = True
     else:
       db_attribute.bit_value.is_shareable = False
-    ObjectConverter.setInteger(db_attribute,
+    ObjectConverter.set_integer(db_attribute,
                                'ioc',
                                rest_attribute.ioc)
 
@@ -257,8 +257,8 @@ class RestControllerBase(Ce1susBaseController):
             attr_def = self.attribute_definition_broker.get_by_id(7)
             db_attr_filename.definition = attr_def
             db_attr_filename.def_attribute_id = attr_def.identifier
-            db_attr_filename.created = datumzait.utcnow()
-            db_attr_filename.modified = datumzait.utcnow()
+            db_attr_filename.created = DatumZait.utcnow()
+            db_attr_filename.modified = DatumZait.utcnow()
             db_attr_filename.creator_id = obj.creator.identifier
             db_attr_filename.modifier_id = obj.creator.identifier
             db_attr_filename.bit_value = BitValue('0', db_attr_filename)
@@ -267,7 +267,7 @@ class RestControllerBase(Ce1susBaseController):
               db_attr_filename.bit_value.is_shareable = True
             else:
               db_attr_filename.bit_value.is_shareable = False
-            ObjectConverter.setInteger(db_attr_filename,
+            ObjectConverter.set_integer(db_attr_filename,
                                        'ioc',
                                        attribute.ioc)
             self.attribute_broker.insert(db_attr_filename, commit=commit)

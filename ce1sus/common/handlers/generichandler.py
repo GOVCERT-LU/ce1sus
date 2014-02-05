@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.base import HandlerBase
 from ce1sus.brokers.event.eventclasses import Attribute
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
 
@@ -52,14 +52,14 @@ class GenericHandler(HandlerBase):
     attribute.definition = definition
     attribute.def_attribute_id = definition.identifier
     attribute.definition = definition
-    attribute.created = datumzait.utcnow()
-    attribute.modified = datumzait.utcnow()
+    attribute.created = DatumZait.utcnow()
+    attribute.modified = DatumZait.utcnow()
     attribute.creator = user
     attribute.creator_id = user.identifier
     attribute.modifier_id = user.identifier
     attribute.modifier = user
     attribute.creator = user
-    ObjectConverter.setInteger(attribute,
+    ObjectConverter.set_integer(attribute,
                                'ioc',
                                params.get('ioc', '0').strip())
     attribute.bit_value = BitValue('0', attribute)

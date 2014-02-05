@@ -34,6 +34,7 @@ class ForeignKeysListener(PoolListener):
     db_cursor.close()
 
 
+# pylint: disable=R0903
 class SqliteSession(SessionObject):
   """
   Session wrapper

@@ -134,9 +134,9 @@ class GroupBroker(BrokerBase):
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
-      ObjectConverter.setInteger(group, 'can_download', download)
-      ObjectConverter.setInteger(group, 'tlp_lvl', tlp_lvl)
-      ObjectConverter.setInteger(group, 'usermails', usermails)
+      ObjectConverter.set_Integer(group, 'can_download', download)
+      ObjectConverter.set_Integer(group, 'tlp_lvl', tlp_lvl)
+      ObjectConverter.set_Integer(group, 'usermails', usermails)
       group.description = cleanPostValue(description)
     return group
 

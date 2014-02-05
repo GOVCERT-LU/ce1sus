@@ -174,11 +174,11 @@ class UserBroker(BrokerBase):
       user.password = cleanPostValue(password)
       user.username = cleanPostValue(username)
     if strings.isNotNull(disabled):
-      ObjectConverter.setInteger(user, 'disabled', disabled)
+      ObjectConverter.set_Integer(user, 'disabled', disabled)
     if strings.isNotNull(priv):
-      ObjectConverter.setInteger(user, 'privileged', priv)
+      ObjectConverter.set_Integer(user, 'privileged', priv)
     if strings.isNotNull(maingroup):
-      ObjectConverter.setInteger(user, 'group_id', maingroup)
+      ObjectConverter.set_Integer(user, 'group_id', maingroup)
 
     if apikey == '1':
       # generate key

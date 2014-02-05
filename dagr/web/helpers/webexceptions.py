@@ -45,6 +45,7 @@ class ErrorHandler(object):
 
   @staticmethod
   def _get_logger():
+    """Returns the class logger"""
     return ErrorHandler.__logger.get_logger('ErrorHandler')
 
   @staticmethod
@@ -88,7 +89,7 @@ class ErrorHandler(object):
                                                     text=text)
 
   @staticmethod
-  def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2', sendMail=True, message='Default Error'):
+  def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2', send_mail=True, message='Default Error'):
     """
     Renders the error page
 
@@ -106,21 +107,24 @@ class ErrorHandler(object):
     else:
       restext = None
     config_settings = ErrorHandler.__sendMail and ErrorHandler.__receiver
-    if  config_settings and sendMail:
+    if  config_settings and send_mail:
       # create mail
-      mailMessage = Mail()
-      mailMessage.body = 'Error: {0}\n\nOccured On:{1}\n\nStackTrace:\n{2}'.format(message, datetime.now(), text)
-      mailMessage.subject = ErrorHandler.__subject
-      if not mailMessage.subject:
-        mailMessage.subject = 'An error Occured'
-      mailMessage.reciever = ErrorHandler.__receiver
+      mail_message = Mail()
+      mail_message.body = 'Error: {0}\n\nOccured On:{1}\n\nStackTrace:\n{2}'.format(message, datetime.now(), text)
+      mail_message.subject = ErrorHandler.__subject
+      if not mail_message.subject:
+        mail_message.subject = 'An error Occured'
+      mail_message.reciever = ErrorHandler.__receiver
       try:
-        ErrorHandler.__mailer.sendMail(mailMessage)
-      except MailerException as e:
-        ErrorHandler._get_logger().critical('Could not send mail Mailer not instantiated:{0}', e)
+        ErrorHandler.__mailer.send_mail(mail_message)
+      except MailerException as err:
+        ErrorHandler._get_logger().critical('Could not send mail Mailer not instantiated:{0}', err)
 
     # TODO: random error screen
-    return ErrorHandler.commodore(title, stringHelper.plaintext2html(error), stringHelper.plaintext2html(restext), version)
+    return ErrorHandler.commodore(title,
+                                  stringHelper.plaintext2html(error),
+                                  stringHelper.plaintext2html(restext),
+                                  version)
 
   @staticmethod
   def handle_error():
@@ -144,12 +148,14 @@ class ErrorHandler(object):
     """
     handle_error
     """
+    if status:
+      pass
     # Bad Request
     ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='400', error=message + '\n?SYNTAX ERROR.'
                              + '\n\n', text=traceback,
                              version=version,
-                             sendMail=True,
+                             send_mail=True,
                                                       message=message)
 
   # pylint: disable=W0621
@@ -158,13 +164,15 @@ class ErrorHandler(object):
     """
     handle_error
     """
+    if status:
+      pass
     # Unauthorized
     ErrorHandler._get_logger().error(message)
     return ErrorHandler.show(title='401', error=message + '\n?SYNTAX ERROR.'
                              + '\n\n', text=
                                                                     traceback,
                              version=version,
-                             sendMail=True,
+                             send_mail=True,
                                                       message=message)
 
   # pylint: disable=W0621
@@ -173,13 +181,15 @@ class ErrorHandler(object):
     """
     handle_error
     """
+    if status:
+      pass
     # Forbiden
     ErrorHandler._get_logger().error(message)
-    return ErrorHandler.show(title='403', error=message + '\n?SYNTAX ERROR.'
-                             + '\n\n', text=
-                                                                    traceback,
+    return ErrorHandler.show(title='403',
+                             error=message + '\n?SYNTAX ERROR.\n\n',
+                             text=traceback,
                              version=version,
-                                                      message=message)
+                             message=message)
 
   # pylint: disable=W0621
   @staticmethod
@@ -187,17 +197,19 @@ class ErrorHandler(object):
     """
     handle_error
     """
+    if status:
+      pass
     # Not Found
     ErrorHandler._get_logger().error(message)
 
-    matchObj = re.match(r".*'(.*)'.*", message, re.M | re.I)
-    fileName = matchObj.group(1)
-    return  ErrorHandler.show(title='404', error='LOAD "' + fileName + '", 8'
+    match_obj = re.match(r".*'(.*)'.*", message, re.M | re.I)
+    file_name = match_obj.group(1)
+    return  ErrorHandler.show(title='404', error='LOAD "' + file_name + '", 8'
                               + '\nLOADING\n\nFILE NOT FOUND',
                               text=traceback,
                              version=version,
-                             sendMail=False,
-                                                      message=message)
+                             send_mail=False,
+                             message=message)
 
   # pylint: disable=W0621
   @staticmethod
@@ -205,11 +217,12 @@ class ErrorHandler(object):
     """
     handle_error
     """
+    if status:
+      pass
     # Internal Error
     ErrorHandler._get_logger().error(message)
-    return ErrorHandler.show(title='500', error=message + '\nFORMULA TOO '
-                            + 'COMPLEX\n', text=
-                                                                   traceback,
+    return ErrorHandler.show(title='500', error=message + '\nFORMULA TOO COMPLEX\n',
+                             text=traceback,
                              version=version,
-                             sendMail=True,
-                                                      message=message)
+                             send_mail=True,
+                             message=message)

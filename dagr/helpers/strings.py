@@ -16,13 +16,12 @@ import cgi
 import dateutil.parser
 import json
 
+
 class InputException(Exception):
   """
   Base exception for input exceptions
   """
-  def __init__(self, message):
-    Exception.__init__(self, message)
-
+pass
 
 def plaintext2html(text, tabstop=4):
   """

@@ -19,7 +19,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
-from dagr.helpers.datumzait import datumzait
+from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 
@@ -97,7 +97,7 @@ class ValidationController(Ce1susBaseController):
       # update modifier
       event.modifier = user
       event.modifier_id = event.modifier.identifier
-      event.modified = datumzait.utcnow()
+      event.modified = DatumZait.utcnow()
       # check if the event has a group
       if event.creator_group is None:
         # if not add the default group of the validating user

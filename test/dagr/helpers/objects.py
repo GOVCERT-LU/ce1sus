@@ -4,8 +4,8 @@ Created on Jul 11, 2013
 @author: jhemp
 '''
 import unittest
-from dagr.helpers.objects import compareObjects, printObject, \
-ValueMismatchException, ArrayMismatchException, printDictionary, PrintException
+from dagr.helpers.objects import compare_objects, print_object, \
+ValueMismatchException, ArrayMismatchException, print_dictionary, PrintException
 
 
 # pylint: disable =C0111, R0903
@@ -19,56 +19,56 @@ class Obj(object):
 class TestObjectHelper(unittest.TestCase):
 
   def testCompareBaseType(self):
-    assert compareObjects(1, 1, raiseExceptions=True)
-    assert compareObjects('a', 'a', raiseExceptions=True)
-    assert compareObjects([1, 2], [1, 2], raiseExceptions=True)
-    assert compareObjects({'foo': 1, 'bar': 2}, {'foo': 1, 'bar': 2},
-                          raiseExceptions=True)
-    assert compareObjects(1, 1, raiseExceptions=True)
+    assert compare_objects(1, 1, raise_exceptions=True)
+    assert compare_objects('a', 'a', raise_exceptions=True)
+    assert compare_objects([1, 2], [1, 2], raise_exceptions=True)
+    assert compare_objects({'foo': 1, 'bar': 2}, {'foo': 1, 'bar': 2},
+                          raise_exceptions=True)
+    assert compare_objects(1, 1, raise_exceptions=True)
     # tests with exceptions
 
     try:
-      compareObjects('a', 'n', raiseExceptions=True)
+      compare_objects('a', 'n', raise_exceptions=True)
       assert(False)
     except ValueMismatchException:
       assert(True)
 
     try:
-      compareObjects(1, 2, raiseExceptions=True)
+      compare_objects(1, 2, raise_exceptions=True)
       assert(False)
     except ValueMismatchException:
       assert(True)
     try:
-      compareObjects([1, 3], [1, 2], raiseExceptions=True)
+      compare_objects([1, 3], [1, 2], raise_exceptions=True)
       assert(False)
     except ValueMismatchException:
       assert(True)
 
     try:
-      compareObjects([1, 3], [1], raiseExceptions=True)
+      compare_objects([1, 3], [1], raise_exceptions=True)
       assert(False)
     except ArrayMismatchException:
       assert(True)
 
     try:
-      compareObjects([1, 3], [1, 2], raiseExceptions=True)
+      compare_objects([1, 3], [1, 2], raise_exceptions=True)
       assert(False)
     except ValueMismatchException:
       assert(True)
 
     try:
-      compareObjects([1, 3], [1], raiseExceptions=True)
+      compare_objects([1, 3], [1], raise_exceptions=True)
       assert(False)
     except ArrayMismatchException:
       assert(True)
 
     obj1 = Obj('LoremIpsum', 1)
     obj2 = Obj('LoremIpsum', 1)
-    assert compareObjects(obj1, obj2, raiseExceptions=True)
+    assert compare_objects(obj1, obj2, raise_exceptions=True)
     try:
       obj1 = Obj('LoremIpsum', 1)
       obj2 = Obj('LoremIpsumFoo', 1)
-      compareObjects(obj1, obj2, raiseExceptions=True)
+      compare_objects(obj1, obj2, raise_exceptions=True)
       assert(False)
     except ValueMismatchException:
       assert(True)
@@ -76,14 +76,14 @@ class TestObjectHelper(unittest.TestCase):
 
   def testPrint(self):
     try:
-      printObject(1)
+      print_object(1)
       assert True
     except PrintException:
       assert False
 
   def testPrintDict(self):
     hashmap = {'a': 1, 'b': 2}
-    printDictionary(hashmap)
+    print_dictionary(hashmap)
     assert True
 
 if __name__ == "__main__":

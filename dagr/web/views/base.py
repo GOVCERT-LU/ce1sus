@@ -30,6 +30,7 @@ class SessionNotFoundException(BaseViewException):
   pass
 
 
+# pylint: disable=R0903
 class BaseView:
   """
   This is the base class for controlles all controllers should extend this

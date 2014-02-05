@@ -128,7 +128,7 @@ class UserController(Ce1susBaseController):
 
   def remove_user(self, user):
     try:
-      self.user_broker.update(user, validate=False)
+      self.user_broker.remove_by_id(user.identifier)
       return user, True
     except IntegrityException as error:
       raise ControllerException('Cannot delete user. The user is referenced by elements.'

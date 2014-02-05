@@ -247,9 +247,9 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
         name = name[0]
       attribute.name = cleanPostValue(name)
       attribute.description = cleanPostValue(description)
-    ObjectConverter.setInteger(attribute, 'class_index', class_index)
-    ObjectConverter.setInteger(attribute, 'handler_index', handler_index)
-    ObjectConverter.setInteger(attribute, 'relation', relation)
+    ObjectConverter.set_integer(attribute, 'class_index', class_index)
+    ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
+    ObjectConverter.set_integer(attribute, 'relation', relation)
     # TODO: recompute chksums
     handler = self.handler_broker.get_by_id(attribute.handler_index)
     key = '{0}{1}{2}{3}'.format(attribute.name,
@@ -262,7 +262,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       attribute.regex = trimmed_regex
     else:
       attribute.regex = '^.*$'
-    ObjectConverter.setInteger(attribute, 'share', share)
+    ObjectConverter.set_integer(attribute, 'share', share)
     if action == 'insert':
       attribute.deletable = 1
     return attribute
