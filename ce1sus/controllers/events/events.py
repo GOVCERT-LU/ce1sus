@@ -12,11 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
-
-from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 
 
 class EventsController(Ce1susBaseController):
@@ -30,4 +26,5 @@ class EventsController(Ce1susBaseController):
     """
     Returns a list of events viewable by the user
     """
+
     return self.event_broker.get_all_for_user(user, limit, offset)

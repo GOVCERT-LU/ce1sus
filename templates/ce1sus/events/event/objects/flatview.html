@@ -19,12 +19,23 @@ $(document).ready(function() {
     <th caria-controls="flatViewTable${event_id}" tabindex="1" role="columnheader" class="sorting">Attribute #</th>
     <th caria-controls="flatViewTable${event_id}" tabindex="1" role="columnheader" class="sorting">Attribute Type</th>
     <th caria-controls="flatViewTable${event_id}" tabindex="1" role="columnheader" class="sorting">Attribute Value</th>
+    <th caria-controls="flatViewTable${event_id}" tabindex="1" role="columnheader" class="sorting">IOC</th>
     <th caria-controls="flatViewTable${event_id}" tabindex="2" role="columnheader" class="sorting">Options</th>
     </tr>
   </thead>
   <tbody>
   <% counter=0%>
   %for flat_object in flat_objects:
+    <%  
+    if flat_object[1].ioc == 1:
+      iocicon = '<span class="glyphicon glyphicon-screenshot"></span>'
+    else:
+      iocicon = ''
+    if flat_object[1].bit_value.is_shareable:
+      shareicon = '<span class="glyphicon glyphicon-ok"></span>'
+    else:
+      shareicon = '<span class="glyphicon glyphicon-remove"></span>'
+    %>
     <%counter=counter+1%>
     <tr>
     <td><%call expr="messages_and_text.object_to_html(counter, shorten_to=100,use_plain_text=False)"/></td>
@@ -34,12 +45,13 @@ $(document).ready(function() {
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].definition.name, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].gui_value, shorten_to=100,use_plain_text=False)"/></td>
+    <td>${iocicon}</td>
     <td style="width: 60px;">
-      <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${flat_object[1].object.identifier}');">
+      <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/flat_objects/${event_id}');">
          <span class="glyphicon glyphicon-eye-open" title="View details"></span>
       </a>
       %if owner:
-        <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${flat_object[1].object.identifier}/');">
+        <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/flat_objects/${event_id}');">
            <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
         </a>
         <a href="#" role="button"
@@ -51,6 +63,7 @@ $(document).ready(function() {
         </a>
       %endif
       </td>
+      
                     
     
     </tr>

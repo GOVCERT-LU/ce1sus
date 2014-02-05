@@ -219,9 +219,10 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
                     document.body.style.marginRight = '0px';
                 } else {
                     if (message.match(/^<!--PostError-->/gi)) {
-                        var resultText = createErrorsMsg(null, message);
+                        //post errors are mainly validations issues
+                        var resultText = responseText;
                     } else {
-                        var resultText = message
+                        var resultText = createErrorsMsg(null, message);
                     }
                     $("#'+id+'body").html(resultText);
                 }

@@ -82,6 +82,9 @@ class IndexView(Ce1susBaseView):
       # set user to session make foo to populate user
       # TODO: make this foo better
       if user.default_group:
+        for group in user.default_group.subgroups:
+          if group.name:
+            pass
         self._put_user_to_session(user)
         self._get_logger().info('User "{0}" logged in'.format(user.username))
       else:

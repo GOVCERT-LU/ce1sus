@@ -122,9 +122,10 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                 
             } else {
                 if (responseText.match(/^<!--PostError-->/gi)) {
-                    var resultText = createErrorsMsg(null, responseText);
-                } else {
+                    //post errors are mainly validations issues
                     var resultText = responseText;
+                } else {
+                    var resultText = createErrorsMsg(null, responseText);
                 } 
                 if (modalID) {
                     $("#" + modalID + "body").html(resultText);

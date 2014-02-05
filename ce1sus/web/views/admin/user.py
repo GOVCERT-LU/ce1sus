@@ -51,7 +51,8 @@ class AdminUserView(Ce1susBaseView):
       users = self.user_controller.get_all_users()
       return self._render_template('/admin/users/leftContent.html',
                                    items=users,
-                                   use_ldap=self.user_controller.use_ldap)
+                                   use_ldap=self.user_controller.use_ldap,
+                                   enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -91,7 +92,8 @@ class AdminUserView(Ce1susBaseView):
       cb_values = self.user_controller.get_cb_group_values()
       return self._render_template('/admin/users/userModal.html',
                                    cb_values=cb_values,
-                                   user=None)
+                                   user=None,
+                                   enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)
 

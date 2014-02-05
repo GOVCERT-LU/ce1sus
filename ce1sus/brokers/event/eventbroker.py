@@ -357,9 +357,9 @@ class EventBroker(BrokerBase):
       event.description = cleanPostValue(description)
       if not event.description:
         event.description = 'no description'
-      ObjectConverter.set_Integer(event, 'tlp_level_id', tlp_index)
-      ObjectConverter.set_Integer(event, 'status_id', status)
-      ObjectConverter.set_Integer(event, 'published', published)
+      ObjectConverter.set_integer(event, 'tlp_level_id', tlp_index)
+      ObjectConverter.set_integer(event, 'status_id', status)
+      ObjectConverter.set_integer(event, 'published', published)
       event.modified = DatumZait.utcnow()
       event.modifier = user
       event.modifier_id = event.modifier.identifier
@@ -378,8 +378,8 @@ class EventBroker(BrokerBase):
           event.last_seen = last_seen
       else:
         event.last_seen = event.first_seen
-      ObjectConverter.set_Integer(event, 'analysis_status_id', analysis)
-      ObjectConverter.set_Integer(event, 'risk_id', risk)
+      ObjectConverter.set_integer(event, 'analysis_status_id', analysis)
+      ObjectConverter.set_integer(event, 'risk_id', risk)
 
     return event
 
