@@ -1,8 +1,8 @@
 function setCBChange(element, contentid) {
 	
 	element.change(function() {
-    	text = this.options[this.selectedIndex].text;
-    	div = $('#'+id+' #attributeFormDefinition #editBox');
+    	var text = this.options[this.selectedIndex].text;
+    	var div = $('#'+id+' #attributeFormDefinition #editBox');
         if (text == 'File') {
         	div = $('#'+id+' #attributeFormDefinition #editBox');
         	div.html('<div class="form-group">'+
@@ -25,7 +25,7 @@ function setCBChange(element, contentid) {
 
 function showSelected(identifier){
 	$('.panel-collapse').each(function () {
-		id = $(this).attr('id');
+		var id = $(this).attr('id');
 		if (id == 'collapseItem'+identifier) {
 			$(this).collapse('show').delay(300);
 		} else {
@@ -43,7 +43,7 @@ function openAllColapses(except){
 	$('.panel-collapse').each(function () {
 		//This is just due to the workaround
 		if (except != 'None') {
-			id = $(this).attr('id');
+			var id = $(this).attr('id');
 			if ( id == 'collapseItem'+except) {
 				$(this).collapse('show');
 				$('#menu'+except+'LI').attr('class', 'active');	
@@ -62,7 +62,7 @@ function closeAllColapses(except){
 	$('.panel-collapse').each(function () {
 		//This is just due to the workaround
 		if (except != 'None') {
-			id = $(this).attr('id');
+		    var id = $(this).attr('id');
 			if ( id == 'collapseItem'+except) {
 				$(this).collapse('hide');
 			}
@@ -72,71 +72,8 @@ function closeAllColapses(except){
 	);
 }
 
-function collapseOpenMyClick(except){
-	alert('huhu');
-}
-function collapseCloseMyClick(except){
-	alert('huhu');
-}
-
-function buttonClick(){
-    var formData = new FormData($('#fileuploadForm')[0]);
-    var bar = $('#bar');
-    var percent = $('#percent');
-    var status = $('#status');
-    var cb = $('#definitionID');
-    request = $.ajax({
-        url: '/events/event/attribute/addFile',  //Server script to process data
-        type: 'POST',
-        // Form data
-        data: formData,
-        //Options to tell jQuery not to process data or worry about content-type.
-        cache: false,
-        contentType: false,
-        processData: false,
-        beforeSend: function() {
-            status.empty();
-            var percentVal = '0%';
-            $('#definitionID').parent().append(' <input type="hidden" name="definition" value="'+$("#definitionID option:selected").val()+'" >');
-            $('#definitionID').prop('disabled', true);
-            
-            bar.show();
-            percent.show();
-            status.show();
-            
-            bar.width(percentVal)
-            percent.html(percentVal);
-        },
-        uploadProgress: function(event, position, total, percentComplete) {
-            var percentVal = percentComplete + '%';
-            bar.width(percentVal)
-            percent.html(percentVal);
-        },
-        complete: function(xhr) {
-            bar.hide();
-            percent.hide();
-            status.hide();
-            status.html(xhr.responseText);
-        }
-    });
-    // callback handler that will be called on success
-    request.done(function (responseText, textStatus, XMLHttpRequest){
-        if (responseText.match(/^--OK--/gi)) {
-            file = responseText.match(/\*(.*)\*/);
-            $("#editBoxHidden").html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label> Value:</label></div></div><div class="col-xs-9 col-sm-9">File Uploaded. Don\'t forget to save.<input id="valueID" name="value" type="hidden" value="'+file[1]+'"/></div></div>');
-        } else {
-            $("#editBoxHidden").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
-        }
-    });
-
-    // callback handler that will be called on failure
-    request.fail(function (responseText, textStatus, XMLHttpRequest){
-        $("#editBoxHidden").html('<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4 class="alert-heading">An unexpected Error occurred!</h4><p>'+responseText+'<input id="valueID" name="value" type="hidden" value=""/></p></div>');
-    });
-}
-
 function enableDisableCB(eventID) {
-    checked = $("#eventCheckBox").prop("checked");
+    var checked = $("#eventCheckBox").prop("checked");
     if (checked) {
         $('#parent_object_idID').prop('disabled', true);
         $('select#parent_object_idID option').filter(
@@ -157,16 +94,16 @@ function enableDisableCB(eventID) {
 
 function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) {
     // setup some local variables
-    form = $(formElement);
+    var form = $(formElement);
     // let's select and cache all the fields
-    inputs = form.find("input, select, button, textarea");
+    var inputs = form.find("input, select, button, textarea");
     // serialize the data in the form
-    serializedData = form.serialize();
+    var serializedData = form.serialize();
 
     // magic to get the button value
-    name = event.originalEvent.explicitOriginalTarget.name;
+    var name = event.originalEvent.explicitOriginalTarget.name;
     if (name) {
-        value = event.originalEvent.explicitOriginalTarget.value;
+        var value = event.originalEvent.explicitOriginalTarget.value;
         serializedData += '&' + name + '=' + value;
     }
 
@@ -174,7 +111,7 @@ function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) 
     inputs.prop("disabled", true);
 
     // fire off the request
-    request = $.ajax({
+    var request = $.ajax({
         url : uri,
         type : "post",
         data : serializedData,
@@ -183,25 +120,23 @@ function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) 
     $("#searchAni").html('Searching <img src="/img/ajax-loader.gif" alt="loading"/> ');
     // callback handler that will be called on success
     request.done(function(responseText, textStatus, XMLHttpRequest) {
-        if (responseText.match(/^<!--OK--/gi)) {
-            // refrehshPage & container if needed
-            
-            $("#" + refreshContainer + "").html(responseText);
-            
+        var message = getResonseTextContent(responseText);
+        if (message.match(/^<!--OK--/gi)) {
+            $("#" + refreshContainer + "").html(message);
         } else {
             if (responseText.match(/^<!--PostError-->/gi)) {
-                resultText = responseText;
+                var resultText = createErrorsMsg(null, responseText);
             } else {
-                resultText = getErrorMsg(responseText)
-            }
+                var resultText = responseText;
+            } 
             $("#" + refreshContainer + "").html(resultText);
         }
     });
 
     // callback handler that will be called on failure
-    request.fail(function(responseText, textStatus, XMLHttpRequest) {
-        resultText = getErrorMsg(responseText)
-        $('#' + contentid + 'Errors').html(resultText);
+    request.fail(function(response, textStatus, XMLHttpRequest) {
+        var message = getResponseConent(response);
+        $('#' + contentid + 'Errors').html(message);
     });
     // callback handler that will be called regardless
     // if the request failed or succeeded
@@ -219,7 +154,7 @@ function loadAttributesProcess(element, formID, containerID, eventID, objectID, 
     //clear container
     $('#'+containerID).html('');
     if (element == null){
-        value = $('#'+formID+' input#definitionID:last').val();
+        var value = $('#'+formID+' input#definitionID:last').val();
         if (enabled) {
             loadContent(containerID,'/events/event/attribute/render_handler_edit/'+value+'/'+eventID+'/'+objectID+'/'+attributeID);
         } else {
@@ -233,5 +168,87 @@ function loadAttributesProcess(element, formID, containerID, eventID, objectID, 
         } else {
             $('#'+formID+' #'+containerID).html('<div class="row"><div class="col-xs-3 col-sm-3"><div style="padding: 5px; text-align:right"><label></label></div></div><div class="col-xs-9 col-sm-9"><div id="editBox"><div id="editBoxHidden">Please select something</div></div></div></div>');
         }
+    }
+}
+
+function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
+        refreshContentID, refreshContentUrl) {
+    $('#' + id).modal('show');
+    loadContent('' + id + 'body', contentUrl);
+    $('#' + id + 'Label').html(title);
+    if (postUrl) {
+        $("#" + id + "Form").unbind('submit');
+        $("#" + id + "Form").submit(function(event) {
+
+            // setup some local variables
+            var form = $('#' + id + 'Form');
+            // let's select and cache all the fields
+            var inputs = form.find("input, select, button, textarea");
+            // serialize the data in the form
+            var serializedData = form.serialize();
+
+            // magic to get the button value
+            var name = event.originalEvent.explicitOriginalTarget.name;
+            if (name) {
+                var value = event.originalEvent.explicitOriginalTarget.value;
+                serializedData += '&' + name + '=' + value;
+            }
+
+            // let's disable the inputs for the duration of the ajax request
+            inputs.prop("disabled", true);
+
+            // fire off the request
+            var request = $.ajax({
+                url : postUrl,
+                type : "post",
+                data : serializedData
+            });
+
+            // callback handler that will be called on success
+            request.done(function(responseText, textStatus, XMLHttpRequest) {
+                var message = getResonseTextContent(responseText);
+                if (message.match(/^<!--OK--/gi)) {
+                    $('#' + id).modal("hide");
+                    // refrehshPage & container if needed
+                    if (refresh) {
+                        loadContent(refreshContentID, refreshContentUrl);
+                    }
+                    // workaround---
+                    $('.modal-backdrop').remove();
+                    document.documentElement.style.overflow = "auto";
+                    document.body.style.marginRight = '0px';
+                } else {
+                    if (message.match(/^<!--PostError-->/gi)) {
+                        var resultText = createErrorsMsg(null, message);
+                    } else {
+                        var resultText = message
+                    }
+                    $("#'+id+'body").html(resultText);
+                }
+            });
+
+            // callback handler that will be called on failure
+            request.fail(function(responseText, textStatus, XMLHttpRequest) {
+                var message = getResponseConent(response);
+                $("#" + id + "body").html(message);
+            });
+            // callback handler that will be called regardless
+            // if the request failed or succeeded
+            request.always(function() {
+                // reenable the inputs
+                inputs.prop("disabled", false);
+            });
+            // prevent default posting of form
+            event.preventDefault();
+        });
+        $('#' + id + 'Footer')
+                .html(
+                        '<input class="btn btn-primary" value="'
+                                + 'Save changes" type="submit"><button class="btn btn-default" data-'
+                                + 'dismiss="modal">Close</button>');
+    } else {
+        $('#' + id + 'Footer').html(
+                '<button class="btn btn-default" data-dismiss="'
+                        + 'modal">Close</button>');
     }
 }

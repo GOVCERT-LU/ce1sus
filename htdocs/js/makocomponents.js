@@ -24,7 +24,7 @@ function getResonseTextContent(responseText) {
         return responseText;
     } else {
         if (responseText.match(/^<!--Error-->/gi)) {
-            return resultText = createErrorsMsg(null, responseText);
+            return createErrorsMsg(null, responseText);
         }
         return responseText;
     }
@@ -122,9 +122,9 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                 
             } else {
                 if (responseText.match(/^<!--PostError-->/gi)) {
-                    var resultText = responseText;
+                    var resultText = createErrorsMsg(null, responseText);
                 } else {
-                    var resultText = getErrorMsg(responseText);
+                    var resultText = responseText;
                 } 
                 if (modalID) {
                     $("#" + modalID + "body").html(resultText);

@@ -54,10 +54,7 @@ class ObjectsView(Ce1susBaseView):
         attribute_definitions = dict()
 
       ower = self._is_event_owner(event)
-      if ower:
-        object_list = self.objects_controller.get_all_event_obejcts(event)
-      else:
-        object_list = self.objects_controller.get_viewable_event_obejcts(event)
+      object_list = self.objects_controller.get_all_event_obejcts(event, ower)
 
       if object_id is None:
         try:
@@ -277,5 +274,20 @@ class ObjectsView(Ce1susBaseView):
       return self._render_template('/events/event/objects/properties.html',
                                    default_share_value=default_share_value)
 
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def flat_objects(self, event_id):
+    try:
+      event = self.objects_controller.get_event_by_id(event_id)
+      self._check_if_event_owner(event)
+      owner = self._is_event_owner(event)
+      flat_objects = self.objects_controller.get_flat_objects(event, owner)
+      return self._render_template('/events/event/objects/flatview.html',
+                                   flat_objects=flat_objects,
+                                   event_id=event_id,
+                                   owner=owner)
     except ControllerException as error:
       return self._render_error_page(error)

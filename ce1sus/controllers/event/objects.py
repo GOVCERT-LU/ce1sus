@@ -80,9 +80,12 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_all_event_obejcts(self, event):
+  def get_all_event_obejcts(self, event, owner):
     try:
-      return self.object_broker.get_event_objects(event.identifier)
+      if owner:
+        return self.object_broker.get_event_objects(event.identifier)
+      else:
+        return self.get_viewable_event_obejcts(event)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -165,3 +168,15 @@ class ObjectsController(Ce1susBaseController):
       return self.def_object_broker.get_by_id(definition_id)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def get_flat_objects(self, event, is_owner):
+    result = list()
+    objects = self.get_all_event_obejcts(event, is_owner)
+    for obj in objects:
+      for attribute in obj.attributes:
+        if is_owner:
+          result.append((obj, attribute))
+        else:
+          if attribute.bit_value.is_validated_and_shared:
+            result.append((obj, attribute))
+    return result
