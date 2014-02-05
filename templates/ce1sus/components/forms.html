@@ -55,7 +55,7 @@
 % endif
 </%def>
 
-<%def name="userForm(user,enabled)">
+<%def name="user_form(user,cb_values, enabled)">
 <div class="row">
 <div class="col-xs-12 col-sm-12" style="text-align:left">
 % if user is None:
@@ -65,7 +65,7 @@
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Priviledged',name='priv',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Disabled',name='disabled',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=0)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cbValues,enabled=enabled,has_empty=False,selected=1)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cb_values,enabled=enabled,has_empty=False,selected=1)"/>
   
 % else:
 %if not user.identifier is None:
@@ -83,7 +83,7 @@
   %else:
     <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=user.hasAPIKey)"/>
   %endif
-  <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cbValues,enabled=enabled,has_empty=False, selected=user.group_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cb_values,enabled=enabled,has_empty=False, selected=user.group_id)"/>
   <%call expr="labeled_input.labeled_editbox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
   
 % endif

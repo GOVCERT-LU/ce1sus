@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+
+
+
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
+<%namespace name="nav" file="/dagr/components/navigation.html"/> 
+
+<div class="btn-group">
+    <a href="#addAttributeModal" role="button" class="btn btn-default" data-toggle="modal">Add new User</a>
+    %if use_ldap:
+    <a href="#addLDAPUserModal" role="button" class="btn btn-default"
+        data-toggle="modal">Add LDAP User</a>
+    %endif
+</div>
+<div style="height:15px"/>
+<% 
+found=False 
+fistID=0
+selected = True
+%>
+<!--list of objects -->
+<script type="text/javascript">
+function loadItem(itemID){
+    loadContent('UserRightContent','/admin/users/right_content/'+itemID);
+}
+</script>
+<div id="pannelDiv" style="overflow:auto;height:800px;width:100%;padding-bottom:5px"> 
+<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
+    %if not items is None: 
+        % for item in items:
+          <%call expr="nav.left_menu_item(item.identifier, 'loadItem({0})'.format(item.identifier),item.username,selected)"/>
+          <%
+          if not foundObject:
+              fistID = item.identifier
+              found=True
+              selected = False
+          %>
+        % endfor 
+    %endif
+    
+</ul>
+</div>
+<!-- AddObjectForm -->
+<%call expr="base_forms.generic_modal_form(modal_id='addAttributeModal',
+                                    url='/admin/users/modify_user',
+                                    refresh_url='/admin/users', 
+                                    refresh_container='adminTabsTabContent')">
+<input type="hidden" name="action" value="insert">
+<%call expr="modals.save_button_modal(id='addAttributeModal',
+                                    title='Add User',
+                                    content_url='/admin/users/add_user')"/>
+</%call>
+
+<!-- LdapUserTable -->
+<%call expr="base_forms.generic_modal_form(modal_id='addLDAPUserModal',url='/admin/users/modify_user',refresh_url='/admin/users', refresh_container='adminTabsTabContent')">
+<%call expr="modals.save_button_modal('addLDAPUserModal', title='Add LDAP User', content_url='/admin/users/ldap_users_table', big=True)"/>
+</%call>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    loadItem(${fistID});
+    resizeScrollPannel('pannelDiv');
+});
+</script>

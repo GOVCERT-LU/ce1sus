@@ -18,7 +18,6 @@ import dagr.helpers.hash as hasher
 from dagr.db.broker import BrokerException
 import re
 from dagr.helpers.converters import ObjectConverter
-from dagr.helpers.ldaphandling import LDAPHandler
 import dagr.helpers.strings as strings
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
@@ -180,20 +179,7 @@ class UserBroker(BrokerBase):
       ObjectConverter.setInteger(user, 'privileged', priv)
     if strings.isNotNull(maingroup):
       ObjectConverter.setInteger(user, 'group_id', maingroup)
-    if action == 'insertLDAP':
-      user.identifier = None
-      lh = LDAPHandler.get_instance()
-      ldapUser = lh.get_user(identifier)
-      user.username = ldapUser.uid
-      user.password = ldapUser.password
-      user.email = ldapUser.mail
-      # TODO: Fix this workaround with the empty mail
-      if user.email is None:
-        ldapUser = lh.get_user(identifier)
-        user.email = ldapUser.mail
-      user.disabled = 1
-      user.privileged = 0
-      user.group_id = 1
+
     if apikey == '1':
       # generate key
       user.apiKey = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))

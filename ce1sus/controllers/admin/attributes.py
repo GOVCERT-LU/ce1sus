@@ -12,17 +12,15 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                   AttributeDefinitionBroker, \
                                                   AttributeDefinition
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 from dagr.db.broker import BrokerException, \
                           ValidationException, \
-                          DeletionException, \
                           IntegrityException
 import types as types
-from dagr.controllers.base import ControllerException, SpecialControllerException
+from dagr.controllers.base import SpecialControllerException
 
 
 class AttributeController(Ce1susBaseController):

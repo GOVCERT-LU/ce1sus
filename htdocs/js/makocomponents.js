@@ -13,15 +13,15 @@ function getResponseConent(response) {
     } else {
         
         var message = response.responseText
-        document.write(message); 
-        return;
+        //document.write(message); 
+        return message;
     }
 }
 
 function getResonseTextContent(responseText) {
     if (responseText.match(/(<html)/i)) {
-        document.write(responseText); 
-        return;
+        //document.write(responseText); 
+        return responseText;
     } else {
         if (responseText.match(/^<!--Error-->/gi)) {
             return resultText = createErrorsMsg(null, responseText);

@@ -25,7 +25,7 @@ from ce1sus.web.views.admin.attributes import AdminAttributeView
 # from ce1sus.web.views.admin.groups import AdminGroupView
 from ce1sus.web.views.admin.objects import AdminObjectsView
 # from ce1sus.web.views.admin.subgroups import AdminSubGroupView
-# from ce1sus.web.views.admin.user import AdminUserView
+from ce1sus.web.views.admin.user import AdminUserView
 from ce1sus.web.views.admin.validation import AdminValidationView
 
 from dagr.helpers.config import Configuration
@@ -88,7 +88,7 @@ def bootstrap():
   cherrypy.tree.mount(AttributesView(config), '/events/event/attribute')
   cherrypy.tree.mount(GroupsView(config), '/events/event/groups')
   cherrypy.tree.mount(AdminView(config), '/admin')
-  # cherrypy.tree.mount(AdminUserView(config), '/admin/users')
+  cherrypy.tree.mount(AdminUserView(config), '/admin/users')
   # cherrypy.tree.mount(AdminGroupView(config), '/admin/groups')
   cherrypy.tree.mount(AdminObjectsView(config), '/admin/objects')
   cherrypy.tree.mount(AdminAttributeView(config), '/admin/attributes')

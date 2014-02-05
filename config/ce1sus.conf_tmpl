@@ -7,12 +7,18 @@ db=
 port=3306
 debug=no
 usecherrypy=yes
+enableRestAPI=no
 
 [ce1sus]
 useldap=yes
-cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
-files=/files
 environment=LOCAL_DEV
+
+[Handlers]
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
+files=
+rt_user=
+rt_password=
+rt_url=
 
 [ErrorHandler]
 debug=no
@@ -33,15 +39,6 @@ templateRoot=templates
 projectRoot=templates/ce1sus
 collectionsize=200
 outputencoding=utf-8
-
-[RTHelper]
-username=
-password=
-url=
-
-[Protector]
-loginurl=/index
-firstpage=/events
 
 [LDAP]
 server=

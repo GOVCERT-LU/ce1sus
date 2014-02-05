@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*- 
 
-<%namespace name="messagesAndText" file="/dagr/components/messagesAndText.html"/> 
 <%namespace name="modals" file="/dagr/components/modals.html"/>
-<%namespace name="baseForms" file="/dagr/components/forms.html"/> 
+<%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 
 </div>
 
 <!-- user details -->
 <h3>User details:</h3>
-<%call expr="forms.userForm(userDetails, False)"/>
+<%call expr="forms.user_form(user, cb_values, False)"/>
 <div class="row">
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
-		% if not userDetails is None:
+		% if not user is None:
 		<div class="btn-group">
 			<a href="#editUserModal" role="button" class="btn  btn-default"
 				data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
                 onclick="if (confirm('Are you sure you want to delete?')) {
-                    dialogCall('/admin/users/modifyUser?identifier=${userDetails.identifier}&action=remove',
+                    dialogCall('/admin/users/modify_user?identifier=${user.identifier}&action=remove',
                                'adminTabsTabContent',
                                '/admin/users')}">
             Delete
@@ -29,12 +28,15 @@
 </div>
 <br/>
 
-%if not userDetails is None:
-	<%call expr="baseForms.genericModalForm(modalID='editUserModal',url='/admin/users/modifyUser',
-	                                    refreshUrl='/admin/users/rightContent?userid={0}'.format(userDetails.identifier),
-	                                    refreshContainer='userRight')">
-	<input type="hidden" name="action" value="update">
-	<%call expr="modals.saveButtonModal(id='editUserModal',title='Edit User',
-	                              contentUrl='/admin/users/editUser/{0}'.format(userDetails.identifier))"/>
-	</%call>
+%if not user is None:
+<!-- EditObjectForm -->
+<%call expr="base_forms.generic_modal_form(modal_id='editUserModal',
+                                    url='/admin/users/modify_user',
+                                    refresh_url='/admin/users/right_content/{0}'.format(user.identifier), 
+                                    refresh_container='UserRightContent')">
+<input type="hidden" name="action" value="update">
+<%call expr="modals.save_button_modal(id='editUserModal',
+                                    title='Edit User',
+                                    content_url='/admin/users/edit_user/{0}'.format(user.identifier))"/>
+</%call>
 %endif

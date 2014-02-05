@@ -54,7 +54,7 @@ class AdminAttributeView(Ce1susBaseView):
                                    url_right_content='/admin/attributes/right_content',
                                    action_url='/admin/attributes/modify_object',
                                    refresh_url='/admin/attributes',
-                                   modal_content_url='/admin/attributes/add_object',
+                                   modal_content_url='/admin/attributes/add_attribute',
                                    items=attributes)
     except ControllerException as error:
       return self._render_error_page(error)

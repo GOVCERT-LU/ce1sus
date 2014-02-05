@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.views.base import Ce1susBaseView, privileged
-from ce1sus.controllers.admin.groups import GroupsController
+from ce1sus.controllers.admin.user import UserController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
@@ -48,11 +48,10 @@ class AdminUserView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      users = self.user_controller.get_all_user_definitions()
-      return self._render_template('/admin/common/leftContent.html',
-                                   id=AdminUserView.ID,
-                                   url_right_content='/admin/users/right_content',
-                                   items=users)
+      users = self.user_controller.get_all_users()
+      return self._render_template('/admin/users/leftContent.html',
+                                   items=users,
+                                   use_ldap=self.user_controller.use_ldap)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -71,11 +70,11 @@ class AdminUserView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      user = self.user_controller.get_user_definitions_by_id(user_id)
-      remaining_users = self.user_controller.get_available_users(user)
+      user = self.user_controller.get_user_by_id(user_id)
+      cb_values = self.user_controller.get_cb_group_values()
       return self._render_template('/admin/users/userRight.html',
                                    id=AdminUserView.ID,
-                                   remaining_users=remaining_users,
+                                   cb_values=cb_values,
                                    user=user)
     except ControllerException as error:
       return self._render_error_page(error)
@@ -88,49 +87,44 @@ class AdminUserView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    return self._render_template('/admin/users/userModal.html',
-                                 user=None)
-
-  @require(privileged(), require_referer(('/internal')))
-  @cherrypy.expose
-  def edit_user_users(self, identifier, operation,
-                     existing=None, remaining=None):
-    """
-    modifies the relation between a user and its users
-
-    :param userID: The userID of the user
-    :type userID: Integer
-    :param operation: the operation used in the context (either add or remove)
-    :type operation: String
-    :param remainingUsers: The identifiers of the users which the user is not
-                            userd to
-    :type remainingUsers: Integer array
-    :param userUsers: The identifiers of the users which the user is
-                       userd to
-    :type userUsers: Integer array
-
-    :returns: generated HTML
-    """
     try:
-      self.user_controller.modify_user_object_relations(operation, identifier, remaining, existing)
-      return self._return_ajax_ok()
+      cb_values = self.user_controller.get_cb_group_values()
+      return self._render_template('/admin/users/userModal.html',
+                                   cb_values=cb_values,
+                                   user=None)
     except ControllerException as error:
       return self._render_error_page(error)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  def modify_user(self, identifier=None, name=None,
-                  description=None, action='insert', share=None):
+  def ldap_users_table(self):
+    try:
+      ldap_users = self.user_controller.get_all_ldap_users()
+
+      return self._render_template('/admin/users/ldapUserTable.html',
+                                   ldap_users=ldap_users)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  def modify_user(self, identifier=None, username=None, password=None,
+                 priv=None, email=None, action='insert', disabled=None,
+                 maingroup=None, ldap_users_table_length=None, apikey=None):
     """
     modifies or inserts a user with the data of the post
 
     :param identifier: The identifier of the user,
                        is only used in case the action is edit or remove
     :type identifier: Integer
-    :param name: The name of the user
-    :type name: String
-    :param description: The description of this user
-    :type description: String
+    :param username: The username of the user
+    :type username: String
+    :param password: The password of the user
+    :type password: String
+    :param email: The email of the user
+    :type email: String
+    :param priv: Is the user privileged to access the administration section
+    :type priv: Integer
     :param action: action which is taken (i.error. edit, insert, remove)
     :type action: String
 
@@ -138,24 +132,26 @@ class AdminUserView(Ce1susBaseView):
     """
     template = self._get_template('/admin/users/userModal.html')
     try:
-      user = self.user_controller.populate_user(identifier,
-                                                   name,
-                                                   description,
-                                                   action,
-                                                   share)
-
+      if action == 'insertLDAP':
+        user = self.user_controller.get_ldap_user(identifier)
+        user, valid = self.user_controller.insert_ldap_user(user)
+      else:
+        user = self.user_controller.populate_user(identifier, username, password,
+                 priv, email, action, disabled, maingroup, apikey)
       if action == 'insert':
-        user, valid = self.user_controller.insert_user_definition(user)
+        user, valid = self.user_controller.insert_user(user)
       if action == 'update':
-        user, valid = self.user_controller.insert_user_definition(user)
+        user, valid = self.user_controller.update_user(user)
       if action == 'remove':
-        user, valid = self.user_controller.insert_user_definition(user)
+        user, valid = self.user_controller.remove_user(user)
 
       if valid:
         return self._return_ajax_ok()
       else:
+        cb_values = self.user_controller.get_cb_group_values()
         return self._render_template('/admin/users/userModal.html',
-                                 user=user)
+                                 user=user,
+                                 cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -171,8 +167,10 @@ class AdminUserView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      user = self.user_controller.get_user_definitions_by_id(userid)
+      user = self.user_controller.get_user_by_id(userid)
+      cb_values = self.user_controller.get_cb_group_values()
       return self._render_template('/admin/users/userModal.html',
-                                 user=user)
+                                 user=user,
+                                 cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)
