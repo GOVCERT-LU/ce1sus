@@ -11,8 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.datumzait import DatumZait
-
 from ce1sus.brokers.definition.attributedefinitionbroker import \
   AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
@@ -21,11 +19,10 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.commentbroker import CommentBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
+from ce1sus.brokers.staticbroker import TLPLevel
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.relationbroker import RelationBroker, EventRelation
+from ce1sus.brokers.relationbroker import RelationBroker
 
 
 class EventController(Ce1susBaseController):

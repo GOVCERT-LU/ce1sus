@@ -22,6 +22,7 @@ from dagr.db.broker import DateTime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from importlib import import_module
 from dagr.helpers.converters import ValueConverter
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 
 
 # pylint: disable=R0903
@@ -210,6 +211,15 @@ class ValueBroker(BrokerBase):
     :type attribute: Attribute
     """
     return ValueBroker.get_class_by_string(definition.classname)
+
+  @staticmethod
+  def get_all_classes():
+    """returns instances of all the table class values"""
+    result = list()
+    table_names = AttributeDefinition.get_all_table_names()
+    for table_name in table_names:
+      result.append(ValueBroker.get_class_by_string(table_name))
+    return result
 
   def __setClassByAttribute(self, attribute):
     """

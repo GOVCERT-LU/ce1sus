@@ -13,16 +13,11 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
 from ce1sus.brokers.valuebroker import ValueBroker
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                            AttributeDefinition, \
-                                            AttributeDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from importlib import import_module
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
-from dagr.helpers.strings import InputException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 
@@ -58,13 +53,13 @@ class SearchController(Ce1susBaseController):
     self.event_broker = self.broker_factory(EventBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 
-  def get_cb_definitions_values_for_all(self):
+  def get_cb_def_values_for_all(self):
     """
     Returns all the attribtue definitions formated for the combobox
     """
     return self.attribute_definition_broker.get_cb_values_for_all()
 
-  def search_results(self, needle, definition_id, operant, user, cache):
+  def search_results(self, needle, definition_id, operant, user, cache=None):
     result = list()
     if needle:
       # convert to the correct type

@@ -228,9 +228,9 @@ class AttributeDefinition(BASE):
     :returns: String
     """
     # Test if the index is
-    if index < 0 and index >= len(self.__tableDefinitions):
+    if index < 0 and index >= len(AttributeDefinition.__tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(index))
-    return self.__tableDefinitions[index]
+    return AttributeDefinition.__tableDefinitions[index]
 
   def find_table_index(self, name):
     """
@@ -242,10 +242,17 @@ class AttributeDefinition(BASE):
     :returns: Integer
     """
     result = None
-    for index, tablename in self.__tableDefinitions.iteritems():
+    for index, tablename in AttributeDefinition.__tableDefinitions.iteritems():
       if tablename == name:
         result = index
         break
+    return result
+
+  @staticmethod
+  def get_all_table_names():
+    result = list()
+    for tablename in AttributeDefinition.__tableDefinitions.itervalues():
+      result.append(tablename)
     return result
 
   @staticmethod

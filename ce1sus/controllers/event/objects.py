@@ -12,15 +12,12 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from dagr.db.broker import ValidationException, \
 BrokerException
-import dagr.helpers.strings as strings
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 

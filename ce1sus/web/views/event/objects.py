@@ -16,7 +16,6 @@ from dagr.web.views.base import SessionNotFoundException
 from ce1sus.controllers.event.objects import ObjectsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
-from dagr.web.helpers.pagination import Paginator, PaginatorOptions
 from dagr.controllers.base import ControllerException
 
 

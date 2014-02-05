@@ -165,6 +165,46 @@ class RelationBroker(BrokerBase):
     """
     return EventRelation
 
+  def __look_for_value_by_class(self, clazz, value, operand, bypass_validation=False):
+    if bypass_validation:
+      code = 0
+    else:
+      code = 12
+    try:
+      if operand == '==':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value == value,
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+      if operand == '<':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value < value,
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+      if operand == '>':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value > value,
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+      if operand == '<=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value <= value,
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+      if operand == '>=':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value >= value,
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+      if operand == 'like':
+        return self.session.query(clazz).join(clazz.attribute).filter(
+                  clazz.value.like('%{0}%'.format(value)),
+                  Attribute.dbcode.op('&')(code) == code
+                        ).all()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
   def __look_For_value_by_attrib_id(self,
                                 clazz,
                                 value,
@@ -229,18 +269,15 @@ class RelationBroker(BrokerBase):
     """
     result = list()
     if attribute_definition is None:
-      # take all definitions into account
-      definitions = self.attribute_definition_broker.get_all()
-      for definition in definitions:
-        clazz = ValueBroker.get_class_by_attribute_definition(definition)
-        try:
-          result = result + self.__look_For_value_by_attrib_id(clazz,
-                                                          value,
-                                                          definition.identifier,
-                                                          operand,
-                                                          False)
-        except BrokerException:
-          pass
+      # search by tables!
+      try:
+        clazzes = ValueBroker.get_all_classes()
+        for clazz in clazzes:
+          result = result + self.__look_for_value_by_class(clazz, value, operand, False)
+
+      except BrokerException:
+        pass
+
     else:
       clazz = ValueBroker.get_class_by_attribute_definition(attribute_definition)
       result = self.__look_For_value_by_attrib_id(clazz,
