@@ -33,14 +33,14 @@ class DBConverter(object):
 
   def __init__(self, config):
     self.__config = config
-    self.__logger = Log(config)
+    self.logger = Log(config)
     self.event_controller = EventController(config)
     self.object_controller = ObjectsController(config)
     self.attribtue_controller = AttributesController(config)
 
   def _get_logger(self):
     """Returns the class logger"""
-    return self.__logger.get_logger(self.__class__.__name__)
+    return self.logger.get_logger(self.__class__.__name__)
 
   def __convert_event(self, event, owner, full, with_definition):
     """Converts Event to RestEvent"""

@@ -31,7 +31,7 @@ class RestBaseHandler(Ce1susBaseView):
 
   def __init__(self, config):
     Ce1susBaseView.__init__(config)
-    self.__logger = Log(config)
+    self.logger = Log(config)
     self.__dictconverter = DictConverter(config)
     self.__jsonconverter = JSONConverter(config)
     self.__dbconverter = DBConverter(config)
@@ -78,7 +78,7 @@ class RestBaseHandler(Ce1susBaseView):
 
   def _get_logger(self):
     """returns the class logger"""
-    return self.__logger.get_logger(self.__class__.__name__)
+    return self.logger.get_logger(self.__class__.__name__)
 
   def __object_to_dict(self, obj, owner, full, with_definition):
     """Converts the object to json"""

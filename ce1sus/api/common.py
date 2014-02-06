@@ -32,7 +32,7 @@ class JSONConverter(object):
   """Class used to map json to rest classes and vice versa"""
 
   def __init__(self, config):
-    self.__logger = Log(config)
+    self.logger = Log(config)
     self.__encoder = JSONEncoder()
     self.__dictconverter = DictConverter(config)
 
@@ -48,7 +48,7 @@ class JSONConverter(object):
 
   def _get_logger(self):
     """Returns the class logger"""
-    return self.__logger.get_logger(self.__class__.__name__)
+    return self.logger.get_logger(self.__class__.__name__)
 
   def get_json(self, rest_object):
     """Converts the RestObject to JSON"""

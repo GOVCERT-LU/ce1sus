@@ -30,11 +30,11 @@ class DictConverter(object):
 
   def __init__(self, config):
     self.__config = config
-    self.__logger = Log(config)
+    self.logger = Log(config)
 
   def _get_logger(self):
     """Returns the class logger"""
-    return self.__logger.get_logger(self.__class__.__name__)
+    return self.logger.get_logger(self.__class__.__name__)
 
   def __map_dict_to_object(self, dictionary):
     """ maps dictionary to rest objects"""
