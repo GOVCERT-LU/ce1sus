@@ -39,7 +39,8 @@ class ErrorHandler(object):
     ErrorHandler.__sendMail = config_section.get('usemailer')
     ErrorHandler.__receiver = config_section.get('receiver')
     ErrorHandler.__subject = config_section.get('subject')
-    ErrorHandler.__mako = MakoHandler(config)
+    # TODO: find a way to load it with mako
+    ErrorHandler.template_root = config.get('Mako', 'templateroot', '/')
     ErrorHandler.__logger = Log(config)
     ErrorHandler.__mailer = Mailer(config)
 
@@ -61,10 +62,7 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return ErrorHandler.__mako.render_template("/dagr/errors/blue_screen.html",
-                                                    title=title,
-                                                    error=error,
-                                                    text=text)
+    return 'Template was not defined'
 
   @staticmethod
   def commodore(title='500',
@@ -82,11 +80,17 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return ErrorHandler.__mako.render_template("/dagr/errors/errorC64.html",
-                                                    title=title,
-                                                    error=error,
-                                                    version=version,
-                                                    text=text)
+    with open("{0}/dagr/errors/errorC64.html".format(ErrorHandler.template_root), "r") as myfile:
+      data = myfile.read()
+    if text:
+      message = text
+    else:
+      message = ''
+    return data.replace('{2}',
+                        '{0}'.format(error)).replace('{0}',
+                         '{0}'.format(title)).replace('{3}',
+                         '{0}'.format(message)).replace('{2}',
+                         '{1}'.format(version))
 
   @staticmethod
   def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2', send_mail=True, message='Default Error'):

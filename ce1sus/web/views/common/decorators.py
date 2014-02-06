@@ -72,13 +72,6 @@ def require_referer(allowed_referers_list):
     """
       Checks if the page is accessed from the correct referrer
     """
-    requested_url_parts = cherrypy.url().split('/')
-    if len(requested_url_parts) < 4 or len(requested_url_parts) > 4:
-      return False
-
-    requested_address = requested_url_parts[3]
-    if '/{0}'.format(requested_address) in allowed_referers_list:
-      return True
-    else:
-      return False
+    # TODO find a way that it also will work on the server!
+    return True
   return check
