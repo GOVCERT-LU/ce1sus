@@ -24,6 +24,7 @@ from shutil import move, rmtree
 from os import makedirs
 import magic
 from ce1sus.common.checks import can_user_download
+from dagr.web.views.classes import Link
 
 
 CHK_SUM_FILE_NAME = '3cee6f0639b390eb6952496314f3551150a88ca4'
@@ -36,16 +37,6 @@ CHK_SUM_MAGIC_NUMBER = '8f461f462e17197751d242c0a0a827fda624d559'
 CHK_SUM_MIME_TYPE = '86529a68c89c9f78be7120da9a5dd5f4a96abe85'
 CHK_SUM_FILE_ID = 'e81cdce63d1c4fd020c929b2ff91da92f5ce14c3'
 CHK_SUM_HASH_MD5 = 'fed503f9b506cf9636497f5423aef9e68a1bd107'
-
-
-# pylint: disable=R0903,R0902
-class Link(object):
-  """
-  Container class for links
-  """
-  def __init__(self, url, identifier):
-    self.url = url
-    self.identifier = identifier
 
 
 class FileHandler(GenericHandler):
@@ -151,13 +142,20 @@ class FileHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
+  def _get_dest_folder(self, rel_folder):
+    try:
+      dest_path = self._get_base_path() + '/' + rel_folder
+      if not exists(dest_path):
+        makedirs(dest_path)
+      return dest_path
+    except TypeError as error:
+      raise HandlerException(error)
+
   @staticmethod
-  def _get_dest_folder():
+  def _get_rel_folder():
     dest_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
                                      DatumZait.now().month,
                                      DatumZait.now().day)
-    if not exists(dest_path):
-      makedirs(dest_path)
     return dest_path
 
   def _process_file_upload(self, uploaded_file):
@@ -199,13 +197,15 @@ class FileHandler(GenericHandler):
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
                                                    user,
                                                    '0'))
-    destination_path = FileHandler._get_dest_folder() + '/' + sha1
-    move(uploaded_file_path, self._get_base_path() + '/' + destination_path)
+
+    rel_folder = FileHandler._get_rel_folder()
+    dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
+    move(uploaded_file_path, dest_path)
 
     # remove temp folder
     rmtree(dirname(uploaded_file_path))
 
-    main_attribute = FileHandler._create_attribute(destination_path,
+    main_attribute = FileHandler._create_attribute(rel_folder + '/' + sha1,
                                                     obj,
                                                     main_definition,
                                                     user,
@@ -327,13 +327,14 @@ class FileWithHashesHandler(FileHandler):
                                                    user,
                                                    '0'))
 
-    destination_path = FileHandler._get_dest_folder() + '/' + sha1
-    move(uploaded_file_path, self._get_base_path() + '/' + destination_path)
+    rel_folder = FileHandler._get_rel_folder()
+    dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
+    move(uploaded_file_path, dest_path)
 
     # remove temp folder
     rmtree(dirname(uploaded_file_path))
 
-    main_attribute = self._create_attribute(destination_path,
+    main_attribute = self._create_attribute(rel_folder + '/' + sha1,
                                                     obj,
                                                     main_definition,
                                                     user,

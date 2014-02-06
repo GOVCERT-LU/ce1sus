@@ -20,6 +20,7 @@ from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.converters import ObjectConverter
+import uuid as uuidgen
 
 
 class ObjectBroker(BrokerBase):
@@ -77,7 +78,11 @@ class ObjectBroker(BrokerBase):
     :returns: Object
     """
     obj = Object()
-    obj.identifier = identifier
+    if action == 'insert':
+      obj.uuid = unicode(uuidgen.uuid4())
+    else:
+      obj.identifier = identifier
+
     if action != 'remove':
       obj.definition = definition
       if not definition is None:

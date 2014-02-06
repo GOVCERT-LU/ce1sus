@@ -78,6 +78,14 @@ class Ce1susBaseView(BaseView):
     :type user: User
 
     """
+    cherrypy.request.login = user.username
+    self._put_to_session('_cp_username', user.username)
+    # set user to session make foo to populate user
+    # TODO: make this foo better
+    if user.default_group:
+      for group in user.default_group.subgroups:
+        if group.name:
+          pass
     self._put_to_session(SESSION_USER, user)
 
   def _get_user(self):

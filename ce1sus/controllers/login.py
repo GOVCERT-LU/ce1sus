@@ -28,7 +28,7 @@ class LoginController(Ce1susBaseController):
     self.user_broker = self.broker_factory(UserBroker)
     self.ldap_handler = LDAPHandler(config)
 
-  def check_credentials(self, username, password):
+  def get_user_y_usr_pwd(self, username, password):
     """
     Checks if the credentials are valid
 
@@ -39,7 +39,7 @@ class LoginController(Ce1susBaseController):
 
     :returns: Boolean
     """
-    valid = False
+
     user = None
     try:
       if self._get_config_variable('useldap'):
@@ -57,27 +57,31 @@ class LoginController(Ce1susBaseController):
         valid = self.ldap_handler.is_valid_user(username, password)
         if not valid:
           user = None
-
     except NothingFoundException as error:
-      valid = False
       self._get_logger().info(('A login attempt was made with username "{0}" '
                                + 'but the user was not defined.').format(username))
     except BrokerException as error:
-      valid = False
       self._get_logger().critical(error)
 
     # check if a user was found and if it was not disabled
     if user:
       if user.disabled == 1:
-        valid = False
+        return None
       else:
-        valid = True
+        return user
     else:
-      valid = False
+      return None
 
-    return valid
+    return user
 
-  def update_last_login(self, username):
+  def get_user_by_apiKey(self, api_key):
+    """returns the user by api key"""
+    try:
+      return self.user_broker.get_user_by_api_key(api_key)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def update_last_login(self, user):
     """
     Updates the last login time for the user by the username and returns the user
 
@@ -86,7 +90,8 @@ class LoginController(Ce1susBaseController):
 
     :returns: User
     """
-    user = self.user_broker.getUserByUserName(username)
-    user.last_login = DatumZait.utcnow()
-    self.user_broker.update(user)
-    return user
+    try:
+      user.last_login = DatumZait.utcnow()
+      self.user_broker.update(user)
+    except BrokerException as error:
+      self._raise_exception(error)

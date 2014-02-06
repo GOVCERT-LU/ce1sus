@@ -31,7 +31,7 @@ from ce1sus.web.views.admin.validation import AdminValidationView
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
 
-from ce1sus.brokers.system.ce1susbroker import Ce1susBroker
+from ce1sus.brokers.ce1susbroker import Ce1susBroker
 
 def bootstrap():
   # want parent of parent directory aka ../../

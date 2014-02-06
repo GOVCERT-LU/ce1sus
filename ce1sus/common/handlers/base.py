@@ -125,12 +125,28 @@ class HandlerBase(object):
     raise HandlerException(('convert_to_gui_value not defined for {0} with parameters '
                            + '{1}').format(self.__class__.__name__, attribute))
 
-  def convert_to_rest_value(self, attribute):
+  def convert_to_search_value(self, value, config):
+    """
+    Converts the search value to be suited for GUI elements
+
+    NOTE: USE ONLY VALUE HERE!!!!
+    """
+    raise HandlerException(('convert_to_search_value not defined for {0} with parameters '
+                           + '{1},{2}').format(self.__class__.__name__, value, config))
+
+  def convert_to_rest_value(self, attribute, config):
     """
     Converts the value suited for rest elements
     """
     raise HandlerException(('convert_to_rest_value not defined for {0} with parameters '
-                           + '{1}').format(self.__class__.__name__, attribute))
+                           + '{1},{2}').format(self.__class__.__name__, attribute, config))
+
+  def convert_to_rest_value_to_plain(self, value, config):
+    """
+    Converts the value suited for rest elements
+    """
+    raise HandlerException(('convert_to_rest_value not defined for {0} with parameters '
+                           + '{1},{2}').format(self.__class__.__name__, value, config))
 
   def get_additinal_attribute_chksums(self):
     """

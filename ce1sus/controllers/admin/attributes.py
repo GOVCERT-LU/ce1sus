@@ -18,7 +18,7 @@ from ce1sus.brokers.definition.attributedefinitionbroker import \
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 from dagr.db.broker import BrokerException, \
                           ValidationException, \
-                          IntegrityException
+                          IntegrityException, NothingFoundException
 import types as types
 from dagr.controllers.base import SpecialControllerException
 
@@ -40,6 +40,14 @@ class AttributeController(Ce1susBaseController):
   def get_attribute_definitions_by_id(self, object_id):
     try:
       return self.attribute_broker.get_by_id(object_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_attribute_definition_by_chksum(self, chksum):
+    try:
+      return self.attribute_broker.get_definition_by_chksum(chksum)
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -71,7 +79,7 @@ class AttributeController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_object(self, identifier=None, name=None, description='',
+  def populate_attribute(self, identifier=None, name=None, description='',
                       regex='^.*$', class_index=0, action='insert',
                       handler_index=0, share=None, relation=None):
     try:

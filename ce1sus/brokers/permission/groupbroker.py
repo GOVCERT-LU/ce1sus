@@ -140,7 +140,9 @@ class GroupBroker(BrokerBase):
       group.description = cleanPostValue(description)
     return group
 
-  def remove_by_id(self, group_id):
+  def remove_by_id(self, group_id, commit=True):
     if group_id == 1 or group_id == '1':
       raise IntegrityException('Cannot delete this group. The group is essential to '
                   + 'the application.')
+    else:
+      BrokerBase.remove_by_id(self, group_id, commit)

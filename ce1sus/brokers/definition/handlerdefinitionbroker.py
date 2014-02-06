@@ -32,4 +32,3 @@ class AttributeHandlerBroker(BrokerBase):
       result[definition.classname] = definition.identifier
 
     return result
-

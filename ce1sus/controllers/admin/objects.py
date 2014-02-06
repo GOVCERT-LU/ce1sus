@@ -13,9 +13,9 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
-from dagr.db.broker import IntegrityException, BrokerException, ValidationException
+from dagr.db.broker import IntegrityException, BrokerException, ValidationException, NothingFoundException
 import types
-from dagr.controllers.base import ControllerException, SpecialControllerException
+from dagr.controllers.base import SpecialControllerException
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 
 
@@ -35,6 +35,14 @@ class ObjectController(Ce1susBaseController):
   def get_object_definitions_by_id(self, object_id):
     try:
       return self.object_broker.get_by_id(object_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_object_definition_by_chksum(self, chksum):
+    try:
+      return self.object_broker.get_definition_by_chksum(chksum)
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
 

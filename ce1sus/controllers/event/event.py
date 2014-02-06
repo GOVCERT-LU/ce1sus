@@ -19,10 +19,11 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.commentbroker import CommentBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.staticbroker import TLPLevel
+from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 from ce1sus.controllers.base import Ce1susBaseController
-from dagr.db.broker import ValidationException, BrokerException
+from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
 from ce1sus.brokers.relationbroker import RelationBroker
+from datetime import datetime
 
 
 class EventController(Ce1susBaseController):
@@ -49,6 +50,8 @@ class EventController(Ce1susBaseController):
     """
     try:
       return self.event_broker.get_by_id(event_id)
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -77,6 +80,8 @@ class EventController(Ce1susBaseController):
         if rel_event.identifier != event.identifier:
           if self._is_event_viewable_for_user(event, user, cache):
             result.append(rel_event)
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._get_logger().error(error)
 
@@ -94,6 +99,7 @@ class EventController(Ce1susBaseController):
     last_seen = kwargs.get('last_seen', None)
     risk = kwargs.get('risk', None)
     analysis = kwargs.get('analysis', None)
+    uuid = kwargs.get('uuid', None)
     # fill in the values
     return self.event_broker.build_event(identifier,
                                         action,
@@ -106,20 +112,74 @@ class EventController(Ce1susBaseController):
                                         last_seen,
                                         risk,
                                         analysis,
-                                        self._get_user(user.username))
+                                        self._get_user(user.username),
+                                        uuid)
 
   def populate_web_event(self, user, **kwargs):
     """
     populates an event object with the given arguments
 
-    :param username:
-    :type username: String
+    :param user:
+    :type user: String
 
     :returns: Event
     """
     event = self.__popultate_event(user, **kwargs)
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
+    return event
+
+  def populate_rest_event(self, user, rest_event, action):
+    """
+    populates an event object with the given rest_event
+
+    :param user:
+    :type user: String
+
+    :returns: Event
+    """
+    tlp_index = TLPLevel.get_by_name(rest_event.tlp)
+    risk_index = Risk.get_by_name(rest_event.risk)
+    analysis_index = Analysis.get_by_name(rest_event.analysis)
+    status_index = Status.get_by_name(rest_event.status)
+    uuid = rest_event.uuid
+
+    if action == 'insert':
+      identifier = None
+      first_seen = datetime.now()
+      last_seen = first_seen
+    else:
+      event = self.event_broker.get_by_uuid(uuid)
+      identifier = event.identifier
+      first_seen = event.first_seen
+      last_seen = event.last_seen
+
+    params = {'user': user,
+              'identifier': identifier,
+              'action': action,
+              'status_index': status_index,
+              'tlp_index': tlp_index,
+              'description': rest_event.description,
+              'name': rest_event.name,
+              'published': rest_event.published,
+              'first_seen': first_seen,
+              'last_seen': last_seen,
+              'risk_index': risk_index,
+              'analysis_index': analysis_index,
+              'uuid': uuid,
+              }
+
+    event = self.__popultate_event(user, **params)
+
+    event.bit_value.is_rest_instert = True
+
+    if rest_event.share == 1:
+      event.bit_value.is_shareable = True
+    else:
+      event.bit_value.is_shareable = False
+
+    event.bit_value.is_validated = False
+
     return event
 
   def insert_event(self, user, event):
@@ -181,11 +241,21 @@ class EventController(Ce1susBaseController):
           if self._is_event_viewable_for_user(rel_event, user, cache):
             result.append(relation)
       return result
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_cb_tlp_lvls(self):
     try:
       return TLPLevel.get_definitions()
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_by_uuid(self, uuid):
+    try:
+      return self.event_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)

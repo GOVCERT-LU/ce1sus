@@ -11,7 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from sqlalchemy.sql.expression import and_
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
@@ -21,7 +20,6 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute
 from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from importlib import import_module
 
 
 # pylint: disable=R0903,R0902
@@ -287,8 +285,3 @@ class RelationBroker(BrokerBase):
                                             False)
 
     return result
-
-  @staticmethod
-  def getSearchClassByClassString(classname):
-    module = import_module('.valuebroker', 'ce1sus.brokers')
-    return getattr(module, classname)

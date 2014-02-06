@@ -15,16 +15,7 @@ from ce1sus.common.handlers.generichandler import GenericHandler
 import types
 from dagr.helpers.rt import RTTickets
 from ce1sus.common.handlers.base import HandlerException
-
-
-# pylint: disable=R0903
-class Link(object):
-  """
-  Container class for links
-  """
-  def __init__(self, url_base=None, identifier=None):
-    self.url_base = url_base
-    self.identifier = identifier
+from dagr.web.views.classes import Link
 
 
 class RTHandler(GenericHandler):

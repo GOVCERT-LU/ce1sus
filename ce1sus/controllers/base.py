@@ -17,6 +17,12 @@ from dagr.db.session import SessionManager
 import cherrypy
 from ce1sus.common.checks import check_if_event_is_viewable, check_viewable_message
 from dagr.helpers.config import ConfigException
+from dagr.controllers.base import ControllerException
+
+
+class ControllerNothingFoundException(ControllerException):
+  """Raised when nothing can be found"""
+  pass
 
 
 class Ce1susBaseController(BaseController):
@@ -30,6 +36,13 @@ class Ce1susBaseController(BaseController):
 
   def _get_user(self, username):
     return self.user_broker.getUserByUserName(username)
+
+  def _raise_nothing_found_exception(self, error):
+    """
+    raises and logs an exception
+    """
+    self._get_logger().error(error)
+    raise ControllerNothingFoundException(error)
 
   def _get_config_variable(self, key, default_value=None):
     """

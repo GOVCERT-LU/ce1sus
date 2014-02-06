@@ -3,27 +3,18 @@
 """
 (Description)
 
-Created on Feb 2, 2014
+Created on Feb 6, 2014
 """
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-
 from dagr.db.session import SessionManager
-from ce1sus.brokers.system.ce1susbroker import Ce1susBroker
+from ce1sus.brokers.ce1susbroker import Ce1susBroker
 from dagr.db.broker import BrokerException
 import json
-
-# The releases are formated as A.B.C where A,B,C are defined as follows
-# A: Major Release
-# B: Release feature changes
-# C: Bug fixes
-APP_REL = '0.7.0'
-DB_REL = '0.8.0'
-REST_REL = '0.2.0'
+import ce1sus.common.ce1susutils as utils
 
 
 class SystemException(Exception):
@@ -34,13 +25,6 @@ class SystemException(Exception):
 class SantityCheckerException(SystemException):
   """SantityCheckerException"""
   pass
-
-
-def sytem_version(context):
-  """
-  Just for displaing inside the leyout
-  """
-  return APP_REL
 
 
 class System(object):
@@ -66,17 +50,17 @@ class System(object):
         0 if value 1 = value 2
         -1 if value 1 < value 2
     """
-    isNumber = True
+    is_number = True
     try:
       value1 = int(value1)
       value2 = int(value2)
     except ValueError:
-      isNumber = False
+      is_number = False
 
     if value1 == value2:
       result = 0
     else:
-      if isNumber:
+      if is_number:
         if value1 - value2 > 0:
           result = 1
         else:
@@ -118,9 +102,9 @@ class System(object):
   def __check_db(self):
     try:
       value = self.ce1sus_broker.get_by_key('db_shema')
-      if System.__compareReleases(DB_REL, value.value) != 0:
+      if System.__compareReleases(utils.DB_REL, value.value) != 0:
         raise SantityCheckerException('DB scheme release mismatch '
-                          + 'expected {0} got {1}'.format(DB_REL,
+                          + 'expected {0} got {1}'.format(utils.DB_REL,
                                                          value.value))
     except BrokerException as error:
       raise SystemException(error)
@@ -129,10 +113,10 @@ class System(object):
     # check app rel
     try:
       value = self.ce1sus_broker.get_by_key('app_rev')
-      if System.__compareReleases(APP_REL,
+      if System.__compareReleases(utils.APP_REL,
                                         value.value) != 0:
         raise SantityCheckerException('Application release mismatch '
-                          + 'expected {0} got {1}'.format(APP_REL,
+                          + 'expected {0} got {1}'.format(utils.APP_REL,
                                                          value.value))
     except BrokerException as error:
       raise SystemException(error)
@@ -141,9 +125,9 @@ class System(object):
   def check_rest_api(release):
     try:
       # check app rel
-      if System.__compareReleases(REST_REL, release) != 0:
+      if System.__compareReleases(utils.REST_REL, release) != 0:
         raise SantityCheckerException('RestAPI release mismatch '
-                          + 'expected {1} got {0}'.format(REST_REL,
+                          + 'expected {1} got {0}'.format(utils.REST_REL,
                                                           release))
     except BrokerException as error:
       raise SystemException(error)
@@ -173,4 +157,3 @@ class System(object):
 
   def close(self):
     self.connector.close()
-

@@ -185,7 +185,7 @@ class UserBroker(BrokerBase):
       user.api_key = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))
     return user
 
-  def getUserByApiKey(self, apiKey):
+  def get_user_by_api_key(self, api_key):
     # check if api key exists
     try:
       result = self.session.query(User).filter(
@@ -193,10 +193,10 @@ class UserBroker(BrokerBase):
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with apikey :{0}'.format(
-                                                                  apiKey))
+                                                                  api_key))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
-                    'Too many results found for apikey :{0}'.format(apiKey))
+                    'Too many results found for apikey :{0}'.format(api_key))
     except sqlalchemy.exc.SQLAlchemyError as e:
       raise BrokerException(e)
 

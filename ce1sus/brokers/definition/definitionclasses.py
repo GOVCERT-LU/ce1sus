@@ -10,16 +10,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+
 from dagr.db.broker import  ValidationException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
-from ce1sus.api.restclasses import RestObjectDefinition, \
-                                   RestAttributeDefinition
 from ce1sus.common.handlers.base import HandlerBase, HandlerException
-from importlib import import_module
 import json
+from ce1sus.common.ce1susutils import get_class
 
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
@@ -71,8 +70,7 @@ class AttributeHandler(BASE):
     """
     creates an instantiated object
     """
-    module = import_module('.' + self.module, 'ce1sus.common.handlers')
-    clazz = getattr(module, self.classname)
+    clazz = get_class('ce1sus.common.handlers.{0}'.format(self.module), self.classname)
     # instantiate
     handler = clazz(self.config)
     # check if handler base is implemented
@@ -150,25 +148,13 @@ class ObjectDefinition(BASE):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def to_rest_object(self, isOwner=False, full=True):
-    result = RestObjectDefinition()
-    result.name = self.name
-    result.description = self.description
-    result.chksum = self.chksum
-    result.attributes = list()
-    if full:
-      for attribute in self.attributes:
-        # note just 1 level else there is the possibility to make cycles
-        result.attributes.append(attribute.to_rest_object(isOwner, False))
-    return result
-
 
 class AttributeDefinition(BASE):
   """This is a container class for the DEF_ATTRIBUTES table."""
   def __init__(self):
     pass
 
-  __tableDefinitions = {0: 'TextValue',
+  tableDefinitions = {0: 'TextValue',
                  1: 'StringValue',
                  2: 'DateValue',
                  3: 'NumberValue'}
@@ -218,7 +204,8 @@ class AttributeDefinition(BASE):
     else:
       return ''
 
-  def find_classname(self, index):
+  @staticmethod
+  def find_classname(index):
     """
     returns the table name
 
@@ -228,11 +215,12 @@ class AttributeDefinition(BASE):
     :returns: String
     """
     # Test if the index is
-    if index < 0 and index >= len(AttributeDefinition.__tableDefinitions):
+    if index < 0 and index >= len(AttributeDefinition.tableDefinitions):
       raise Exception('Invalid input "{0}"'.format(index))
-    return AttributeDefinition.__tableDefinitions[index]
+    return AttributeDefinition.tableDefinitions[index]
 
-  def find_table_index(self, name):
+  @staticmethod
+  def find_table_index(name):
     """
     searches for the index for the given table name
 
@@ -242,7 +230,7 @@ class AttributeDefinition(BASE):
     :returns: Integer
     """
     result = None
-    for index, tablename in AttributeDefinition.__tableDefinitions.iteritems():
+    for index, tablename in AttributeDefinition.tableDefinitions.iteritems():
       if tablename == name:
         result = index
         break
@@ -250,8 +238,9 @@ class AttributeDefinition(BASE):
 
   @staticmethod
   def get_all_table_names():
+    """returns all the table names"""
     result = list()
-    for tablename in AttributeDefinition.__tableDefinitions.itervalues():
+    for tablename in AttributeDefinition.tableDefinitions.itervalues():
       result.append(tablename)
     return result
 
@@ -265,7 +254,7 @@ class AttributeDefinition(BASE):
     :returns: Dictionary
     """
     result = dict()
-    for index, tablename in AttributeDefinition.__tableDefinitions.iteritems():
+    for index, tablename in AttributeDefinition.tableDefinitions.iteritems():
       if simple:
         key = tablename.replace('Value', '')
       else:
@@ -314,22 +303,7 @@ class AttributeDefinition(BASE):
     function = getattr(self.objects, 'remove')
     function(obj)
 
-  def is_class_index_existing(self, index):
-    return index >= 0 and index <= len(self._AttributeDefinition__tableDefinitions)
-
-  def to_rest_object(self, is_owner=False, full=True):
-    result = RestAttributeDefinition()
-    result.description = self.description
-    result.name = self.name
-    result.regex = self.regex
-    result.class_index = self.class_index
-    result.handler_index = self.handler_index
-    result.relation = self.relation
-    result.chksum = self.chksum
-    result.objects = list()
-    result.relation = self.relation
-    if full:
-      for obj in self.objects:
-        # note just 1 level else there is the possibility to make cycles
-        result.objects.append(obj.to_rest_object(is_owner, False))
-    return result
+  @staticmethod
+  def is_class_index_existing(index):
+    """Returns true if the class index exsits"""
+    return index >= 0 and index <= len(AttributeDefinition.tableDefinitions)

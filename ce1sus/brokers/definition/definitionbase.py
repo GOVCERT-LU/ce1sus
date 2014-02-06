@@ -63,7 +63,6 @@ class DefinitionBrokerBase(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.get_broker_class().__class__.__name__, chksums))
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)
 
@@ -88,6 +87,5 @@ class DefinitionBrokerBase(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No {0} not found for {1}'.format(self.get_broker_class().__class__.__name__, name))
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       self.session.rollback()
       raise BrokerException(error)

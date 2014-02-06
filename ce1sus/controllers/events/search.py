@@ -15,11 +15,11 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from importlib import import_module
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.common.ce1susutils import get_class
 
 
 class SearchControllerException(Exception):
@@ -74,9 +74,8 @@ class SearchController(Ce1susBaseController):
       else:
         definition = self.attribute_definition_broker.get_by_id(definition_id)
         classname = definition.classname
-        module = import_module('.valuebroker', 'ce1sus.brokers')
-        clazz = getattr(module, classname)
-        needle = clazz.convert(needle)
+        clazz = get_class('ce1sus.brokers.valuebroker', classname)
+        needle = clazz.convert_to_search_value(needle, self.config)
 
       found_values = self.relation_broker.look_for_attribute_value(definition,
                                                                   needle,

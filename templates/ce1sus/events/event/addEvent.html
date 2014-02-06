@@ -5,9 +5,9 @@
 
 <h2>Add an Event</h2>
 
-<%call expr="base_forms.generic_form(id='editGroupsForm', url='/events/event/modify_event',refresh_url='/events/recent',refresh_container='eventsTabTabContent')">
+<%call expr="base_forms.reload_tab_form(id='editGroupsForm', url='/events/event/modify_event',tab_url='/events/recent',reload_tab_id='recentEvents')">
 <div class="row">
-        <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
+    <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <input type="hidden" name="action" value="insert">
 	${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values,today=today)}
 	<div class="col-xs-12 col-sm-12" style="text-align:left">

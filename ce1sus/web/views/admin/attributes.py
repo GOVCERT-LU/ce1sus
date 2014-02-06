@@ -151,7 +151,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      attribute = self.attribute_controller.populate_object(identifier,
+      attribute = self.attribute_controller.populate_attribute(identifier,
                                                               name,
                                                               description,
                                                               regex,

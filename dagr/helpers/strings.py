@@ -67,7 +67,9 @@ def plaintext2html(text, tabstop=4):
         last = string.groups()[-1]
         if last in ['\n', '\r', '\r\n']:
           last = '<br/>'
-        return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
+        # I dont want links!
+        # return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
+        return '%s%s%s' % (prefix, url, last)
   # convert to text to be compliant
   stringText = unicode(text)
   if len(stringText) > 0:

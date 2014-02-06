@@ -131,7 +131,9 @@ class SubGroupBroker(BrokerBase):
       subgroup.description = cleanPostValue(description)
     return subgroup
 
-  def remove_by_id(self, subgroup_id):
+  def remove_by_id(self, subgroup_id, commit=True):
     if subgroup_id == 1 or subgroup_id == '1':
       raise IntegrityException('Cannot delete this subgroup. The subgroup is essential to '
                   + 'the application.')
+    else:
+      BrokerBase.remove_by_id(self, subgroup_id, commit)

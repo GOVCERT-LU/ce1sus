@@ -95,9 +95,8 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __populate_object(self, identifier, event_id, parent_object_id, definition_id, user, share, action):
+  def __populate_object(self, identifier, event_id, parent_object_id, definition, user, share, action):
     try:
-      definition = self.def_object_broker.get_by_id(definition_id)
       user = self._get_user(user.username)
       return self.object_broker.build_object(None,
                                             event_id,
@@ -110,10 +109,30 @@ class ObjectsController(Ce1susBaseController):
       self._raise_exception(error)
 
   def populate_web_object(self, identifier, event, parent_object_id, definition_id, user, share, action):
-    obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition_id, user, share, action)
-    obj.bit_value.is_web_insert = True
-    obj.bit_value.is_validated = True
-    return obj
+    try:
+      definition = self.def_object_broker.get_by_id(definition_id)
+      obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition, user, share, action)
+      obj.bit_value.is_web_insert = True
+      obj.bit_value.is_validated = True
+      return obj
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def populate_rest_object(self, event, rest_object, parent_object_id, user, action):
+    try:
+      definition = self.def_object_broker.get_object_definition_by_chksum(rest_object.definition.chksum)
+      obj = self.__populate_object(rest_object.identifier, event.identifier, parent_object_id, definition, user, rest_object.share, action)
+      obj.bit_value.is_rest_instert = True
+
+      if obj.share == 1:
+        obj.bit_value.is_shareable = True
+      else:
+        obj.bit_value.is_shareable = False
+
+      obj.bit_value.is_validated = False
+      return obj
+    except BrokerException as error:
+      self._raise_exception(error)
 
   def insert_object(self, user, event, obj):
     try:

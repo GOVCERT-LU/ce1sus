@@ -257,30 +257,6 @@ class Event(BASE):
                                  + ' empty.'))
     return ObjectValidator.isObjectValid(self)
 
-  def to_rest_object(self, is_owner=False, full=True):
-    result = RestEvent()
-    result.tile = self.title
-    result.description = self.description
-    result.first_seen = self.first_seen
-    result.last_seen = self.last_seen
-    result.tlp = self.tlp
-    result.risk = self.risk
-    result.analysis = self.analysis
-    result.uuid = self.uuid
-
-    result.objects = list()
-    if full:
-      for obj in self.objects:
-        # share only the objects which are shareable or are owned by the user
-        if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or is_owner:
-          result.objects.append(obj.to_rest_object(is_owner))
-    result.comments = list()
-    if self.bit_value.is_shareable:
-      result.share = 1
-    else:
-      result.share = 0
-    return result
-
 
 # pylint: disable=R0903
 class Comment(BASE):
@@ -435,29 +411,6 @@ class Object(BASE):
       ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
-
-  def to_rest_object(self, is_owner=False, full=True):
-    result = RestObject()
-    result.parent_object_id = self.parent_object_id
-    result.parent_event_id = self.parent_event_id
-    result.definition = self.definition.to_rest_object()
-
-    result.attributes = list()
-    if full:
-      for attribute in self.attributes:
-        if (attribute.bit_value.is_shareable and
-                                      attribute.bit_value.is_validated) or is_owner:
-          result.attributes.append(attribute.to_rest_object(is_owner))
-    result.children = list()
-    if full:
-      for obj in self.children:
-        if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or is_owner:
-          result.children.append(obj.to_rest_object(is_owner))
-    if self.bit_value.is_shareable:
-      result.share = 1
-    else:
-      result.share = 0
-    return result
 
   def get_parent_event(self):
     if self.event:
@@ -639,14 +592,3 @@ class Attribute(BASE):
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)
-
-  def to_rest_object(self, is_owner=False):
-    result = RestAttribute()
-    result.definition = self.definition.to_rest_object()
-    result.value = self.value
-    result.ioc = self.ioc
-    if self.bit_value.is_shareable:
-      result.share = 1
-    else:
-      result.share = 0
-    return result

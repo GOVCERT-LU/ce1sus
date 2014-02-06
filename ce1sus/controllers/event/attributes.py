@@ -130,11 +130,10 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __populate_attributes(self, user, obj, definition_id, action, params):
+  def __populate_attributes(self, user, obj, definition, action, params, rest=False):
     try:
       if action == 'insert':
         definitions = dict()
-        definition = self.def_attributes_broker.get_by_id(definition_id)
         definitions[definition.chksum] = definition
         handler_instance = definition.handler
         # get additional definitions if required
@@ -143,7 +142,13 @@ class AttributesController(Ce1susBaseController):
           additional_definitions = self.def_attributes_broker.get_defintion_by_chksums(additional_definitions_chksums)
           for additional_definition in additional_definitions:
             definitions[additional_definition.chksum] = additional_definition
-        attribute, additional_attributes = handler_instance.process_gui_post(obj,
+        if rest:
+          attribute, additional_attributes = handler_instance.process_rest_post(obj,
+                                                                             definitions,
+                                                                             self._get_user(user.username),
+                                                                             params)
+        else:
+          attribute, additional_attributes = handler_instance.process_gui_post(obj,
                                                                              definitions,
                                                                              self._get_user(user.username),
                                                                              params)
@@ -156,15 +161,42 @@ class AttributesController(Ce1susBaseController):
     attribute.bit_value.is_web_insert = True
     attribute.bit_value.is_validated = True
 
+  @staticmethod
+  def __set_rest_attribute(attribute):
+    attribute.bit_value.is_web_insert = True
+    attribute.bit_value.is_validated = True
+
   def populate_web_attributes(self, user, obj, definition_id, action, params):
-    attribute, additional_attributes = self.__populate_attributes(user,
-                                                                  obj,
-                                                                  definition_id,
-                                                                  action,
-                                                                  params)
-    # set bit values
-    AttributesController.__set_web_attribute(attribute)
-    if additional_attributes:
-      for additional_attribute in additional_attributes:
-        AttributesController.__set_web_attribute(additional_attribute)
-    return attribute, additional_attributes
+    try:
+      definition = self.def_attributes_broker.get_by_id(definition_id)
+      attribute, additional_attributes = self.__populate_attributes(user,
+                                                                    obj,
+                                                                    definition,
+                                                                    action,
+                                                                    params)
+      # set bit values
+      AttributesController.__set_web_attribute(attribute)
+      if additional_attributes:
+        for additional_attribute in additional_attributes:
+          AttributesController.__set_web_attribute(additional_attribute)
+      return attribute, additional_attributes
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def populate_rest_attributes(self, user, rest_attribute, action):
+    try:
+      definition = self.def_attributes_broker.get_definition_by_chksum(rest_attribute.definition.chksum)
+      attribute, additional_attributes = self.__populate_attributes(user,
+                                                                    None,
+                                                                    definition,
+                                                                    action,
+                                                                    rest_attribute)
+      # set bit values
+      AttributesController.__set_rest_attribute(attribute)
+      if additional_attributes:
+        for additional_attribute in additional_attributes:
+          AttributesController.__set_rest_attribute(additional_attribute)
+      return attribute, additional_attributes
+
+    except BrokerException as error:
+      self._raise_exception(error)

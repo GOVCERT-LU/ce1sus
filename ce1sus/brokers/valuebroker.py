@@ -20,9 +20,9 @@ from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.db.broker import DateTime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
-from importlib import import_module
 from dagr.helpers.converters import ValueConverter
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from ce1sus.common.ce1susutils import get_class
 
 
 # pylint: disable=R0903
@@ -199,8 +199,7 @@ class ValueBroker(BrokerBase):
     :param classname: the name of the class
     :type classname: Class
     """
-    module = import_module('.valuebroker', 'ce1sus.brokers')
-    return getattr(module, classname)
+    return get_class('ce1sus.brokers.valuebroker', classname)
 
   @staticmethod
   def get_class_by_attribute_definition(definition):
@@ -273,7 +272,6 @@ class ValueBroker(BrokerBase):
         'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
            self.get_broker_class()))
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self._get_logger().fatal(error)
       raise BrokerException(error)
 
     return result
@@ -330,11 +328,9 @@ class ValueBroker(BrokerBase):
                       ).delete(synchronize_session='fetch')
       self.do_commit(commit)
     except sqlalchemy.exc.OperationalError as e:
-      self._get_logger().error(e)
       self.session.rollback()
       raise IntegrityException(e)
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self._get_logger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)
 
@@ -354,6 +350,5 @@ class ValueBroker(BrokerBase):
                       clazz.value == value
                       ).all()
     except sqlalchemy.exc.SQLAlchemyError as e:
-      self._get_logger().fatal(e)
       self.session.rollback()
       raise BrokerException(e)

@@ -89,7 +89,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
      timeout: 30000 //3secs
     });
 
-    request.error(function(response, textStatus, XMLHttpRequest) {
+    request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);
         if (modalID) {
             $('#' + modalID + 'body').html(resultText);
@@ -98,16 +98,17 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
             $('#' + contentid + 'Errors').html(resultText);
         }
     });
-    
-    request.success(function(responseText, textStatus, XMLHttpRequest) {
+    request.error(request.fail);
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
         var message = getResonseTextContent(responseText);
         if (responseText.match(/^<!--OK--/gi)) {
+            form[0].reset();
             if (modalID) {
                 $("#" + modalID).modal('hide');
             }
             // refrehshPage & container if needed
             if (doRefresh) {
-                form[0].reset();
+                
                 if (refreshUrl != "None") {
                     loadContent(refreshContainer, refreshUrl);
                 } else {
@@ -161,11 +162,12 @@ function loadContent(contentid, url) {
          timeout: 30000 //3secs
         });
         
-        request.error(function(response, textStatus, XMLHttpRequest) {
+        request.fail(function(response, textStatus, XMLHttpRequest) {
             var message = getResponseConent(response);
             $("#" + hiddenDiv).html(message);
         });
-        request.success(function(responseText, textStatus, XMLHttpRequest) {
+        request.error(request.fail);
+        request.done(function(responseText, textStatus, XMLHttpRequest) {
             var message = getResonseTextContent(responseText);
             $("#" + hiddenDiv).html(message);
         });
@@ -364,11 +366,12 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
         url : url,
      timeout: 30000 //3secs
     });
-    request.error(function(response, textStatus, XMLHttpRequest) {
+    request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);
         alert(message);
     });
-    request.success(function(responseText, textStatus, XMLHttpRequest) {
+    request.error(request.fail);
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
         var message = getResonseTextContent(responseText);
         if (message.match(/^<!--OK--/gi)) {
             // do refresh

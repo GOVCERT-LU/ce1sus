@@ -72,24 +72,12 @@ class IndexView(Ce1susBaseView):
     """
     if username is None or password is None:
       raise HTTPRedirect('/index')
-
-    valid = self.login_controller.check_credentials(username, password)
-    if valid:
-      user = self.login_controller.update_last_login(username)
+    user = self.login_controller.get_user_y_usr_pwd(username, password)
+    if user:
+      self.login_controller.update_last_login(user)
       # put in session
-      cherrypy.request.login = user.username
-      self._put_to_session('_cp_username', user.username)
-      # set user to session make foo to populate user
-      # TODO: make this foo better
-      if user.default_group:
-        for group in user.default_group.subgroups:
-          if group.name:
-            pass
-        self._put_user_to_session(user)
-        self._get_logger().info('User "{0}" logged in'.format(user.username))
-      else:
-        return self.index('Invalid username or password.')
-
+      self._put_user_to_session(user)
+      self._get_logger().info('User "{0}" logged in'.format(user.username))
       raise HTTPRedirect('/internal')
     else:
       return self.index('Invalid username or password.')
