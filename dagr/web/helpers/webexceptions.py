@@ -83,14 +83,15 @@ class ErrorHandler(object):
     with open("{0}/dagr/errors/errorC64.html".format(ErrorHandler.template_root), "r") as myfile:
       data = myfile.read()
     if text:
-      message = text
+      message = '<p>{0}</p>'.format(text)
     else:
       message = ''
-    return data.replace('{2}',
-                        '{0}'.format(error)).replace('{0}',
-                         '{0}'.format(title)).replace('{3}',
-                         '{0}'.format(message)).replace('{2}',
-                         '{1}'.format(version))
+
+    template = data.replace('${error}', '{0}'.format(error))
+    template = template.replace('${title}', '{0}'.format(title))
+    template = template.replace('${text}', '{0}'.format(message))
+    template = template.replace('${version}', '{0}'.format(version))
+    return template
 
   @staticmethod
   def show(title='500', error='DEFAULT', text='DEFAULT MESSAGE', version='2', send_mail=True, message='Default Error'):
