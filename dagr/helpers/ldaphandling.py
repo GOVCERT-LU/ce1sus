@@ -67,7 +67,7 @@ class LDAPHandler(object):
 
     :returns: Logger
     """
-    return self.logger._get_logger(self.__class__.__name__)
+    return self.logger.get_logger(self.__class__.__name__)
 
   def __get_connection(self):
     """
