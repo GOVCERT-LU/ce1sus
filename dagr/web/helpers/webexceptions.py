@@ -36,17 +36,17 @@ class ErrorHandler(object):
     cherrypy.config.update({'error_page.500': ErrorHandler.error_page_500})
     cherrypy.config.update({'request.error_response':
                             ErrorHandler.handle_error})
-    ErrorHandler.sendMail = config_section.get('usemailer')
-    ErrorHandler.receiver = config_section.get('receiver')
-    ErrorHandler.subject = config_section.get('subject')
-    ErrorHandler.mako = MakoHandler(config)
-    ErrorHandler.logger = Log(config)
-    ErrorHandler.mailer = Mailer(config)
+    ErrorHandler.__sendMail = config_section.get('usemailer')
+    ErrorHandler.__receiver = config_section.get('receiver')
+    ErrorHandler.__subject = config_section.get('subject')
+    ErrorHandler.__mako = MakoHandler(config)
+    ErrorHandler.__logger = Log(config)
+    ErrorHandler.__mailer = Mailer(config)
 
   @staticmethod
   def _get_logger():
     """Returns the class logger"""
-    return ErrorHandler.logger.get_logger('ErrorHandler')
+    return ErrorHandler.__logger.get_logger('ErrorHandler')
 
   @staticmethod
   def blue_screen(title='500', error='DEFAULT', text='DEFAULT MESSAGE'):
@@ -61,7 +61,7 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return ErrorHandler.mako.render_template("/dagr/errors/blue_screen.html",
+    return ErrorHandler.__mako.render_template("/dagr/errors/blue_screen.html",
                                                     title=title,
                                                     error=error,
                                                     text=text)
@@ -82,7 +82,7 @@ class ErrorHandler(object):
     :tyoe
     :returns: generated HTML
     """
-    return ErrorHandler.mako.render_template("/dagr/errors/errorC64.html",
+    return ErrorHandler.__mako.render_template("/dagr/errors/errorC64.html",
                                                     title=title,
                                                     error=error,
                                                     version=version,
@@ -106,17 +106,17 @@ class ErrorHandler(object):
       restext = text
     else:
       restext = None
-    config_settings = ErrorHandler.sendMail and ErrorHandler.receiver
+    config_settings = ErrorHandler.__sendMail and ErrorHandler.__receiver
     if  config_settings and send_mail:
       # create mail
       mail_message = Mail()
       mail_message.body = 'Error: {0}\n\nOccured On:{1}\n\nStackTrace:\n{2}'.format(message, datetime.now(), text)
-      mail_message.subject = ErrorHandler.subject
+      mail_message.subject = ErrorHandler.__subject
       if not mail_message.subject:
         mail_message.subject = 'An error Occured'
-      mail_message.reciever = ErrorHandler.receiver
+      mail_message.reciever = ErrorHandler.__receiver
       try:
-        ErrorHandler.mailer.send_mail(mail_message)
+        ErrorHandler.__mailer.send_mail(mail_message)
       except MailerException as err:
         ErrorHandler._get_logger().critical('Could not send mail Mailer not instantiated:{0}', err)
 
@@ -203,7 +203,10 @@ class ErrorHandler(object):
     ErrorHandler._get_logger().error(message)
 
     match_obj = re.match(r".*'(.*)'.*", message, re.M | re.I)
-    file_name = match_obj.group(1)
+    if match_obj:
+      file_name = match_obj.group(1)
+    else:
+      file_name = '*'
     return  ErrorHandler.show(title='404', error='LOAD "' + file_name + '", 8'
                               + '\nLOADING\n\nFILE NOT FOUND',
                               text=traceback,
