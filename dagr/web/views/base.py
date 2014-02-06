@@ -128,7 +128,7 @@ class BaseView:
     session = self._get_session()
     session.clear()
     session.delete()
-    session.clean_up()
+    # session.clean_up()
     self._get_logger().debug('Session destroyed')
 
   def _get_session(self):

@@ -89,7 +89,7 @@ class IndexView(Ce1susBaseView):
     Log out method
     """
     self._get_logger().info('User {0} logged out'.format(self._get_user().username))
-    # self.destroy_session()
+    self._destroy_session()
     raise HTTPRedirect('/')
 
   @require()
