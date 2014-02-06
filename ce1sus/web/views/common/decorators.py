@@ -72,11 +72,11 @@ def require_referer(allowed_referers_list):
     """
       Checks if the page is accessed from the correct referrer
     """
-    referer_parts = cherrypy.request.headers.get('Referer', '/').split('/')
-    if len(referer_parts) < 4 or len(referer_parts) > 4:
+    requested_url_parts = cherrypy.url().split('/')
+    if len(requested_url_parts) < 4 or len(requested_url_parts) > 4:
       return False
 
-    requested_address = referer_parts[3]
+    requested_address = requested_url_parts[3]
     if '/{0}'.format(requested_address) in allowed_referers_list:
       return True
     else:
