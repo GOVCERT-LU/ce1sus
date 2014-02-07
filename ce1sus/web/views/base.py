@@ -102,16 +102,19 @@ class Ce1susBaseView(BaseView):
     """
     return self._get_from_session('_cp_events_cache', dict())
 
-  def _check_if_event_is_viewable(self, event):
-    """
-    Checks if the user can view the event else raises an exception
-    """
+  def _is_event_viewable(self, event):
     user = self._get_user()
     cache = self._get_authorized_events_cache()
     viewable = check_if_event_is_viewable(event, user, cache)
     log_msg = check_viewable_message(viewable, event.identifier, user.username)
     self._get_logger().info(log_msg)
+    return viewable
 
+  def _check_if_event_is_viewable(self, event):
+    """
+    Checks if the user can view the event else raises an exception
+    """
+    viewable = self._is_event_viewable(event)
     if not viewable:
       raise cherrypy.HTTPError(403)
 

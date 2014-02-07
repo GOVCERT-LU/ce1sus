@@ -36,12 +36,12 @@ class RestEventHandler(RestBaseHandler):
     except ControllerNothingFoundException as error:
       return self._raise_nothing_found(error)
     except ControllerException as error:
-      return self._raise_error('ControllerException', error)
+      return self._raise_error('ControllerException', error=error)
 
   def view(self, uuid, **options):
     try:
       event = self.event_controller.get_by_uuid(uuid)
-      self._check_if_event_is_viewable(event)
+      self._is_event_viewable(event)
       owner = self._is_event_owner(event)
 
       with_definition = options.get('fulldefinitions', False)
@@ -49,11 +49,11 @@ class RestEventHandler(RestBaseHandler):
     except ControllerNothingFoundException as error:
       return self._raise_nothing_found(error)
     except ControllerException as error:
-      return self._raise_error('ControllerException', error)
+      return self._raise_error('ControllerException', error=error)
 
   def _raise_invalid_error(self, obj):
     error_msg = ObjectValidator.getFirstValidationError(obj)
-    self._raise_error('InvalidException', error_msg)
+    self._raise_error('InvalidException', msg=error_msg)
 
   def update(self, uuid, **options):
     if not uuid:
@@ -86,10 +86,10 @@ class RestEventHandler(RestBaseHandler):
         rest_event.uuid = event.uuid
         return self.return_object(event, True, True, with_definition)
       except ControllerException as error:
-        return self._raise_error('ControllerException', error)
+        return self._raise_error('ControllerException', error=error)
 
     else:
-      return self._raise_error('Exception', 'Not Implemented')
+      return self._raise_error('Exception', msg='Not Implemented')
 
   def get_function_name(self, parameter, action):
     if action == 'GET':

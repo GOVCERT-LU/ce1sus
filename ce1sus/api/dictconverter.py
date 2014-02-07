@@ -43,7 +43,8 @@ class DictConverter(object):
       result = self.__populate_classname_by_dict(classname, contents)
     else:
       result = None
-    self._get_logger().debug('End mapping dictionary to object. Time elapsed {1}'.format(datetime.now() - start_time))
+
+    self._get_logger().debug('End mapping dictionary to object. Time elapsed {0}'.format(datetime.now() - start_time))
     return result
 
   def __get_object_data(self, dictionary):
@@ -60,8 +61,10 @@ class DictConverter(object):
     """ Maps the data to the class"""
     self._get_logger().debug('Mapping dictionary to class {0}'.format(classname))
     instance = get_class('ce1sus.api.restclasses', classname)
+    """
     if not isinstance(instance, RestClass):
       raise DictConversionException(('{0} does not implement RestClass').format(classname))
+    """
     self.__populate_instance_by_dict(instance, dictionary)
     return instance
 

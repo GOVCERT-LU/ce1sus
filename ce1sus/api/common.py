@@ -15,6 +15,8 @@ __license__ = 'GPL v3+'
 from dagr.helpers.debug import Log
 from json import JSONEncoder, JSONDecoder
 from ce1sus.api.dictconverter import DictConverter, DictConversionException
+import json
+import decimal
 
 
 class JSONException(Exception):
@@ -31,6 +33,11 @@ class JSONConverter(object):
 
   """Class used to map json to rest classes and vice versa"""
 
+  @staticmethod
+  def default(o):
+    if isinstance(o, decimal.Decimal):
+      return str(o)
+
   def __init__(self, config):
     self.logger = Log(config)
     self.__encoder = JSONEncoder()
@@ -39,7 +46,8 @@ class JSONConverter(object):
   def generate_json(self, dictionary):
     """encodes dictionary to JSON"""
     self._get_logger().debug('Encoding dictionary to JSON')
-    return JSONEncoder().encode(dictionary)
+    return json.dumps(dictionary, default=JSONConverter.default)
+    # return JSONEncoder().encode(dictionary)
 
   def decode_json(self, json):
     """decodes JSON to dictionary"""
@@ -76,7 +84,16 @@ class JSONConverter(object):
     dictionary = self.decode_json(json_string)
     data = self.__get_data(dictionary)
     try:
-      return self.__dictconverter.convert_to_rest_obj(data)
+      results = data.get('Results', None)
+      if results is None:
+        return self.__dictconverter.convert_to_rest_obj(data)
+      else:
+        rest_items = list()
+        for item in results:
+          rest_item = self.__dictconverter.convert_to_rest_obj(item)
+          rest_items.append(rest_item)
+        return rest_items
+
     except DictConversionException as error:
       self._get_logger().fatal(error)
       raise JSONException(error)

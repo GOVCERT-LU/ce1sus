@@ -93,16 +93,23 @@ class RestBaseHandler(Ce1susBaseView):
       self._get_logger().fatal(error)
       self._raise_error('ConversionException', error=error)
 
-  def return_object(self, obj, owner, full, with_definition):
-    """ Retruns the formated return message for an object"""
-    self._get_logger().debug('Returning object')
-    obj_dict = self.__object_to_dict(obj, owner, full, with_definition)
-    result = dict(obj_dict.items() + self.create_status().items())
+  def create_rest_obj(self, obj, owner, full, with_definition):
+    return self.__object_to_dict(obj, owner, full, with_definition)
+
+  def create_return_msg(self, dictionary):
+    result = dict(dictionary.items() + self.create_status().items())
     try:
       return self.__jsonconverter.generate_json(result)
     except JSONException as error:
       self._get_logger().fatal(error)
       self._raise_error('ConversionException', error=error)
+
+  def return_object(self, obj, owner, full, with_definition):
+    """ Retruns the formated return message for an object"""
+    self._get_logger().debug('Returning object')
+    obj_dict = self.create_rest_obj(obj, owner, full, with_definition)
+    result = dict(obj_dict.items() + self.create_status().items())
+    return self.create_return_msg(result)
 
   def convert_to_db_Object(self, rest_obj, user, action):
     return self.__dbconverter.convert_rest_instance(rest_obj, user, action)

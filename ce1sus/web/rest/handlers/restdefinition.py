@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from ce1sus.rest.restbase import RestControllerBase
+from ce1sus.web.rest.handlers.restbase import RestBaseHandler
 from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                                                       AttributeDefinitionBroker
@@ -22,13 +22,13 @@ from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                       AttributeHandlerBroker
 
 
-class RestDefinitionController(RestControllerBase):
+class RestDefinitionController(RestBaseHandler):
 
   PARAMETER_INSERT_MAPPER = {'attribute': 'update_attribute_definitions',
                              'object': 'update_object_definitions'}
 
-  def __init__(self):
-    RestControllerBase.__init__(self)
+  def __init__(self, config):
+    RestBaseHandler.__init__(self, config)
     self.attribute_definition_broker = self.broker_factory(
                                                     AttributeDefinitionBroker
                                                        )

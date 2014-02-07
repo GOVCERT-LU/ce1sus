@@ -19,9 +19,10 @@ from dagr.helpers.validator.valuevalidator import ValueValidator
 from dagr.helpers.validator.objectvalidator import ValidationException
 from cherrypy import request
 import json
-from dagr.db.broker import BrokerException
 from ce1sus.controllers.login import LoginController
 from ce1sus.web.rest.handlers.restevent import RestEventHandler
+from ce1sus.web.rest.handlers.restevents import RestEventsHandler
+from dagr.controllers.base import ControllerException
 
 
 class RestController(RestBaseHandler):
@@ -55,7 +56,7 @@ class RestController(RestBaseHandler):
     self.instances = dict()
     # add instances known to rest
     self.instances['event'] = RestEventHandler(config)
-    # self.instances['events'] = RestEventsController(config)
+    self.instances['events'] = RestEventsHandler(config)
     # self.instances['search'] = RestSearchController(config)
     # self.instances['definition'] = RestDefinitionController(config)
     # self.instances['definitions'] = RestDefinitionsController(config)
@@ -182,7 +183,7 @@ class RestController(RestBaseHandler):
     user = None
     try:
       user = self.login_controller.get_user_by_apiKey(api_key)
-    except BrokerException as error:
+    except ControllerException as error:
       self._get_logger().debug(error)
     if user:
       return user
@@ -246,4 +247,4 @@ class RestController(RestBaseHandler):
         self._raise_error('SystemError', msg='Method {0} is not defined for {0}'.format(action,
                                                                   controller))
     except RestHandlerException as error:
-      self.__handle_handler_exceptions(error)
+      return self.__handle_handler_exceptions(error)
