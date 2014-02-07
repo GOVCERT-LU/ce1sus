@@ -27,6 +27,7 @@ from ce1sus.web.views.admin.objects import AdminObjectsView
 from ce1sus.web.views.admin.subgroups import AdminSubGroupView
 from ce1sus.web.views.admin.user import AdminUserView
 from ce1sus.web.views.admin.validation import AdminValidationView
+from ce1sus.web.rest.restcontroller import RestController
 
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
@@ -95,7 +96,7 @@ def bootstrap():
 
   if load_rest_api:
     logger.get_logger('BootStrap').debug("Loading Rest...")
-    # cherrypy.tree.mount(RestController(ce1susConfigFile), '/REST/')
+    cherrypy.tree.mount(RestController(config), '/REST/')
   else:
     logger.get_logger('BootStrap').debug("Loading Rest skipped. Disabled in config")
 

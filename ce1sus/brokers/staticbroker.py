@@ -34,8 +34,11 @@ def get_dict_element_by_id(dictionary, identifier):
   """
   identifier = int(identifier)
   if identifier in dictionary.keys():
-    return dictionary[identifier]
-  raise Exception('Invalid input "{0}"'.format(identifier))
+    value = dictionary[identifier]
+  if value:
+    return value
+  else:
+    raise Exception('Invalid input "{0}"'.format(identifier))
 
 
 def get_dict_element_by_value(dictionary, value):

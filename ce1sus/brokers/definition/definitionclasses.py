@@ -31,7 +31,7 @@ _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
 
 class AttributeHandler(BASE):
   """
-  TODO: Description
+  Attribute handler class
   """
   def __init__(self):
     pass

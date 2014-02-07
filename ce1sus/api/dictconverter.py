@@ -91,7 +91,7 @@ class DictConverter(object):
       value = None
     else:
       string_value = u'{0}'.format(value)
-      # TODO: user json
+      # TODO: use json
       if string_value.isdigit():
         value = eval(string_value)
       else:

@@ -30,7 +30,7 @@ class RestBaseHandler(Ce1susBaseView):
   """Base class for handlers"""
 
   def __init__(self, config):
-    Ce1susBaseView.__init__(config)
+    Ce1susBaseView.__init__(self, config)
     self.logger = Log(config)
     self.__dictconverter = DictConverter(config)
     self.__jsonconverter = JSONConverter(config)
@@ -82,7 +82,7 @@ class RestBaseHandler(Ce1susBaseView):
 
   def __object_to_dict(self, obj, owner, full, with_definition):
     """Converts the object to json"""
-    self._get_logger().debug('Converting object to JSON with parameters {0},{1} and {3}'.format(owner,
+    self._get_logger().debug('Converting object to JSON with parameters {0},{1} and {2}'.format(owner,
                                                                                                 full,
                                                                                                 with_definition))
     try:
@@ -103,6 +103,9 @@ class RestBaseHandler(Ce1susBaseView):
     except JSONException as error:
       self._get_logger().fatal(error)
       self._raise_error('ConversionException', error=error)
+
+  def convert_to_db_Object(self, rest_obj, user, action):
+    return self.__dbconverter.convert_rest_instance(rest_obj, user, action)
 
   def get_post_object(self):
     """Returns the posted json to a rest object"""

@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 
 from dagr.helpers.debug import Log
 from json import JSONEncoder, JSONDecoder
-from ce1sus.api.dictconverter import DictConverter, ConversionException
+from ce1sus.api.dictconverter import DictConverter, DictConversionException
 
 
 class JSONException(Exception):
@@ -77,10 +77,6 @@ class JSONConverter(object):
     data = self.__get_data(dictionary)
     try:
       return self.__dictconverter.convert_to_rest_obj(data)
-    except ConversionException as error:
+    except DictConversionException as error:
       self._get_logger().fatal(error)
       raise JSONException(error)
-
-
-
-

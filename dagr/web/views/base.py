@@ -46,8 +46,8 @@ class BaseView:
     :returns: BaseView
     """
     self.config = config
-    self.mako = MakoHandler(self.config)
-    self.logger = Log(self.config)
+    self.mako = MakoHandler(config)
+    self.logger = Log(config)
 
   def _create_session(self):
     """

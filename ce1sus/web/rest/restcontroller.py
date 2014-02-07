@@ -13,13 +13,15 @@ __license__ = 'GPL v3+'
 
 import cherrypy
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler, RestHandlerException
-from ce1sus.common.ce1susutils import System, SantityCheckerException, convert_string_to_value
+from ce1sus.common.ce1susutils import convert_string_to_value
+from ce1sus.common.system import System, SantityCheckerException
 from dagr.helpers.validator.valuevalidator import ValueValidator
 from dagr.helpers.validator.objectvalidator import ValidationException
 from cherrypy import request
 import json
 from dagr.db.broker import BrokerException
 from ce1sus.controllers.login import LoginController
+from ce1sus.web.rest.handlers.restevent import RestEventHandler
 
 
 class RestController(RestBaseHandler):
@@ -52,7 +54,7 @@ class RestController(RestBaseHandler):
     self.login_controller = LoginController(config)
     self.instances = dict()
     # add instances known to rest
-    # self.instances['event'] = RestEventController(config)
+    self.instances['event'] = RestEventHandler(config)
     # self.instances['events'] = RestEventsController(config)
     # self.instances['search'] = RestSearchController(config)
     # self.instances['definition'] = RestDefinitionController(config)
@@ -163,9 +165,7 @@ class RestController(RestBaseHandler):
 
   def __get_action(self):
     """Returns the request action"""
-    action = cherrypy.request.method
-    if not action in RestController.REST_mapper:
-      self._raise_fatal_error(msg='Action {0} is not defined in mapper'.format(action))
+    return cherrypy.request.method
 
   def __handle_handler_exceptions(self, error):
     """Generates the return message for hanlder exceptions"""
@@ -222,7 +222,10 @@ class RestController(RestBaseHandler):
       if parameter:
         method_name = controller.get_function_name(parameter, action)
       else:
-        method_name = RestController.REST_mapper[action]
+        if action in RestController.REST_mapper:
+          method_name = RestController.REST_mapper[action]
+        else:
+          self._raise_fatal_error(msg='Action {0} is not defined in mapper'.format(action))
 
       if method_name:
         # call method if existing

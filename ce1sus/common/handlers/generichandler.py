@@ -105,3 +105,6 @@ class GenericHandler(HandlerBase):
 
   def get_additinal_attribute_chksums(self):
     return list()
+
+  def convert_to_rest_value(self, attribute, config):
+    return attribute.plain_value

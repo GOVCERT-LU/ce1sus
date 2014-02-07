@@ -17,6 +17,7 @@ import ast
 from dagr.helpers.converters import ValueConverter
 import re
 from dagr.helpers.validator.valuevalidator import ValueValidator
+import json
 
 
 # The releases are formated as A.B.C where A,B,C are defined as follows
@@ -51,10 +52,10 @@ def convert_string_to_value(string):
     # check if datetime
     if ValueValidator.validateDateTime(string):
       return_value = ValueConverter.set_date(string)
-    # TODO: user JSON instead
+    # TODO: use JSON instead
     if (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
       re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
-      return_value = ast.literal_eval(return_value)
+      return_value = ast.literal_eval(string)
     else:
       return_value = string
   return return_value

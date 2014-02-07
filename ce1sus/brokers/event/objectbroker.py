@@ -40,7 +40,6 @@ class ObjectBroker(BrokerBase):
     """
     overrides BrokerBase.remove_by_id
     """
-    # TODO: REVIEW THIS
     try:
       obj = self.get_by_id(identifier)
       # check if objects does not have children

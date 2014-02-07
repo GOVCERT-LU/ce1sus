@@ -105,6 +105,12 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  def get_attribute_definition_by_chksum(self, chksum):
+    try:
+      return self.def_attributes_broker.get_by_chksum(chksum)
+    except BrokerException as error:
+      self._raise_exception(error)
+
   def insert_attributes(self, user, obj, attribute, additional_attributes):
     try:
       self._get_logger().debug('User {0} inserts attributes on object {1}'.format(user.username,

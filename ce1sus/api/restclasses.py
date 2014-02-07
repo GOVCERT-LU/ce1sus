@@ -78,9 +78,9 @@ class RestEvent(RestClass):
     self.__set_value(result, 'analysis', self.analysis)
     result[self.get_classname()]['published'] = self.published
     if self.objects:
+      result[self.get_classname()]['objects'] = list()
       for obj in self.objects:
         result[self.get_classname()]['objects'].append(obj.to_dict())
-      result[self.get_classname()]['objects'] = list()
     else:
       result[self.get_classname()]['objects'] = None
     result[self.get_classname()]['share'] = u'{0}'.format(self.share)
@@ -101,14 +101,12 @@ class RestObject(RestClass):
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
-    result[self.get_classname()]['children'] = list()
-
     if self.children:
+      result[self.get_classname()]['children'] = list()
       for child in self.children:
         result[self.get_classname()]['children'].append(child.to_dict())
     else:
       result[self.get_classname()]['children'] = None
-
     result[self.get_classname()]['definition'] = self.definition.to_dict()
 
     if self.attributes:
