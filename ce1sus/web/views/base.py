@@ -133,7 +133,10 @@ class Ce1susBaseView(BaseView):
     :returns: Boolean
     """
     user = self._get_user()
-    return is_event_owner(event, user)
+    if event:
+      return is_event_owner(event, user)
+    else:
+      return True
 
   def _get_error_message(self, error):
     error_msg = '{0}'.format(error)
