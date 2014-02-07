@@ -172,6 +172,7 @@ class AdminUserView(Ce1susBaseView):
       cb_values = self.user_controller.get_cb_group_values()
       return self._render_template('/admin/users/userModal.html',
                                  user=user,
-                                 cb_values=cb_values)
+                                 cb_values=cb_values,
+                                 enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)

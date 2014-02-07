@@ -60,7 +60,7 @@
 <div class="col-xs-12 col-sm-12" style="text-align:left">
 % if user is None:
   <%call expr="labeled_input.labeled_editbox(label='Username',name='username',value='',enabled=enabled)"/>
-  <%call expr="labeled_input.labeledPasswordBox(label='Password',name='password',value='',enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Password',name='password',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Priviledged',name='priv',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Disabled',name='disabled',enabled=enabled,has_empty=False,selected=0)"/>

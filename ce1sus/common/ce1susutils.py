@@ -17,7 +17,6 @@ import ast
 from dagr.helpers.converters import ValueConverter
 import re
 from dagr.helpers.validator.valuevalidator import ValueValidator
-import json
 
 
 # The releases are formated as A.B.C where A,B,C are defined as follows
