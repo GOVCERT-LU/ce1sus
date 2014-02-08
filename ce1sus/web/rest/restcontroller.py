@@ -22,6 +22,7 @@ import json
 from ce1sus.controllers.login import LoginController
 from ce1sus.web.rest.handlers.restevent import RestEventHandler
 from ce1sus.web.rest.handlers.restevents import RestEventsHandler
+from ce1sus.web.rest.handlers.restdefinitions import RestDefinitionsHanldler
 from dagr.controllers.base import ControllerException
 
 
@@ -59,7 +60,7 @@ class RestController(RestBaseHandler):
     self.instances['events'] = RestEventsHandler(config)
     # self.instances['search'] = RestSearchController(config)
     # self.instances['definition'] = RestDefinitionController(config)
-    # self.instances['definitions'] = RestDefinitionsController(config)
+    self.instances['definitions'] = RestDefinitionsHanldler(config)
 
   def __check_version(self, version):
     """checks if the requested version is compatible with this version"""

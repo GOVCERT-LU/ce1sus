@@ -107,7 +107,19 @@ class AttributesController(Ce1susBaseController):
 
   def get_attribute_definition_by_chksum(self, chksum):
     try:
-      return self.def_attributes_broker.get_by_chksum(chksum)
+      return self.def_attributes_broker.get_defintion_by_chksum(chksum)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_defintion_by_chksum(self, chksum):
+    try:
+      return self.def_attributes_broker.get_defintion_by_chksum(chksum)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_defintion_by_chksums(self, chksums):
+    try:
+      return self.def_attributes_broker.get_defintion_by_chksums(chksums)
     except BrokerException as error:
       self._raise_exception(error)
 

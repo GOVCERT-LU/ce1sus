@@ -104,11 +104,11 @@ class DBConverter(object):
       rest_object_definition.name = definition.name
       rest_object_definition.description = definition.description
       rest_object_definition.attributes = list()
-      if full:
-        for attribute in definition.attributes:
-          # note just 1 level else there is the possibility to make cycles
-          rest_attribute_definition = self.__convert_attr_def(attribute, full, with_definition)
-          rest_object_definition.attributes.append(rest_attribute_definition)
+    if full:
+      for attribute in definition.attributes:
+        # note just 1 level else there is the possibility to make cycles
+        rest_attribute_definition = self.__convert_attr_def(attribute, full, with_definition)
+        rest_object_definition.attributes.append(rest_attribute_definition)
 
       return rest_object_definition
 

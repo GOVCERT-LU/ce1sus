@@ -126,6 +126,14 @@ class Ce1susBaseView(BaseView):
     if not valid:
       raise cherrypy.HTTPError(403)
 
+  def _check_if_priviledged(self):
+    """
+    Checks is the user is the event owner
+    """
+    user = self._get_user()
+    if not user.privileged:
+      raise cherrypy.HTTPError(403)
+
   def _is_event_owner(self, event):
     """"
     Checks if the event is the owner

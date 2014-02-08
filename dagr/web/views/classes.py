@@ -16,14 +16,14 @@ __license__ = 'GPL v3+'
 class Link(object):
   """Class representing a link"""
 
-  def __init__(self, base_url=None, identifier=None):
-    self.base_url = base_url
+  def __init__(self, url_base='', identifier=''):
+    self.url_base = url_base
     self.identifier = identifier
 
   @property
   def url(self):
     if self.identifier:
-      url = '{0}/{1}'.format(self.base_url, self.identifier)
+      url = '{0}{1}'.format(self.url_base, self.identifier)
     else:
-      url = self.base_url
+      url = self.url_base
     return url
