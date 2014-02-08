@@ -112,7 +112,8 @@ class ObjectBroker(BrokerBase):
                                               Object.parent_event_id == event_id,
                                               Object.event_id == event_id
                                                ),
-                                              Object.identifier != object_id
+                                              Object.identifier != object_id,
+                                              Object.parent_object_id == None
                                                           )
       objs = result.all()
 

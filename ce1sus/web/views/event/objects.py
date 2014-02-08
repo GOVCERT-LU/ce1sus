@@ -227,17 +227,19 @@ class ObjectsView(Ce1susBaseView):
   @cherrypy.expose
   @require(require_referer(('/internal')))
   def modify_parent(self,
-                    event_id,
-                    object_id,
+                    event_id=None,
+                    object_id=None,
                     parent_object_id=None,
                     set_event_parent=None):
     try:
-      if set_event_parent is None and not parent_object_id:
-        return self._return_ajax_error('Please select someting before saving.')
-      event = self.objects_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
-      obj = self.objects_controller.get_by_id(object_id)
-      self.objects_controller.set_parent_relation(obj, event, parent_object_id)
+      if event_id and object_id:
+        if set_event_parent is None and not parent_object_id:
+          return self._return_ajax_error('Please select someting before saving.')
+        event = self.objects_controller.get_event_by_id(event_id)
+        self._check_if_event_is_viewable(event)
+        obj = self.objects_controller.get_by_id(object_id)
+        self.objects_controller.set_parent_relation(obj, event, parent_object_id)
+        return self._return_ajax_ok()
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

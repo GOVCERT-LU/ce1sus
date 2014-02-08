@@ -4,15 +4,19 @@
 
 <%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
 <%
- if is_event_parent: 
-   checkStr = 'checked'
- else:
-   checkStr = ''
+if is_event_parent: 
+  checkStr = 'checked'
+else:
+  checkStr = ''
+if cb_values:
+  hasValues='true'
+else:
+  hasValues='false'
 %>
 <input type="hidden" name="object_id" value="${object_id}">
 <input type="hidden" name="event_id" value="${event_id}">
 <%call expr="labeled_input.generic_labeler('Is parent event',is_event_parent)">
-    <input onclick="enableDisableCB(this.id);" id ="eventCheckBox" type="checkbox" name="setEventParent" value="1" ${checkStr}/>
+    <input onclick="enableDisableCB(this.id,${hasValues});" id ="eventCheckBox" type="checkbox" name="set_event_parent" value="1" ${checkStr}/>
 </%call>
 <%call expr="labeled_disabled_combobox(label='Parent object',name='parent_object_id',values=cb_values,enabled=(not is_event_parent),has_empty=True,selected=selected)"/>
 

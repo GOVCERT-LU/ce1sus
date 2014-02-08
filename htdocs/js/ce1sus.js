@@ -72,22 +72,28 @@ function closeAllColapses(except){
 	);
 }
 
-function enableDisableCB(eventID) {
-    var checked = $("#eventCheckBox").prop("checked");
-    if (checked) {
-        $('#parent_object_idID').prop('disabled', true);
-        $('select#parent_object_idID option').filter(
-                function() {
-                    this.selected = (this.text == '');
-                });
+function enableDisableCB(eventID, hasValues) {
+    if (hasValues) {
+        var checked = $("#eventCheckBox").prop("checked");
+        if (checked) {
+            $('#parent_object_idID').prop('disabled', true);
+            $('select#parent_object_idID option').filter(
+                    function() {
+                        this.selected = (this.text == '');
+                    });
+        } else {
+            $('#parent_object_idID').prop('disabled', false);
+            $('select#parent_object_idID option')
+                    .filter(
+                            function() {
+                                this.selected = ($(this)
+                                        .val() == 'None');
+                            });
+        }
     } else {
-        $('#parent_object_idID').prop('disabled', false);
-        $('select#parent_object_idID option')
-                .filter(
-                        function() {
-                            this.selected = ($(this)
-                                    .val() == 'None');
-                        });
+        alert('No objects can be assigned.');
+        $("#eventCheckBox").prop('checked', true);
+        
     }
 }
 
