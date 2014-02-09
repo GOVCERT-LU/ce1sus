@@ -280,31 +280,31 @@ class FileWithHashesHandler(FileHandler):
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
                                                    user,
-                                                   '0'))
+                                                   '1'))
 
     attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(uploaded_file_path),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_MD5, definitions),
                                                    user,
-                                                   '0'))
+                                                   '1'))
 
     attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(uploaded_file_path),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA256, definitions),
                                                    user,
-                                                   '0'))
+                                                   '1'))
 
     attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(uploaded_file_path),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA384, definitions),
                                                    user,
-                                                   '0'))
+                                                   '1'))
 
     attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(uploaded_file_path),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA512, definitions),
                                                    user,
-                                                   '0'))
+                                                   '1'))
 
     attributes.append(FileHandler._create_attribute(getsize(uploaded_file_path),
                                                    obj,
@@ -323,7 +323,7 @@ class FileWithHashesHandler(FileHandler):
     if file_id:
       attributes.append(FileHandler._create_attribute(file_id,
                                                    obj,
-                                                   FileHandler._get_definition(CHK_SUM_MIME_TYPE, definitions),
+                                                   FileHandler._get_definition(CHK_SUM_FILE_ID, definitions),
                                                    user,
                                                    '0'))
 

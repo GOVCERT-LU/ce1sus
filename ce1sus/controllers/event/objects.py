@@ -202,7 +202,7 @@ class ObjectsController(Ce1susBaseController):
 
   def get_flat_objects(self, event, is_owner):
     result = list()
-    objects = self.get_all_event_obejcts(event, is_owner)
+    objects = self.object_broker.get_all_event_objects(event.identifier)
     for obj in objects:
       for attribute in obj.attributes:
         if is_owner:

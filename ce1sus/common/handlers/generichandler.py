@@ -39,8 +39,33 @@ class GenericHandler(HandlerBase):
     """
     attribute = Attribute()
     attribute.identifier = None
-    value = params.get('value')
-    share = params.get('shared')
+    value = params.get('value', None)
+    share = params.get('shared', None)
+    attribute.bit_value = BitValue('0', attribute)
+    if share is None:
+      # use the default value from the definition
+      if definition.share == 1:
+        attribute.bit_value.is_shareable = True
+      else:
+        attribute.bit_value.is_shareable = False
+    else:
+      # check if parent is sharable
+      if obj.bit_value.is_shareable:
+        if share == '0':
+          attribute.bit_value.is_shareable = False
+        else:
+          attribute.bit_value.is_shareable = share
+      else:
+        attribute.bit_value.is_shareable = share
+
+    is_ioc = params.get('ioc', None)
+    if is_ioc is None:
+      # take default value
+      attribute.ioc = 0
+    else:
+      ObjectConverter.set_integer(attribute,
+                               'ioc', is_ioc)
+
     if isinstance(value, list):
       value = value[0]
     if hasattr(value, 'strip'):
@@ -59,18 +84,7 @@ class GenericHandler(HandlerBase):
     attribute.modifier_id = user.identifier
     attribute.modifier = user
     attribute.creator = user
-    ObjectConverter.set_integer(attribute,
-                               'ioc',
-                               params.get('ioc', '0').strip())
-    attribute.bit_value = BitValue('0', attribute)
-    # check if parent is sharable
-    if obj.bit_value.is_shareable:
-      if share == '1':
-        attribute.bit_value.is_shareable = True
-      else:
-        attribute.bit_value.is_shareable = False
-    else:
-      attribute.bit_value.is_shareable = False
+
     return attribute
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):

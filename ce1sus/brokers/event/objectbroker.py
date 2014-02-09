@@ -196,6 +196,17 @@ class ObjectBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
+  def get_all_event_objects(self, event_id):
+    try:
+      result = self.session.query(Object).filter(or_(Object.event_id == event_id,
+                                                     Object.parent_event_id == event_id)
+                                                 )
+      return result.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+        return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
+
   def get_viewable_event_objects(self, event_id):
     """
     Returns the objects of the event
