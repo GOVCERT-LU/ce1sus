@@ -39,22 +39,6 @@ class EventController(Ce1susBaseController):
     self.commentBroker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 
-  def get_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
-    except NothingFoundException as error:
-      self._raise_nothing_found_exception(error)
-    except BrokerException as error:
-      self._raise_exception(error)
-
   def get_related_events(self, event, user, cache):
     """
     Returns the relations which the user can see

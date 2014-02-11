@@ -60,7 +60,7 @@ class EventView(Ce1susBaseView):
     user = self._get_user()
     cache = self._get_authorized_events_cache()
     try:
-      event = self.event_controller.get_by_id(event_id)
+      event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       relations = self.event_controller.get_related_events(event, user, cache)
       return self._render_template('/events/event/view.html',
@@ -79,7 +79,7 @@ class EventView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      event = self.event_controller.get_by_id(event_id)
+      event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       return self._render_template('/events/event/eventBase.html',
                                    event_id=event_id,
@@ -96,7 +96,7 @@ class EventView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      event = self.event_controller.get_by_id(event_id)
+      event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
 
       return self.__render_event_details('/events/event/details.html', event)
@@ -113,7 +113,7 @@ class EventView(Ce1susBaseView):
     """
     # right checks
     try:
-      event = self.event_controller.get_by_id(event_id)
+      event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       return self.__render_event_details('/events/event/editDetails.html', event)
     except ControllerException as error:
@@ -189,7 +189,7 @@ class EventView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      event = self.event_controller.get_by_id(event_id)
+      event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       user = self._get_user()
       cache = self._get_authorized_events_cache()

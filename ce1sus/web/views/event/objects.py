@@ -205,7 +205,7 @@ class ObjectsView(Ce1susBaseView):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
-      obj = self.objects_controller.get_by_id(object_id)
+      obj = self.objects_controller.get_object_by_id(object_id)
 
       if obj.event_id:
         is_event_parent = True
@@ -237,7 +237,7 @@ class ObjectsView(Ce1susBaseView):
           return self._return_ajax_error('Please select someting before saving.')
         event = self.objects_controller.get_event_by_id(event_id)
         self._check_if_event_is_viewable(event)
-        obj = self.objects_controller.get_by_id(object_id)
+        obj = self.objects_controller.get_object_by_id(object_id)
         self.objects_controller.set_parent_relation(obj, event, parent_object_id)
         return self._return_ajax_ok()
       return self._return_ajax_ok()
@@ -256,7 +256,7 @@ class ObjectsView(Ce1susBaseView):
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_owner(event)
       user = self._get_user()
-      obj = self.objects_controller.get_by_id(object_id)
+      obj = self.objects_controller.get_object_by_id(object_id)
       self.objects_controller.remove_object(user, event, obj)
       return self._return_ajax_ok()
     except ControllerException as error:

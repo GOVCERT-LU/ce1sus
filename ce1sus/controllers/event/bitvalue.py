@@ -27,48 +27,6 @@ class BitValueController(Ce1susBaseController):
     self.object_broker = self.broker_factory(ObjectBroker)
     self.event_broker = self.broker_factory(EventBroker)
 
-  def get_event_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_object_by_id(self, object_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.object_broker.get_by_id(object_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_attribute_by_id(self, attribute_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.attribute_broker.get_by_id(attribute_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
   @staticmethod
   def __set_shared(instance, share):
 

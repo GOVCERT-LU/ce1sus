@@ -110,10 +110,10 @@
                         %if attribute.bit_value.is_validated_and_shared or owner:
                         <tr>
                         <td><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
-                        <td>${shareicon}</td>
+                        <td style="text-align:center">${shareicon}</td>
                         <td><%call expr="messages_and_text.object_to_html(attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
                         <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
-                        <td>${iocicon}</td>
+                        <td style="text-align:center">${iocicon}</td>
                         <td style="width: 60px;">
                           <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}');">
                              <span class="glyphicon glyphicon-eye-open" title="View details"></span>

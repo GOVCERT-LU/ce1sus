@@ -93,7 +93,7 @@ class AttributesView(Ce1susBaseView):
       self._put_to_session('instertAttribute', None)
       event = self.attributes_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
-      attribute = self.attributes_controller.get_by_id(attribute_id)
+      attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
       user = self._get_user()
       handler = attribute.definition.handler
       return handler.render_gui_view(self._render_template, attribute, user)
@@ -114,7 +114,7 @@ class AttributesView(Ce1susBaseView):
         event = self.attributes_controller.get_event_by_id(event_id)
         self._check_if_event_is_viewable(event)
         if attribute_id:
-          attribute = self.attributes_controller.get_by_id(attribute_id)
+          attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
       if definition_id:
         definition = self.attributes_controller.get_attribute_definition_by_id(definition_id)
       else:
@@ -183,7 +183,7 @@ class AttributesView(Ce1susBaseView):
       self._check_if_event_is_viewable(event)
       obj = self.attributes_controller.get_object_by_id(object_id)
       cb_definitions = self.attributes_controller.get_cb_attribute_definitions_by_obj(obj)
-      attribute = self.attributes_controller.get_by_id(attribute_id)
+      attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
       return self._render_template('/events/event/attributes/attributesModal.html',
                                    event_id=event_id,
                                    object_id=object_id,

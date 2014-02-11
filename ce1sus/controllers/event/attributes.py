@@ -18,9 +18,6 @@ from dagr.db.broker import ValidationException, \
 BrokerException
 from ce1sus.common.handlers.base import HandlerException
 from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.definition.handlerdefinitionbroker import \
                                                         AttributeHandlerBroker
 
@@ -30,26 +27,9 @@ class AttributesController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
     self.value_broker = self.broker_factory(ValueBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
-
-  def get_by_id(self, attribute_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.attribute_broker.get_by_id(attribute_id)
-    except BrokerException as error:
-      self._raise_exception(error)
 
   def remove_by_id(self, attribute_id):
     """
@@ -62,34 +42,6 @@ class AttributesController(Ce1susBaseController):
     """
     try:
       return self.attribute_broker.remove_by_id(attribute_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_object_by_id(self, object_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.object_broker.get_by_id(object_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_event_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
     except BrokerException as error:
       self._raise_exception(error)
 

@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-import cherrypy
 import types
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
@@ -34,20 +33,6 @@ class GroupsController(Ce1susBaseController):
   def get_available_subgroups(self, event):
     try:
       return self.event_broker.get_event_subgroups(event.identifier, False)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_event_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
     except BrokerException as error:
       self._raise_exception(error)
 

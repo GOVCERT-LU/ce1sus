@@ -25,20 +25,6 @@ class CommentsController(Ce1susBaseController):
     self.comment_broker = self.broker_factory(CommentBroker)
     self.event_broker = self.broker_factory(EventBroker)
 
-  def get_event_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
   def get_by_id(self, comment_id):
     try:
       return self.comment_broker.get_by_id(comment_id)

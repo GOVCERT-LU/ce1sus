@@ -32,34 +32,6 @@ class ObjectsController(Ce1susBaseController):
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
 
-  def get_event_by_id(self, event_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.event_broker.get_by_id(event_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
-  def get_by_id(self, object_id):
-    """
-    Returns an event with the given ID
-
-    :param event_id: identifer of the event
-    :type event_id: Integer
-
-    :returns: Event
-    """
-    try:
-      return self.object_broker.get_by_id(object_id)
-    except BrokerException as error:
-      self._raise_exception(error)
-
   def get_attr_def_by_obj_def(self, object_definition):
     """
     Returns a list of attribute definitions with the given object definition
