@@ -179,7 +179,7 @@ function loadNewTab(pk, id, url, reload, title) {
         $('#' + tabID + pk + 'LI').attr('class', 'dropdown active');
     } else {
         // createTab
-        var keyValue = tabID+pk;s
+        var keyValue = tabID+pk;
         var tab = $("<li/>")
         .attr("id", keyValue +'LI')
         .attr("class", 'dropdown active');
