@@ -4,23 +4,22 @@ $.fn.scrollView = function() {
             scrollTop : $(this).offset().top
         }, 1000);
     });
-}
+};
 
 function getResponseConent(response) {
-    if ((response.status == 403) || (response.status == 404)) {
-        var message = getErrorMsg(response)
-        return message
+    if ((response.status === 403) || (response.status === 404)) {
+        var message = getErrorMsg(response);
+        return message;
     } else {
-        
-        var message = response.responseText
-        document.write(message); 
+        var message = response.responseText;
+        document.write(message);
         return message;
     }
 }
 
 function getResonseTextContent(responseText) {
     if (responseText.match(/(<html)/i)) {
-        document.write(responseText); 
+        document.write(responseText);
         return responseText;
     } else {
         if (responseText.match(/^<!--Error-->/gi)) {
@@ -32,15 +31,15 @@ function getResonseTextContent(responseText) {
 
 function createErrorsMsg(code, message) {
     var resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-    if (code != null) {
+    if (code !== null) {
         resultText += '<h4 class="alert-heading" style="text-align:left">Error: ' + code
-                + '</h4><p><div style="text-align:left">'
+                + '</h4><p><div style="text-align:left">';
     } else {
-        resultText += '<h4 class="alert-heading" style="text-align:left">Error occurred!</h4><p><div style="text-align:left">'
+        resultText += '<h4 class="alert-heading" style="text-align:left">Error occurred!</h4><p><div style="text-align:left">';
     }
     resultText += message;
     resultText += '</div></p></div>';
-    return resultText
+    return resultText;
 }
 
 function getErrorMsg(resonseText) {
@@ -51,9 +50,9 @@ function getErrorMsg(resonseText) {
         var message = resonseText;
     }
     if (typeof (resonseText.status) !== 'undefined') {
-        var code = resonseText.status
+        var code = resonseText.status;
     } else {
-        var code = null
+        var code = null;
     }
     return createErrorsMsg(resonseText.status,message);
 }
@@ -76,10 +75,8 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     var form = $(formElement);
     var inputs = form.find("input, select, button, textarea");
     var formData = new FormData(form[0]);
-
     //disable the inputs
     inputs.prop("disabled", true);
-
     var request = $.ajax({
         url : uri,
         type : "post",
@@ -88,50 +85,46 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
         processData: false,
      timeout: 30000 //3secs
     });
-
     request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);
         if (modalID) {
-            $('#' + modalID + 'body').html(resultText);
+            $('#' + modalID + 'body').html(message);
         } else {
 
-            $('#' + contentid + 'Errors').html(resultText);
+            $('#' + contentid + 'Errors').html(message);
         }
     });
     request.error(request.fail);
     request.done(function(responseText, textStatus, XMLHttpRequest) {
         var message = getResonseTextContent(responseText);
-        if (responseText.match(/^<!--OK--/gi)) {
+        if (message.match(/^<!--OK--/gi)) {
             form[0].reset();
             if (modalID) {
                 $("#" + modalID).modal('hide');
             }
             // refrehshPage & container if needed
             if (doRefresh) {
-                
-                if (refreshUrl != "None") {
+                if (refreshUrl !== "None") {
                     loadContent(refreshContainer, refreshUrl);
                 } else {
-                    $("#" + refreshContainer).html(responseText);
+                    $("#" + refreshContainer).html(message);
                 }
-
             }
         } else {
-            if (responseText.match(/^<!--Error-->/gi)) {
-                var resultText = createErrorsMsg(null, responseText);
+            if (message.match(/^<!--Error-->/gi)) {
+                var resultText = createErrorsMsg(null, message);
                 form.prepend(resultText);
-                
             } else {
-                if (responseText.match(/^<!--PostError-->/gi)) {
+                if (message.match(/^<!--PostError-->/gi)) {
                     //post errors are mainly validations issues
-                    var resultText = responseText;
+                    var resultText = message;
                 } else {
-                    var resultText = createErrorsMsg(null, responseText);
-                } 
+                    var resultText = createErrorsMsg(null, message);
+                }
                 if (modalID) {
-                    $("#" + modalID + "body").html(resultText);
+                    $("#" + modalID + "body").html(message);
                 } else {
-                    $("#" + refreshContainer + "").html(resultText);
+                    $("#" + refreshContainer + "").html(message);
                 }
             }
         }
@@ -161,7 +154,6 @@ function loadContent(contentid, url) {
             url : url,
          timeout: 30000 //3secs
         });
-        
         request.fail(function(response, textStatus, XMLHttpRequest) {
             var message = getResponseConent(response);
             $("#" + hiddenDiv).html(message);
@@ -187,7 +179,7 @@ function loadNewTab(pk, id, url, reload, title) {
         $('#' + tabID + pk + 'LI').attr('class', 'dropdown active');
     } else {
         // createTab
-        var keyValue = tabID+pk
+        var keyValue = tabID+pk;s
         var tab = $("<li/>")
         .attr("id", keyValue +'LI')
         .attr("class", 'dropdown active');
@@ -208,16 +200,16 @@ function loadNewTab(pk, id, url, reload, title) {
             .attr("class", 'dropdown-menu')
             .attr("role", 'menu');
         if (!reload) {
-            var menuItem = $('<li/>')
-            var reload =  $('<a/>')
+            var menuItem = $('<li/>');
+            var reloadLink =  $('<a/>')
             .attr("href", '#')
             .attr("tabindex", '-1')
             .attr("onclick", "loadTabLi('"+keyValue+"', true);")
             .html('Reload');
-            menuItem.append(reload);
+            menuItem.append(reloadLink);
             dropdown.append(menuItem);
         }
-        var menuItem2 = $('<li/>')
+        var menuItem2 = $('<li/>');
         var close = $('<a/>')
         .attr("href", '#')
         .attr("tabindex", '-1')
@@ -225,10 +217,8 @@ function loadNewTab(pk, id, url, reload, title) {
         .html('Close');
         menuItem2.append(close);
         dropdown.append(menuItem2);
-
         tab.append(link);
         tab.append(dropdown);
-        
         $("#" + tabID).append(tab);
     }
     // load Content
@@ -236,12 +226,10 @@ function loadNewTab(pk, id, url, reload, title) {
 }
 
 function closeTab(tabulatorID, tabToCloseID) {
-
     $('#' + tabToCloseID).find("a").each(function() {
         // normalerweis get et just een
         $(this).attr('onclick', '').unbind('click');
     });
-
     $('#' + tabToCloseID).remove();
     //empty contents of pane
     var conentID = tabulatorID+"TabContent";
@@ -256,9 +244,8 @@ function closeTab(tabulatorID, tabToCloseID) {
         activateLi(identifier);
         $(this).find('a').each(function(){
             var url = $(this).attr('src');
-            return loadTab(url, identifier)
+            return loadTab(url, identifier);
         });
-        
         return false;
     });
 }
@@ -290,7 +277,7 @@ function findAndLoadActiveLi(id, contentID) {
                 });
             }
         }
-    })
+    });
 }
 
 function hideHidden(contentID) {
@@ -307,27 +294,21 @@ function getHiddenDivID(id, contentID) {
     hideHidden(contentID);
     var hiddenID =   id + 'Hidden';
     var parentDiv = $('#' + contentID);
-    var parentParend = parentDiv.parent();
     //heck if one is existing and then show it else
     parentDiv.children('div').each(function() {
-        if (this.id == hiddenID) {
+        if (this.id === hiddenID) {
             $(this).css("display", "block");
             found = true;
         }
     });
     //if noone found append a new one
-    
     if (!found) {
         var $div = $("<div/>")
         .attr("id", hiddenID)
         .html("");
-
         parentDiv.append($div);
     }
-    
     return hiddenID;
-    
-    
 }
 
 function loadToolbarLi(id, contentID, reload) {
@@ -339,7 +320,7 @@ function loadToolbarLi(id, contentID, reload) {
         loadContent(contentID, url);
     } else {
         var hiddenDivID = getHiddenDivID(id, contentID);
-        //if div is empty load content 
+        //if div is empty load content
         if ($('#' + hiddenDivID).is(':empty')) {
             loadContent(hiddenDivID, url);
         } else {
@@ -360,8 +341,6 @@ function loadTabLi(id, reload) {
 
 function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
         doCloseTab, tabID, tabToClose) {
-
-    
     var request = $.ajax({
         url : url,
      timeout: 30000 //3secs
@@ -390,7 +369,6 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
             alert('Error:\n' + message);
         }
     });
-
 }
 
 function dialogCall(url, refreshContainer, refreshUrl) {

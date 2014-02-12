@@ -1,75 +1,72 @@
 function setCBChange(element, contentid) {
-	
-	element.change(function() {
-    	var text = this.options[this.selectedIndex].text;
-    	var div = $('#'+id+' #attributeFormDefinition #editBox');
-        if (text == 'File') {
-        	div = $('#'+id+' #attributeFormDefinition #editBox');
-        	div.html('<div class="form-group">'+
-        			  '<label for="inputEmail1" class="col-lg-3 control-label">Value:'+
-        		      '</label>'+
-        			  '<div class="col-lg-9">'+
-        		      '<input class="form-control" id="valueID" name='+
-        			  '"value" type="file" /></div></div>');
-        } else {
-        	div.html('<div class="form-group">'+
-      			  '<label for="inputEmail1" class="col-lg-3 control-label">Value:'+
-    		      '</label>'+
-    			  '<div class="col-lg-9">'+
-    		      '<input class="form-control" id="valueID" name='+
-    			  '"value" type="text" /></div></div>');
+
+    element.change(function() {
+    var text = this.options[this.selectedIndex].text;
+    var div = $('#'+id+' #attributeFormDefinition #editBox');
+    if (text === 'File') {
+        div = $('#'+id+' #attributeFormDefinition #editBox');
+        div.html('<div class="form-group">'+
+                  '<label for="inputEmail1" class="col-lg-3 control-label">Value:'+
+                  '</label>'+
+                  '<div class="col-lg-9">'+
+                  '<input class="form-control" id="valueID" name='+
+                  '"value" type="file" /></div></div>');
+    } else {
+        div.html('<div class="form-group">'+
+              '<label for="inputEmail1" class="col-lg-3 control-label">Value:'+
+              '</label>'+
+              '<div class="col-lg-9">'+
+              '<input class="form-control" id="valueID" name='+
+              '"value" type="text" /></div></div>');
         }
     });
 }
 
-
 function showSelected(identifier){
-	$('.panel-collapse').each(function () {
-		var id = $(this).attr('id');
-		if (id == 'collapseItem'+identifier) {
-			$(this).collapse('show').delay(300);
-		} else {
-			$(this).collapse('hide').delay(300);
-		}
-	});
-	$('#collapseItem'+identifier).scrollView();
-	activateMenuLi(identifier)
+    $('.panel-collapse').each(function () {
+        var id = $(this).attr('id');
+        if (id === 'collapseItem'+identifier) {
+            $(this).collapse('show').delay(300);
+        } else {
+            $(this).collapse('hide').delay(300);
+        }
+    });
+    $('#collapseItem'+identifier).scrollView();
+    activateMenuLi(identifier);
 }
 
 function openAllColapses(except){
-	$('#leftMenu').find("li").each(function() {
-	    $(this).attr('class', '');
-	});
-	$('.panel-collapse').each(function () {
-		//This is just due to the workaround
-		if (except != 'None') {
-			var id = $(this).attr('id');
-			if ( id == 'collapseItem'+except) {
-				$(this).collapse('show');
-				$('#menu'+except+'LI').attr('class', 'active');	
-				$(this).scrollView();
-			}
-		} else {
-			$(this).collapse('show')};
-			
-		} 
-	);
-
-	
+    $('#leftMenu').find("li").each(function() {
+        $(this).attr('class', '');
+    });
+    $('.panel-collapse').each(function () {
+        //This is just due to the workaround
+        if (except !== 'None') {
+            var id = $(this).attr('id');
+            if ( id === 'collapseItem'+except) {
+                $(this).collapse('show');
+                $('#menu'+except+'LI').attr('class', 'active');
+                $(this).scrollView();
+            }
+        } else {
+            $(this).collapse('show');
+        }
+        });
 }
 
 function closeAllColapses(except){
-	$('.panel-collapse').each(function () {
-		//This is just due to the workaround
-		if (except != 'None') {
-		    var id = $(this).attr('id');
-			if ( id == 'collapseItem'+except) {
-				$(this).collapse('hide');
-			}
-		} else {
-			$(this).collapse('hide')}
-		} 
-	);
+    $('.panel-collapse').each(function () {
+        //This is just due to the workaround
+        if (except !== 'None') {
+            var id = $(this).attr('id');
+            if ( id === 'collapseItem'+except) {
+                $(this).collapse('hide');
+            }
+        } else {
+            $(this).collapse('hide');
+            }
+        }
+    );
 }
 
 function enableDisableCB(eventID, hasValues) {
@@ -79,7 +76,7 @@ function enableDisableCB(eventID, hasValues) {
             $('#parent_object_idID').prop('disabled', true);
             $('select#parent_object_idID option').filter(
                     function() {
-                        this.selected = (this.text == '');
+                        this.selected = (this.text === '');
                     });
         } else {
             $('#parent_object_idID').prop('disabled', false);
@@ -87,7 +84,7 @@ function enableDisableCB(eventID, hasValues) {
                     .filter(
                             function() {
                                 this.selected = ($(this)
-                                        .val() == 'None');
+                                        .val() === 'None');
                             });
         }
     } else {
@@ -134,7 +131,7 @@ function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) 
                 var resultText = createErrorsMsg(null, responseText);
             } else {
                 var resultText = responseText;
-            } 
+            }
             $("#" + refreshContainer + "").html(resultText);
         }
     });
@@ -159,14 +156,14 @@ function searchFormSubmit(formElement, event, uri, contentid, refreshContainer) 
 function loadAttributesProcess(element, formID, containerID, eventID, objectID, attributeID, enabled) {
     //clear container
     $('#'+containerID).html('');
-    if (element == null){
+    if (element === null){
         var value = $('#'+formID+' input#definitionID:last').val();
         if (enabled) {
             loadContent(containerID,'/events/event/attribute/render_handler_edit/'+value+'/'+eventID+'/'+objectID+'/'+attributeID);
         } else {
             loadContent(containerID,'/events/event/attribute/render_handler_view/'+eventID+'/'+attributeID);
         }
-        
+
     } else {
         value = $(element).val();
         if (value) {
@@ -233,9 +230,8 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
                     $("#'+id+'body").html(resultText);
                 }
             });
-
             // callback handler that will be called on failure
-            request.fail(function(responseText, textStatus, XMLHttpRequest) {
+            request.fail(function(response, textStatus, XMLHttpRequest) {
                 var message = getResponseConent(response);
                 $("#" + id + "body").html(message);
             });
