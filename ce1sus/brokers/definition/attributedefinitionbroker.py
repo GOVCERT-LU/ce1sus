@@ -247,22 +247,22 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
         name = name[0]
       attribute.name = cleanPostValue(name)
       attribute.description = cleanPostValue(description)
-    ObjectConverter.set_integer(attribute, 'class_index', class_index)
-    ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
-    ObjectConverter.set_integer(attribute, 'relation', relation)
-    # TODO: recompute chksums
-    handler = self.handler_broker.get_by_id(attribute.handler_index)
-    key = '{0}{1}{2}{3}'.format(attribute.name,
+      ObjectConverter.set_integer(attribute, 'class_index', class_index)
+      ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
+      ObjectConverter.set_integer(attribute, 'relation', relation)
+      # TODO: recompute chksums
+      handler = self.handler_broker.get_by_id(attribute.handler_index)
+      key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,
                              attribute.class_index,
                              handler.uuid)
-    attribute.dbchksum = hashSHA1(key)
-    trimmed_regex = cleanPostValue(regex)
-    if strings.isNotNull(trimmed_regex):
-      attribute.regex = trimmed_regex
-    else:
-      attribute.regex = '^.*$'
-    ObjectConverter.set_integer(attribute, 'share', share)
+      attribute.dbchksum = hashSHA1(key)
+      trimmed_regex = cleanPostValue(regex)
+      if strings.isNotNull(trimmed_regex):
+        attribute.regex = trimmed_regex
+      else:
+        attribute.regex = '^.*$'
+      ObjectConverter.set_integer(attribute, 'share', share)
     if action == 'insert':
       attribute.deletable = 1
     return attribute

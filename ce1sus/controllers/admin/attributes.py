@@ -116,7 +116,7 @@ class AttributeController(Ce1susBaseController):
   def remove_attribute_definition(self, attribute):
     try:
       attribute = self.attribute_broker.remove_by_id(attribute.identifier)
-      return attribute, False
+      return attribute, True
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')
     except BrokerException as error:

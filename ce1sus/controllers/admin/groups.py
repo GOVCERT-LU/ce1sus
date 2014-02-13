@@ -12,11 +12,12 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from dagr.db.broker import BrokerException, ValidationException
+from dagr.db.broker import BrokerException, ValidationException, IntegrityException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from ce1sus.brokers.permission.permissionclasses import Group
+from dagr.controllers.base import ControllerException
 
 
 class GroupController(Ce1susBaseController):
@@ -114,5 +115,8 @@ class GroupController(Ce1susBaseController):
     try:
       self.group_broker.remove_by_id(group.identifier)
       return group, True
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete this group. The group is referenced by elements.'
+                    + ' Remove the events of this group first.')
     except BrokerException as error:
       self._raise_exception(error)
