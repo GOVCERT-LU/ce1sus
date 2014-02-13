@@ -11,7 +11,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from dagr.db.broker import ValidationException, BrokerException
+from dagr.db.broker import ValidationException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
@@ -21,15 +21,10 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator, \
                                                    FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
-from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
                                        NumberValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import \
-                                                       AttributeHandlerBroker
-from dagr.db.session import SessionManager
-from dagr.helpers.debug import Log
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -423,6 +418,7 @@ class Object(BASE):
       return self.event_id
     else:
       return self.parent_event_id
+
 
 class Attribute(BASE):
   """This is a container class for the ATTRIBUTES table."""
