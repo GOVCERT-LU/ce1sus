@@ -11,28 +11,30 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import cherrypy
-from ce1sus.rest.restbase import RestControllerBase
+
+from ce1sus.web.rest.handlers.restbase import RestBaseHandler
 from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException, NothingFoundException
 from dagr.helpers.datumzait import DatumZait
 import json
 
 
-class RestSearchController(RestControllerBase):
+class RestSearchHandler(RestBaseHandler):
 
   MAX_LIMIT = 20
   PARAMETER_MAPPER = {'attributes': 'view_attributes',
-                      'events': 'viewEvents'}
+                      'events': 'view_events'}
 
-  def __init__(self):
-    RestControllerBase.__init__(self)
+  def __init__(self, config):
+    RestBaseHandler.__init__(self, config)
+
     self.event_broker = self.broker_factory(EventBroker)
 
   def __get_limit(self, options):
-    limit = options.get('limit', RestSearchController.MAX_LIMIT / 2)
+    limit = options.get('limit', RestSearchHandler.MAX_LIMIT / 2)
 
     # limit has to be between 0 and maximum value
-    if limit < 0 or limit > RestSearchController.MAX_LIMIT:
+    if limit < 0 or limit > RestSearchHandler.MAX_LIMIT:
       self.raise_error('InvalidArgument',
                       'The limit value has to be between 0 and 20')
     return limit
@@ -85,7 +87,7 @@ class RestSearchController(RestControllerBase):
     else:
       return True
 
-  def view_attributes(self, uuid, api_key, **options):
+  def view_attributes(self, uuid, **options):
     try:
       with_definition = options.get('fulldefinitions', False)
       # TODO use these!
@@ -225,7 +227,7 @@ class RestSearchController(RestControllerBase):
     except BrokerException as error:
       return self.raise_error('BrokerException', error)
 
-  def viewEvents(self, uuid, api_key, **options):
+  def view_events(self, uuid, **options):
     try:
       # TODO use these!
       start_date = options.get('startdate', None)
@@ -280,5 +282,5 @@ class RestSearchController(RestControllerBase):
 
   def get_function_name(self, parameter, action):
     if action == 'GET':
-      return RestSearchController.PARAMETER_MAPPER.get(parameter, None)
+      return RestSearchHandler.PARAMETER_MAPPER.get(parameter, None)
     return None

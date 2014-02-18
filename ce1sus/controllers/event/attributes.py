@@ -176,3 +176,40 @@ class AttributesController(Ce1susBaseController):
 
     except BrokerException as error:
       self._raise_exception(error)
+
+  def get_all_definitions(self):
+    try:
+      return self.def_attributes_broker.get_all()
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def insert_definition(self, user, attribute_definition):
+    try:
+      self.def_attributes_broker.insert(attribute_definition, True)
+      return attribute_definition, True
+    except ValidationException:
+      return attribute_definition, False
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_handler_by_uuid(self, uuid):
+    try:
+      return self.handler_broker.get_by_uuid(uuid)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def populate_rest_attr_def(self, user, rest_attr_def, action):
+    try:
+      handler = self.handler_broker.get_by_uuid(rest_attr_def.handler_uuid)
+      return self.def_attributes_broker.build_attribute_definition(identifier=None,
+                                                                   name=rest_attr_def.name,
+                                                                   description=rest_attr_def.description,
+                                                                   regex=rest_attr_def.regex,
+                                                                   class_index=rest_attr_def.class_index,
+                                                                   action=action,
+                                                                   handler_index=handler.identifier,
+                                                                   share=rest_attr_def.share,
+                                                                   relation=rest_attr_def.relation
+                                                                   )
+    except BrokerException as error:
+      self._raise_exception(error)

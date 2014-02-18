@@ -12,11 +12,9 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler
-from ce1sus.api.restclasses import RestEvent
 from ce1sus.controllers.event.event import EventController
 from dagr.controllers.base import ControllerException
 from ce1sus.controllers.base import ControllerNothingFoundException
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class RestEventHandler(RestBaseHandler):
@@ -50,10 +48,6 @@ class RestEventHandler(RestBaseHandler):
       return self._raise_nothing_found(error)
     except ControllerException as error:
       return self._raise_error('ControllerException', error=error)
-
-  def _raise_invalid_error(self, obj):
-    error_msg = ObjectValidator.getFirstValidationError(obj)
-    self._raise_error('InvalidException', msg=error_msg)
 
   def update(self, uuid, **options):
     if not uuid:

@@ -17,6 +17,7 @@ import cherrypy
 from ce1sus.api.dictconverter import DictConverter, DictConversionException
 from ce1sus.api.common import JSONConverter, JSONException
 from ce1sus.web.rest.dbconverter import DBConverter, DBConversionException
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class RestHandlerException(Exception):
@@ -52,10 +53,10 @@ class RestBaseHandler(Ce1susBaseView):
   def _raise_fatal_error(self, error=None, msg=None):
     """generates a fatal error"""
     if error:
-      self._get_logger.fatal(error)
+      self._get_logger().critical(error)
       message = error.message
     else:
-      self._get_logger.fatal(msg)
+      self._get_logger().critical(msg)
       message = msg
     raise cherrypy.HTTPError(418, message)
 
@@ -67,7 +68,7 @@ class RestBaseHandler(Ce1susBaseView):
       if error:
         message = error.message
       else:
-        self._get_logger().fatal('Error message was not defined')
+        self._get_logger().critical('Error message was not defined')
         raise cherrypy.HTTPError(418)
     self._get_logger().error(message)
     raise RestHandlerException('{0}: {1}'.format(errorclass, message))
@@ -82,6 +83,8 @@ class RestBaseHandler(Ce1susBaseView):
 
   def __object_to_dict(self, obj, owner, full, with_definition):
     """Converts the object to json"""
+    # TODO: find a more elegant way to do the following line
+    full = full == 'True'
     self._get_logger().debug('Converting object to JSON with parameters {0},{1} and {2}'.format(owner,
                                                                                                 full,
                                                                                                 with_definition))
@@ -90,7 +93,7 @@ class RestBaseHandler(Ce1susBaseView):
       dictionary = self.__dictconverter.convert_to_dict(rest_object)
       return dictionary
     except (DictConversionException, JSONException, DBConversionException) as error:
-      self._get_logger().fatal(error)
+      self._get_logger().critical(error)
       self._raise_error('ConversionException', error=error)
 
   def create_rest_obj(self, obj, owner, full, with_definition):
@@ -101,7 +104,7 @@ class RestBaseHandler(Ce1susBaseView):
     try:
       return self.__jsonconverter.generate_json(result)
     except JSONException as error:
-      self._get_logger().fatal(error)
+      self._get_logger().critical(error)
       self._raise_error('ConversionException', error=error)
 
   def return_object(self, obj, owner, full, with_definition):
@@ -133,3 +136,7 @@ class RestBaseHandler(Ce1susBaseView):
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
       self._raise_error('UnRecoverableException',
                       'An unrecoverable error occurred. {0}'.format(error))
+
+  def _raise_invalid_error(self, obj):
+    error_msg = ObjectValidator.getFirstValidationError(obj)
+    self._raise_error('InvalidException', msg=error_msg)

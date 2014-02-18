@@ -13,7 +13,6 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler
-from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.controllers.event.attributes import AttributesController
 from ce1sus.controllers.event.objects import ObjectsController
 from dagr.controllers.base import ControllerException
@@ -39,15 +38,15 @@ class RestDefinitionsHanldler(RestBaseHandler):
       if chksums:
         definitions = controller.get_defintion_by_chksums(chksums)
       else:
-        definitions = controller.get_all()
+        definitions = controller.get_all_definitions()
 
       result = list()
       user = self._get_user()
       if isinstance(definitions, list):
         for definition in definitions:
-          result.append(self.create_rest_obj(definition, user, full_definition, True))
+          result.append(self.create_rest_obj(definition, user, full_definition == 'True', True))
       else:
-        result.append(self.create_rest_obj(definitions, user, full_definition, True))
+        result.append(self.create_rest_obj(definitions, user, full_definition == 'True', True))
       result_dict = {'Results': result}
       return self.create_return_msg(result_dict)
     except ControllerException as error:
@@ -59,7 +58,7 @@ class RestDefinitionsHanldler(RestBaseHandler):
     chksums = options.get('chksum', list())
     return self.__get_definition(self.attributes_controller,
                                 chksums,
-                                full_definition)
+                                full_definition == 'True')
 
   def view_obejcts_definitions(self, identifier, **options):
     self._check_if_priviledged()
@@ -67,4 +66,4 @@ class RestDefinitionsHanldler(RestBaseHandler):
     chksums = options.get('chksum', list())
     return self.__get_definition(self.objects_controller,
                                 chksums,
-                                full_definition)
+                                full_definition == 'True')

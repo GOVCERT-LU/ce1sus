@@ -57,6 +57,7 @@ class DBConverter(object):
     rest_event.status = event.status
     rest_event.uuid = event.uuid
     rest_event.published = event.published
+    rest_event.group = event.creator_group.name
     rest_event.objects = list()
     if full:
       for obj in event.objects:
@@ -124,9 +125,8 @@ class DBConverter(object):
       rest_attr_definition.name = definition.name
       rest_attr_definition.regex = definition.regex
       rest_attr_definition.class_index = definition.class_index
-      # TODO: Change to uuid instead of index!
-      rest_attr_definition.handler_index = definition.handler_index
-      rest_attr_definition.relation = definition.relation
+      rest_attr_definition.handler_uuid = definition.attribute_handler.uuid
+      rest_attr_definition.share = definition.share
       rest_attr_definition.relation = definition.relation
 
     if full:
@@ -250,11 +250,32 @@ class DBConverter(object):
     except ControllerException as error:
       raise DBConversionException(error)
 
+  def __convert_rest_attr_def(self, rest_attr_def, user, action):
+    try:
+      attr_def = self.attribtue_controller.populate_rest_attr_def(user, rest_attr_def, action)
+      return attr_def
+    except ControllerException as error:
+      raise DBConversionException(error)
+
+  def __convert_rest_obj_def(self, rest_obj_def, user, action):
+    try:
+      obj_def = self.object_controller.populate_rest_obj_def(user, rest_obj_def, action)
+      for attribute in rest_obj_def.attributes:
+        obj_def.attributes.append(self.__convert_rest_attr_def(attribute, user, action))
+      return obj_def
+    except ControllerException as error:
+      raise DBConversionException(error)
+
   def convert_rest_instance(self, rest_instance, user, action):
     """convert RestObjects back to Objects"""
     self._get_logger().debug('Starting rest conversion')
     # find the rest class name
-    rest_object = self.__convert_rest_event(rest_instance, user, action)
+    if isinstance(rest_instance, RestEvent):
+      rest_object = self.__convert_rest_event(rest_instance, user, action)
+    elif isinstance(rest_instance, RestAttributeDefinition):
+      rest_object = self.__convert_rest_attr_def(rest_instance, user, action)
+    elif isinstance(rest_instance, RestObjectDefinition):
+      rest_object = self.__convert_rest_obj_def(rest_instance, user, action)
     if not rest_object:
-      raise DBConversionException('Rest supports only conversions of whole events')
+      raise DBConversionException('Rest supports conversion failed')
     return rest_object

@@ -10,8 +10,9 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-from dagr.db.broker import BrokerBase
+from dagr.db.broker import BrokerBase, BrokerException, NothingFoundException, TooManyResultsFoundException
 from ce1sus.brokers.definition.definitionclasses import AttributeHandler
+import sqlalchemy.orm.exc
 
 
 class AttributeHandlerBroker(BrokerBase):
@@ -32,3 +33,15 @@ class AttributeHandlerBroker(BrokerBase):
       result[definition.classname] = definition.identifier
 
     return result
+
+  def get_by_uuid(self, uuid):
+    try:
+      return self.session.query(AttributeHandler).filter(AttributeHandler.uuid == uuid).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with uuid :{0}'.format(
+                                                                  uuid))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for uuid :{0}'.format(uuid))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

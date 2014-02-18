@@ -14,108 +14,51 @@ __license__ = 'GPL v3+'
 
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler
 from dagr.db.broker import BrokerException, NothingFoundException
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                                      AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                                                      ObjectDefinitionBroker
-from ce1sus.brokers.definition.handlerdefinitionbroker import \
-                                                      AttributeHandlerBroker
+from ce1sus.controllers.event.attributes import AttributesController
+from ce1sus.controllers.event.objects import ObjectsController
+from dagr.controllers.base import ControllerException
 
 
-class RestDefinitionController(RestBaseHandler):
+class RestDefinitionHanldler(RestBaseHandler):
 
-  PARAMETER_INSERT_MAPPER = {'attribute': 'update_attribute_definitions',
-                             'object': 'update_object_definitions'}
+  PARAMETER_INSERT_MAPPER = {'attribute': 'insert_attribute_definitions',
+                             'object': 'insert_object_definitions'}
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.attribute_definition_broker = self.broker_factory(
-                                                    AttributeDefinitionBroker
-                                                       )
-    self.object_definition_broker = self.broker_factory(ObjectDefinitionBroker)
-    self.handler_broker = self.broker_factory(AttributeHandlerBroker)
+    self.attributes_controller = AttributesController(config)
+    self.objects_controller = ObjectsController(config)
 
   def get_function_name(self, parameter, action):
     if action == 'POST':
-      return RestDefinitionController.PARAMETER_INSERT_MAPPER.get(parameter,
+      return RestDefinitionHanldler.PARAMETER_INSERT_MAPPER.get(parameter,
                                                                    None)
     return None
 
-  def update_attribute_definitions(self, identifier, api_key, **options):
-    self.checkIfPriviledged(self.getUserByAPIKey(api_key))
+  def insert_attribute_definitions(self, identifier, **options):
+    self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
-    rest_definition = self.get_post_object()
     try:
-      definition = self.attribute_definition_broker.build_attribute_definition(
-                               identifier=None,
-                               name=rest_definition.name,
-                               description=rest_definition.description,
-                               regex=rest_definition.regex,
-                               class_index=rest_definition.class_index,
-                               action='insert',
-                               handler_index=rest_definition.handler_index,
-                               share=1,
-                               relation=1)
-      self.attribute_definition_broker.insert(definition, True)
-      obj = self._object_to_json(definition,
-                               True,
-                               full_definition,
-                               False)
-      return self._return_message(obj)
-    except BrokerException as error:
-        return self.raise_error('BrokerException', error)
+      rest_attribute_definition = self.get_post_object()
+      user = self._get_user()
+      attribute_definition = self.convert_to_db_Object(rest_attribute_definition, user, 'insert')
+      attribute_definition, valid = self.attributes_controller.insert_definition(user, attribute_definition)
+      if not valid:
+        self._raise_invalid_error(attribute_definition)
+      return self.return_object(attribute_definition, True, full_definition, True)
+    except ControllerException as error:
+      return self._raise_error('ControllerException', error=error)
 
-  def update_object_definitions(self, identifier, api_key, **options):
-    self.checkIfPriviledged(self.getUserByAPIKey(api_key))
+  def insert_object_definitions(self, identifier, **options):
+    self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
-    rest_definition = self.get_post_object()
     try:
-      definition = self.object_definition_broker.build_object_definition(
-                               identifier=None,
-                               name=rest_definition.name,
-                               description=rest_definition.description,
-                               action='insert',
-                               share=1,
-                               )
-      # check if existing
-      try:
-        # continue
-        definition = self.object_definition_broker.get_defintion_by_chksum(definition.chksum)
-      except NothingFoundException:
-        # insert
-        self.object_definition_broker.insert(definition, False)
-
-      # insert attributes if there are:
-      for rest_attribtue in rest_definition.attributes:
-        attribute = self.attribute_definition_broker.build_attribute_definition(identifier=None,
-                               name=rest_attribtue.name,
-                               description=rest_attribtue.description,
-                               regex=rest_attribtue.regex,
-                               class_index=rest_attribtue.class_index,
-                               action='insert',
-                               handler_index=rest_attribtue.handler_index,
-                               share=1,
-                               relation=rest_attribtue.relation)
-        # check if attribute exists
-        try:
-          # continue
-          attribute = self.attribute_definition_broker.get_defintion_by_chksum(attribute.chksum)
-        except NothingFoundException:
-          # insert
-          # check if handler and class index exist
-          if not attribute.is_class_index_existing(attribute.class_index):
-            self.raise_error('UnknownDefinitionException', 'Cannot Insert Attribute as ClassIndex {0} does not exist'.format(attribute.class_index))
-          if not self.handler_broker.is_handler_index_existing(attribute.handler_index):
-            self.raise_error('UnknownDefinitionException', 'Cannot Insert Attribute as HanlderIndex {0} does not exist'.format(attribute.handler_index))
-          self.attribute_definition_broker.insert(attribute, False)
-
-        definition.attributes.append(attribute)
-
-      self.object_definition_broker.do_commit(True)
-      obj = self._object_to_json(definition,
-                               True,
-                               full_definition,
-                               False)
-      return self._return_message(obj)
-    except BrokerException as error:
-        return self.raise_error('BrokerException', error)
+      rest_object_definition = self.get_post_object()
+      user = self._get_user()
+      object_definition = self.convert_to_db_Object(rest_object_definition, user, 'insert')
+      object_definition, valid = self.objects_controller.insert_definition(user, object_definition)
+      if not valid:
+        self._raise_invalid_error(object_definition)
+      return self.return_object(object_definition, True, full_definition, True)
+    except ControllerException as error:
+      return self._raise_error('ControllerException', error=error)

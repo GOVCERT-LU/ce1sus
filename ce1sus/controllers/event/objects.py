@@ -32,6 +32,7 @@ class ObjectsController(Ce1susBaseController):
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
 
+
   def get_attr_def_by_obj_def(self, object_definition):
     """
     Returns a list of attribute definitions with the given object definition
@@ -192,3 +193,26 @@ class ObjectsController(Ce1susBaseController):
           if attribute.bit_value.is_validated_and_shared:
             result.append((obj, attribute))
     return result
+
+  def get_all_definitions(self):
+    try:
+      return self.def_object_broker.get_all()
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def insert_definition(self, user, attribute_definition):
+    try:
+      self.def_object_broker.insert(attribute_definition, True)
+      return attribute_definition, True
+    except ValidationException:
+      return attribute_definition, False
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def populate_rest_obj_def(self, user, rest_obj_def, action):
+    try:
+      return self.def_object_broker.build_object_definition(identifier=None, name=rest_obj_def.name,
+                  description=rest_obj_def.description, action='insert',
+                               share=rest_obj_def.share)
+    except BrokerException as error:
+      self._raise_exception(error)

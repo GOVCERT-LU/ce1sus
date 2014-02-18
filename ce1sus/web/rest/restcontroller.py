@@ -23,6 +23,7 @@ from ce1sus.controllers.login import LoginController
 from ce1sus.web.rest.handlers.restevent import RestEventHandler
 from ce1sus.web.rest.handlers.restevents import RestEventsHandler
 from ce1sus.web.rest.handlers.restdefinitions import RestDefinitionsHanldler
+from ce1sus.web.rest.handlers.restdefinition import RestDefinitionHanldler
 from dagr.controllers.base import ControllerException
 
 
@@ -58,8 +59,8 @@ class RestController(RestBaseHandler):
     # add instances known to rest
     self.instances['event'] = RestEventHandler(config)
     self.instances['events'] = RestEventsHandler(config)
-    # self.instances['search'] = RestSearchController(config)
-    # self.instances['definition'] = RestDefinitionController(config)
+    # self.instances['search'] = RestSearchHandler(config)
+    self.instances['definition'] = RestDefinitionHanldler(config)
     self.instances['definitions'] = RestDefinitionsHanldler(config)
 
   def __check_version(self, version):
@@ -229,11 +230,12 @@ class RestController(RestBaseHandler):
         else:
           self._raise_fatal_error(msg='Action {0} is not defined in mapper'.format(action))
 
+      method = None
       if method_name:
         # call method if existing
         method = getattr(controller, method_name, None)
       else:
-        self._raise_error('SystemError', msg='Method {0} is undefined'.format(method))
+        self._raise_fatal_error(msg='No method defined for {0} with parameter {1}'.format(action, parameter))
 
       if method:
           # TODO: put uuid in options?!?
@@ -245,7 +247,7 @@ class RestController(RestBaseHandler):
           else:
             self._raise_fatal_error(msg='Called function returned Noting')
       else:
-        self._raise_error('SystemError', msg='Method {0} is not defined for {0}'.format(action,
+        self._raise_error('SystemError', msg='Method {0} is not defined for {1}'.format(method_name,
                                                                   controller))
     except RestHandlerException as error:
       return self.__handle_handler_exceptions(error)
