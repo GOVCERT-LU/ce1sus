@@ -143,7 +143,8 @@ class AttributesController(Ce1susBaseController):
                                                                     obj,
                                                                     definition,
                                                                     action,
-                                                                    params)
+                                                                    params,
+                                                                    False)
       # set bit values
       AttributesController.__set_web_attribute(attribute)
       if additional_attributes:
@@ -153,18 +154,23 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_rest_attributes(self, user, rest_attribute, action):
+  def populate_rest_attributes(self, user, obj, rest_attribute, action):
     try:
-      definition = self.def_attributes_broker.get_definition_by_chksum(rest_attribute.definition.chksum)
+      definition = self.def_attributes_broker.get_defintion_by_chksum(rest_attribute.definition.chksum)
       attribute, additional_attributes = self.__populate_attributes(user,
-                                                                    None,
+                                                                    obj,
                                                                     definition,
                                                                     action,
-                                                                    rest_attribute)
+                                                                    rest_attribute,
+                                                                    True)
+      # Set parent object
+      attribute.object = obj
+
       # set bit values
       AttributesController.__set_rest_attribute(attribute)
       if additional_attributes:
         for additional_attribute in additional_attributes:
+          additional_attribute.object = obj
           AttributesController.__set_rest_attribute(additional_attribute)
       return attribute, additional_attributes
 

@@ -82,7 +82,7 @@ class ObjectsController(Ce1susBaseController):
   def __populate_object(self, identifier, event_id, parent_object_id, definition, user, share, action):
     try:
       user = self._get_user(user.username)
-      return self.object_broker.build_object(None,
+      return self.object_broker.build_object(identifier,
                                             event_id,
                                             definition,
                                             user,
@@ -102,13 +102,22 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_rest_object(self, event, rest_object, parent_object_id, user, action):
+  def populate_rest_object(self, event, rest_object, parent_object, user, action):
     try:
-      definition = self.def_object_broker.get_object_definition_by_chksum(rest_object.definition.chksum)
-      obj = self.__populate_object(rest_object.identifier, event.identifier, parent_object_id, definition, user, rest_object.share, action)
-      obj.bit_value.is_rest_instert = True
+      definition = self.def_object_broker.get_defintion_by_chksum(rest_object.definition.chksum)
+      parent_obj_id = None
+      if parent_object:
+        parent_obj_id = parent_object.identifier
 
-      if obj.share == 1:
+      obj = self.__populate_object(None, event.identifier, parent_obj_id, definition, user, rest_object.share, action)
+
+      if parent_object is None:
+        obj.event = event
+      else:
+        # obj.parent_object = [parent_object]
+        obj.parent_event = event
+
+      if rest_object.share == 1:
         obj.bit_value.is_shareable = True
       else:
         obj.bit_value.is_shareable = False

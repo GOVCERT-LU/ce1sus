@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, \
-                           BrokerException
+                           BrokerException, ValidationException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 from dagr.helpers.datumzait import DatumZait
@@ -21,6 +21,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.converters import ObjectConverter
 import uuid as uuidgen
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class ObjectBroker(BrokerBase):

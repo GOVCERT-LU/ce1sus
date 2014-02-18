@@ -41,7 +41,7 @@ class RestEventHandler(RestBaseHandler):
   def view(self, uuid, **options):
     try:
       event = self.event_controller.get_by_uuid(uuid)
-      self._is_event_viewable(event)
+      self._check_if_event_is_viewable(event)
       owner = self._is_event_owner(event)
 
       with_definition = options.get('fulldefinitions', False)
@@ -62,28 +62,25 @@ class RestEventHandler(RestBaseHandler):
 
         user = self._get_user()
         event = self.convert_to_db_Object(rest_event, user, 'insert')
-        # first check if event is valid
+        # check if event is valid
         valid = event.validate()
         if valid:
           for obj in event.objects:
-            valid = obj.validate()
+            valid = obj.validate(True)
             if valid:
-              for attribute in obj.attribtues:
-                valid = attribute.validate()
+              for attribute in obj.attributes:
+                valid = attribute.validate(False)
                 if not valid:
                   self._raise_invalid_error(attribute)
             else:
               # action when not valid
               self._raise_invalid_error(obj)
-            event, valid = self.event_controller.insert_event(user, event)
         else:
           # action when not valid
           self._raise_invalid_error(event)
-
+        # ok the event is valid so continue
+        event, valid = self.event_controller.insert_event(user, event)
         with_definition = options.get('fulldefinitions', False)
-        # obj = self._object_to_json(event, True, True, with_definition)
-        rest_event = RestEvent()
-        rest_event.uuid = event.uuid
         return self.return_object(event, True, True, with_definition)
       except ControllerException as error:
         return self._raise_error('ControllerException', error=error)

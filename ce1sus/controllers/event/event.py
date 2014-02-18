@@ -24,6 +24,8 @@ from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
+from dagr.controllers.base import ControllerException
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class EventController(Ce1susBaseController):
@@ -71,7 +73,7 @@ class EventController(Ce1susBaseController):
 
     return result
 
-  def __popultate_event(self, user, **kwargs):
+  def __popultate_event(self, **kwargs):
     action = kwargs.get('action', None)
     identifier = kwargs.get('identifier', None)
     status = kwargs.get('status', None)
@@ -84,6 +86,7 @@ class EventController(Ce1susBaseController):
     risk = kwargs.get('risk', None)
     analysis = kwargs.get('analysis', None)
     uuid = kwargs.get('uuid', None)
+    user = kwargs.get('user', None)
     # fill in the values
     return self.event_broker.build_event(identifier,
                                         action,
@@ -108,7 +111,8 @@ class EventController(Ce1susBaseController):
 
     :returns: Event
     """
-    event = self.__popultate_event(user, **kwargs)
+    kwargs['user'] = user
+    event = self.__popultate_event(**kwargs)
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
     return event
@@ -130,8 +134,14 @@ class EventController(Ce1susBaseController):
 
     if action == 'insert':
       identifier = None
-      first_seen = datetime.now()
-      last_seen = first_seen
+      if rest_event.first_seen:
+        first_seen = rest_event.first_seen
+      else:
+        first_seen = datetime.now()
+      if rest_event.first_seen:
+        last_seen = rest_event.last_seen
+      else:
+        last_seen = first_seen
     else:
       event = self.event_broker.get_by_uuid(uuid)
       identifier = event.identifier
@@ -141,19 +151,19 @@ class EventController(Ce1susBaseController):
     params = {'user': user,
               'identifier': identifier,
               'action': action,
-              'status_index': status_index,
+              'status': status_index,
               'tlp_index': tlp_index,
               'description': rest_event.description,
-              'name': rest_event.name,
+              'name': rest_event.title,
               'published': rest_event.published,
               'first_seen': first_seen,
               'last_seen': last_seen,
-              'risk_index': risk_index,
-              'analysis_index': analysis_index,
+              'risk': risk_index,
+              'analysis': analysis_index,
               'uuid': uuid,
               }
 
-    event = self.__popultate_event(user, **params)
+    event = self.__popultate_event(**params)
 
     event.bit_value.is_rest_instert = True
 
@@ -178,7 +188,12 @@ class EventController(Ce1susBaseController):
     :returns: Event, Boolean
     """
     try:
-      self.event_broker.insert(event)
+      self.event_broker.insert(event, False)
+      # generate relations if needed!
+      for obj in event.objects:
+        for attribute in obj.attributes:
+          self.relation_broker.generate_attribute_relations(attribute, False)
+      self.event_broker.do_commit(True)
       return event, True
     except ValidationException:
       return event, False
@@ -243,3 +258,27 @@ class EventController(Ce1susBaseController):
       self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def __insert_whole_object(self, user, objects):
+    for obj in objects:
+      self.object_broker.insert(obj, False)
+      for attribute in obj.attributes:
+        self.attribute_broker.insert(attribute, False)
+      # children
+      self.__insert_whole_object(user, obj.children)
+
+  def __find_first_invalid_obj(self, obj):
+    validation_error = ObjectValidator.getFirstValidationError(obj)
+    if not validation_error:
+      # check attribtues
+      for attribute in obj.attribtues:
+        validation_error = ObjectValidator.getFirstValidationError(attribute)
+        if validation_error:
+          return validation_error
+      # check children
+      for child in obj.children:
+        validation_error = self.__find_first_invalid_obj(child)
+        if validation_error:
+          return validation_error
+    else:
+      return validation_error

@@ -66,16 +66,21 @@ class GenericHandler(HandlerBase):
       ObjectConverter.set_integer(attribute,
                                'ioc', is_ioc)
 
+    # Note first the definition has to be specified
+    attribute.definition = definition
+    attribute.def_attribute_id = definition.identifier
+
+    # Note second the object has to be specified
+    attribute.object = obj
+    attribute.object_id = obj.identifier
+
     if isinstance(value, list):
       value = value[0]
     if hasattr(value, 'strip'):
       attribute.value = value.strip()
     else:
       attribute.value = value
-    attribute.obejct = obj
-    attribute.object_id = obj.identifier
-    attribute.definition = definition
-    attribute.def_attribute_id = definition.identifier
+
     attribute.definition = definition
     attribute.created = DatumZait.utcnow()
     attribute.modified = DatumZait.utcnow()
@@ -121,4 +126,15 @@ class GenericHandler(HandlerBase):
     return list()
 
   def convert_to_rest_value(self, attribute, config):
-    return attribute.plain_value
+    value = attribute.plain_value
+    return value
+
+  def process_rest_post(self, obj, definitions, user, rest_attribute):
+    definition = self._get_main_definition(definitions)
+    # create Params
+    params = dict()
+    params['value'] = rest_attribute.value
+    params['ioc'] = rest_attribute.ioc
+    params['shared'] = rest_attribute.share
+    attribute = self.create_attribute(params, obj, definition, user)
+    return attribute, None

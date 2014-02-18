@@ -71,7 +71,8 @@ class RestEvent(RestClass):
     self.__set_date_value(result, 'first_seen', self.first_seen)
     if self.last_seen is None:
       self.last_seen = self.first_seen
-    self.__set_date_value(result, 'last_seen', self.last_seen)
+    else:
+      self.__set_date_value(result, 'last_seen', self.last_seen)
     self.__set_value(result, 'tlp', self.tlp)
     self.__set_value(result, 'status', self.status)
     self.__set_value(result, 'risk', self.risk)
@@ -149,7 +150,7 @@ class RestObjectDefinition(RestClass):
     self.name = None
     self.description = None
     self.chksum = None
-    self.attributes = list()
+    self.attributes = None
 
   def to_dict(self):
     result = dict()

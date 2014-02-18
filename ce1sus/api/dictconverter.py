@@ -13,7 +13,6 @@ __license__ = 'GPL v3+'
 
 from ce1sus.common.ce1susutils import get_class
 from dagr.helpers.debug import Log
-from ce1sus.api.restclasses import RestClass, RestEvent, RestObject, RestAttribute, RestObjectDefinition, RestAttributeDefinition
 from datetime import datetime
 from types import DictionaryType, ListType
 from dagr.helpers.strings import stringToDateTime, InputException
@@ -60,7 +59,7 @@ class DictConverter(object):
   def __populate_classname_by_dict(self, classname, dictionary):
     """ Maps the data to the class"""
     self._get_logger().debug('Mapping dictionary to class {0}'.format(classname))
-    instance = get_class('ce1sus.api.restclasses', classname)
+    instance = get_class('ce1sus.api.restclasses', classname)()
     """
     if not isinstance(instance, RestClass):
       raise DictConversionException(('{0} does not implement RestClass').format(classname))

@@ -38,24 +38,6 @@ class EventBroker(BrokerBase):
     self.attribute_broker = AttributeBroker(session)
     self.object_broker = ObjectBroker(session)
 
-  def insert(self, instance, commit=True, validate=True):
-    """
-    overrides BrokerBase.insert
-    """
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException('Invalid Event:' + ObjectValidator.getFirstValidationError(instance))
-    try:
-      BrokerBase.insert(self, instance, False)
-      # insert value for value table
-      for obj in instance.objects:
-        for attribute in obj.attributes:
-          self.attribute_broker.insert(attribute, False, validate)
-      self.do_commit(commit)
-    except BrokerException as error:
-      self.session.rollback()
-      raise BrokerException(error)
-
   def __event_groups(self, clazz, join_relation, identifier, belong_in=True):
     try:
         groups = self.session.query(clazz).join(join_relation).filter(Event.identifier == identifier).all()

@@ -47,15 +47,16 @@ class DBConverter(object):
     """Converts Event to RestEvent"""
     self._get_logger().debug('Converting event')
     rest_event = RestEvent()
-    rest_event.tile = event.title
+    rest_event.title = event.title
     rest_event.description = event.description
     rest_event.first_seen = event.first_seen
     rest_event.last_seen = event.last_seen
-    rest_event.tlp = event.tlp
+    rest_event.tlp = event.tlp.text
     rest_event.risk = event.risk
     rest_event.analysis = event.analysis
     rest_event.status = event.status
     rest_event.uuid = event.uuid
+    rest_event.published = event.published
     rest_event.objects = list()
     if full:
       for obj in event.objects:
@@ -76,7 +77,7 @@ class DBConverter(object):
     rest_object = RestObject()
     rest_object.parent_object_id = obj.parent_object_id
     rest_object.parent_event_id = obj.parent_event_id
-    rest_object.definition = self.__convert_obj_def(obj.definition, full, with_definition)
+    rest_object.definition = self.__convert_obj_def(obj.definition, False, with_definition)
     rest_object.attributes = list()
     if full:
       for attribute in obj.attributes:
@@ -109,10 +110,8 @@ class DBConverter(object):
         # note just 1 level else there is the possibility to make cycles
         rest_attribute_definition = self.__convert_attr_def(attribute, full, with_definition)
         rest_object_definition.attributes.append(rest_attribute_definition)
-
-      return rest_object_definition
-
     rest_object_definition.chksum = definition.chksum
+    return rest_object_definition
 
   def __convert_attr_def(self, definition, full, with_definition):
     """Converts AttribtueDefinition to RestAttributeDefinition"""
@@ -141,14 +140,14 @@ class DBConverter(object):
   def __convert_attribute(self, attribute, owner, full, with_definition):
     """Converts Attribute to RestAttribtue"""
     rest_attribute = RestAttribute()
-    rest_attribute.definition = self.__convert_attr_def(attribute.definition, full, with_definition)
+    rest_attribute.definition = self.__convert_attr_def(attribute.definition, False, with_definition)
     # determine how to rest value
     try:
       handler = attribute.definition.handler
       value = handler.convert_to_rest_value(attribute, self.__config)
+      rest_attribute.value = value
     except HandlerException as error:
       raise DBConversionException(error)
-    rest_attribute.value = value
     rest_attribute.ioc = attribute.ioc
     if attribute.bit_value.is_shareable:
       rest_attribute.share = 1
@@ -180,10 +179,10 @@ class DBConverter(object):
       rest_object = self.__convert_attr_def(instance, full, with_definition)
     return rest_object
 
-  def __convert_rest_attribute(self, rest_attribute, user, action):
+  def __convert_rest_attribute(self, obj, rest_attribute, user, action):
     self._get_logger().debug('Starting conversion of rest object')
     try:
-      attribute, additional_attributes = self.attribtue_controller.populate_rest_attributes(user, rest_attribute, action)
+      attribute, additional_attributes = self.attribtue_controller.populate_rest_attributes(user, obj, rest_attribute, action)
       return attribute, additional_attributes
     except ControllerException as error:
       self._get_logger().error(error)
@@ -193,40 +192,41 @@ class DBConverter(object):
     self._get_logger().debug('Generate attribute hasht')
     return hashMD5(attribute.definition.chksum, attribute.plain_value)
 
-  def __convert_rest_object(self, event, rest_obj, user, action):
+  def __convert_rest_object(self, event, parent_object, rest_obj, user, action):
     self._get_logger().debug('Starting conversion of rest object')
     try:
       obj = self.object_controller.populate_rest_object(event,
                                                         rest_obj,
-                                                        None,
+                                                        parent_object,
                                                         user,
                                                         action)
+
       seen_attributes = list()
       # append attribtues
       if rest_obj.attributes:
         for rest_attribute in rest_obj.attributes:
-          attribute, additional_attributes = self.__convert_rest_attribute(rest_attribute, user, action)
+          attribute, additional_attributes = self.__convert_rest_attribute(obj, rest_attribute, user, action)
           # check if attribute was not already seen and append it
           hash_value = self.__gen_attr_hash(attribute)
           if not hash_value in seen_attributes:
             seen_attributes.append(hash_value)
-            obj.append(attribute)
+            obj.attributes.append(attribute)
           if additional_attributes:
             for additional_attribute in additional_attributes:
               hash_value = self.__gen_attr_hash(additional_attribute)
               if not hash_value in seen_attributes:
                 seen_attributes.append(hash_value)
-                obj.append(additional_attribute)
+                obj.attributes.append(additional_attribute)
 
       if rest_obj.children:
         for rest_obj_child in rest_obj.children:
           # TODO: find a better way to set the parent_id
-          child = self.object_controller.populate_rest_object(event,
-                                                              rest_obj_child,
-                                                              0,
-                                                              user,
-                                                              action)
-          child.parent_object_id = None
+          child = self.__convert_rest_object(event,
+                                             obj,
+                                             rest_obj_child,
+                                             user,
+                                             action)
+          child.parent_event_id = None
           obj.children.append(child)
 
       return obj
@@ -242,7 +242,7 @@ class DBConverter(object):
 
         if rest_event.objects:
           for rest_obj in rest_event.objects:
-            obj = self.__convert_rest_object(event, rest_obj, user, action)
+            obj = self.__convert_rest_object(event, None, rest_obj, user, action)
             event.objects.append(obj)
         return event
       else:
@@ -254,9 +254,7 @@ class DBConverter(object):
     """convert RestObjects back to Objects"""
     self._get_logger().debug('Starting rest conversion')
     # find the rest class name
-    rest_object = None
-    if isinstance(rest_instance, Event):
-      rest_object = self.__convert_rest_event(rest_instance, user, action)
+    rest_object = self.__convert_rest_event(rest_instance, user, action)
     if not rest_object:
       raise DBConversionException('Rest supports only conversions of whole events')
     return rest_object

@@ -39,14 +39,17 @@ class AttributeBroker(BrokerBase):
     return Attribute
 
   def insert(self, instance, commit=True, validate=True):
-    """
-    overrides BrokerBase.insert
-    """
+    # find relations
+    BrokerBase.insert(self, instance, False, validate)
+    self.relation_broker.generate_attribute_relations(instance, False)
+
+  """
+  def insert(self, instance, commit=True, validate=True):
     # validation of the value of the attribute first
     # get the definition containing the definition how to validate an attribute
     definition = instance.definition
     ObjectValidator.validateRegex(instance,
-                                  'plain_value',
+                                  'value',
                                   definition.regex,
                                   'The value does not match {0}'.format(
                                                             definition.regex),
@@ -70,9 +73,6 @@ class AttributeBroker(BrokerBase):
       raise BrokerException(e)
 
   def update(self, instance, commit=True, validate=True):
-    """
-    overrides BrokerBase.update
-    """
     # validation of the value of the attribute first
     definition = instance.definition
     ObjectValidator.validateRegex(instance,
@@ -93,6 +93,7 @@ class AttributeBroker(BrokerBase):
     except BrokerException as e:
       self.session.rollback()
       raise BrokerException(e)
+  """
 
   def remove_by_id(self, identifier, commit=True):
     try:

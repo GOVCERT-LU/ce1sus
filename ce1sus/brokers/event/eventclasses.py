@@ -25,6 +25,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
                                        NumberValue
+from ce1sus.common.ce1susutils import get_class
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
@@ -331,6 +332,7 @@ class Object(BASE):
   children = relationship("Object", primaryjoin='Object.identifier' +
                          '==Object.parent_object_id')
   dbcode = Column('code', Integer)
+  uuid = Column('uuid', String)
   __bit_code = None
 
   @property
@@ -384,16 +386,17 @@ class Object(BASE):
     function = getattr(self.attributes, 'remove')
     function(attribute)
 
-  def validate(self):
+  def validate(self, ignore_attribtues=False):
     """
     Checks if the attributes of the class are valid
 
     :returns: Boolean
     """
-    for attribute in self.attributes:
-      result = attribute.validate()
-      if not result:
-        return False
+    if not ignore_attribtues:
+      for attribute in self.attributes:
+        result = attribute.validate()
+        if not result:
+          return False
     function = getattr(self.definition, 'validate')
     if not function():
       return False
@@ -447,7 +450,7 @@ class Attribute(BASE):
   # valuerelations
   string_value = relationship(StringValue,
                   primaryjoin="Attribute.identifier==StringValue.attribute_id",
-                  lazy='joined', uselist=False,)
+                  lazy='joined', uselist=False)
   date_value = relationship(DateValue,
                   primaryjoin="Attribute.identifier==DateValue.attribute_id",
                   lazy='joined', uselist=False)
@@ -461,7 +464,7 @@ class Attribute(BASE):
   children = relationship('Attribute',
                           primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
   __value_id = None
-  __value = None
+  internal_value = None
   __value_obj = None
   __handler_class = None
   dbcode = Column('code', Integer)
@@ -504,23 +507,25 @@ class Attribute(BASE):
     """
     return getattr(self.definition, 'name')
 
+  def __get_value_obj(self):
+    if not self.string_value  is None:
+      value = self.string_value
+    elif not self.date_value  is None:
+      value = self.date_value
+    elif not self.text_value is None:
+      value = self.text_value
+    elif not self.number_value is None:
+      value = self.number_value
+    else:
+      value = None
+    return value
+
   def __get_value(self):
     if self.__value_obj is None:
-      if not self.string_value  is None:
-        value = self.string_value
-      elif not self.date_value  is None:
-        value = self.date_value
-      elif not self.text_value is None:
-        value = self.text_value
-      elif not self.number_value is None:
-        value = self.number_value
-      else:
-        value = None
-      self.__value_obj = value
-      if value is None:
-        return self.__value
-    else:
-      return self.__value_obj.value
+      self.__value_obj = self.__get_value_obj()
+      if self.__value_obj:
+        self.internal_value = self.__value_obj.value
+    return self.internal_value
 
   @property
   def value_id(self):
@@ -536,36 +541,39 @@ class Attribute(BASE):
   @property
   def plain_value(self):
     value = self.__get_value()
-    if value:
-      return value
+    if value is None:
+      raise Exception('Empty value')
     else:
-      return getattr(self.__value_obj, 'value')
+      return value
 
   @property
   def gui_value(self):
-    value = self.plain_value
-    if value:
-      handler_instance = self.__get_handler_instance()
-      value = handler_instance.convert_to_gui_value(self)
-      return value
-    return None
-
-  @property
-  def rest_value(self):
-    value = self.plain_value
-    if value:
-      handler_instance = self.__get_handler_instance()
-      value = handler_instance.convert_to_rest_value(self)
-      return value
-    return None
+    self.__get_value()
+    handler_instance = self.__get_handler_instance()
+    value = handler_instance.convert_to_gui_value(self)
+    return value
 
   @property
   def value(self):
-    raise Exception('Illegal access {0}'.format(self.__class__.__name__))
+    return self.plain_value
 
   @value.setter
   def value(self, value):
-    self.__value = value
+    if self.definition:
+      classname = self.definition.classname
+      value_instance = get_class('ce1sus.brokers.valuebroker', classname)()
+      value_instance.attribute_id = self.identifier
+      value_instance.attribute = self
+      value_instance.value = value
+      if self.object:
+        value_instance.event = self.object.get_parent_event()
+      else:
+        raise Exception('No object was specified')
+      # set the value
+      attr_name = classname.replace('V', '_v').lower()
+      setattr(self, attr_name, value_instance)
+    else:
+      raise Exception('No definition was specified')
 
   def __get_handler_instance(self):
     """
@@ -575,16 +583,29 @@ class Attribute(BASE):
     """
     return getattr(self.definition, 'handler')
 
-  def validate(self):
+  def validate(self, full=True):
     """
     Checks if the attributes of the class are valid
 
     :returns: Boolean
     """
     ObjectValidator.validateDigits(self, 'def_attribute_id')
-    ObjectValidator.validateDigits(self, 'object_id')
-    ObjectValidator.validateDigits(self, 'creator_id')
-    ObjectValidator.validateDigits(self, 'modifier_id')
+    # validate attribute value
+    value_obj = self.__get_value_obj()
+    ObjectValidator.validateRegex(value_obj,
+                                  'value',
+                                  self.definition.regex,
+                                  'The value does not match {0}'.format(
+                                                            self.definition.regex),
+                                  True)
+    errors = not value_obj.validate()
+    if errors:
+      return False
+
+    if full:
+      ObjectValidator.validateDigits(self, 'object_id')
+      ObjectValidator.validateDigits(self, 'creator_id')
+      ObjectValidator.validateDigits(self, 'modifier_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
     return ObjectValidator.isObjectValid(self)

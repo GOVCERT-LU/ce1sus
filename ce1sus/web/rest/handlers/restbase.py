@@ -112,14 +112,18 @@ class RestBaseHandler(Ce1susBaseView):
     return self.create_return_msg(result)
 
   def convert_to_db_Object(self, rest_obj, user, action):
-    return self.__dbconverter.convert_rest_instance(rest_obj, user, action)
+    try:
+      return self.__dbconverter.convert_rest_instance(rest_obj, user, action)
+    except DBConversionException as error:
+      raise RestHandlerException(error)
 
   def get_post_object(self):
     """Returns the posted json to a rest object"""
     try:
       content_length = cherrypy.request.headers['Content-Length']
       raw = cherrypy.request.body.read(int(content_length))
-      rest_obj = self.__jsonconverter.get_rest_object(raw)
+      dictionary = self.__jsonconverter.decode_json(raw)
+      rest_obj = self.__dictconverter.convert_to_rest_obj(dictionary)
       return rest_obj
     except AttributeError as error:
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))

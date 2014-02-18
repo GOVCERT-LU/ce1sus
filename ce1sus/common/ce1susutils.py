@@ -23,7 +23,7 @@ from dagr.helpers.validator.valuevalidator import ValueValidator
 # A: Major Release
 # B: Release feature changes
 # C: Bug fixes
-APP_REL = '0.7.2'
+APP_REL = '0.7.3'
 DB_REL = '0.8.0'
 REST_REL = '0.2.0'
 

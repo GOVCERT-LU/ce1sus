@@ -12,29 +12,24 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
-import dagr.helpers.strings as strings
 
 
 class MultipleGenericHandler(GenericHandler):
 
-  def populate_attributes(self, params, obj, definition, user):
+  def process_gui_post(self, obj, definitions, user, params):
+    definition = self._get_main_definition(definitions)
     attributes = list()
     values = params.get('value').split('\n')
     for value in values:
-      stringValue = value.replace('\r', '')
-      if (strings.isNotNull(stringValue)):
-        params['value'] = stringValue
-        attribute = GenericHandler.populate_attributes(self,
-                                                    params,
-                                                    obj,
-                                                    definition,
-                                                    user)
-        attributes.append(attribute)
-    return attributes
+      params['value'] = value
+      attribute = self.create_attribute(params, obj, definition, user)
+      attributes.append(attribute)
+    attribute = attributes.pop(0)
+    return attribute, attributes
 
-  def render(self, enabled, eventID, enableShare, user, definition, attribute=None):
-    return self.renderTemplate('/events/event/attributes/handlers/multGeneric.html',
-                               attribute,
-                               definition,
-                               enabled,
-                               enableShare)
+  def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
+    return template_renderer('/common/handlers/multGeneric.html',
+                             attribute=None,
+                             enabled=True,
+                             default_share_value=default_share_value,
+                             enable_share=share_enabled)
