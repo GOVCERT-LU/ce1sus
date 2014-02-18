@@ -125,11 +125,14 @@ class BaseView:
     """
     Destroys a session
     """
-    session = self._get_session()
-    session.clear()
-    session.delete()
-    # session.clean_up()
-    self._get_logger().debug('Session destroyed')
+    try:
+      session = self._get_session()
+      session.clear()
+      session.delete()
+      # session.clean_up()
+      self._get_logger().debug('Session destroyed')
+    except KeyError:
+      pass
 
   def _get_session(self):
     """

@@ -86,7 +86,7 @@ class RestEvent(RestClass):
     else:
       result[self.get_classname()]['objects'] = None
     result[self.get_classname()]['share'] = u'{0}'.format(self.share)
-    self.__set_value(result, 'group', self.group)
+    result[self.get_classname()]['group'] = self.group
     return result
 
 
