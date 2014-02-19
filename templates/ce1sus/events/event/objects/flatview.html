@@ -5,7 +5,7 @@
 $(document).ready(function() {
     $('#flatViewTable${event_id}').dataTable( {
       "iDisplayLength": 10,
-      "aaSorting": [[ 0, "asc" ]],
+      "aaSorting": [[ 4, "asc" ]],
     });
   });
 </script>
@@ -20,7 +20,8 @@ $(document).ready(function() {
     <th caria-controls="flatViewTable${event_id}" tabindex="4" role="columnheader" class="sorting">Attribute Type</th>
     <th caria-controls="flatViewTable${event_id}" tabindex="5" role="columnheader" class="sorting">Attribute Value</th>
     <th caria-controls="flatViewTable${event_id}" tabindex="6" role="columnheader" class="sorting">IOC</th>
-    <th caria-controls="flatViewTable${event_id}" tabindex="7" role="columnheader" class="sorting">Options</th>
+    <th caria-controls="flatViewTable${event_id}" tabindex="7" role="columnheader" class="sorting">Created</th>
+    <th caria-controls="flatViewTable${event_id}" tabindex="8" role="columnheader" class="sorting">Options</th>
     </tr>
   </thead>
   <tbody>
@@ -46,6 +47,7 @@ $(document).ready(function() {
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].definition.name, shorten_to=60,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].gui_value, shorten_to=60,use_plain_text=False)"/></td>
     <td style="text-align:center">${iocicon}</td>
+    <td><%call expr="messages_and_text.object_to_html(flat_object[1].created, shorten_to=60,use_plain_text=False)"/></td>
     <td style="width: 60px;">
       <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/flat_objects/${event_id}');">
          <span class="glyphicon glyphicon-eye-open" title="View details"></span>
