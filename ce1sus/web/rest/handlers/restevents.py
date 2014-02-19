@@ -29,21 +29,16 @@ class RestEventsHandler(RestBaseHandler):
     try:
       uuids = options.get('uuids', list())
       with_definition = options.get('fulldefinitions', False)
-
       start_date = options.get('startdate', None)
       end_date = options.get('enddate', DatumZait.utcnow())
-
       offset = options.get('page', 0)
       limit = options.get('limit', 20)
-      limit = int(limit)
-      offset = int(offset)
 
       # limit has to be between 0 and maximum value
       if limit < 0 or limit > RestEventsHandler.MAX_LIMIT:
         self._raise_error('InvalidArgument',
                         msg='The limit value has to be between 0 and 20')
 
-      user = self._get_user()
       # search only if something was specified
       if start_date or uuids:
         events = self.events_controller.get_events(uuids,
@@ -51,9 +46,9 @@ class RestEventsHandler(RestBaseHandler):
                                       end_date,
                                       offset,
                                       limit,
-                                      user)
+                                      self._get_user())
       else:
-        events = self.events_controller.get_user_events(user=user,
+        events = self.events_controller.get_user_events(user=self._get_user(),
                                                 limit=limit,
                                                 offset=offset)
 
@@ -63,15 +58,16 @@ class RestEventsHandler(RestBaseHandler):
           viewable = self._is_event_viewable(event)
           owner = self._is_event_owner(event)
           if viewable or owner:
-            result.append(self.create_rest_obj(event, user, True, with_definition))
+            result.append(self.create_rest_obj(event, self._get_user(), True, with_definition))
         except cherrypy.HTTPError:
           pass
 
-      result_dict = {'Results': result}
-      return self.create_return_msg(result_dict)
+      result = {'Results': result}
+      return self.create_return_msg(result)
 
     except ControllerException as error:
       return self._raise_error('ControllerException', error)
 
+  # pylint: disable=R0201
   def get_function_name(self, parameter, action):
     return None

@@ -28,6 +28,7 @@ class RestDefinitionsHanldler(RestBaseHandler):
     self.attributes_controller = AttributesController(config)
     self.objects_controller = ObjectsController(config)
 
+  # pylint: disable=R0201
   def get_function_name(self, parameter, action):
     if action == 'GET':
       return RestDefinitionsHanldler.PARAMETER_MAPPER.get(parameter, None)

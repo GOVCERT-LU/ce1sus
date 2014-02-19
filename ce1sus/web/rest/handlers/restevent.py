@@ -82,6 +82,7 @@ class RestEventHandler(RestBaseHandler):
     else:
       return self._raise_error('Exception', msg='Not Implemented')
 
+  # pylint: disable=R0201
   def get_function_name(self, parameter, action):
     if action == 'GET':
       return RestEventHandler.PARAMETER_MAPPER.get(parameter, None)

@@ -195,6 +195,7 @@ class DBConverter(object):
     self._get_logger().debug('Generate attribute hasht')
     return hashMD5(attribute.definition.chksum, attribute.plain_value)
 
+  # pylint: disable=R0914,R0913
   def __convert_rest_object(self, event, parent_object, rest_obj, user, action):
     self._get_logger().debug('Starting conversion of rest object')
     try:

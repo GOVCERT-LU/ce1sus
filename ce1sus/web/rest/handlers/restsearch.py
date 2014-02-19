@@ -48,14 +48,13 @@ class RestSearchHandler(RestBaseHandler):
 
       # check if the search should be performed on a needle
       user = self._get_user()
-      cache = self._get_authorized_events_cache()
       events = self.serach_controller.filtered_search_for_rest(object_type,
                                                                None,
                                                                attributes,
                                                                start_date,
                                                                end_date,
                                                                user,
-                                                               cache,
+                                                               self._get_authorized_events_cache(),
                                                                limit,
                                                                offset)
       if not events:
@@ -86,15 +85,13 @@ class RestSearchHandler(RestBaseHandler):
       attributes = options.get('attributes', list())
 
       # check if the search should be performed on a needle
-      user = self._get_user()
-      cache = self._get_authorized_events_cache()
       events = self.serach_controller.filtered_search_for_rest(object_type,
                                                                object_attribtues,
                                                                attributes,
                                                                start_date,
                                                                end_date,
-                                                               user,
-                                                               cache,
+                                                               self._get_user(),
+                                                               self._get_authorized_events_cache(),
                                                                limit,
                                                                offset)
       if not events:
@@ -103,13 +100,14 @@ class RestSearchHandler(RestBaseHandler):
       # process events
       result = list()
       for event in events:
-        result.append(self.create_rest_obj(event, user, True, with_definition))
-      result_dict = {'Results': result}
-      return self.create_return_msg(result_dict)
+        result.append(self.create_rest_obj(event, self._get_user(), True, with_definition))
+      result = {'Results': result}
+      return self.create_return_msg(result)
 
     except ControllerException as error:
       return self._raise_error('ControllerException', error=error)
 
+  # pylint: disable=R0201
   def get_function_name(self, parameter, action):
     if action == 'GET':
       return RestSearchHandler.PARAMETER_MAPPER.get(parameter, None)
