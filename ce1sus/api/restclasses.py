@@ -100,6 +100,7 @@ class RestObject(RestClass):
     self.parent = None
     self.children = list()
     self.share = 1
+    self.author = None
 
   def to_dict(self):
     result = dict()
@@ -121,6 +122,7 @@ class RestObject(RestClass):
       result[self.get_classname()]['attributes'] = None
 
     result[self.get_classname()]['share'] = u'{0}'.format(self.share)
+    result[self.get_classname()]['author'] = self.author
     return result
 
 
@@ -133,6 +135,7 @@ class RestAttribute(RestClass):
     self.value = None
     self.ioc = None
     self.share = 1
+    self.author = None
 
   def to_dict(self):
     result = dict()
@@ -141,12 +144,13 @@ class RestAttribute(RestClass):
     result[self.get_classname()]['value'] = self.value
     result[self.get_classname()]['ioc'] = u'{0}'.format(self.ioc)
     result[self.get_classname()]['share'] = u'{0}'.format(self.share)
+    result[self.get_classname()]['author'] = self.author
     return result
 
 
 class RestObjectDefinition(RestClass):
   """Rest object representing an ObjectDefinition"""
-  # TODO: Add relationable
+
   def __init__(self):
     RestClass.__init__(self)
     self.name = None
@@ -173,7 +177,7 @@ class RestObjectDefinition(RestClass):
 
 class RestAttributeDefinition(RestClass):
   """Rest object representing an AttributeDefinition"""
-  # TODO: Add relationable
+
   def __init__(self):
     RestClass.__init__(self)
     self.name = None
@@ -197,3 +201,17 @@ class RestAttributeDefinition(RestClass):
     result[self.get_classname()]['chksum'] = self.chksum
     result[self.get_classname()]['share'] = u'{0}'.format(self.share)
     return result
+
+
+# pylint: disable=R0902
+class RestUUID(RestClass):
+  """Rest class of an event"""
+
+  def __init__(self):
+    RestClass.__init__(self)
+    self.uuid = None
+
+  def to_dict(self):
+    result = dict()
+    result[self.get_classname()] = dict()
+    result[self.get_classname()]['uuid'] = self.uuid

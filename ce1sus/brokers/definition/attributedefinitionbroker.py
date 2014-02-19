@@ -250,7 +250,6 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       ObjectConverter.set_integer(attribute, 'class_index', class_index)
       ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
       ObjectConverter.set_integer(attribute, 'relation', relation)
-      # TODO: recompute chksums
       handler = self.handler_broker.get_by_id(attribute.handler_index)
       key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,

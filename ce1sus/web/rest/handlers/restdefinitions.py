@@ -44,9 +44,9 @@ class RestDefinitionsHanldler(RestBaseHandler):
       user = self._get_user()
       if isinstance(definitions, list):
         for definition in definitions:
-          result.append(self.create_rest_obj(definition, user, full_definition == 'True', True))
+          result.append(self.create_rest_obj(definition, user, full_definition, True))
       else:
-        result.append(self.create_rest_obj(definitions, user, full_definition == 'True', True))
+        result.append(self.create_rest_obj(definitions, user, full_definition, True))
       result_dict = {'Results': result}
       return self.create_return_msg(result_dict)
     except ControllerException as error:
@@ -58,7 +58,7 @@ class RestDefinitionsHanldler(RestBaseHandler):
     chksums = options.get('chksum', list())
     return self.__get_definition(self.attributes_controller,
                                 chksums,
-                                full_definition == 'True')
+                                full_definition)
 
   def view_obejcts_definitions(self, identifier, **options):
     self._check_if_priviledged()
@@ -66,4 +66,4 @@ class RestDefinitionsHanldler(RestBaseHandler):
     chksums = options.get('chksum', list())
     return self.__get_definition(self.objects_controller,
                                 chksums,
-                                full_definition == 'True')
+                                full_definition)

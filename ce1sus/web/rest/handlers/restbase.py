@@ -83,8 +83,7 @@ class RestBaseHandler(Ce1susBaseView):
 
   def __object_to_dict(self, obj, owner, full, with_definition):
     """Converts the object to json"""
-    # TODO: find a more elegant way to do the following line
-    full = full == 'True'
+
     self._get_logger().debug('Converting object to JSON with parameters {0},{1} and {2}'.format(owner,
                                                                                                 full,
                                                                                                 with_definition))

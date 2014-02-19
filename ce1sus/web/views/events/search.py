@@ -12,10 +12,11 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.views.base import Ce1susBaseView
-from ce1sus.controllers.events.search import SearchController, SearchControllerException
+from ce1sus.controllers.events.search import SearchController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.helpers.strings import InputException
+from dagr.controllers.base import ControllerException
 
 
 class SearchView(Ce1susBaseView):
@@ -58,5 +59,5 @@ class SearchView(Ce1susBaseView):
       return self._return_ajax_ok() + self._render_template('/events/search/results.html',
                                                               results=results
                                                               )
-    except (InputException, SearchControllerException) as error:
+    except (InputException, ControllerException) as error:
       return '{0}'.format(error)

@@ -11,11 +11,10 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.common.ce1susutils import get_class
+from ce1sus.common.ce1susutils import get_class, convert_string_to_value
 from dagr.helpers.debug import Log
 from datetime import datetime
 from types import DictionaryType, ListType
-from dagr.helpers.strings import stringToDateTime, InputException
 
 
 class DictConversionException(Exception):
@@ -91,15 +90,7 @@ class DictConverter(object):
       value = None
     else:
       string_value = u'{0}'.format(value)
-      # TODO: use json
-      if string_value.isdigit():
-        value = eval(string_value)
-      else:
-        try:
-          # is it a date?
-          value = stringToDateTime(string_value)
-        except InputException:
-          pass
+      value = convert_string_to_value(string_value)
     setattr(instance, key, value)
 
   def __populate_instance_by_dict(self, instance, dictionary):

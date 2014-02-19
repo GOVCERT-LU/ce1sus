@@ -25,6 +25,7 @@ from ce1sus.web.rest.handlers.restevents import RestEventsHandler
 from ce1sus.web.rest.handlers.restdefinitions import RestDefinitionsHanldler
 from ce1sus.web.rest.handlers.restdefinition import RestDefinitionHanldler
 from dagr.controllers.base import ControllerException
+from ce1sus.web.rest.handlers.restsearch import RestSearchHandler
 
 
 class RestController(RestBaseHandler):
@@ -59,7 +60,7 @@ class RestController(RestBaseHandler):
     # add instances known to rest
     self.instances['event'] = RestEventHandler(config)
     self.instances['events'] = RestEventsHandler(config)
-    # self.instances['search'] = RestSearchHandler(config)
+    self.instances['search'] = RestSearchHandler(config)
     self.instances['definition'] = RestDefinitionHanldler(config)
     self.instances['definitions'] = RestDefinitionsHanldler(config)
 

@@ -44,15 +44,15 @@ def convert_string_to_value(string):
   if string:
     if string == 'True':
       return_value = True
-    if string == 'False':
+    elif string == 'False':
       return_value = False
-    if string.isdigit():
+    elif string.isdigit():
       return_value = ValueConverter.set_integer(string)
     # check if datetime
-    if ValueValidator.validateDateTime(string):
+    elif ValueValidator.validateDateTime(string):
       return_value = ValueConverter.set_date(string)
     # TODO: use JSON instead
-    if (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
+    elif (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
       re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
       return_value = ast.literal_eval(string)
     else:

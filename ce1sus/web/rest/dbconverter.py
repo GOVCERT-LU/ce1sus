@@ -43,7 +43,7 @@ class DBConverter(object):
     """Returns the class logger"""
     return self.logger.get_logger(self.__class__.__name__)
 
-  def __convert_event(self, event, owner, full, with_definition):
+  def convert_event(self, event, owner, full, with_definition):
     """Converts Event to RestEvent"""
     self._get_logger().debug('Converting event')
     rest_event = RestEvent()
@@ -63,7 +63,7 @@ class DBConverter(object):
       for obj in event.objects:
         # share only the objects which are shareable or are owned by the user
         if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or owner:
-          rest_object = self.__convert_object(obj, owner, full, with_definition)
+          rest_object = self.convert_object(obj, owner, full, with_definition)
           rest_event.objects.append(rest_object)
     rest_event.comments = list()
     if event.bit_value.is_shareable:
@@ -72,7 +72,7 @@ class DBConverter(object):
       rest_event.share = 0
     return rest_event
 
-  def __convert_object(self, obj, owner, full, with_definition):
+  def convert_object(self, obj, owner, full, with_definition):
     """Converts Object to RestObject"""
     self._get_logger().debug('Converting object')
     rest_object = RestObject()
@@ -83,18 +83,19 @@ class DBConverter(object):
     if full:
       for attribute in obj.attributes:
         if (attribute.bit_value.is_shareable and attribute.bit_value.is_validated) or owner:
-          rest_attribute = self.__convert_attribute(attribute, owner, full, with_definition)
+          rest_attribute = self.convert_attribute(attribute, owner, full, with_definition)
           rest_object.attributes.append(rest_attribute)
     rest_object.children = list()
     if full:
       for child in obj.children:
         if (child.bit_value.is_shareable and child.bit_value.is_validated) or owner:
-          rest_child_object = self.__convert_object(child, owner, full, with_definition)
+          rest_child_object = self.convert_object(child, owner, full, with_definition)
           rest_object.children.append(rest_child_object)
     if obj.bit_value.is_shareable:
       rest_object.share = 1
     else:
       rest_object.share = 0
+    rest_object.author = obj.creator.default_group.name
     return rest_object
 
   def __convert_obj_def(self, definition, full, with_definition):
@@ -137,7 +138,7 @@ class DBConverter(object):
 
     return rest_attr_definition
 
-  def __convert_attribute(self, attribute, owner, full, with_definition):
+  def convert_attribute(self, attribute, owner, full, with_definition):
     """Converts Attribute to RestAttribtue"""
     rest_attribute = RestAttribute()
     rest_attribute.definition = self.__convert_attr_def(attribute.definition, False, with_definition)
@@ -154,8 +155,10 @@ class DBConverter(object):
     else:
       rest_attribute.share = 0
 
+    rest_attribute.author = attribute.creator.default_group.name
+
     if owner:
-      # TODO: If owner is really needed
+      # TODO: check If owner is really needed
       pass
     return rest_attribute
 
@@ -164,13 +167,13 @@ class DBConverter(object):
     self._get_logger().debug('Starting dictionary conversion')
     # find the rest class name
     if isinstance(instance, Event):
-      rest_object = self.__convert_event(instance, owner, full, with_definition)
+      rest_object = self.convert_event(instance, owner, full, with_definition)
 
     if isinstance(instance, Object):
-      rest_object = self.__convert_object(instance, owner, full, with_definition)
+      rest_object = self.convert_object(instance, owner, full, with_definition)
 
     if isinstance(instance, Attribute):
-      rest_object = self.__convert_attribute(instance, owner, full, with_definition)
+      rest_object = self.convert_attribute(instance, owner, full, with_definition)
 
     if isinstance(instance, ObjectDefinition):
       rest_object = self.__convert_obj_def(instance, full, with_definition)
