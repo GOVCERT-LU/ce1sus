@@ -975,9 +975,9 @@ CREATE TABLE `ce1sus` (
 
 LOCK TABLES `ce1sus` WRITE;
 /*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
-INSERT INTO `ce1sus` VALUES (1,'app_rev','0.7.0'),
+INSERT INTO `ce1sus` VALUES (1,'app_rev','0.7.3'),
 (2,'db_shema','0.8.0'),
-(3,'handler_config','{\"files\": \"/home/jhemp/workspace/myCels1us/files\", \"rt_url\": \"https://rt.govcert.etat.lu/rt/\", \"cveurl\": \"http://cve.mitre.org/cgi-bin/cvename.cgi?name=\", \"rt_password\": \"D6imjht9t3VRtU3\", \"rt_user\": \"botuser\"}');
+(3,'handler_config','{}');
 /*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

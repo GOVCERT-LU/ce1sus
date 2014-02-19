@@ -16,6 +16,7 @@ from ce1sus.controllers.login import LoginController
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.views.common.decorators import require
+from dagr.helpers.validator.valuevalidator import ValueValidator
 
 
 class IndexView(Ce1susBaseView):
@@ -72,6 +73,10 @@ class IndexView(Ce1susBaseView):
     """
     if username is None or password is None:
       raise HTTPRedirect('/index')
+      # validate user and user name
+    if  (not ValueValidator.validateAlNum(username, minLength=1, maxLength=60, withSymbols=True) and
+         not ValueValidator.validateAlNum(password, minLength=1, maxLength=60, withSymbols=True)):
+      return self.index('Invalid input.')
     user = self.login_controller.get_user_y_usr_pwd(username, password)
     if user:
       self.login_controller.update_last_login(user)
