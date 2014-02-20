@@ -112,7 +112,6 @@ class MySqlConnector(Connector):
       socket_obj.connect((host, port))
       socket_obj.close()
     except socket.error as error:
-      self.get_logger().critical(error)
       return False
     return True
 

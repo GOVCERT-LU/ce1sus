@@ -13,13 +13,16 @@ from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from dagr.helpers.objects import print_object
 from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.config import Configuration
+from ce1sus.brokers.ce1susbroker import Ce1susConfig
 
 
 class TestEventBrokers(unittest.TestCase):
 
   def setUp(self):
 
-    self.session_manager = SessionManager('../config/ce1sustest.conf')
+    config = Configuration('../../../config/ce1sustest.conf')
+    self.session_manager = SessionManager(config)
     self.timeStamp = datetime.now()
     # CreateNeeded Users and group
     self.groupbroker = self.session_manager.broker_factory(GroupBroker)
@@ -31,6 +34,7 @@ class TestEventBrokers(unittest.TestCase):
     self.group.description = 'Description'
     self.group.email = 'a@a.com'
     self.group.usermails = long(1)
+    self.group.tlp_lvl = long(1)
     self.user_broker = self.session_manager.broker_factory(UserBroker)
     self.user = User()
     self.user.identifier = 666

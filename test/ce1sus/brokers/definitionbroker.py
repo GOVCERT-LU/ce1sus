@@ -11,19 +11,23 @@ from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
                                                         ObjectDefinition
 import dagr.helpers.objects as helpers
 from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
+from dagr.helpers.config import Configuration
+from ce1sus.brokers.ce1susbroker import Ce1susConfig
+
 
 class TestDefinitionBrokers(unittest.TestCase):
 
   # The following test have to be ordered
   def setUp(self):
-    self.object = ObjectDefinition()
+    config = Configuration('../../../config/ce1sustest.conf')
+    self.session_manager = SessionManager(config)
+
     self.object = ObjectDefinition()
     self.object.name = 'Name'
     self.object.identifier = long(666)
     self.object.description = 'A description'
     self.object.share = long(1)
 
-    self.session_manager = SessionManager('../config/ce1sustest.conf')
     self.attributebroker = self.session_manager.broker_factory(
                                                       AttributeDefinitionBroker)
     self.attribute = AttributeDefinition()
@@ -34,7 +38,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.attribute.valuetable = long(1)
     self.attribute.share = long(1)
     self.attribute.class_index = long(0)
-    self.attribute.handler_index = long(0)
+    self.attribute.handler_index = long(1)
     self.attribute.deletable = long(1)
     self.attribute.relation = long(1)
     self.attribute.objects = list()

@@ -64,6 +64,7 @@ class SessionManager:
     else:
       raise SessionManagerException(('Protocol {0} '
                                     + 'is undefined').format(protocol))
+    self.__direct_session = None
 
   def broker_factory(self, clazz):
     """
@@ -77,7 +78,13 @@ class SessionManager:
     if not issubclass(clazz, BrokerBase):
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
-    broker = clazz(self.connector.get_session())
+    if self.__config_section.get('usecherrypy', False):
+      session = self.connector.get_session()
+    else:
+      if not self.__direct_session:
+        self.__direct_session = self.connector.get_direct_session()
+      session = self.__direct_session
+    broker = clazz(session)
     return broker
 
   def close(self):
