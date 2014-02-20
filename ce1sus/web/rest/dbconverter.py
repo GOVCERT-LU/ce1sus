@@ -220,6 +220,8 @@ class DBConverter(object):
               hash_value = self.__gen_attr_hash(additional_attribute)
               if not hash_value in seen_attributes:
                 seen_attributes.append(hash_value)
+                # attach to parent
+                attribute.children.append(additional_attribute)
                 obj.attributes.append(additional_attribute)
 
       if rest_obj.children:

@@ -54,9 +54,9 @@ class GenericHandler(HandlerBase):
         if share == '0':
           attribute.bit_value.is_shareable = False
         else:
-          attribute.bit_value.is_shareable = share
+          attribute.bit_value.is_shareable = True
       else:
-        attribute.bit_value.is_shareable = share
+        attribute.bit_value.is_shareable = False
 
     is_ioc = params.get('ioc', None)
     if is_ioc is None:

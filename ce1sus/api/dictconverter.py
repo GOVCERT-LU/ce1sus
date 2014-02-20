@@ -78,9 +78,15 @@ class DictConverter(object):
     self._get_logger().debug('Mapping list for attribute {0}'.format(key))
     result = list()
     for item in value:
-      subkey, subvalue = self.__get_object_data(item)
-      subinstance = self.__populate_classname_by_dict(subkey, subvalue)
-      result.append(subinstance)
+      # if dictionary then they are objects
+      if isinstance(item, DictionaryType):
+        subkey, subvalue = self.__get_object_data(item)
+        subinstance = self.__populate_classname_by_dict(subkey, subvalue)
+        result.append(subinstance)
+      else:
+        # its acutally a single value
+        result = value
+        break
     setattr(instance, key, result)
 
   def __populate_atomic_value(self, instance, key, value):

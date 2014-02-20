@@ -53,7 +53,6 @@ class RestEventHandler(RestBaseHandler):
     if not uuid:
       try:
         rest_event = self.get_post_object()
-
         user = self._get_user()
         event = self.convert_to_db_Object(rest_event, user, 'insert')
         # check if event is valid

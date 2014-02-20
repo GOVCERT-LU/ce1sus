@@ -130,11 +130,13 @@ class AttributesController(Ce1susBaseController):
   def __set_web_attribute(attribute):
     attribute.bit_value.is_web_insert = True
     attribute.bit_value.is_validated = True
+    attribute.bit_value.is_rest_instert = False
 
   @staticmethod
   def __set_rest_attribute(attribute):
-    attribute.bit_value.is_web_insert = True
-    attribute.bit_value.is_validated = True
+    attribute.bit_value.is_web_insert = False
+    attribute.bit_value.is_rest_instert = True
+    attribute.bit_value.is_validated = False
 
   def populate_web_attributes(self, user, obj, definition_id, action, params):
     try:

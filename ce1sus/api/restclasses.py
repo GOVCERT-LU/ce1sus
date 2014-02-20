@@ -28,6 +28,14 @@ class RestClass(object):
     raise RestClassException(('ToJson is not implemented for '
                               + '{0}').format(self.get_classname()))
 
+  @staticmethod
+  def convert_value(value):
+    """converts the value None to '' else it will be send as None-Text"""
+    if value:
+      return value
+    else:
+      return ''
+
 
 # pylint: disable=R0902
 class RestEvent(RestClass):
@@ -66,27 +74,26 @@ class RestEvent(RestClass):
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
-    result[self.get_classname()]['uuid'] = self.uuid
-    result[self.get_classname()]['title'] = self.title
-    result[self.get_classname()]['description'] = u'{0}'.format(self.description)
-    self.__set_date_value(result, 'first_seen', self.first_seen)
+    result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
+    result[self.get_classname()]['title'] = RestClass.convert_value(self.title)
+    result[self.get_classname()]['description'] = u'{0}'.format(RestClass.convert_value(self.description))
+    self.__set_date_value(result, 'first_seen', RestClass.convert_value(self.first_seen))
+
     if self.last_seen is None:
       self.last_seen = self.first_seen
-    else:
-      self.__set_date_value(result, 'last_seen', self.last_seen)
-    self.__set_value(result, 'tlp', self.tlp)
-    self.__set_value(result, 'status', self.status)
-    self.__set_value(result, 'risk', self.risk)
-    self.__set_value(result, 'analysis', self.analysis)
-    result[self.get_classname()]['published'] = self.published
+    self.__set_date_value(result, 'last_seen', self.last_seen)
+    self.__set_value(result, 'tlp', RestClass.convert_value(self.tlp))
+    self.__set_value(result, 'status', RestClass.convert_value(self.status))
+    self.__set_value(result, 'risk', RestClass.convert_value(self.risk))
+    self.__set_value(result, 'analysis', RestClass.convert_value(self.analysis))
+    result[self.get_classname()]['published'] = RestClass.convert_value(self.published)
+    objs = list()
     if self.objects:
-      result[self.get_classname()]['objects'] = list()
       for obj in self.objects:
-        result[self.get_classname()]['objects'].append(obj.to_dict())
-    else:
-      result[self.get_classname()]['objects'] = None
-    result[self.get_classname()]['share'] = u'{0}'.format(self.share)
-    result[self.get_classname()]['group'] = self.group
+        objs.append(obj.to_dict())
+    result[self.get_classname()]['objects'] = RestClass.convert_value(objs)
+    result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
+    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
     return result
 
 
@@ -95,7 +102,7 @@ class RestObject(RestClass):
 
   def __init__(self):
     RestClass.__init__(self)
-    self.definition = None
+    self.definition = RestObjectDefinition()
     self.attributes = None
     self.parent = None
     self.children = list()
@@ -105,24 +112,21 @@ class RestObject(RestClass):
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
+    children = list()
     if self.children:
-      result[self.get_classname()]['children'] = list()
       for child in self.children:
-        result[self.get_classname()]['children'].append(child.to_dict())
-    else:
-      result[self.get_classname()]['children'] = None
+        children.append(child.to_dict())
+    result[self.get_classname()]['children'] = RestClass.convert_value(children)
     result[self.get_classname()]['definition'] = self.definition.to_dict()
 
+    attributes = list()
     if self.attributes:
-      result[self.get_classname()]['attributes'] = list()
-
       for attribute in self.attributes:
-        result[self.get_classname()]['attributes'].append(attribute.to_dict())
-    else:
-      result[self.get_classname()]['attributes'] = None
+        attributes.append(attribute.to_dict())
+    result[self.get_classname()]['attributes'] = RestClass.convert_value(attributes)
 
-    result[self.get_classname()]['share'] = u'{0}'.format(self.share)
-    result[self.get_classname()]['author'] = self.author
+    result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
+    result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
     return result
 
 
@@ -131,7 +135,7 @@ class RestAttribute(RestClass):
 
   def __init__(self):
     RestClass.__init__(self)
-    self.definition = None
+    self.definition = RestAttributeDefinition()
     self.value = None
     self.ioc = None
     self.share = 1
@@ -141,10 +145,10 @@ class RestAttribute(RestClass):
     result = dict()
     result[self.get_classname()] = dict()
     result[self.get_classname()]['definition'] = self.definition.to_dict()
-    result[self.get_classname()]['value'] = self.value
-    result[self.get_classname()]['ioc'] = u'{0}'.format(self.ioc)
-    result[self.get_classname()]['share'] = u'{0}'.format(self.share)
-    result[self.get_classname()]['author'] = self.author
+    result[self.get_classname()]['value'] = RestClass.convert_value(self.value)
+    result[self.get_classname()]['ioc'] = u'{0}'.format(RestClass.convert_value(self.ioc))
+    result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
+    result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
     return result
 
 
@@ -162,16 +166,16 @@ class RestObjectDefinition(RestClass):
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
-    result[self.get_classname()]['name'] = self.name
-    result[self.get_classname()]['description'] = self.description
-    result[self.get_classname()]['chksum'] = self.chksum
+    result[self.get_classname()]['name'] = RestClass.convert_value(self.name)
+    result[self.get_classname()]['description'] = RestClass.convert_value(self.description)
+    result[self.get_classname()]['chksum'] = RestClass.convert_value(self.chksum)
+    attributes = list()
     if self.attributes:
-      result[self.get_classname()]['attributes'] = list()
       for attribute in self.attributes:
-        result[self.get_classname()]['attributes'].append(attribute.to_dict())
-    else:
-      result[self.get_classname()]['attributes'] = None
-    result[self.get_classname()]['share'] = u'{0}'.format(self.share)
+        attributes.append(attribute.to_dict())
+    result[self.get_classname()]['attributes'] = RestClass.convert_value(attributes)
+
+    result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
     return result
 
 
@@ -192,26 +196,12 @@ class RestAttributeDefinition(RestClass):
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
-    result[self.get_classname()]['name'] = self.name
-    result[self.get_classname()]['description'] = self.description
-    result[self.get_classname()]['regex'] = self.regex
-    result[self.get_classname()]['class_index'] = self.class_index
-    result[self.get_classname()]['handler_uuid'] = self.handler_uuid
-    result[self.get_classname()]['relation'] = self.relation
-    result[self.get_classname()]['chksum'] = self.chksum
-    result[self.get_classname()]['share'] = u'{0}'.format(self.share)
+    result[self.get_classname()]['name'] = RestClass.convert_value(self.name)
+    result[self.get_classname()]['description'] = RestClass.convert_value(self.description)
+    result[self.get_classname()]['regex'] = RestClass.convert_value(self.regex)
+    result[self.get_classname()]['class_index'] = RestClass.convert_value(self.class_index)
+    result[self.get_classname()]['handler_uuid'] = RestClass.convert_value(self.handler_uuid)
+    result[self.get_classname()]['relation'] = RestClass.convert_value(self.relation)
+    result[self.get_classname()]['chksum'] = RestClass.convert_value(self.chksum)
+    result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
     return result
-
-
-# pylint: disable=R0902
-class RestUUID(RestClass):
-  """Rest class of an event"""
-
-  def __init__(self):
-    RestClass.__init__(self)
-    self.uuid = None
-
-  def to_dict(self):
-    result = dict()
-    result[self.get_classname()] = dict()
-    result[self.get_classname()]['uuid'] = self.uuid

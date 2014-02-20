@@ -25,6 +25,7 @@ from os import makedirs
 import magic
 from ce1sus.common.checks import can_user_download
 from dagr.web.views.classes import Link
+import base64
 
 
 CHK_SUM_FILE_NAME = 'e40de7dccb534b85f9db42e5b990b8a06a5027cf'
@@ -227,10 +228,13 @@ class FileHandler(GenericHandler):
         return child.plain_value
     return None
 
-  def convert_to_gui_value(self, attribute):
+  def _get_user(self):
     # Note this is not as it should be !!
     session = getattr(cherrypy, 'session')
-    user = session.get(SESSION_USER, None)
+    return session.get(SESSION_USER, None)
+
+  def convert_to_gui_value(self, attribute):
+    user = self._get_user()
     if user:
       event = attribute.object.get_parent_event()
       can_download = can_user_download(event, user)
@@ -241,6 +245,8 @@ class FileHandler(GenericHandler):
                                           attribute.object.get_parent_event_id(),
                                           attribute.identifier)
           filename = FileHandler.__get_orig_filename(attribute)
+          if not filename:
+            filename = basename(file_path)
           return Link(url, 'Download file "{0}"'.format(filename))
         else:
           return '(File is MIA or is corrupt)'
@@ -248,6 +254,68 @@ class FileHandler(GenericHandler):
         return '(Not Provided)'
     else:
       return '(Not Provided)'
+
+  def convert_to_rest_value(self, attribute, config):
+    user = self._get_user()
+    if user:
+      event = attribute.object.get_parent_event()
+      can_download = can_user_download(event, user)
+      if can_download:
+        file_path = self._get_base_path() + '/' + attribute.plain_value
+        if isfile(file_path):
+          filename = FileHandler.__get_orig_filename(attribute)
+          file_obj = open(file_path, "rb")
+          binary_data = file_obj.read()
+          file_obj.close()
+          b64_encoded = base64.b64encode(binary_data)
+          return (filename, b64_encoded)
+        else:
+          return '(File is MIA or is corrupt)'
+      else:
+        return '(Not Provided)'
+    else:
+      return '(Not Provided)'
+
+  def process_rest_post(self, obj, definitions, user, rest_attribute):
+    definition = self._get_main_definition(definitions)
+    # check if value is valid
+    if len(rest_attribute.value) != 2:
+      raise HandlerException('Value is invalid format has to be ("filename","{base64 encoded file}")')
+
+    # create Params
+    params = dict()
+    # create and store file
+    filename = rest_attribute.value[0]
+    b64_encoded = rest_attribute.value[1]
+    binary_data = base64.b64decode(b64_encoded)
+    tmp_path = self._get_tmp_folder() + '/' + filename
+    # create file in tmp
+    file_obj = open(tmp_path, "w")
+    file_obj.write(binary_data)
+    file_obj.close
+
+    sha1 = hasher.fileHashSHA1(tmp_path)
+    rel_folder = FileHandler._get_rel_folder()
+    dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
+
+    # move it to the correct place
+    move(tmp_path, dest_path)
+    # remove temp folder
+    rmtree(dirname(tmp_path))
+    # TODO: do as for the GUI and create all attributes
+    params['value'] = rel_folder + '/' + sha1
+    params['ioc'] = rest_attribute.ioc
+
+    attribute = self.create_attribute(params, obj, definition, user)
+    attributes = list()
+    attributes.append(FileHandler._create_attribute(filename,
+                                                   obj,
+                                                   FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
+                                                   user,
+                                                   '0',
+                                                   '1'))
+
+    return attribute, attributes
 
 
 class FileWithHashesHandler(FileHandler):
