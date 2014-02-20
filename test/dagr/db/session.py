@@ -14,19 +14,19 @@ class TestSession(unittest.TestCase):
 
   def testSetupFound(self):
     try:
-      config = Configuration('../../../ce1susFoo.cfg')
+      config = Configuration('ce1susFoo.cfg')
       session = SessionManager(config)
       session.close()
       assert False
     except:
       assert True
 
-      config = Configuration('../../../config/ce1sustest.conf')
+      config = Configuration('config/ce1sustest.conf')
       session = SessionManager(config)
       session.close()
       assert True
 
-      config = Configuration('../../../config/ce1sustest.conf')
+      config = Configuration('config/ce1sustest.conf')
       session = SessionManager(config)
       session.broker_factory(GroupBroker)
       assert True

@@ -20,7 +20,7 @@ class TestPermissionBrokers(unittest.TestCase):
   # The following test have to be ordered
 
   def setUp(self):
-    config = Configuration('../../../config/ce1sustest.conf')
+    config = Configuration('config/ce1sustest.conf')
     self.session_manager = SessionManager(config)
     self.groupbroker = self.session_manager.broker_factory(GroupBroker)
 

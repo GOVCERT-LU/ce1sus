@@ -21,7 +21,7 @@ class TestEventBrokers(unittest.TestCase):
 
   def setUp(self):
 
-    config = Configuration('../../../config/ce1sustest.conf')
+    config = Configuration('config/ce1sustest.conf')
     self.session_manager = SessionManager(config)
     self.timeStamp = datetime.now()
     # CreateNeeded Users and group
