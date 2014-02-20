@@ -28,7 +28,7 @@ from dagr.web.views.classes import Link
 import base64
 
 
-CHK_SUM_FILE_NAME = 'e40de7dccb534b85f9db42e5b990b8a06a5027cf'
+CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
 CHK_SUM_HASH_SHA1 = 'dc4e8dd46d60912abbfc3dd61c16ef1f91414032'
 CHK_SUM_HASH_SHA256 = '1350a97f87dfb644437814905cded4a86e58a480'
 CHK_SUM_HASH_SHA384 = '40c1ce5808fa21c6a90d27e4b08b7b7171a23b92'
@@ -60,7 +60,7 @@ class FileHandler(GenericHandler):
     return hasher.hashSHA256(key)
 
   @staticmethod
-  def _create_attribute(value, obj, definition, user, ioc):
+  def _create_attribute(value, obj, definition, user, ioc, share=None):
     """
     Creates an attribue obj
 
@@ -78,6 +78,8 @@ class FileHandler(GenericHandler):
     params = dict()
     params['value'] = value
     params['ioc'] = ioc
+    if share:
+      params['shared'] = share
 
     return GenericHandler.create_attribute(params,
                                            obj,
@@ -305,6 +307,7 @@ class FileHandler(GenericHandler):
     # TODO: do as for the GUI and create all attributes
     params['value'] = rel_folder + '/' + sha1
     params['ioc'] = rest_attribute.ioc
+    params['shared'] = '{0}'.format(rest_attribute.share)
 
     attribute = self.create_attribute(params, obj, definition, user)
     attributes = list()
@@ -312,8 +315,7 @@ class FileHandler(GenericHandler):
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
                                                    user,
-                                                   '0',
-                                                   '1'))
+                                                   '0'))
 
     return attribute, attributes
 

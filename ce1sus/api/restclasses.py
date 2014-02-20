@@ -31,7 +31,7 @@ class RestClass(object):
   @staticmethod
   def convert_value(value):
     """converts the value None to '' else it will be send as None-Text"""
-    if value:
+    if value or value == 0:
       return value
     else:
       return ''
@@ -161,7 +161,7 @@ class RestObjectDefinition(RestClass):
     self.description = None
     self.chksum = None
     self.attributes = None
-    self.share = 0
+    self.share = 1
 
   def to_dict(self):
     result = dict()
@@ -191,7 +191,7 @@ class RestAttributeDefinition(RestClass):
     self.handler_uuid = None
     self.chksum = None
     self.relation = 0
-    self.share = 0
+    self.share = 1
 
   def to_dict(self):
     result = dict()

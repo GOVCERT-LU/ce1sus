@@ -135,6 +135,6 @@ class GenericHandler(HandlerBase):
     params = dict()
     params['value'] = rest_attribute.value
     params['ioc'] = rest_attribute.ioc
-    params['shared'] = rest_attribute.share
+    params['shared'] = '{0}'.format(rest_attribute.share)
     attribute = self.create_attribute(params, obj, definition, user)
     return attribute, None
