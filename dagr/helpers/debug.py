@@ -81,8 +81,8 @@ class Log(object):
       logger = logging.getLogger(classname)
       logger.setLevel(self.log_lvl)
       if self.__config_section:
-        self.__set_console_handler(logger)
         self.__set_logfile(logger)
+      self.__set_console_handler(logger)
       self.loggers[classname] = logger
     return logger
 

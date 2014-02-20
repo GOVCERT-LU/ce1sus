@@ -8,6 +8,7 @@ import os
 from dagr.helpers.debug import Log
 from dagr.helpers.config import ConfigFileNotFoundException, \
 ConfigParsingException
+from dagr.helpers.config import Configuration
 
 
 # pylint: disable=R0904, C0111, R0201, W0612, W0613, R0915, R0903
@@ -33,26 +34,30 @@ class TestLog(unittest.TestCase):
   def testSetup(self):
 
     # load without config
-    Log.get_instance()
+    log = Log()
+    log.get_logger('TestLog').info('haha1')
     assert True
 
     # load with config
     name = 'test.cfg'
     try:
       self.generateConfig(name)
-      Log(name)
-      Log._get_logger('TestLog').debug('haha')
+      config = Configuration(name)
+      log = Log(config)
+      log.get_logger('TestLog').debug('haha')
       assert True
-    except:
+    except Exception as e:
+      print e
       assert False
     finally:
       self.remove_file(name)
-      self.remove_file('logger.txt')
+      # self.remove_file('logger.txt')
 
     # load with no file config
     name = 'test2.cfg'
     try:
-      Log(name)
+      config = Configuration(name)
+      log = Log(config)
       assert False
     except ConfigFileNotFoundException:
       assert True
@@ -61,7 +66,8 @@ class TestLog(unittest.TestCase):
     name = 'test.cfg'
     try:
       self.generateConfig(name, writeSection=False)
-      Log(name)
+      config = Configuration(name)
+      log = Log(config)
       assert False
     except ConfigParsingException:
       assert True
@@ -72,7 +78,8 @@ class TestLog(unittest.TestCase):
     name = 'test.cfg'
     try:
       self.generateConfig(name, sectionName='haaha', writeSection=False)
-      Log(name)
+      config = Configuration(name)
+      log = Log(config)
       assert False
     except ConfigParsingException:
       assert True

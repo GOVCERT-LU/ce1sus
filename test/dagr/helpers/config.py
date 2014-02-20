@@ -67,7 +67,8 @@ class TestConfiguration(unittest.TestCase):
       # missing section
       name = 'test.cfg'
       self.generate_working_file(name)
-      config = Configuration(name, 'Section2')
+      config = Configuration(name)
+      config.get_section('Section2')
       del config
       assert False
     except ConfigSectionNotFoundException:
@@ -126,10 +127,12 @@ class TestConfiguration(unittest.TestCase):
       key = section.get('name')
       assert key == 'Test'
       key = section.get('UpperCase')
+      assert key != 'Test'
+      key = section.get('uppercase')
       assert key == 'Test'
-      key = section.get('Boolean')
+      key = section.get('boolean')
       assert key
-      key = section.get('Number')
+      key = section.get('number')
       assert key == 1
     except ConfigException:
       assert False
@@ -140,8 +143,7 @@ class TestConfiguration(unittest.TestCase):
       name = 'test.cfg'
       self.generate_working_file(name)
       config = Configuration(name)
-      section = config.get_section('Section')
-      key = section.get('name2')
+      section = config.get('Section', 'name2')
       assert False
     except ConfigKeyNotFoundException:
       assert True
