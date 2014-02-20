@@ -60,6 +60,7 @@ def convert_string_to_value(string):
   return return_value
 
 
+# pylint: disable=W0613
 def sytem_version(context):
   """
   Just for displaing inside the leyout

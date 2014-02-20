@@ -22,7 +22,7 @@ from ce1sus.common.ce1susutils import get_class
 
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
-    'DObj_has_DAttr', BASE.metadata,
+    'DObj_has_DAttr', getattr(BASE, 'metadata'),
     Column('def_attribute_id', Integer, ForeignKey(
                                           'DEF_Attributes.def_attribute_id')),
     Column('def_object_id', Integer, ForeignKey('DEF_Objects.def_object_id'))
@@ -40,13 +40,17 @@ class AttributeHandler(BASE):
   module_classname = Column('moduleClassName', String)
   description = Column('description', String)
   uuid = Column('uuid', String)
-  attributes = relationship('AttributeDefinition', primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index')
+  attributes = relationship('AttributeDefinition',
+                            primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index')
   ce1sus_id = Column('config', Integer, ForeignKey('ce1sus.ce1sus_id'))
   configuration = relationship('Ce1susConfig')
   __config = None
 
   @property
   def config(self):
+    """
+    Returns the global configuration for handlers
+    """
     if self.__config is None:
       config_str = getattr(self.configuration, 'value')
       self.__config = json.loads(config_str)
@@ -92,16 +96,8 @@ class ObjectDefinition(BASE):
   attributes = relationship('AttributeDefinition', secondary='DObj_has_DAttr',
                             back_populates='objects', cascade='all',
                             order_by="AttributeDefinition.name")
-  dbchksum = Column('chksum', String)
+  chksum = Column('chksum', String)
   share = Column('sharable', Integer)
-
-  @property
-  def chksum(self):
-    return self.dbchksum
-
-  @chksum.setter
-  def chksum(self, chksum):
-    self.dbchksum = chksum
 
   def add_attribute(self, attribute):
     """
@@ -179,22 +175,17 @@ class AttributeDefinition(BASE):
                             order_by="ObjectDefinition.name")
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
-  dbchksum = Column('chksum', String)
+  chksum = Column('chksum', String)
   __handler = None
 
   @property
   def handler(self):
+    """
+    Returns the instantiatied handler
+    """
     if self.__handler is None:
       self.__handler = getattr(self.attribute_handler, 'create_instance')()
     return self.__handler
-
-  @property
-  def chksum(self):
-    return self.dbchksum
-
-  @chksum.setter
-  def chksum(self, chksum):
-    self.dbchksum = chksum
 
   @property
   def classname(self):

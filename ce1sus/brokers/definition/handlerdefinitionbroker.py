@@ -16,6 +16,9 @@ import sqlalchemy.orm.exc
 
 
 class AttributeHandlerBroker(BrokerBase):
+  """
+  Attribute handler broker
+  """
 
   def get_broker_class(self):
     """
@@ -35,6 +38,9 @@ class AttributeHandlerBroker(BrokerBase):
     return result
 
   def get_by_uuid(self, uuid):
+    """
+    Returns the handler by its uuid
+    """
     try:
       return self.session.query(AttributeHandler).filter(AttributeHandler.uuid == uuid).one()
     except sqlalchemy.orm.exc.NoResultFound:

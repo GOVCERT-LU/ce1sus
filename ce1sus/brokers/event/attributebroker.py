@@ -11,11 +11,8 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, ValidationException, \
-                           BrokerException
-from dagr.helpers.validator.objectvalidator import ObjectValidator
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                              AttributeDefinitionBroker
+from dagr.db.broker import BrokerBase, BrokerException
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 from ce1sus.brokers.event.eventclasses import Attribute
@@ -39,61 +36,9 @@ class AttributeBroker(BrokerBase):
     return Attribute
 
   def insert(self, instance, commit=True, validate=True):
-    # find relations
+    # finds in addition the relations
     BrokerBase.insert(self, instance, False, validate)
     self.relation_broker.generate_attribute_relations(instance, False)
-
-  """
-  def insert(self, instance, commit=True, validate=True):
-    # validation of the value of the attribute first
-    # get the definition containing the definition how to validate an attribute
-    definition = instance.definition
-    ObjectValidator.validateRegex(instance,
-                                  'value',
-                                  definition.regex,
-                                  'The value does not match {0}'.format(
-                                                            definition.regex),
-                                  True)
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException(ObjectValidator.getFirstValidationError(instance))
-
-    try:
-      # insert value for value table
-      BrokerBase.insert(self, instance, False, validate)
-      # insert relations
-
-      self.relation_broker.generate_attribute_relations(instance, False)
-
-      self.value_broker.inser_by_attribute(instance, False)
-      self.do_commit(True)
-
-    except BrokerException as e:
-      self.session.rollback()
-      raise BrokerException(e)
-
-  def update(self, instance, commit=True, validate=True):
-    # validation of the value of the attribute first
-    definition = instance.definition
-    ObjectValidator.validateRegex(instance,
-                                  'plain_value',
-                                  definition.regex,
-                                  'The value does not match {0}'.format(
-                                                          definition.regex),
-                                  False)
-    errors = not instance.validate()
-    if errors:
-      raise ValidationException(ObjectValidator.getFirstValidationError(instance))
-    try:
-      BrokerBase.update(self, instance, False, validate)
-      # updates the value of the value table
-      self.do_commit(False)
-      self.value_broker.update_by_attribute(instance, False)
-      self.do_commit(commit)
-    except BrokerException as e:
-      self.session.rollback()
-      raise BrokerException(e)
-  """
 
   def remove_by_id(self, identifier, commit=True):
     try:
@@ -106,9 +51,9 @@ class AttributeBroker(BrokerBase):
                             identifier=attribute.identifier,
                             commit=False)
       self.do_commit(commit)
-    except BrokerException as e:
+    except BrokerException as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   def remove_attribute_list(self, attributes, commit=True):
     """
@@ -126,11 +71,6 @@ class AttributeBroker(BrokerBase):
     except BrokerException as error:
       self.session.rollback()
       raise BrokerException(error)
-
-  def look_for_attribute_value(self, attribute_definition, value, operand='=='):
-    return self.relation_broker.look_for_attribute_value(attribute_definition,
-                                              value,
-                                              operand)
 
   def update_attribute(self, user, attribute, commit=True):
     """

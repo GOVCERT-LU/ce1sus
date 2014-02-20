@@ -45,37 +45,52 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_cb_attribute_definitions_by_obj(self, obj):
+  def get_cb_attr_def_by_obj(self, obj):
+    """
+    Returns the values for combobox displaying attributes definitions
+    """
     try:
       return self.def_attributes_broker.get_cb_values(obj.def_object_id)
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_attribute_definition_by_id(self, attribute_defintion_id):
+  def get_attr_def_by_id(self, attribute_defintion_id):
+    """
+    Returns the attribute definition by its id
+    """
     try:
       return self.def_attributes_broker.get_by_id(attribute_defintion_id)
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_attribute_definition_by_chksum(self, chksum):
+  def get_attr_def_by_chksum(self, chksum):
+    """
+    Returns the attribute definition by its chksum
+    """
     try:
       return self.def_attributes_broker.get_defintion_by_chksum(chksum)
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_defintion_by_chksum(self, chksum):
-    try:
-      return self.def_attributes_broker.get_defintion_by_chksum(chksum)
-    except BrokerException as error:
-      self._raise_exception(error)
+    """
+    Alias for get_attr_def_by_chksum
+    """
+    return self.get_attr_def_by_chksum(chksum)
 
   def get_defintion_by_chksums(self, chksums):
+    """
+    Returns the attribute definitions matching the list of chksums
+    """
     try:
       return self.def_attributes_broker.get_defintion_by_chksums(chksums)
     except BrokerException as error:
       self._raise_exception(error)
 
   def insert_attributes(self, user, obj, attribute, additional_attributes):
+    """
+    inserts the attributes to the DB
+    """
     try:
       self._get_logger().debug('User {0} inserts attributes on object {1}'.format(user.username,
                                                                                   obj.identifier))
@@ -100,7 +115,11 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  # pylint: disable=R0913
   def __populate_attributes(self, user, obj, definition, action, params, rest=False):
+    """
+    Populates the attributes to be inserted
+    """
     try:
       if action == 'insert':
         definitions = dict()
@@ -128,17 +147,27 @@ class AttributesController(Ce1susBaseController):
 
   @staticmethod
   def __set_web_attribute(attribute):
+    """
+    sets the parameters for a web attribute
+    """
     attribute.bit_value.is_web_insert = True
     attribute.bit_value.is_validated = True
     attribute.bit_value.is_rest_instert = False
 
   @staticmethod
   def __set_rest_attribute(attribute):
+    """
+    sets the parameters for a rest attribute
+    """
     attribute.bit_value.is_web_insert = False
     attribute.bit_value.is_rest_instert = True
     attribute.bit_value.is_validated = False
 
+  # pylint: disable=R0913
   def populate_web_attributes(self, user, obj, definition_id, action, params):
+    """
+    Populates the attributes to be inserted coming from the web interface
+    """
     try:
       definition = self.def_attributes_broker.get_by_id(definition_id)
       attribute, additional_attributes = self.__populate_attributes(user,
@@ -157,6 +186,9 @@ class AttributesController(Ce1susBaseController):
       self._raise_exception(error)
 
   def populate_rest_attributes(self, user, obj, rest_attribute, action):
+    """
+    Populates the attributes to be inserted coming from the rest api
+    """
     try:
       definition = self.def_attributes_broker.get_defintion_by_chksum(rest_attribute.definition.chksum)
       attribute, additional_attributes = self.__populate_attributes(user,
@@ -180,12 +212,19 @@ class AttributesController(Ce1susBaseController):
       self._raise_exception(error)
 
   def get_all_definitions(self):
+    """
+    Returns all the attribute definitions
+    """
     try:
       return self.def_attributes_broker.get_all()
     except BrokerException as error:
       self._raise_exception(error)
 
   def insert_definition(self, user, attribute_definition):
+    """
+    Inserts an attribute definition
+    """
+    self._get_logger().debug('User {0} inserts an attribute definition'.format(user.username))
     try:
       self.def_attributes_broker.insert(attribute_definition, True)
       return attribute_definition, True
@@ -195,12 +234,19 @@ class AttributesController(Ce1susBaseController):
       self._raise_exception(error)
 
   def get_handler_by_uuid(self, uuid):
+    """
+    Returns the handler by its uuid
+    """
     try:
       return self.handler_broker.get_by_uuid(uuid)
     except BrokerException as error:
       self._raise_exception(error)
 
   def populate_rest_attr_def(self, user, rest_attr_def, action):
+    """
+    Populates an attribute coming from the rest api
+    """
+    self._get_logger().debug('User {0} populates an attribute definition over the rest api'.format(user.username))
     try:
       handler = self.handler_broker.get_by_uuid(rest_attr_def.handler_uuid)
       return self.def_attributes_broker.build_attribute_definition(identifier=None,

@@ -42,7 +42,7 @@ class AttributesView(Ce1susBaseView):
       event = self.attributes_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       obj = self.attributes_controller.get_object_by_id(object_id)
-      cb_definitions = self.attributes_controller.get_cb_attribute_definitions_by_obj(obj)
+      cb_definitions = self.attributes_controller.get_cb_attr_def_by_obj(obj)
       return self._render_template('/events/event/attributes/attributesModal.html',
                                    event_id=event_id,
                                    object_id=object_id,
@@ -66,7 +66,7 @@ class AttributesView(Ce1susBaseView):
       event = self.attributes_controller.get_event_by_id(event_id)
       self._is_event_owner(event)
       obj = self.attributes_controller.get_object_by_id(object_id)
-      attr_definition = self.attributes_controller.get_attribute_definition_by_id(defattrib_id)
+      attr_definition = self.attributes_controller.get_attr_def_by_id(defattrib_id)
       if attr_definition.share:
         if obj.bit_value.is_shareable:
           default_share_value = 1
@@ -116,7 +116,7 @@ class AttributesView(Ce1susBaseView):
         if attribute_id:
           attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
       if definition_id:
-        definition = self.attributes_controller.get_attribute_definition_by_id(definition_id)
+        definition = self.attributes_controller.get_attr_def_by_id(definition_id)
       else:
         if attribute:
           definition = attribute.definition
@@ -182,7 +182,7 @@ class AttributesView(Ce1susBaseView):
       event = self.attributes_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       obj = self.attributes_controller.get_object_by_id(object_id)
-      cb_definitions = self.attributes_controller.get_cb_attribute_definitions_by_obj(obj)
+      cb_definitions = self.attributes_controller.get_cb_attr_def_by_obj(obj)
       attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
       return self._render_template('/events/event/attributes/attributesModal.html',
                                    event_id=event_id,

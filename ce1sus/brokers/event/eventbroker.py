@@ -11,9 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, ValidationException, \
-NothingFoundException, TooManyResultsFoundException, \
-BrokerException
+from dagr.db.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 import sqlalchemy.orm.exc
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
@@ -25,7 +23,6 @@ from ce1sus.brokers.event.objectbroker import ObjectBroker
 import uuid as uuidgen
 from ce1sus.helpers.bitdecoder import BitValue
 from dagr.helpers.strings import cleanPostValue
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 # pylint: disable=R0904
@@ -39,6 +36,9 @@ class EventBroker(BrokerBase):
     self.object_broker = ObjectBroker(session)
 
   def __event_groups(self, clazz, join_relation, identifier, belong_in=True):
+    """
+    Returns all the groups of the event
+    """
     try:
         groups = self.session.query(clazz).join(join_relation).filter(Event.identifier == identifier).all()
         if not belong_in:
@@ -112,24 +112,27 @@ class EventBroker(BrokerBase):
                                      user,
                                      limit,
                                      offset):
+    """
+    Returns all the events taking into account the users groups
+    """
     if user.default_group is None:
       # as the user has no main group it is impossible to see any thing
       result = list()
     else:
       tlp_lvl = user.default_group.tlp_lvl
-      mainGroupID = user.default_group.identifier
-      subGroupsIDs = list()
+      main_group_id = user.default_group.identifier
+      sub_group_ids = list()
       for subgroup in user.default_group.subgroups:
-        subGroupsIDs.append(subgroup.identifier)
+        sub_group_ids.append(subgroup.identifier)
       try:
-        if len(subGroupsIDs) > 0:
+        if len(sub_group_ids) > 0:
           result = self.session.query(Event).filter(
                                         or_(
-                                          Event.creator_group_id == mainGroupID,
+                                          Event.creator_group_id == main_group_id,
                                           and_(
                                             or_(
-                                            Event.maingroups.identifier.in_(
-                                                                  subGroupsIDs
+                                            getattr(Event.maingroups, 'identifier').in_(
+                                                                  sub_group_ids
                                                                        ),
                                             Event.tlp_level_id >= tlp_lvl,
                                             Event.dbcode.op('&')(12) == 12
@@ -141,7 +144,7 @@ class EventBroker(BrokerBase):
         else:
           result = self.session.query(Event).filter(
                                       or_(
-                                        Event.creator_group_id == mainGroupID,
+                                        Event.creator_group_id == main_group_id,
                                         and_(
                                             Event.tlp_level_id >= tlp_lvl,
                                             Event.published == 1,
@@ -231,7 +234,9 @@ class EventBroker(BrokerBase):
     self.__modify_event_groups(event_id, group_id, commit, False)
 
   def __modify_event_subgroups(self, event_id, group_id, commit=True, insert=True):
-
+    """
+    Performs changes in the event's subgroups
+    """
     try:
       group = self.session.query(SubGroup).filter(SubGroup.identifier ==
                                                group_id).one()
@@ -248,27 +253,27 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def add_subgroup_to_event(self, eventID, groupID, commit=True):
+  def add_subgroup_to_event(self, event_id, group_id, commit=True):
     """
     Add a group to an event
 
-    :param eventID: Identifier of the event
-    :type eventID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param event_id: Identifier of the event
+    :type event_id: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
-    self.__modify_event_subgroups(eventID, groupID, commit, True)
+    self.__modify_event_subgroups(event_id, group_id, commit, True)
 
-  def remove_subgroup_from_event(self, eventID, groupID, commit=True):
+  def remove_subgroup_from_event(self, event_id, group_id, commit=True):
     """
     removes a group to an event
 
-    :param eventID: Identifier of the event
-    :type eventID: Integer
-    :param groupID: Identifier of the group
-    :type groupID: Integer
+    :param event_id: Identifier of the event
+    :type event_id: Integer
+    :param group_id: Identifier of the group
+    :type group_id: Integer
     """
-    self.__modify_event_subgroups(eventID, groupID, commit, False)
+    self.__modify_event_subgroups(event_id, group_id, commit, False)
 
   def build_event(self,
                  identifier,

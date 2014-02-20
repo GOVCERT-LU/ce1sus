@@ -167,6 +167,7 @@ class RestController(RestBaseHandler):
       self._destroy_session()
       raise cherrypy.NotFound
 
+  # pylint: disable=R0201
   def __get_action(self):
     """Returns the request action"""
     return cherrypy.request.method
@@ -240,6 +241,7 @@ class RestController(RestBaseHandler):
 
       if method:
           # TODO: put uuid in options?!?
+          # pylint: disable=W0142
           result = method(uuid, **options)
           self._destroy_session()
           # The rest handlers should always give json back!

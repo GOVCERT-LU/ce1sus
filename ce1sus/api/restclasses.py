@@ -77,7 +77,7 @@ class RestEvent(RestClass):
     result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
     result[self.get_classname()]['title'] = RestClass.convert_value(self.title)
     result[self.get_classname()]['description'] = u'{0}'.format(RestClass.convert_value(self.description))
-    self.__set_date_value(result, 'first_seen', RestClass.convert_value(self.first_seen))
+    self.__set_date_value(result, 'first_seen', self.first_seen)
 
     if self.last_seen is None:
       self.last_seen = self.first_seen

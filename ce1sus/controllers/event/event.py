@@ -24,7 +24,6 @@ from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
-from dagr.controllers.base import ControllerException
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
@@ -38,7 +37,7 @@ class EventController(Ce1susBaseController):
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
-    self.commentBroker = self.broker_factory(CommentBroker)
+    self.comment_broker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 
   def get_related_events(self, event, user, cache):
@@ -74,6 +73,10 @@ class EventController(Ce1susBaseController):
     return result
 
   def __popultate_event(self, **kwargs):
+    """
+    Populates an event
+    """
+
     action = kwargs.get('action', None)
     identifier = kwargs.get('identifier', None)
     status = kwargs.get('status', None)
@@ -163,6 +166,7 @@ class EventController(Ce1susBaseController):
               'uuid': uuid,
               }
 
+    # pylint:disable=W0142
     event = self.__popultate_event(**params)
 
     event.bit_value.is_rest_instert = True
@@ -187,6 +191,7 @@ class EventController(Ce1susBaseController):
 
     :returns: Event, Boolean
     """
+    self._get_logger().debug('User {0} inserts a new event'.format(user.username))
     try:
       self.event_broker.insert(event, False)
       # generate relations if needed!
@@ -207,6 +212,7 @@ class EventController(Ce1susBaseController):
     :param event:
     :type event: Event
     """
+    self._get_logger().debug('User {0} removes event {1}'.format(user.username, event.identifier))
     try:
       self.event_broker.remove_by_id(event.identifier)
     except BrokerException as error:
@@ -221,6 +227,7 @@ class EventController(Ce1susBaseController):
     :param event:
     :type event: Event
     """
+    self._get_logger().debug('User {0} updates event {1}'.format(user.username, event.identifier))
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, True)
@@ -231,6 +238,9 @@ class EventController(Ce1susBaseController):
       self._raise_exception(error)
 
   def get_full_event_relations(self, event, user, cache):
+    """
+    Returns the complete event relations with attributes and all
+    """
     try:
       result = list()
       relations = self.relation_broker.get_relations_by_event(event, False)
@@ -246,39 +256,21 @@ class EventController(Ce1susBaseController):
       self._raise_exception(error)
 
   def get_cb_tlp_lvls(self):
+    """
+    Returns the values for the combobox displaying tlp lvls
+    """
     try:
       return TLPLevel.get_definitions()
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_by_uuid(self, uuid):
+    """
+    Returns the event by its uuid
+    """
     try:
       return self.event_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._raise_exception(error)
-
-  def __insert_whole_object(self, user, objects):
-    for obj in objects:
-      self.object_broker.insert(obj, False)
-      for attribute in obj.attributes:
-        self.attribute_broker.insert(attribute, False)
-      # children
-      self.__insert_whole_object(user, obj.children)
-
-  def __find_first_invalid_obj(self, obj):
-    validation_error = ObjectValidator.getFirstValidationError(obj)
-    if not validation_error:
-      # check attribtues
-      for attribute in obj.attribtues:
-        validation_error = ObjectValidator.getFirstValidationError(attribute)
-        if validation_error:
-          return validation_error
-      # check children
-      for child in obj.children:
-        validation_error = self.__find_first_invalid_obj(child)
-        if validation_error:
-          return validation_error
-    else:
-      return validation_error

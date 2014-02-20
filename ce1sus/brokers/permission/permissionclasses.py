@@ -20,7 +20,7 @@ import re
 
 # Relation table for user and groups, ass net agebonnen mai ouni geet et net!?
 __REL_SUBGROUP_GROUPS = Table(
-   'Subgroups_has_Groups', BASE.metadata,
+   'Subgroups_has_Groups', getattr(BASE, 'metadata'),
    Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
    Column('group_id', Integer, ForeignKey('Groups.group_id'))
    )
@@ -48,6 +48,9 @@ class User(BASE):
 
   @property
   def has_api_key(self):
+    """
+    Returns true if the user has an api key
+    """
     if self.api_key is None:
       return 0
     else:
@@ -118,6 +121,9 @@ class Group(BASE):
 
 
 class SubGroup(BASE):
+  """
+  Sub group class
+  """
 
   def __init__(self):
     pass

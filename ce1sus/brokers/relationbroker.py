@@ -22,8 +22,11 @@ from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 
 
-# pylint: disable=R0903,R0902
+# pylint: disable=R0903,R0902,W0232
 class EventRelation(BASE):
+  """
+  Container class for event relations
+  """
   __tablename__ = 'EventRelations'
   identifier = Column('EventRelations_id', Integer, primary_key=True)
   event_id = Column(Integer, ForeignKey('Events.event_id'))
@@ -51,6 +54,7 @@ class EventRelation(BASE):
 
 
 class RelationBroker(BrokerBase):
+  """This is the interface between python an the database"""
 
   def __init__(self, session):
     BrokerBase.__init__(self, session)
@@ -67,8 +71,8 @@ class RelationBroker(BrokerBase):
 
     """
     if attribute.definition.relation == 1:
-      clazz = ValueBroker.get_class_by_attribute_definition(attribute.definition)
-      relations = self.__look_For_value_by_attrib_id(clazz,
+      clazz = ValueBroker.get_class_by_attr_def(attribute.definition)
+      relations = self.__look_for_value_by_attrib_id(clazz,
                                             attribute.plain_value,
                                             attribute.definition.identifier,
                                             '==',
@@ -164,6 +168,9 @@ class RelationBroker(BrokerBase):
     return EventRelation
 
   def __look_for_value_by_class(self, clazz, value, operand, bypass_validation=False):
+    """
+    Searches the tables for a value
+    """
     if bypass_validation:
       code = 0
     else:
@@ -203,12 +210,16 @@ class RelationBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def __look_For_value_by_attrib_id(self,
+  # pylint: disable=R0913
+  def __look_for_value_by_attrib_id(self,
                                 clazz,
                                 value,
                                 attribute_definition_id,
                                 operand='==',
                                 bypass_validation=False):
+    """
+    Searches the tables for the value using an attribute definition id
+    """
     if bypass_validation:
       code = 0
     else:
@@ -277,8 +288,8 @@ class RelationBroker(BrokerBase):
         pass
 
     else:
-      clazz = ValueBroker.get_class_by_attribute_definition(attribute_definition)
-      result = self.__look_For_value_by_attrib_id(clazz,
+      clazz = ValueBroker.get_class_by_attr_def(attribute_definition)
+      result = self.__look_for_value_by_attrib_id(clazz,
                                             value,
                                             attribute_definition.identifier,
                                             operand,

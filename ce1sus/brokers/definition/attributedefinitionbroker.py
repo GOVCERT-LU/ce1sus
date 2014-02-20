@@ -10,19 +10,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import NothingFoundException, \
-                           BrokerException, \
-                           IntegrityException, DeletionException
+from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException, DeletionException
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 import sqlalchemy.orm.exc
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
-                                              AttributeDefinition
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.strings as strings
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import \
-                                                        AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 
 class AttributeDefinitionBroker(DefinitionBrokerBase):
@@ -140,7 +136,10 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def _findallchksums(self, obj):
+  def findallchksums(self, obj):
+    """
+    Returns all the checksums of the attributes required by an object definition
+    """
     result = dict()
     for attribute in obj.attributes:
       chksums = attribute.handler.get_additinal_attribute_chksums()
@@ -169,7 +168,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       attribute = self.session.query(AttributeDefinition).filter(
                                 AttributeDefinition.identifier == attr_id).one()
       # check if chksum is not required
-      required_chksums = self._findallchksums(obj)
+      required_chksums = self.findallchksums(obj)
       # remove self
       existing = required_chksums.get(attribute.chksum, None)
       if existing:
@@ -255,7 +254,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
                              attribute.regex,
                              attribute.class_index,
                              handler.uuid)
-      attribute.dbchksum = hashSHA1(key)
+      attribute.chksum = hashSHA1(key)
       trimmed_regex = cleanPostValue(regex)
       if strings.isNotNull(trimmed_regex):
         attribute.regex = trimmed_regex

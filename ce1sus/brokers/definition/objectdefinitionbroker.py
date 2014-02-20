@@ -12,13 +12,11 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException
 import sqlalchemy.orm.exc
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, \
-                                              AttributeDefinition
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
 from dagr.helpers.converters import ObjectConverter
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
-from ce1sus.brokers.definition.handlerdefinitionbroker import \
-                                                        AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 
@@ -113,20 +111,6 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def __findallchksums(self, obj):
-    result = dict()
-    for attribute in obj.attributes:
-      chksums = attribute.handler.get_additinal_attribute_chksums()
-      if chksums:
-        if isinstance(chksums, list):
-          for chksum in chksums:
-            ref_attribute = self.attribute_broker.get_defintion_by_chksum(chksum)
-            result[chksum] = (attribute.name, ref_attribute.name)
-        else:
-          attribute = self.attribute_broker.get_defintion_by_chksum(chksums)
-          result[chksums] = (attribute.name, ref_attribute.name)
-    return result
-
   def remove_attribute_from_object(self, obj_id, attr_id, commit=True):
     """
     Removes an object from an attribute
@@ -141,7 +125,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
                                 ObjectDefinition.identifier == obj_id).one()
       attribute = self.attribute_broker.get_by_id(attr_id)
       # check if chksum is not required
-      required_chksums = self._findallchksums(obj)
+      required_chksums = self.attribute_broker.findallchksums(obj)
       # remove self
       existing = required_chksums.get(attribute.chksum, None)
       if existing:
@@ -158,20 +142,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def _findallchksums(self, obj):
-    result = dict()
-    for attribute in obj.attributes:
-      chksums = attribute.handler.get_additinal_attribute_chksums()
-      if chksums:
-        if isinstance(chksums, list):
-          for chksum in chksums:
-            ref_attribute = self.attribute_broker.get_defintion_by_chksum(chksum)
-            result[chksum] = (attribute.name, ref_attribute.name)
-        else:
-          attribute = self.attribute_broker.get_defintion_by_chksum(chksums)
-          result[chksums] = (attribute.name, ref_attribute.name)
-    return result
-
+  # pylint:disable=R0913
   def build_object_definition(self, identifier=None, name=None,
                   description=None, action='insert',
                                share=None):
@@ -197,5 +168,5 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
       obj.name = cleanPostValue(name)
       obj.description = cleanPostValue(description)
       ObjectConverter.set_integer(obj, 'share', share)
-      obj.dbchksum = hashSHA1(obj.name)
+      obj.chksum = hashSHA1(obj.name)
     return obj

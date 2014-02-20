@@ -27,6 +27,9 @@ class IndexView(Ce1susBaseView):
     self.login_controller = LoginController(config)
 
   def __get_environment_string(self):
+    """
+    Returns the string for displaying the environment
+    """
     env = self._get_config_variable('environment', 'Item environment is not specified in the configuration.')
     env = '[{0}]'.format(env)
     return env

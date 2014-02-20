@@ -48,7 +48,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      attributes = self.attribute_controller.get_all_attribute_definitions()
+      attributes = self.attribute_controller.get_all_attr_defs()
       return self._render_template('/admin/common/leftContent.html',
                                    id=AdminAttributeView.ID,
                                    url_right_content='/admin/attributes/right_content',
@@ -74,7 +74,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      attribute = self.attribute_controller.get_attribute_definitions_by_id(attribute_id)
+      attribute = self.attribute_controller.get_attr_def_by_id(attribute_id)
       remaining_objects = self.attribute_controller.get_available_objects(attribute)
       cb_values = self.attribute_controller.get_cb_table_definitions()
       cb_handler_values = self.attribute_controller.get_cb_handler_definitions()
@@ -190,7 +190,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
-      attribute = self.attribute_controller.get_attribute_definitions_by_id(attributeid)
+      attribute = self.attribute_controller.get_attr_def_by_id(attributeid)
       cb_values = self.attribute_controller.get_cb_table_definitions()
       cb_handler_values = self.attribute_controller.get_cb_handler_definitions()
       return self._render_template('/admin/attributes/attributeModal.html',

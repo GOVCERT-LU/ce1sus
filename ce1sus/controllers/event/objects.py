@@ -32,7 +32,6 @@ class ObjectsController(Ce1susBaseController):
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
 
-
   def get_attr_def_by_obj_def(self, object_definition):
     """
     Returns a list of attribute definitions with the given object definition

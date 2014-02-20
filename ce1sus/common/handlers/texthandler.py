@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
-from dagr.helpers.strings import plaintext2html
 
 
 class TextHandler(GenericHandler):
@@ -39,4 +38,3 @@ class TextHandler(GenericHandler):
                              enabled=True,
                              default_share_value=default_share_value,
                              enable_share=share_enabled)
-

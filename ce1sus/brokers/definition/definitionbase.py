@@ -34,10 +34,11 @@ class DefinitionBrokerBase(BrokerBase):
     """
     try:
       definition = self.session.query(self.get_broker_class()).filter(
-                                self.get_broker_class().dbchksum == chksum).one()
+                                getattr(self.get_broker_class(), 'chksum') == chksum).one()
       return definition
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for CHKSUM {1}'.format(self.get_broker_class().__class__.__name__, chksum))
+      raise NothingFoundException('No {0} not found for CHKSUM {1}'.format(self.get_broker_class().__class__.__name__,
+                                                                           chksum))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -55,13 +56,14 @@ class DefinitionBrokerBase(BrokerBase):
     """
     try:
       definitions = self.session.query(self.get_broker_class()).filter(
-                              self.get_broker_class().dbchksum.in_(chksums)).all()
+                              getattr(self.get_broker_class(), 'chksum').in_(chksums)).all()
       if definitions:
         return definitions
       else:
         return list()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.get_broker_class().__class__.__name__, chksums))
+      raise NothingFoundException('No {0} not found for CHKSUMS {1}'.format(self.get_broker_class().__class__.__name__,
+                                                                            chksums))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -79,7 +81,7 @@ class DefinitionBrokerBase(BrokerBase):
     """
     try:
       definition = self.session.query(self.get_broker_class()).filter(
-                                self.get_broker_class().name == name).one()
+                                getattr(self.get_broker_class(), 'name') == name).one()
       return definition
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(

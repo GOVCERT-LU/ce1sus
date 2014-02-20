@@ -11,6 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+from ce1sus.api.restclasses import RestClass
 from ce1sus.common.ce1susutils import get_class, convert_string_to_value
 from dagr.helpers.debug import Log
 from datetime import datetime
@@ -23,6 +24,7 @@ class DictConversionException(Exception):
 
 
 class DictConverter(object):
+  """Class converts a dict to an object an visversa"""
 
   def __init__(self, config):
     self.__config = config
@@ -59,10 +61,8 @@ class DictConverter(object):
     """ Maps the data to the class"""
     self._get_logger().debug('Mapping dictionary to class {0}'.format(classname))
     instance = get_class('ce1sus.api.restclasses', classname)()
-    """
     if not isinstance(instance, RestClass):
       raise DictConversionException(('{0} does not implement RestClass').format(classname))
-    """
     self.__populate_instance_by_dict(instance, dictionary)
     return instance
 

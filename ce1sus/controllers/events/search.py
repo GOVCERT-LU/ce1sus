@@ -58,7 +58,11 @@ class SearchController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  # pylint: disable=R0913
   def search_results(self, needle, definition_id, operant, user, cache=None):
+    """
+    handles the search and its results
+    """
     try:
       result = list()
       if needle:

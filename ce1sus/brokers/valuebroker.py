@@ -25,7 +25,7 @@ from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.common.ce1susutils import get_class
 
 
-# pylint: disable=R0903
+# pylint: disable=R0903,W0232
 class StringValue(BASE):
   """This is a container class for the STRINGVALUES table."""
 
@@ -188,7 +188,7 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Class
     """
-    return ValueBroker.get_class_by_attribute_definition(
+    return ValueBroker.get_class_by_attr_def(
                                                 attribute.definition)
 
   @staticmethod
@@ -202,7 +202,7 @@ class ValueBroker(BrokerBase):
     return get_class('ce1sus.brokers.valuebroker', classname)
 
   @staticmethod
-  def get_class_by_attribute_definition(definition):
+  def get_class_by_attr_def(definition):
     """
     returns class for the attribute
 
@@ -220,7 +220,7 @@ class ValueBroker(BrokerBase):
       result.append(ValueBroker.get_class_by_string(table_name))
     return result
 
-  def __setClassByAttribute(self, attribute):
+  def __set_class_by_attribute(self, attribute):
     """
     sets class for the attribute
 
@@ -229,35 +229,35 @@ class ValueBroker(BrokerBase):
     """
     self.__clazz = self.get_class_by_attribute(attribute)
 
-  def __convertAttriuteValueToValue(self, attribute, isInsert=True):
+  def __convert_attr_value_to_value(self, attribute, is_insert=True):
     """
-    converts an Attribute to a XXXXXValue object
+    converts an Attribute to a Value object
 
     :param attribute: the attribute in context
     :type attribute: Attribute
 
-    :returns: XXXXXValue
+    :returns: Value
     """
-    valueInstance = self.__clazz()
-    valueInstance.value = attribute.plain_value
-    if not isInsert:
-      valueInstance.identifier = attribute.value_id
-    valueInstance.attribute_id = attribute.identifier
-    valueInstance.attribute = attribute
-    valueInstance.event_id = attribute.object.get_parent_event_id()
-    return valueInstance
+    value_instance = self.__clazz()
+    value_instance.value = attribute.plain_value
+    if not is_insert:
+      value_instance.identifier = attribute.value_id
+    value_instance.attribute_id = attribute.identifier
+    value_instance.attribute = attribute
+    value_instance.event_id = attribute.object.get_parent_event_id()
+    return value_instance
 
   def get_by_attribute(self, attribute):
     """
-    fetches one XXXXXValue instance with the information of the given attribute
+    fetches one Value instance with the information of the given attribute
 
     :param attribute: the attribute in context
     :type attribute: Attribute
 
-    :returns : XXXXXValue
+    :returns : Value
     """
 
-    self.__setClassByAttribute(attribute)
+    self.__set_class_by_attribute(attribute)
 
     try:
       clazz = self.get_broker_class()
@@ -278,63 +278,63 @@ class ValueBroker(BrokerBase):
 
   def inser_by_attribute(self, attribute, commit=True):
     """
-    Inserts one XXXXXValue instance with the information of the given attribute
+    Inserts one Value instance with the information of the given attribute
 
     :param attribute: the attribute in context
     :type attribute: Attribute
 
-    :returns : XXXXXValue
+    :returns : Value
     """
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be inserted is invalid')
 
-    self.__setClassByAttribute(attribute)
-    value = self.__convertAttriuteValueToValue(attribute, True)
+    self.__set_class_by_attribute(attribute)
+    value = self.__convert_attr_value_to_value(attribute, True)
     value.identifier = None
     BrokerBase.insert(self, value, commit)
 
   def update_by_attribute(self, attribute, commit=True):
     """
-    updates one XXXXXValue instance with the information of the given attribute
+    updates one Value instance with the information of the given attribute
 
     :param attribute: the attribute in context
     :type attribute: Attribute
 
-    :returns : XXXXXValue
+    :returns : Value
     """
     errors = not attribute.validate()
     if errors:
       raise ValidationException('Attribute to be updated is invalid')
 
-    self.__setClassByAttribute(attribute)
-    value = self.__convertAttriuteValueToValue(attribute, False)
+    self.__set_class_by_attribute(attribute)
+    value = self.__convert_attr_value_to_value(attribute, False)
     BrokerBase.update(self, value, commit)
 
   def remove_by_attribute(self, attribute, commit):
     """
-    Removes one XXXXXValue with the information given by the attribtue
+    Removes one Value with the information given by the attribute
 
     :param attribute: the attribute in context
     :type attribute: Attribute
     :param commit: do a commit after
     :type commit: Boolean
     """
-    self.__setClassByAttribute(attribute)
+    self.__set_class_by_attribute(attribute)
 
     try:
       self.session.query(self.get_broker_class()).filter(
                     self.get_broker_class().attribute_id == attribute.identifier
                       ).delete(synchronize_session='fetch')
       self.do_commit(commit)
-    except sqlalchemy.exc.OperationalError as e:
+    except sqlalchemy.exc.OperationalError as error:
       self.session.rollback()
-      raise IntegrityException(e)
-    except sqlalchemy.exc.SQLAlchemyError as e:
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
-  def lookforValue(self, clazz, value):
+  def look_for_value(self, clazz, value):
     """
     returns a list of matching values
 
@@ -349,6 +349,6 @@ class ValueBroker(BrokerBase):
       return self.session.query(clazz).filter(
                       clazz.value == value
                       ).all()
-    except sqlalchemy.exc.SQLAlchemyError as e:
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)

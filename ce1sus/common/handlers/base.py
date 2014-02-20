@@ -32,10 +32,14 @@ class HandlerBase(object):
     """
     Generates the HTML for an external get method
 
-    :param enabled: If the view should be enabled
-    :type enabled: Boolean
-    :param attribute: The attribute to be displayed
+    :param template_renderer: template renderer
+    :type template_renderer: Makohandler
+    :param action: Action used to call
+    :type action: String
+    :param attribute: The attribute in context
     :type attribute: Attribute
+    :param user: The user calling the function
+    :type user: User
 
     :returns: generated HTML
     """
@@ -48,12 +52,16 @@ class HandlerBase(object):
 
   def process_gui_post(self, obj, definitions, user, params):
     """
-    Generates the HTML for an external get method
+    Process of the post over the GUI
 
-    :param enabled: If the view should be enabled
-    :type enabled: Boolean
-    :param attribute: The attribute to be displayed
-    :type attribute: Attribute
+    :param obj: parent object
+    :type obj: Object
+    :param definitions: The reqiried definitions
+    :type definitions: List of attribtue Definitions
+    :param user: The user calling the function
+    :type user: User
+    :param params: The parameters of the post
+    :type params: Dict
 
     :returns: Attribute, [List of Attribute]
     """
@@ -68,10 +76,15 @@ class HandlerBase(object):
     """
     Generates the HTML for displaying the attribute
 
-    :param enabled: If the view should be enabled
-    :type enabled: Boolean
+    :param template_renderer: template renderer
+    :type template_renderer: Makohandler
     :param attribute: The attribute to be displayed
     :type attribute: Attribute
+    :param attribute: The attribute in context
+    :type attribute: Attribute
+    :param user: The user calling the function
+    :type user: User
+
 
     :returns: generated HTML
     """
@@ -85,10 +98,14 @@ class HandlerBase(object):
     """
     Generates the HTML for displaying the attribute
 
-    :param enabled: If the view should be enabled
-    :type enabled: Boolean
-    :param attribute: The attribute to be displayed
-    :type attribute: Attribute
+    :param template_renderer: template renderer
+    :type template_renderer: Makohandler
+    :param definition: The attribute to be displayed
+    :type definition: AttributeDefinition
+    :param default_share_value: The value for the default share
+    :type default_share_value: Boolean
+    :param share_enabled: should the share be enabled
+    :type share_enabled: Boolean
 
     :returns: generated HTML
     """
@@ -104,10 +121,14 @@ class HandlerBase(object):
     """
     Generates the HTML for displaying the attribute
 
-    :param enabled: If the view should be enabled
-    :type enabled: Boolean
-    :param attributes: The attribute to be displayed
-    :type attribute: List of Attribute
+    :param template_renderer: template renderer
+    :type template_renderer: Makohandler
+    :param attribute: The attribute to be displayed
+    :type attribute: Attribute
+    :param additional_attributes: Action used to call
+    :type additional_attributes: String
+    :param user: The user calling the function
+    :type user: User
 
     :returns: generated HTML
     """
@@ -125,28 +146,12 @@ class HandlerBase(object):
     raise HandlerException(('convert_to_gui_value not defined for {0} with parameters '
                            + '{1}').format(self.__class__.__name__, attribute))
 
-  def convert_to_search_value(self, value, config):
-    """
-    Converts the search value to be suited for GUI elements
-
-    NOTE: USE ONLY VALUE HERE!!!!
-    """
-    raise HandlerException(('convert_to_search_value not defined for {0} with parameters '
-                           + '{1},{2}').format(self.__class__.__name__, value, config))
-
-  def convert_to_rest_value(self, attribute, config):
+  def convert_to_rest_value(self, attribute):
     """
     Converts the value suited for rest elements
     """
     raise HandlerException(('convert_to_rest_value not defined for {0} with parameters '
-                           + '{1},{2}').format(self.__class__.__name__, attribute, config))
-
-  def convert_to_rest_value_to_plain(self, value, config):
-    """
-    Converts the value suited for rest elements
-    """
-    raise HandlerException(('convert_to_rest_value not defined for {0} with parameters '
-                           + '{1},{2}').format(self.__class__.__name__, value, config))
+                           + '{1}').format(self.__class__.__name__, attribute))
 
   def get_additinal_attribute_chksums(self):
     """
@@ -168,3 +173,25 @@ class HandlerBase(object):
         raise HandlerException('Error determining main definition for {0}').format(self.__class__.__name__)
     else:
       raise HandlerException('Could not determine main definition for {0}').format(self.__class__.__name__)
+
+  def process_rest_post(self, obj, definitions, user, rest_attribute):
+    """
+    Process of the post over the RestAPI
+
+    :param obj: parent object
+    :type obj: Object
+    :param definitions: The reqiried definitions
+    :type definitions: List of attribtue Definitions
+    :param user: The user calling the function
+    :type user: User
+    :param rest_attribute: Attribute inserting over rest
+    :type rest_attribute: ReatAttribue
+
+    :returns: Attribute, [List of Attribute]
+    """
+    raise HandlerException(('process_gui_post not defined for {0} with parameters '
+                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                       obj,
+                                                       definitions,
+                                                       user,
+                                                       rest_attribute))

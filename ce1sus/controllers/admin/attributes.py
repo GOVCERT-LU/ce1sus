@@ -12,13 +12,9 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                                  AttributeDefinitionBroker, \
-                                                  AttributeDefinition
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker, AttributeDefinition
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
-from dagr.db.broker import BrokerException, \
-                          ValidationException, \
-                          IntegrityException, NothingFoundException
+from dagr.db.broker import BrokerException, ValidationException, IntegrityException
 import types as types
 from dagr.controllers.base import SpecialControllerException
 
@@ -31,27 +27,28 @@ class AttributeController(Ce1susBaseController):
     self.attribute_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
 
-  def get_all_attribute_definitions(self):
+  def get_all_attr_defs(self):
+    """
+    Returns all attribute definitions
+    """
     try:
       return self.attribute_broker.get_all(AttributeDefinition.name.asc())
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_attribute_definitions_by_id(self, object_id):
+  def get_attr_def_by_id(self, object_id):
+    """
+    Returns the attribute definition by the given id
+    """
     try:
       return self.attribute_broker.get_by_id(object_id)
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_attribute_definition_by_chksum(self, chksum):
-    try:
-      return self.attribute_broker.get_definition_by_chksum(chksum)
-    except NothingFoundException as error:
-      self._raise_nothing_found_exception(error)
-    except BrokerException as error:
-      self._raise_exception(error)
-
   def get_available_objects(self, attribute):
+    """
+    Returns all no associated objects
+    """
     try:
       return self.attribute_broker.get_objects_by_attribute(attribute.identifier, False)
     except BrokerException as error:
@@ -59,6 +56,9 @@ class AttributeController(Ce1susBaseController):
 
   @staticmethod
   def __handle_input(add_function, object_id, value):
+    """
+    handles the post values of the list view
+    """
     if isinstance(value, types.StringTypes):
       add_function(object_id, value, False)
     else:

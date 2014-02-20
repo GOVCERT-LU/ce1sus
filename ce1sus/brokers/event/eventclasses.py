@@ -28,17 +28,17 @@ from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
 from ce1sus.common.ce1susutils import get_class
 
 
-_REL_GROUPS_EVENTS = Table('Groups_has_Events', BASE.metadata,
+_REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),
     Column('event_id', Integer, ForeignKey('Events.event_id')),
     Column('group_id', Integer, ForeignKey('Groups.group_id'))
 )
-_REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', BASE.metadata,
+_REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', getattr(BASE, 'metadata'),
     Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
     Column('event_id', Integer, ForeignKey('Events.event_id'))
 )
 
 
-# pylint: disable=R0902
+# pylint: disable=R0902,W0232
 class Event(BASE):
   """This is a container class for the EVENTS table."""
 
@@ -83,6 +83,9 @@ class Event(BASE):
 
   @property
   def bit_value(self):
+    """
+    Property for the bit_value
+    """
     if self.__bit_code is None:
       if self.dbcode is None:
         self.__bit_code = BitValue('0', self)
@@ -92,7 +95,11 @@ class Event(BASE):
 
   @bit_value.setter
   def bit_value(self, bitvalue):
+    """
+    Property for the bit_value
+    """
     self.__bit_code = bitvalue
+    self.dbcode = bitvalue.bit_code
 
   def add_dbject(self, obj):
     """
@@ -337,6 +344,9 @@ class Object(BASE):
 
   @property
   def shared(self):
+    """
+    Property shared if set it is sharable else not
+    """
     if self.bit_value.is_shareable:
       return 0
     else:
@@ -344,6 +354,9 @@ class Object(BASE):
 
   @shared.setter
   def shared(self, value):
+    """
+    Property shared if set it is sharable else not
+    """
     if value == 1:
       self.bit_value.is_shareable = True
     else:
@@ -351,6 +364,9 @@ class Object(BASE):
 
   @property
   def bit_value(self):
+    """
+    Property for the bit_value
+    """
     if self.__bit_code is None:
       if self.dbcode is None:
         self.__bit_code = BitValue('0', self)
@@ -360,6 +376,9 @@ class Object(BASE):
 
   @bit_value.setter
   def bit_value(self, bitvalue):
+    """
+    Property for the bit_value
+    """
     self.__bit_code = bitvalue
     self.dbcode = bitvalue.bit_code
 
@@ -411,12 +430,18 @@ class Object(BASE):
     return ObjectValidator.isObjectValid(self)
 
   def get_parent_event(self):
+    """
+    Returns the parent event of an object
+    """
     if self.event:
       return self.event
     else:
       return self.parent_event
 
   def get_parent_event_id(self):
+    """
+    Returns the parent event ID of an object
+    """
     if self.event:
       return self.event_id
     else:
@@ -473,6 +498,9 @@ class Attribute(BASE):
 
   @property
   def shared(self):
+    """
+    Property shared if set it is sharable else not
+    """
     if self.bit_value.is_shareable:
       return 0
     else:
@@ -480,6 +508,9 @@ class Attribute(BASE):
 
   @shared.setter
   def shared(self, value):
+    """
+    Property shared if set it is sharable else not
+    """
     if value == 1:
       self.bit_value.is_shareable = True
     else:
@@ -487,6 +518,9 @@ class Attribute(BASE):
 
   @property
   def bit_value(self):
+    """
+    Property for the bit_value
+    """
     if self.__bit_code is None:
       if self.dbcode is None:
         self.__bit_code = BitValue('0', self)
@@ -496,7 +530,11 @@ class Attribute(BASE):
 
   @bit_value.setter
   def bit_value(self, bitvalue):
+    """
+    Property for the bit_value
+    """
     self.__bit_code = bitvalue
+    self.dbcode = bitvalue.bit_code
 
   @property
   def key(self):
@@ -508,6 +546,9 @@ class Attribute(BASE):
     return getattr(self.definition, 'name')
 
   def __get_value_obj(self):
+    """
+    Returns the value object of an attibute
+    """
     if not self.string_value  is None:
       value = self.string_value
     elif not self.date_value  is None:
@@ -521,6 +562,9 @@ class Attribute(BASE):
     return value
 
   def __get_value(self):
+    """
+    Returns the actual value of an attribtue
+    """
     if self.__value_obj is None:
       self.__value_obj = self.__get_value_obj()
       if self.__value_obj:
@@ -529,6 +573,9 @@ class Attribute(BASE):
 
   @property
   def value_id(self):
+    """
+    Returns the ID of the value in its table
+    """
     value = self.__get_value()
     if value is None:
       return None
@@ -540,6 +587,9 @@ class Attribute(BASE):
 
   @property
   def plain_value(self):
+    """
+    Returns the plain value of an attribute as it is stored in the DB
+    """
     value = self.__get_value()
     if value is None:
       raise Exception('Empty value')
@@ -548,6 +598,9 @@ class Attribute(BASE):
 
   @property
   def gui_value(self):
+    """
+    Returns the value of an attribute under the format for the GUI
+    """
     self.__get_value()
     handler_instance = self.__get_handler_instance()
     value = handler_instance.convert_to_gui_value(self)
@@ -555,18 +608,24 @@ class Attribute(BASE):
 
   @property
   def value(self):
+    """
+    Alias for plain_value
+    """
     return self.plain_value
 
   @value.setter
   def value(self, value):
+    """
+    Plain value setter, somehow :)
+    """
     if self.definition:
-      classname = self.definition.classname
+      classname = getattr(self.definition, 'classname')
       value_instance = get_class('ce1sus.brokers.valuebroker', classname)()
       value_instance.attribute_id = self.identifier
       value_instance.attribute = self
       value_instance.value = value
       if self.object:
-        value_instance.event = self.object.get_parent_event()
+        value_instance.event = getattr(self.object, 'get_parent_event')()
       else:
         raise Exception('No object was specified')
       # set the value
@@ -594,11 +653,10 @@ class Attribute(BASE):
     value_obj = self.__get_value_obj()
     ObjectValidator.validateRegex(value_obj,
                                   'value',
-                                  self.definition.regex,
-                                  'The value does not match {0}'.format(
-                                                            self.definition.regex),
+                                  getattr(self.definition, 'regex'),
+                                  'The value does not match {0}'.format(getattr(self.definition, 'regex')),
                                   True)
-    errors = not value_obj.validate()
+    errors = not getattr(value_obj, 'validate')()
     if errors:
       return False
 

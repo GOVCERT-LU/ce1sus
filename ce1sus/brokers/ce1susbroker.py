@@ -16,13 +16,13 @@ from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, T
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, String
 import sqlalchemy.orm.exc
-from dagr.helpers.datumzait import DatumZait
-from ce1sus.brokers.event.eventclasses import Comment
-from dagr.helpers.strings import cleanPostValue
 
 
-# pylint: disable=R0903,R0902
+# pylint: disable=R0903,R0902,W0232
 class Ce1susConfig(BASE):
+  """
+  Container class for the ce1sus configuration
+  """
   __tablename__ = 'ce1sus'
   identifier = Column('ce1sus_id', Integer, primary_key=True)
   key = Column('key', String)
@@ -37,6 +37,7 @@ class Ce1susConfig(BASE):
 
 class Ce1susBroker(BrokerBase):
   """This is the interface between python an the database"""
+
   def get_broker_class(self):
     """
     overrides BrokerBase.get_broker_class
@@ -44,6 +45,9 @@ class Ce1susBroker(BrokerBase):
     return Ce1susConfig
 
   def get_by_key(self, key):
+    """
+    Returns a Ce1susConfig by it's key
+    """
     try:
       return self.session.query(Ce1susConfig).filter(Ce1susConfig.key == key).one()
     except sqlalchemy.orm.exc.NoResultFound:

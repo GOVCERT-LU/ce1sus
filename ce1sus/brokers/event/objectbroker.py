@@ -11,17 +11,14 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, \
-                           BrokerException, ValidationException
+from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.helpers.bitdecoder import BitValue
-from dagr.helpers.converters import ObjectConverter
 import uuid as uuidgen
-from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class ObjectBroker(BrokerBase):
@@ -197,6 +194,9 @@ class ObjectBroker(BrokerBase):
       raise BrokerException(error)
 
   def get_all_event_objects(self, event_id):
+    """
+    Return all the objects belonging to an event even the object children
+    """
     try:
       result = self.session.query(Object).filter(or_(Object.event_id == event_id,
                                                      Object.parent_event_id == event_id)

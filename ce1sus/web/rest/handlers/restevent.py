@@ -74,7 +74,7 @@ class RestEventHandler(RestBaseHandler):
         # ok the event is valid so continue
         event, valid = self.event_controller.insert_event(user, event)
         with_definition = options.get('fulldefinitions', False)
-        return self.return_object(event, True, True, with_definition)
+        return self.return_object(event, True, False, with_definition)
       except ControllerException as error:
         return self._raise_error('ControllerException', error=error)
 

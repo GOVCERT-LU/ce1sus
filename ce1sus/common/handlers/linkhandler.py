@@ -22,7 +22,7 @@ class RTHandler(GenericHandler):
   """Handler for handling tickets"""
   def __init__(self, config):
     GenericHandler.__init__(self, config)
-    self.rt = RTTickets(self.config.get('rt_url'),
+    self.rt_system = RTTickets(self.config.get('rt_url'),
                         self.config.get('rt_user'),
                         self.config.get('rt_password'))
 
@@ -85,18 +85,14 @@ class RTHandler(GenericHandler):
 
     :returns: generated HTML
     """
-
-    labels = [{'idLink':'#'},
-              {'title':'Title'},
-              {'selector':'Options'}]
-    tickets = self.rt.get_all_tickets()
+    tickets = self.rt_system.get_all_tickets()
     return template_renderer('/common/handlers/RTtickets.html',
                              tickets=tickets,
-                             rt_url=self.rt.get_base_ticket_url())
+                             rt_url=self.rt_system.get_base_ticket_url())
 
   def convert_to_gui_value(self, attribute):
     link = Link()
-    link.url_base = self.rt.get_base_ticket_url()
+    link.url_base = self.rt_system.get_base_ticket_url()
     link.identifier = attribute.plain_value
     return link
 

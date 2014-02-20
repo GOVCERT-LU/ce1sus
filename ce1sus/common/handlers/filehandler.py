@@ -59,6 +59,7 @@ class FileHandler(GenericHandler):
                                      hashed_file_name)
     return hasher.hashSHA256(key)
 
+  # pylint: disable=R0913
   @staticmethod
   def _create_attribute(value, obj, definition, user, ioc, share=None):
     """
@@ -131,12 +132,18 @@ class FileHandler(GenericHandler):
                              enable_share=False)
 
   def _get_base_path(self):
+    """
+    Returns the base path for files (as specified in the configuration)
+    """
     try:
       return self.config.get('files')
     except ConfigException as error:
       raise HandlerException(error)
 
   def _get_tmp_folder(self):
+    """
+    Returns the temporary folder, and creates it when not existing
+    """
     try:
       tmp_path = self._get_base_path() + '/tmp/' + hasher.hashSHA1('{0}'.format(DatumZait.now()))
       if not exists(tmp_path):
@@ -146,6 +153,9 @@ class FileHandler(GenericHandler):
       raise HandlerException(error)
 
   def _get_dest_folder(self, rel_folder):
+    """
+    Returns the destination folder, and creates it when not existing
+    """
     try:
       dest_path = self._get_base_path() + '/' + rel_folder
       if not exists(dest_path):
@@ -156,12 +166,18 @@ class FileHandler(GenericHandler):
 
   @staticmethod
   def _get_rel_folder():
+    """
+    Returns the string of the relative folder position
+    """
     dest_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
                                      DatumZait.now().month,
                                      DatumZait.now().day)
     return dest_path
 
   def _process_file_upload(self, uploaded_file):
+    """
+    Uploads the file (only used by the GUI)
+    """
     if uploaded_file:
       size = 0
       tmp_path = self._get_tmp_folder()
@@ -182,9 +198,15 @@ class FileHandler(GenericHandler):
 
   @staticmethod
   def _get_definition(chksum, definitions):
+    """
+    Returns the given definition for the given chksum
+    """
     return definitions.get(chksum)
 
   def insert(self, obj, definitions, user, params):
+    """
+    Creates ans inserts the file and its attributes (only used by the GUI)
+    """
     main_definition = self._get_main_definition(definitions)
     uploaded_file_path = self._process_file_upload(params.get('value', None))
 
@@ -225,12 +247,19 @@ class FileHandler(GenericHandler):
 
   @staticmethod
   def __get_orig_filename(attribtue):
+    """
+    Returns the original filename
+    """
     for child in attribtue.children:
       if child.definition.chksum == CHK_SUM_FILE_NAME:
         return child.plain_value
     return None
 
+  # pylint: disable=R0201
   def _get_user(self):
+    """
+    Returns the session user
+    """
     # Note this is not as it should be !!
     session = getattr(cherrypy, 'session')
     return session.get(SESSION_USER, None)
@@ -257,7 +286,7 @@ class FileHandler(GenericHandler):
     else:
       return '(Not Provided)'
 
-  def convert_to_rest_value(self, attribute, config):
+  def convert_to_rest_value(self, attribute):
     user = self._get_user()
     if user:
       event = attribute.object.get_parent_event()
@@ -278,6 +307,7 @@ class FileHandler(GenericHandler):
     else:
       return '(Not Provided)'
 
+  # pylint:disable=R0914,W0104
   def process_rest_post(self, obj, definitions, user, rest_attribute):
     definition = self._get_main_definition(definitions)
     # check if value is valid
@@ -288,8 +318,7 @@ class FileHandler(GenericHandler):
     params = dict()
     # create and store file
     filename = rest_attribute.value[0]
-    b64_encoded = rest_attribute.value[1]
-    binary_data = base64.b64decode(b64_encoded)
+    binary_data = base64.b64decode(rest_attribute.value[1])
     tmp_path = self._get_tmp_folder() + '/' + filename
     # create file in tmp
     file_obj = open(tmp_path, "w")
@@ -321,9 +350,11 @@ class FileHandler(GenericHandler):
 
 
 class FileWithHashesHandler(FileHandler):
+  """
+  Extends the filehandler with additional hashes
+  """
 
-  @staticmethod
-  def get_additinal_attribute_chksums():
+  def get_additinal_attribute_chksums(self):
     return [CHK_SUM_FILE_NAME,
             CHK_SUM_HASH_SHA1,
             CHK_SUM_HASH_SHA256,
@@ -336,52 +367,37 @@ class FileWithHashesHandler(FileHandler):
             CHK_SUM_HASH_MD5]
 
   def insert(self, obj, definitions, user, params):
-    main_definition = self._get_main_definition(definitions)
-    uploaded_file_path = self._process_file_upload(params.get('value', None))
-
-    attributes = list()
-    attributes.append(FileHandler._create_attribute(basename(uploaded_file_path),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
-                                                   user,
-                                                   '0'))
-    sha1 = hasher.fileHashSHA1(uploaded_file_path)
-    attributes.append(FileHandler._create_attribute(sha1,
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
-                                                   user,
-                                                   '1'))
-
-    attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(uploaded_file_path),
+    attribute, attributes = FileHandler.insert(self, obj, definitions, user, params)
+    attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(attribute.plain_value),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_MD5, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(uploaded_file_path),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(attribute.plain_value),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA256, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(uploaded_file_path),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(attribute.plain_value),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA384, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(uploaded_file_path),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(attribute.plain_value),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA512, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(getsize(uploaded_file_path),
+    attributes.append(FileHandler._create_attribute(getsize(attribute.plain_value),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_SIZE_IN_BYTES, definitions),
                                                    user,
                                                    '0'))
-    mime_type = magic.from_file(uploaded_file_path, mime=True)
+    mime_type = magic.from_file(attribute.plain_value, mime=True)
     if mime_type:
       attributes.append(FileHandler._create_attribute(mime_type,
                                                    obj,
@@ -389,7 +405,7 @@ class FileWithHashesHandler(FileHandler):
                                                    user,
                                                    '0'))
 
-    file_id = magic.from_file(uploaded_file_path)
+    file_id = magic.from_file(attribute.plain_value)
     if file_id:
       attributes.append(FileHandler._create_attribute(file_id,
                                                    obj,
@@ -397,16 +413,10 @@ class FileWithHashesHandler(FileHandler):
                                                    user,
                                                    '0'))
 
-    rel_folder = FileHandler._get_rel_folder()
-    dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
-    move(uploaded_file_path, dest_path)
-
-    # remove temp folder
-    rmtree(dirname(uploaded_file_path))
-
-    main_attribute = self._create_attribute(rel_folder + '/' + sha1,
+    definition = self._get_main_definition(definitions)
+    main_attribute = self._create_attribute(attribute.plain_value,
                                                     obj,
-                                                    main_definition,
+                                                    definition,
                                                     user,
                                                     '0')
     attributes.append(main_attribute)
