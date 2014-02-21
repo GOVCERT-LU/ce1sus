@@ -17,7 +17,7 @@ from dagr.helpers.config import ConfigException
 import cherrypy
 from ce1sus.common.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import DatumZait
-from os.path import isfile, getsize, basename, exists, dirname
+from os.path import isfile, getsize, basename, exists, dirname, splitext
 import dagr.helpers.hash as hasher
 from ce1sus.common.handlers.base import HandlerException
 from shutil import move, rmtree
@@ -26,6 +26,8 @@ import magic
 from ce1sus.common.checks import can_user_download
 from dagr.web.views.classes import Link
 import base64
+import zipfile
+from os import remove
 
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
@@ -107,7 +109,23 @@ class FileHandler(GenericHandler):
       filepath = base_path + '/' + rel_path
       if isfile(filepath):
         filename = FileHandler.__get_orig_filename(attribute)
-        return serve_file(filepath, "application/x-download", "attachment", name=filename)
+        # create zipfile
+        tmp_path = self._get_base_path()
+        if not filename:
+          filename = basename(filepath)
+        tmp_path += '/' + filename + '.zip'
+        # remove file if it should exist
+        try:
+            remove(tmp_path)
+        except OSError:
+            pass
+        # create zip file
+        zip_file = zipfile.ZipFile(tmp_path, mode='w')
+        # TODO: set password for zip file
+        zip_file.write(filepath, arcname=filename)
+        zip_file.close()
+
+        return serve_file(tmp_path, "application/x-download", "attachment", name=basename(tmp_path))
       else:
         raise  HandlerException('The was not found in "{0}"'.format(filepath))
     else:
@@ -235,7 +253,6 @@ class FileHandler(GenericHandler):
                                                     main_definition,
                                                     user,
                                                     '0')
-    attributes.append(main_attribute)
 
     # return attributes
     return main_attribute, attributes
@@ -368,36 +385,37 @@ class FileWithHashesHandler(FileHandler):
 
   def insert(self, obj, definitions, user, params):
     attribute, attributes = FileHandler.insert(self, obj, definitions, user, params)
-    attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(attribute.plain_value),
+    filepath = self._get_base_path() + '/' + attribute.plain_value
+    attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(filepath),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_MD5, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(attribute.plain_value),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(filepath),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA256, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(attribute.plain_value),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(filepath),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA384, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(attribute.plain_value),
+    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(filepath),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_HASH_SHA512, definitions),
                                                    user,
                                                    '1'))
 
-    attributes.append(FileHandler._create_attribute(getsize(attribute.plain_value),
+    attributes.append(FileHandler._create_attribute(getsize(filepath),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_SIZE_IN_BYTES, definitions),
                                                    user,
                                                    '0'))
-    mime_type = magic.from_file(attribute.plain_value, mime=True)
+    mime_type = magic.from_file(filepath, mime=True)
     if mime_type:
       attributes.append(FileHandler._create_attribute(mime_type,
                                                    obj,
@@ -405,7 +423,7 @@ class FileWithHashesHandler(FileHandler):
                                                    user,
                                                    '0'))
 
-    file_id = magic.from_file(attribute.plain_value)
+    file_id = magic.from_file(filepath)
     if file_id:
       attributes.append(FileHandler._create_attribute(file_id,
                                                    obj,
@@ -419,7 +437,6 @@ class FileWithHashesHandler(FileHandler):
                                                     definition,
                                                     user,
                                                     '0')
-    attributes.append(main_attribute)
 
     # return attributes
     return main_attribute, attributes
