@@ -53,6 +53,16 @@ class AttributesView(Ce1susBaseView):
     except ControllerException as error:
       return self._render_error_page(error)
 
+  def __get_default_share_value(self, attr_definition, obj):
+    if attr_definition.share:
+      if obj.bit_value.is_shareable:
+        default_share_value = 1
+      else:
+        default_share_value = 0
+    else:
+      default_share_value = 0
+    return default_share_value
+
   @require(require_referer(('/internal')))
   @cherrypy.expose
   def render_handler_input(self, defattrib_id, event_id, object_id):
@@ -67,13 +77,7 @@ class AttributesView(Ce1susBaseView):
       self._is_event_owner(event)
       obj = self.attributes_controller.get_object_by_id(object_id)
       attr_definition = self.attributes_controller.get_attr_def_by_id(defattrib_id)
-      if attr_definition.share:
-        if obj.bit_value.is_shareable:
-          default_share_value = 1
-        else:
-          default_share_value = 0
-      else:
-        default_share_value = 0
+      default_share_value = self.__get_default_share_value(attr_definition, obj)
       handler = attr_definition.handler
       return handler.render_gui_input(self._render_template,
                                       attr_definition,
@@ -161,8 +165,11 @@ class AttributesView(Ce1susBaseView):
                                                                                                attribute,
                                                                                                additional_attributes)
         if not valid:
+          # TODO: activate EDIT
           self._get_logger().info('Attributes are invalid')
           handler = attribute.definition.handler
+          attr_definition = self.attributes_controller.get_attr_def_by_id(def_id)
+          default_share_value = self.__get_default_share_value(attr_definition, obj)
           return self._return_ajax_post_error(handler.render_gui_edit(self._render_template,
                                                               attribute,
                                                               additional_attributes,

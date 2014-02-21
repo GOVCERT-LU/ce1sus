@@ -255,3 +255,4 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
                         + 'modal">Close</button>');
     }
 }
+

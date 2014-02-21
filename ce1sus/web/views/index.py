@@ -12,11 +12,12 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.views.base import Ce1susBaseView
-from ce1sus.controllers.login import LoginController
+from ce1sus.controllers.login import LoginController, ActivationTimedOut
 import cherrypy
 from cherrypy._cperror import HTTPRedirect
 from ce1sus.web.views.common.decorators import require
 from dagr.helpers.validator.valuevalidator import ValueValidator
+from dagr.controllers.base import ControllerException
 
 
 class IndexView(Ce1susBaseView):
@@ -74,20 +75,20 @@ class IndexView(Ce1susBaseView):
     :type password: String
 
     """
-    if username is None or password is None:
-      raise HTTPRedirect('/index')
-      # validate user and user name
-    if  (not ValueValidator.validateAlNum(username, minLength=1, maxLength=60, withSymbols=True) and
-         not ValueValidator.validateAlNum(password, minLength=1, maxLength=60, withSymbols=True)):
-      return self.index('Invalid input.')
-    user = self.login_controller.get_user_y_usr_pwd(username, password)
-    if user:
+    try:
+      if username is None or password is None:
+        raise HTTPRedirect('/index')
+        # validate user and user name
+      if  (not ValueValidator.validateAlNum(username, minLength=1, maxLength=60, withSymbols=True) and
+           not ValueValidator.validateAlNum(password, minLength=1, maxLength=60, withSymbols=True)):
+        return self.index('Invalid input.')
+      user = self.login_controller.get_user_by_usr_pwd(username, password)
       self.login_controller.update_last_login(user)
       # put in session
       self._put_user_to_session(user)
       self._get_logger().info('User "{0}" logged in'.format(user.username))
       raise HTTPRedirect('/internal')
-    else:
+    except ControllerException:
       return self.index('Invalid username or password.')
 
   @cherrypy.expose
@@ -112,3 +113,19 @@ class IndexView(Ce1susBaseView):
     return self._render_template('/index/basePage.html',
                                  env=self.__get_environment_string(),
                                  is_authenticated=True)
+
+  @cherrypy.expose
+  def activate(self, activation_str=None):
+    try:
+      if activation_str:
+        self.login_controller.activate_user(activation_str)
+        return self._render_template('/index/authenticate.html',
+                                   env=self.__get_environment_string(),
+                                   error_msg=None)
+      raise HTTPRedirect('/')
+    except ActivationTimedOut as error:
+      return self._render_template('/index/authenticate.html',
+                                   env=self.__get_environment_string(),
+                                   error_msg=error.message)
+    except ControllerException:
+      raise HTTPRedirect('/')

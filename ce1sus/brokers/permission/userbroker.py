@@ -22,6 +22,9 @@ import dagr.helpers.strings as strings
 from ce1sus.brokers.permission.permissionclasses import User
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
+import random
+from dagr.helpers.datumzait import DatumZait
+import gnupg
 
 
 class UserBroker(BrokerBase):
@@ -39,12 +42,13 @@ class UserBroker(BrokerBase):
     if validate and not errors:
       instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
+
     try:
       BrokerBase.insert(self, instance, commit, validate=False)
       self.do_commit(commit)
-    except sqlalchemy.exc.SQLAlchemyError as e:
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   def update(self, instance, commit=True, validate=True):
     """
@@ -66,9 +70,9 @@ class UserBroker(BrokerBase):
     try:
       BrokerBase.update(self, instance, commit, validate=False)
       self.do_commit(commit)
-    except sqlalchemy.exc.SQLAlchemyError as e:
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
 
   def isUserPrivileged(self, username):
     """
@@ -105,9 +109,9 @@ class UserBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for' +
                                          'ID :{0}'.format(username))
-    except sqlalchemy.exc.SQLAlchemyError as e:
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return user
 
   def getUserByUsernameAndPassword(self, username, password):
@@ -137,16 +141,15 @@ class UserBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for ID ' +
                                          ':{0}'.format(username))
-    except sqlalchemy.exc.SQLAlchemyError as e:
+    except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
-      raise BrokerException(e)
+      raise BrokerException(error)
     return user
 
   # pylint: disable=R0913
-  @staticmethod
-  def buildUser(identifier=None, username=None, password=None,
+  def build_user(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None, apikey=None):
+                 maingroup=None, apikey=None, gpgkey=None, name=None, sirname=None):
     """
     puts a user with the data together
 
@@ -167,22 +170,30 @@ class UserBroker(BrokerBase):
     :returns: generated HTML
     """
     user = User()
-    if not action == 'insert':
-      user.identifier = identifier
+    if action == 'insert':
+      user.password_plain = cleanPostValue(password)
+      user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
+      user.activation_sent = DatumZait.utcnow()
+    else:
+      user = self.get_by_id(identifier)
     if not action == 'remove' and action != 'insertLDAP':
       user.email = cleanPostValue(email)
       user.password = cleanPostValue(password)
       user.username = cleanPostValue(username)
+      user.gpg_key = cleanPostValue(gpgkey)
+      user.name = name
+      user.sirname = sirname
+
+      if apikey == '1' and user.api_key != 1:
+        # generate key
+        user.api_key = hashSHA1('{0}{1}{2}'.format(user.email, user.username, random.random()))
+
     if strings.isNotNull(disabled):
       ObjectConverter.set_integer(user, 'disabled', disabled)
     if strings.isNotNull(priv):
       ObjectConverter.set_integer(user, 'privileged', priv)
     if strings.isNotNull(maingroup):
       ObjectConverter.set_integer(user, 'group_id', maingroup)
-
-    if apikey == '1':
-      # generate key
-      user.api_key = hashSHA1('{0}{1}APIKey'.format(user.email, user.username))
     return user
 
   def get_user_by_api_key(self, api_key):
@@ -197,8 +208,8 @@ class UserBroker(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for apikey :{0}'.format(api_key))
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
   def get_all(self):
     """
@@ -213,7 +224,20 @@ class UserBroker(BrokerBase):
                                   ).order_by(User.username.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as e:
-      raise BrokerException(e)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
     return result
+
+  def get_user_by_act_str(self, activation_str):
+    try:
+      result = self.session.query(User).filter(
+                       User.activation_str == activation_str).one()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found for activation_str {0}'.format(activation_str))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException(
+                    'Too many results found for activation_str :{0}'.format(activation_str))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

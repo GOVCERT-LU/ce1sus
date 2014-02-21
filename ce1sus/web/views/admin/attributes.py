@@ -171,8 +171,12 @@ class AdminAttributeView(Ce1susBaseView):
       if valid:
         return self._return_ajax_ok()
       else:
+        cb_values = self.attribute_controller.get_cb_table_definitions()
+        cb_handler_values = self.attribute_controller.get_cb_handler_definitions()
         return self._return_ajax_post_error(self._render_template('/admin/attributes/attributeModal.html',
-                                 attribute=attribute))
+                                 attribute=attribute,
+                                 cb_values=cb_values,
+                                 cb_handler_values=cb_handler_values))
     except SpecialControllerException as error:
       return self._return_ajax_error(error.message)
     except ControllerException as error:

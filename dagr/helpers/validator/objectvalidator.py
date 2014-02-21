@@ -15,6 +15,7 @@ import re
 from sre_constants import error
 from dagr.helpers.strings import stringToDateTime, InputException
 import datetime
+from dagr.helpers.objects import get_fields
 
 ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'
 ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
@@ -128,16 +129,20 @@ class ObjectValidator:
 
       :returns: Boolean
     """
-    for value in vars(obj).itervalues():
+    fields = get_fields(obj)
+    for field_name in fields:
+      value = getattr(obj, field_name)
       if type(value) == FailedValidation:
         return False
     return True
 
   @staticmethod
   def getFirstValidationError(obj):
-    for key, value in vars(obj).iteritems():
+    fields = get_fields(obj)
+    for field_name in fields:
+      value = getattr(obj, field_name)
       if type(value) == FailedValidation:
-        attributeName = key[key.rfind('_') + 1:]
+        attributeName = field_name[field_name.rfind('_') + 1:]
         return 'Attribute "{0}" is invalid due to: {1}'.format(attributeName, value.error)
     return ''
 

@@ -186,7 +186,7 @@ class RestController(RestBaseHandler):
     """Returns the user if existing else raises a 403"""
     user = None
     try:
-      user = self.login_controller.get_user_by_apiKey(api_key)
+      user = self.login_controller.get_user_by_apikey(api_key)
     except ControllerException as error:
       self._get_logger().debug(error)
     if user:

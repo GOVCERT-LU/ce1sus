@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from smtplib import SMTPException, SMTP
 from email.mime.text import MIMEText
 from dagr.helpers.debug import Log
+import gnupg
 
 
 class MailerException(Exception):
@@ -34,6 +35,7 @@ class Mail(object):
     self.reciever = None
     self.subject = None
     self.body = None
+    self.encrypt = False
 
   @property
   def message(self):
@@ -50,6 +52,28 @@ class Mailer(object):
     self.__config_section = config.get_section('Mailer')
     self.sender = self.__config_section.get('from')
     self.logger = Log(config)
+    self.__key_path = self.__config_section.get('gpgkeys', None)
+    self.__passphrase = self.__config_section.get('passphrase', None)
+
+  def __encrypt_message(self, text, reciever):
+    self.get_logger().debug('Encrypting message')
+
+    if self.__key_path:
+      # gpg = gnupg.GPG(gnupghome=self.__key_path)
+      gpg = gnupg.GPG(gnupghome=self.__key_path)
+      # there should be at most one!
+      private_key = gpg.list_keys(True)[0]
+      signer_fingerprint = private_key.get('fingerprint', None)
+      if signer_fingerprint:
+        encrypted_data = gpg.encrypt(text, reciever,
+                                     sign=signer_fingerprint,
+                                     passphrase=self.__passphrase,
+                                     always_trust=True)
+        return str(encrypted_data)
+      else:
+        raise MailerException('PK fingerprint not found.')
+    else:
+      raise MailerException('An encrypted mail will be send but path was not specified.')
 
   def send_mail(self, mail):
     """Sends the mail object"""
@@ -61,7 +85,12 @@ class Mailer(object):
       smtp_obj.ehlo()
 
       # Create a text/plain message
-      message = MIMEText(mail.body)
+      text = mail.body.encode("iso-8859-15", "replace")
+      if mail.encrypt:
+        message = MIMEText(self.__encrypt_message(text, mail.reciever))
+      else:
+        message = MIMEText(text)
+
       message['Subject'] = mail.subject
       if  mail.sender:
         sender = mail.sender
@@ -75,6 +104,10 @@ class Mailer(object):
     except SMTPException as error:
       self.get_logger().critical(error)
       raise MailerException(error)
+
+  def add_gpg_key(self, data):
+    gpg = gnupg.GPG(gnupghome=self.__key_path)
+    gpg.import_keys(data)
 
   def get_logger(self):
     """returns the internal logger"""

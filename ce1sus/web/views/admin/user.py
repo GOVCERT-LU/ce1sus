@@ -112,7 +112,8 @@ class AdminUserView(Ce1susBaseView):
   @cherrypy.expose
   def modify_user(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None, ldap_users_table_length=None, apikey=None):
+                 maingroup=None, ldap_users_table_length=None, apikey=None,
+                 gpgkey=None, name=None, sirname=None):
     """
     modifies or inserts a user with the data of the post
 
@@ -138,13 +139,13 @@ class AdminUserView(Ce1susBaseView):
         user, valid = self.user_controller.insert_ldap_user(user)
       else:
         user = self.user_controller.populate_user(identifier, username, password,
-                 priv, email, action, disabled, maingroup, apikey)
-      if action == 'insert':
-        user, valid = self.user_controller.insert_user(user)
-      if action == 'update':
-        user, valid = self.user_controller.update_user(user)
-      if action == 'remove':
-        user, valid = self.user_controller.remove_user(user)
+                 priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname)
+        if action == 'insert':
+          user, valid = self.user_controller.insert_user(user)
+        if action == 'update':
+          user, valid = self.user_controller.update_user(user)
+        if action == 'remove':
+          user, valid = self.user_controller.remove_user(user)
 
       if valid:
         return self._return_ajax_ok()
@@ -152,7 +153,8 @@ class AdminUserView(Ce1susBaseView):
         cb_values = self.user_controller.get_cb_group_values()
         return self._render_template('/admin/users/userModal.html',
                                  user=user,
-                                 cb_values=cb_values)
+                                 cb_values=cb_values,
+                                 enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)
 

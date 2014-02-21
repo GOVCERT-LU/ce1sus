@@ -347,6 +347,9 @@ class EventBroker(BrokerBase):
       ObjectConverter.set_integer(event, 'tlp_level_id', tlp_index)
       ObjectConverter.set_integer(event, 'status_id', status)
       ObjectConverter.set_integer(event, 'published', published)
+      # if published
+      if event.published == 1:
+        event.last_publish_date = DatumZait.utcnow()
       event.modified = DatumZait.utcnow()
       event.modifier = user
       event.modifier_id = event.modifier.identifier

@@ -80,6 +80,7 @@ class Event(BASE):
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
   __bit_code = None
+  last_publish_date = Column('last_publish_date', DateTime(timezone=True))
 
   @property
   def bit_value(self):

@@ -25,6 +25,8 @@ from dagr.db.broker import ValidationException, BrokerException, NothingFoundExc
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
+from dagr.helpers.mailer import Mailer, Mail, MailerException
+from ce1sus.brokers.mailbroker import MailTemplateBroker
 
 
 class EventController(Ce1susBaseController):
@@ -39,6 +41,8 @@ class EventController(Ce1susBaseController):
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
+    self.mailer = Mailer(config)
+    self.mail_broker = self.broker_factory(MailTemplateBroker)
 
   def get_related_events(self, event, user, cache):
     """
@@ -91,7 +95,7 @@ class EventController(Ce1susBaseController):
     uuid = kwargs.get('uuid', None)
     user = kwargs.get('user', None)
     # fill in the values
-    return self.event_broker.build_event(identifier,
+    event = self.event_broker.build_event(identifier,
                                         action,
                                         status,
                                         tlp_index,
@@ -104,6 +108,10 @@ class EventController(Ce1susBaseController):
                                         analysis,
                                         self._get_user(user.username),
                                         uuid)
+    # send mail if published!
+    if event.published == 1:
+      pass
+    return event
 
   def populate_web_event(self, user, **kwargs):
     """
@@ -118,6 +126,7 @@ class EventController(Ce1susBaseController):
     event = self.__popultate_event(**kwargs)
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
+
     return event
 
   def populate_rest_event(self, user, rest_event, action):
@@ -218,6 +227,24 @@ class EventController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  def __send_update_mail(self, event):
+    try:
+      """Procedure to send out activation mail"""
+      mail_tmpl = self.mail_broker.get_activation_template()
+      mail = Mail()
+      mail.reciever = 'foo'
+      mail.subject = mail_tmpl.subject
+      body = mail_tmpl.body
+      mail.body = body
+
+      mail.encrypt = True
+
+      # self.mailer.send_mail(mail)
+    except BrokerException as error:
+      self._raise_exception(error)
+    except MailerException as error:
+      self._raise_exception(error)
+
   def update_event(self, user, event):
     """
     updates an event
@@ -230,6 +257,8 @@ class EventController(Ce1susBaseController):
     self._get_logger().debug('User {0} updates event {1}'.format(user.username, event.identifier))
     try:
       user = self._get_user(user.username)
+      if event.published == 1:
+        self.__send_update_mail(event)
       self.event_broker.update_event(user, event, True)
       return event, True
     except ValidationException:

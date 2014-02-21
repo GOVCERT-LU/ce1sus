@@ -41,10 +41,27 @@ class User(BASE):
   email = Column('email', String)
   disabled = Column('disabled', Integer)
   api_key = Column('apikey', String)
+  gpg_key = Column('gpg_key', String)
   group_id = Column('group_id', Integer, ForeignKey('Groups.group_id'))
   default_group = relationship('Group',
                               primaryjoin='User.group_id==Group.identifier',
                               lazy='joined')
+  activated = Column('activated', DateTime)
+  activation_sent = Column('activation_sent', DateTime)
+  name = Column('name', String)
+  sirname = Column('sirname', String)
+  password_plain = None
+  activation_str = Column('activation_str', String)
+
+  @property
+  def display_name(self):
+    return '{0} {1}'.format(self.sirname, self.name)
+
+  @property
+  def allowed(self):
+    if self.disabled == 0 and self.activated:
+      return True
+    return False
 
   @property
   def has_api_key(self):
@@ -76,6 +93,14 @@ class User(BASE):
     ObjectValidator.validateDigits(self, 'privileged', minimal=0, maximal=1)
     ObjectValidator.validateDigits(self, 'disabled', minimal=0, maximal=1)
     ObjectValidator.validateEmailAddress(self, 'email')
+    ObjectValidator.validateAlNum(self, 'name', minLength=3, withSymbols=True)
+    ObjectValidator.validateAlNum(self, 'sirname', minLength=3, withSymbols=True)
+
+    # if self.gpg_key:
+    #  ObjectValidator.validateRegex(self,
+    #                                'gpg_key',
+    #                                '-----BEGIN PGP PUBLIC KEY BLOCK-----(.*?)-----END PGP PUBLIC KEY BLOCK-----',
+    #                                'GPG Key not under the right format')
     if not self.last_login is None:
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)

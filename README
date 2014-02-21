@@ -8,12 +8,13 @@ Requirements
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap (optional)
+  * python-ldap
   * rtkit (optional)
   * webtest (1.2.1+, optional)
   * dateutil
   * cherrypy3
   * memcache
+  * m2crypto  (0.21.1+)
 
 - mysql (5.1+)
 - libmagic1

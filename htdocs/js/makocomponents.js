@@ -121,10 +121,10 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                 } else {
                     var resultText = createErrorsMsg(null, message);
                 }
-                if (modalID) {
+                if (modalID && !contentid) {
                     $("#" + modalID + "body").html(message);
                 } else {
-                    $("#" + refreshContainer + "").html(message);
+                    $("#" + contentid).html(message);
                 }
             }
         }

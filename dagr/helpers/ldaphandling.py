@@ -22,8 +22,13 @@ class LDAPUser(object):
     self.uid = None
     self.mail = None
     self.password = 'EXTERNALAUTH'
-    self.display_name = None
+    self.sir_name = None
+    self.name = None
     self.dn_string = None
+
+  @property
+  def display_name(self):
+    return '{0} {1}'.format(self.sir_name, self.name)
 
 
 class LDAPException(Exception):
@@ -73,17 +78,14 @@ class LDAPHandler(object):
     """
     Open the connection to the LDAP server
     """
-    connection = None
-
     try:
       connection = ldap.initialize(self.__config_section.get('server'))
       if self.__tls:
         connection.start_tls_s()
+        return connection
     except ldap.LDAPError as error:
       self._get_logger().fatal(error)
       raise ServerErrorException('LDAP error: {0}'.format(error))
-
-    return connection
 
   def is_valid_user(self, uid, password):
     """
@@ -127,6 +129,19 @@ class LDAPHandler(object):
       raise ServerErrorException('LDAP error: {0}'.format(error))
 
   @staticmethod
+  def __get_clean_value(dictionary, identifier):
+    value = dictionary.get(identifier, None)
+    if value:
+      value = value[0]
+      # Foo to prevent ascii errors as ldap module returns strings!
+      try:
+        return value
+      except UnicodeDecodeError:
+        return unicode(value, 'utf-8', errors='replace')
+    else:
+      return None
+
+  @staticmethod
   def __map_user(ldap_user):
     """
     Maps the response from the LDAP server to userobject container
@@ -139,16 +154,15 @@ class LDAPHandler(object):
     attributes = ldap_user[1]
     user = LDAPUser()
     user.dn_string = ldap_user[0]
-    for key, value in attributes.iteritems():
-      if hasattr(user, key):
-      # Foo to prevent ascii errors as ldap module returns strings!
-        try:
-          setattr(user, key, unicode(value[0]))
-        except UnicodeDecodeError:
-          setattr(user, key, unicode(value[0], 'utf-8', errors='replace'))
+    user.uid = LDAPHandler.__get_clean_value(attributes, 'uid')
+    user.mail = LDAPHandler.__get_clean_value(attributes, 'mail')
+    user.password = 'EXTERNALAUTH'
+    user.sir_name = LDAPHandler.__get_clean_value(attributes, 'sn')
+    user.name = LDAPHandler.__get_clean_value(attributes, 'givenName')
+    user.dn_string = LDAPHandler.__get_clean_value(attributes, 'dn')
     return user
 
-  def get_all_users(self):
+  def __get_all_users(self):
     """
     Returns the attribute value
 
@@ -160,12 +174,13 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid=*)'
-    attributes = ["uid", "display_name", "mail"]
+    attributes = None
+    user_list = None
     try:
       connection = self.__get_connection()
       result = connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
                                filter_, attributes)
-      self.__close_connection(connection)
+
       user_list = list()
       for user in result:
         user = LDAPHandler.__map_user(user)
@@ -175,7 +190,16 @@ class LDAPHandler(object):
     except ldap.LDAPError as error:
       self._get_logger().fatal(error)
       raise ServerErrorException('LDAP error: {0}'.format(error))
+    self.__close_connection(connection)
     return user_list
+
+  def get_all_users(self):
+    users = self.__get_all_users()
+    if users:
+      if users[0].mail:
+        return users
+      else:
+        return self.__get_all_users()
 
   def get_user(self, uid):
     """
@@ -189,7 +213,7 @@ class LDAPHandler(object):
     :returns: String
     """
     filter_ = '(uid={0})'.format(uid)
-    attributes = ["uid", "display_name", "mail", "dc"]
+    attributes = None
 
     try:
       connection = self.__get_connection()

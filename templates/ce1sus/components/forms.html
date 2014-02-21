@@ -59,9 +59,12 @@
 <div class="row">
 <div class="col-xs-12 col-sm-12" style="text-align:left">
 % if user is None:
+  <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value='',enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Sir name',name='sirname',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Username',name='username',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Password',name='password',value='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',value='',enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_textbox(label='GPG key',name='gpgkey',message='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Priviledged',name='priv',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Disabled',name='disabled',enabled=enabled,has_empty=False,selected=0)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=0)"/>
@@ -72,9 +75,12 @@
   <input type="hidden" name="identifier" value="${user.identifier}">
   <%call expr="labeled_input.labeled_editbox(label='Identifier',name='userID',value=user.identifier,enabled=False)"/>
 %endif
+  <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=user.name,enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Sir name',name='sirname',value=user.sirname,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Username',name='username',value=user.username,enabled=enabled)"/>
   <%call expr="labeled_input.labeledPasswordBox(label='Password',name='password',value=user.password,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',value=user.email,enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_textbox(label='GPG key',name='gpgkey',message=user.gpg_key,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Priviledged',name='priv',enabled=enabled,has_empty=True,selected=user.privileged)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Disabled',name='disabled',enabled=enabled,has_empty=True,selected=user.disabled)"/>
   

@@ -5,6 +5,25 @@
 <%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 
 
+<%def name="attribute_modal_form(modal_id, url, content_id, refresh_url=None, refresh_container=None)">
+<form id="${modal_id}Form" name="${modal_id}FormName" method="POST" action="${url}" class="form-horizontal" enctype="multipart/form-data">
+    ${caller.body()}
+</form>
+<script type="text/javascript">
+$( document ).ready(function() {
+    $("#${modal_id}Form").submit(function(event){
+        <%
+        if not (refresh_url is None and refresh_container is None):
+            refresh = 'true'
+        else:
+            refresh = 'false'
+        %>
+        genericFormSubmit(this,event,'${modal_id}' ,'${content_id}', '${url}','${refresh}','${refresh_container}','${refresh_url}')
+    });
+});
+</script>
+</%def>
+
 <%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False)">
 % if (not object is None):
         <div class="panel panel-default" >
@@ -47,7 +66,7 @@
                                            'eventTabs${event_id}TabContent',
                                            '/events/event/objects/objects/${event_id}')}" title="delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
                         <!--  dont remove this -->
-			                <%call expr="base_forms.generic_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
+			                <%call expr="attribute_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),content_id='editBox_eventAttributeFromNoneHidden',url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
 			                  <input type="hidden" name="action" value="insert">
 			                  <%call expr="modals.save_button_modal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',content_url='/events/event/attribute/add_attribute/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
