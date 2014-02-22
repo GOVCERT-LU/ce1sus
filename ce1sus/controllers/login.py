@@ -33,6 +33,14 @@ class LoginController(Ce1susBaseController):
     self.user_broker = self.broker_factory(UserBroker)
     self.ldap_handler = LDAPHandler(config)
 
+  def __get_ldap_user(self, username):
+    try:
+      user = self.user_broker.getUserByUsernameAndPassword(username,
+                                                         'EXTERNALAUTH')
+    except Exception:
+      user = None
+    return user
+
   def get_user_by_usr_pwd(self, username, password):
     """
     Checks if the credentials are valid
@@ -48,12 +56,7 @@ class LoginController(Ce1susBaseController):
       user = None
       try:
         if self._get_config_variable('useldap'):
-          try:
-            user = self.user_broker.getUserByUsernameAndPassword(username,
-                                                               'EXTERNALAUTH')
-          except NothingFoundException as error:
-            user = None
-
+          user = self.__get_ldap_user(username)
         if user is None:
           # the user was not specified as ldap user use traditional login
           user = self.user_broker.getUserByUsernameAndPassword(username, password)

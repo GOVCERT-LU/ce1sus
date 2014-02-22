@@ -73,12 +73,10 @@ class Mailer(object):
       except ImportError as error:
         info_log = getattr(self.get_logger(), 'info')
         info_log(error)
-        info_log('GPG Path not specified sending unsinged mail')
-        return text
-    else:
-      info_log = getattr(self.get_logger(), 'info')
-      info_log('GPG Path not specified sending unsinged mail')
-      return text
+
+    info_log = getattr(self.get_logger(), 'info')
+    info_log('GPG Path not specified sending unsinged mail')
+    return text
 
   def __encrypt_message(self, text, reciever):
     self.get_logger().debug('Encrypting message')
