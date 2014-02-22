@@ -118,7 +118,8 @@ class LDAPHandler(object):
       try:
         if not (uid is None or password is None):
           connection = self.__get_connection()
-          connection.simple_bind_s(self.__get_user_dn(uid), password)
+          user_dn = self.__get_user_dn(uid)
+          connection.simple_bind_s(user_dn, password)
           self.__close_connection(connection)
       except ldap.INVALID_CREDENTIALS:
         self._get_logger().info('Username or password is invalid for {0}'.format(
@@ -159,7 +160,6 @@ class LDAPHandler(object):
     user.password = 'EXTERNALAUTH'
     user.sir_name = LDAPHandler.__get_clean_value(attributes, 'sn')
     user.name = LDAPHandler.__get_clean_value(attributes, 'givenName')
-    user.dn_string = LDAPHandler.__get_clean_value(attributes, 'dn')
     return user
 
   def __get_all_users(self):

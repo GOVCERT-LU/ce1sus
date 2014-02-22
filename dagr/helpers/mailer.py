@@ -109,8 +109,9 @@ class Mailer(object):
         error_log = getattr(self.get_logger(), 'error')
         error_log(error)
 
+    #TODO raise exception!!!
     info_log = getattr(self.get_logger(), 'info')
-    info_log('GPG Path not specified sending unencrypted mail')
+    info_log('GPG not installed sending unencrypted mail')
     return text
 
   def send_mail(self, mail):
