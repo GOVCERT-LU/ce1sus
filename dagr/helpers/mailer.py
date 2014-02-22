@@ -69,7 +69,11 @@ class Mailer(object):
             signed_data = gpg.sign(text,
                      keyid=signer_fingerprint,
                      passphrase=self.__passphrase)
-            return signed_data
+            if signed_data:
+              return signed_data
+            else:
+              info_log = getattr(self.get_logger(), 'info')
+              info_log('Something went wrong while signing')
       except ImportError as error:
         info_log = getattr(self.get_logger(), 'info')
         info_log(error)
