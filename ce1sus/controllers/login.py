@@ -71,8 +71,7 @@ class LoginController(Ce1susBaseController):
         # check if a user was found and if it was not disabled
         self.__check_user(user)
       else:
-        self._get_logger().info(('A login attempt was made with username "{0}" '
-                                 + 'but the user was not defined.').format(username))
+        self._get_logger().critical('User was none, leads to a compromized db')
       return user
     except BrokerException as error:
       self._raise_exception(error)
