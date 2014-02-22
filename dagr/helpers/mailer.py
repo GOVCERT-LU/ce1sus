@@ -107,10 +107,11 @@ class Mailer(object):
           raise MailerException('No passphrase specified.')
       except ImportError as error:
         error_log = getattr(self.get_logger(), 'error')
-        error_log('Could not find gnupg send mail unencrypted')
         error_log(error)
-    else:
-      raise MailerException('An encrypted mail will be send but path was not specified.')
+
+    info_log = getattr(self.get_logger(), 'info')
+    info_log('GPG Path not specified sending unencrypted mail')
+    return text
 
   def send_mail(self, mail):
     """Sends the mail object"""
