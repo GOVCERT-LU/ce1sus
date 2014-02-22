@@ -67,10 +67,12 @@ class LoginController(Ce1susBaseController):
                                  + 'but the user was not defined.').format(username))
       except BrokerException as error:
         self._get_logger().critical(error)
-
-      # check if a user was found and if it was not disabled
-      self.__check_user(user)
-
+      if user:
+        # check if a user was found and if it was not disabled
+        self.__check_user(user)
+      else:
+        self._get_logger().info(('A login attempt was made with username "{0}" '
+                                 + 'but the user was not defined.').format(username))
       return user
     except BrokerException as error:
       self._raise_exception(error)
