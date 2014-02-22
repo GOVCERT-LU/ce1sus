@@ -71,12 +71,12 @@ class Mailer(object):
                      passphrase=self.__passphrase)
             return signed_data
       except ImportError as error:
-        info_log = getattr(self.logger, 'info')
+        info_log = getattr(self.get_logger(), 'info')
         info_log(error)
         info_log('GPG Path not specified sending unsinged mail')
         return text
     else:
-      info_log = getattr(self.logger, 'info')
+      info_log = getattr(self.get_logger(), 'info')
       info_log('GPG Path not specified sending unsinged mail')
       return text
 
@@ -103,7 +103,7 @@ class Mailer(object):
         else:
           raise MailerException('No passphrase specified.')
       except ImportError as error:
-        error_log = getattr(self.logger, 'error')
+        error_log = getattr(self.get_logger(), 'error')
         error_log('Could not find gnupg send mail unencrypted')
         error_log(error)
     else:
@@ -146,7 +146,7 @@ class Mailer(object):
         gpg = gpg_class(gnupghome=self.__key_path)
         gpg.import_keys(data)
     except ImportError as error:
-      error_log = getattr(self.logger, 'error')
+      error_log = getattr(self.get_logger(), 'error')
       error_log('Could not find gnupg will not import key')
       error_log(error)
 
