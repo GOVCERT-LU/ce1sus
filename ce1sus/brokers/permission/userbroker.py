@@ -24,7 +24,6 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 import random
 from dagr.helpers.datumzait import DatumZait
-import gnupg
 
 
 class UserBroker(BrokerBase):
