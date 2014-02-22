@@ -22,7 +22,7 @@ from dagr.db.broker import DateTime
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from dagr.helpers.converters import ValueConverter
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from ce1sus.common.ce1susutils import get_class
+from dagr.helpers.objects import get_class
 
 
 # pylint: disable=R0903,W0232

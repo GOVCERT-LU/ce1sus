@@ -20,7 +20,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 import types
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.relationbroker import RelationBroker
-from ce1sus.common.ce1susutils import get_class
+from dagr.helpers.objects import get_class
 from dagr.db.broker import BrokerException
 
 

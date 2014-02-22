@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from importlib import import_module
 import ast
 from dagr.helpers.converters import ValueConverter
 import re
@@ -26,16 +25,6 @@ from dagr.helpers.validator.valuevalidator import ValueValidator
 APP_REL = '0.7.4'
 DB_REL = '0.8.0'
 REST_REL = '0.2.0'
-
-
-def get_class(modulename, classname):
-  """returns the class name from a string"""
-  splited_modulename = modulename.rsplit('.', 1)
-  module_name = splited_modulename[1]
-  package = splited_modulename[0]
-  module = import_module('.' + module_name, package)
-  clazz = getattr(module, classname)
-  return clazz
 
 
 def convert_string_to_value(string):

@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from smtplib import SMTPException, SMTP
 from email.mime.text import MIMEText
 from dagr.helpers.debug import Log
-import gnupg
+from dagr.helpers.objects import get_class
 
 
 class MailerException(Exception):
@@ -55,23 +55,57 @@ class Mailer(object):
     self.__key_path = self.__config_section.get('gpgkeys', None)
     self.__passphrase = self.__config_section.get('passphrase', None)
 
+  def __sign_message(self, text):
+    if self.__key_path:
+      # gpg = gnupg.GPG(gnupghome=self.__key_path)
+      try:
+        gpg_class = get_class('gnupg', 'GPG')
+        gpg = gpg_class(gnupghome=self.__key_path)
+        if self.__passphrase:
+          # there should be at most one!
+          private_key = gpg.list_keys(True)[0]
+          signer_fingerprint = private_key.get('fingerprint', None)
+          if signer_fingerprint:
+            signed_data = gpg.sign(text,
+                     keyid=signer_fingerprint,
+                     passphrase=self.__passphrase)
+            return signed_data
+      except ImportError as error:
+        info_log = getattr(self.logger, 'info')
+        info_log(error)
+        info_log('GPG Path not specified sending unsinged mail')
+        return text
+    else:
+      info_log = getattr(self.logger, 'info')
+      info_log('GPG Path not specified sending unsinged mail')
+      return text
+
   def __encrypt_message(self, text, reciever):
     self.get_logger().debug('Encrypting message')
 
     if self.__key_path:
       # gpg = gnupg.GPG(gnupghome=self.__key_path)
-      gpg = gnupg.GPG(gnupghome=self.__key_path)
-      # there should be at most one!
-      private_key = gpg.list_keys(True)[0]
-      signer_fingerprint = private_key.get('fingerprint', None)
-      if signer_fingerprint:
-        encrypted_data = gpg.encrypt(text, reciever,
-                                     sign=signer_fingerprint,
-                                     passphrase=self.__passphrase,
-                                     always_trust=True)
-        return str(encrypted_data)
-      else:
-        raise MailerException('PK fingerprint not found.')
+      try:
+        gpg_class = get_class('gnupg', 'GPG')
+        gpg = gpg_class(gnupghome=self.__key_path)
+        if self.__passphrase:
+          # there should be at most one!
+          private_key = gpg.list_keys(True)[0]
+          signer_fingerprint = private_key.get('fingerprint', None)
+          if signer_fingerprint:
+            encrypted_data = gpg.encrypt(text, reciever,
+                                         sign=signer_fingerprint,
+                                         passphrase=self.__passphrase,
+                                         always_trust=True)
+            return str(encrypted_data)
+          else:
+            raise MailerException('PK fingerprint not found.')
+        else:
+          raise MailerException('No passphrase specified.')
+      except ImportError as error:
+        error_log = getattr(self.logger, 'error')
+        error_log('Could not find gnupg send mail unencrypted')
+        error_log(error)
     else:
       raise MailerException('An encrypted mail will be send but path was not specified.')
 
@@ -89,6 +123,7 @@ class Mailer(object):
       if mail.encrypt:
         message = MIMEText(self.__encrypt_message(text, mail.reciever))
       else:
+        text = self.__sign_message(text)
         message = MIMEText(text)
 
       message['Subject'] = mail.subject
@@ -106,8 +141,14 @@ class Mailer(object):
       raise MailerException(error)
 
   def add_gpg_key(self, data):
-    gpg = gnupg.GPG(gnupghome=self.__key_path)
-    gpg.import_keys(data)
+    try:
+        gpg_class = get_class('gnupg', 'GPG')
+        gpg = gpg_class(gnupghome=self.__key_path)
+        gpg.import_keys(data)
+    except ImportError as error:
+      error_log = getattr(self.logger, 'error')
+      error_log('Could not find gnupg will not import key')
+      error_log(error)
 
   def get_logger(self):
     """returns the internal logger"""

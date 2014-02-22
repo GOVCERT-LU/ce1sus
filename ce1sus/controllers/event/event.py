@@ -232,14 +232,14 @@ class EventController(Ce1susBaseController):
       """Procedure to send out activation mail"""
       mail_tmpl = self.mail_broker.get_activation_template()
       mail = Mail()
-      mail.reciever = 'foo'
+      mail.reciever = 'jean-paul.weber@govcert.etat.lu'
       mail.subject = mail_tmpl.subject
       body = mail_tmpl.body
       mail.body = body
 
       mail.encrypt = True
 
-      # self.mailer.send_mail(mail)
+      self.mailer.send_mail(mail)
     except BrokerException as error:
       self._raise_exception(error)
     except MailerException as error:

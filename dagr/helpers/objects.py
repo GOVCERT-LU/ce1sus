@@ -15,6 +15,21 @@ import types
 import datetime
 from collections import Iterable
 from inspect import isfunction, ismethod
+from importlib import import_module
+
+
+def get_class(modulename, classname):
+  """returns the class name from a string"""
+  splited_modulename = modulename.rsplit('.', 1)
+  if len(splited_modulename) > 1:
+    module_name = '.' + splited_modulename[1]
+    package = splited_modulename[0]
+  else:
+    module_name = modulename
+    package = ''
+  module = import_module(module_name, package)
+  clazz = getattr(module, classname)
+  return clazz
 
 
 class CompareException(Exception):

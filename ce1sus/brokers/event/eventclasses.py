@@ -25,7 +25,7 @@ from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
                                        NumberValue
-from ce1sus.common.ce1susutils import get_class
+from dagr.helpers.objects import get_class
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),

@@ -18,7 +18,7 @@ from dagr.db.session import BASE
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.common.handlers.base import HandlerBase, HandlerException
 import json
-from ce1sus.common.ce1susutils import get_class
+from dagr.helpers.objects import get_class
 
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
