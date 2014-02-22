@@ -110,13 +110,22 @@ class Ce1susBaseView(BaseView):
     self._get_logger().info(log_msg)
     return viewable
 
+  def __get_username(self):
+    user = self._get_user()
+    if user:
+      username = user.username
+      if username:
+        return username
+    return 'Unkown'
+
   def _check_if_event_is_viewable(self, event):
     """
     Checks if the user can view the event else raises an exception
     """
     viewable = self._is_event_viewable(event)
     if not viewable:
-      raise cherrypy.HTTPError(403)
+      username = self.__get_username()
+      raise cherrypy.HTTPError(403, 'User {0} is not authorized to view event {1}'.format(username, event.identifer))
 
   def _check_if_event_owner(self, event):
     """
@@ -124,7 +133,8 @@ class Ce1susBaseView(BaseView):
     """
     valid = self._is_event_owner(event)
     if not valid:
-      raise cherrypy.HTTPError(403)
+      username = self.__get_username()
+      raise cherrypy.HTTPError(403, 'User {0} is does not own event {1}'.format(username, event.identifer))
 
   def _check_if_priviledged(self):
     """
@@ -132,7 +142,8 @@ class Ce1susBaseView(BaseView):
     """
     user = self._get_user()
     if not user.privileged:
-      raise cherrypy.HTTPError(403)
+      username = self.__get_username()
+      raise cherrypy.HTTPError(403, 'User {0} is not privileged'.format(username))
 
   def _is_event_owner(self, event):
     """"
