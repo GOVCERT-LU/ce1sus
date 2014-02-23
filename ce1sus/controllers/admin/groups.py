@@ -18,6 +18,7 @@ from ce1sus.brokers.staticbroker import TLPLevel
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from ce1sus.brokers.permission.permissionclasses import Group
 from dagr.controllers.base import ControllerException
+from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
 
 
 class GroupController(Ce1susBaseController):
@@ -26,6 +27,7 @@ class GroupController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.group_broker = self.broker_factory(GroupBroker)
+    self.subgroup_broker = self.broker_factory(SubGroupBroker)
 
   def get_all_groups(self):
     try:
@@ -95,6 +97,8 @@ class GroupController(Ce1susBaseController):
 
   def insert_group(self, group):
     try:
+      default_subgroup = self.subgroup_broker.get_by_id(1)
+      group.subgroups.append(default_subgroup)
       self.group_broker.insert(group)
       return group, True
     except ValidationException as error:
