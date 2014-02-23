@@ -54,11 +54,12 @@ class ObjectController(Ce1susBaseController):
 
   @staticmethod
   def __handle_input(add_function, object_id, value):
-    if isinstance(value, types.StringTypes):
-      add_function(object_id, value, False)
-    else:
-      for attribute_id in value:
-        add_function(object_id, attribute_id, False)
+    if value:
+      if isinstance(value, types.StringTypes):
+        add_function(object_id, value, False)
+      else:
+        for attribute_id in value:
+          add_function(object_id, attribute_id, False)
 
   def modify_object_attribute_relations(self, operation, object_id, remaining_attributes, object_attributes):
     try:

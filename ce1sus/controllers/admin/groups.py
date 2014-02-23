@@ -56,11 +56,12 @@ class GroupController(Ce1susBaseController):
 
   @staticmethod
   def __handle_input(add_function, object_id, value):
-    if isinstance(value, types.StringTypes):
-      add_function(object_id, value, False)
-    else:
-      for attribute_id in value:
-        add_function(object_id, attribute_id, False)
+    if value:
+      if isinstance(value, types.StringTypes):
+        add_function(object_id, value, False)
+      else:
+        for attribute_id in value:
+          add_function(object_id, attribute_id, False)
 
   def modify_group_subgroup_relations(self, operation, group_id, remaining_subgroups, group_subgroups):
     try:

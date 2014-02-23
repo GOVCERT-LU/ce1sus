@@ -101,7 +101,7 @@ class AdminGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  def edit_group_groups(self, identifier, operation,
+  def edit_group_subgroups(self, identifier, operation,
                      existing=None, remaining=None):
     """
     modifies the relation between a group and its groups

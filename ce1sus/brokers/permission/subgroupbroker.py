@@ -58,7 +58,7 @@ class SubGroupBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def add_group_to_subgroup(self, group_id, subgroup_id, commit=True):
+  def add_group_to_subgroup(self, subgroup_id, group_id, commit=True):
     """
     Add a user to a group
 
@@ -80,7 +80,7 @@ class SubGroupBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def remove_group_from_subgroup(self, group_id, subgroup_id, commit=True):
+  def remove_group_from_subgroup(self, subgroup_id, group_id, commit=True):
     """
     Removes a user to a group
 
