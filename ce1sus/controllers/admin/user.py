@@ -17,9 +17,7 @@ from dagr.db.broker import IntegrityException, BrokerException, \
 from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from dagr.controllers.base import ControllerException
-from ce1sus.brokers.mailbroker import MailTemplateBroker
-from dagr.helpers.mailer import Mailer, Mail, MailerException
-from dagr.helpers.config import ConfigException
+from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 
 # pylint: disable=R0904
@@ -32,8 +30,7 @@ class UserController(Ce1susBaseController):
     self.group_broker = self.broker_factory(GroupBroker)
     self.ldap_handler = LDAPHandler(config)
     self.__use_ldap = config.get('ce1sus', 'useldap', False)
-    self.mail_broker = self.broker_factory(MailTemplateBroker)
-    self.mailer = Mailer(config)
+    self.mail_handler = MailHandler(config)
 
   @property
   def use_ldap(self):
@@ -104,48 +101,19 @@ class UserController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __send_activation_mail(self, user):
-    try:
-      """Procedure to send out activation mail"""
-      mail_tmpl = self.mail_broker.get_activation_template()
-      mail = Mail()
-      mail.reciever = user.email
-      mail.subject = mail_tmpl.subject
-      body = mail_tmpl.body
-      url = self.config.get('ce1sus', 'baseurl')
-      activation_url = url + '/activate/{0}'.format(user.activation_str)
-      body = body.replace('${name}', '{0}'.format(user.name))
-      body = body.replace('${sirname}', '{0}'.format(user.sirname))
-      body = body.replace('${username}', '{0}'.format(user.username))
-      body = body.replace('${password}', '{0}'.format(user.password_plain))
-      body = body.replace('${ce1sus_url}', '{0}'.format(url))
-      body = body.replace('${activation_link}', '{0}'.format(activation_url))
-      mail.body = body
-
-      if user.gpg_key:
-        mail.encrypt = True
-
-      self.mailer.send_mail(mail)
-    except BrokerException as error:
-      self._raise_exception(error)
-    except ConfigException as error:
-      self._raise_exception(error)
-    except MailerException as error:
-      self._raise_exception(error)
-
   def insert_user(self, user, validate=True):
     try:
       self.user_broker.insert(user, validate=validate)
 
       if user.gpg_key:
-        self.mailer.add_gpg_key(user.gpg_key)
+        self.mail_handler.import_gpg_key(user.gpg_key)
 
       # send activation mail
-      self.__send_activation_mail(user)
+      self.mail_handler.send_activation_mail(user)
       return user, True
     except ValidationException as error:
       return user, False
-    except BrokerException as error:
+    except (BrokerException, MailHandlerException) as error:
       self._raise_exception(error)
 
   def update_user(self, user):
@@ -153,7 +121,7 @@ class UserController(Ce1susBaseController):
       self.user_broker.update(user, validate=False)
       # add it again in case of changes
       if user.gpg_key:
-        self.mailer.add_gpg_key(user.gpg_key)
+        self.mail_handler.import_gpg_key(user.gpg_key)
       return user, True
     except ValidationException as error:
       return user, False

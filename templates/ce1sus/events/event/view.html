@@ -38,10 +38,10 @@
   <% counter=0%>
   %for relation in relations:
     <%
-    if event.published == 0:
-      style = 'background-color: #ff0000'
-    else:
+    if relation.published:
       style = ''
+    else:
+      style = 'background-color: #ff0000'
     counter = counter +1
     %>
     <tr onclick="loadNewTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', true, 'Event #${relation.identifier}');">

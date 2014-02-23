@@ -11,10 +11,8 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-  AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-  ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.commentbroker import CommentBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
@@ -24,9 +22,7 @@ from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
-from dagr.helpers.validator.objectvalidator import ObjectValidator
-from dagr.helpers.mailer import Mailer, Mail, MailerException
-from ce1sus.brokers.mailbroker import MailTemplateBroker
+from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 
 class EventController(Ce1susBaseController):
@@ -41,8 +37,7 @@ class EventController(Ce1susBaseController):
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
-    self.mailer = Mailer(config)
-    self.mail_broker = self.broker_factory(MailTemplateBroker)
+    self.mail_handler = MailHandler(config)
 
   def get_related_events(self, event, user, cache):
     """
@@ -126,6 +121,10 @@ class EventController(Ce1susBaseController):
     event = self.__popultate_event(**kwargs)
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
+    if event.published:
+      event.bit_value.is_shareable = True
+    else:
+      event.bit_value.is_shareable = False
 
     return event
 
@@ -167,7 +166,8 @@ class EventController(Ce1susBaseController):
               'tlp_index': tlp_index,
               'description': rest_event.description,
               'name': rest_event.title,
-              'published': rest_event.published,
+              # 'published': rest_event.published,
+              'published': 0,
               'first_seen': first_seen,
               'last_seen': last_seen,
               'risk': risk_index,
@@ -227,24 +227,6 @@ class EventController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __send_update_mail(self, event):
-    try:
-      """Procedure to send out activation mail"""
-      mail_tmpl = self.mail_broker.get_activation_template()
-      mail = Mail()
-      mail.reciever = 'jean-paul.weber@govcert.etat.lu'
-      mail.subject = mail_tmpl.subject
-      body = mail_tmpl.body
-      mail.body = body
-
-      mail.encrypt = True
-
-      self.mailer.send_mail(mail)
-    except BrokerException as error:
-      self._raise_exception(error)
-    except MailerException as error:
-      self._raise_exception(error)
-
   def update_event(self, user, event):
     """
     updates an event
@@ -257,13 +239,13 @@ class EventController(Ce1susBaseController):
     self._get_logger().debug('User {0} updates event {1}'.format(user.username, event.identifier))
     try:
       user = self._get_user(user.username)
-      if event.published == 1:
-        self.__send_update_mail(event)
       self.event_broker.update_event(user, event, True)
+      if event.published == 1 and event.bit_value.is_validated_and_shared:
+        self.mail_handler.send_event_mail(event)
       return event, True
     except ValidationException:
       return event, False
-    except BrokerException as error:
+    except (BrokerException, MailHandlerException) as error:
       self._raise_exception(error)
 
   def get_full_event_relations(self, event, user, cache):

@@ -104,8 +104,8 @@ class GroupBroker(BrokerBase):
       raise BrokerException(error)
 
   # pylint: disable=R0903,R0913
-  @staticmethod
-  def build_group(identifier=None,
+  def build_group(self,
+                 identifier=None,
                  name=None,
                  description=None,
                  download=None,
@@ -130,7 +130,7 @@ class GroupBroker(BrokerBase):
     """
     group = Group()
     if not action == 'insert':
-      group.identifier = identifier
+      group = self.get_by_id(identifier)
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)

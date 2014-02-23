@@ -94,3 +94,9 @@ class MailTemplateBroker(BrokerBase):
   def get_activation_template(self):
     """Returns the template for the activation of users"""
     return self.__get_template(MailTemplateBroker.ACTIVATION)
+
+  def get_publication_template(self):
+    return self.__get_template(MailTemplateBroker.EVENT_PUBLICATION)
+
+  def get_update_template(self):
+    return self.__get_template(MailTemplateBroker.EVENT_UPDATE)

@@ -143,7 +143,7 @@
   
   <%call expr="labeled_input.labeled_editbox(label='Title',name='name',value='', enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
-  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=enabled,has_empty=False)"/>
+  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=False,has_empty=False,selected=0)"/>
   
   <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=False)"/>
   <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=False)"/>

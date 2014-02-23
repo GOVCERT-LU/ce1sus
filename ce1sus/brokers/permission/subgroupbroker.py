@@ -103,8 +103,8 @@ class SubGroupBroker(BrokerBase):
       raise BrokerException(error)
 
   # pylint: disable=R0903,R0913
-  @staticmethod
-  def build_subgroup(identifier=None,
+  def build_subgroup(self,
+                 identifier=None,
                  name=None,
                  description=None,
                  action='insert'):
@@ -125,7 +125,7 @@ class SubGroupBroker(BrokerBase):
     """
     subgroup = SubGroup()
     if not action == 'insert':
-      subgroup.identifier = identifier
+      subgroup = self.get_by_id(identifier)
     if not action == 'remove':
       subgroup.name = cleanPostValue(name)
       subgroup.description = cleanPostValue(description)

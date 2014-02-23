@@ -12,14 +12,13 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                                  AttributeDefinitionBroker
-from dagr.db.broker import ValidationException, \
-BrokerException
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from dagr.db.broker import ValidationException, BrokerException
 from ce1sus.common.handlers.base import HandlerException
 from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.brokers.definition.handlerdefinitionbroker import \
-                                                        AttributeHandlerBroker
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.objectbroker import ObjectBroker
 
 
 class AttributesController(Ce1susBaseController):
@@ -30,6 +29,8 @@ class AttributesController(Ce1susBaseController):
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
     self.value_broker = self.broker_factory(ValueBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
+    self.event_broker = self.broker_factory(EventBroker)
+    self.object_broker = self.broker_factory(ObjectBroker)
 
   def remove_by_id(self, attribute_id):
     """
@@ -106,10 +107,15 @@ class AttributesController(Ce1susBaseController):
             self.attribute_broker.insert(additional_attribute, commit=False)
           except ValidationException:
             valid = False
-        if valid:
-          self.attribute_broker.do_commit(True)
-        else:
-          self.attribute_broker.do_rollback()
+      if valid:
+        self.attribute_broker.do_commit(True)
+        event = obj.get_parent_event()
+        event.published = 0
+        self.object_broker.update_object(user, obj, commit=False)
+        self.event_broker.update_event(user, event, commit=False)
+      else:
+        self.attribute_broker.do_rollback()
+
       return attribute, additional_attributes, valid
 
     except BrokerException as error:

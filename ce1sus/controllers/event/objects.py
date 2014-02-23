@@ -131,6 +131,7 @@ class ObjectsController(Ce1susBaseController):
     try:
       try:
         user = self._get_user(user.username)
+        event.published = 0
         self.event_broker.update_event(user, event, commit=False)
         self.object_broker.insert(obj, commit=False)
         self.object_broker.do_commit(True)

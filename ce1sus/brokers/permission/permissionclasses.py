@@ -123,6 +123,9 @@ class Group(BASE):
                        back_populates='groups', cascade='all',
                             order_by="SubGroup.name",
                               lazy='joined')
+  users = relationship('User',
+                       primaryjoin='User.group_id==Group.identifier')
+  gpg_key = Column('gpg_key', String)
 
   def validate(self):
     """

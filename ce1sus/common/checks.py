@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-def __is_viewable(event, user):
+def is_viewable(event, user_default_group, user_priv=False):
   """
   Checks if the page if viewable for the given group
 
@@ -21,12 +21,11 @@ def __is_viewable(event, user):
 
   :returns: Boolean
   """
-  user_default_group = user.default_group
   # if the user has no default group he has no rights
   if user_default_group is None:
     return False
   # check if user is privileged
-  result = user.privileged
+  result = user_priv
   if not result:
     # check if the user created the event
     result = event.creator_group.identifier == user_default_group.identifier
@@ -44,7 +43,7 @@ def __is_viewable(event, user):
         result = user_default_group in event.maingroups
     # check if the user belong to one of the common groups
     if not result:
-      groups = user.default_group.subgroups
+      groups = user_default_group.subgroups
       for group in event.subgroups:
         if group in groups:
             return True
@@ -81,16 +80,15 @@ def check_if_event_is_viewable(event, user, cache=None):
 
   :returns: Boolean
   """
-
   # get eventfrom session
   if cache is None:
-    result = __is_viewable(event, user)
+    result = is_viewable(event, user.default_group, user.privileged == 1)
   else:
     viewable = cache.get(event.identifier, None)
     if viewable == True:
       return True
     else:
-      result = __is_viewable(event, user)
+      result = is_viewable(event, user.default_group, user.privileged == 1)
       cache[event.identifier] = result
 
   return result

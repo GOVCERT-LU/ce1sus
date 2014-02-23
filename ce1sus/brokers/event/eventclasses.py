@@ -323,6 +323,7 @@ class Object(BASE):
   event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
                        '==Object.event_id')
   created = Column('created', DateTime)
+  modified = Column('modified', DateTime)
   creator_id = Column('creator_id', Integer,
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
