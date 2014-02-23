@@ -1,0 +1,36 @@
+<%namespace name="forms" file="/ce1sus/components/forms.html"/> 
+<%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="base_form" file="/dagr/components/forms.html"/> 
+<%namespace name="dagr" module="dagr.web.helpers.webstrings"/>
+
+<!-- group details -->
+<h3>${mail_template.name} - Mail Template</h3>
+<div class="row">
+    <div class="col-xs-3 col-sm-3" style="text-align: right">
+      % if not object is None:
+      <div class="btn-object">
+          <a href="#editMailModal" role="button" class="btn  btn-default"
+              data-toggle="modal">Edit</a>
+      </div>
+      %endif
+    </div>
+</div>
+
+<%call expr="forms.mail_form(mail_template, False)"/>
+
+<legend>Description</legend>
+${dagr.plaintext2html(text=mail_template.description)}
+
+
+%if not Mail is None:
+<%call expr="base_form.generic_modal_form(modal_id='editMailModal',
+                                    url='/admin/mails/modify_mail',
+                                    refresh_url='/admin/mails/right_content/{0}'.format(mail_template.identifier),
+                                    refresh_container='MailRightContent')">
+<input type="hidden" name="action" value="update">
+<%call expr="modals.save_button_modal(id='editMailModal',
+                              title='Edit Mail',
+                              content_url='/admin/mails/edit_mail/{0}'.format(mail_template.identifier),
+                              big=True)"/>
+</%call>
+%endif

@@ -55,6 +55,17 @@
 % endif
 </%def>
 
+<%def name="mail_form(mail_template,enabled)">
+% if object is None:
+  <%call expr="labeled_input.labeled_editbox(label='Subject',name='subject',value='', enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_textbox(label='Body',name='body',message='',enabled=enabled)"/>
+% else:
+  <input type="hidden" name="identifier" value="${mail_template.identifier}">
+  <%call expr="labeled_input.labeled_editbox(label='Subject',name='subject',value=mail_template.subject, enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_textbox(label='Body',name='body',rows=20,message=mail_template.body,enabled=enabled)"/>
+% endif
+</%def>
+
 <%def name="user_form(user,cb_values, enabled)">
 <div class="row">
 <div class="col-xs-12 col-sm-12" style="text-align:left">

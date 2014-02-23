@@ -1,4 +1,4 @@
-Copyright (C) 2012 GOVCERT.LU
+Copyright (C) 2012-2014 GOVCERT.LU
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -16,8 +16,22 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------
 
 
-This project uses the Twitter Bootstrap CSS/JS framework which is licensed
+This project uses the following software which is licensed as:
+
+Twitter Bootstrap CSS/JS framework 
 under the Apache v2.0 license.
 The license is included in the docs/licenses folder.
 The Bootstrap code has not been modified.
 URL: https://github.com/twitter/bootstrap
+
+jQuery v1.10.2:
+(c) 2005, 2013 jQuery Foundation, Inc.
+jquery.org/license
+https://jquery.org
+
+DataTables:
+Allan Jardine (www.sprymedia.co.uk)
+GPL v2 license
+Copyright 2008-2012 Allan Jardine, all rights reserved
+http://www.datatables.net
+

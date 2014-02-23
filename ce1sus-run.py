@@ -21,6 +21,7 @@ from ce1sus.web.views.common.bitvalue import BitValueView
 from ce1sus.web.views.event.attributes import AttributesView
 from ce1sus.web.views.event.groups import GroupsView
 from ce1sus.web.views.admin.index import AdminView
+from ce1sus.web.views.admin.mails import AdminMailView
 from ce1sus.web.views.admin.attributes import AdminAttributeView
 from ce1sus.web.views.admin.groups import AdminGroupView
 from ce1sus.web.views.admin.objects import AdminObjectsView
@@ -93,6 +94,7 @@ def bootstrap():
   cherrypy.tree.mount(AdminAttributeView(config), '/admin/attributes')
   cherrypy.tree.mount(AdminSubGroupView(config), '/admin/subgroups')
   cherrypy.tree.mount(AdminValidationView(config), '/admin/validation')
+  cherrypy.tree.mount(AdminMailView(config), '/admin/mails')
 
   if load_rest_api:
     logger.get_logger('BootStrap').debug("Loading Rest...")

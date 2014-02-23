@@ -52,10 +52,10 @@
 
 
 
-<%def name="labeled_textbox(label, name, message, enabled=True, validation_msg=None)">
+<%def name="labeled_textbox(label, name, message, enabled=True, validation_msg=None, cols=40, rows=5)">
 	<!-- BEGIN labeledTextBox -->
 	<%call expr="generic_labeler(label,enabled)">
-	  <%call expr="input.textbox(name, message, 40, 5, enabled, validation_msg)"/>
+	  <%call expr="input.textbox(name, message, cols, rows, enabled, validation_msg)"/>
 	</%call>
 	<!-- END labeledTextBox -->
 </%def>
