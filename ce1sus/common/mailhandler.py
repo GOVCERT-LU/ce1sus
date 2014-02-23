@@ -67,6 +67,9 @@ class MailHandler(object):
     self._get_logger().debug('Processing subject')
     text = subject.replace('${event_uuid}', '{0}'.format(event.uuid))
     text = text.replace('${event_id}', '{0}'.format(event.identifier))
+    text = text.replace('${event_tlp}', '{0}'.format(event.tlp.text))
+    text = text.replace('${event_risk}', '{0}'.format(event.risk))
+    text = text.replace('${event_title}', '{0}'.format(event.title))
     return text
 
   def __attribute_to_text(self, attribute, indent_str):
