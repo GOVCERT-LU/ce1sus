@@ -20,6 +20,7 @@ from dagr.db.broker import ValidationException, \
 BrokerException
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
+from dagr.helpers.datumzait import DatumZait
 
 
 class ObjectsController(Ce1susBaseController):
@@ -133,6 +134,7 @@ class ObjectsController(Ce1susBaseController):
         user = self._get_user(user.username)
         event.published = 0
         self.event_broker.update_event(user, event, commit=False)
+        obj.modified = DatumZait.now()
         self.object_broker.insert(obj, commit=False)
         self.object_broker.do_commit(True)
         return obj, True
