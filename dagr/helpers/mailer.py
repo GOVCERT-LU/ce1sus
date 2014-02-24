@@ -56,7 +56,7 @@ class Mailer(object):
     self.__passphrase = self.__config_section.get('passphrase', None)
 
   def get_gpg(self):
-    self.get_logger().debug('Getting gpg')
+    self.get_logger().debug('Getting gpg from ' + self.__key_path)
     gpg = gnupg.GPG(gnupghome=self.__key_path)
     try:
       if self.__key_path:
