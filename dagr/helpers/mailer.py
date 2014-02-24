@@ -59,16 +59,6 @@ class Mailer(object):
   def get_gpg(self):
     self.get_logger().debug('Getting gpg from ' + self.__key_path)
     gpg = gnupg.GPG(gnupghome=self.__key_path)
-    try:
-      if self.__key_path:
-        gpg.list_keys(True)[0]
-    except:
-      # TODO: make this externally
-
-      keyfile = self.__config_section.get('keyfile', None)
-      self.get_logger().debug('Importing key gpg' + keyfile)
-      key_data = open(keyfile).read()
-      gpg.import_keys(key_data)
     return gpg
 
   def __sign_message(self, text):

@@ -28,6 +28,7 @@ class LDAPUser(object):
 
   def __clean_value(self, value):
     if value:
+      # TODO find out why this happend!!
       return unicode(value, errors='ignore')
     return value
 
