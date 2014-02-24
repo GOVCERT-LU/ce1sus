@@ -40,7 +40,7 @@ class Mail(object):
   @property
   def message(self):
     """Formated plain message"""
-    return """From: {0}\nTo: {1}\nSubject:{2}\n\n {3}""".format(self.sender,
+    return u"""From: {0}\nTo: {1}\nSubject:{2}\n\n {3}""".format(self.sender,
                                                                 self.reciever,
                                                                 self.body)
 
