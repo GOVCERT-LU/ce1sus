@@ -92,7 +92,7 @@ class MailHandler(object):
     self._get_logger().debug('Converting object to text')
     text = ''
     indent_str = '\t' * indent
-    text = u'{0}{1}{0}:\n'.format(text, ('\t' * (indent - 1)), obj.definition.name)
+    text = u'{0}{1}{2}:\n'.format(text, ('\t' * (indent - 1)), obj.definition.name)
     if obj.attributes:
       for attribute in obj.attributes:
         if publication_date:
