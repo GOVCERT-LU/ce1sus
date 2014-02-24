@@ -131,10 +131,10 @@ class RestBaseHandler(Ce1susBaseView):
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
       self._raise_error('UnRecoverableException',
                       msg='JSON structure error. {0}'.format(error))
-    #except Exception as error:
-    #  self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
-    #  self._raise_error('UnRecoverableException',
-    #                  msg='An unrecoverable error occurred. {0}'.format(error))
+    except Exception as error:
+      self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
+      self._raise_error('UnRecoverableException',
+                      msg='An unrecoverable error occurred. {0}'.format(error))
 
   def _raise_invalid_error(self, obj):
     error_msg = ObjectValidator.getFirstValidationError(obj)
