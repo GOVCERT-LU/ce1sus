@@ -91,6 +91,7 @@ class ObjectBroker(BrokerBase):
       obj.parent_object_id = parent_object_id
       obj.parent_event_id = event_id
     obj.creator_id = user.identifier
+    obj.modified = DatumZait.utcnow()
     obj.bit_value = BitValue('0', obj)
     if shared == '1':
       obj.bit_value.is_shareable = True
