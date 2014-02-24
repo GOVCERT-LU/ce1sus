@@ -22,6 +22,7 @@ from ce1sus.brokers.definition.objectdefinitionbroker import \
 from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 
 class ValidationController(Ce1susBaseController):
@@ -34,6 +35,7 @@ class ValidationController(Ce1susBaseController):
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
+    self.mail_handler = MailHandler(config)
 
   def get_all_unvalidated_events(self, limit=200, offset=0):
     try:
@@ -106,7 +108,9 @@ class ValidationController(Ce1susBaseController):
       # perform validation of objects
       self.__validate_objects(event.objects)
       self.event_broker.update(event)
-    except BrokerException as error:
+      if event.published == 1 and event.bit_value.is_validated_and_shared:
+        self.mail_handler.send_event_mail(event)
+    except (BrokerException, MailHandlerException) as error:
       self._raise_exception(error)
 
   def remove_unvalidated_event(self, event):
