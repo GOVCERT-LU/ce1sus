@@ -95,6 +95,7 @@ class AttributesController(Ce1susBaseController):
     try:
       self._get_logger().debug('User {0} inserts attributes on object {1}'.format(user.username,
                                                                                   obj.identifier))
+      user = self._get_user(user.username)
       valid = True
       try:
         self.attribute_broker.insert(attribute, commit=False)
