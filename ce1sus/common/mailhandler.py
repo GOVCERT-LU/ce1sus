@@ -169,8 +169,9 @@ class MailHandler(object):
     text = text.replace('${event_description}', '{0}'.format(event.description))
 
     # creating objects data
-    event_objects = self.__objects_to_text(event.objects)
-    text = text.replace('${event_objects}', event_objects)
+    if '${event_objects}' in text:
+      event_objects = self.__objects_to_text(event.objects)
+      text = text.replace('${event_objects}', event_objects)
     # Note relations are user specific will be done before sending!
     return text
 
