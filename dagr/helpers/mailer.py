@@ -63,9 +63,11 @@ class Mailer(object):
         gpg.list_keys(True)[0]
     except:
       # TODO: make this externally
-      self.get_logger().debug('Importing key gpg')
+
       keyfile = self.__config_section.get('keyfile', None)
+      self.get_logger().debug('Importing key gpg' + keyfile)
       key_data = open(keyfile).read()
+      self.get_logger().debug('DATA {0}'.format(key_data))
       gpg.import_keys(key_data)
       self.get_logger().debug(gpg.list_keys(True)[0])
     return gpg
