@@ -54,15 +54,20 @@ class Mailer(object):
     self.logger = Log(config)
     self.__key_path = self.__config_section.get('gpgkeys', None)
     self.__passphrase = self.__config_section.get('passphrase', None)
-    self.gpg = gnupg.GPG(gnupghome=self.__key_path)
+
+  def get_gpg(self):
+    self.get_logger().debug('Getting gpg')
+    gpg = gnupg.GPG(gnupghome=self.__key_path)
     try:
       if self.__key_path:
-        self.gpg.list_keys(True)[0]
+        gpg.list_keys(True)[0]
     except:
       # TODO: make this externally
+      self.get_logger().debug('Importing key gpg')
       keyfile = self.__config_section.get('keyfile', None)
       key_data = open(keyfile).read()
-      self.gpg.import_keys(key_data)
+      gpg.import_keys(key_data)
+    return gpg
 
   def __sign_message(self, text):
     if self.__key_path:
@@ -70,10 +75,11 @@ class Mailer(object):
       try:
         if self.__passphrase:
           # there should be at most one!
-          private_key = self.gpg.list_keys(True)[0]
+          gpg = self.get_gpg()
+          private_key = gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            signed_data = self.gpg.sign(text,
+            signed_data = gpg.sign(text,
                      keyid=signer_fingerprint,
                      passphrase=self.__passphrase)
             message = str(signed_data)
@@ -97,10 +103,11 @@ class Mailer(object):
       try:
         if self.__passphrase:
           # there should be at most one!
-          private_key = self.gpg.list_keys(True)[0]
+          gpg = self.get_gpg()
+          private_key = gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            encrypted_data = self.gpg.encrypt(text, reciever,
+            encrypted_data = gpg.encrypt(text, reciever,
                                          sign=signer_fingerprint,
                                          passphrase=self.__passphrase,
                                          always_trust=True)
@@ -151,7 +158,8 @@ class Mailer(object):
 
   def add_gpg_key(self, data):
     try:
-        self.gpg.import_keys(data)
+      gpg = self.get_gpg()
+      gpg.import_keys(data)
     except ImportError as error:
       error_log = getattr(self.get_logger(), 'error')
       error_log('Could not find gnupg will not import key')
