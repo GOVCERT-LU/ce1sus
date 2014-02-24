@@ -67,6 +67,7 @@ class Mailer(object):
       keyfile = self.__config_section.get('keyfile', None)
       key_data = open(keyfile).read()
       gpg.import_keys(key_data)
+      self.get_logger().debug(gpg.list_keys(True)[0])
     return gpg
 
   def __sign_message(self, text):
