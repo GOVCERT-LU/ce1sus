@@ -26,9 +26,12 @@ class LDAPUser(object):
     self.name = None
     self.dn_string = None
 
+  def __clean_value(self, value):
+    return lambda s: s.decode('utf8', 'ignore')
+
   @property
   def display_name(self):
-    return '{0} {1}'.format(self.sir_name, self.name)
+    return '{0} {1}'.format(self.__clean_value(self.sir_name), self.__clean_value(self.name))
 
 
 class LDAPException(Exception):
@@ -136,7 +139,7 @@ class LDAPHandler(object):
       value = value[0]
       # Foo to prevent ascii errors as ldap module returns strings!
       try:
-        return value.decode('utf-8')
+        return value
       except UnicodeDecodeError:
         return unicode(value, 'utf-8', errors='replace')
     else:
