@@ -92,20 +92,20 @@ class MailHandler(object):
     self._get_logger().debug('Converting object to text')
     text = ''
     indent_str = '\t' * indent
-    text += u'{0}{1}:\n'.format(('\t' * (indent - 1)), obj.definition.name)
+    text = u'{0}{1}{0}:\n'.format(text, ('\t' * (indent - 1)), obj.definition.name)
     if obj.attributes:
       for attribute in obj.attributes:
         if publication_date:
           if (attribute.modified >= publication_date) or (attribute.created >= publication_date):
             if (attribute.bit_value.is_shareable and attribute.bit_value.is_validated):
-              text += self.__attribute_to_text(attribute, indent_str) + '\n'
+              text = u'{0}{1}\n'.format(text, self.__attribute_to_text(attribute, indent_str))
         else:
           if (attribute.bit_value.is_shareable and attribute.bit_value.is_validated):
-            text += self.__attribute_to_text(attribute, indent_str) + '\n'
+            text = u'{0}{1}\n'.format(text, self.__attribute_to_text(attribute, indent_str))
     else:
-      text += u'{0}Empty\n'.format(indent_str)
+      text = u'{0}{1}Empty\n'.format(text, indent_str)
     for child in obj.children:
-      text += self.__object_to_text(child, publication_date, indent + 1) + '\n'
+      text = u'{0}{1}\n'.format(text, self.__object_to_text(child, publication_date, indent + 1))
     # check if there are items
     if not self.__remove_control_chars(text):
       text = u'None'
@@ -119,10 +119,10 @@ class MailHandler(object):
         if publication_date:
           if (obj.modified >= publication_date) or (obj.created >= publication_date):
             if (obj.bit_value.is_shareable and obj.bit_value.is_validated):
-              text += self.__object_to_text(obj, publication_date) + '\n'
+              text = u'{0}{1}\n'.format(text, self.__object_to_text(obj, publication_date))
         else:
           if (obj.bit_value.is_shareable and obj.bit_value.is_validated):
-            text += self.__object_to_text(obj, publication_date) + '\n'
+            text = u'{0}{1}\n'.format(text, self.__object_to_text(obj, publication_date))
       if not self.__remove_control_chars(text):
         text = 'None'
     else:
@@ -140,11 +140,11 @@ class MailHandler(object):
             if relation.rel_event.last_publish_date >= event.last_publish_date:
               if is_viewable(relation.rel_event, group, False):
                 url = self.__get_event_url(relation.rel_event)
-                text += url + '\n'
+                text = u'{0}{1}\n'.format(text, url)
           else:
             if is_viewable(relation.rel_event, group, False):
               url = self.__get_event_url(relation.rel_event)
-              text += url + '\n'
+              text = u'{0}{1}\n'.format(text, url)
     if not self.__remove_control_chars(text):
       text = 'None'
     return text
