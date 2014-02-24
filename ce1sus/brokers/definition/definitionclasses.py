@@ -79,7 +79,7 @@ class AttributeHandler(BASE):
     handler = clazz(self.config)
     # check if handler base is implemented
     if not isinstance(handler, HandlerBase):
-      raise HandlerException(('{0} does not implement '
+      raise HandlerException((u'{0} does not implement '
                               + 'HandlerBase').format(self.module_classname))
     return handler
 
@@ -108,7 +108,7 @@ class ObjectDefinition(BASE):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException('Attribute to be added is invalid')
+      raise ValidationException(u'Attribute to be added is invalid')
     function = getattr(self.attributes, 'append')
     function(attribute)
 
@@ -121,7 +121,7 @@ class ObjectDefinition(BASE):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException('Attribute to be removed is invalid')
+      raise ValidationException(u'Attribute to be removed is invalid')
     function = getattr(self.attributes, 'remove')
     function(attribute)
 
@@ -207,7 +207,7 @@ class AttributeDefinition(BASE):
     """
     # Test if the index is
     if index < 0 and index >= len(AttributeDefinition.tableDefinitions):
-      raise Exception('Invalid input "{0}"'.format(index))
+      raise Exception(u'Invalid input "{0}"'.format(index))
     return AttributeDefinition.tableDefinitions[index]
 
   @staticmethod

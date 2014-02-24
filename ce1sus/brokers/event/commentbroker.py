@@ -35,7 +35,7 @@ class CommentBroker(BrokerBase):
       result = self.session.query(Comment).filter(
                         Comment.event_id == eventID).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with event ID :{0}'.format(
+      raise NothingFoundException(u'Nothing found with event ID :{0}'.format(
                                                                   eventID))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()

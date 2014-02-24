@@ -25,7 +25,7 @@ class RestClass(object):
   @abstractmethod
   def to_dict(self):
     """converts the object to a dictionary"""
-    raise RestClassException(('ToJson is not implemented for '
+    raise RestClassException((u'ToJson is not implemented for '
                               + '{0}').format(self.get_classname()))
 
   @staticmethod
@@ -62,14 +62,14 @@ class RestEvent(RestClass):
     if value:
       dictionary[self.get_classname()][attributename] = u'{0}'.format(value)
     else:
-      raise RestClassException('{0} attribute was no set'.format(attributename))
+      raise RestClassException(u'{0} attribute was no set'.format(attributename))
 
   def __set_date_value(self, dictionary, attributename, value):
     """sets the value for the given attribute if existing else raise an exception"""
     if value:
       self.__set_value(dictionary, attributename, value.isoformat())
     else:
-      raise RestClassException('{0} attribute was no set'.format(attributename))
+      raise RestClassException(u'{0} attribute was no set'.format(attributename))
 
   def to_dict(self):
     result = dict()

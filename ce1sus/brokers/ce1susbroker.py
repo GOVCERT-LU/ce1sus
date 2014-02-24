@@ -51,7 +51,7 @@ class Ce1susBroker(BrokerBase):
     try:
       return self.session.query(Ce1susConfig).filter(Ce1susConfig.key == key).one()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with key :{0}'.format(
+      raise NothingFoundException(u'Nothing found with key :{0}'.format(
                                                                   key))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(

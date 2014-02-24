@@ -43,7 +43,7 @@ class ObjectBroker(BrokerBase):
       # check if objects does not have children
       children = self.get_object_childern_for_obj_id(obj.identifier)
       if len(children) > 0:
-        raise BrokerException('Object has children. '
+        raise BrokerException(u'Object has children. '
                 + 'The object cannot be removed if there are still children.')
       else:
         BrokerBase.remove_by_id(self, obj.identifier, False)
@@ -121,7 +121,7 @@ class ObjectBroker(BrokerBase):
         values[key] = obj.identifier
       return values
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
                                                                   event_id))
 
   def get_event_objects_children(self, event_id):
@@ -136,7 +136,7 @@ class ObjectBroker(BrokerBase):
                                                  == event_id).all()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
                                                                   event_id))
 
   def get_viewable_event_obj_children(self, event_id):
@@ -153,7 +153,7 @@ class ObjectBroker(BrokerBase):
                                                  )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
                                                                   event_id))
 
   def get_object_childern_for_obj_id(self, object_id):
@@ -172,7 +172,7 @@ class ObjectBroker(BrokerBase):
           result = result + sub_children
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException('Nothing found with ID :{0}'.format(
+        raise NothingFoundException(u'Nothing found with ID :{0}'.format(
                                                                   object_id))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)

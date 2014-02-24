@@ -45,13 +45,13 @@ class JSONConverter(object):
 
   def generate_json(self, dictionary):
     """encodes dictionary to JSON"""
-    self._get_logger().debug('Encoding dictionary to JSON')
+    self._get_logger().debug(u'Encoding dictionary to JSON')
     return json.dumps(dictionary, default=JSONConverter.default)
     # return JSONEncoder().encode(dictionary)
 
   def decode_json(self, json):
     """decodes JSON to dictionary"""
-    self._get_logger().debug('Decoding JSON to dictionary')
+    self._get_logger().debug(u'Decoding JSON to dictionary')
     return JSONDecoder().decode(json)
 
   def _get_logger(self):
@@ -65,7 +65,7 @@ class JSONConverter(object):
 
   def __get_data(self, dictionary):
     # TODO: Has to be done beforehand!!!! place this somewhere else
-    self._get_logger().debug('Pharsing JSON answer')
+    self._get_logger().debug(u'Pharsing JSON answer')
     # get the answer if on the server went everything correct
     response = dictionary.pop('response', None)
     if response:
@@ -77,7 +77,7 @@ class JSONConverter(object):
         message = response.get('errors', '')[0]
         raise JSONRequestFailedException(message)
     else:
-      raise JSONException('Malformatted JSON')
+      raise JSONException(u'Malformatted JSON')
 
   def get_rest_object(self, json_string):
     """Converts a JSON string to rest objects"""

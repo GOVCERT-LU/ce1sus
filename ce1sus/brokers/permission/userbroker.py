@@ -37,7 +37,7 @@ class UserBroker(BrokerBase):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('User to be inserted is invalid')
+        raise ValidationException(u'User to be inserted is invalid')
     if validate and not errors:
       instance.password = hasher.hashSHA1(instance.password,
                                              instance.username)
@@ -58,7 +58,7 @@ class UserBroker(BrokerBase):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('User to be updated is invalid')
+        raise ValidationException(u'User to be updated is invalid')
 
     if instance.password != 'EXTERNALAUTH':
     # Don't update if the password is already a hash
@@ -103,10 +103,10 @@ class UserBroker(BrokerBase):
     try:
       user = self.session.query(User).filter(User.username == username).one()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(username)
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(username)
                                   )
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException('Too many results found for' +
+      raise TooManyResultsFoundException(u'Too many results found for' +
                                          'ID :{0}'.format(username))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
@@ -135,10 +135,10 @@ class UserBroker(BrokerBase):
       user = self.session.query(User).filter(User.username == username,
                                              User.password == passwd).one()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(username)
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(username)
                                   )
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException('Too many results found for ID ' +
+      raise TooManyResultsFoundException(u'Too many results found for ID ' +
                                          ':{0}'.format(username))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
@@ -202,7 +202,7 @@ class UserBroker(BrokerBase):
                        User.api_key == api_key).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with apikey :{0}'.format(
+      raise NothingFoundException(u'Nothing found with apikey :{0}'.format(
                                                                   api_key))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
@@ -222,7 +222,7 @@ class UserBroker(BrokerBase):
       result = self.session.query(self.get_broker_class()
                                   ).order_by(User.username.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
+      raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
@@ -234,7 +234,7 @@ class UserBroker(BrokerBase):
                        User.activation_str == activation_str).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for activation_str {0}'.format(activation_str))
+      raise NothingFoundException(u'Nothing found for activation_str {0}'.format(activation_str))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
                     'Too many results found for activation_str :{0}'.format(activation_str))

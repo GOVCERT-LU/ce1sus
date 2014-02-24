@@ -37,7 +37,7 @@ class DictConverter(object):
 
   def __map_dict_to_object(self, dictionary):
     """ maps dictionary to rest objects"""
-    self._get_logger().debug('Start mapping dictionary to object')
+    self._get_logger().debug(u'Start mapping dictionary to object')
     start_time = datetime.now()
     if dictionary:
       classname, contents = self.__get_object_data(dictionary)
@@ -45,38 +45,38 @@ class DictConverter(object):
     else:
       result = None
 
-    self._get_logger().debug('End mapping dictionary to object. Time elapsed {0}'.format(datetime.now() - start_time))
+    self._get_logger().debug(u'End mapping dictionary to object. Time elapsed {0}'.format(datetime.now() - start_time))
     return result
 
   def __get_object_data(self, dictionary):
     """ Returns the classname and the corresponding data"""
-    self._get_logger().debug('Decapsulating dictionary to classname and data')
+    self._get_logger().debug(u'Decapsulating dictionary to classname and data')
     if len(dictionary) == 1:
       for key, value in dictionary.iteritems():
-        self._get_logger().debug('Found class name {0}'.format(key))
+        self._get_logger().debug(u'Found class name {0}'.format(key))
         return key, value
     else:
-      raise DictConversionException('Dictionary is malformed expected one entry got more.')
+      raise DictConversionException(u'Dictionary is malformed expected one entry got more.')
 
   def __populate_classname_by_dict(self, classname, dictionary):
     """ Maps the data to the class"""
-    self._get_logger().debug('Mapping dictionary to class {0}'.format(classname))
-    instance = get_class('ce1sus.api.restclasses', classname)()
+    self._get_logger().debug(u'Mapping dictionary to class {0}'.format(classname))
+    instance = get_class(u'ce1sus.api.restclasses', classname)()
     if not isinstance(instance, RestClass):
-      raise DictConversionException(('{0} does not implement RestClass').format(classname))
+      raise DictConversionException((u'{0} does not implement RestClass').format(classname))
     self.__populate_instance_by_dict(instance, dictionary)
     return instance
 
   def __set_dict_value(self, instance, key, value):
     """ Maps sub object"""
-    self._get_logger().debug('Mapping sub object for attribute {0}'.format(key))
+    self._get_logger().debug(u'Mapping sub object for attribute {0}'.format(key))
     subkey, subvalue = self.__get_object_data(value)
     subinstance = self.__populate_classname_by_dict(subkey, subvalue)
     setattr(instance, key, subinstance)
 
   def __set_list_value(self, instance, key, value):
     """ Maps the list attribute"""
-    self._get_logger().debug('Mapping list for attribute {0}'.format(key))
+    self._get_logger().debug(u'Mapping list for attribute {0}'.format(key))
     result = list()
     for item in value:
       # if dictionary then they are objects
@@ -92,7 +92,7 @@ class DictConverter(object):
 
   def __populate_atomic_value(self, instance, key, value):
     """ Maps atomic attribute"""
-    self._get_logger().debug('Mapping value "{1}" for attribute {0}'.format(key, value))
+    self._get_logger().debug(u'Mapping value "{1}" for attribute {0}'.format(key, value))
     if value == '':
       value = None
     else:
@@ -102,7 +102,7 @@ class DictConverter(object):
 
   def __populate_instance_by_dict(self, instance, dictionary):
     """populates the instance with the dictinary values"""
-    self._get_logger().debug('Populating instance by dictionary')
+    self._get_logger().debug(u'Populating instance by dictionary')
     for key, value in dictionary.iteritems():
       if isinstance(value, DictionaryType):
         self.__set_dict_value(instance, key, value)
@@ -113,11 +113,11 @@ class DictConverter(object):
 
   def convert_to_rest_obj(self, dictionary):
     """Maps a dictionary to an instance"""
-    self._get_logger().debug('Mapping dictionary')
+    self._get_logger().debug(u'Mapping dictionary')
     instance = self.__map_dict_to_object(dictionary)
     return instance
 
   def convert_to_dict(self, rest_object):
     """converts an rest_object to a dictionary"""
-    self._get_logger().debug('Converting {0} to dictionary'.format(rest_object.get_classname()))
+    self._get_logger().debug(u'Converting {0} to dictionary'.format(rest_object.get_classname()))
     return rest_object.to_dict()

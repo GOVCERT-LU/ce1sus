@@ -265,7 +265,7 @@ class ValueBroker(BrokerBase):
               clazz.attribute_id == attribute.identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No value found with ID :{0} in {1}'.format(
+      raise NothingFoundException(u'No value found with ID :{0} in {1}'.format(
                                   attribute.identifier, self.get_broker_class()))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
@@ -287,7 +287,7 @@ class ValueBroker(BrokerBase):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException('Attribute to be inserted is invalid')
+      raise ValidationException(u'Attribute to be inserted is invalid')
 
     self.__set_class_by_attribute(attribute)
     value = self.__convert_attr_value_to_value(attribute, True)
@@ -305,7 +305,7 @@ class ValueBroker(BrokerBase):
     """
     errors = not attribute.validate()
     if errors:
-      raise ValidationException('Attribute to be updated is invalid')
+      raise ValidationException(u'Attribute to be updated is invalid')
 
     self.__set_class_by_attribute(attribute)
     value = self.__convert_attr_value_to_value(attribute, False)

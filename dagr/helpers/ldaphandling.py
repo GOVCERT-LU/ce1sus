@@ -26,15 +26,9 @@ class LDAPUser(object):
     self.name = None
     self.dn_string = None
 
-  def __clean_value(self, value):
-    if value:
-      # TODO find out why this happend!!
-      return unicode(value, errors='ignore')
-    return value
-
   @property
   def display_name(self):
-    return '{0} {1}'.format(self.__clean_value(self.sir_name), self.__clean_value(self.name))
+    return u'{0} {1}'.format(self.sir_name, self.name)
 
 
 class LDAPException(Exception):

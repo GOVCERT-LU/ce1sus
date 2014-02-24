@@ -48,7 +48,7 @@ class EventBroker(BrokerBase):
             groups = self.session.query(clazz).filter(not_(clazz.identifier.in_(group_ids)))
 
     except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException('Nothing found for ID: {0}', format(identifier))
+        raise NothingFoundException(u'Nothing found for ID: {0}', format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
         raise BrokerException(error)
     return groups
@@ -102,7 +102,7 @@ class EventBroker(BrokerBase):
                         ).filter(Event.dbcode.op('&')(4) == 4).order_by(
                         Event.created.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
+      raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -158,7 +158,7 @@ class EventBroker(BrokerBase):
         else:
           result = result.limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException('Nothing found')
+        raise NothingFoundException(u'Nothing found')
       except sqlalchemy.exc.SQLAlchemyError as error:
         self.session.rollback()
         raise BrokerException(error)
@@ -173,7 +173,7 @@ class EventBroker(BrokerBase):
                                             Event.dbcode.op('&')(4) != 4
                                                ).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found')
+      raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -206,7 +206,7 @@ class EventBroker(BrokerBase):
         event.remove_group_from_event(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or event not found')
+      raise NothingFoundException(u'Group or event not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -248,7 +248,7 @@ class EventBroker(BrokerBase):
         event.subgroups.remove(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or event not found')
+      raise NothingFoundException(u'Group or event not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -390,7 +390,7 @@ class EventBroker(BrokerBase):
                         Event.uuid == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with uuid :{0}'.format(
+      raise NothingFoundException(u'Nothing found with uuid :{0}'.format(
                                                                   identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(
@@ -440,7 +440,7 @@ class EventBroker(BrokerBase):
 
       return query.all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Search did not yield any results.')
+      raise NothingFoundException(u'Search did not yield any results.')
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 

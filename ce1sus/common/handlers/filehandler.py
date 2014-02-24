@@ -199,7 +199,7 @@ class FileHandler(GenericHandler):
     if uploaded_file:
       size = 0
       tmp_path = self._get_tmp_folder()
-      file_path = tmp_path + '/' + uploaded_file.filename
+      file_path = u'{0}/{1}'.format(tmp_path, uploaded_file.filename)
       file_obj = open(file_path, 'a')
       while True:
         data = uploaded_file.file.read(8192)
@@ -209,10 +209,10 @@ class FileHandler(GenericHandler):
         size += len(data)
       file_obj.close()
       if size == 0:
-        raise HandlerException('Upload of the given file failed.')
+        raise HandlerException(u'Upload of the given file failed.')
       return file_path
     else:
-      raise  HandlerException('No file selected. Please try again.')
+      raise  HandlerException(u'No file selected. Please try again.')
 
   @staticmethod
   def _get_definition(chksum, definitions):
@@ -295,7 +295,7 @@ class FileHandler(GenericHandler):
           filename = FileHandler.__get_orig_filename(attribute)
           if not filename:
             filename = basename(file_path)
-          return Link(url, 'Download file "{0}"'.format(filename))
+          return Link(url, u'Download file "{0}"'.format(filename))
         else:
           return '(File is MIA or is corrupt)'
       else:

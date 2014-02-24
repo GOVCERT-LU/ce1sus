@@ -81,7 +81,7 @@ class MailTemplateBroker(BrokerBase):
                         MailTemplate.function_id == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for function_id :{0}'.format(
+      raise NothingFoundException(u'Nothing found for function_id :{0}'.format(
                                                                   identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(

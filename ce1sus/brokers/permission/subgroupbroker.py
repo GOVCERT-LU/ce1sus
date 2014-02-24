@@ -75,7 +75,7 @@ class SubGroupBroker(BrokerBase):
       subgroup.groups.append(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or subgroup not found')
+      raise NothingFoundException(u'Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -97,7 +97,7 @@ class SubGroupBroker(BrokerBase):
       subgroup.groups.remove(group)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group or subgroup not found')
+      raise NothingFoundException(u'Group or subgroup not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -133,7 +133,7 @@ class SubGroupBroker(BrokerBase):
 
   def remove_by_id(self, subgroup_id, commit=True):
     if subgroup_id == 1 or subgroup_id == '1':
-      raise IntegrityException('Cannot delete this subgroup. The subgroup is essential to '
+      raise IntegrityException(u'Cannot delete this subgroup. The subgroup is essential to '
                   + 'the application.')
     else:
       BrokerBase.remove_by_id(self, subgroup_id, commit)

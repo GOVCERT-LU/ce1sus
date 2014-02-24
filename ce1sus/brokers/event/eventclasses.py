@@ -111,7 +111,7 @@ class Event(BASE):
     """
     errors = not obj.validate()
     if errors:
-      raise ValidationException('Invalid Object:' + ValidationException(ObjectValidator.getFirstValidationError(obj)))
+      raise ValidationException(u'Invalid Object:' + ValidationException(ObjectValidator.getFirstValidationError(obj)))
     function = getattr(self.objects, 'append')
     function(obj)
 
@@ -198,7 +198,7 @@ class Event(BASE):
     """
     errors = not group.validate()
     if errors:
-      raise ValidationException('Invalid Group:' + ValidationException(ObjectValidator.getFirstValidationError(group)))
+      raise ValidationException(u'Invalid Group:' + ValidationException(ObjectValidator.getFirstValidationError(group)))
     function = getattr(self.maingroups, 'append')
     function(group)
 
@@ -594,7 +594,7 @@ class Attribute(BASE):
     """
     value = self.__get_value()
     if value is None:
-      raise Exception('Empty value')
+      raise Exception(u'Empty value')
     else:
       return value
 
@@ -629,12 +629,12 @@ class Attribute(BASE):
       if self.object:
         value_instance.event = getattr(self.object, 'get_parent_event')()
       else:
-        raise Exception('No object was specified')
+        raise Exception(u'No object was specified')
       # set the value
       attr_name = classname.replace('V', '_v').lower()
       setattr(self, attr_name, value_instance)
     else:
-      raise Exception('No definition was specified')
+      raise Exception(u'No definition was specified')
 
   def __get_handler_instance(self):
     """

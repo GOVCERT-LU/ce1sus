@@ -65,7 +65,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
  ~ObjectDefinition.identifier.in_(obj_ids)).order_by(ObjectDefinition.name.asc()
                                                     ).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for ID: {0}',
+      raise NothingFoundException(u'Nothing found for ID: {0}',
                                   format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
@@ -131,7 +131,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
           obj.add_attribute(additional_attribtue)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound as error:
-      raise NothingFoundException('Attribute or Object not found')
+      raise NothingFoundException(u'Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -172,13 +172,13 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       # remove self
       existing = required_chksums.get(attribute.chksum, None)
       if existing:
-        raise IntegrityException(('Attribute {0} is still required by attribute {1}.'
+        raise IntegrityException((u'Attribute {0} is still required by attribute {1}.'
                                   + ' Please remove {1} first.').format(existing[1], existing[0]))
       else:
         attribute.remove_object(obj)
         self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute or Object not found')
+      raise NothingFoundException(u'Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -240,7 +240,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     if not action == 'insert':
       attribute = self.get_by_id(identifier)
       if attribute.deletable == 0:
-        raise DeletionException('Attribute cannot be edited or deleted')
+        raise DeletionException(u'Attribute cannot be edited or deleted')
     if not action == 'remove':
       if isinstance(name, list):
         name = name[0]

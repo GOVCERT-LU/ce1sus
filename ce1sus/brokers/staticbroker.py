@@ -38,7 +38,7 @@ def get_dict_element_by_id(dictionary, identifier):
   if value:
     return value
   else:
-    raise Exception('Invalid input "{0}"'.format(identifier))
+    raise Exception(u'Invalid input "{0}"'.format(identifier))
 
 
 def get_dict_element_by_value(dictionary, value):
@@ -54,7 +54,7 @@ def get_dict_element_by_value(dictionary, value):
       result = key
       break
   if result is None:
-    raise Exception('Invalid input "{0}"'.format(value))
+    raise Exception(u'Invalid input "{0}"'.format(value))
   return result
 
 

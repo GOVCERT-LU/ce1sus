@@ -92,7 +92,7 @@ class System(object):
     array2 = release2.split('.')
 
     if len(array1) != len(array2) and len(array1) != 3:
-      raise SantityCheckerException('The releases have not the right format.')
+      raise SantityCheckerException(u'The releases have not the right format.')
     result = System.__compare_values(array1[0], array2[0])
     if result >= 0:
       result = System.__compare_values(array1[1], array2[1])
@@ -111,7 +111,7 @@ class System(object):
     try:
       value = self.ce1sus_broker.get_by_key('db_shema')
       if System.__compare_releases(utils.DB_REL, value.value) != 0:
-        raise SantityCheckerException('DB scheme release mismatch '
+        raise SantityCheckerException(u'DB scheme release mismatch '
                           + 'expected {0} got {1}'.format(utils.DB_REL,
                                                          value.value))
     except BrokerException as error:
@@ -126,7 +126,7 @@ class System(object):
       value = self.ce1sus_broker.get_by_key('app_rev')
       if System.__compare_releases(utils.APP_REL,
                                         value.value) != 0:
-        raise SantityCheckerException('Application release mismatch '
+        raise SantityCheckerException(u'Application release mismatch '
                           + 'expected {0} got {1}'.format(utils.APP_REL,
                                                          value.value))
     except BrokerException as error:
@@ -140,7 +140,7 @@ class System(object):
     try:
       # check app rel
       if System.__compare_releases(utils.REST_REL, release) != 0:
-        raise SantityCheckerException('RestAPI release mismatch '
+        raise SantityCheckerException(u'RestAPI release mismatch '
                           + 'expected {1} got {0}'.format(utils.REST_REL,
                                                           release))
     except BrokerException as error:

@@ -63,7 +63,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
  ~AttributeDefinition.identifier.in_(attribute_ids)).order_by(
                                           AttributeDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found for ID: {0}',
+      raise NothingFoundException(u'Nothing found for ID: {0}',
                                   format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
@@ -106,7 +106,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
 
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute or Object not found')
+      raise NothingFoundException(u'Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -129,7 +129,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
       # remove self
       existing = required_chksums.get(attribute.chksum, None)
       if existing:
-        raise IntegrityException(('Attribute {0} is still required by Object {2} due to Attribute {1}.'
+        raise IntegrityException((u'Attribute {0} is still required by Object {2} due to Attribute {1}.'
                                   + ' Please remove {1} from Object {2} first.').format(existing[1],
                                                                                         existing[0],
                                                                                         obj.name))
@@ -137,7 +137,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
         obj.remove_attribute(attribute)
         self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Attribute or Object not found')
+      raise NothingFoundException(u'Attribute or Object not found')
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
