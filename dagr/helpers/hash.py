@@ -23,7 +23,8 @@ def __genericHash(string, hashType, salt=''):
   function = getattr(hashlib, hashType)
   hasher = function()
   function = getattr(hasher, 'update')
-  function(string + salt)
+  hash_str = u'{0}{1}'.format(string, salt)
+  function(hash_str)
   return hasher.hexdigest()
 
 
