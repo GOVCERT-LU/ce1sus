@@ -68,11 +68,15 @@ class MySqlConnector(Connector):
                                           port=port
                                         )
     if self.config.get('usecherrypy'):
-      SAEnginePlugin(cherrypy.engine, self).subscribe()
-      self.sa_tool = SATool()
-      cherrypy.tools.db = self.sa_tool
+      # check if not already instantiated
+      try:
+        cherrypy.tools.db
+      except AttributeError:
+        SAEnginePlugin(cherrypy.engine, self).subscribe()
+        self.sa_tool = SATool()
+        cherrypy.tools.db = self.sa_tool
+        cherrypy.config.update({'tools.db.on': 'True'})
       self.session = None
-      cherrypy.config.update({'tools.db.on': 'True'})
     else:
       self.session = self.get_direct_session()
 
