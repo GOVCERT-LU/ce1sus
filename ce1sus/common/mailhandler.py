@@ -75,13 +75,13 @@ class MailHandler(object):
   def __attribute_to_text(self, attribute, indent_str):
     self._get_logger().debug('Converting attribute to text')
     value = unicode(attribute.plain_value)
-    prefix = '{0} : '.format(attribute.definition.name)
+    prefix = u'{0} : '.format(attribute.definition.name)
     if '\n' in value:
       value = value.replace('\n', '\n' + indent_str + (' ' * len(prefix)))
     if attribute.ioc == 1:
-      text = indent_str + '{0}{1} - IOC'.format(prefix, value)
+      text = u'{0}{1}{2} - IOC'.format(indent_str, prefix, value)
     else:
-      text = indent_str + '{0}{1}'.format(prefix, value)
+      text = u'{0}{1}{2}'.format(indent_str, prefix, value)
     return text
 
   @staticmethod
@@ -92,7 +92,7 @@ class MailHandler(object):
     self._get_logger().debug('Converting object to text')
     text = ''
     indent_str = '\t' * indent
-    text += ('\t' * (indent - 1)) + obj.definition.name + ':\n'
+    text += u'{0}{1}:\n'.format(('\t' * (indent - 1)), obj.definition.name)
     if obj.attributes:
       for attribute in obj.attributes:
         if publication_date:
@@ -103,12 +103,12 @@ class MailHandler(object):
           if (attribute.bit_value.is_shareable and attribute.bit_value.is_validated):
             text += self.__attribute_to_text(attribute, indent_str) + '\n'
     else:
-      text += indent_str + 'Empty' + '\n'
+      text += u'{0}Empty\n'.format(indent_str)
     for child in obj.children:
       text += self.__object_to_text(child, publication_date, indent + 1) + '\n'
     # check if there are items
     if not self.__remove_control_chars(text):
-      text = 'None'
+      text = u'None'
     return text
 
   def __objects_to_text(self, objects, publication_date=None):
