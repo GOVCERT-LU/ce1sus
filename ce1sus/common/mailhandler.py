@@ -77,7 +77,7 @@ class MailHandler(object):
     value = unicode(attribute.plain_value)
     prefix = u'{0} : '.format(attribute.definition.name)
     if '\n' in value:
-      value = value.replace('\n', '\n' + indent_str + (' ' * len(prefix)))
+      value = value.decode("utf-8").replace('\n', '\n' + indent_str + (' ' * len(prefix))).encode("utf-8")
     if attribute.ioc == 1:
       text = u'{0}{1}{2} - IOC'.format(indent_str, prefix, value)
     else:
