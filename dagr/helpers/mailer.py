@@ -54,6 +54,7 @@ class Mailer(object):
     self.logger = Log(config)
     self.__key_path = self.__config_section.get('gpgkeys', None)
     self.__passphrase = self.__config_section.get('passphrase', None)
+    self.gpg = self.get_gpg()
 
   def get_gpg(self):
     self.get_logger().debug('Getting gpg from ' + self.__key_path)
@@ -67,9 +68,7 @@ class Mailer(object):
       keyfile = self.__config_section.get('keyfile', None)
       self.get_logger().debug('Importing key gpg' + keyfile)
       key_data = open(keyfile).read()
-      self.get_logger().debug('DATA {0}'.format(key_data))
       gpg.import_keys(key_data)
-      self.get_logger().debug(gpg.list_keys(True)[0])
     return gpg
 
   def __sign_message(self, text):
@@ -78,7 +77,7 @@ class Mailer(object):
       try:
         if self.__passphrase:
           # there should be at most one!
-          gpg = self.get_gpg()
+          gpg = self.gpg
           private_key = gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
@@ -106,7 +105,7 @@ class Mailer(object):
       try:
         if self.__passphrase:
           # there should be at most one!
-          gpg = self.get_gpg()
+          gpg = self.gpg
           private_key = gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
@@ -161,7 +160,7 @@ class Mailer(object):
 
   def add_gpg_key(self, data):
     try:
-      gpg = self.get_gpg()
+      gpg = self.gpg
       gpg.import_keys(data)
     except ImportError as error:
       error_log = getattr(self.get_logger(), 'error')

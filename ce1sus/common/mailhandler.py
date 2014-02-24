@@ -74,7 +74,7 @@ class MailHandler(object):
 
   def __attribute_to_text(self, attribute, indent_str):
     self._get_logger().debug('Converting attribute to text')
-    value = attribute.plain_value
+    value = unicode(attribute.plain_value)
     prefix = '{0} : '.format(attribute.definition.name)
     if '\n' in value:
       value = value.replace('\n', '\n' + indent_str + (' ' * len(prefix)))
