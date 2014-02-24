@@ -28,7 +28,7 @@ class LDAPUser(object):
 
   def __clean_value(self, value):
     if value:
-      return unicode(value, errors='ignore')
+      return unicode(value, errors='replace')
     return value
 
   @property
