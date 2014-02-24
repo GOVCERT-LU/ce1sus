@@ -100,7 +100,6 @@ class Mailer(object):
 
   def __encrypt_message(self, text, reciever):
     self.get_logger().debug('Encrypting message')
-
     if self.__key_path:
       try:
         if self.__passphrase:

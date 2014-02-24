@@ -135,10 +135,7 @@ class LDAPHandler(object):
     if value:
       value = value[0]
       # Foo to prevent ascii errors as ldap module returns strings!
-      try:
-        return value
-      except UnicodeDecodeError:
-        return unicode(value, 'utf-8', errors='replace')
+      return unicode(value, 'utf-8', errors='replace')
     else:
       return None
 
