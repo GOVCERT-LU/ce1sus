@@ -57,7 +57,7 @@ class Mailer(object):
     self.gpg = self.get_gpg()
 
   def get_gpg(self):
-    self.get_logger().debug('Getting gpg from ' + self.__key_path)
+    self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
     gpg = gnupg.GPG(gnupghome=self.__key_path)
     return gpg
 
@@ -113,8 +113,8 @@ class Mailer(object):
 
     #TODO raise exception!!!
     info_log = getattr(self.get_logger(), 'info')
-    info_log('GPG not installed sending unencrypted mail')
-    return text
+    info_log('GPG not installed not sending unencrypted mail')
+    raise MailerException('GPG not configured.')
 
   def send_mail(self, mail):
     """Sends the mail object"""
