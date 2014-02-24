@@ -27,7 +27,7 @@ class LDAPUser(object):
     self.dn_string = None
 
   def __clean_value(self, value):
-    return lambda value: value.decode('utf8', 'ignore')
+    return value.decode('utf8', 'ignore')
 
   @property
   def display_name(self):
