@@ -192,8 +192,9 @@ class DBConverter(object):
       raise DBConversionException(error)
 
   def __gen_attr_hash(self, attribute):
-    self._get_logger().debug('Generate attribute hasht')
-    return hashMD5(attribute.definition.chksum, attribute.plain_value)
+    hash_str = u'{0}{1}'.format(attribute.definition.chksum, attribute.plain_value)
+    self._get_logger().debug(u'Generate attribute hash for {0}'.format(hash_str))
+    return hashMD5(hash_str)
 
   # pylint: disable=R0914,R0913
   def __convert_rest_object(self, event, parent_object, rest_obj, user, action):
