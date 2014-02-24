@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from smtplib import SMTPException, SMTP
 from email.mime.text import MIMEText
 from dagr.helpers.debug import Log
-from dagr.helpers.objects import get_class
+import gnupg
 
 
 class MailerException(Exception):
@@ -54,19 +54,26 @@ class Mailer(object):
     self.logger = Log(config)
     self.__key_path = self.__config_section.get('gpgkeys', None)
     self.__passphrase = self.__config_section.get('passphrase', None)
+    self.gpg = gnupg.GPG(gnupghome=self.__key_path)
+    try:
+      if self.__key_path:
+        self.gpg.list_keys(True)[0]
+    except:
+      # TODO: make this externally
+      keyfile = self.__config_section.get('keyfile', None)
+      key_data = open(keyfile).read()
+      self.gpg.import_keys(key_data)
 
   def __sign_message(self, text):
     if self.__key_path:
       # gpg = gnupg.GPG(gnupghome=self.__key_path)
       try:
-        gpg_class = get_class('gnupg', 'GPG')
-        gpg = gpg_class(gnupghome=self.__key_path)
         if self.__passphrase:
           # there should be at most one!
-          private_key = gpg.list_keys(True)[0]
+          private_key = self.gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            signed_data = gpg.sign(text,
+            signed_data = self.gpg.sign(text,
                      keyid=signer_fingerprint,
                      passphrase=self.__passphrase)
             message = str(signed_data)
@@ -87,16 +94,13 @@ class Mailer(object):
     self.get_logger().debug('Encrypting message')
 
     if self.__key_path:
-      # gpg = gnupg.GPG(gnupghome=self.__key_path)
       try:
-        gpg_class = get_class('gnupg', 'GPG')
-        gpg = gpg_class(gnupghome=self.__key_path)
         if self.__passphrase:
           # there should be at most one!
-          private_key = gpg.list_keys(True)[0]
+          private_key = self.gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            encrypted_data = gpg.encrypt(text, reciever,
+            encrypted_data = self.gpg.encrypt(text, reciever,
                                          sign=signer_fingerprint,
                                          passphrase=self.__passphrase,
                                          always_trust=True)
@@ -147,9 +151,7 @@ class Mailer(object):
 
   def add_gpg_key(self, data):
     try:
-        gpg_class = get_class('gnupg', 'GPG')
-        gpg = gpg_class(gnupghome=self.__key_path)
-        gpg.import_keys(data)
+        self.gpg.import_keys(data)
     except ImportError as error:
       error_log = getattr(self.get_logger(), 'error')
       error_log('Could not find gnupg will not import key')
