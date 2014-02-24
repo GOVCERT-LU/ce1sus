@@ -136,7 +136,7 @@ class LDAPHandler(object):
       value = value[0]
       # Foo to prevent ascii errors as ldap module returns strings!
       try:
-        return value
+        return value.decode('utf-8')
       except UnicodeDecodeError:
         return unicode(value, 'utf-8', errors='replace')
     else:
