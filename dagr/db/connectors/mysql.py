@@ -47,17 +47,7 @@ class MySqlConnector(Connector):
     Connector.__init__(self, config)
     hostname = self.config.get('host')
     port = self.config.get('port')
-    # check if host is available
-    response = os.system("ping -c 1 " + hostname)
     self.engine = None
-    if response != 0:
-      raise SessionManagerException('Host "{hostname}" not ' +
-                                     'available'.format(hostname=hostname))
-    # check if socket available
-    if not self.is_service_existing(hostname, port):
-      raise SessionManagerException('Service on "{hostname}:{port}"' +
-                                    ' not available'.format(hostname=hostname,
-                                                            port=port))
     self.connection_string = ('{prot}://{user}:{password}@'
                              + '{host}:{port}/{db}').format(
                                           prot=self.protocol,
@@ -72,14 +62,27 @@ class MySqlConnector(Connector):
       try:
         cherrypy.tools.db
       except AttributeError:
+        self.__check_if_existing(hostname, port)
         SAEnginePlugin(cherrypy.engine, self).subscribe()
         self.sa_tool = SATool()
         cherrypy.tools.db = self.sa_tool
         cherrypy.config.update({'tools.db.on': 'True'})
       self.session = None
     else:
+      self.__check_if_existing(hostname, port)
       self.session = self.get_direct_session()
 
+  def __check_if_existing(self, hostname, port):
+    # check if host is available
+    response = os.system("ping -c 1 " + hostname)
+    if response != 0:
+      raise SessionManagerException('Host "{hostname}" not ' +
+                                     'available'.format(hostname=hostname))
+    # check if socket available
+    if not self.is_service_existing(hostname, port):
+      raise SessionManagerException('Service on "{hostname}:{port}"' +
+                                    ' not available'.format(hostname=hostname,
+                                                            port=port))
   def get_engine(self):
     """
     Returns the engine
