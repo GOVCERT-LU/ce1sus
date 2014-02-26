@@ -66,7 +66,7 @@ class EventView(Ce1susBaseView):
       return self._render_template('/events/event/view.html',
                                    event=event,
                                    owner=self._is_event_owner(event),
-                                   relations=checked_relations)
+                                   relations=relations)
     except ControllerException as error:
       return self._render_error_page(error)
 
