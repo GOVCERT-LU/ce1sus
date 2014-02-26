@@ -95,7 +95,7 @@ class Ce1susBaseView(BaseView):
     :returns: User
     """
     user = self._get_from_session(SESSION_USER)
-    if web:
+    if user and web:
       setattr(user, 'session', True)
     return user
 
