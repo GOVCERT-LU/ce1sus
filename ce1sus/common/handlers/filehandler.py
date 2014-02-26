@@ -17,7 +17,7 @@ from dagr.helpers.config import ConfigException
 import cherrypy
 from ce1sus.common.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import DatumZait
-from os.path import isfile, getsize, basename, exists, dirname, splitext
+from os.path import isfile, getsize, basename, exists, dirname
 import dagr.helpers.hash as hasher
 from ce1sus.common.handlers.base import HandlerException
 from shutil import move, rmtree
@@ -28,7 +28,7 @@ from dagr.web.views.classes import Link
 import base64
 import zipfile
 from os import remove
-
+import hashlib
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
 CHK_SUM_HASH_SHA1 = 'dc4e8dd46d60912abbfc3dd61c16ef1f91414032'
@@ -113,7 +113,7 @@ class FileHandler(GenericHandler):
         tmp_path = self._get_base_path()
         if not filename:
           filename = basename(filepath)
-        tmp_path += '/' + filename + '.zip'
+        tmp_path += '/' + basename(filepath) + '.zip'
         # remove file if it should exist
         try:
             remove(tmp_path)
@@ -124,8 +124,16 @@ class FileHandler(GenericHandler):
         # TODO: set password for zip file
         zip_file.write(filepath, arcname=filename)
         zip_file.close()
-
-        return serve_file(tmp_path, "application/x-download", "attachment", name=basename(tmp_path))
+        print type(filename)
+        filename = u'{0}.zip'.format(filename)
+        filename = filename.encode('utf-8')
+        result = serve_file(tmp_path, "application/x-download", "attachment", name=filename)
+        # clean up
+        try:
+            remove(tmp_path)
+        except OSError:
+            pass
+        return result
       else:
         raise  HandlerException('The was not found in "{0}"'.format(filepath))
     else:
@@ -196,10 +204,22 @@ class FileHandler(GenericHandler):
     """
     Uploads the file (only used by the GUI)
     """
+
+    filename = uploaded_file.filename.encode('ISO-8859-1')
     if uploaded_file:
       size = 0
       tmp_path = self._get_tmp_folder()
-      file_path = u'{0}/{1}'.format(tmp_path, uploaded_file.filename)
+      # TODO: save with sha1
+      block_size = 2 ** 20
+      hasher = hashlib.sha1()
+      while True:
+          data = uploaded_file.read(block_size)
+          if not data:
+              break
+          hasher.update(data)
+      sha1_str = hasher.hexdigest()
+
+      file_path = u'{0}/{1}'.format(tmp_path, sha1_str)
       file_obj = open(file_path, 'a')
       while True:
         data = uploaded_file.file.read(8192)
@@ -210,7 +230,8 @@ class FileHandler(GenericHandler):
       file_obj.close()
       if size == 0:
         raise HandlerException(u'Upload of the given file failed.')
-      return file_path
+
+      return (file_path, filename)
     else:
       raise  HandlerException(u'No file selected. Please try again.')
 
@@ -226,10 +247,11 @@ class FileHandler(GenericHandler):
     Creates ans inserts the file and its attributes (only used by the GUI)
     """
     main_definition = self._get_main_definition(definitions)
-    uploaded_file_path = self._process_file_upload(params.get('value', None))
+    uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
 
     attributes = list()
-    attributes.append(FileHandler._create_attribute(basename(uploaded_file_path),
+    # TODO encode filename
+    attributes.append(FileHandler._create_attribute(filename.encode('utf8'),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
                                                    user,

@@ -61,7 +61,6 @@ class ObjectsView(Ce1susBaseView):
           object_id = self._pull_from_session('instertedObject')
         except SessionNotFoundException:
           object_id = None
-
       return self._render_template('/events/event/objects/objectsBase.html',
                                    event_id=event_id,
                                    object_list=object_list,

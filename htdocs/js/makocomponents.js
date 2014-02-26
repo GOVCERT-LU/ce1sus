@@ -79,11 +79,11 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     inputs.prop("disabled", true);
     var request = $.ajax({
         url : uri,
-        type : "post",
+        type : "POST",
         data : formData,
         contentType: false,
         processData: false,
-     timeout: 30000 //3secs
+        timeout: 30000 //3secs
     });
     request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);

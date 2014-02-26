@@ -71,7 +71,7 @@ def plaintext2html(text, tabstop=4):
         # return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
         return '%s%s%s' % (prefix, url, last)
   # convert to text to be compliant
-  stringText = unicode(text)
+  stringText = u'{0}'.format(text)
   if len(stringText) > 0:
     stringText = re.sub(re_string, replacements, stringText)
     stringText = stringText.replace('\"', '&quot;')

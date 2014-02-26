@@ -27,7 +27,7 @@ classname = type(object).__name__
 if hasattr(object,'isoformat'):
   string = object.isoformat()
 else:
-  string = unicode(object)
+  string = u'{0}'.format(object)
 if shorten_to > 0:
   result = string[:shorten_to]
 if len(string) >= shorten_to:
