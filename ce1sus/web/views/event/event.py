@@ -66,7 +66,7 @@ class EventView(Ce1susBaseView):
       return self._render_template('/events/event/view.html',
                                    event=event,
                                    owner=self._is_event_owner(event),
-                                   relations=relations)
+                                   relations=checked_relations)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -159,7 +159,7 @@ class EventView(Ce1susBaseView):
         if not valid:
           self._get_logger().info('Event is invalid')
           return self._return_ajax_post_error(self.__render_event_details('/events/event/editDetails.html',
-                                                          event))
+                                                            event))
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

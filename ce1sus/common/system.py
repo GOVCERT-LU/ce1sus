@@ -94,12 +94,12 @@ class System(object):
     if len(array1) != len(array2) and len(array1) != 3:
       raise SantityCheckerException(u'The releases have not the right format.')
     result = System.__compare_values(array1[0], array2[0])
-    if result >= 0:
+    if result == 0:
       result = System.__compare_values(array1[1], array2[1])
       if result == 0:
         # Second position means major changes
         result = System.__compare_values(array1[2], array2[2])
-        if result == 0:
+        if result >= 0:
           # Third position means new version
           return 0
     return result

@@ -371,11 +371,12 @@ class ObjectValidator:
     errorMsg = ('The date is not under the right form as i.e. ' +
                  '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
 
-
     value = getattr(obj, attributeName)
     if isinstance(value, datetime.datetime):
       return True
     try:
+      if ObjectValidator.validateIP(obj, attributeName, False):
+        return False
       stringToDateTime(value)
       return True
     except InputException as e:

@@ -46,9 +46,9 @@ class RestEventsHandler(RestBaseHandler):
                                       end_date,
                                       offset,
                                       limit,
-                                      self._get_user())
+                                      self._get_user(False))
       else:
-        events = self.events_controller.get_user_events(user=self._get_user(),
+        events = self.events_controller.get_user_events(user=self._get_user(False),
                                                 limit=limit,
                                                 offset=offset)
 
@@ -58,7 +58,7 @@ class RestEventsHandler(RestBaseHandler):
           viewable = self._is_event_viewable(event)
           owner = self._is_event_owner(event)
           if viewable or owner:
-            result.append(self.create_rest_obj(event, self._get_user(), True, with_definition))
+            result.append(self.create_rest_obj(event, self._get_user(False), True, with_definition))
         except cherrypy.HTTPError:
           pass
 

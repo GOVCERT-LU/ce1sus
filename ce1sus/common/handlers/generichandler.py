@@ -129,12 +129,7 @@ class GenericHandler(HandlerBase):
     value = attribute.plain_value
     return value
 
-  def process_rest_post(self, obj, definitions, user, rest_attribute):
+  def process_rest_post(self, obj, definitions, user, params):
     definition = self._get_main_definition(definitions)
-    # create Params
-    params = dict()
-    params['value'] = rest_attribute.value
-    params['ioc'] = rest_attribute.ioc
-    params['shared'] = '{0}'.format(rest_attribute.share)
     attribute = self.create_attribute(params, obj, definition, user)
     return attribute, None

@@ -131,7 +131,7 @@ class BaseView:
       session.delete()
       # session.clean_up()
       self._get_logger().debug('Session destroyed')
-    except KeyError:
+    except:
       pass
 
   def _get_session(self):

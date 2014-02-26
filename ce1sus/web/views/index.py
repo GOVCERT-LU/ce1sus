@@ -45,6 +45,9 @@ class IndexView(Ce1susBaseView):
 
     :returns: generated HTML
     """
+    user = self._get_user()
+    if user:
+      return self.internal()
     return self.login(error_msg)
 
   @cherrypy.expose
@@ -79,8 +82,8 @@ class IndexView(Ce1susBaseView):
       if username is None or password is None:
         raise HTTPRedirect('/index')
         # validate user and user name
-      if  (not ValueValidator.validateAlNum(username, minLength=1, maxLength=60, withSymbols=True) and
-           not ValueValidator.validateAlNum(password, minLength=1, maxLength=60, withSymbols=True)):
+      if  (not ValueValidator.validateAlNum(username, minLength=1, maxLength=64, withSymbols=True, withSpaces=True) and
+           not ValueValidator.validateAlNum(password, minLength=1, maxLength=64, withSymbols=True, withSpaces=True)):
         return self.index('Invalid input.')
       user = self.login_controller.get_user_by_usr_pwd(username, password)
       self.login_controller.update_last_login(user)

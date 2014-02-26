@@ -42,7 +42,7 @@ class RestDefinitionsHanldler(RestBaseHandler):
         definitions = controller.get_all_definitions()
 
       result = list()
-      user = self._get_user()
+      user = self._get_user(False)
       if isinstance(definitions, list):
         for definition in definitions:
           result.append(self.create_rest_obj(definition, user, full_definition, True))

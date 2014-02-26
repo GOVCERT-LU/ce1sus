@@ -5,7 +5,6 @@ import cherrypy
 from dagr.db.session import SessionManager
 from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
-from dagr.web.helpers.webexceptions import ErrorHandler
 from ce1sus.common.system import System
 from dagr.helpers.mailer import Mailer
 
@@ -32,8 +31,16 @@ from ce1sus.web.rest.restcontroller import RestController
 
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
-
+from logging import handlers
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
+import logging
+
+def my_log_traceback(severity=logging.CRITICAL):
+    """Write the last error's headers and traceback to the cherrypy error log witih a CRITICAL severity."""
+    from cherrypy import _cperror
+    h = ["  %s: %s" % (k, v) for k, v in cherrypy.request.header_list]
+    cherrypy.log('\nRequest Headers:\n' + '\n'.join(h) + '\n\n' + _cperror.format_exc(), "HTTP", severity=severity)
+
 
 def bootstrap():
   # want parent of parent directory aka ../../
@@ -57,6 +64,19 @@ def bootstrap():
 
   # load config file
   config = Configuration(ce1susConfigFile)
+
+  cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
+
+  # set up an SMTP handler to mail when the CRITICAL error occurs
+  if config.get('ErrorHandler', 'useMailer', False):
+    smtpserver = config.get('Mailer', 'smtp')
+    fromaddr = config.get('Mailer', 'from')
+    toaddr = config.get('ErrorHandler', 'receiver')
+    subject = config.get('ErrorHandler', 'subject')
+    h = handlers.SMTPHandler(smtpserver, fromaddr, toaddr, subject)
+    h.setLevel(logging.CRITICAL)
+    cherrypy.log.error_log.addHandler(h)
+
   load_rest_api = config.get('ce1sus', 'enablerestapi', default_value=False)
 
   # Setup logger
@@ -70,11 +90,6 @@ def bootstrap():
     logger.get_logger('BootStrap').debug("Performing REST API checks...")
     system.perform_rest_api_startup_checks()
   system.close()
-
-  logger.get_logger('BootStrap').debug("Loading ErrorHandler...")
-  ErrorHandler(config)
-
-
 
   logger.get_logger('BootStrap').debug("Loading Views...")
   # Load 'Modules'

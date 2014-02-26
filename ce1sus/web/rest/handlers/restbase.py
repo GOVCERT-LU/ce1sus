@@ -16,8 +16,8 @@ from dagr.helpers.debug import Log
 import cherrypy
 from ce1sus.api.dictconverter import DictConverter, DictConversionException
 from ce1sus.api.common import JSONConverter, JSONException
-from ce1sus.web.rest.dbconverter import DBConverter, DBConversionException
 from dagr.helpers.validator.objectvalidator import ObjectValidator
+from ce1sus.web.rest.dictdbconverter import DictDBConverter, DictDBConversionException
 
 
 class RestHandlerException(Exception):
@@ -35,7 +35,7 @@ class RestBaseHandler(Ce1susBaseView):
     self.logger = Log(config)
     self.__dictconverter = DictConverter(config)
     self.__jsonconverter = JSONConverter(config)
-    self.__dbconverter = DBConverter(config)
+    self.__dict_db_converter = DictDBConverter(config)
 
   def create_status(self, classname=None, message=None):
     """Creates a stratus message"""
@@ -88,10 +88,10 @@ class RestBaseHandler(Ce1susBaseView):
                                                                                                 full,
                                                                                                 with_definition))
     try:
-      rest_object = self.__dbconverter.convert_instance(obj, owner, full, with_definition)
+      rest_object = self.__dict_db_converter.convert_instance(obj, owner, full, with_definition)
       dictionary = self.__dictconverter.convert_to_dict(rest_object)
       return dictionary
-    except (DictConversionException, JSONException, DBConversionException) as error:
+    except (DictConversionException, JSONException, DictDBConversionException) as error:
       self._get_logger().critical(error)
       self._raise_error('ConversionException', error=error)
 
@@ -113,19 +113,14 @@ class RestBaseHandler(Ce1susBaseView):
     result = dict(obj_dict.items() + self.create_status().items())
     return self.create_return_msg(result)
 
-  def convert_to_db_Object(self, rest_obj, user, action):
-    try:
-      return self.__dbconverter.convert_rest_instance(rest_obj, user, action)
-    except DBConversionException as error:
-      raise RestHandlerException(error)
-
-  def get_post_object(self):
+  def get_post_object(self, action):
     """Returns the posted json to a rest object"""
     try:
       content_length = cherrypy.request.headers['Content-Length']
       raw = cherrypy.request.body.read(int(content_length))
       dictionary = self.__jsonconverter.decode_json(raw)
-      rest_obj = self.__dictconverter.convert_to_rest_obj(dictionary)
+      user = self._get_user(False)
+      rest_obj = self.__dict_db_converter.convert_to_db_object(user, dictionary, action)
       return rest_obj
     except AttributeError as error:
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))

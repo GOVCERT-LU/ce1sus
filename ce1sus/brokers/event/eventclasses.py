@@ -26,6 +26,8 @@ from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
                                        NumberValue
 from dagr.helpers.objects import get_class
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.hybrid import hybrid_method
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),

@@ -47,7 +47,7 @@ class RestSearchHandler(RestBaseHandler):
       attributes = options.get('attributes', list())
 
       # check if the search should be performed on a needle
-      user = self._get_user()
+      user = self._get_user(False)
       events = self.serach_controller.filtered_search_for_rest(object_type,
                                                                None,
                                                                attributes,
@@ -90,7 +90,7 @@ class RestSearchHandler(RestBaseHandler):
                                                                attributes,
                                                                start_date,
                                                                end_date,
-                                                               self._get_user(),
+                                                               self._get_user(False),
                                                                self._get_authorized_events_cache(),
                                                                limit,
                                                                offset)
@@ -100,7 +100,7 @@ class RestSearchHandler(RestBaseHandler):
       # process events
       result = list()
       for event in events:
-        result.append(self.create_rest_obj(event, self._get_user(), True, with_definition))
+        result.append(self.create_rest_obj(event, self._get_user(False), True, with_definition))
       result = {'Results': result}
       return self.create_return_msg(result)
 

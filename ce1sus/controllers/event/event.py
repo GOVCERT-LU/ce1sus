@@ -62,13 +62,12 @@ class EventController(Ce1susBaseController):
       for relation in relations:
         rel_event = relation.rel_event
         if rel_event.identifier != event.identifier:
-          if self._is_event_viewable_for_user(event, user, cache):
+          if self._is_event_viewable_for_user(rel_event, user, cache):
             result.append(rel_event)
     except NothingFoundException as error:
       self._raise_nothing_found_exception(error)
     except BrokerException as error:
       self._get_logger().error(error)
-
     return result
 
   def __popultate_event(self, **kwargs):
@@ -90,6 +89,8 @@ class EventController(Ce1susBaseController):
     uuid = kwargs.get('uuid', None)
     user = kwargs.get('user', None)
     # fill in the values
+    if hasattr(user, 'session'):
+      user = self._get_user(user.username)
     event = self.event_broker.build_event(identifier,
                                         action,
                                         status,
@@ -101,11 +102,8 @@ class EventController(Ce1susBaseController):
                                         last_seen,
                                         risk,
                                         analysis,
-                                        self._get_user(user.username),
+                                        user,
                                         uuid)
-    # send mail if published!
-    if event.published == 1:
-      pass
     return event
 
   def populate_web_event(self, user, **kwargs):
@@ -125,10 +123,10 @@ class EventController(Ce1susBaseController):
       event.bit_value.is_shareable = True
     else:
       event.bit_value.is_shareable = False
-
+    event.published = 0
     return event
 
-  def populate_rest_event(self, user, rest_event, action):
+  def populate_rest_event(self, user, dict, action):
     """
     populates an event object with the given rest_event
 
@@ -137,21 +135,19 @@ class EventController(Ce1susBaseController):
 
     :returns: Event
     """
-    tlp_index = TLPLevel.get_by_name(rest_event.tlp)
-    risk_index = Risk.get_by_name(rest_event.risk)
-    analysis_index = Analysis.get_by_name(rest_event.analysis)
-    status_index = Status.get_by_name(rest_event.status)
-    uuid = rest_event.uuid
+    tlp_index = TLPLevel.get_by_name(dict.get('tlp', None))
+    risk_index = Risk.get_by_name(dict.get('risk', None))
+    analysis_index = Analysis.get_by_name(dict.get('analysis', None))
+    status_index = Status.get_by_name(dict.get('status', None))
+    uuid = dict.get('uuid', None)
 
     if action == 'insert':
       identifier = None
-      if rest_event.first_seen:
-        first_seen = rest_event.first_seen
-      else:
+      first_seen = dict.get('first_seen', None)
+      if not first_seen:
         first_seen = datetime.now()
-      if rest_event.first_seen:
-        last_seen = rest_event.last_seen
-      else:
+      last_seen = dict.get('last_seen', None)
+      if not last_seen:
         last_seen = first_seen
     else:
       event = self.event_broker.get_by_uuid(uuid)
@@ -164,9 +160,9 @@ class EventController(Ce1susBaseController):
               'action': action,
               'status': status_index,
               'tlp_index': tlp_index,
-              'description': rest_event.description,
-              'name': rest_event.title,
-              'published': rest_event.published,
+              'description': dict.get('description', 'No description'),
+              'name': dict.get('description', 'No Title'),
+              'published': dict.get('published', '0'),
               'first_seen': first_seen,
               'last_seen': last_seen,
               'risk': risk_index,
@@ -179,7 +175,8 @@ class EventController(Ce1susBaseController):
 
     event.bit_value.is_rest_instert = True
 
-    if rest_event.share == 1:
+    share = dict.get('share', None)
+    if share == '1':
       event.bit_value.is_shareable = True
     else:
       event.bit_value.is_shareable = False
@@ -203,9 +200,11 @@ class EventController(Ce1susBaseController):
     try:
       self.event_broker.insert(event, False)
       # generate relations if needed!
+      attributes = list()
       for obj in event.objects:
-        for attribute in obj.attributes:
-          self.relation_broker.generate_attribute_relations(attribute, False)
+        attributes += obj.attributes
+      if attributes:
+        self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       self.event_broker.do_commit(True)
       return event, True
     except ValidationException:
@@ -254,11 +253,16 @@ class EventController(Ce1susBaseController):
     try:
       result = list()
       relations = self.relation_broker.get_relations_by_event(event, False)
+      seen_events = list()
       for relation in relations:
           rel_event = relation.rel_event
           # check if is viewable for user
-          if self._is_event_viewable_for_user(rel_event, user, cache):
+          if relation.rel_event_id in seen_events:
             result.append(relation)
+          else:
+            if self._is_event_viewable_for_user(rel_event, user, cache):
+              result.append(relation)
+              seen_events.append(relation.rel_event_id)
       return result
     except NothingFoundException as error:
       self._raise_nothing_found_exception(error)

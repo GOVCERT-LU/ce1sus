@@ -20,6 +20,7 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute
 from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from sqlalchemy.orm import joinedload, joinedload_all
 
 
 # pylint: disable=R0903,R0902,W0232
@@ -32,7 +33,7 @@ class EventRelation(BASE):
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False,
                        primaryjoin='Event.identifier' +
-                       '==EventRelation.event_id', lazy='joined')
+                       '==EventRelation.event_id')
   rel_event_id = Column(Integer, ForeignKey('Events.event_id'))
   rel_event = relationship("Event", uselist=False,
                            primaryjoin='Event.identifier' +
@@ -40,7 +41,7 @@ class EventRelation(BASE):
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute", uselist=False,
                        primaryjoin='Attribute.identifier' +
-                       '==EventRelation.attribute_id', lazy='joined')
+                       '==EventRelation.attribute_id')
   rel_attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   rel_attribute = relationship("Attribute", uselist=False,
                        primaryjoin='Attribute.identifier' +
@@ -78,28 +79,56 @@ class RelationBroker(BrokerBase):
                                             '==',
                                             True)
       event = attribute.object.get_parent_event()
-
       for relation in relations:
 
         # make insert foo
         if relation.event_id != event.identifier:
-
-          # check if the relation is not already existing
-          results = None
-          if not results:
-            # make relation in both ways
-            relation_entry = EventRelation()
-            relation_entry.event_id = event.identifier
-            relation_entry.rel_event_id = relation.event_id
-            relation_entry.attribute_id = attribute.identifier
-            relation_entry.rel_attribute_id = relation.attribute_id
-            try:
-              self.insert(relation_entry, False)
-            except IntegrityException:
-              # do nothing if duplicate
-              pass
-
+          # make relation in both ways
+          relation_entry = EventRelation()
+          relation_entry.event_id = event.identifier
+          relation_entry.rel_event_id = relation.event_id
+          relation_entry.attribute_id = attribute.identifier
+          relation_entry.rel_attribute_id = relation.attribute_id
+          try:
+            self.insert(relation_entry, False)
+          except IntegrityException:
+            # do nothing if duplicate
+            pass
       self.do_commit(commit)
+
+  def generate_bulk_attributes_relations(self, event, attributes, commit=False):
+    # processattribtues
+    values = dict()
+    classes = dict()
+    values_attr_id = dict()
+    for attribtue in attributes:
+      classname = attribtue.definition.classname
+      classes[classname] = ValueBroker.get_class_by_string(classname)
+      if not values.get(classname, None):
+        values[classname] = list()
+      values[classname].append(attribtue.plain_value)
+      values_attr_id[attribtue.plain_value] = attribtue.identifier
+    # collect relations
+    for classname, clazz in classes.iteritems():
+      search_items = values.get(classname)
+      found_items = self.session.query(clazz).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
+                  clazz.value.in_(search_items)
+                        ).all()
+      for found_item in found_items:
+        # make insert foo
+        if found_item.event_id != event.identifier:
+          # make relation in both ways
+          relation_entry = EventRelation()
+          relation_entry.event_id = event.identifier
+          relation_entry.rel_event_id = found_item.event_id
+          relation_entry.attribute_id = values_attr_id.get(found_item.attribute.plain_value)
+          relation_entry.rel_attribute_id = found_item.attribute_id
+          try:
+            self.insert(relation_entry, False)
+          except IntegrityException:
+            # do nothing if duplicate
+            pass
+    self.do_commit(commit)
 
   def get_relations_by_event(self, event, unique_events=True):
     """
@@ -261,6 +290,8 @@ class RelationBroker(BrokerBase):
                   clazz.value.like('%{0}%'.format(value)),
                   Attribute.dbcode.op('&')(code) == code
                         ).all()
+    except ValueError:
+      return list()
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

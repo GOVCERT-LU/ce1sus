@@ -88,13 +88,16 @@ class Ce1susBaseView(BaseView):
           pass
     self._put_to_session(SESSION_USER, user)
 
-  def _get_user(self):
+  def _get_user(self, web=True):
     """
     Returns the user from the session
 
     :returns: User
     """
-    return self._get_from_session(SESSION_USER)
+    user = self._get_from_session(SESSION_USER)
+    if web:
+      setattr(user, 'session', True)
+    return user
 
   def _get_authorized_events_cache(self):
     """

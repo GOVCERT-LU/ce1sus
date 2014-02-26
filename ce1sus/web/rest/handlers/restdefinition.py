@@ -40,9 +40,8 @@ class RestDefinitionHanldler(RestBaseHandler):
     self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
     try:
-      rest_attribute_definition = self.get_post_object()
-      user = self._get_user()
-      attribute_definition = self.convert_to_db_Object(rest_attribute_definition, user, 'insert')
+      attribute_definition = self.get_post_object('insert')
+      user = self._get_user(False)
       attribute_definition, valid = self.attributes_controller.insert_definition(user, attribute_definition)
       if not valid:
         self._raise_invalid_error(attribute_definition)
@@ -54,9 +53,8 @@ class RestDefinitionHanldler(RestBaseHandler):
     self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
     try:
-      rest_object_definition = self.get_post_object()
-      user = self._get_user()
-      object_definition = self.convert_to_db_Object(rest_object_definition, user, 'insert')
+      object_definition = self.get_post_object('insert')
+      user = self._get_user(False)
       object_definition, valid = self.objects_controller.insert_definition(user, object_definition)
       if not valid:
         self._raise_invalid_error(object_definition)

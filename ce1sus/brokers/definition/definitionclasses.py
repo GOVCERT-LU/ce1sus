@@ -41,7 +41,9 @@ class AttributeHandler(BASE):
   description = Column('description', String)
   uuid = Column('uuid', String)
   attributes = relationship('AttributeDefinition',
-                            primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index')
+                            primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
+                            lazy='joined'
+                            )
   ce1sus_id = Column('config', Integer, ForeignKey('ce1sus.ce1sus_id'))
   configuration = relationship('Ce1susConfig')
   __config = None
@@ -70,13 +72,17 @@ class AttributeHandler(BASE):
     """
     return unicode(self.module_classname).rsplit('.')[0]
 
+  @property
+  def clazz(self):
+    clazz = get_class('ce1sus.common.handlers.{0}'.format(self.module), self.classname)
+    return clazz
+
   def create_instance(self):
     """
     creates an instantiated object
     """
-    clazz = get_class('ce1sus.common.handlers.{0}'.format(self.module), self.classname)
     # instantiate
-    handler = clazz(self.config)
+    handler = self.clazz(self.config)
     # check if handler base is implemented
     if not isinstance(handler, HandlerBase):
       raise HandlerException((u'{0} does not implement '

@@ -19,11 +19,12 @@ from dagr.db.broker import BrokerException
 import re
 from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.strings as strings
-from ce1sus.brokers.permission.permissionclasses import User
+from ce1sus.brokers.permission.permissionclasses import User, Group
 from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 import random
 from dagr.helpers.datumzait import DatumZait
+from sqlalchemy.orm import joinedload, joinedload_all
 
 
 class UserBroker(BrokerBase):
@@ -132,7 +133,7 @@ class UserBroker(BrokerBase):
       passwd = hasher.hashSHA1(password, username)
 
     try:
-      user = self.session.query(User).filter(User.username == username,
+      user = self.session.query(User).options(joinedload(User.default_group, Group.subgroups)).filter(User.username == username,
                                              User.password == passwd).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found with ID :{0}'.format(username)

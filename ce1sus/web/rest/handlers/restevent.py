@@ -52,9 +52,8 @@ class RestEventHandler(RestBaseHandler):
   def update(self, uuid, **options):
     if not uuid:
       try:
-        rest_event = self.get_post_object()
-        user = self._get_user()
-        event = self.convert_to_db_Object(rest_event, user, 'insert')
+        event = self.get_post_object('insert')
+        user = self._get_user(False)
         # check if event is valid
         valid = event.validate()
         if valid:
@@ -74,6 +73,9 @@ class RestEventHandler(RestBaseHandler):
         # ok the event is valid so continue
         event, valid = self.event_controller.insert_event(user, event)
         with_definition = options.get('fulldefinitions', False)
+        event.maingroups = list()
+        event.subgroups = list()
+        event.objects = list()
         return self.return_object(event, True, False, with_definition)
       except ControllerException as error:
         return self._raise_error('ControllerException', error=error)

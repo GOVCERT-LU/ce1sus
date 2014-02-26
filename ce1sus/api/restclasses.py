@@ -36,6 +36,8 @@ class RestClass(object):
   def convert_value(value):
     """converts the value None to '' else it will be send as None-Text"""
     if value or value == 0:
+      if isinstance(value, Ce1susWrappedFile):
+        return value.get_api_wrapped_value()
       return value
     else:
       return ''
@@ -234,4 +236,4 @@ class Ce1susWrappedFile(object):
     return base64.b64encode(self.value)
 
   def get_api_wrapped_value(self):
-    return json.dumps({'file': (self.name, self.get_base64())})
+    return json.dumps((self.name, self.get_base64()))

@@ -39,36 +39,32 @@ class RTHandler(GenericHandler):
     params['ioc'] = '0'
     params['shared'] = '0'
     definition = self._get_main_definition(definitions)
-    if 'value' in params:
-      attributes = list()
-      attribute = GenericHandler.create_attribute(params,
-                                                  obj,
-                                                  definition,
-                                                  user)
-      attributes.append(attribute)
-      return attributes
-    else:
-      if 'tickets' in params:
-        tickets = params.get('tickets')
+    values = params.get('value', None)
+    if values:
+      value_arry = values.split(',')
+      if len(value_arry) == 1:
+        attribute = GenericHandler.create_attribute(params,
+                                                    obj,
+                                                    definition,
+                                                    user)
+        return attribute, None
+      else:
         attributes = list()
-        if isinstance(tickets, types.StringTypes):
-          params['value'] = tickets
+        first = True
+        for value in value_arry:
+          params['value'] = value
           attribute = GenericHandler.create_attribute(params,
                                                   obj,
                                                   definition,
                                                   user)
-          attributes.append(attribute)
-        else:
-          for ticket in tickets:
-            params['value'] = ticket
-            attribute = GenericHandler.create_attribute(params,
-                                                  obj,
-                                                  definition,
-                                                  user)
+          if first:
+            main_attribute = attribute
+            first = False
+          else:
             attributes.append(attribute)
-        return attributes
-      else:
-        raise HandlerException('Please select something before saveing.')
+        return main_attribute, attributes
+    else:
+      raise HandlerException('Please select something before saveing.')
 
   def render_gui_view(self, template_renderer, attribute, user):
     # convert attribute's value

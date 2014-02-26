@@ -85,9 +85,12 @@ def stringToDateTime(string):
   Converts a string to a DateTime if the format is known
   """
   try:
-    return dateutil.parser.parse(string)
+    if string:
+      return dateutil.parser.parse(string)
+    return None
   except:
     raise InputException(u'Format of Date "{0}" is unknown'.format(string))
+
 
 def cleanPostValue(value):
   result = None
@@ -98,6 +101,7 @@ def cleanPostValue(value):
   if result:
     result.strip().encode('UTF-8', 'ignore')
   return result
+
 
 def isNotNull(value):
   """
