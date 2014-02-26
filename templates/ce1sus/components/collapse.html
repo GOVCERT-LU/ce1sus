@@ -66,11 +66,14 @@ $( document ).ready(function() {
                                            'eventTabs${event_id}TabContent',
                                            '/events/event/objects/objects/${event_id}')}" title="delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
                         <!--  dont remove this -->
+                        %endif
+                     </div>
+                 </div>
 			                <%call expr="attribute_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),content_id='editBox_eventAttributeFromNoneHidden',url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
 			                  <input type="hidden" name="action" value="insert">
-			                  <%call expr="modals.save_button_modal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',content_url='/events/event/attribute/add_attribute/{0}/{1}'.format(event_id, object.identifier))"/>
+			                  <%call expr="modals.save_button_modal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',content_url='/events/event/attribute/add_attribute/{0}/{1}'.format(event_id, object.identifier), big=True)"/>
 			                </%call>
-			           %endif
+			           
 			                <%call expr="modals.generic_dialog_modal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
 			                  <%call expr="forms.eventObjectForm(event_id,object, False,obj_definitions)"/>
 			                </%call>
@@ -87,7 +90,7 @@ $( document ).ready(function() {
                        %endif
 		                 <!--  dont remove this --> 
 		            %endif
-                    </div>
+                    
                 </div>
             </div>
         </div>
