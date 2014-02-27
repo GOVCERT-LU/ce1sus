@@ -139,13 +139,8 @@ class ObjectsController(Ce1susBaseController):
       else:
         parent_object.children.append(obj)
         obj.parent_event = event
-
-      if obj.shared == 1:
-        obj.bit_value.is_shareable = True
-      else:
-        obj.bit_value.is_shareable = False
-
       obj.bit_value.is_validated = False
+      obj.bit_value.is_rest_instert = True
       return obj
     except BrokerException as error:
       self._raise_exception(error)
