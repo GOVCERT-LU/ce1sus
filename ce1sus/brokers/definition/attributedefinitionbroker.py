@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException, DeletionException
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 import sqlalchemy.orm.exc
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition, AttributeHandler
 from dagr.helpers.converters import ObjectConverter
 import dagr.helpers.strings as strings
 from dagr.helpers.hash import hashSHA1
@@ -248,6 +248,8 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       attribute.description = cleanPostValue(description)
       ObjectConverter.set_integer(attribute, 'class_index', class_index)
       ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
+      # collect also the handler
+      attribute.attribute_handler = self.handler_broker.get_by_id(attribute.handler_index)
       ObjectConverter.set_integer(attribute, 'relation', relation)
       handler = self.handler_broker.get_by_id(attribute.handler_index)
       key = '{0}{1}{2}{3}'.format(attribute.name,

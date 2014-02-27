@@ -160,7 +160,7 @@ class EventController(Ce1susBaseController):
               'status': status_index,
               'tlp_index': tlp_index,
               'description': dict.get('description', 'No description'),
-              'name': dict.get('description', 'No Title'),
+              'name': dict.get('title', 'No Title'),
               'published': dict.get('published', '0'),
               'first_seen': first_seen,
               'last_seen': last_seen,
