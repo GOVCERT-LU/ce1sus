@@ -29,6 +29,7 @@ import base64
 import zipfile
 from os import remove
 import hashlib
+from dagr.helpers.strings import convert_to_value
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
 CHK_SUM_HASH_SHA1 = 'dc4e8dd46d60912abbfc3dd61c16ef1f91414032'
@@ -347,17 +348,22 @@ class FileHandler(GenericHandler):
       return '(Not Provided)'
 
   # pylint:disable=R0914,W0104
-  def process_rest_post(self, obj, definitions, user, rest_attribute):
+  def process_rest_post(self, obj, definitions, user, dictionary):
     definition = self._get_main_definition(definitions)
     # check if value is valid
-    if len(rest_attribute.value) != 2:
+    value = dictionary.get('value', list())
+    if value:
+      value = convert_to_value(value)
+    share = dictionary.get('share', '0')
+    ioc = dictionary.get('ioc', '0')
+    if len(value) != 2:
       raise HandlerException('Value is invalid format has to be ("filename","{base64 encoded file}")')
 
     # create Params
     params = dict()
     # create and store file
-    filename = rest_attribute.value[0]
-    binary_data = base64.b64decode(rest_attribute.value[1])
+    filename = value[0]
+    binary_data = base64.b64decode(value[1])
     tmp_path = self._get_tmp_folder() + '/' + filename
     # create file in tmp
     file_obj = open(tmp_path, "w")
@@ -374,8 +380,8 @@ class FileHandler(GenericHandler):
     rmtree(dirname(tmp_path))
     # TODO: do as for the GUI and create all attributes
     params['value'] = rel_folder + '/' + sha1
-    params['ioc'] = rest_attribute.ioc
-    params['shared'] = '{0}'.format(rest_attribute.share)
+    params['ioc'] = ioc
+    params['shared'] = '{0}'.format(share)
 
     attribute = self.create_attribute(params, obj, definition, user)
     attributes = list()

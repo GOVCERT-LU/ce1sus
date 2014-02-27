@@ -122,10 +122,6 @@ class RestBaseHandler(Ce1susBaseView):
       user = self._get_user(False)
       rest_obj = self.__dict_db_converter.convert_to_db_object(user, dictionary, action)
       return rest_obj
-    except AttributeError as error:
-      self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
-      self._raise_error('UnRecoverableException',
-                      msg='JSON structure error. {0}'.format(error))
     except Exception as error:
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
       self._raise_error('UnRecoverableException',
