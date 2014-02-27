@@ -119,10 +119,7 @@ class EventController(Ce1susBaseController):
     event = self.__popultate_event(**kwargs)
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
-    if event.published:
-      event.bit_value.is_shareable = True
-    else:
-      event.bit_value.is_shareable = False
+    event.bit_value.is_shareable = True
     event.published = 0
     return event
 
@@ -140,7 +137,8 @@ class EventController(Ce1susBaseController):
     analysis_index = Analysis.get_by_name(dict.get('analysis', None))
     status_index = Status.get_by_name(dict.get('status', None))
     uuid = dict.get('uuid', None)
-
+    if not uuid:
+      uuid = None
     if action == 'insert':
       identifier = None
       first_seen = dict.get('first_seen', None)

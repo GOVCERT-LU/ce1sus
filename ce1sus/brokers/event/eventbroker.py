@@ -329,7 +329,8 @@ class EventBroker(BrokerBase):
         event.creator_group_id = user.default_group.identifier
         event.maingroups = list()
         event.maingroups.append(user.default_group)
-        event.bit_value = BitValue('1000', event)
+        event.bit_value = BitValue('0', event)
+        event.bit_value.is_shareable = True
         event.created = DatumZait.utcnow()
         event.creator_id = user.identifier
         event.creator = user

@@ -22,9 +22,13 @@ class BitValue(object):
   [3] : Is sharable
   """
 
+  # 1
   WEB_INSERT = 0
+  # 2
   REST_INSERT = 1
+  # 4
   VALIDATED = 2
+  # 8
   SHARABLE = 3
 
   def __init__(self, bit_value, parentObj=None):
