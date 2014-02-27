@@ -21,6 +21,7 @@ from ce1sus.brokers.event.eventclasses import Attribute
 from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from sqlalchemy.orm import joinedload, joinedload_all
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 
 
 # pylint: disable=R0903,R0902,W0232
@@ -111,8 +112,9 @@ class RelationBroker(BrokerBase):
     # collect relations
     for classname, clazz in classes.iteritems():
       search_items = values.get(classname)
-      found_items = self.session.query(clazz).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
-                  clazz.value.in_(search_items)
+      found_items = self.session.query(clazz).join(Attribute, AttributeDefinition).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
+                  clazz.value.in_(search_items),
+                  AttributeDefinition.relation == 1
                         ).all()
       for found_item in found_items:
         # make insert foo
@@ -121,7 +123,11 @@ class RelationBroker(BrokerBase):
           relation_entry = EventRelation()
           relation_entry.event_id = event.identifier
           relation_entry.rel_event_id = found_item.event_id
-          relation_entry.attribute_id = values_attr_id.get(found_item.attribute.plain_value)
+          attribute_id = values_attr_id.get(found_item.attribute.plain_value, None)
+          if attribute_id:
+            relation_entry.attribute_id = attribute_id
+          else:
+            continue
           relation_entry.rel_attribute_id = found_item.attribute_id
           try:
             self.insert(relation_entry, False)
