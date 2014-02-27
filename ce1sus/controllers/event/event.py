@@ -120,7 +120,8 @@ class EventController(Ce1susBaseController):
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
     event.bit_value.is_shareable = True
-    event.published = 0
+    if not event.published:
+      event.published = 0
     return event
 
   def populate_rest_event(self, user, dict, action):
