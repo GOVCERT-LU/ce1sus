@@ -16,6 +16,10 @@ from ce1sus.common.handlers.generichandler import GenericHandler
 
 class MultipleGenericHandler(GenericHandler):
 
+  @staticmethod
+  def get_uuid():
+    return '08645c00-8dec-11e3-baa8-0800200c9a66'
+
   def process_gui_post(self, obj, definitions, user, params):
     definition = self._get_main_definition(definitions)
     attributes = list()

@@ -48,6 +48,10 @@ class FileHandler(GenericHandler):
 
   URLSTR = '/events/event/attribute/call_handler_get/{0}/{1}/{2}'
 
+  @staticmethod
+  def get_uuid():
+    return '0be5e1a0-8dec-11e3-baa8-0800200c9a66'
+
   def get_additinal_attribute_chksums(self):
     return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
 
@@ -398,6 +402,9 @@ class FileWithHashesHandler(FileHandler):
   """
   Extends the filehandler with additional hashes
   """
+  @staticmethod
+  def get_uuid():
+    return 'e8b47b60-8deb-11e3-baa8-0800200c9a66'
 
   def get_additinal_attribute_chksums(self):
     return [CHK_SUM_FILE_NAME,

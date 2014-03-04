@@ -16,6 +16,9 @@ from ce1sus.common.handlers.generichandler import GenericHandler
 
 class TextHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
+  @staticmethod
+  def get_uuid():
+    return '1a8ec7d0-8dec-11e3-baa8-0800200c9a66'
 
   def render_gui_view(self, template_renderer, attribute, user):
     # convert attribute's value

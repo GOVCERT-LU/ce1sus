@@ -26,6 +26,10 @@ class RTHandler(GenericHandler):
                         self.config.get('rt_user'),
                         self.config.get('rt_password'))
 
+  @staticmethod
+  def get_uuid():
+    return 'f1509d30-8deb-11e3-baa8-0800200c9a66'
+
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/ticket.html',
                              attribute=None,
@@ -100,6 +104,10 @@ class CVEHandler(GenericHandler):
     GenericHandler.__init__(self, config)
     self.url = self.config.get('cveurl')
 
+  @staticmethod
+  def get_uuid():
+    return '04cda0b0-8dec-11e3-baa8-0800200c9a66'
+
   def render_gui_view(self, template_renderer, attribute, user):
     # convert attribute's value
     return template_renderer('/common/handlers/cve.html',
@@ -117,6 +125,10 @@ class CVEHandler(GenericHandler):
 
 class LinkHander(GenericHandler):
   """Handler for handling Links"""
+
+  @staticmethod
+  def get_uuid():
+    return '1e18d8f0-8dec-11e3-baa8-0800200c9a66'
 
   def convert_to_gui_value(self, attribute):
     link = Link()

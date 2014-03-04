@@ -17,6 +17,10 @@ from ce1sus.common.handlers.generichandler import GenericHandler
 class DateHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
 
+  @staticmethod
+  def get_uuid():
+    return '11406d00-8dec-11e3-baa8-0800200c9a66'
+
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/datetime.html',
                              attribute=None,

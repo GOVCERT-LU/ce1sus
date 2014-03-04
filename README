@@ -1,35 +1,49 @@
+ce1sus a Thread Information Database 
+-------------------------------------
+
+The purpose of ce1sus is to store any information around any kind of thread in a structured manner and 
+share this information with trusted partners.
+
+Features:
+* correlation: automatically creating relations between malwares, events and attributes
+* storing data in a structured format (allowing automated use of the database for various purposes)
+
+    central IOC database: storing technical and non-technical information about malwares and attacks, ... Data from external instances is also imported into your local instance
+    
+    
+    export: generating IDS, OpenIOC, plain text, xml output to integrate with other systems (network IDS, host IDS, custom tools, …)
+    import: batch-import, import from OpenIOC, GFI sandbox, ThreatConnect CSV, ...
+    data-sharing: automatically exchange and synchronization with other parties and trust-groups
+
+
 Requirements
 ---------
 - python
   * python (2.7+)
   * mako (0.7+)
   * sqlalchemy (0.7+)
-  * sqlalchemy-ext (0.7+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
   * python-ldap
-  * rtkit (optional)
-  * webtest (1.2.1+, optional)
   * dateutil
   * cherrypy3
   * memcache
+  * rtkit (optional)
   * m2crypto  (0.21.1+)
-
 - mysql (5.1+)
-- libmagic1
-- uwsgi
-- uwsgi-plugin-python
 - nginx (v1.4+)
 
-
+Installation
+------------
+- note GPG key must be owned by the owner of the web server
+- configuration
 
 Webserver
 ---------
 There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
 * nginx (1.4+)
 * uwsgi (1.2.3+, with python-2 support)
-
 
 uwsgi config (ce1sus.ini):
 _______________________________________
@@ -101,3 +115,15 @@ server {
   }
 }
 _______________________________________
+
+
+ChangeLog
+---------
+
+Documentation
+-------------
+- See below
+
+RoadMap
+-------
+- Write a complete documentaion

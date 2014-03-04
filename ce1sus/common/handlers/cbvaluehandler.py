@@ -19,6 +19,10 @@ from dagr.helpers.validator.valuevalidator import ValueValidator
 class CBValueHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
 
+  @staticmethod
+  def get_uuid():
+    return '141dea70-8dec-11e3-baa8-0800200c9a66'
+
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     cb_values = CBValueHandler.__get_cb_values(definition.regex)
     return template_renderer('/common/handlers/cbValues.html',

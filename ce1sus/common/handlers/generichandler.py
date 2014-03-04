@@ -22,6 +22,10 @@ class GenericHandler(HandlerBase):
   """The generic handler for handling known atomic values"""
 
   @staticmethod
+  def get_uuid():
+    return 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+
+  @staticmethod
   def create_attribute(params, obj, definition, user):
     """
     Creates the attribute
