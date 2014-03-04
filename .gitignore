@@ -21,3 +21,6 @@ magic.py
 /cover.sh
 /sonar-project.properties
 /files
+/gpgkey
+/gpgkeys
+/sessions

@@ -7,9 +7,6 @@ from dagr.helpers.debug import Log
 from dagr.web.helpers.templates import MakoHandler
 from ce1sus.common.system import System
 from dagr.helpers.mailer import Mailer
-
-
-
 from ce1sus.web.views.index import IndexView
 from ce1sus.web.views.events.events import EventsView
 from ce1sus.web.views.event.event import EventView
@@ -28,7 +25,6 @@ from ce1sus.web.views.admin.subgroups import AdminSubGroupView
 from ce1sus.web.views.admin.user import AdminUserView
 from ce1sus.web.views.admin.validation import AdminValidationView
 from ce1sus.web.rest.restcontroller import RestController
-
 from dagr.helpers.config import Configuration
 from ce1sus.web.views.common.decorators import require, check_auth
 from logging import handlers
@@ -68,13 +64,14 @@ def bootstrap():
   cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
 
   # set up an SMTP handler to mail when the CRITICAL error occurs
-  if config.get('ErrorHandler', 'useMailer', False):
+  use_mailer = config.get('ErrorHandler', 'usemailer', False)
+  if use_mailer:
     smtpserver = config.get('Mailer', 'smtp')
     fromaddr = config.get('Mailer', 'from')
     toaddr = config.get('ErrorHandler', 'receiver')
     subject = config.get('ErrorHandler', 'subject')
     h = handlers.SMTPHandler(smtpserver, fromaddr, toaddr, subject)
-    h.setLevel(logging.CRITICAL)
+    h.setLevel(logging.ERROR)
     cherrypy.log.error_log.addHandler(h)
 
   load_rest_api = config.get('ce1sus', 'enablerestapi', default_value=False)

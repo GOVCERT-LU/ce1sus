@@ -28,8 +28,11 @@ class RestEventHandler(RestBaseHandler):
   def view_metadata(self, uuid, **options):
     try:
       event = self.event_controller.get_by_uuid(uuid)
-      self._check_if_event_is_viewable(event)
       owner = self._is_event_owner(event)
+      if not owner:
+        self._check_if_event_is_viewable(event)
+      self._check_if_event_is_viewable(event)
+
       return self.return_object(event, owner, False, False)
     except ControllerNothingFoundException as error:
       return self._raise_nothing_found(error)
@@ -39,9 +42,9 @@ class RestEventHandler(RestBaseHandler):
   def view(self, uuid, **options):
     try:
       event = self.event_controller.get_by_uuid(uuid)
-      self._check_if_event_is_viewable(event)
       owner = self._is_event_owner(event)
-
+      if not owner:
+        self._check_if_event_is_viewable(event)
       with_definition = options.get('fulldefinitions', False)
       return self.return_object(event, owner, True, with_definition)
     except ControllerNothingFoundException as error:

@@ -12,15 +12,27 @@ function getResponseConent(response) {
         return message;
     } else {
         var message = response.responseText;
-        document.write(message);
-        return message;
+        return generateErrorFromBody(message);
     }
+}
+
+function generateErrorFromBody(message){
+    var bodyStart = message.indexOf('<body') + 5;
+    var bodyEnd = message.indexOf('</body>');
+    message = message.substring(bodyStart,bodyEnd); 
+    bodyStart = message.indexOf('>')+1;
+    message = message.substring(bodyStart); 
+    //Remove powered tag
+    bodyEnd = message.indexOf('<div id="');
+    message = message.substring(0,bodyEnd);
+    message = createErrorsMsg('FOO', message);
+    return message;
 }
 
 function getResonseTextContent(responseText) {
     if (responseText.match(/(<html)/i)) {
-        document.write(responseText);
-        return responseText;
+        //document.write(responseText);
+        return generateErrorFromBody(responseText);;
     } else {
         if (responseText.match(/^<!--Error-->/gi)) {
             return createErrorsMsg(null, responseText);
@@ -32,10 +44,14 @@ function getResonseTextContent(responseText) {
 function createErrorsMsg(code, message) {
     var resultText = '<div class="alert alert-block alert-danger fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
     if (code !== null) {
-        resultText += '<h4 class="alert-heading" style="text-align:left">Error: ' + code
+        if (code==='FOO') {
+            '<div style="text-align:left">';
+        } else {
+            resultText += '<h4 class="alert-heading" style="text-align:left">Error: ' + code
                 + '</h4><p><div style="text-align:left">';
+        }
     } else {
-        resultText += '<h4 class="alert-heading" style="text-align:left">Error occurred!</h4><p><div style="text-align:left">';
+      resultText += '<h4 class="alert-heading" style="text-align:left">Error occurred!</h4><p><div style="text-align:left">';
     }
     resultText += message;
     resultText += '</div></p></div>';
