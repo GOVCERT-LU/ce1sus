@@ -1,0 +1,160 @@
+# Documentation #
+
+NOTE: The documentation is still a bit short yet but will be updated soon
+
+## Installataion ##
+
+### Requirements ###
+- python
+  * python (2.7+)
+  * mako (0.7+)
+  * sqlalchemy (0.7+)
+  * mysqldb (1.2.3)
+  * python-magic (0.4.6+)
+    ** https://github.com/ahupp/python-magic
+  * python-ldap
+  * dateutil
+  * cherrypy3
+  * memcache
+  * rtkit (optional)
+  * gnupg (0.3.5+)
+- mysql (5.1+)
+- nginx (v1.4+) (Optional)
+
+### Webserver ###
+There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
+* nginx (1.4+)
+* uwsgi (1.2.3+, with python-2 support)
+
+uwsgi config (ce1sus.ini):
+_______________________________________
+[uwsgi]
+uid = www-data
+gid = www-data
+pythonpath = /path/to/ce1sus
+plugins = python27
+module = ce1sus-run
+workers = 2
+vacuum = True
+max-requests = 1000000
+harakiri = 120
+harakiri-verbose = true
+need-app = true
+buffer-size = 32768
+listen = 200
+
+master-as-root = true
+max-fd = 10240
+#memory-report = true
+#stats = /tmp/stats.socket
+chown-socket = www-data
+_______________________________________
+
+
+nginx config:
+_______________________________________
+server {
+  listen 443;
+  server_name <servername>;
+
+  root /path/to/ce1sus/ce1sus/public;
+
+  access_log /var/log/nginx/ce1sus_access.log common;
+  error_log /var/log/nginx/ce1sus_error.log;
+
+  ssl on;
+  ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+  ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+
+  ssl_ciphers AESGCM:SHA512:SHA384:SHA256:AES128:SHA512:SHA384:SHA256:-SSLv3:-RC4:HIGH:!MD5:!aNULL:!eNULL:!EDH;
+  ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+  ssl_prefer_server_ciphers on;
+  ssl_session_cache    shared:SSL:10m;
+  ssl_session_timeout  5m;
+
+  location /css {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /images {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /img {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location /js {
+    root /path/to/ce1sus/ce1sus/public;
+  }
+
+  location / {
+    uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
+    include     uwsgi_params;
+    uwsgi_param SCRIPT_NAME "";
+    uwsgi_param HTTPS on;
+  }
+}
+_______________________________________
+
+### Mails ###
+
+Ce1sus will send out mails for the following events:
+
+* Event publication
+* Event validation if the event is published
+* Adding a user
+* Errors
+
+### Templates ###
+The mail templates can be configured via the admin interface, for more informations see the descriptions of each template.
+
+### Receivers ###
+-> all user who can see the event
+
+### Notes ###
+The gpg key folder has to be owned by the owner of the webserver (www-data)
+
+### Ce1sus ###
+1. Install the requirements
+2. Clone the repository
+3. Import DB scheme
+4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
+   - Use the templates (for an easier setup 
+   
+   The following sections have to be set to the correct values for ce1sus.conf
+   * [SessionManager]
+   * [ce1sus]
+   * [Handlers]
+   * [Mako]
+   * [Mailer]
+   
+   The remaining sections can be used as specified in the templates
+   
+5. Run ce1sus either locally or via ngix/uwsgi
+
+## User guide ##
+See MANUAL
+
+## Rest API ##
+See ce1sus_api.ods for a basic overview of the different functions
+
+### Notes ###
+The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
+
+## Handlers ##
+Ce1sus support custom handlers, these handlers are used to perfrom additional operations (i.e. parsing of the email)
+
+### Notes ###
+There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is be explained below
+
+1. Create a handler extending either the Generichandler or HandlerBase
+2. Place it in ce1sus.commom.handlers
+3. Insert into the Table AttributeHanlders
+    * the modile and classname i.e. generichandler.GenericHandler
+    * A uuid for the handler
+
+The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the uuid specified in the handler
+
+## Known Issues ##
+* Sending encrypted mails takes some time (Action performed on save)

@@ -30,6 +30,7 @@ class EventController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
+    self.send_mails = config.get('ce1sus', 'sendmail', False)
     self.event_broker = self.broker_factory(EventBroker)
     self.object_broker = self.broker_factory(ObjectBroker)
     self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
@@ -237,8 +238,9 @@ class EventController(Ce1susBaseController):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, True)
-      if event.published == 1 and event.bit_value.is_validated_and_shared:
-        self.mail_handler.send_event_mail(event)
+      if self.send_mails:
+        if event.published == 1 and event.bit_value.is_validated_and_shared:
+          self.mail_handler.send_event_mail(event)
       return event, True
     except ValidationException:
       return event, False

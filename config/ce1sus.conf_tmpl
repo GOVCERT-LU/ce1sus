@@ -1,3 +1,4 @@
+# DB Configuration
 [SessionManager]
 protocol=mysql+mysqlconnector
 username=
@@ -7,21 +8,29 @@ db=
 port=3306
 debug=no
 usecherrypy=yes
-enableRestAPI=no
 
+#General configurations for ce1sus
 [ce1sus]
+sendmails=yes
 useldap=yes
 environment=LOCAL_DEV
+enableRestAPI=yes
+#Not this has to be the external address for ce1sus
+baseurl=http://localhost:8080
 
+#Handler configurations
 [Handlers]
 cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
+#Destination for uploaded files
 files=
+#Configuration to access the RT rest api
 rt_user=
 rt_password=
 rt_url=
 
 [ErrorHandler]
 debug=no
+#If set then do not forget to set the reciever email
 useMailer=No
 subject=ErrorOccureredForCelsus
 receiver=
@@ -35,16 +44,19 @@ size=10000000
 backups=1000
 
 [Mako]
-templateRoot=templates
-projectRoot=templates/ce1sus
+#Note the absolute path have to be sepcified for templateRoot and projectRoot
+templateRoot=/path/to/ce1sus/ce1sus/templates
+projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus
 collectionsize=200
 outputencoding=utf-8
 
+#Configuration for the LDAP server
 [LDAP]
 server=
 usetls=True
 users_dn=
 
+#Configuration for the smtp server
 [Mailer]
 from=ce1sus
 smtp=

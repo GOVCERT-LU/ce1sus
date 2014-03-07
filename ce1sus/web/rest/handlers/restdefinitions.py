@@ -54,7 +54,6 @@ class RestDefinitionsHanldler(RestBaseHandler):
       return self._raise_error('ControllerException', error)
 
   def view_attributes_definitions(self, identifier, **options):
-    self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
     chksums = options.get('chksum', list())
     return self.__get_definition(self.attributes_controller,
@@ -62,7 +61,6 @@ class RestDefinitionsHanldler(RestBaseHandler):
                                 full_definition)
 
   def view_obejcts_definitions(self, identifier, **options):
-    self._check_if_priviledged()
     full_definition = options.get('fulldefinitions', False)
     chksums = options.get('chksum', list())
     return self.__get_definition(self.objects_controller,

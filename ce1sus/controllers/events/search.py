@@ -94,6 +94,8 @@ class SearchController(Ce1susBaseController):
                              found_value.attribute)
             result.append(obj)
         return result
+      else:
+        raise ControllerException('Please specify something before searching.')
     except BrokerException as error:
       self._raise_exception(error)
 

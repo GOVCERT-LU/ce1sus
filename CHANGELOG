@@ -1,0 +1,53 @@
+# Changelog #
+
+## Release 0.8.0 ## 
+* Add more examples to explain implementation
+* Update entry point example
+* Mail support
+
+## Release 0.7.0 ##
+* Reorganize files/source for a "better" comprehension
+
+## Release 0.4.0 ##
+* REST Api
+* New protection system
+* Supports SQLLite
+
+## Release 0.3.0 ##
+* Search operators like "=" "<" ">" "like"
+* After Adding jump to added object/attribute
+* Relations are just created when it is defined to do so
+* Relations are not made when they exists or if they belong to the event itself
+* CB Value attribute handler
+
+## Release 0.2.0 ##
+* Detect relations
+* File adding
+* Malicious files
+* Normal files
+* Attribute handling can be specified through handlers
+* User management
+* Specify users
+* Add users to groups
+* Grand admin access to users
+* Users can only see/edit events which: Are written by the user or, Have are on the same or below the highest TLP level of the user or Belog to the same groups as the users
+* The above point is also valid for all child element of an event
+* DB connection
+* Web GUI
+* Adding events, objects, attributes
+* The value of attributes are checked by the defined regex
+* Multiple values can be added to an attribute (MultipleGenericHandler) separated by Newlines
+* Automated relation detection based on attributes values
+* Relation between objects and attributes definitions
+* Relation between objects (parent-child)
+* Add events to groups
+* Add Comments to events and or objects
+* Downloadable files inkl protection
+* Disable users accounts
+* supports ldap
+* supports CVE and RT
+
+## Release 0.1.0 ##
+
+* First Release
+

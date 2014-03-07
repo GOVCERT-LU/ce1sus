@@ -29,6 +29,7 @@ class ValidationController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
+    self.send_mails = config.get('ce1sus', 'sendmail', False)
     self.event_broker = self.broker_factory(EventBroker)
     self.object_broker = self.broker_factory(ObjectBroker)
     self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
@@ -108,8 +109,9 @@ class ValidationController(Ce1susBaseController):
       # perform validation of objects
       self.__validate_objects(event.objects)
       self.event_broker.update(event)
-      if event.published == 1 and event.bit_value.is_validated_and_shared:
-        self.mail_handler.send_event_mail(event)
+      if self.send_mails:
+        if event.published == 1 and event.bit_value.is_validated_and_shared:
+          self.mail_handler.send_event_mail(event)
     except (BrokerException, MailHandlerException) as error:
       self._raise_exception(error)
 

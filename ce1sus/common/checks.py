@@ -81,16 +81,18 @@ def check_if_event_is_viewable(event, user, cache=None):
   :returns: Boolean
   """
   # get eventfrom session
-  if cache is None:
-    result = is_viewable(event, user.default_group, user.privileged == 1)
-  else:
-    viewable = cache.get(event.identifier, None)
-    if viewable == True:
-      return True
-    else:
+  if event:
+    if cache is None:
       result = is_viewable(event, user.default_group, user.privileged == 1)
-      cache[event.identifier] = result
-
+    else:
+      viewable = cache.get(event.identifier, None)
+      if viewable == True:
+        return True
+      else:
+        result = is_viewable(event, user.default_group, user.privileged == 1)
+        cache[event.identifier] = result
+  else:
+    return False
   return result
 
 

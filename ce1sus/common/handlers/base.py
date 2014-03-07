@@ -11,8 +11,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from abc import ABCMeta, abstractmethod
-
 
 class HandlerException(Exception):
   """
@@ -27,7 +25,6 @@ class HandlerBase(object):
 
   Note this class is pseudo abstract
   """
-  __metaclass__ = ABCMeta
 
   def __init__(self, config):
     self.config = config
@@ -76,7 +73,6 @@ class HandlerBase(object):
                                                        obj,
                                                        definitions))
 
-  @abstractmethod
   @staticmethod
   def get_uuid():
     raise HandlerException('get_uuid not defined')
