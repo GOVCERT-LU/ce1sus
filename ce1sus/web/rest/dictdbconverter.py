@@ -231,6 +231,7 @@ class DictDBConverter(object):
       rest_attribute.share = 0
 
     rest_attribute.author = attribute.creator.default_group.name
+    return rest_attribute
 
   def convert_event(self, event, owner, full, with_definition):
     """Converts Event to RestEvent"""
