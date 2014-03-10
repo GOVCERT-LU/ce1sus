@@ -220,7 +220,7 @@ class DictDBConverter(object):
     # determine how to rest value
     try:
       handler = attribute.definition.handler
-      value = handler.convert_to_rest_value(attribute, self.__config)
+      value = handler.convert_to_rest_value(attribute)
       rest_attribute.value = value
     except HandlerException as error:
       raise DictDBConversionException(error)
