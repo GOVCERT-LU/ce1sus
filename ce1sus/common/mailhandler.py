@@ -138,7 +138,7 @@ class MailHandler(object):
       for relation in relations:
         if relation.rel_event.published:
           if update:
-            if relation.rel_event.last_publish_date >= event.last_publish_date:
+            if relation.rel_event.last_publish_date and relation.rel_event.last_publish_date >= event.last_publish_date:
               if is_viewable(relation.rel_event, group, False):
                 url = self.__get_event_url(relation.rel_event)
                 text = u'{0}{1}\n'.format(text, url)
