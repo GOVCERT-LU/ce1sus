@@ -35,7 +35,7 @@ if len(string) >= shorten_to:
 else:
   result = string
 if 'Link' in object.__class__.__name__:
-  result = '<a href="{0}" target="_blank">{1}</a>'.format(object.url, object.identifier)
+  result = u'<a href="{0}" target="_blank">{1}</a>'.format(object.url, object.identifier)
 else:
   if not use_plain_text: 
     result = dagr.plaintext2html(text=result)
