@@ -148,6 +148,8 @@ class MailHandler(object):
               text = u'{0}{1}\n'.format(text, url)
     if not self.__remove_control_chars(text):
       text = 'None'
+    if not text.strip():
+      return 'None'
     return text
 
   def __get_event_url(self, event):
