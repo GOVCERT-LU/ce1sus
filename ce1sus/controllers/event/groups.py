@@ -38,11 +38,12 @@ class GroupsController(Ce1susBaseController):
 
   @staticmethod
   def __handle_input(add_function, event_id, post_value):
-    if isinstance(post_value, types.StringTypes):
-      add_function(event_id, post_value, False)
-    else:
-      for group_id in post_value:
-        add_function(event_id, group_id, False)
+    if post_value:
+      if isinstance(post_value, types.StringTypes):
+        add_function(event_id, post_value, False)
+      else:
+        for group_id in post_value:
+          add_function(event_id, group_id, False)
 
   def modify_groups(self, operation, event_id, remaining_groups, event_groups):
     try:
