@@ -23,7 +23,7 @@ class Link(object):
   @property
   def url(self):
     if self.identifier:
-      url = '{0}{1}'.format(self.url_base, self.identifier)
+      url = u'{0}{1}'.format(self.url_base, self.identifier)
     else:
       url = self.url_base
     return url
