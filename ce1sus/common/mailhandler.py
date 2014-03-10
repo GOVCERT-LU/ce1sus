@@ -115,6 +115,7 @@ class MailHandler(object):
     self._get_logger().debug('Converting objects to text')
     text = 'None'
     if objects:
+      text = 'None'
       for obj in objects:
         if publication_date:
           if (obj.modified >= publication_date) or (obj.created >= publication_date):
