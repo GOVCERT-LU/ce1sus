@@ -33,7 +33,7 @@ class AttributeHandlerBroker(BrokerBase):
     result = dict()
     definitions = self.get_all()
     for definition in definitions:
-      result[definition.classname] = definition.identifier
+      result[definition.classname] = (definition.identifier, definition.description)
 
     return result
 
