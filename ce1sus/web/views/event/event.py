@@ -18,6 +18,7 @@ from ce1sus.web.views.common.decorators import require, require_referer
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from dagr.helpers.datumzait import DatumZait
 from dagr.controllers.base import ControllerException
+from cherrypy import HTTPRedirect
 
 
 class EventView(Ce1susBaseView):
@@ -198,3 +199,16 @@ class EventView(Ce1susBaseView):
                                    relations=relations)
     except ControllerException as error:
       self._get_logger().error(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def extview(self, uuid):
+    try:
+      event = self.event_controller.get_by_uuid(uuid)
+      self._check_if_event_is_viewable(event)
+      self._put_to_session('extViewEvent', event.identifier)
+      raise HTTPRedirect('/internal')
+    except ControllerException as error:
+      self._get_logger().error(error)
+      self._put_to_session('extViewEventError', error)
+      raise HTTPRedirect('/internal')

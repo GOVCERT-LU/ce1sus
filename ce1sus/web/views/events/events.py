@@ -46,11 +46,20 @@ class EventsView(Ce1susBaseView):
     """
 
     try:
+      error = self._get_from_session('extViewEventError', None)
+      if error:
+        error = error.message
+      ext_event_id = self._get_from_session('extViewEvent', None)
+      if ext_event_id:
+        self._put_to_session('extViewEvent', None)
+
       user = self._get_user()
       events = self.events_controller.get_user_events(user, limit, offset)
       return self._render_template('/events/recent.html',
                                    events=events,
                                    url='/events/event/view',
-                                   tab_id='eventsTabTabContent')
+                                   tab_id='eventsTabTabContent',
+                                   error=error,
+                                   ext_event_id=ext_event_id)
     except ControllerException as error:
       return self._render_error_page(error)

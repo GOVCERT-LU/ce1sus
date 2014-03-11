@@ -154,7 +154,7 @@ class MailHandler(object):
 
   def __get_event_url(self, event):
     url = self.config.get('ce1sus', 'baseurl')
-    return '{0}/event/extView/{1}'.format(url, event.uuid)
+    return '{0}/events/event/extview/{1}'.format(url, event.uuid)
 
   def __process_publication_body(self, body, event):
     self._get_logger().debug('Processing body')
