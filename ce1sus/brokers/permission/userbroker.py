@@ -184,7 +184,7 @@ class UserBroker(BrokerBase):
       user.name = name
       user.sirname = sirname
 
-      if apikey == '1' and user.api_key != 1:
+      if apikey == '1' and not user.api_key:
         # generate key
         user.api_key = hashSHA1('{0}{1}{2}'.format(user.email, user.username, random.random()))
 
