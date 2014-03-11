@@ -12,6 +12,32 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import dagr.helpers.strings as strings
+import re
+from dagr.helpers.validator.valuevalidator import ValueValidator
+import ast
+
+
+def convert_string_to_value(string):
+
+  """Returns the python value of the given string"""
+  return_value = None
+  if string:
+    if string == 'True':
+      return_value = True
+    elif string == 'False':
+      return_value = False
+    elif string.isdigit():
+      return_value = ValueConverter.set_integer(string)
+    # check if datetime
+    elif ValueValidator.validateDateTime(string):
+      return_value = ValueConverter.set_date(string)
+    # TODO: use JSON instead
+    elif (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
+      re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
+      return_value = ast.literal_eval(string)
+    else:
+      return_value = string
+  return return_value
 
 
 class ConversionException(Exception):

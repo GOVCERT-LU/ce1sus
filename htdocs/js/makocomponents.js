@@ -30,14 +30,18 @@ function generateErrorFromBody(message){
 }
 
 function getResonseTextContent(responseText) {
-    if (responseText.match(/(<html)/i)) {
-        //document.write(responseText);
-        return generateErrorFromBody(responseText);;
+    if (responseText.match(/<!--MainPage-->/gi)) {
+        document.write(responseText);
     } else {
-        if (responseText.match(/^<!--Error-->/gi)) {
-            return createErrorsMsg(null, responseText);
+        if (responseText.match(/(<html)/i)) {
+            //document.write(responseText);
+            return generateErrorFromBody(responseText);;
+        } else {
+            if (responseText.match(/^<!--Error-->/gi)) {
+                return createErrorsMsg(null, responseText);
+            }
+            return responseText;
         }
-        return responseText;
     }
 }
 

@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.api.restclasses import RestClass
-from dagr.helpers.strings import convert_string_to_value
+from dagr.helpers.converters import convert_string_to_value
 from dagr.helpers.debug import Log
 from datetime import datetime
 from types import DictionaryType, ListType

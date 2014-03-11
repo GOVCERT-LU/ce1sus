@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 import cherrypy
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler, RestHandlerException
-from dagr.helpers.strings import convert_string_to_value
+from dagr.helpers.converters import convert_string_to_value
 from ce1sus.common.system import System, SantityCheckerException
 from dagr.helpers.validator.valuevalidator import ValueValidator
 from dagr.helpers.validator.objectvalidator import ValidationException

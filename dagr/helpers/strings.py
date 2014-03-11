@@ -15,9 +15,6 @@ import re
 import cgi
 import dateutil.parser
 import json
-import ast
-from dagr.helpers.converters import ValueConverter
-from dagr.helpers.validator.valuevalidator import ValueValidator
 
 
 class InputException(Exception):
@@ -25,28 +22,6 @@ class InputException(Exception):
   Base exception for input exceptions
   """
 pass
-
-
-def convert_string_to_value(string):
-  """Returns the python value of the given string"""
-  return_value = None
-  if string:
-    if string == 'True':
-      return_value = True
-    elif string == 'False':
-      return_value = False
-    elif string.isdigit():
-      return_value = ValueConverter.set_integer(string)
-    # check if datetime
-    elif ValueValidator.validateDateTime(string):
-      return_value = ValueConverter.set_date(string)
-    # TODO: use JSON instead
-    elif (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
-      re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
-      return_value = ast.literal_eval(string)
-    else:
-      return_value = string
-  return return_value
 
 
 def plaintext2html(text, tabstop=4):
@@ -78,10 +53,10 @@ def plaintext2html(text, tabstop=4):
     if characters['lineend']:
       return '<br/>'
     elif characters['space']:
-      t = string.group().replace('\t', '&nbsp;' * tabstop)
-      t = t.replace(' ', '&nbsp;')
-      return t
-    elif characters['space'] == '\t':
+      tabs = string.group().replace('\tabs', '&nbsp;' * tabstop)
+      tabs = tabs.replace(' ', '&nbsp;')
+      return tabs
+    elif characters['space'] == '\tabs':
       return ' ' * tabstop
     else:
       url = string.group('protocal')
@@ -97,13 +72,13 @@ def plaintext2html(text, tabstop=4):
         # return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
         return '%s%s%s' % (prefix, url, last)
   # convert to text to be compliant
-  stringText = u'{0}'.format(text)
-  if len(stringText) > 0:
-    stringText = re.sub(re_string, replacements, stringText)
-    stringText = stringText.replace('\"', '&quot;')
+  string_text = u'{0}'.format(text)
+  if len(string_text) > 0:
+    string_text = re.sub(re_string, replacements, string_text)
+    string_text = string_text.replace('\"', '&quot;')
   else:
-    stringText = ''
-  return stringText
+    string_text = ''
+  return string_text
 
 
 def stringToDateTime(string):
