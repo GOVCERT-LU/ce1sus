@@ -121,6 +121,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
             // refrehshPage & container if needed
             if (doRefresh) {
                 if (refreshUrl !== "None") {
+                    refreshContainer = getHiddenDivID(refreshContainer, contentid)
                     loadContent(refreshContainer, refreshUrl);
                 } else {
                     $("#" + refreshContainer).html(message);
@@ -371,6 +372,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
         if (message.match(/^<!--OK--/gi)) {
             // do refresh
             if (refreshContent) {
+                refreshContainer = getHiddenDivID(refreshContainer, null);
                 loadContent(refreshContainer, refreshUrl);
             } else {
                 if (doCloseTab) {

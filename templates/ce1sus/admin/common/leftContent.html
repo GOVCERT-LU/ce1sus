@@ -27,7 +27,7 @@ function loadItem(itemID){
         % for item in items:
           <%call expr="nav.left_menu_item(item.identifier, 'loadItem({0})'.format(item.identifier),item.name,selected)"/>
           <%
-          if not foundObject:
+          if not found:
               fistID = item.identifier
               found=True
               selected = False
