@@ -115,7 +115,6 @@ class BaseView:
 
     :returns: object
     """
-    self.__is_session_key(key)
     session = self._get_session()
     value = session.pop(key, default_value)
     self._get_logger().debug('Returned session value "{0}" for key "{1}" and removed it'.format(value, key))

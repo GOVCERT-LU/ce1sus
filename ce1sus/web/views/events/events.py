@@ -46,12 +46,10 @@ class EventsView(Ce1susBaseView):
     """
 
     try:
-      error = self._get_from_session('extViewEventError', None)
+      error = self._pull_from_session('extViewEventError', None)
       if error:
         error = error.message
-      ext_event_id = self._get_from_session('extViewEvent', None)
-      if ext_event_id:
-        self._put_to_session('extViewEvent', None)
+      ext_event_id = self._pull_from_session('extViewEvent', None)
 
       user = self._get_user()
       events = self.events_controller.get_user_events(user, limit, offset)
