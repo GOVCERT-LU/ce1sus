@@ -22,23 +22,8 @@
       <div class="col-sd-${width} col-md-${width} ">
         <table border="0" cellpadding="5" width="100%">
             <tr>
-                 <td>
-                   <label>${moving_name} is part of these ${identifier_name}s:</label>
-                   <select class="form-control"  name="existing" size="10" multiple="multiple" tabindex="1"> 
-                          %if not existing is None:
-                              % for item in existing:
-                                  <option value="${getattr(item, 'identifier')}">${getattr(item, attribute_name)}</option> 
-                              % endfor
-                          %endif
-                   </select>
-                 </td>
-                 <td align="center">
-                   <button name="operation" class="btn  btn-default" type="submit" value="add">&lt;</button>
-                   <br/>
-                   <button name="operation" class="btn  btn-default" type="submit" value="remove">&gt;</button>
-                 </td>
                 <td>
-                  <label>${moving_name} is <b>not</b> part of these ${identifier_name}:</label>
+                  <label><b>Remaining</b> ${moving_name}:</label>
                     <select class="form-control"  name="remaining" size="10" multiple="multiple" tabindex="1"> 
                           %if not remaining is None:
                               % for item in remaining:
@@ -47,6 +32,22 @@
                           %endif
                    </select>
                  </td>
+                 <td align="center">
+                   <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
+                   <br/>
+                   <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
+                 </td>
+                 <td>
+                   <label>Associated ${moving_name}:</label>
+                   <select class="form-control"  name="existing" size="10" multiple="multiple" tabindex="1"> 
+                          %if not existing is None:
+                              % for item in existing:
+                                  <option value="${getattr(item, 'identifier')}">${getattr(item, attribute_name)}</option> 
+                              % endfor
+                          %endif
+                   </select>
+                 </td>
+
 
             </tr>
         </table>
