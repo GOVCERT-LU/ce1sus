@@ -67,7 +67,8 @@ class ObjectsView(Ce1susBaseView):
                                    obj_definitions=self.objects_controller.get_cb_object_definitions(),
                                    attribute_definitions=attribute_definitions,
                                    object_id=object_id,
-                                   owner=ower)
+                                   owner=ower,
+                                   published=event.published)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -289,6 +290,7 @@ class ObjectsView(Ce1susBaseView):
       return self._render_template('/events/event/objects/flatview.html',
                                    flat_objects=flat_objects,
                                    event_id=event_id,
-                                   owner=owner)
+                                   owner=owner,
+                                   published=event.published)
     except ControllerException as error:
       return self._render_error_page(error)

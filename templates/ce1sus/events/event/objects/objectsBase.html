@@ -16,7 +16,7 @@
         <div id="objectLeft">
             %if owner:
             <div class="btn-group">
-              <a href="#addObjectModal" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
+              <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal');">Add new Object</a>
             </div>
             %endif
             <div style="height:15px"/>
@@ -54,4 +54,13 @@ $( document ).ready(function() {
     openAllColapses('${object_id}');
     
 });
+function inforUnpublished(modalID) {
+    %if published:
+        if(confirm("Modifications on event will unpublish it. Don't forget to republish.")) {
+            $('#'+modalID).modal('show');
+        }
+    %else:
+        $('#'+modalID).modal('show');
+    %endif
+}
 </script>

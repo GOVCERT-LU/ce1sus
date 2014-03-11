@@ -44,7 +44,9 @@ class AdminValidationView(Ce1susBaseView):
       return self._render_template('/events/recent.html',
                                    events=events,
                                    url='/admin/validation/event',
-                                   tab_id='validationTabsTabContent')
+                                   tab_id='validationTabsTabContent',
+                                   error=None,
+                                   ext_event_id=None)
     except ControllerException as error:
       return self._render_error_page(error)
 
