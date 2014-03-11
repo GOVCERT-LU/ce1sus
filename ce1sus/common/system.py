@@ -14,7 +14,23 @@ from dagr.db.session import SessionManager
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
 from dagr.db.broker import BrokerException
 import json
-import ce1sus.common.ce1susutils as utils
+
+
+# The releases are formated as A.B.C where A,B,C are defined as follows
+# A: Major Release
+# B: Release feature changes
+# C: Bug fixes
+APP_REL = '0.8.7'
+DB_REL = '0.8.3'
+REST_REL = '0.2.0'
+
+
+# pylint: disable=W0613
+def sytem_version(context):
+  """
+  Just for displaing inside the leyout
+  """
+  return APP_REL
 
 
 class SystemException(Exception):
@@ -110,9 +126,9 @@ class System(object):
     """
     try:
       value = self.ce1sus_broker.get_by_key('db_shema')
-      if System.__compare_releases(utils.DB_REL, value.value) != 0:
+      if System.__compare_releases(DB_REL, value.value) != 0:
         raise SantityCheckerException(u'DB scheme release mismatch '
-                          + 'expected {0} got {1}'.format(utils.DB_REL,
+                          + 'expected {0} got {1}'.format(DB_REL,
                                                          value.value))
     except BrokerException as error:
       raise SystemException(error)
@@ -124,10 +140,10 @@ class System(object):
     # check app rel
     try:
       value = self.ce1sus_broker.get_by_key('app_rev')
-      if System.__compare_releases(utils.APP_REL,
+      if System.__compare_releases(APP_REL,
                                         value.value) != 0:
         raise SantityCheckerException(u'Application release mismatch '
-                          + 'expected {0} got {1}'.format(utils.APP_REL,
+                          + 'expected {0} got {1}'.format(APP_REL,
                                                          value.value))
     except BrokerException as error:
       raise SystemException(error)
@@ -139,9 +155,9 @@ class System(object):
     """
     try:
       # check app rel
-      if System.__compare_releases(utils.REST_REL, release) != 0:
+      if System.__compare_releases(REST_REL, release) != 0:
         raise SantityCheckerException(u'RestAPI release mismatch '
-                          + 'expected {1} got {0}'.format(utils.REST_REL,
+                          + 'expected {1} got {0}'.format(REST_REL,
                                                           release))
     except BrokerException as error:
       raise SystemException(error)
