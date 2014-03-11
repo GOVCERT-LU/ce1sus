@@ -111,6 +111,20 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  def flat_event_objects(self, event_id):
+    try:
+      event = self.validation_controller.get_event_by_id(event_id)
+
+      flat_objects = self.validation_controller.get_flat_objects(event)
+      return self._render_template('/events/event/objects/flatview.html',
+                                   flat_objects=flat_objects,
+                                   event_id=event_id,
+                                   owner=True)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
   def validate_event(self, event_id):
     try:
       event = self.validation_controller.get_event_by_id(event_id)
@@ -129,3 +143,4 @@ class AdminValidationView(Ce1susBaseView):
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
+

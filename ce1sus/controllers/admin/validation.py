@@ -120,3 +120,11 @@ class ValidationController(Ce1susBaseController):
       self.event_broker.remove_by_id(event.identifier)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def get_flat_objects(self, event):
+    result = list()
+    objects = self.object_broker.get_all_event_objects(event.identifier)
+    for obj in objects:
+      for attribute in obj.attributes:
+          result.append((obj, attribute))
+    return result
