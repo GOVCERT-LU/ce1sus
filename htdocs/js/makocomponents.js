@@ -117,6 +117,9 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
             form[0].reset();
             if (modalID) {
                 $("#" + modalID).modal('hide');
+                $('.modal-backdrop').remove();
+                document.documentElement.style.overflow = "auto";
+                document.body.style.marginRight='0px';
             }
             // refrehshPage & container if needed
             if (doRefresh) {

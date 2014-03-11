@@ -43,11 +43,8 @@ $(document).ready(function() {
     $("#${id}").on("show.bs.modal", function() {
         loadContent('${id}body','${content_url}')
     });
-    $("#${id}").on("hide.bs.modal", function() {
+    $("#${id}").on("hide.bs.modal", function(e) {
     	$("#${id}body").empty();
-        $('.modal-backdrop').remove();
-        document.documentElement.style.overflow = "auto";
-        document.body.style.marginRight='0px';
     });
 %endif
 </script>
