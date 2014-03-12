@@ -43,7 +43,7 @@ else:
 $( document ).ready(function() {
     $('#${id}Form').submit(function(event){
         formEvent(this,event,'${url}','${id}',false,null,null);
-        loadTab('${tab_url}','${reload_tab_id}');
+        reloadSideNav('${reload_tab_id}');
     });
 });
 </script>

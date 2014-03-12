@@ -121,6 +121,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
             // refrehshPage & container if needed
             if (doRefresh) {
                 if (refreshUrl !== "None") {
+                    refreshContainer = getHiddenDivID(refreshContainer, contentid);
                     loadContent(refreshContainer, refreshUrl);
                 } else {
                     $("#" + refreshContainer).html(message);
@@ -155,6 +156,46 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
 
 }
 
+function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
+        doCloseTab, tabID, tabToClose) {
+    var request = $.ajax({
+        url : url,
+     timeout: 30000 //3secs
+    });
+    request.fail(function(response, textStatus, XMLHttpRequest) {
+        var message = getResponseConent(response);
+        alert(message);
+    });
+    request.error(request.fail);
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
+        var message = getResonseTextContent(responseText);
+        if (message.match(/^<!--OK--/gi)) {
+            // do refresh
+            if (refreshContent) {
+                refreshContainer = getHiddenDivID(refreshContainer, null);
+                loadContent(refreshContainer, refreshUrl);
+            }
+            if (doCloseTab) {
+                closeTab(tabID, tabToClose);
+            }
+        } else {
+            if (message.match(/^<!--Error-->/gi)) {
+                var startPos = message.lastIndexOf('>');
+                message = message.substring(startPos+1);
+            }
+            alert('Error:\n' + message);
+        }
+    });
+}
+
+function dialogCall(url, refreshContainer, refreshUrl) {
+    genericDialogCall(url, refreshContainer, refreshUrl, true, false, '', '');
+}
+
+function dialogCloseTabCall(url, tabID, tabToClose) {
+    genericDialogCall(url, 'recentEventsHidden', '/events/recent', true, true, tabID, tabToClose);
+}
+
 function loadContent(contentid, url) {
     //Append new div to content
     if (contentid.match(/Hidden$/)) {
@@ -183,6 +224,8 @@ function loadContent(contentid, url) {
 }
 
 function loadNewTab(pk, id, url, reload, title) {
+    alert('deprecated');
+    return false;
     // getTabID
     var tabID = id.replace("TabContent", "");
     // deactivate Tabs
@@ -242,6 +285,8 @@ function loadNewTab(pk, id, url, reload, title) {
 }
 
 function closeTab(tabulatorID, tabToCloseID) {
+    alert('deprecated');
+    return false;
     $('#' + tabToCloseID).find("a").each(function() {
         // normalerweis get et just een
         $(this).attr('onclick', '').unbind('click');
@@ -276,6 +321,8 @@ function activateLi(id) {
 }
 
 function loadTab(url, id) {
+    alert('deprecated');
+    return false;
     activateLi(id);
     var parentName = $('#' + id + 'LI').parent().attr('id');
     loadContent(parentName + 'TabContent', url);
@@ -295,6 +342,7 @@ function findAndLoadActiveLi(id, contentID) {
         }
     });
 }
+
 
 function hideHidden(contentID) {
     $('#' + contentID).children('div').each(function() {
@@ -347,6 +395,8 @@ function loadToolbarLi(id, contentID, reload) {
 }
 
 function loadTabLi(id, reload) {
+    alert('deprecated');
+    return false;
     var obj = $("#" + id + "LI");
     var ul = obj.closest('ul');
     var parentName = ul.get(0).id;
@@ -355,45 +405,6 @@ function loadTabLi(id, reload) {
 }
 
 
-function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
-        doCloseTab, tabID, tabToClose) {
-    var request = $.ajax({
-        url : url,
-     timeout: 30000 //3secs
-    });
-    request.fail(function(response, textStatus, XMLHttpRequest) {
-        var message = getResponseConent(response);
-        alert(message);
-    });
-    request.error(request.fail);
-    request.done(function(responseText, textStatus, XMLHttpRequest) {
-        var message = getResonseTextContent(responseText);
-        if (message.match(/^<!--OK--/gi)) {
-            // do refresh
-            if (refreshContent) {
-                loadContent(refreshContainer, refreshUrl);
-            } else {
-                if (doCloseTab) {
-                    closeTab(tabID, tabToClose);
-                }
-            }
-        } else {
-            if (message.match(/^<!--Error-->/gi)) {
-                var startPos = message.lastIndexOf('>');
-                message = message.substring(startPos+1);
-            }
-            alert('Error:\n' + message);
-        }
-    });
-}
-
-function dialogCall(url, refreshContainer, refreshUrl) {
-    genericDialogCall(url, refreshContainer, refreshUrl, true, false, '', '');
-}
-
-function dialogCloseTabCall(url, tabID, tabToClose) {
-    genericDialogCall(url, '', '', false, true, tabID, tabToClose);
-}
 
 function activateMenuLi(id) {
     // deactivateActiveOne
@@ -408,4 +419,164 @@ function resizeScrollPannel(id) {
     var div = $(id);
     var windowHeight = $(window).height() - 300;
     div.css({'height': windowHeight+'px' });
+}
+
+
+
+
+
+/*
+*
+*
+* NEW DESING FUNCTIONS
+*
+*/
+
+
+
+function activateSidenav(id) {
+    // deactivateActiveOne
+    $('#' + id).parent().parent().children("div").each(function() {
+        $(this).attr('class', 'mylist-group-item');
+    });
+    // activate tab
+    $('#' + id).parent().attr('class', 'mylist-group-item active');
+}
+
+function loadSideNav(id, reload) {
+    var contentID = "SideNavContent";
+
+    activateSidenav(id);
+    var url = $('#' + id).attr('src');
+    var hiddenDivID = getHiddenDivID(id, contentID);
+    if (reload) {
+        loadContent(hiddenDivID, url);
+    } else {
+        //if div is empty load content
+        if ($('#' + hiddenDivID).is(':empty')) {
+            loadContent(hiddenDivID, url);
+        } else {
+            //show content
+            $('#' + hiddenDivID).css("display", "block");
+        }
+    }
+}
+
+function findAndLoadActiveSideNav(id) {
+    $('#' + id).children("div").each(function() {
+        var item = $(this);
+        var className = item.attr('class');
+        if (className) {
+            if (className.match(/active/i)) {
+                tabid = $(this).children('div').attr('id');
+                return loadSideNav(tabid, false);
+            }
+        }
+    });
+}
+
+function loadNewSideNavTab(pk, id, url, reload, title) {
+    // getTabID
+    var tabID = id.replace("TabContent", "");
+    // deactivate Tabs
+    // deactivateActiveOne
+    $('#' + tabID).children("div").each(function() {
+        $(this).attr('class', 'mylist-group-item');
+    });
+    var keyValue = tabID+pk;
+    // check if element exists
+    if ($('#' + tabID + pk).length) {
+        $('#' + tabID + pk).parent().attr('class', 'list-group-item active');
+    } else {
+        // createTab
+        var tab = $("<div/>")
+        .attr("class", 'list-group-item active');
+        
+        var link = $("<div/>")
+        .attr("class", 'link')
+        .attr("src", url)
+        .attr("id", keyValue)
+        .html(title);
+        if (reload) {
+            link.attr("onclick", 'loadSideNav(this.id, true)');
+        } else {
+            link.attr("onclick", 'loadSideNav(this.id, false)');
+        }
+        tab.append(link);
+
+        var badge = $('<div/>')
+        .attr("class", 'badge')
+        .attr("onclick", 'closeSideNavTab(\'' + tabID + '\',\'' + tabID + pk + '\');')
+        .html('x');
+        tab.append(badge);
+        var clean = $("<div/>")
+        .attr("style", 'clear: both;');
+        tab.append(clean);
+
+        $("#" + tabID).append(tab);
+    }
+    // load Content
+    loadSideNav(keyValue, false);
+}
+
+function closeSideNavTab(tabulatorID, tabToCloseID) {
+    $('#' + tabToCloseID).parent().remove();
+    var contentID = tabToCloseID+"Hidden";
+    $('#' + contentID).remove();
+    var opentab = $('#' + tabulatorID).children().first().children().first();
+    var firstID = opentab.attr('id');
+    var url = opentab.attr('src');
+    loadSideNav(firstID, false);
+}
+
+
+
+/*
+*
+* Tabulator functions
+*
+*/
+
+function activateTab(id) {
+    // deactivateActiveOne
+    $('#' + id + 'LI').parent().find("li").each(function() {
+        $(this).attr('class', 'dropdown');
+    });
+    // activate tab
+    $('#' + id + 'LI').attr('class', 'dropdown active');
+}
+
+function loadTab(id, reload) {
+    var containerID = $('#'+id).parent().parent().attr('id');
+    var contentID = containerID+"TabContent";
+
+    activateTab(id);
+    var url = $('#' + id).attr('src');
+    var hiddenDivID = getHiddenDivID(id, contentID);
+    if (reload) {
+        loadContent(hiddenDivID, url);
+    } else {
+        //if div is empty load content
+        if ($('#' + hiddenDivID).is(':empty')) {
+            loadContent(hiddenDivID, url);
+        } else {
+            //show content
+            $('#' + hiddenDivID).css("display", "block");
+        }
+    }
+}
+
+function findAndLoadActiveTab(id, reload=false) {
+    $('#' + id).find("li").each(function() {
+        var item = $(this);
+        var className = item.attr('class');
+        if (className) {
+            if (className.match(/active/i)) {
+                item.find("a").each(function() {
+                    tabid = $(this).attr('id'); 
+                    return loadTab(tabid, reload);
+                });
+            }
+        }
+    });
 }

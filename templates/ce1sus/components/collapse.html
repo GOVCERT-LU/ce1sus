@@ -132,27 +132,27 @@ $( document ).ready(function() {
                         %>
                         %if attribute.bit_value.is_validated_and_shared or owner:
                         <tr>
-                        <td><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
-                        <td style="text-align:center">${shareicon}</td>
-                        <td><%call expr="messages_and_text.object_to_html(attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
-                        <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
-                        <td style="text-align:center">${iocicon}</td>
-                        <td style="width: 60px;">
-                          <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}');">
-                             <span class="glyphicon glyphicon-eye-open" title="View details"></span>
-                          </a>
-                          %if owner:
-                            <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}/');">
-                               <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
+                          <td><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
+                          <td style="text-align:center">${shareicon}</td>
+                          <td><%call expr="messages_and_text.object_to_html(attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
+                          <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
+                          <td style="text-align:center">${iocicon}</td>
+                          <td style="width: 60px;">
+                            <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}');">
+                               <span class="glyphicon glyphicon-eye-open" title="View details"></span>
                             </a>
-                            <a href="#" role="button"
-                              onclick="if (confirm('Are you sure you want to delete?')) {
-                                  dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
-                                             'eventTabs${event_id}TabContent',
-                                             '/events/event/objects/objects/${event_id}')}" title="delete">
-                               <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
-                            </a>
-                          %endif
+                            %if owner:
+                              <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/objects/${event_id}/${object.identifier}/');">
+                                 <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
+                              </a>
+                              <a href="#" role="button"
+                                onclick="if (confirm('Are you sure you want to delete?')) {
+                                    dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
+                                               'eventTabs${event_id}TabContent',
+                                               '/events/event/objects/objects/${event_id}')}" title="delete">
+                                 <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
+                              </a>
+                            %endif
                           </td>
                         </tr>
                         %endif
@@ -192,8 +192,8 @@ $( document ).ready(function() {
             %endfor
     %endif
     %if ident == 1:
-    <form id="paginatorModalAttributeForm">
-    <%call expr="modals.generic_modal(id='paginatorModalAttribute',title='No Title',content_url=None)">
+    <form id="paginatorModalAttributeFormObjectsStruct">
+    <%call expr="modals.generic_modal(id='paginatorModalAttributeObjectsStruct',title='No Title',content_url=None)">
     </%call>
     </form>
     <script type="text/javascript">

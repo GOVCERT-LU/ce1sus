@@ -7,12 +7,12 @@
     <div class="col-xs-12 col-sm-12" style="text-align:left">
         %if owner:
         <div class="btn-group">
-           <button class="btn btn-default" onclick="loadContent('eventEdit','/events/event/edit_event/${event.identifier}')">Edit</button>
+           <button class="btn btn-default" onclick="loadContent('eventEdit${event.identifier}','/events/event/edit_event/${event.identifier}')">Edit</button>
            <button class="btn btn-danger"
             onclick="if (confirm('Are you sure you want to delete?')) {
                 dialogCloseTabCall('/events/event/modify_event?identifier=${event.identifier}&action=remove',
                            'eventsTab',
-                           'eventsTab${event.identifier}')}">
+                           'eventsTab${event.identifier}');}">
             Delete
             </button>
            

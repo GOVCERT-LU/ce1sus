@@ -2,8 +2,12 @@
 
 <%def name="menu(id, contentid, loadSelected=True)">
 
-<nav class="navbar navbar-inverse" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="navbar-header">
+    <a href="#" class="navbar-brand">Ce1sus 1ibrary ${env}</a>
+  </div>
+  <div class="navbar-collapse collapse">
+
 		<ul id="${id}" class="nav navbar-nav">
 				    ${caller.body()}
 		</ul>

@@ -21,18 +21,18 @@
   %for relation in relations:
     <%
     if relation.rel_event.published == 0:
-      style = 'background-color: #ff0000'
+      style = 'background-color: #ff0000; cursor: pointer;'
     else:
-      style = ''
+      style = 'cursor: pointer;'
     %>
     <tr>
-    <td style="${style}"><%call expr="messages_and_text.object_to_html(relation.rel_event.identifier, shorten_to=100,use_plain_text=False)"/></td>
+    <td style="${style}" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.rel_event.identifier}', false, 'Event #${relation.rel_event.identifier}');"><%call expr="messages_and_text.object_to_html(relation.rel_event.identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_event.title, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
     <td style="width: 60px;">
-      <a href="#" onclick="loadNewTab('${relation.rel_event.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.rel_event.identifier}', true, 'Event #${relation.rel_event.identifier}');">
+      <a href="#" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.rel_event.identifier}', false, 'Event #${relation.rel_event.identifier}');">
          <span class="glyphicon glyphicon-eye-open" title="View event"></span>
       </a>
     </td>
