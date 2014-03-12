@@ -1,15 +1,15 @@
 [global]
 tools.encode.on = True
 tools.encode.encoding='UTF-8'
-environment='production'
 log.screen=True
 tools.staticdir.on=True,
-tools.staticdir.root=
+tools.staticdir.root='/path/to/ce1sus/htdocs'
 tools.staticdir.dir=''
 tools.sessions.on=True
 tools.sessions.timeout=60
 tools.auth.on=True
+#Do not set caching to true
 tools.caching.on=False
-tools.caching.delay=3600
 tools.db.on=True
 tools.sessions.clean_up_delay = 5
+request.show_tracebacks=False

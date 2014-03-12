@@ -17,8 +17,6 @@ The structurization provides helps for a better understanding of the provenances
 to a better overview how the events are related.
 
 
-
-
 Features:
 * Creates relations between events through their attributes
 * Stores and presents the event in a structured manner
@@ -63,7 +61,9 @@ Features:
 3. Import DB scheme
 4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
    - Use the templates (for an easier setup (Note: All sections have to be checked and set to the according levels)
+     Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus
 5. Run ce1sus
+6. Login as admin with password admin
 
 ## Documentation ##
 See the DOCUMENTATION file for details.
@@ -73,3 +73,6 @@ See the CHANGELOG file for details.
 
 ## License ##
 See the LICENSE file for details.
+
+## Remarks ##
+For any questions feel free to ask.

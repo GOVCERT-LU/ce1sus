@@ -11,8 +11,10 @@ usecherrypy=yes
 
 #General configurations for ce1sus
 [ce1sus]
-sendmails=yes
-useldap=yes
+#If set to yes emails will be send to the users/groups who can access/see the event
+sendmails=no
+useldap=no
+#The following variable be displayed in the title section
 environment=LOCAL_DEV
 enableRestAPI=yes
 #Not this has to be the external address for ce1sus

@@ -118,7 +118,7 @@ The gpg key folder has to be owned by the owner of the webserver (www-data)
 ### Ce1sus ###
 1. Install the requirements
 2. Clone the repository
-3. Import DB scheme
+3. Import DB scheme from docs/sql
 4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
    - Use the templates (for an easier setup 
    
@@ -130,11 +130,12 @@ The gpg key folder has to be owned by the owner of the webserver (www-data)
    * [Mailer]
    
    The remaining sections can be used as specified in the templates
+   Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus in all of the configurations.
    
 5. Run ce1sus either locally or via ngix/uwsgi
 
 ## User guide ##
-See MANUAL
+Will be soon available
 
 ## Rest API ##
 See ce1sus_api.ods for a basic overview of the different functions
@@ -151,7 +152,7 @@ There is not yet an automated installation of such handlers therefore they have 
 1. Create a handler extending either the Generichandler or HandlerBase
 2. Place it in ce1sus.commom.handlers
 3. Insert into the Table AttributeHanlders
-    * the modile and classname i.e. generichandler.GenericHandler
+    * the module and classname i.e. generichandler.GenericHandler
     * A uuid for the handler
 
 The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the uuid specified in the handler

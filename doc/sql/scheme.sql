@@ -49,16 +49,16 @@ CREATE TABLE `AttributeHandlers` (
 
 LOCK TABLES `AttributeHandlers` WRITE;
 /*!40000 ALTER TABLE `AttributeHandlers` DISABLE KEYS */;
-INSERT INTO `AttributeHandlers` VALUES (1,'generichandler.GenericHandler',NULL,3,'dea62bf0-8deb-11e3-baa8-0800200c9a66'),
-(2,'filehandler.FileWithHashesHandler',NULL,3,'e8b47b60-8deb-11e3-baa8-0800200c9a66'),
-(3,'linkhandler.RTHandler',NULL,3,'f1509d30-8deb-11e3-baa8-0800200c9a66'),
-(5,'linkhandler.CVEHandler',NULL,3,'04cda0b0-8dec-11e3-baa8-0800200c9a66'),
-(6,'multiplegenerichandler.MultipleGenericHandler',NULL,3,'08645c00-8dec-11e3-baa8-0800200c9a66'),
-(7,'filehandler.FileHandler',NULL,3,'0be5e1a0-8dec-11e3-baa8-0800200c9a66'),
-(8,'datehandler.DateHandler',NULL,3,'11406d00-8dec-11e3-baa8-0800200c9a66'),
-(9,'cbvaluehandler.CBValueHandler',NULL,3,'141dea70-8dec-11e3-baa8-0800200c9a66'),
-(10,'texthandler.TextHandler',NULL,3,'1a8ec7d0-8dec-11e3-baa8-0800200c9a66'),
-(11,'linkhandler.LinkHander',NULL,3,'1e18d8f0-8dec-11e3-baa8-0800200c9a66');
+INSERT INTO `AttributeHandlers` VALUES (1,'generichandler.GenericHandler','Generic Handler, usable for a single line entry',31,'dea62bf0-8deb-11e3-baa8-0800200c9a66'),
+(2,'filehandler.FileWithHashesHandler','Generates all the required file attributes when a file is uploaded',31,'e8b47b60-8deb-11e3-baa8-0800200c9a66'),
+(3,'linkhandler.RTHandler','Handler for RT Tickets. Note: Works only if RTKit is installed and cofigured.',31,'f1509d30-8deb-11e3-baa8-0800200c9a66'),
+(5,'linkhandler.CVEHandler','Handler for CVEs.',31,'04cda0b0-8dec-11e3-baa8-0800200c9a66'),
+(6,'multiplegenerichandler.MultipleGenericHandler','Similar to the GenericHandler but for each new line a new attribute of the same type is created.',31,'08645c00-8dec-11e3-baa8-0800200c9a66'),
+(7,'filehandler.FileHandler','Generates a sha1 and filename attribtue in addition when a file is uploaded',31,'0be5e1a0-8dec-11e3-baa8-0800200c9a66'),
+(8,'datehandler.DateHandler','Handler for dates. \r\n\r\nNote: Format nust be YYYY-MM-DD',31,'11406d00-8dec-11e3-baa8-0800200c9a66'),
+(9,'cbvaluehandler.CBValueHandler','Handler for ComboBoxes. \r\n\r\nNote: The values for the combbox is defined by the regex which has to be like the following \"^yes$|^no$\"',31,'141dea70-8dec-11e3-baa8-0800200c9a66'),
+(10,'texthandler.TextHandler','Handler for texts.',31,'1a8ec7d0-8dec-11e3-baa8-0800200c9a66'),
+(11,'linkhandler.LinkHander','Handler for links.',31,'1e18d8f0-8dec-11e3-baa8-0800200c9a66');
 /*!40000 ALTER TABLE `AttributeHandlers` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Attribute_Object_Relations`;
@@ -113,7 +113,7 @@ CREATE TABLE `Attributes` (
   CONSTRAINT `FK_Attr_parent_id_attr_id` FOREIGN KEY (`parent_attr_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `FK_Attr_Users_creator_id_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Attr_Users_modifier_id_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=361289 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Attributes` WRITE;
@@ -138,7 +138,7 @@ CREATE TABLE `Comments` (
   CONSTRAINT `FK_Comments_User_creator_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Comments_User_modifier_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_events_comments_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Comments` WRITE;
@@ -165,7 +165,7 @@ CREATE TABLE `DEF_Attributes` (
   KEY `IDX_def_attributes_chksum` (`chksum`),
   KEY `FK_DEF_Attr_AttrHandler_attibute_id` (`handlerIndex`),
   CONSTRAINT `FK_DEF_Attr_AttrHandler_attibute_id` FOREIGN KEY (`handlerIndex`) REFERENCES `AttributeHandlers` (`AttributeHandler_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=668 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=671 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `DEF_Attributes` WRITE;
@@ -175,23 +175,23 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (3,'hash_sha256','sha256 hash of a file','^[0-9a-fA-F]{64}$',1,6,1,1,1,'1350a97f87dfb644437814905cded4a86e58a480'),
 (4,'hash_sha384','sha384 hash of a file','^[0-9a-fA-F]{96}$',1,6,1,1,1,'40c1ce5808fa21c6a90d27e4b08b7b7171a23b92'),
 (5,'hash_sha512','sha512 hash of a file','^[0-9a-fA-F]{128}$',1,6,1,1,1,'6d2cf7df2da95b6f878a9be2b754de1e6d1f6224'),
-(6,'hash_ssdeep','ssdeep hash of a file','^\\d+:[a-zA-Z0-9+]+:[a-zA-Z0-9+]+$',1,6,1,1,1,'579955964b6950f03ef86fe4b38cd065800127b6'),
+(6,'hash_ssdeep','ssdeep hash of a file','^\\d+:[a-zA-Z0-9+]+:[a-zA-Z0-9+]+$',1,6,1,1,0,'579955964b6950f03ef86fe4b38cd065800127b6'),
 (7,'file_name','The file_name field specifies the name of the file.','^.+$',1,6,1,1,0,'beba24a09fe92b09002616e6d703b3a14306fed1'),
 (8,'size_in_bytes','The size_in_bytes field specifies the size of the file, in bytes.','^\\d+$',3,1,1,1,0,'9d99d7a9a888a8bfd0075090c33e6a707625673a'),
 (9,'magic_number','The magic_number specifies the particular magic number (typically a hexadecimal constant used to identify a file format) corresponding to the file, if applicable.','^.+$',1,1,1,1,0,'75f5ca9e1dcfd81cdd03751a7ee45a1ef716a05d'),
-(10,'reference_internal_identifier','Holds a reference to an internal ID number.','^\\d+$',3,3,1,1,0,'616cdf707dd0a11453502f0f1cc8f29cf0e30b87'),
+(10,'reference_internal_identifier','Holds a reference to an internal ID number.','^\\d+$',3,3,1,0,1,'616cdf707dd0a11453502f0f1cc8f29cf0e30b87'),
 (11,'vulnerability_cve','CVE reference to a known vulnerability','^CVE-\\d{4}-\\d{4,}$',1,5,1,1,1,'3e1bfba5cd1f0f691f9228a421a96696e4ceec5c'),
 (12,'raw_file','The raw file data','^.+$',1,2,1,0,0,'03c710c3265fe4488f559ebda358beb63525bda3'),
-(13,'raw_document_file','The raw document (non malicious file)','^.+$',1,7,1,1,0,'1ebe4177af30053b59b349611de8b83874552ccf'),
+(13,'raw_document_file','The raw document (non malicious file)','^.+$',1,7,1,0,0,'1ebe4177af30053b59b349611de8b83874552ccf'),
 (14,'hostname','Fully qualified domain name','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,1,'304b44f1d241b7b97a2d658cddf798042d416ca8'),
 (15,'description','Contains free text description for an object','^.+$',0,10,1,1,0,'408ae68eee4c289d0aac277963787374ff5ad137'),
 (16,'comment','Holds free text for comments about objects and event.','^.+$',0,10,1,0,0,'42dac9882bc6ab5e3c3d52cf5a7019b4c84ed20f'),
 (17,'is_malicious','Boolean to identify malicious objects','^yes$|^no$',1,9,1,1,0,'45abf1f8ae6f94c05c68d0627aca6aaaee157fb6'),
 (18,'malware_file_type','dropper, trojan, banking trojan, RAT, rogue document, phishing document,....','^virus$|^trojan$|^dropper$|^malware$|^rootkit$|^keylogger$|^worm$',1,9,1,1,0,'1315318855c519151051865b89daf21150ee349f'),
-(19,'file_full_path','The File path including the file name.','^.+$',1,1,1,1,0,'0cebf13a5cc2973ccc3b50981a27a033f0ab0d6a'),
+(19,'file_full_path','The File path including the file name.','^.+$',1,6,1,1,1,'3deeaa2d18bb3048292f90b0c059ef1ebda6bed5'),
 (20,'file_extension','The File_Extension field specifies the file extension of the file.','^.+$',1,1,1,1,0,'2032d235730e19920a156a0a800e12540ba25359'),
 (21,'file_format','The File_Format field specifies the particular file format of the file, most typically specified by a tool such as the UNIX file command.','^.+$',1,1,1,1,0,'6bb0adbd2fcbd13548e45565da4f1c48b71ad659'),
-(22,'digital_signature','The Digital_Signatures field is optional and captures one or more digital signatures for the file.','^.+$',0,10,1,1,1,'89bf3463897168294b65c622e5f910c734c393bf'),
+(22,'digital_signature','The Digital_Signatures field is optional and captures one or more digital signatures for the file.','^.+$',0,10,1,1,0,'89bf3463897168294b65c622e5f910c734c393bf'),
 (23,'file_modified_time','The Modified_Time field specifies the date/time the file was last modified.','^.+$',2,8,1,1,0,'46a80748b358f9f33a49bdaab613c6e7f0997037'),
 (24,'file_accessed_datetime','The Accessed_Time field specifies the date/time the file was last accessed.','^.+$',2,8,1,1,0,'a3fdb385ba736bc39ee50a56cdfea72a9e8e24dc'),
 (25,'file_created_datetime','The Created_Time field specifies the date/time the file was created.','^.+$',2,8,1,1,0,'d1bff3999396458e2472df468bc196ce632b48e2'),
@@ -202,13 +202,13 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (30,'vulnerability_free_text','Free text description for a vulnerability','^.+$',0,10,1,1,0,'98dd154b5d2fcf245666bacb2fbcda6fcb350478'),
 (31,'reference_url','URL pointing to online information','^.+$',1,11,1,1,0,'8c251c717b842f29fa3411219c41b4d1d532894a'),
 (32,'reference_free_text','Free text used to give reference information.','^.+$',0,10,1,1,0,'204a2682e62980f6659d3497d87e2daea4fe5218'),
-(33,'analysis_free_text','A free text analysis for the object. dd','^.+$',0,10,1,1,0,'452fba47ced447f27f20db54bfe70370447ff5c1'),
+(33,'analysis_free_text','A free text analysis for the object.','^.+$',0,10,1,1,0,'452fba47ced447f27f20db54bfe70370447ff5c1'),
 (34,'information_source','Free text holding information about the source of an information (e.g where did a document come from).','^.+$',0,10,1,1,0,'56b96a943ae84aa93f4327ad5bff2b6bf34252c4'),
 (35,'reference_internal_case','Holds a reference to an internal case to which the event is related.','^.+$',1,1,1,1,0,'bd5c60354d04682952254f0ad7b92ffa94b88f83'),
 (36,'reference_external_identifier','Contains an external identifier for the event','^.+$',1,1,1,0,1,'a1833102fe930fd33c55f63f0fefa65e8e94e38c'),
 (37,'creation_datetime','The creation time stamp of an object','^.+$',2,8,1,1,0,'7516648da395d83038eeebf09e9b1d1c52d6520f'),
-(38,'raw_pcap_file','The raw file data','^.+$',1,7,1,1,0,'187872308675251e2df91cbff7d02c162d99b778'),
-(39,'email_attachment_file_name','The Attachments field specifies any files that were attached to the email message. It imports and uses the CybOX FileObjectType from the File_Object to do so.','^.+$',1,1,1,1,0,'4fb9c6a95cef16b5b91084fef34648266cb0cfa7'),
+(38,'raw_pcap_file','The raw file data','^.+$',1,7,1,0,0,'187872308675251e2df91cbff7d02c162d99b778'),
+(39,'email_attachment_file_name','The Attachments field specifies any files that were attached to the email message. It imports and uses the CybOX FileObjectType from the File_Object to do so.','^.+$',1,6,1,1,0,'06ff6128f7d8492706a4f236bd05c434f09ab48d'),
 (40,'email_bcc','The BCC field specifies the email addresses of any recipients that were included in the blind carbon copy header of the email message.','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,0,'79cbb7999bc6a4c75d3ac426b4ea98b90d6dd5b1'),
 (41,'email_cc','The CC field specifies the email addresses of any recipients that were included in the carbon copy header of the email message.','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,0,'cdb410fab4a9bb160da0e266e185a8d9109310ff'),
 (42,'email_content_type','The Content-Type field specifies the internet media, or MIME, type of the email message content.','^.+$',1,1,1,1,0,'044cc82f1057d86ba6e468a534d6fef72989a3f3'),
@@ -217,15 +217,15 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (45,'email_in_reply_to','The In_Reply_To field specifies the message ID of the message that this email is a reply to.','^.+$',1,1,1,1,0,'feeef985f623f68a5b7160a22fa306c735a1a426'),
 (46,'email_message_id','The Message_ID field specifies the automatically generated ID of the email message.','^.+$',1,1,1,1,0,'08d3555ef4c29fe2ad8e5e916dc20fadd2b1a963'),
 (47,'email_mime_version','The MIME-Version field specifies the version of the MIME formatting used in the email message.','^.+$',1,1,1,1,0,'9969f591aaae20457c0d7a90a02a948ea115df3d'),
-(48,'email_raw_body','The Raw_Body field specifies the complete (raw) body of the email message.','^.+$',1,7,1,0,0,'27798f7502c9b45329ab14a9a2c797613f21fb77'),
-(49,'email_raw_header','The Raw_Header field specifies the complete (raw) headers of the email message.','^.+$',0,10,1,0,0,'29c34a2e442394ab031e94613dd46d907a022547'),
+(48,'email_raw_body','The Raw_Body field specifies the complete (raw) body of the email message.','^.+$',1,7,1,1,0,'27798f7502c9b45329ab14a9a2c797613f21fb77'),
+(49,'email_raw_header','The Raw_Header field specifies the complete (raw) headers of the email message.','^.+$',0,10,1,1,0,'29c34a2e442394ab031e94613dd46d907a022547'),
 (50,'email_receive_datetime','The Date field specifies the date/time that the email message was received by the mail server.','^.+$',2,8,1,1,0,'b00422663b098074b02b1c252f8464cf03c4dafc'),
 (51,'email_relay_ip','This attribute hold the IP address of an MTA used to deliver the mail.','^.+$',1,1,1,1,1,'71e951d917852abe8039abaecfc6ee7805f8cea9'),
 (52,'email_reply_to','The Reply_To field specifies the email address that should be used when replying to the email message.','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,1,1,1,0,'987f1f8263d855713ebd84c6899640875b1ac719'),
 (53,'email_send_datetime','The Date field specifies the date/time that the email message was sent.','^.+$',2,8,1,1,0,'3555502fb6a76e5951da4a8fdc3a90173c4da587'),
-(54,'email_sender','The Sender field specifies the email address of the sender who is acting on behalf of the author listed in the From: field','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,1,1,1,0,'94d4c5f854c43acd950d27e0244b650e5767987e'),
-(55,'email_server','The Email_Server field is optional and specifies the relevant email server.','^.+$',1,1,1,1,0,'39b2b50c988c163284c966797a605d9fda959cdc'),
-(56,'email_subject','The Subject field specifies the subject (a brief summary of the message topic) of the email message.','^.+$',1,1,1,1,0,'2ce464780bd3f8c2215849fd883bf236003d2778'),
+(54,'email_sender','The Sender field specifies the email address of the sender who is acting on behalf of the author listed in the From: field','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,1,1,1,1,'94d4c5f854c43acd950d27e0244b650e5767987e'),
+(55,'email_server','The Email_Server field is optional and specifies the relevant email server.','^.+$',1,1,1,1,1,'39b2b50c988c163284c966797a605d9fda959cdc'),
+(56,'email_subject','The Subject field specifies the subject (a brief summary of the message topic) of the email message.','^.+$',1,1,1,1,1,'2ce464780bd3f8c2215849fd883bf236003d2778'),
 (57,'email_to','The To field specifies the email addresses of the recipients of the email message.','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,0,'e56afb60554c27a596338fb54862bb9f17e5f77f'),
 (58,'email_x_mailer','The X-Mailer field specifies the software used to send the email message. This field is non-standard.','^.+$',1,1,1,1,0,'0620ff7527bb1da229bfe531a331178140482bb1'),
 (59,'email_x_originating_ip','The X-Originating-IP field specifies the originating IP Address of the email sender, in terms of their connection to the mail server used to send the email message. This field is non-standard.','^.+$',1,1,1,1,0,'21ab432d3a8e45268ad496f8f6dad3babf32a6d4'),
@@ -236,44 +236,43 @@ INSERT INTO `DEF_Attributes` VALUES (1,'hash_md5','md5 hash of a file','^[0-9a-f
 (64,'ida_pro_file','An IDA pro file.','^.+$',1,7,1,1,0,'56e75ee498e22a82f5d8ff7b4b5ce66cc3e78214'),
 (65,'log_records','Free text for storing log information.','^.+$',0,10,1,1,0,'4f5eca66b72a03d44e5663da38147dc55ea7764a'),
 (66,'whois','Whois network information','^.+$',0,10,1,1,0,'34bbb09bca2a02158170067847f3447a6c99a188'),
-(67,'asn','The asn value specifies an identifier for an autonomous system number.','^.+$',1,1,1,1,1,'f58374950a2493f6c65628853c53c8f3d348b652'),
+(67,'asn','The asn value specifies an identifier for an autonomous system number.','^.+$',1,6,1,1,1,'1640b2e9fc72eb8653a96152d6e43dbee39cba0a'),
 (68,'domain','Contains a fully qualified domain name','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,1,'90828f4af42b665fb1a426b3a887019b0da61eb4'),
-(69,'file_content_pattern','Contains a pattern that can be found in the raw file data','^.+$',1,1,1,1,0,'ae7bb656b0f3c66a349c713c9f8f27f111916c26'),
-(70,'file_full_path_pattern','A pattern that matches the full path of a file (including its file name).','^.+$',1,1,1,1,0,'f930e4d37fa2a8ef374bc61e1f8cf7c8d632d96c'),
-(71,'file_name_pattern','A pattern that matches the file name','^.+$',1,1,1,1,0,'d057a7295b689bc157701a9dbd5915c3787eea95'),
+(69,'file_content_pattern','Contains a pattern that can be found in the raw file data','^.+$',1,1,1,1,1,'ae7bb656b0f3c66a349c713c9f8f27f111916c26'),
+(70,'file_full_path_pattern','A pattern that matches the full path of a file (including its file name).','^.+$',1,6,1,1,1,'e9c9673adab78472dd9bd537fe3e71e27da02be2'),
+(71,'file_name_pattern','A pattern that matches the file name','^.+$',1,6,1,1,1,'1151d630f84f79fe3314d78dd71d64420ee6d70f'),
 (72,'hostname_c&c','Fully qualified domain name of a host hosting a command and control server','^(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,1,'1ddc87499788f4e241a00dc109ff92532b00059f'),
 (73,'ids_rules','Holds IDS rules. These rules need to be prefixed with the used format (e.g. snort).','^.+$',0,6,1,1,0,'d66dc46c3d6c003104e56bfb7510239416d6588f'),
 (74,'ipv4_addr','The IPv4-addr value specifies an IPV4 address.','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$',1,6,1,1,1,'cdfd7afaf21cede78d8d09e36aae52c82ebe1f69'),
 (75,'ipv4_addr_c&c','IPv4 address hosting a command and control server','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$',1,6,1,1,1,'4832af9c21e301a5c957576f39764b715aa08cbf'),
-(76,'ipv4_net','IPv4 CIDR block','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$',1,6,1,1,0,'d2c4f5ac5fe93b08a8527734ddde58ba84fa8aac'),
+(76,'ipv4_net','IPv4 CIDR block','^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}$',1,6,1,1,1,'d2c4f5ac5fe93b08a8527734ddde58ba84fa8aac'),
 (77,'ipv6_addr','The IPv6-addr value specifies an IPv6 address.','^.+$',1,6,1,1,1,'7fa231f4cd8e63ddd64a3ca8d2e3e0184290e6c2'),
 (78,'ipv6_addr_c&c','IPv6 address hosting a command and control server','^.+$',1,6,1,1,1,'c2ee2f470c24a5b99ae0d5b0f46236746a40ef2a'),
-(79,'ipv6_net','IPv6 sub-network','^.+$',1,6,1,1,0,'fa08732c96cbae117fb166b44dc6d95a040182a7'),
+(79,'ipv6_net','IPv6 sub-network','^.+$',1,6,1,1,1,'fa08732c96cbae117fb166b44dc6d95a040182a7'),
 (80,'mutex','The Mutex object is intended to characterize generic mutual exclusion (mutex) objects.','^.+$',1,6,1,1,1,'6b6612510088b40d84d4efa687e03b4cf9ba476f'),
 (81,'open_ioc_definition','Hold open IOC definitions.','^.+$',1,7,1,1,0,'4098d7b47789dbad918d1681305c61ff760d4fff'),
 (82,'traffic_content_pattern','Pattern matching network traffic content.','^.+$',1,1,1,1,0,'cc35a2e8d1fe7b658f5124797572d6041abca614'),
-(83,'url','Holds a complete URL (e.g. http://www.govcert.lu/en/index.hmtl)','^.+$',1,6,1,1,0,'ed3f523221541f4318716ace3c51ebd44ef593e9'),
+(83,'url','Holds a complete URL (e.g. http://www.govcert.lu/en/index.hmtl)','^.+$',1,11,1,1,0,'45c2e97e2782cf8d96c1143d3d03cb2ca5715ad8'),
 (84,'url_path','Holds only the path part of an URL. (e.g. /en/index.html)','^.+$',1,6,1,1,0,'8839eb1c1aec5a82fe09e9b0a29ef007395ef7ad'),
 (85,'url_pattern','Holds a pattern that matches URL.','^.+$',1,6,1,1,0,'97992b35806bb95123fe5698eb739419d556ccf7'),
-(86,'win_registry_key','The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.','^.+$',0,10,1,1,1,'2687dcd982aced325ba5476d19c100897ab9df47'),
-(87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,10,1,1,1,'98fc9e6a364ad850765c20a0eb55ad7b2df7b3ee'),
+(86,'win_registry_key','The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.','^.+$',0,10,1,1,0,'2687dcd982aced325ba5476d19c100897ab9df47'),
+(87,'yara_rule','Holds YARA rules used to identify and classify malware samples.','^.+$',0,10,1,1,0,'98fc9e6a364ad850765c20a0eb55ad7b2df7b3ee'),
 (88,'mime_type','mime_type','^.+$',0,1,1,1,0,'b7cc0982923b2a26f8665b44365b590400cff9bf'),
-(89,'compromized_hostname','compromized_hostname','^.+$',1,1,1,1,1,'62f87cdb0deddb0359a1ff0cc06eb0446f10eb11'),
-(90,'ipv4_addr_phishingSite','ipv4_addr_phishingSite','^.+$',1,1,1,1,1,'d5c2621b1861a94a654149c745f81a291b60a2e2'),
 (91,'ip_port','IP port','^[\\d]{1,}$',3,1,1,1,0,'5b64983419e14b6e14b5c1b7dc88df8e519a5650'),
 (101,'ip_protocol','IP protocol','^tcp$|^udp$|^icmp$',1,9,1,1,0,'1b451a5443e2fa80e03757dddc78b3d6471d425c'),
 (111,'file_id','File description as returned by unix \"file\" command','^.+$',1,1,1,1,0,'745af7b7cf3bf4c5a0b2b04ad9cd2c9b8da39fc1'),
 (121,'xor_pattern','The xor_pattern field contains a hexadecimal-character hex string','^(?:0x)?[a-fA-F0-9-:]+$',1,6,1,1,1,'b2fa4aa6d962c9defb974e355910505e6688f2ed'),
 (131,'username','The Username field specifies the particular username of the user account','^[a-zA-Z0-9._-]+$',1,1,1,1,0,'7deec7c49b69c77efecaa39ea3e72b5d043afd6a'),
 (141,'password','Passwords are clear text stings used to authenticated a user','^.+$',1,1,1,1,1,'8bda7d81460bea54192da176f1700b9c313aa962'),
-(151,'full_name','The Full_Name field specifies the full name of the user','^.+$',1,1,1,0,0,'e40de7dccb534b85f9db42e5b990b8a06a5027cf'),
-(161,'encryption_key','Clear text stings used along with an encryption algorithm in order to cypher data','^.+$',0,10,1,1,1,'a73a20f8e9d91b906683e35108c28f2770923606'),
-(171,'email_address','The associated email address','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,0,'c98c68de457bcadfdeb6347b1add00f147b87320'),
-(181,'http_user_agent','HTTP defines methods (sometimes referred to as verbs) to indicate the desired action to be performed on the identified resource. What this resource represents, whether pre-existing data or data that is generated dynamically, depends on the implementation of the server. Often, the resource corresponds to a file or the output of an executable residing on the server.','^.+$',1,1,1,1,0,'0343b882c2156d8a62f3d5ab9dea5523af2cf8fb'),
+(151,'full_name','The Full_Name field specifies the full name of the user','^.+$',1,6,1,0,1,'9c1983c73e71473e16c27340e7bed25ea379c784'),
+(161,'encryption_key','Clear text stings used along with an encryption algorithm in order to cypher data','^.+$',0,10,1,1,0,'a73a20f8e9d91b906683e35108c28f2770923606'),
+(171,'email_address','The associated email address','^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$',1,6,1,1,1,'c98c68de457bcadfdeb6347b1add00f147b87320'),
+(181,'http_user_agent','HTTP defines methods (sometimes referred to as verbs) to indicate the desired action to be performed on the identified resource. What this resource represents, whether pre-existing data or data that is generated dynamically, depends on the implementation of the server. Often, the resource corresponds to a file or the output of an executable residing on the server.','^.+$',1,6,1,1,0,'f7a02a199ed15f3bcdae4b6c3a10547b88ec7cfa'),
 (191,'http_method','The Hypertext Transfer Protocol (HTTP) identifies the client software originating the request, using a \"User-Agent\" header, even when the client is not operated by a user.','^GET$|^HEAD$|^POST$|^PUT$|^DELETE$|^TRACE$|^OPTIONS$|^CONNECT$|^PATCH$',1,9,1,1,0,'94c4b13a5acca85cc227ee43aa958f67151152d1'),
 (201,'http_version','HTTP uses a \"<major>.<minor>\" numbering scheme to indicate versions of the protocol.','^\\d+\\.\\d+$',1,1,1,1,0,'16fbca2bbca4eedfd50b6400c7b21412b6bdcfa6'),
-(214,'Test_attribute','test description','^.+$',0,10,1,1,0,'13c857889d8e393be8a2961e868e21730b330f3e'),
-(667,'memory_pattern','Contains a memory pattern','^.+$',0,10,1,1,0,'1204c194109b6716fcdae9b6e03f0614e8248843');
+(211,'memory_pattern','Contains a memory pattern','^.+$',0,10,1,1,1,'1204c194109b6716fcdae9b6e03f0614e8248843'),
+(221,'campaign','The Campaign field characterizes a single cyber threat Campaign.\r\n','^.+$',1,1,1,0,1,'30164ef9b506235589e5d4623b8b49223d6f49d5'),
+(241,'named_pipe','Specifies a named pipe handle.','^.+$',1,6,1,1,1,'6c384560f8eafadd17bedb3829ff61aa5b2b5364');
 /*!40000 ALTER TABLE `DEF_Attributes` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DEF_Objects`;
@@ -288,7 +287,7 @@ CREATE TABLE `DEF_Objects` (
   PRIMARY KEY (`def_object_id`),
   UNIQUE KEY `chksum_UNIQUE` (`chksum`),
   KEY `IDX_def_objects_chksum` (`chksum`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=670 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `DEF_Objects` WRITE;
@@ -303,8 +302,7 @@ INSERT INTO `DEF_Objects` VALUES (1,'generic_file','Generic file','7a6272431a454
 (8,'ioc_records','ioc_records','4ffb865c9d6950a643fd29d7170e849b1d077b9a',1),
 (9,'malicious_website','malicious_website','e34bafaf6afd4a30188913d181fce87d85fcf037',1),
 (10,'source_code','source_code\r\n\r\nThis includes all uncompiled code','0c4fa34ab948d93a78795a5301c11f772a635620',1),
-(11,'user_account','User profile','4ab2df0a57a74fdf904e0e27086676ed9c4c3cdf',1),
-(16,'test_object','test description sdf 2','fc20ab0360ba35c4e29401c286d995b761a3cfc0',1);
+(11,'user_account','User profile','4ab2df0a57a74fdf904e0e27086676ed9c4c3cdf',1);
 /*!40000 ALTER TABLE `DEF_Objects` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DObj_has_DAttr`;
@@ -347,12 +345,13 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (5,5),
 (6,5),
 (8,5),
+(10,5),
 (1,6),
-(2,6),
 (6,6),
 (8,6),
 (10,6),
 (1,7),
+(5,7),
 (6,7),
 (8,7),
 (10,7),
@@ -389,7 +388,6 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (11,15),
 (1,16),
 (2,16),
-(3,16),
 (4,16),
 (6,16),
 (7,16),
@@ -456,6 +454,7 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (8,31),
 (9,31),
 (10,31),
+(11,31),
 (1,32),
 (2,32),
 (3,32),
@@ -466,6 +465,7 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (8,32),
 (9,32),
 (10,32),
+(11,32),
 (1,33),
 (4,33),
 (5,33),
@@ -473,18 +473,17 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (7,33),
 (9,33),
 (10,33),
+(2,34),
 (3,35),
 (3,36),
 (4,37),
 (4,38),
 (5,39),
-(8,39),
 (5,40),
 (5,41),
 (5,42),
 (5,43),
 (5,44),
-(8,44),
 (5,45),
 (5,46),
 (5,47),
@@ -497,7 +496,6 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (5,54),
 (5,55),
 (5,56),
-(8,56),
 (5,57),
 (5,58),
 (5,59),
@@ -540,6 +538,7 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (8,84),
 (8,85),
 (8,86),
+(8,87),
 (1,88),
 (6,88),
 (8,91),
@@ -551,12 +550,13 @@ INSERT INTO `DObj_has_DAttr` VALUES (1,1),
 (8,141),
 (11,141),
 (11,151),
-(8,161),
 (11,171),
 (8,181),
 (8,191),
 (8,201),
-(8,667);
+(8,211),
+(3,221),
+(8,241);
 /*!40000 ALTER TABLE `DObj_has_DAttr` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `DateValues`;
@@ -600,7 +600,7 @@ CREATE TABLE `EventRelations` (
   CONSTRAINT `fk_EventRelations_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_EventRelations_attr_rel_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Nerf` FOREIGN KEY (`rel_attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=284302 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `EventRelations` WRITE;
@@ -628,6 +628,7 @@ CREATE TABLE `Events` (
   `uuid` varchar(45) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `creatorGroup` int(11) NOT NULL,
   `code` int(1) NOT NULL,
+  `last_publish_date` datetime DEFAULT NULL,
   PRIMARY KEY (`event_id`),
   KEY `IDX_Events_uuid` (`uuid`),
   KEY `IDK_Events_creator_id` (`creator_id`),
@@ -636,7 +637,7 @@ CREATE TABLE `Events` (
   CONSTRAINT `FK_Events_Groups_creator` FOREIGN KEY (`creatorGroup`) REFERENCES `Groups` (`group_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Events_User_creator_user_ID` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Events_User_modifier_user_ID` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=817 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Events` WRITE;
@@ -661,25 +662,6 @@ LOCK TABLES `Events_has_Objects` WRITE;
 /*!40000 ALTER TABLE `Events_has_Objects` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Events_has_Objects` ENABLE KEYS */;
 UNLOCK TABLES;
-DROP TABLE IF EXISTS `ExtCe1sus`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ExtCe1sus` (
-  `extce1sus_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `url` varchar(255) NOT NULL,
-  `apikey` varchar(45) NOT NULL,
-  `last_full_sync` datetime DEFAULT NULL,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `created` datetime NOT NULL,
-  PRIMARY KEY (`extce1sus_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `ExtCe1sus` WRITE;
-/*!40000 ALTER TABLE `ExtCe1sus` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ExtCe1sus` ENABLE KEYS */;
-UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -691,17 +673,17 @@ CREATE TABLE `Groups` (
   `tlplvl` int(1) NOT NULL,
   `email` varchar(255) CHARACTER SET utf32 COLLATE utf32_unicode_ci NOT NULL,
   `usermails` int(1) NOT NULL DEFAULT '0',
-  `pgpKey` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `ce1sus_url` varchar(255) DEFAULT NULL,
+  `gpg_key` text,
   PRIMARY KEY (`group_id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `IDK_Groups_tlplvl` (`tlplvl`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=668 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Groups` WRITE;
 /*!40000 ALTER TABLE `Groups` DISABLE KEYS */;
-INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'a@a.com',0,NULL,NULL);
+INSERT INTO `Groups` VALUES (1,'Default_Group','Default Group, for all users',0,3,'default@localhost.com',0,NULL,NULL);
 /*!40000 ALTER TABLE `Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Groups_has_Events`;
@@ -728,16 +710,20 @@ DROP TABLE IF EXISTS `Mails`;
 CREATE TABLE `Mails` (
   `mail_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` text NOT NULL,
   `body` text NOT NULL,
   `function_id` int(11) NOT NULL,
-  `subject` varchar(255) NOT NULL,
-  PRIMARY KEY (`mail_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `subject` text NOT NULL,
+  PRIMARY KEY (`mail_id`),
+  UNIQUE KEY `function_id_UNIQUE` (`function_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Mails` WRITE;
 /*!40000 ALTER TABLE `Mails` DISABLE KEYS */;
+INSERT INTO `Mails` VALUES (1,'Activation','User Activation Mail\r\n\r\nThe following place holders are available:\r\n${sirname}         - Sirname of the user\r\n${name}            - Name of the user\r\n${activation_link} - Activation link\r\n${ce1sus_url}      - URL of this ce1sus\r\n${username}        - Username\r\n${password}        - Password in plaintext\r\n\r\n\r\nNote:\r\nThe activation link has to be present in this mail else the user wont be able to activate his/her account','Dear ${sirname} ${name}\r\n\r\nWelcome to the Ce1sus community. Your user account has been created and has to be activated over the following link:\r\n\r\n${activation_link}\r\n\r\nNote: The activation is valid for 24 hours.\r\n\r\nThe normal page of the system you can by accessed at the following URL: \r\n\r\n${ce1sus_url}\r\n\r\nYour login credentials are as follow:\r\n\r\nUsername: ${username}\r\nPassword: ${password}\r\n\r\nTo activate your account please visit the following link\r\n\r\n\r\nWe hope that you find the information contained in our database useful and we’re looking forward to all the valuable information that you’ll be able to share with us.\r\n\r\nPlease keep in mind that all users and organisations have to conform to the Terms of Use, they are there to make sure that this community works based on trust and that there is fair contribution of validated and valuable data into Ce1sus.\r\n\r\nIf you run into any issues or have any feedback regarding Ce1sus, don\'t hesitate to contact us at ce1sus@govcert.etat.lu\r\n\r\nLooking forward to fostering the collaboration between our organisations through your active participation in this information sharing program.\r\n\r\nBest Regards,',1,'User Registration'),
+(2,'Update','Mail send on updates\r\n\r\nThe following place holders are available for the subject:\r\n${event_id}     - Internal event identifier\r\n${event_uuid}   - UUID of the event\r\n${event_tlp}    - TLP level\r\n${event_risk}   - Risk\r\n${event_title}  - event title\r\n\r\nThe following place holders are available for the body:\r\n${event_url}         - Url to the externalview of the event\r\n${event_uuid}        - UUID of the event\r\n${event_title}       - Title of the event\r\n${event_created}     - creation date\r\n${event_reporter}    - group name of the creator\r\n${event_risk}        - Risk\r\n${event_analysis}    - Analysis\r\n${event_description} - Event description\r\n\r\n${event_relations}         - All the links of the related event\r\n${event_objects}           - All the event objects and their attributes\r\n${event_updated_relations} - All the links of the related event, which changed since the last publication\r\n${event_updated_objects}   - All the event objects and their attributes, which changed since the last publication','==============================================\r\nURL            : ${event_url}\r\nEvent          : ${event_uuid}\r\n==============================================\r\nTitle          : ${event_title}\r\nDate           : ${event_created}\r\nReported by    : ${event_reporter}\r\nRisk           : ${event_risk}\r\nAnalysis       : ${event_analysis}\r\nDescription    : \r\n${event_description}\r\n==============================================\r\nRelated to     : \r\n${event_relations}\r\n==============================================\r\nEvent Objects  :\r\n\r\n${event_objects}\r\n==============================================\r\nUpdated Relations :\r\n${event_updated_relations}\r\n==============================================\r\nUpdated Objects   :\r\n${event_updated_objects}\r\n==============================================',2,'Event[${event_id}] ${event_uuid} Updated - ${event_tlp} - ${event_risk} - ${event_title}'),
+(3,'Publication','Mail send on publication\r\n\r\nThe following place holders are available for the subject:\r\n${event_id}     - Internal event identifier\r\n${event_uuid}   - UUID of the event\r\n${event_tlp}    - TLP level\r\n${event_risk}   - Risk\r\n${event_title}  - event title\r\n\r\nThe following place holders are available for the body:\r\n${event_url}         - Url to the externalview of the event\r\n${event_uuid}        - UUID of the event\r\n${event_title}       - Title of the event\r\n${event_created}     - creation date\r\n${event_reporter}    - group name of the creator\r\n${event_risk}        - Risk\r\n${event_analysis}    - Analysis\r\n${event_description} - Event description\r\n\r\n${event_relations}         - All the links of the related event\r\n${event_objects}           - All the event objects and their attributes','==============================================\r\nURL            : ${event_url}\r\nEvent          : ${event_uuid}\r\n==============================================\r\nTitle          : ${event_title}\r\nDate           : ${event_created}\r\nReported by    : ${event_reporter}\r\nRisk           : ${event_risk}\r\nAnalysis       : ${event_analysis}\r\nDescription    : \r\n${event_description}\r\n==============================================\r\nRelated to     : \r\n${event_relations}\r\n==============================================\r\nEvent Objects  :\r\n\r\n${event_objects}\r\n==============================================',3,'Event[${event_id}] ${event_uuid} Published - ${event_tlp} - ${event_risk} - ${event_title}');
 /*!40000 ALTER TABLE `Mails` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `NumberValues`;
@@ -754,7 +740,7 @@ CREATE TABLE `NumberValues` (
   KEY `idx_NumberValues_event_event_id` (`event_id`),
   CONSTRAINT `fk_NumberValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `fk_NumberValues_event_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `NumberValues` WRITE;
@@ -793,6 +779,7 @@ CREATE TABLE `Objects` (
   `code` int(1) NOT NULL DEFAULT '0',
   `modifier_id` bigint(20) DEFAULT NULL,
   `uuid` varchar(45) NOT NULL,
+  `modified` datetime NOT NULL,
   PRIMARY KEY (`object_id`),
   KEY `IDX_DObj_objects_def_object_id` (`def_object_id`),
   KEY `IDX_objects_events_event_id` (`event_id`),
@@ -807,38 +794,12 @@ CREATE TABLE `Objects` (
   CONSTRAINT `FK_Obj_Obj_parent_id_object_id` FOREIGN KEY (`parentObject`) REFERENCES `Objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Obj_user_creator_id_user_id` FOREIGN KEY (`creator_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_Obj_user_modifier_id_user_id` FOREIGN KEY (`modifier_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1213 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Objects` WRITE;
 /*!40000 ALTER TABLE `Objects` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Objects` ENABLE KEYS */;
-UNLOCK TABLES;
-DROP TABLE IF EXISTS `PushErrors`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `PushErrors` (
-  `error_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `error_message` varchar(255) NOT NULL,
-  `subgroup_id` bigint(20) DEFAULT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `data` longtext NOT NULL,
-  `created` datetime NOT NULL,
-  `resolution_id` int(11) NOT NULL DEFAULT '0',
-  `group_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`error_id`),
-  KEY `FK_PError_Group_group_id_idx` (`user_id`),
-  KEY `FK_PError_User_user_id_idx` (`subgroup_id`),
-  KEY `fk_PushErrors_1_idx` (`group_id`),
-  CONSTRAINT `FK_PError_Group_group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_PError_SubGroup_subgroup_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_PError_User_user_id` FOREIGN KEY (`subgroup_id`) REFERENCES `SubGroups_has_Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-LOCK TABLES `PushErrors` WRITE;
-/*!40000 ALTER TABLE `PushErrors` DISABLE KEYS */;
-/*!40000 ALTER TABLE `PushErrors` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `StringValues`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -853,7 +814,7 @@ CREATE TABLE `StringValues` (
   KEY `IDX_StringValues_event_event_id` (`event_id`),
   CONSTRAINT `fk_StringValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_StringValues_event_event_id` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=360692 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `StringValues` WRITE;
@@ -892,7 +853,7 @@ CREATE TABLE `Subgroups` (
 
 LOCK TABLES `Subgroups` WRITE;
 /*!40000 ALTER TABLE `Subgroups` DISABLE KEYS */;
-INSERT INTO `Subgroups` VALUES (1,'Default_Subgroup','Default_Subgroup');
+INSERT INTO `Subgroups` VALUES (1,'All','Everyone');
 /*!40000 ALTER TABLE `Subgroups` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `Subgroups_has_Groups`;
@@ -925,7 +886,7 @@ CREATE TABLE `TextValues` (
   KEY `IDX_TextValues_attribute_id` (`attribute_id`),
   KEY `event_id` (`event_id`),
   CONSTRAINT `FK_TextValues_attr_attribute_id` FOREIGN KEY (`attribute_id`) REFERENCES `Attributes` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=500 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `TextValues` WRITE;
@@ -945,20 +906,25 @@ CREATE TABLE `Users` (
   `disabled` int(1) NOT NULL DEFAULT '1',
   `apikey` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `group_id` int(11) DEFAULT NULL,
-  `pgpKey` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `activated` int(1) NOT NULL DEFAULT '0',
+  `gpg_key` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+  `activated` datetime DEFAULT NULL,
+  `activation_sent` datetime DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `sirname` varchar(255) NOT NULL,
+  `activation_str` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`),
   UNIQUE KEY `username_UNIQUE` (`username`),
   UNIQUE KEY `apikey_UNIQUE` (`apikey`),
   KEY `fk_users_groups_mainGroup` (`group_id`),
+  KEY `idx_activation_str` (`activation_str`),
   CONSTRAINT `FK_User_Group_Group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=712 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2014-02-13 08:58:39','admin@admin.com',0,NULL,11,NULL,0);
+INSERT INTO `Users` VALUES (1,'admin','dd94709528bb1c83d08f3088d4043f4742891f4f',1,'2014-03-12 09:27:41','admin@admin.com',0,NULL,1,'','2014-02-20 15:33:57','2014-02-21 18:10:15','Root','Administrator',NULL);
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `ce1sus`;
@@ -970,14 +936,14 @@ CREATE TABLE `ce1sus` (
   `value` text NOT NULL,
   PRIMARY KEY (`ce1sus_id`),
   UNIQUE KEY `key_UNIQUE` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `ce1sus` WRITE;
 /*!40000 ALTER TABLE `ce1sus` DISABLE KEYS */;
-INSERT INTO `ce1sus` VALUES (1,'app_rev','0.7.3'),
-(2,'db_shema','0.8.0'),
-(3,'handler_config','{}');
+INSERT INTO `ce1sus` VALUES (1,'app_rev','0.8.6'),
+(11,'db_shema','0.8.3'),
+(31,'handler_config','{\"files\": \"\"}');
 /*!40000 ALTER TABLE `ce1sus` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
