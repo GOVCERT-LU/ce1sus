@@ -111,11 +111,11 @@ class AttributesController(Ce1susBaseController):
           except ValidationException:
             valid = False
       if valid:
-        self.attribute_broker.do_commit(True)
+        self.object_broker.update_object(user, obj, commit=False)
         event = obj.get_parent_event()
         event.published = 0
-        self.object_broker.update_object(user, obj, commit=False)
         self.event_broker.update_event(user, event, commit=False)
+        self.attribute_broker.do_commit(True)
       else:
         self.attribute_broker.do_rollback()
 

@@ -70,6 +70,7 @@ class AttributesView(Ce1susBaseView):
     Renders the view for the handler input
     """
     try:
+      self._put_to_session('instertedObject', object_id)
       # Clear Session variable
       self._put_to_session('instertAttribute', None)
 

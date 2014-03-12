@@ -39,6 +39,7 @@ class ObjectsView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       # fill dictionary of attribute definitions but only the needed ones
@@ -57,10 +58,7 @@ class ObjectsView(Ce1susBaseView):
       object_list = self.objects_controller.get_all_event_obejcts(event, ower)
 
       if object_id is None:
-        try:
-          object_id = self._pull_from_session('instertedObject')
-        except SessionNotFoundException:
-          object_id = None
+        object_id = self._pull_from_session('instertedObject')
       return self._render_template('/events/event/objects/objectsBase.html',
                                    event_id=event_id,
                                    object_list=object_list,
