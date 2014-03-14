@@ -1,23 +1,17 @@
 # ce1sus a Thread Information Database #
 
-NOTE: This is still not the final release, but the database wont change. For any questions write a mail to the developers
+The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners. 
 
-The purpose of ce1sus is to store any information around any kind of thread in a structured manner and 
-share this information with trusted partners. The threads contained in this database can be of any type (i.e. scam, malware) and
-the modeled event in ce1sus should represent the real case it self. 
+The ce1sus events is designed to represent the real-life case as as close as possible. 
 
 Example:
 Email with a malicious attachment
 
-In such cases the event should be composed of an email object which has a a child the attachment. 
-The child on his side can also have children when for instance the file drops other files. Each object should also have
-their respective attributes, which can later be used to relate the event to other events.
+In such cases the event should start by an email object. That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object then will get a child object representing the attachment. If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
 
-The structurization provides helps for a better understanding of the provenances of the different attributes and this leads
-to a better overview how the events are related.
+Such structurization provides help for a better understanding of the provenances of the different attributes and this leads to a better overview how the events are related.
 
-
-Features:
+##Features##
 * Creates relations between events through their attributes
 * Stores and presents the event in a structured manner
 * Different levels of sharing 
@@ -35,18 +29,18 @@ Features:
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap
-  * dateutil
-  * cherrypy3
+  * python-ldap (2.4.10+)
+  * dateutil (1.5+)
+  * cherrypy3 (3.2.2+)
   * memcache
   * rtkit (optional)
   * gnupg (0.3.5+)
 - mysql (5.1+)
-- nginx (v1.4+) (Optional)
+- nginx (1.4+)
+- uwsgi (1.2.3+, with python-2 support)
 
 ## RoadMap ##
 * Improved web interface
-* Improved mails
 * Maintenance tools
 * Share definitions
 * Proposal mechanism
@@ -62,8 +56,14 @@ Features:
 4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
    - Use the templates (for an easier setup (Note: All sections have to be checked and set to the according levels)
      Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus
-5. Run ce1sus
-6. Login as admin with password admin
+5. Configure ngix/uwsgi or run it locally
+6. Run ce1sus
+7. Login as admin with password admin
+
+##Note##
+This is still not the final release, we are still adding functionalities. The database scheme however is final and will not change.
+
+For any questions write a mail to the developers
 
 ## Documentation ##
 See the DOCUMENTATION file for details.

@@ -2,7 +2,7 @@
 
 NOTE: The documentation is still a bit short yet but will be updated soon
 
-## Installataion ##
+## Installation ##
 
 ### Requirements ###
 - python
@@ -13,13 +13,11 @@ NOTE: The documentation is still a bit short yet but will be updated soon
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
   * python-ldap
-  * dateutil
-  * cherrypy3
+  * dateutilis
   * memcache
   * rtkit (optional)
   * gnupg (0.3.5+)
 - mysql (5.1+)
-- nginx (v1.4+) (Optional)
 
 ### Webserver ###
 There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
@@ -113,7 +111,8 @@ The mail templates can be configured via the admin interface, for more informati
 -> all user who can see the event
 
 ### Notes ###
-The gpg key folder has to be owned by the owner of the webserver (www-data)
+1. The gpg key folder has to be owned by the owner of the webserver (www-data)
+2. Sending mails will also depends on the configuration of ce1sus
 
 ### Ce1sus ###
 1. Install the requirements
@@ -127,7 +126,7 @@ The gpg key folder has to be owned by the owner of the webserver (www-data)
    * [ce1sus]
    * [Handlers]
    * [Mako]
-   * [Mailer]
+   * [Mailer] (only required if ErrorHandler/useMailer or ce1sus/sendmail is set to yes)
    
    The remaining sections can be used as specified in the templates
    Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus in all of the configurations.
@@ -136,6 +135,9 @@ The gpg key folder has to be owned by the owner of the webserver (www-data)
 
 ## User guide ##
 Will be soon available
+
+## Attributes ##
+ce1us offers the possibility to create custom attributes or edit the existing ones. However this can cause troubles if the events are shared (i.e. unwanted duplicates). Therefore it is suggested at least in the beginning not to change the existing attribute definitions.
 
 ## Rest API ##
 See ce1sus_api.ods for a basic overview of the different functions

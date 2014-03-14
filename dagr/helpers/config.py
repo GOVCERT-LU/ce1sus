@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ConfigParser import ConfigParser, Error, ParsingError
 from os.path import isfile
 from os import getcwd
-from dagr.helpers.strings import convert_to_value
+from dagr.helpers.converters import convert_string_to_value
 
 
 class ConfigException(Exception):
@@ -72,7 +72,7 @@ class Configuration(object):
     for option in options:
       try:
         string = self.config_parser.get(section, option)
-        result[option] = convert_to_value(string)
+        result[option] = convert_string_to_value(string)
       except Error as error:
         raise ConfigException(error)
     return result
@@ -98,7 +98,7 @@ class Configuration(object):
       raise ConfigSectionNotFoundException('Section ' + section +
                                              ' is not found in ' + self.config_file)
 
-  def get(self, section, key, default_value=None):
+  def get(self, section, key, default_value='@@NotSet'):
     """
     Returns the value for the given section key pair
 
@@ -106,7 +106,7 @@ class Configuration(object):
     section = self.get_section(section)
     if key in section.keys():
       return section.get(key)
-    elif default_value is None:
+    elif default_value == '@@NotSet':
       raise ConfigKeyNotFoundException('Key ' + key + ' not found.')
     else:
       return default_value

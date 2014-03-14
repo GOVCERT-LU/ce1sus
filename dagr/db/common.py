@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from abc import abstractmethod
+from dagr.helpers.converters import convert_string_to_value
 
 
 class SessionManagerException(Exception):

@@ -114,29 +114,3 @@ def isNotNull(value):
     return False
   string = unicode(value)
   return string and string != ''
-
-
-def convert_to_value(string):
-  """
-  Tries to convert a string to a python value
-
-  :param string: a string representing a python value
-  :type string: String
-
-  :returns: object
-  """
-  if string is None:
-    result = None
-  else:
-    upper_fct = getattr(string, 'upper')
-    if upper_fct() in ['YES', 'TRUE', 'T']:
-      result = True
-    elif upper_fct() in ['NO', 'FALSE', 'F']:
-      result = False
-    else:
-      try:
-        result = json.loads(string)
-      except ValueError:
-        result = string
-
-  return result

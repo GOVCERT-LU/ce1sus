@@ -29,7 +29,8 @@ import base64
 import zipfile
 from os import remove
 import hashlib
-from dagr.helpers.strings import convert_to_value
+from dagr.helpers.converters import convert_string_to_value
+
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
 CHK_SUM_HASH_SHA1 = 'dc4e8dd46d60912abbfc3dd61c16ef1f91414032'
@@ -357,7 +358,7 @@ class FileHandler(GenericHandler):
     # check if value is valid
     value = dictionary.get('value', list())
     if value:
-      value = convert_to_value(value)
+      value = convert_string_to_value(value)
     share = dictionary.get('share', '0')
     ioc = dictionary.get('ioc', '0')
     if len(value) != 2:
