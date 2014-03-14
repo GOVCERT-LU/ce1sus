@@ -18,6 +18,7 @@ from ce1sus.brokers.permission.userbroker import UserBroker
 from ce1sus.brokers.permission.groupbroker import GroupBroker
 from dagr.controllers.base import ControllerException
 from ce1sus.common.mailhandler import MailHandler, MailHandlerException
+from dagr.helpers.datumzait import DatumZait
 
 
 # pylint: disable=R0904
@@ -108,8 +109,16 @@ class UserController(Ce1susBaseController):
       if user.gpg_key:
         self.mail_handler.import_gpg_key(user.gpg_key)
 
-      # send activation mail
-      self.mail_handler.send_activation_mail(user)
+      send_mail = self._get_config().get('ce1sus', 'sendmail', False)
+
+      if send_mail:
+        # send activation mail
+        self.mail_handler.send_activation_mail(user)
+        # activate the user directly
+      else:
+        user.activated = DatumZait.utcnow()
+        user.activation_str = None
+        self.user_broker.update(user)
       return user, True
     except ValidationException as error:
       return user, False

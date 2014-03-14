@@ -1,153 +1,168 @@
-# Documentation #
+Documentation
+=============
 
-NOTE: The documentation is still a bit short yet but will be updated soon
+The documentation is still under developpment
 
-## Installation ##
+Installation
+------------ 
 
-1. Install the requirements
-2. Clone the repository
-3. Import DB scheme
-4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
-   - Use the templates (for an easier setup (Note: All sections have to be checked and set to the according levels)
-     Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus
-5. Configure ngix/uwsgi or run it locally
-6. Run ce1sus
-7. Login as admin with password admin
+The setup is quite easy :
 
-### Requirements ###
-- python
-  * python (2.7+)
-  * mako (0.7+)
-  * sqlalchemy (0.7+)
-  * mysqldb (1.2.3)
-  * python-magic (0.4.6+)
-    ** https://github.com/ahupp/python-magic
-  * python-ldap
-  * dateutilis
-  * memcache
-  * rtkit (optional)
-  * gnupg (0.3.5+)
-- mysql (5.1+)
+Install the requirements
 
-### Webserver ###
-There are multiple options for serving this web-app. The one used here is by running ngingx with uwsgi:
-* nginx (1.4+)
-* uwsgi (1.2.3+, with python-2 support)
+Clone the repository
 
-uwsgi config (ce1sus.ini):
-_______________________________________
-[uwsgi]
-uid = www-data
-gid = www-data
-pythonpath = /path/to/ce1sus
-plugins = python27
-module = ce1sus-run
-workers = 2
-vacuum = True
-max-requests = 1000000
-harakiri = 120
-harakiri-verbose = true
-need-app = true
-buffer-size = 32768
-listen = 200
+    git clone git@github.com:GOVCERT-LU/ce1sus.git
 
-master-as-root = true
-max-fd = 10240
-#memory-report = true
-#stats = /tmp/stats.socket
-chown-socket = www-data
-_______________________________________
+Import DB scheme
 
+    The scheme can be found under ./docs/sql/scheme.sql
 
-nginx config:
-_______________________________________
-server {
-  listen 443;
-  server_name <servername>;
+Create configuration files ce1sus.conf and cherrypy.conf in the ./config folder
 
-  root /path/to/ce1sus/ce1sus/public;
+    A template of the configuration files found in ./config
 
-  access_log /var/log/nginx/ce1sus_access.log common;
-  error_log /var/log/nginx/ce1sus_error.log;
+    The following sections have to be set to the correct values for ce1sus.conf
+      * [SessionManager]
+      * [ce1sus]
+      * [Handlers]
+      * [Mako]
+      * [Mailer] (only required if ErrorHandler/useMailer or ce1sus/sendmail is set)
 
-  ssl on;
-  ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
-  ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+    Note: All sections have to be checked and set to the accordingly
+          Replace '/path/to/ce1sus/' with the real path to ce1sus
 
-  ssl_ciphers AESGCM:SHA512:SHA384:SHA256:AES128:SHA512:SHA384:SHA256:-SSLv3:-RC4:HIGH:!MD5:!aNULL:!eNULL:!EDH;
-  ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
-  ssl_prefer_server_ciphers on;
-  ssl_session_cache    shared:SSL:10m;
-  ssl_session_timeout  5m;
+Configure ngix/uwsgi or run it locally
 
-  location /css {
-    root /path/to/ce1sus/ce1sus/public;
-  }
+   Here are templates for the configuration of ngix and uwsgi
 
-  location /images {
-    root /path/to/ce1sus/ce1sus/public;
-  }
+      uwsgi config (ce1sus.ini):
+      _______________________________________
+      [uwsgi]
+      uid = www-data
+      gid = www-data
+      pythonpath = /path/to/ce1sus
+      plugins = python27
+      module = ce1sus-run
+      workers = 2
+      vacuum = True
+      max-requests = 1000000
+      harakiri = 120
+      harakiri-verbose = true
+      need-app = true
+      buffer-size = 32768
+      listen = 200
 
-  location /img {
-    root /path/to/ce1sus/ce1sus/public;
-  }
+      master-as-root = true
+      max-fd = 10240
+      #memory-report = true
+      #stats = /tmp/stats.socket
+      chown-socket = www-data
+      _______________________________________
 
-  location /js {
-    root /path/to/ce1sus/ce1sus/public;
-  }
+      nginx config:
+      _______________________________________
+      server {
+        listen 443;
+        server_name <servername>;
+      
+        root /path/to/ce1sus/ce1sus/public;
+      
+        access_log /var/log/nginx/ce1sus_access.log common;
+        error_log /var/log/nginx/ce1sus_error.log;
 
-  location / {
-    uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
-    include     uwsgi_params;
-    uwsgi_param SCRIPT_NAME "";
-    uwsgi_param HTTPS on;
-  }
-}
-_______________________________________
+        ssl on;
+        ssl_certificate /path/to/certificate/ssl-cert.pem;
+        ssl_certificate_key /path/to/certificate/ssl-cert.key;
+      
+        ssl_ciphers  AESGCM:SHA512:SHA384:SHA256:AES128:SHA512:SHA384:SHA256:-SSLv3:-RC4:HIGH:!MD5:!aNULL:!eNULL:!EDH;
+        ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+        ssl_prefer_server_ciphers on;
+        ssl_session_cache    shared:SSL:10m;
+        ssl_session_timeout  5m;
 
-### Mails ###
+        location /css {
+          root /path/to/ce1sus/ce1sus/public;
+        }
 
-Ce1sus will send out mails for the following events:
+        location /images {
+          root /path/to/ce1sus/ce1sus/public;
+        }
 
-* Event publication
-* Event validation if the event is published
-* Adding a user
-* Errors
+        location /img {
+          root /path/to/ce1sus/ce1sus/public;
+        }
 
-### Templates ###
-The mail templates can be configured via the admin interface, for more informations see the descriptions of each template.
+        location /js {
+          root /path/to/ce1sus/ce1sus/public;
+        }
 
-### Receivers ###
--> all user who can see the event
+        location / {
+          uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
+          include     uwsgi_params;
+          uwsgi_param SCRIPT_NAME "";
+          uwsgi_param HTTPS on;
+        }
+      }
+      _______________________________________
 
-### Notes ###
-1. The gpg key folder has to be owned by the owner of the webserver (www-data)
-2. Sending mails will also depends on the configuration of ce1sus
-3. Note users have to be activated before they can login. Therefore a valid email has to be supplied while creating a user.
+    Note: Replace '/path/to/ce1sus/' with the real path of ce1sus and '/path/to/certificate/' to the path of the corresponding certificate.
 
-### Ce1sus ###
-1. Install the requirements
-2. Clone the repository
-3. Import DB scheme from docs/sql
-4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
-   - Use the templates (for an easier setup 
-   
-   The following sections have to be set to the correct values for ce1sus.conf
-   * [SessionManager]
-   * [ce1sus]
-   * [Handlers]
-   * [Mako]
-   * [Mailer] (only required if ErrorHandler/useMailer or ce1sus/sendmail is set to yes)
-   
-   The remaining sections can be used as specified in the templates
-   Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus in all of the configurations.
-   
-5. Run ce1sus either locally or via ngix/uwsgi
+Run ngix/uwsgi to launch ce1sus
 
-## User guide ##
-Will be soon available
+Login as admin with password admin
 
-## Attributes ##
+Interface
+---------
+
+The web interface of Ce1sus has two sections:
+
+    1. Administration
+         The administration section is used to:
+             * Validate events inserted over the RESTAPI
+             * Define definitions for objects and attributes
+             * User management
+             * Group management
+             * Editing mail templates
+
+    2. Event view
+         The event view is used to:
+             * View the 200 recent entries
+             * Search for attributes
+             * Add/Edit events
+
+Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
+
+User management
+---------------
+
+Note: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
+      If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
+      If ce1sus/sendmail is not set the account is directly activated.
+
+Mails
+-----
+Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
+Therefore the section [Mailer] has to be configured. 
+
+Note: It is recommended to supply an GPG key for ce1sus else it is only possible to get notifications on event which have a TLP level of white. This folder/key has to be owned by the owner of ce1sus (i.e. www-data) 
+
+If the configuration ErrorHandler/useMailer is set the configured receiver will receive mails on irregular behaviour.
+
+If the configuration ce1sus/sendmail is set then ce1sus will send out mails for the following events:
+
+    * Event publication
+    * Event validation if the event is published
+    * Adding a user
+
+Each mail of the above events use a template which can be configured via the admin interface, for more informations see the descriptions of each template.
+
+Note:
+    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive the mail, regardless which TLP level it is.
+    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP while.
+    
+Attributes
+----------
 ce1us offers the possibility to create custom attributes or edit the existing ones. 
 The attribute/object definitions are identified by their check sums (chksums).
 These chksums are computed as follows:
@@ -158,25 +173,27 @@ These chksums are computed as follows:
 However changes may cause troubles if the events are shared (i.e. duplicates). 
 Therefore it is suggested at least in the beginning not to change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate it.
 
-## Rest API ##
-See ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api contains all the required modules to access this API for python. 
+Handlers
+--------
+Ce1sus support custom handlers, these handlers are used to perfrom additional operations (i.e. parsing of the email).
 
-### Notes ###
-The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
-
-## Handlers ##
-Ce1sus support custom handlers, these handlers are used to perfrom additional operations (i.e. parsing of the email)
-
-### Notes ###
 There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is be explained below
 
 1. Create a handler extending either the Generichandler or HandlerBase
 2. Place it in ce1sus.commom.handlers
 3. Insert into the Table AttributeHanlders
-    * the module and classname i.e. generichandler.GenericHandler
-    * A uuid for the handler
+    * The module and classname i.e. generichandler.GenericHandler
+    * The uuid for the handler
 
-The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the uuid specified in the handler
+The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the one specified in the handler
+
+
+Rest API
+--------
+See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api provides all the required modules to access this API for python. 
+
+Note: The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
+
 
 ## Known Issues ##
 * Sending encrypted mails takes some time (Action performed on save)

@@ -1,26 +1,32 @@
-# Changelog #
+Changelog
+=========
 
-## Release 0.8.0 ## 
+Release 0.8.0
+-------------
 * Add more examples to explain implementation
 * Update entry point example
 * Mail support
 
-## Release 0.7.0 ##
+Release 0.7.0
+-------------
 * Reorganize files/source for a "better" comprehension
 
-## Release 0.4.0 ##
+Release 0.4.0
+-------------
 * REST Api
 * New protection system
 * Supports SQLLite
 
-## Release 0.3.0 ##
+Release 0.3.0
+-------------
 * Search operators like "=" "<" ">" "like"
 * After Adding jump to added object/attribute
 * Relations are just created when it is defined to do so
 * Relations are not made when they exists or if they belong to the event itself
 * CB Value attribute handler
 
-## Release 0.2.0 ##
+Release 0.2.0
+-------------
 * Detect relations
 * File adding
 * Malicious files
@@ -47,7 +53,7 @@
 * supports ldap
 * supports CVE and RT
 
-## Release 0.1.0 ##
-
+Release 0.1.0
+-------------
 * First Release
 

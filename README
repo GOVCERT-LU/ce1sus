@@ -1,17 +1,29 @@
-# ce1sus a Thread Information Database #
+ce1sus
+=======
 
-The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners. 
+ce1sus is a threat information database.
 
-The ce1sus events is designed to represent the real-life case as as close as possible. 
+The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners.
+
+Ce1sus entries are modeled to represent the real-life case as as close as possible. 
 
 Example:
 Email with a malicious attachment
 
 In such cases the event should start by an email object. That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object then will get a child object representing the attachment. If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
 
-Such structurization provides help for a better understanding of the provenances of the different attributes and this leads to a better overview how the events are related.
+Such structured events improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
 
-##Features##
+Note
+----
+
+This is still not the final release, we are still adding functionalities. The database scheme however is final and will not change.
+
+For any questions write a mail to the developers
+
+Features
+--------
+
 * Creates relations between events through their attributes
 * Stores and presents the event in a structured manner
 * Different levels of sharing 
@@ -21,7 +33,9 @@ Such structurization provides help for a better understanding of the provenances
 * Completely open source
 * Improved Search
 
-## Requirements ##
+Requirements
+------------
+
 - python
   * python (2.7+)
   * mako (0.7+)
@@ -39,8 +53,9 @@ Such structurization provides help for a better understanding of the provenances
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
 
-## RoadMap ##
-* Improved web interface
+RoadMap
+--------
+* Improved web interface (In progress)
 * Maintenance tools
 * Share definitions
 * Proposal mechanism
@@ -49,30 +64,36 @@ Such structurization provides help for a better understanding of the provenances
 * More handlers
 * ....
 
-## Getting started ##
-1. Install the requirements
-2. Clone the repository
-3. Import DB scheme
-4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
-   - Use the templates (for an easier setup (Note: All sections have to be checked and set to the according levels)
-     Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus
-5. Configure ngix/uwsgi or run it locally
-6. Run ce1sus
-7. Login as admin with password admin
+Installation
+------------ 
 
-##Note##
-This is still not the final release, we are still adding functionalities. The database scheme however is final and will not change.
+The setup is quite easy :
 
-For any questions write a mail to the developers
+Install the requirements
 
-## Documentation ##
-See the DOCUMENTATION file for details.
+Clone the repository
 
-## Changelog ##
-See the CHANGELOG file for details.
+    git clone git@github.com:GOVCERT-LU/ce1sus.git
 
-## License ##
-See the LICENSE file for details.
+Import DB scheme
 
-## Remarks ##
+    The scheme can be found under ./docs/sql/scheme.sql
+
+Create configuration files ce1sus.conf and cherrypy.conf in the ./config folder
+
+    A template of the configuration files found in ./config
+    Note: All sections have to be checked and set to the accordingly
+          Replace '/path/to/ce1sus/' with the real path to ce1sus
+
+Configure ngix/uwsgi or run it locally
+
+   Example configurations can be found in the DOCUMENTATION file
+
+Run ngix/uwsgi to launch ce1sus
+
+Login as admin with password admin
+
+Remarks
+-------
+
 For any questions feel free to ask.
