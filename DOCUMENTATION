@@ -113,6 +113,7 @@ The mail templates can be configured via the admin interface, for more informati
 ### Notes ###
 1. The gpg key folder has to be owned by the owner of the webserver (www-data)
 2. Sending mails will also depends on the configuration of ce1sus
+3. Note users have to be activated before they can login. Therefore a valid email has to be supplied while creating a user.
 
 ### Ce1sus ###
 1. Install the requirements
@@ -137,10 +138,18 @@ The mail templates can be configured via the admin interface, for more informati
 Will be soon available
 
 ## Attributes ##
-ce1us offers the possibility to create custom attributes or edit the existing ones. However this can cause troubles if the events are shared (i.e. unwanted duplicates). Therefore it is suggested at least in the beginning not to change the existing attribute definitions.
+ce1us offers the possibility to create custom attributes or edit the existing ones. 
+The attribute/object definitions are identified by their check sums (chksums).
+These chksums are computed as follows:
+
+* attribute chksum =  SHA1(name || regex || class_index || handler.uuid)
+* object chksum = SHA1(name)
+
+However changes may cause troubles if the events are shared (i.e. duplicates). 
+Therefore it is suggested at least in the beginning not to change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate it.
 
 ## Rest API ##
-See ce1sus_api.ods for a basic overview of the different functions
+See ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api contains all the required modules to access this API for python. 
 
 ### Notes ###
 The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
