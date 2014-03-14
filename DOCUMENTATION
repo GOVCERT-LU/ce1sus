@@ -4,6 +4,16 @@ NOTE: The documentation is still a bit short yet but will be updated soon
 
 ## Installation ##
 
+1. Install the requirements
+2. Clone the repository
+3. Import DB scheme
+4. Create configuration files ce1sus.conf and cherrypy.conf in the config folder
+   - Use the templates (for an easier setup (Note: All sections have to be checked and set to the according levels)
+     Do not forget to replace '/path/to/ce1sus/' with the real path of ce1sus
+5. Configure ngix/uwsgi or run it locally
+6. Run ce1sus
+7. Login as admin with password admin
+
 ### Requirements ###
 - python
   * python (2.7+)
