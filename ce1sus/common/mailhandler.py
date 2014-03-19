@@ -64,12 +64,12 @@ class MailHandler(object):
       raise MailHandlerException(error)
 
   def __process_subject(self, subject, event):
-    self._get_logger().debug('Processing subject')
-    text = subject.replace('${event_uuid}', '{0}'.format(event.uuid))
-    text = text.replace('${event_id}', '{0}'.format(event.identifier))
-    text = text.replace('${event_tlp}', '{0}'.format(event.tlp.text))
-    text = text.replace('${event_risk}', '{0}'.format(event.risk))
-    text = text.replace('${event_title}', '{0}'.format(event.title))
+    self._get_logger().debug(u'Processing subject')
+    text = subject.replace(u'${event_uuid}', '{0}'.format(event.uuid))
+    text = text.replace(u'${event_id}', u'{0}'.format(event.identifier))
+    text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp.text))
+    text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
+    text = text.replace(u'${event_title}', u'{0}'.format(event.title))
     return text
 
   def __attribute_to_text(self, attribute, indent_str):
@@ -77,7 +77,7 @@ class MailHandler(object):
     value = unicode(attribute.plain_value)
     prefix = u'{0} : '.format(attribute.definition.name)
     if '\n' in value:
-      value = value.decode("utf-8").replace('\n', '\n' + indent_str + (' ' * len(prefix))).encode("utf-8")
+      value = value.replace(u'\n', u'\n' + indent_str + (' ' * len(prefix)))
     if attribute.ioc == 1:
       text = u'{0}{1}{2} - IOC'.format(indent_str, prefix, value)
     else:
@@ -159,32 +159,32 @@ class MailHandler(object):
   def __process_publication_body(self, body, event):
     self._get_logger().debug('Processing body')
     # creating metadata
-    text = body.replace('${event_uuid}', '{0}'.format(event.uuid))
-    text = text.replace('${event_id}', '{0}'.format(event.identifier))
+    text = body.replace(u'${event_uuid}', u'{0}'.format(event.uuid))
+    text = text.replace(u'${event_id}', u'{0}'.format(event.identifier))
     event_url = self.__get_event_url(event)
-    text = text.replace('${event_url}', '{0}'.format(event_url))
-    text = text.replace('${event_created}', '{0}'.format(event.created))
-    text = text.replace('${event_reporter}', '{0}'.format(event.creator_group.name))
-    text = text.replace('${event_tlp}', '{0}'.format(event.tlp.text))
-    text = text.replace('${event_analysis}', '{0}'.format(event.analysis))
-    text = text.replace('${event_risk}', '{0}'.format(event.risk))
-    text = text.replace('${event_title}', '{0}'.format(event.title))
-    text = text.replace('${event_description}', '{0}'.format(event.description))
+    text = text.replace(u'${event_url}', u'{0}'.format(event_url))
+    text = text.replace(u'${event_created}', u'{0}'.format(event.created))
+    text = text.replace(u'${event_reporter}', u'{0}'.format(event.creator_group.name))
+    text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp.text))
+    text = text.replace(u'${event_analysis}', u'{0}'.format(event.analysis))
+    text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
+    text = text.replace(u'${event_title}', u'{0}'.format(event.title))
+    text = text.replace(u'${event_description}', u'{0}'.format(event.description))
 
     # creating objects data
     if '${event_objects}' in text:
       event_objects = self.__objects_to_text(event.objects)
-      text = text.replace('${event_objects}', event_objects)
+      text = text.replace(u'${event_objects}', event_objects)
     # Note relations are user specific will be done before sending!
     return text
 
   def __process_update_body(self, body, event):
-    self._get_logger().debug('Processing update body')
+    self._get_logger().debug(u'Processing update body')
     text = self.__process_publication_body(body, event)
     # creating objects data
     objects = list()
     event_objects = self.__objects_to_text(event.objects, event.last_publish_date)
-    text = text.replace('${event_updated_objects}', event_objects)
+    text = text.replace(u'${event_updated_objects}', event_objects)
     # Note relations are user specific will be done before sending!
     return text
 
@@ -193,21 +193,21 @@ class MailHandler(object):
     # creating relations data
     # add relations to mail
     event_relations = self.__relations_to_text(group, event, False)
-    mail.body = mail.body.replace('${event_relations}', event_relations)
+    mail.body = mail.body.replace(u'${event_relations}', event_relations)
     if update:
       event_relations = self.__relations_to_text(group, event, True)
-      mail.body = mail.body.replace('${event_updated_relations}', event_relations)
+      mail.body = mail.body.replace(u'${event_updated_relations}', event_relations)
 
   def __send_mail(self, mail, reciever, event):
     mail.reciever = reciever.email
     if mail.encrypt:
       if reciever.gpg_key:
-        self._get_logger().debug('Mail sending encrypted mail to {0}'.format(reciever.email))
+        self._get_logger().debug(u'Mail sending encrypted mail to {0}'.format(reciever.email))
         self.mailer.send_mail(mail)
       else:
-        self._get_logger().info('Mail will not be send to {0} as not gpg key'.format(reciever.email))
+        self._get_logger().info(u'Mail will not be send to {0} as not gpg key'.format(reciever.email))
     else:
-      self._get_logger().debug('Mail sending plain text mail to {0}'.format(reciever.email))
+      self._get_logger().debug(u'Mail sending plain text mail to {0}'.format(reciever.email))
       self.mailer.send_mail(mail)
 
   def __process_send_event_mail(self, mail, event, update):
@@ -258,13 +258,13 @@ class MailHandler(object):
       mail.subject = mail_tmpl.subject
       body = mail_tmpl.body
       url = self.config.get('ce1sus', 'baseurl')
-      activation_url = url + '/activate/{0}'.format(user.activation_str)
-      body = body.replace('${name}', '{0}'.format(user.name))
-      body = body.replace('${sirname}', '{0}'.format(user.sirname))
-      body = body.replace('${username}', '{0}'.format(user.username))
-      body = body.replace('${password}', '{0}'.format(user.password_plain))
-      body = body.replace('${ce1sus_url}', '{0}'.format(url))
-      body = body.replace('${activation_link}', '{0}'.format(activation_url))
+      activation_url = url + u'/activate/{0}'.format(user.activation_str)
+      body = body.replace(u'${name}', u'{0}'.format(user.name))
+      body = body.replace(u'${sirname}', u'{0}'.format(user.sirname))
+      body = body.replace(u'${username}', u'{0}'.format(user.username))
+      body = body.replace(u'${password}', u'{0}'.format(user.password_plain))
+      body = body.replace(u'${ce1sus_url}', u'{0}'.format(url))
+      body = body.replace(u'${activation_link}', u'{0}'.format(activation_url))
       mail.body = body
 
       if user.gpg_key:
