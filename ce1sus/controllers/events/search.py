@@ -77,10 +77,6 @@ class SearchController(Ce1susBaseController):
           definition = None
         else:
           definition = self.attribute_definition_broker.get_by_id(definition_id)
-          classname = definition.classname
-          clazz = get_class('ce1sus.brokers.valuebroker', classname)
-          needle = clazz.convert_to_search_value(needle, self.config)
-
         found_values = self.relation_broker.look_for_attribute_value(definition,
                                                                     needle,
                                                                     operant)

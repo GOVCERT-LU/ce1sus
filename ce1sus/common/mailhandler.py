@@ -65,7 +65,7 @@ class MailHandler(object):
 
   def __process_subject(self, subject, event):
     self._get_logger().debug(u'Processing subject')
-    text = subject.replace(u'${event_uuid}', '{0}'.format(event.uuid))
+    text = subject.replace(u'${event_uuid}', u'{0}'.format(event.uuid))
     text = text.replace(u'${event_id}', u'{0}'.format(event.identifier))
     text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp.text))
     text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
