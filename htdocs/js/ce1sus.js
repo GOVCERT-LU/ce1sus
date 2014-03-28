@@ -37,7 +37,7 @@ function showSelected(identifier){
 
 function openAllColapses(except){
     $('#leftMenu').find("li").each(function() {
-        $(this).attr('class', '');
+        $(this).attr('class', 'active');
     });
     $('.panel-collapse').each(function () {
         //This is just due to the workaround

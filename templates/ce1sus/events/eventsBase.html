@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
+<%namespace name="sidenav" file="/dagr/components/sidenav.html"/>
 
-<%namespace name="tabulator" file="/dagr/components/tabs.html"/>
-
-<%call expr="tabulator.tabulator(id='eventsTab')"> 
-    <%call expr="tabulator.tab(id='recentEvents',url='/events/recent',name='Recent Events' ,active=True)"/> 
-    <%call expr="tabulator.tab(id='searchEvent',url='/events/search', name='Search Events',reload=False)"/> 
-    <%call expr="tabulator.tab(id='addEvent',url='/events/event/add_event', name='Add Event',reload=False)"/> 
+<%call expr="sidenav.list(id='eventsTab')"> 
+    <%call expr="sidenav.entry(id='recentEvents',url='/events/recent',name='Recent Events' ,active=True, reload=False, reloadBotton=True)"/> 
+    <%call expr="sidenav.entry(id='searchEvent',url='/events/search', name='Search Events',reload=False, reloadBotton=False)"/> 
+    <%call expr="sidenav.entry(id='addEvent',url='/events/event/add_event', name='Add Event',reload=False, reloadBotton=False)"/> 
 </%call>

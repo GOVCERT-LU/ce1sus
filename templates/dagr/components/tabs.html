@@ -4,13 +4,18 @@
 <%def name="tabulator(id)">
 <ul class="nav nav-tabs" id="${id}">
     ${caller.body()}
+  <li class="dropdown" style="float: right;">
+    <a href="#" id="reload" class="dropdown-toggle active" data-toggle="dropdown" onclick="findAndLoadActiveTab('${id}', true);">
+      Reload &#x21bb;
+    </a>
+  </li>
 </ul>
-<div  class="tab-content" id="${id}TabContent" style="margin-top:30px;margin-left:30px;margin-right:30px">
+<div class="tab-content" id="${id}TabContent" style="margin-top:20px;margin-left:10px;margin-right:10px">
 </div>
 
 <script type="text/javascript">
 $(document).ready(function () { 
-    findAndLoadActiveLi('${id}','${id}TabContent');
+    findAndLoadActiveTab('${id}');
 });
 </script>
 </%def>
@@ -24,20 +29,13 @@ else:
   activeString ='class="dropdown"'
 if reload:
   reloadStr = 'true'
-  reloadButton = ''
 else:
   reloadStr = 'false'
-  reloadButton = ('<ul class="dropdown-menu" role="menu">'
-                 +'<li><a href="#" tabindex="-1" onclick="loadTabLi(\'{0}\', true)">Reload &#x21bb;</a></li>'
-                 +'</ul>').format(id)
 %>
 <li ${activeString} id="${id}LI">
-<a href="#" id="${id}" class="dropdown-toggle active" data-toggle="dropdown" src="${url}" onclick="loadTabLi(this.id, ${reloadStr})">
+<a href="#" id="${id}" class="dropdown-toggle active" data-toggle="dropdown" src="${url}" onclick="loadTab(this.id, ${reloadStr})">
     ${name}
-    %if reloadButton:
-    <span class="caret"></span>
-    %endif
 </a>
-${reloadButton}
 </li>
 </%def>
+

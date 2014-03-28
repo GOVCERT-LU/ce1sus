@@ -8,8 +8,8 @@
 
 
 
-<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal',url='/events/event/objects/modify_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventTabs{0}TabContent'.format(event_id))">
-    <%call expr="modals.save_button_modal(id='addObjectModal',title='Add object',content_url='/events/event/objects/add_object/{0}'.format(event_id))"/>
+<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal{0}'.format(event_id),url='/events/event/objects/modify_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+    <%call expr="modals.save_button_modal(id='addObjectModal{0}'.format(event_id),title='Add object',content_url='/events/event/objects/add_object/{0}'.format(event_id))"/>
 </%call>
 <div class="row">
     <div class="col-xs-3 col-sm-3">
@@ -17,6 +17,7 @@
             %if owner:
             <div class="btn-group">
               <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal');">Add new Object</a>
+              <a href="#addObjectModal${event_id}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
             </div>
             %endif
             <div style="height:15px"/>

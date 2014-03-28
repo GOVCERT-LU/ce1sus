@@ -64,7 +64,7 @@ class EventView(Ce1susBaseView):
       event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       relations = self.event_controller.get_related_events(event, user, cache)
-      return self._render_template('/events/event/view.html',
+      return self._render_template('/events/event/overview.html',
                                    event=event,
                                    owner=self._is_event_owner(event),
                                    relations=relations)
@@ -196,6 +196,7 @@ class EventView(Ce1susBaseView):
       cache = self._get_authorized_events_cache()
       relations = self.event_controller.get_full_event_relations(event, user, cache)
       return self._render_template('/events/event/relations.html',
+                                   event=event,
                                    relations=relations)
     except ControllerException as error:
       self._get_logger().error(error)

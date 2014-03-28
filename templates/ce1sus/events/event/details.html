@@ -1,23 +1,23 @@
 <%namespace name="base_forms" file="/dagr/components/forms.html"/> 
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
 
-<legend>Details</legend>
-
-<div class="row">
-    <div class="col-xs-12 col-sm-12" style="text-align:left">
+<legend>Details 
         %if owner:
-        <div class="btn-group">
-           <button class="btn btn-default" onclick="loadContent('eventEdit','/events/event/edit_event/${event.identifier}')">Edit</button>
+        <div class="btn-group" style="padding-bottom: 2px;">
+           <button class="btn btn-default" onclick="loadContent('eventEdit${event.identifier}','/events/event/edit_event/${event.identifier}')">Edit</button>
            <button class="btn btn-danger"
             onclick="if (confirm('Are you sure you want to delete?')) {
                 dialogCloseTabCall('/events/event/modify_event?identifier=${event.identifier}&action=remove',
                            'eventsTab',
-                           'eventsTab${event.identifier}')}">
+                           'eventsTab${event.identifier}');}">
             Delete
             </button>
            
         </div>
         %endif
+</legend>
+<div class="row">
+    <div class="col-xs-12 col-sm-12" style="text-align:left">
         ${forms.event_form(event=event,enabled=False, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
     </div>
 </div>

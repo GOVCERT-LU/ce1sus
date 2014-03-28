@@ -22,10 +22,13 @@ function loadItem(itemID){
 }
 </script>
 <div id="pannelDiv" style="overflow:auto;height:800px;width:100%;padding-bottom:5px"> 
-<ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
+<ul id="${id}" class="nav nav-pills nav-stacked" style="max-width: 300px;">
     %if not items is None: 
         % for item in items:
-          <%call expr="nav.left_menu_item(item.identifier, 'loadItem({0})'.format(item.identifier),item.name,selected)"/>
+          <%
+           itemid = id+str(item.identifier)
+          %>
+          <%call expr="nav.left_menu_item(itemid, 'loadItem({0})'.format(item.identifier),item.name,selected)"/>
           <%
           if not found:
               fistID = item.identifier
