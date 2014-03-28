@@ -28,8 +28,11 @@ $( document ).ready(function() {
 </script>
 </%def>
 
-<%def name="reload_tab_form(id, url, reload_tab_id, tab_url, horizontal=True)">
+<%def name="reload_tab_form(id, url, reload_tab_id, tab_url, horizontal=True, sidenav=False)">
 <%
+if sidenav == False:
+  sidenav = "false"
+
 if horizontal:
    form_class='class="form-horizontal"'
 else:
@@ -42,8 +45,8 @@ else:
 <script type="text/javascript">
 $( document ).ready(function() {
     $('#${id}Form').submit(function(event){
-        formEvent(this,event,'${url}','${id}',false,null,null);
-        reloadSideNav('${reload_tab_id}');
+        formEvent(this, event, '${url}', '${id}', true, '${reload_tab_id}', '${tab_url}', '${sidenav}');
+//        loadSideNav('${reload_tab_id}', true);
     });
 });
 </script>

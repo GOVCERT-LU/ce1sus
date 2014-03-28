@@ -1,6 +1,6 @@
 <%namespace name="tabulator" file="/dagr/components/tabs.html"/>
 
-<h4>Event #${event_id}</h4>
+<!--<h4>Event #${event_id}</h4>-->
 
 <%call expr="tabulator.tabulator(id='eventTabs{0}'.format(event_id))"> 
     <%call expr="tabulator.tab(id='eventOverView{0}'.format(event_id),url='/events/event/event/{0}'.format(event_id),name='Overview' ,active=True,reload=False)"/>

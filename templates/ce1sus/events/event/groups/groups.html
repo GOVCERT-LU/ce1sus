@@ -14,7 +14,7 @@
                                       attribute_name='name',
                                       post_action='/events/event/groups/modify_groups',
                                       refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
-                                      refresh_container='eventTabs{0}TabContent'.format(event.identifier),
+                                      refresh_container='eventGroups{0}'.format(event.identifier),
                                       enabled=enabled
                                       )"/>
 
@@ -27,7 +27,7 @@
                                       attribute_name='name',
                                       post_action='/events/event/groups/modify_subgroups',
                                       refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
-                                      refresh_container='eventTabs{0}TabContent'.format(event.identifier),
+                                      refresh_container='eventGroups{0}'.format(event.identifier),
                                       enabled=enabled
                                       )"/>
 %else:

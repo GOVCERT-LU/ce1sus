@@ -49,18 +49,18 @@ $(document).ready(function() {
     <td style="text-align:center">${iocicon}</td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].created, shorten_to=60,use_plain_text=False)"/></td>
     <td style="width: 60px;">
-      <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'eventTabs${event_id}TabContent','/events/event/objects/flat_objects/${event_id}');">
+      <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'flatView${event_id}','/events/event/objects/flat_objects/${event_id}');">
          <span class="glyphicon glyphicon-eye-open" title="View details"></span>
       </a>
       %if owner:
-        <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}','/events/event/bit_value/modify_attribute_properties','True','eventTabs${event_id}TabContent','/events/event/objects/flat_objects/${event_id}');">
+        <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}','/events/event/bit_value/modify_attribute_properties','True','flatView${event_id}','/events/event/objects/flat_objects/${event_id}');">
            <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
         </a>
         <a href="#" role="button"
           onclick="if (confirm('Are you sure you want to delete?')) {
               dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${flat_object[1].identifier}',
-                         'eventTabs${event_id}TabContent',
-                         '/events/event/objects/objects/${event_id}')}" title="delete">
+                         'flatView${event_id}',
+                         '/events/event/objects/flat_objects/${event_id}')}" title="delete">
            <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
         </a>
       %endif

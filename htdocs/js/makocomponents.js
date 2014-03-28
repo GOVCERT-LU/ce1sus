@@ -74,10 +74,10 @@ function getErrorMsg(resonseText) {
 }
 
 function formEvent(element, event, uri, contentid, doRefresh, refreshContainer,
-        refreshUrl) {
+        refreshUrl, sidenav) {
 
     genericFormSubmit(element, event, null, contentid, uri, doRefresh,
-            refreshContainer, refreshUrl);
+            refreshContainer, refreshUrl, sidenav);
 }
 
 function formSubmit(formElement, event, modalID, uri, doRefresh,
@@ -87,7 +87,8 @@ function formSubmit(formElement, event, modalID, uri, doRefresh,
 }
 
 function genericFormSubmit(formElement, event, modalID, contentid, uri,
-        doRefresh, refreshContainer, refreshUrl) {
+        doRefresh, refreshContainer, refreshUrl, sidenav) {
+    if(typeof(sidenav)==='undefined') sidenav = false;
     var form = $(formElement);
     var inputs = form.find("input, select, button, textarea");
     var formData = new FormData(form[0]);
@@ -123,6 +124,10 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                 if (refreshUrl !== "None") {
                     refreshContainer = getHiddenDivID(refreshContainer, contentid);
                     loadContent(refreshContainer, refreshUrl);
+                    $('#'+refreshContainer).css("display", "block");
+                    if (sidenav) {
+                      loadSideNav(sidenav, true);
+                    }
                 } else {
                     $("#" + refreshContainer).html(message);
                 }
