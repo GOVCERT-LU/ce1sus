@@ -451,19 +451,6 @@ function activateSidenav(id) {
     $('#' + id).parent().parent().children("div").each(function() {
         $(this).attr('class', 'mylist-group-item');
     });
-    request.error(request.fail);
-    request.done(function(responseText, textStatus, XMLHttpRequest) {
-        var message = getResonseTextContent(responseText);
-        if (message.match(/^<!--OK--/gi)) {
-            // do refresh
-            if (refreshContent) {
-                refreshContainer = getHiddenDivID(refreshContainer, null);
-                loadContent(refreshContainer, refreshUrl);
-            } else {
-                if (doCloseTab) {
-                    closeTab(tabID, tabToClose);
-                }
-            }
     // activate tab
     $('#' + id).parent().attr('class', 'mylist-group-item active');
 }
