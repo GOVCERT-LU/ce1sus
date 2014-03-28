@@ -542,7 +542,6 @@ function closeSideNavTab(tabulatorID, tabToCloseID) {
 }
 
 
-
 /*
 *
 * Tabulator functions
