@@ -220,7 +220,7 @@
   <%call expr="labeled_input.labeled_editbox(label='Identifier',name='objID',value=object.identifier,enabled=False)"/>
 %endif
   <%call expr="labeled_input.labeled_combobox(label='Definition',name='definition',values=cb_definitions,enabled=enabled,has_empty=True,selected=object.def_object_id)"/>
-  <%call expr="labeled_input.labeled_editbox(label='Creator',name='userID',value=object.creator.username,enabled=False)"/>
+  
   <%call expr="labeled_input.labeled_datetime_picker(label='Created',name='created',value=object.created,enabled=False)"/>
   
 % endif
