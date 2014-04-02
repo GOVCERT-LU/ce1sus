@@ -257,7 +257,7 @@ class FileHandler(GenericHandler):
 
     attributes = list()
     # TODO encode filename
-    attributes.append(FileHandler._create_attribute(filename.encode('utf8'),
+    attributes.append(FileHandler._create_attribute(u'{0}'.format(filename),
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
                                                    user,
