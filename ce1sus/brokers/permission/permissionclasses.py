@@ -144,7 +144,8 @@ class Group(BASE):
                                   withSymbols=True)
     ObjectValidator.validateDigits(self, 'can_download', minimal=0, maximal=1)
     ObjectValidator.validateDigits(self, 'usermails', minimal=0, maximal=1)
-    ObjectValidator.validateEmailAddress(self, 'email')
+    if self.usermails == 0:
+      ObjectValidator.validateEmailAddress(self, 'email')
     return ObjectValidator.isObjectValid(self)
 
 
