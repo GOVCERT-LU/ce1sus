@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
-
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
 
 <%
-identifier = 'eventAttributeFromNone'
-if not attribute is None:
-  identifier = 'eventAttributeFrom{0}'.format(attribute.identifier)
+  identifier = 'eventAttributeFromNone'
+  if not attribute is None:
+    identifier = 'eventAttributeFrom{0}'.format(attribute.identifier)
 %>
 <%call expr="forms.event_attribute_form(identifier,event_id,object_id,attribute,enabled,cb_definitions)"/>

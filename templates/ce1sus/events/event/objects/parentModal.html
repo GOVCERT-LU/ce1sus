@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-
 <%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
 <%
 if is_event_parent: 
@@ -16,67 +14,69 @@ else:
 <input type="hidden" name="object_id" value="${object_id}">
 <input type="hidden" name="event_id" value="${event_id}">
 <%call expr="labeled_input.generic_labeler('Is parent event',is_event_parent)">
-    <input onclick="enableDisableCB(this.id,${hasValues});" id ="eventCheckBox" type="checkbox" name="set_event_parent" value="1" ${checkStr}/>
+  <input onclick="enableDisableCB(this.id,${hasValues});" id ="eventCheckBox" type="checkbox" name="set_event_parent" value="1" ${checkStr}/>
 </%call>
+
 <%call expr="labeled_disabled_combobox(label='Parent object',name='parent_object_id',values=cb_values,enabled=(not is_event_parent),has_empty=True,selected=selected)"/>
 
 <%def name="labeled_disabled_combobox(label, name, values, enabled=True, validation_msg=None, selected=None, has_empty=False)">
-    <!-- BEGIN labeledComboBox -->
-    <%call expr="labeled_input.generic_labeler(label,enabled)">
-      <%call expr="diabled_combobox(name, values, enabled, selected, validation_msg, has_empty)"/>
-    </%call>
-    <!-- END labeledComboBox -->
+  <!-- BEGIN labeledComboBox -->
+  <%call expr="labeled_input.generic_labeler(label,enabled)">
+    <%call expr="diabled_combobox(name, values, enabled, selected, validation_msg, has_empty)"/>
+  </%call>
+  <!-- END labeledComboBox -->
 </%def>
 
 <%def name="diabled_combobox(name, values, enabled=True, selected=None, validation_msg=None, has_empty=False, sorted=True)">
-    <!-- BEGIN comboBox --><%
-    if (enabled):
-      enabled_str = ''
+  <!-- BEGIN comboBox -->
+  <%
+  if (enabled):
+    enabled_str = ''
     else:
       enabled_str =  ' disabled ' 
     
-    if not selected is None and hasattr(selected,'error'):
-      validation_msg = getattr(selected,'error')
+  if not selected is None and hasattr(selected,'error'):
+    validation_msg = getattr(selected,'error')
     
-    hasDataContent=False
-    dataToggle=''
-    keys = list(values.keys())
-    if sorted:
-       keys.sort()
-     %>
-     <select class="form-control" id="${name}ID" name="${name}" ${enabled_str}>
-      %if not values is None:
-        %if has_empty:
-            %if not selected:
-            <option value="" data-toggle="tooltip" title="Empty Value. Please Select one." selected></option>
-            %else:
-            <option value="" data-toggle="tooltip" title="Empty Value. Please Select one."></option>
-            %endif
-        %endif
-        %if not values is None:
-            %for key in keys:
-                <%
-                value = values.get(key,None)
-                if isinstance(value, tuple):
-                   title = 'title="{0}"'.format(value[1])
-                   value = value[0]
-                   if not hasDataContent:
-                     hasDataContent = True
-                     dataToggle='data-toggle="tooltip"'
-                else:
-                   title = ''
-                %>
-                %if not selected is None and value == selected:
-                  <option value="${value}" ${dataToggle} ${title} selected>${key}</option>
-                %else:
-                  <option value="${value}" ${dataToggle} ${title} >${key}</option>
-                %endif
-            %endfor
+  hasDataContent=False
+  dataToggle=''
+  keys = list(values.keys())
+  if sorted:
+    keys.sort()
+  %>
+  <select class="form-control" id="${name}ID" name="${name}" ${enabled_str}>
+    %if not values is None:
+      %if has_empty:
+        %if not selected:
+          <option value="" data-toggle="tooltip" title="Empty Value. Please Select one." selected></option>
+        %else:
+          <option value="" data-toggle="tooltip" title="Empty Value. Please Select one."></option>
         %endif
       %endif
-    </select> 
-    % if (not (validation_msg is None)) and enabled:
-      <%call expr="messagesAndText.error(validation_msg)"/>
-    % endif
-    <!-- END comboBox -->
+      %if not values is None:
+        %for key in keys:
+          <%
+          value = values.get(key,None)
+          if isinstance(value, tuple):
+            title = 'title="{0}"'.format(value[1])
+            value = value[0]
+            if not hasDataContent:
+              hasDataContent = True
+              dataToggle='data-toggle="tooltip"'
+            else:
+              title = ''
+          %>
+          %if not selected is None and value == selected:
+            <option value="${value}" ${dataToggle} ${title} selected>${key}</option>
+          %else:
+            <option value="${value}" ${dataToggle} ${title} >${key}</option>
+          %endif
+        %endfor
+      %endif
+    %endif
+  </select> 
+  %if (not (validation_msg is None)) and enabled:
+    <%call expr="messagesAndText.error(validation_msg)"/>
+  %endif
+  <!-- END comboBox -->
 </%def>

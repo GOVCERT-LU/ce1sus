@@ -1,11 +1,11 @@
 <%namespace name="tabulator" file="/dagr/components/tabs.html"/>
 
-<h4>Event #${event_id}</h4>
+<!--<h4>Event #${event_id}</h4>-->
 
 <%call expr="tabulator.tabulator(id='eventTabs{0}'.format(event_id))"> 
-    <%call expr="tabulator.tab(id='eventOverView{0}'.format(event_id),url='/admin/validation/event_details/{0}'.format(event_id),name='Overview' ,active=True)"/>
-    <%call expr="tabulator.tab(id='eventObjects{0}'.format(event_id),url='/admin/validation/event_objects/{0}'.format(event_id), name='Objects')"/>
-    <%call expr="tabulator.tab(id='eventFlatObjects{0}'.format(event_id),url='/admin/validation/flat_event_objects/{0}'.format(event_id), name='Flat Objects')"/>
-    <%call expr="tabulator.tab(id='eventRelations{0}'.format(event_id),url='/events/event/relations/{0}'.format(event_id), name='Relations')"/>
-    <%call expr="tabulator.tab(id='eventGroups{0}'.format(event_id),url='/events/event/groups/groups/{0}'.format(event_id), name='Groups')"/> 
+  <%call expr="tabulator.tab(id='eventOverView{0}'.format(event_id),url='/admin/validation/event_details/{0}'.format(event_id),name='Overview' ,active=True)"/>
+  <%call expr="tabulator.tab(id='eventObjects{0}'.format(event_id),url='/admin/validation/event_objects/{0}'.format(event_id), name='Objects')"/>
+  <%call expr="tabulator.tab(id='eventFlatObjects{0}'.format(event_id),url='/admin/validation/flat_event_objects/{0}'.format(event_id), name='Flat Objects')"/>
+  <%call expr="tabulator.tab(id='eventRelations{0}'.format(event_id),url='/events/event/relations/{0}'.format(event_id), name='Relations')"/>
+  <%call expr="tabulator.tab(id='eventGroups{0}'.format(event_id),url='/events/event/groups/groups/{0}'.format(event_id), name='Groups')"/> 
 </%call>

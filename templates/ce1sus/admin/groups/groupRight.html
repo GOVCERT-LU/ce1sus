@@ -11,17 +11,16 @@
 <div class="row">
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
 		% if not group is None:
-		<div class="btn-group">
-			<a href="#editGroupModal" role="button" class="btn  btn-default"
-				data-toggle="modal">Edit</a>
-			<button class="btn btn-danger"
-                onclick="if (confirm('Are you sure you want to delete?')) {
-                    dialogCall('/admin/groups/modify_group?identifier=${group.identifier}&action=remove',
-                               'adminTabsTabContent',
-                               '/admin/groups')}">
-            Delete
-            </button>
-		</div>
+  		<div class="btn-group">
+	  		<a href="#editGroupModal" role="button" class="btn  btn-default" data-toggle="modal">Edit</a>
+  			<button class="btn btn-danger"
+          onclick="if (confirm('Are you sure you want to delete?')) {
+            dialogCall('/admin/groups/modify_group?identifier=${group.identifier}&action=remove',
+                       'adminGroup',
+                       '/admin/groups')}">
+          Delete
+        </button>
+		  </div>
 		%endif
 	</div>
 </div>
@@ -46,12 +45,12 @@
 
 %if not group is None:
 <%call expr="base_form.generic_modal_form(modal_id='editGroupModal',
-                                    url='/admin/groups/modify_group',
-                                    refresh_url='/admin/groups/right_content/{0}'.format(group.identifier),
-                                    refresh_container='GroupRightContent')">
+                                          url='/admin/groups/modify_group',
+                                          refresh_url='/admin/groups/right_content/{0}'.format(group.identifier),
+                                          refresh_container='GroupRightContent')">
 <input type="hidden" name="action" value="update">
 <%call expr="modals.save_button_modal(id='editGroupModal',
-                              title='Edit group',
-                              content_url='/admin/groups/edit_group/{0}'.format(group.identifier))"/>
+                                      title='Edit group',
+                                       content_url='/admin/groups/edit_group/{0}'.format(group.identifier))"/>
 </%call>
 %endif
