@@ -126,12 +126,12 @@ class EventBroker(BrokerBase):
         sub_group_ids.append(subgroup.identifier)
       try:
         if len(sub_group_ids) > 0:
-          result = self.session.query(Event).filter(
+          result = self.session.query(Event).join(Group).filter(
                                         or_(
                                           Event.creator_group_id == main_group_id,
                                           and_(
                                             or_(
-                                            getattr(Event.maingroups, 'identifier').in_(
+                                            Group.identifier.in_(
                                                                   sub_group_ids
                                                                        ),
                                             Event.tlp_level_id >= tlp_lvl,

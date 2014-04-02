@@ -66,7 +66,8 @@ class ObjectsView(Ce1susBaseView):
                                    attribute_definitions=attribute_definitions,
                                    object_id=object_id,
                                    owner=ower,
-                                   published=event.published)
+                                   published=event.published,
+                                   user=self._get_user())
     except ControllerException as error:
       return self._render_error_page(error)
 
