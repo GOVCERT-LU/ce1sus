@@ -125,34 +125,23 @@ class EventBroker(BrokerBase):
       for subgroup in user.default_group.subgroups:
         sub_group_ids.append(subgroup.identifier)
       try:
-        if len(sub_group_ids) > 0:
-          result = self.session.query(Event).join(Group).filter(
-                                        or_(
-                                          Event.creator_group_id == main_group_id,
-                                          and_(
-                                            or_(
-                                            Group.identifier.in_(
-                                                                  sub_group_ids
-                                                                       ),
-                                            Event.tlp_level_id >= tlp_lvl,
-                                            Event.dbcode.op('&')(12) == 12
-                                            ),
-                                            Event.published == 1)
-                                          )
-                                        ).order_by(
-                        Event.created.desc())
-        else:
-          result = self.session.query(Event).filter(
+
+        result = self.session.query(Event).join(Group).filter(
                                       or_(
-                                        Event.creator_group_id == main_group_id,
                                         and_(
+                                             Event.dbcode.op('&')(4) == 4,
+                                             Event.creator_group_id == main_group_id
+                                        ),
+                                        and_(
+                                          or_(
+                                            Group.identifier.in_(sub_group_ids),
                                             Event.tlp_level_id >= tlp_lvl,
-                                            Event.published == 1,
-                                            Event.dbcode.op('&')(12) == 12
-                                            )
+                                          ),
+                                          Event.dbcode.op('&')(12) == 12,
+                                          Event.published == 1)
                                         )
                                       ).order_by(
-                        Event.created.desc())
+                      Event.created.desc())
         if limit is None and offset is None:
           result = result.all()
         else:
