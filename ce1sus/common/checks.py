@@ -40,13 +40,17 @@ def is_viewable(event, user_default_group, user_priv=False):
     result = event.tlp.identifier >= user_tlp
     # check if the user belong to one of the common maingroups
     if not result:
-        result = user_default_group in event.maingroups
+      for group in event.maingroups:
+        if group.identifier == user_default_group.identifier:
+          result = True
+          break
     # check if the user belong to one of the common groups
     if not result:
-      groups = user_default_group.subgroups
-      for group in event.subgroups:
-        if group in groups:
-            return True
+      for usr_subgroup in user_default_group.subgroups:
+        for subgroup in event.subgroups:
+          if usr_subgroup.identifier == subgroup.identifier:
+              result = True
+              break
   return result
 
 
@@ -84,6 +88,7 @@ def check_if_event_is_viewable(event, user, cache=None):
   if event:
     if cache is None:
       result = is_viewable(event, user.default_group, user.privileged == 1)
+      cache[event.identifier] = result
     else:
       viewable = cache.get(event.identifier, None)
       if viewable == True:

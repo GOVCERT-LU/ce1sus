@@ -105,11 +105,15 @@ class Ce1susBaseView(BaseView):
     """
     return self._get_from_session('_cp_events_cache', dict())
 
+  def _act_authorized_events_cache(self, cache):
+    self._put_to_session('_cp_events_cache', cache)
+
   def _is_event_viewable(self, event):
     user = self._get_user()
     cache = self._get_authorized_events_cache()
     viewable = check_if_event_is_viewable(event, user, cache)
     log_msg = check_viewable_message(viewable, event.identifier, user.username)
+    self._act_authorized_events_cache(cache)
     self._get_logger().info(log_msg)
     return viewable
 
@@ -128,7 +132,7 @@ class Ce1susBaseView(BaseView):
     viewable = self._is_event_viewable(event)
     if not viewable:
       username = self.__get_username()
-      raise cherrypy.HTTPError(403, 'User {0} is not authorized to view event {1}'.format(username, event.identifer))
+      raise cherrypy.HTTPError(403, 'User {0} is not authorized to view event {1}'.format(username, event.identifier))
 
   def _check_if_event_owner(self, event):
     """

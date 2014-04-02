@@ -125,27 +125,47 @@ class EventBroker(BrokerBase):
       for subgroup in user.default_group.subgroups:
         sub_group_ids.append(subgroup.identifier)
       try:
+        # prepare list of event matching the groups
+        try:
+          maingroups = self.session.query(Event.identifier).join(Event.maingroups).filter(
+                                           Event.dbcode.op('&')(12) == 12,
+                                           Group.identifier == main_group_id
+                                    ).all()
+        except sqlalchemy.orm.exc.NoResultFound:
+          maingroups = list()
 
-        result = self.session.query(Event).join(Group).filter(
-                                      or_(
-                                        and_(
-                                             Event.dbcode.op('&')(4) == 4,
-                                             Event.creator_group_id == main_group_id
-                                        ),
-                                        and_(
-                                          or_(
-                                            Group.identifier.in_(sub_group_ids),
-                                            Event.tlp_level_id >= tlp_lvl,
-                                          ),
-                                          Event.dbcode.op('&')(12) == 12,
-                                          Event.published == 1)
-                                        )
-                                      ).order_by(
-                      Event.created.desc())
-        if limit is None and offset is None:
-          result = result.all()
+        if len(sub_group_ids) > 0:
+          try:
+            subgroups = self.session.query(Event.identifier).join(Event.subgroups).filter(
+                                             Event.dbcode.op('&')(12) == 12,
+                                             Group.identifier.in_(sub_group_ids)
+                                      ).all()
+          except sqlalchemy.orm.exc.NoResultFound:
+            subgroups = list()
         else:
-          result = result.limit(limit).offset(offset).all()
+          subgroups = list()
+        event_ids = list()
+        for item in maingroups + subgroups:
+          event_ids.append(item[0])
+        result = self.session.query(Event).filter(
+                                                    or_(
+                                                        and_(
+                                                           Event.dbcode.op('&')(4) == 4,
+                                                           Event.creator_group_id == main_group_id
+                                                        ),
+                                                        and_(
+                                                             or_(
+                                                                   Event.identifier.in_(event_ids),
+                                                                   Event.tlp_level_id >= tlp_lvl
+                                                                 ),
+                                                           Event.published == 1
+                                                        )
+                                                    )
+                                                  )
+        if limit is None and offset is None:
+          result = result.order_by(Event.created.desc()).all()
+        else:
+          result = result.order_by(Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
         raise NothingFoundException(u'Nothing found')
       except sqlalchemy.exc.SQLAlchemyError as error:
