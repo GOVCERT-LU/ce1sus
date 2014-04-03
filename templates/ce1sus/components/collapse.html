@@ -25,10 +25,19 @@ $( document ).ready(function() {
 </script>
 </%def>
 
-<%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False)">
-% if (not object is None):
+<%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None)">
+<%
+allowed = owner or (user.default_group.identifier == object.creator.default_group.identifier and not object.bit_value.is_validated)
+%>
+% if (not object is None) and (object.bit_value.is_validated or allowed ):
+<%
+if object.bit_value.is_proposal and not object.bit_value.is_validated:
+  header_bg = 'background-color: yellow;'
+else:
+  header_bg = ''
+%>
         <div class="panel panel-default" >
-        <div class="panel-heading" style="padding:5px;">
+        <div class="panel-heading" style="padding:5px;${header_bg}">
             <div class="row">
                 <div class="col-xs-5 col-sm-5" style="height: 34px; line-height: 34px;">
 
@@ -53,19 +62,28 @@ $( document ).ready(function() {
                       disabled_str = '" data-toggle="modal"'
                     %> 
                     %if show_menu:
-                        %if owner:
-                       <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
-                       <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                       %if owner:
+                         <a  onclick="inforUnpublished('addObjectAttributeModal${object.identifier}');" href="#" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+                         <a onclick="inforUnpublished('addChildObjectModal${object.identifier}');" href="#" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                         %if owner and object.bit_value.is_proposal and not object.bit_value.is_validated:
+                         <a onclick="inforUnpublished('validateObjectModal${object.identifier}');" href="#" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-saved" title="Validate object"></span></a>
+                         %endif
+                       %else:
+                         <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+-                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                       %endif
+                       
+                       %if allowed:
                        <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify object"><span class="glyphicon glyphicon-list"></span></a>
                        <a href="#setPropertiesModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify properties"><span class="glyphicon glyphicon-pencil"></span></a>
                        %endif
                        <a  class="btn btn-default" href="#infoModal${object.identifier}" role="button" data-toggle="modal" title="View details"><span class="glyphicon glyphicon-eye-open"></span></a>
-                       %if owner:
+                       %if allowed:
                        <a href="#" class="btn btn-danger" role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                                 dialogCall('/events/event/objects/remove_object?event_id=${event_id}&object_id=${object.identifier}',
                                            'eventObjects${event_id}',
-                                           '/events/event/objects/objects/${event_id}')}" title="delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                                           '/events/event/objects/objects/${event_id}')}"><span class="glyphicon glyphicon-remove-circle"  title="delete"></span></a>
                         <!--  dont remove this -->
                         %endif
                      </div>
@@ -79,13 +97,20 @@ $( document ).ready(function() {
 			                <%call expr="modals.generic_dialog_modal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
 			                  <%call expr="forms.eventObjectForm(event_id,object, False,obj_definitions)"/>
 			                </%call>
-			           %if owner:
+			           %if allowed:
 			                <%call expr="base_forms.generic_modal_form(modal_id='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attach_child_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
 			                    <%call expr="modals.save_button_modal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',content_url='/events/event/objects/add_child_object/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
 			                <%call expr="base_forms.generic_modal_form(modal_id='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modify_parent',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
 			                    <%call expr="modals.save_button_modal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',content_url='/events/event/objects/set_parent/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
+                      
+                            %if owner and object.bit_value.is_proposal and not object.bit_value.is_validated:
+                              <%call expr="base_forms.generic_modal_form(modal_id='validateObjectModal{0}'.format(object.identifier),url='/events/event/objects/validate_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+                                  <%call expr="modals.save_button_modal(id='validateObjectModal{0}'.format(object.identifier),title='Validate Object',content_url='/events/event/objects/validate_object_modal/{0}/{1}'.format(event_id, object.identifier))"/>
+                              </%call>
+                            %endif
+                            
 			                <%call expr="base_forms.generic_modal_form(modal_id='setPropertiesModal{0}'.format(object.identifier),url='/events/event/bit_value/modify_object_properties',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
                                 <%call expr="modals.save_button_modal(id='setPropertiesModal{0}'.format(object.identifier),title='Set Object Properties',content_url='/events/event/bit_value/set_object_properties/{0}/{1}'.format(event_id, object.identifier))"/>
                             </%call>
@@ -130,10 +155,17 @@ $( document ).ready(function() {
                           shareicon = '<span class="glyphicon glyphicon-ok"></span>'
                         else:
                            shareicon = '<span class="glyphicon glyphicon-remove"></span>'
+                        
+                        attribute_owner = (user.default_group.identifier == attribute.creator.default_group.identifier)
+                        if attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
+                          tdstyle = 'style="background-color: yellow;"'
+                        else:
+                          tdstyle = ''
                         %>
-                        %if attribute.bit_value.is_validated_and_shared or owner:
-                        <tr>
-                          <td><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
+                        
+                        %if attribute.bit_value.is_validated_and_shared or owner or attribute_owner:
+                        <tr >
+                          <td ${tdstyle}><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
                           <td style="text-align:center">${shareicon}</td>
                           <td><%call expr="messages_and_text.object_to_html(attribute.definition.name, shorten_to=100,use_plain_text=False)"/></td>
                           <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
@@ -142,7 +174,17 @@ $( document ).ready(function() {
                             <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventObjects${event_id}','/events/event/objects/objects/${event_id}/${object.identifier}');">
                                <span class="glyphicon glyphicon-eye-open" title="View details"></span>
                             </a>
-                            %if owner:
+                            
+                            %if owner and attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
+                              <a href="#" role="button"
+                                onclick="if (confirm('Are you sure you want to validate this attribute?')) {
+                                    dialogCall('/events/event/attribute/validate_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
+                                               'eventObjects${event_id}',
+                                               '/events/event/objects/objects/${event_id}')}" title="delete">
+                                 <span class="glyphicon glyphicon-saved" title="Remove"></span>
+                              </a>
+                            %endif
+                            %if owner or (attribute_owner and not attribute.bit_value.is_validated):
                               <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventObjects${event_id}','/events/event/objects/objects/${event_id}/${object.identifier}/');"
                                  <span class="glyphicon glyphicon-pencil" title="Modify properties"></span>
                               </a>
@@ -174,20 +216,20 @@ $( document ).ready(function() {
   %endif
 </%def>
 
-<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False)">
+<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None)">
     %if not object_list is None:
 	<%
     spana = ident
     spanb = 12 - spana
 	%>
             %for object in object_list:
-		        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner)"/>
+		        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner, user)"/>
 	            <div class="row">
 	            %if spana > 0:
 	            <div class="col-xs-${spana} col-sm-${spana}">&nbsp;</div>
 	            %endif
 	            <div class="col-xs-${spanb} col-sm-${spanb}">
-	               <%call expr="node(event_id, object.children,ident+1, show_menu, owner)"/>
+	               <%call expr="node(event_id, object.children,ident+1, show_menu, owner, user)"/>
 	            </div>
 	            </div>
             %endfor

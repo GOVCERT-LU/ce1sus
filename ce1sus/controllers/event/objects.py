@@ -65,18 +65,19 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_all_event_obejcts(self, event, owner):
+  def get_all_event_obejcts(self, event, owner, user):
     try:
       if owner:
         return self.object_broker.get_event_objects(event.identifier)
       else:
-        return self.get_viewable_event_obejcts(event)
+        return self.get_viewable_event_obejcts(event, user)
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_viewable_event_obejcts(self, event):
+  def get_viewable_event_obejcts(self, event, user):
     try:
-      return self.object_broker.get_viewable_event_objects(event.identifier)
+      group_id = user.default_group.identifier
+      return self.object_broker.get_viewable_event_objects(event.identifier, group_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -94,12 +95,13 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_web_object(self, identifier, event, parent_object_id, definition_id, user, share, action):
+  def populate_web_object(self, identifier, event, parent_object_id, definition_id, user, share, action, proposal):
     try:
       definition = self.def_object_broker.get_by_id(definition_id)
       obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition, user, share, action)
       obj.bit_value.is_web_insert = True
-      obj.bit_value.is_validated = True
+      obj.bit_value.is_validated = not proposal
+      obj.bit_value.is_proposal = proposal
       return obj
     except BrokerException as error:
       self._raise_exception(error)
@@ -149,7 +151,9 @@ class ObjectsController(Ce1susBaseController):
     try:
       try:
         user = self._get_user(user.username)
-        event.published = 0
+        # only do this when the owner is doing this
+        if self.is_event_owner(event, user):
+          event.published = 0
         self.event_broker.update_event(user, event, commit=False)
         obj.modified = DatumZait.now()
         self.object_broker.insert(obj, commit=False)
@@ -201,7 +205,7 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def get_flat_objects(self, event, is_owner):
+  def get_flat_objects(self, event, is_owner, user):
     result = list()
     objects = self.object_broker.get_all_event_objects(event.identifier)
     for obj in objects:
@@ -209,8 +213,11 @@ class ObjectsController(Ce1susBaseController):
         if is_owner:
           result.append((obj, attribute))
         else:
-          if attribute.bit_value.is_validated_and_shared:
+          if attribute.creator.default_group.identifier == user.default_group.identifier:
             result.append((obj, attribute))
+          else:
+            if attribute.bit_value.is_validated_and_shared:
+              result.append((obj, attribute))
     return result
 
   def get_all_definitions(self):
@@ -233,5 +240,29 @@ class ObjectsController(Ce1susBaseController):
       return self.def_object_broker.build_object_definition(identifier=None, name=dictionary.get('name', None),
                   description=dictionary.get('description', None), action=action,
                                share=dictionary.get('share', None))
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def validate_object_all(self, event, obj, user):
+    try:
+      obj.bit_value.is_validated = True
+      for attribute in obj.attributes:
+        attribute.bit_value.is_validated = True
+      self.object_broker.update(obj, commit=False)
+      if event.published == 1:
+        event.published = 0
+        self.event_broker.update_event(user, event, commit=False)
+      self.object_broker.do_commit(True)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def validate_object(self, event, obj, user):
+    try:
+      obj.bit_value.is_validated = True
+      self.object_broker.update(obj, commit=False)
+      if event.published == 1:
+        event.published = 0
+        self.event_broker.update_event(user, event, commit=False)
+      self.object_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)

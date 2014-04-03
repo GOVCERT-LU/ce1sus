@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 import cherrypy
 from dagr.web.views.base import BaseView
 from ce1sus.common.checks import check_if_event_is_viewable, check_viewable_message, is_event_owner
+from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 
 SESSION_USER = '_cp_user'
@@ -46,6 +47,7 @@ class Ce1susBaseView(BaseView):
 
   def __init__(self, config):
     BaseView.__init__(self, config)
+    self.mail_handler = MailHandler(config)
 
   def admin_area(self):
     """
@@ -141,7 +143,20 @@ class Ce1susBaseView(BaseView):
     valid = self._is_event_owner(event)
     if not valid:
       username = self.__get_username()
-      raise cherrypy.HTTPError(403, 'User {0} is does not own event {1}'.format(username, event.identifer))
+      raise cherrypy.HTTPError(403, 'User {0} is does not own event {1}'.format(username, event.identifier))
+
+  def _check_if_allowed_event_object(self, event, obj=None):
+    valid = self._is_event_owner(event)
+    if not valid:
+      if obj:
+        creator_grp_id = obj.creator.default_group.identifier
+        user_grp_id = self._get_user().default_group.identifier
+        if  (not obj.bit_value.is_validated and  creator_grp_id != user_grp_id):
+          username = self.__get_username()
+          raise cherrypy.HTTPError(403, 'User {0} has no rights on {1} {2}'.format(username, obj, obj.identifier))
+      else:
+        username = self.__get_username()
+        raise cherrypy.HTTPError(403, 'User {0} is does not own event {1}'.format(username, event.identifier))
 
   def _check_if_priviledged(self):
     """
@@ -182,3 +197,15 @@ class Ce1susBaseView(BaseView):
     :returns: generated HTML
     """
     return self._render_template('/common/error.html', error_msg=self._get_error_message(error))
+
+  def send_notification_mail(self, event):
+    try:
+      # get info from session
+      send_mails = self._get_from_session('_cp_send_mails', dict())
+      send_mail = send_mails.get(event.identifier, False)
+      if not send_mail:
+        self.mail_handler.send_event_notification_mail(event)
+        send_mails[event.identifier] = True
+        self._put_to_session('_cp_send_mails', send_mails)
+    except MailHandlerException as error:
+      self._get_logger().debug(error)

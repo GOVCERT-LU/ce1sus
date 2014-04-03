@@ -17,6 +17,7 @@ from sqlalchemy.sql.expression import or_
 from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.permission.permissionclasses import User, Group
 from ce1sus.helpers.bitdecoder import BitValue
 import uuid as uuidgen
 
@@ -208,7 +209,7 @@ class ObjectBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
-  def get_viewable_event_objects(self, event_id):
+  def get_viewable_event_objects(self, event_id, group_id):
     """
     Returns the objects of the event
 
@@ -216,9 +217,12 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(Object.event_id
+      result = self.session.query(Object).join(Object.creator, User.default_group).filter(Object.event_id
                                                  == event_id,
-                                                Object.dbcode.op('&')(12) == 12
+                                                 or_(
+                                                     Object.dbcode.op('&')(12) == 12,
+                                                     Group.identifier == group_id
+                                                     )
                                                  )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:

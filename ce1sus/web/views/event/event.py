@@ -153,9 +153,11 @@ class EventView(Ce1susBaseView):
           return self._return_ajax_post_error(self.__render_event_details('/events/event/addEvent.html',
                                                           event))
       if action == 'remove':
+        self._check_if_event_owner(event)
         self.event_controller.remove_event(user, event)
 
       if action == 'update':
+        self._check_if_event_owner(event)
         event, valid = self.event_controller.update_event(user, event)
         if not valid:
           self._get_logger().info('Event is invalid')

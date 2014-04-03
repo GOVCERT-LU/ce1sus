@@ -38,8 +38,8 @@ class BitValueView(Ce1susBaseView):
   def set_object_properties(self, event_id, object_id):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
       obj = self.bit_value_controller.get_object_by_id(object_id)
+      self._check_if_allowed_event_object(event, obj)
       return self.__generate_template(event_id, obj, True)
     except ControllerException as error:
       return self._render_error_page(error)
@@ -49,9 +49,10 @@ class BitValueView(Ce1susBaseView):
   def modify_object_properties(self, event_id, identifier, shared):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
       user = self._get_user()
-      self.bit_value_controller.set_object_values(user, event, identifier, shared)
+      obj = self.bit_value_controller.get_object_by_id(identifier)
+      self._check_if_allowed_event_object(event, obj)
+      self.bit_value_controller.set_object_values(user, event, obj, shared)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
@@ -61,9 +62,9 @@ class BitValueView(Ce1susBaseView):
   def set_attribute_properties(self, event_id, object_id, attribute_id):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
       obj = self.bit_value_controller.get_object_by_id(object_id)
       attribute = self.bit_value_controller.get_attribute_by_id(attribute_id)
+      self._check_if_allowed_event_object(event, attribute)
       return self.__generate_template(event_id, attribute, obj.bit_value.is_shareable)
     except ControllerException as error:
       return self._render_error_page(error)
@@ -73,9 +74,10 @@ class BitValueView(Ce1susBaseView):
   def modify_attribute_properties(self, event_id, identifier, shared):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
       user = self._get_user()
-      self.bit_value_controller.set_attribute_values(user, event, identifier, shared)
+      attribute = self.bit_value_controller.get_attribute_by_id(identifier)
+      self._check_if_allowed_event_object(event, attribute)
+      self.bit_value_controller.set_attribute_values(user, event, attribute, shared)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

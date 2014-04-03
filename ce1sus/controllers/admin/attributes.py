@@ -27,6 +27,12 @@ class AttributeController(Ce1susBaseController):
     self.attribute_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
 
+  def get_attribute_by_id(self, attribute_id):
+    try:
+      return self.attribute_broker.get_by_id(attribute_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
   def get_all_attr_defs(self):
     """
     Returns all attribute definitions

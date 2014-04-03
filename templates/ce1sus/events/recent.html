@@ -61,6 +61,6 @@
     });
   });
 %if ext_event_id:
-  loadNewTab('${ext_event_id}', 'eventsTabTabContent', '/events/event/view/${ext_event_id}', true, 'Event #${ext_event_id}')
+    loadNewSideNavTab('${ext_event_id}', 'eventsTabTabContent', '/events/event/view/${ext_event_id}', true, 'Event #${ext_event_id}');
 %endif
 </script>

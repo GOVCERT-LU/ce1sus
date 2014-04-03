@@ -176,7 +176,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
     });
     request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);
-        alert(message);
+        alert(jQuery(message).text());
     });
     request.error(request.fail);
     request.done(function(responseText, textStatus, XMLHttpRequest) {
@@ -195,7 +195,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
                 var startPos = message.lastIndexOf('>');
                 message = message.substring(startPos+1);
             }
-            alert('Error:\n' + message);
+            alert('Error:\n' + textStatus);
         }
     });
 }

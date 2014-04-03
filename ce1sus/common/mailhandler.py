@@ -59,7 +59,22 @@ class MailHandler(object):
         update = False
 
       mail.subject = self.__process_subject(mail_tmpl.subject, event)
-      self.__process_send_event_mail(mail, event, update)
+      self.__process_send_mail(mail, event, update, True)
+    except (BrokerException, ConfigException) as error:
+      raise MailHandlerException(error)
+
+  def send_event_notification_mail(self, event):
+    try:
+      mail = Mail()
+      mail_tmpl = self.mail_broker.get_notifcation_template()
+      mail.body = self.__process_notification_body(mail_tmpl.body, event)
+      mail.subject = self.__process_subject(mail_tmpl.subject, event)
+      # send mail to groups
+      if event.creator_group.usermails:
+        self.__send_mail(mail, event.creator_group, event, True)
+      else:
+        for user in event.creator_group.users:
+          self.__send_mail(mail, user, event, True)
     except (BrokerException, ConfigException) as error:
       raise MailHandlerException(error)
 
@@ -178,6 +193,22 @@ class MailHandler(object):
     # Note relations are user specific will be done before sending!
     return text
 
+  def __process_notification_body(self, body, event):
+    self._get_logger().debug('Processing body')
+    # creating metadata
+    text = body.replace(u'${event_uuid}', u'{0}'.format(event.uuid))
+    text = text.replace(u'${event_id}', u'{0}'.format(event.identifier))
+    event_url = self.__get_event_url(event)
+    text = text.replace(u'${event_url}', u'{0}'.format(event_url))
+    text = text.replace(u'${event_created}', u'{0}'.format(event.created))
+    text = text.replace(u'${event_reporter}', u'{0}'.format(event.creator_group.name))
+    text = text.replace(u'${event_tlp}', u'{0}'.format(event.tlp.text))
+    text = text.replace(u'${event_analysis}', u'{0}'.format(event.analysis))
+    text = text.replace(u'${event_risk}', u'{0}'.format(event.risk))
+    text = text.replace(u'${event_title}', u'{0}'.format(event.title))
+    text = text.replace(u'${event_description}', u'{0}'.format(event.description))
+    return text
+
   def __process_update_body(self, body, event):
     self._get_logger().debug(u'Processing update body')
     text = self.__process_publication_body(body, event)
@@ -198,19 +229,25 @@ class MailHandler(object):
       event_relations = self.__relations_to_text(group, event, True)
       mail.body = mail.body.replace(u'${event_updated_relations}', event_relations)
 
-  def __send_mail(self, mail, reciever, event):
-    mail.reciever = reciever.email
-    if mail.encrypt:
-      if reciever.gpg_key:
-        self._get_logger().debug(u'Mail sending encrypted mail to {0}'.format(reciever.email))
-        self.mailer.send_mail(mail)
+  def __send_mail(self, mail, reciever, event, ignore_errors=False):
+    try:
+      mail.reciever = reciever.email
+      if mail.encrypt:
+        if reciever.gpg_key:
+          self._get_logger().debug(u'Mail sending encrypted mail to {0}'.format(reciever.email))
+          self.mailer.send_mail(mail)
+        else:
+          self._get_logger().info(u'Mail will not be send to {0} as not gpg key'.format(reciever.email))
       else:
-        self._get_logger().info(u'Mail will not be send to {0} as not gpg key'.format(reciever.email))
-    else:
-      self._get_logger().debug(u'Mail sending plain text mail to {0}'.format(reciever.email))
-      self.mailer.send_mail(mail)
+        self._get_logger().debug(u'Mail sending plain text mail to {0}'.format(reciever.email))
+        self.mailer.send_mail(mail)
+    except MailerException as error:
+      if ignore_errors:
+        self._get_logger().info(u'Mail could not be send to mail to {0} due to {1}'.format(reciever.email, error))
+      else:
+        raise error
 
-  def __process_send_event_mail(self, mail, event, update):
+  def __process_send_mail(self, mail, event, update, sent_to_subgroups=True, ignore_errors=False):
     try:
 
       # send mail only if gpg key of the user or tlp == White
@@ -223,16 +260,17 @@ class MailHandler(object):
       mail_body = mail.body
       # send mail to subgroups
       seen_group_ids = list()
-      for subgroup in event.subgroups:
-        for group in subgroup.groups:
-          seen_group_ids.append(group.identifier)
-          mail.body = mail_body
-          self.__add_relations(mail, group, event, update)
-          if group.usermails:
-            self.__send_mail(mail, group, event)
-          else:
-            for user in group.users:
-              self.__send_mail(mail, user, event)
+      if sent_to_subgroups:
+        for subgroup in event.subgroups:
+          for group in subgroup.groups:
+            seen_group_ids.append(group.identifier)
+            mail.body = mail_body
+            self.__add_relations(mail, group, event, update)
+            if group.usermails:
+              self.__send_mail(mail, group, event, ignore_errors)
+            else:
+              for user in group.users:
+                self.__send_mail(mail, user, event, ignore_errors)
 
       # send mail to groups
       for group in event.maingroups:
@@ -241,10 +279,10 @@ class MailHandler(object):
         if group.identifier not in seen_group_ids:
           # send mail
           if group.usermails:
-            self.__send_mail(mail, group, event)
+            self.__send_mail(mail, group, event, ignore_errors)
           else:
             for user in group.users:
-                self.__send_mail(mail, user, event)
+                self.__send_mail(mail, user, event, ignore_errors)
 
     except MailerException as error:
       self._get_logger().critical(error)

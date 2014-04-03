@@ -14,11 +14,13 @@
 <div class="row">
     <div class="col-xs-3 col-sm-3">
         <div id="objectLeft">
-            %if owner:
             <div class="btn-group">
-              <a href="#addObjectModal${event_id}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
+              %if owner:
+                <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal${event_id}');">Add new Object</a>
+              %else:
+                <a href="#addObjectModal${event_id}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
+              %endif
             </div>
-            %endif
             <div style="height:15px"/>
             
             <div class="row">
@@ -43,7 +45,7 @@
                 </div>
             </div>
             <div class="panel-group" id="accordion">
-              <%call expr="collapse.node(event_id, object_list, owner=owner)"/>
+              <%call expr="collapse.node(event_id, object_list, owner=owner, user=user)"/>
             </div>
         </div>
     </div>

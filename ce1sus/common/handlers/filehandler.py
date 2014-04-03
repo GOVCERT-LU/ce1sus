@@ -256,8 +256,8 @@ class FileHandler(GenericHandler):
     uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
 
     attributes = list()
-    # TODO encode filename
-    attributes.append(FileHandler._create_attribute(u'{0}'.format(filename),
+    convertedFilename = filename.decode('utf8')
+    attributes.append(FileHandler._create_attribute(convertedFilename,
                                                    obj,
                                                    FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
                                                    user,

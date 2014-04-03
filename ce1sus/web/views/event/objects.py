@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.web.views.base import Ce1susBaseView
-from dagr.web.views.base import SessionNotFoundException
 from ce1sus.controllers.event.objects import ObjectsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
@@ -24,6 +23,7 @@ class ObjectsView(Ce1susBaseView):
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
+    self.send_mails = config.get('ce1sus', 'sendmail', False)
     self.objects_controller = ObjectsController(config)
 
   @cherrypy.expose
@@ -55,7 +55,8 @@ class ObjectsView(Ce1susBaseView):
         attribute_definitions = dict()
 
       ower = self._is_event_owner(event)
-      object_list = self.objects_controller.get_all_event_obejcts(event, ower)
+      user = self._get_user()
+      object_list = self.objects_controller.get_all_event_obejcts(event, ower, user)
 
       if object_id is None:
         object_id = self._pull_from_session('instertedObject')
@@ -67,7 +68,7 @@ class ObjectsView(Ce1susBaseView):
                                    object_id=object_id,
                                    owner=ower,
                                    published=event.published,
-                                   user=self._get_user())
+                                   user=user)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -110,6 +111,7 @@ class ObjectsView(Ce1susBaseView):
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       user = self._get_user()
+      proposal = not (event.creator_group.identifier == user.default_group.identifier)
 
       obj = self.objects_controller.populate_web_object(None,
                                                         event,
@@ -117,10 +119,16 @@ class ObjectsView(Ce1susBaseView):
                                                         definition,
                                                         self._get_user(),
                                                         shared,
-                                                        action)
+                                                        action,
+                                                        proposal)
       if action == 'insert':
         obj, valid = self.objects_controller.insert_object(user, event, obj)
+
+      if self.send_mails and (event.creator_group.identifier != user.default_group.identifier):
+          self.send_notification_mail(event)
+
       if action == 'remove':
+        self._check_if_allowed_event_object(event, obj)
         self.objects_controller.remove_object(user, event, obj)
       if not valid:
           self._get_logger().info('Event is invalid')
@@ -253,9 +261,9 @@ class ObjectsView(Ce1susBaseView):
     """
     try:
       event = self.objects_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
       user = self._get_user()
       obj = self.objects_controller.get_object_by_id(object_id)
+      self._check_if_allowed_event_object(event, obj)
       self.objects_controller.remove_object(user, event, obj)
       return self._return_ajax_ok()
     except ControllerException as error:
@@ -283,13 +291,43 @@ class ObjectsView(Ce1susBaseView):
   def flat_objects(self, event_id):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
-      self._check_if_event_owner(event)
+      self._check_if_event_is_viewable(event)
       owner = self._is_event_owner(event)
-      flat_objects = self.objects_controller.get_flat_objects(event, owner)
+      user = self._get_user()
+      flat_objects = self.objects_controller.get_flat_objects(event, owner, user)
       return self._render_template('/events/event/objects/flatview.html',
                                    flat_objects=flat_objects,
                                    event_id=event_id,
                                    owner=owner,
                                    published=event.published)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def validate_object_modal(self, event_id, object_id):
+    try:
+      event = self.objects_controller.get_event_by_id(event_id)
+      self._check_if_event_owner(event)
+      return self._render_template('/events/event/objects/validateModal.html',
+                                   object_id=object_id,
+                                   event_id=event_id)
+
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def validate_object(self, event_id, object_id, operation):
+    try:
+      event = self.objects_controller.get_event_by_id(event_id)
+      self._check_if_event_owner(event)
+      obj = self.objects_controller.get_object_by_id(object_id)
+      user = self._get_user()
+      if (operation == 'everything'):
+        self.objects_controller.validate_object_all(event, obj, user)
+      else:
+        self.objects_controller.validate_object(event, obj, user)
+      return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

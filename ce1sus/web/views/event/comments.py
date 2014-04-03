@@ -67,7 +67,7 @@ class CommentsView(Ce1susBaseView):
                          comment_text=None, action=None):
     try:
       event = self.comments_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
+      self._check_if_event_owner(event)
       user = self._get_user()
       comment = self.comments_controller.populate_web_comment(comment_id, comment_text, event, user, action)
       if action == 'insert':

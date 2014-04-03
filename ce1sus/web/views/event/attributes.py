@@ -25,7 +25,9 @@ class AttributesView(Ce1susBaseView):
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
+    self.send_mails = config.get('ce1sus', 'sendmail', False)
     self.attributes_controller = AttributesController(config)
+
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
@@ -154,11 +156,14 @@ class AttributesView(Ce1susBaseView):
       params = dict()
       for key, value in kwargs.iteritems():
         params[key] = value
+      proposal = not (event.creator_group.identifier == user.default_group.identifier)
+
       attribute, additional_attributes = self.attributes_controller.populate_web_attributes(user,
                                                                                             obj,
                                                                                             def_id,
                                                                                             action,
-                                                                                            params)
+                                                                                            params,
+                                                                                            proposal)
 
       if action == 'insert':
         attribute, additional_attributes, valid = self.attributes_controller.insert_attributes(user,
@@ -169,12 +174,14 @@ class AttributesView(Ce1susBaseView):
           # TODO: activate EDIT
           self._get_logger().info('Attributes are invalid')
           handler = attribute.definition.handler
-          attr_definition = self.attributes_controller.get_attr_def_by_id(def_id)
-          default_share_value = self.__get_default_share_value(attr_definition, obj)
           return self._return_ajax_post_error(handler.render_gui_edit(self._render_template,
                                                               attribute,
                                                               additional_attributes,
                                                               obj.bit_value.is_shareable))
+
+      if self.send_mails and (event.creator_group.identifier != user.default_group.identifier):
+          self.send_notification_mail(event)
+
       if action == 'update':
         # TODO: modify attribute
         pass
@@ -207,10 +214,23 @@ class AttributesView(Ce1susBaseView):
     try:
       # Clear Session variable
       self._put_to_session('instertAttribute', None)
+      event = self.attributes_controller.get_event_by_id(event_id)
+      attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
+      self._check_if_allowed_event_object(event, attribute)
+      self.attributes_controller.remove_by_id(attribute_id)
+      return self._return_ajax_ok()
+    except ControllerException as error:
+      return self._return_ajax_post_error(self._get_error_message(error))
 
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def validate_attribute(self, event_id, attribute_id):
+    try:
+      self._put_to_session('instertAttribute', None)
       event = self.attributes_controller.get_event_by_id(event_id)
       self._check_if_event_owner(event)
-      self.attributes_controller.remove_by_id(attribute_id)
+      attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
+      self.attributes_controller.validate_attribute(event, attribute, self._get_user())
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._return_ajax_post_error(self._get_error_message(error))

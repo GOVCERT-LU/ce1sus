@@ -113,7 +113,8 @@ class AttributesController(Ce1susBaseController):
       if valid:
         self.object_broker.update_object(user, obj, commit=False)
         event = obj.get_parent_event()
-        event.published = 0
+        if self._is_event_owner(event):
+          event.published = 0
         self.event_broker.update_event(user, event, commit=False)
         self.attribute_broker.do_commit(True)
       else:
@@ -166,6 +167,7 @@ class AttributesController(Ce1susBaseController):
     attribute.bit_value.is_web_insert = True
     attribute.bit_value.is_validated = True
     attribute.bit_value.is_rest_instert = False
+    attribute.bit_value.is_proposal = False
 
   @staticmethod
   def __set_rest_attribute(attribute):
@@ -175,9 +177,18 @@ class AttributesController(Ce1susBaseController):
     attribute.bit_value.is_web_insert = False
     attribute.bit_value.is_rest_instert = True
     attribute.bit_value.is_validated = False
+    attribute.bit_value.is_proposal = False
+
+  @staticmethod
+  def __set_proposet_attribute(attribute):
+    """
+    sets the parameters for a web attribute
+    """
+    attribute.bit_value.is_proposal = True
+    attribute.bit_value.is_validated = False
 
   # pylint: disable=R0913
-  def populate_web_attributes(self, user, obj, definition_id, action, params):
+  def populate_web_attributes(self, user, obj, definition_id, action, params, proposal):
     """
     Populates the attributes to be inserted coming from the web interface
     """
@@ -191,9 +202,13 @@ class AttributesController(Ce1susBaseController):
                                                                     False)
       # set bit values
       AttributesController.__set_web_attribute(attribute)
+      if proposal:
+        AttributesController.__set_proposet_attribute(attribute)
       if additional_attributes:
         for additional_attribute in additional_attributes:
           AttributesController.__set_web_attribute(additional_attribute)
+          if proposal:
+            AttributesController.__set_proposet_attribute(additional_attribute)
       return attribute, additional_attributes
     except BrokerException as error:
       self._raise_exception(error)
@@ -311,5 +326,16 @@ class AttributesController(Ce1susBaseController):
                                                                    share=dictionary.get('share', None),
                                                                    relation=dictionary.get('relation', None)
                                                                    )
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def validate_attribute(self, event, attribute, user):
+    try:
+      attribute.bit_value.is_validated = True
+      self.attribute_broker.update(attribute, commit=False)
+      if event.published == 1:
+        event.published = 0
+        self.event_broker.update_event(user, event, commit=False)
+      self.object_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)

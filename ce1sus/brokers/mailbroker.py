@@ -58,8 +58,7 @@ class MailTemplateBroker(BrokerBase):
   ACTIVATION = 1
   EVENT_PUBLICATION = 2
   EVENT_UPDATE = 3
-  ATTRIBUTE_PROPOSAL = 4
-  OBJECT_PROPOSAL = 5
+  PROPOSAL = 4
 
   def __init__(self, session):
     BrokerBase.__init__(self, session)
@@ -97,6 +96,9 @@ class MailTemplateBroker(BrokerBase):
 
   def get_publication_template(self):
     return self.__get_template(MailTemplateBroker.EVENT_PUBLICATION)
+
+  def get_notifcation_template(self):
+    return self.__get_template(MailTemplateBroker.PROPOSAL)
 
   def get_update_template(self):
     return self.__get_template(MailTemplateBroker.EVENT_UPDATE)

@@ -37,13 +37,23 @@ $(document).ready(function() {
     else:
       shareicon = '<span class="glyphicon glyphicon-remove"></span>'
     %>
-    <%counter=counter+1%>
+    <%
+      counter=counter+1
+      if flat_object[1].bit_value.is_proposal and not flat_object[1].bit_value.is_validated:
+        attr_tdstyle = 'style="background-color: yellow;"'
+      else:
+        attr_tdstyle = ''
+      if flat_object[0].bit_value.is_proposal and not flat_object[0].bit_value.is_validated:
+        obj_tdstyle = 'style="background-color: yellow;"'
+      else:
+        obj_tdstyle = ''
+    %>
     <tr>
-    <td><%call expr="messages_and_text.object_to_html(counter, shorten_to=60,use_plain_text=False)"/></td>
+    <td ${obj_tdstyle}><%call expr="messages_and_text.object_to_html(counter, shorten_to=60,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[0].identifier, shorten_to=60,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[0].definition.name, shorten_to=60,use_plain_text=False)"/></td>
     
-    <td><%call expr="messages_and_text.object_to_html(flat_object[1].identifier, shorten_to=60,use_plain_text=False)"/></td>
+    <td ${attr_tdstyle}><%call expr="messages_and_text.object_to_html(flat_object[1].identifier, shorten_to=60,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].definition.name, shorten_to=60,use_plain_text=False)"/></td>
     <td><%call expr="messages_and_text.object_to_html(flat_object[1].gui_value, shorten_to=60,use_plain_text=False)"/></td>
     <td style="text-align:center">${iocicon}</td>

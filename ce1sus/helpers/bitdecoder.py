@@ -30,11 +30,13 @@ class BitValue(object):
   VALIDATED = 2
   # 8
   SHARABLE = 3
+  # 16
+  PROPOSAL = 4
 
   def __init__(self, bit_value, parentObj=None):
     # TODO make an intvalue and check if between 0 and 15
     value = int('{0}'.format(bit_value))
-    if (value >= 0) and (value <= 20):
+    if (value >= 0) and (value <= 32):
       bits = value
     else:
       bits = int('{0}'.format(bit_value), 2)
@@ -47,6 +49,14 @@ class BitValue(object):
   @property
   def bit_code(self):
     return self.__bit_value
+
+  @property
+  def is_proposal(self):
+    return self.__get_value(BitValue.PROPOSAL)
+
+  @is_proposal.setter
+  def is_proposal(self, value):
+    self.__set_value(BitValue.PROPOSAL, value)
 
   @property
   def is_rest_instert(self):

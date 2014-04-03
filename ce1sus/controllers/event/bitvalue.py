@@ -54,11 +54,16 @@ class BitValueController(Ce1susBaseController):
       for attribute in obj.attributes:
         BitValueController.__set_shared(attribute, share)
 
-  def set_object_values(self, user, event, obj_id, share, validated='1'):
+  def get_object_by_id(self, object_id):
+    try:
+      return self.object_broker.get_by_id(object_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def set_object_values(self, user, event, obj, share, validated='1'):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, False)
-      obj = self.object_broker.get_by_id(obj_id)
       BitValueController.__set_share_object(obj, share)
       BitValueController.__set_validated(obj, validated)
       self.object_broker.update_object(user, obj, commit=False)
@@ -66,11 +71,17 @@ class BitValueController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def set_attribute_values(self, user, event, attr_id, share, validated='1'):
+  def get_attribute_by_id(self, attr_id):
+    try:
+      return self.attribute_broker.get_by_id(attr_id)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def set_attribute_values(self, user, event, attribute, share, validated='1'):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, False)
-      attribute = self.attribute_broker.get_by_id(attr_id)
+
       self.object_broker.update_object(user, attribute.object, commit=False)
       BitValueController.__set_shared(attribute, share)
       BitValueController.__set_validated(attribute, validated)

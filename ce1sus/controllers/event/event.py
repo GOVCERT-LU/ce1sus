@@ -239,7 +239,9 @@ class EventController(Ce1susBaseController):
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, True)
       if self.send_mails:
-        if event.published == 1 and event.bit_value.is_validated_and_shared:
+        old_event = self.event_broker.get_by_id(event.identifier)
+        changed = event.published != old_event.published
+        if changed and event.bit_value.is_validated_and_shared:
           self.mail_handler.send_event_mail(event)
       return event, True
     except ValidationException:
