@@ -26,19 +26,19 @@
       style = ''
     %>
     <tr>
-    <td style="${style} cursor: pointer;" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', false, 'Event #${event.identifier}');"><%call expr="messages_and_text.object_to_html(event.identifier, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.title, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.analysis, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.risk, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.status, shorten_to=100,use_plain_text=False)"/></td>
-    <td style="background-color: ${event.tlp.color}"><%call expr="messages_and_text.object_to_html(event.tlp.text, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.creator_group.name, shorten_to=100,use_plain_text=False)"/></td>
-    <td><%call expr="messages_and_text.object_to_html(event.modified, shorten_to=100,use_plain_text=False)"/></td>
-    <td style="width: 60px;">
-      <a href="#" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', true, 'Event #${event.identifier}');">
-         <span class="glyphicon glyphicon-eye-open" title="View event"></span>
-      </a>
-    </td>
+      <td style="${style} cursor: pointer;" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', false, 'Event #${event.identifier}');"><%call expr="messages_and_text.object_to_html(event.identifier, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.title, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.analysis, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.risk, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.status, shorten_to=100,use_plain_text=False)"/></td>
+      <td style="background-color: ${event.tlp.color}"><%call expr="messages_and_text.object_to_html(event.tlp.text, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.creator_group.name, shorten_to=100,use_plain_text=False)"/></td>
+      <td><%call expr="messages_and_text.object_to_html(event.modified, shorten_to=100,use_plain_text=False)"/></td>
+      <td style="width: 60px;">
+        <a href="#" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', true, 'Event #${event.identifier}');">
+           <span class="glyphicon glyphicon-eye-open" title="View event"></span>
+        </a>
+      </td>
     </tr>
   %endfor
   </tbody>

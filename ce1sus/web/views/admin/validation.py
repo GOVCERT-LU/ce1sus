@@ -107,7 +107,8 @@ class AdminValidationView(Ce1susBaseView):
                                    obj_definitions=dict(),
                                    attribute_definitions=dict(),
                                    object_id=None,
-                                   owner=True)
+                                   owner=True,
+                                   user=self._get_user())
     except ControllerException as error:
       return self._render_error_page(error)
 

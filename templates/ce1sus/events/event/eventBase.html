@@ -3,9 +3,9 @@
 <!--<h4>Event #${event_id}</h4>-->
 
 <%call expr="tabulator.tabulator(id='eventTabs{0}'.format(event_id))"> 
-    <%call expr="tabulator.tab(id='eventOverView{0}'.format(event_id),url='/events/event/event/{0}'.format(event_id),name='Overview' ,active=True,reload=False)"/>
-    <%call expr="tabulator.tab(id='eventObjects{0}'.format(event_id),url='/events/event/objects/objects/{0}'.format(event_id), name='Objects Structured',reload=False)"/>
-    <%call expr="tabulator.tab(id='flatView{0}'.format(event_id),url='/events/event/objects/flat_objects/{0}'.format(event_id), name='Objects Flat',reload=False)"/>
-    <%call expr="tabulator.tab(id='eventRelations{0}'.format(event_id),url='/events/event/relations/{0}'.format(event_id), name='Relations',reload=False)"/>
-    <%call expr="tabulator.tab(id='eventGroups{0}'.format(event_id),url='/events/event/groups/groups/{0}'.format(event_id), name='Groups',reload=False)"/> 
+  <%call expr="tabulator.tab(id='eventOverView{0}'.format(event_id),  url='/events/event/event/{0}'.format(event_id),                name='Overview' ,          reload=False, active=True,)"/>
+  <%call expr="tabulator.tab(id='eventObjects{0}'.format(event_id),   url='/events/event/objects/objects/{0}'.format(event_id),      name='Objects Structured', reload=False)"/>
+  <%call expr="tabulator.tab(id='flatView{0}'.format(event_id),       url='/events/event/objects/flat_objects/{0}'.format(event_id), name='Objects Flat',       reload=False)"/>
+  <%call expr="tabulator.tab(id='eventRelations{0}'.format(event_id), url='/events/event/relations/{0}'.format(event_id),            name='Relations',          reload=False)"/>
+  <%call expr="tabulator.tab(id='eventGroups{0}'.format(event_id),    url='/events/event/groups/groups/{0}'.format(event_id),        name='Groups',             reload=False)"/> 
 </%call>

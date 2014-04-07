@@ -6,8 +6,6 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 <%namespace name="tables" file="/ce1sus/components/tables.html"/> 
 
-
-
 <!-- group details -->
 <h3>Attribute details:</h3>
 <%call expr="forms.attribute_form(attribute, False, cb_values, cb_handler_values)"/>
@@ -15,14 +13,13 @@
 	<div class="col-xs-3 col-sm-3" style="text-align: right">
 		% if not attribute is None:
 		<div class="btn-group">
-			<a href="#editAttributeModal" role="button" class="btn btn-default"
-				data-toggle="modal">Edit</a>
+			<a href="#editAttributeModal" role="button" class="btn btn-default" data-toggle="modal">Edit</a>
 			<button class="btn btn-danger"
 				onclick="if (confirm('Are you sure you want to delete?')) {
 					dialogCall('/admin/attributes/modify_attribute?identifier=${attribute.identifier}&action=remove',
-				               'adminTabsTabContent',
-				               '/admin/attributes')}">
-			Delete
+				             'adminTabsTabContent',
+				             '/admin/attributes')}">
+  			Delete
 			</button>
 		</div>
 		%endif
@@ -31,28 +28,28 @@
 <br/>
 <h4>Objectmanagment of this attribute:</h4>
 % if not attribute is None:
-<%call expr="tables.add_remove_tables(id='editObjectAttriutes',
-                                      identifier=attribute.identifier,
-                                      identifier_name='Attribute',
-                                      moving_name='Objects',
-                                      remaining=remaining_objects,
-                                      existing=attribute.objects,
-                                      attribute_name='name',
-                                      post_action='/admin/attributes/edit_attribute_attributes',
-                                      refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
-                                      refresh_container='{0}RightContent'.format(id),
-                                      enabled=True,
-                                      width=7
-                                      )"/>
+  <%call expr="tables.add_remove_tables(id='editObjectAttriutes',
+                                        identifier=attribute.identifier,
+                                        identifier_name='Attribute',
+                                        moving_name='Objects',
+                                        remaining=remaining_objects,
+                                        existing=attribute.objects,
+                                        attribute_name='name',
+                                        post_action='/admin/attributes/edit_attribute_attributes',
+                                        refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
+                                        refresh_container='{0}RightContent'.format(id),
+                                        enabled=True,
+                                        width=7
+                                        )"/>
 %endif
 %if not attribute is None:
 	<%call expr="base_form.generic_modal_form(modal_id='editAttributeModal',
-	                                    url='/admin/attributes/modify_attribute',
-	                                    refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
-	                                    refresh_container='AttributeRightContent')">
+	                                          url='/admin/attributes/modify_attribute',
+	                                          refresh_url='/admin/attributes/right_content/{0}'.format(attribute.identifier),
+	                                          refresh_container='AttributeRightContent')">
 	<input type="hidden" name="action" value="update">
 	<%call expr="modals.save_button_modal(id='editAttributeModal',
-	                              title='Edit attribute',
-	                              content_url='/admin/attributes/edit_attribute/{0}'.format(attribute.identifier))"/>
+         	                              title='Edit attribute',
+	                                      content_url='/admin/attributes/edit_attribute/{0}'.format(attribute.identifier))"/>
 	</%call>
 %endif

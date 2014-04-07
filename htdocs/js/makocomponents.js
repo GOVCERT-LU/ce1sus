@@ -188,7 +188,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
                 loadContent(refreshContainer, refreshUrl);
             }
             if (doCloseTab) {
-                closeTab(tabID, tabToClose);
+                closeSideNavTab(tabID, tabToClose);
             }
         } else {
             if (message.match(/^<!--Error-->/gi)) {
@@ -205,7 +205,11 @@ function dialogCall(url, refreshContainer, refreshUrl) {
 }
 
 function dialogCloseTabCall(url, tabID, tabToClose) {
-    genericDialogCall(url, 'recentEventsHidden', '/events/recent', true, true, tabID, tabToClose);
+    genericDialogCall(url, 'recentEvents', '/events/recent', true, true, tabID, tabToClose);
+}
+
+function dialogCloseTabCallValidated(url, tabID, tabToClose) {
+    genericDialogCall(url, 'unValiEv', '/admin/validation/unvalidated', true, true, tabID, tabToClose);
 }
 
 function loadContent(contentid, url) {
@@ -540,7 +544,6 @@ function closeSideNavTab(tabulatorID, tabToCloseID) {
     var url = opentab.attr('src');
     loadSideNav(firstID, false);
 }
-
 
 
 /*

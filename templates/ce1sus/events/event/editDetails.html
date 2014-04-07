@@ -7,16 +7,16 @@
 <legend>Edit Details</legend>
 
 <%call expr="base_forms.generic_form(id='editEventForm', url='/events/event/modify_event',refresh_url='/events/event/details/{0}'.format(event.identifier),refresh_container='eventEdit{0}'.format(event.identifier))">
-    <input type="hidden" name="action" value="update"/>
-    ${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
-    <div class="row">
-        <div class="col-xs-12 col-sm-12" style="text-align:left">
-            <div class="btn-group">
-               <button id="${event.identifier}Save" class="btn btn-primary" type="submit">Save</button>
-               <button id="${event.identifier}Cancel" class="btn btn-default" onclick="loadContent('eventEdit${event.identifier}','/events/event/details/${event.identifier}')">Cancel</button>
-            </div>
-        </div>
+  <input type="hidden" name="action" value="update"/>
+  ${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
+  <div class="row">
+    <div class="col-xs-12 col-sm-12" style="text-align:left">
+      <div class="btn-group">
+        <button id="${event.identifier}Save" class="btn btn-primary" type="submit">Save</button>
+        <button id="${event.identifier}Cancel" class="btn btn-default" onclick="loadContent('eventEdit${event.identifier}','/events/event/details/${event.identifier}')">Cancel</button>
+      </div>
     </div>
+  </div>
 <script type="text/javascript">
 $(document).ready(function() {
     $('#${event.identifier}Save').keydown(function(event){

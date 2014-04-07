@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+<%namespace name="sidenav" file="/dagr/components/sidenav.html"/>
 
-<%namespace name="tabulator" file="/dagr/components/tabs.html"/>
-
-<%call expr="tabulator.tabulator(id='validationTabs')">
-    <%call expr="tabulator.tab(id='unValiEv',url='/admin/validation/unvalidated', name='Unvalidated events',active=True)"/> 
+<%call expr="sidenav.list(id='validationTabs')">
+  <%call expr="sidenav.entry(id='unValiEv',url='/admin/validation/unvalidated',name='Unvalidated events' ,active=True, reload=False, reloadBotton=True)"/>
 </%call>
+
