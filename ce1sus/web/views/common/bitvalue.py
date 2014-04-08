@@ -46,13 +46,13 @@ class BitValueView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
-  def modify_object_properties(self, event_id, identifier, shared):
+  def modify_object_properties(self, event_id, identifier, shared, user_default_values=None):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
       user = self._get_user()
       obj = self.bit_value_controller.get_object_by_id(identifier)
       self._check_if_allowed_event_object(event, obj)
-      self.bit_value_controller.set_object_values(user, event, obj, shared)
+      self.bit_value_controller.set_object_values(user, event, obj, shared, use_default=user_default_values)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

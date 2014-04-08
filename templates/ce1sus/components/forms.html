@@ -321,5 +321,24 @@ else:
 <%call expr="labeled_input.labeled_editbox(label='Origin',name='',value=origin,enabled=False)"/>
 <%call expr="labeled_input.labeled_yes_no_combobox(label='Validated',name='',enabled=False,has_empty=False,selected=validated)"/>
 <%call expr="labeled_input.labeled_yes_no_combobox(label='Shared',name='shared',enabled=enabled,has_empty=False,selected=shared)"/>
+<div id="sharedDefaultHidden" >
+<%call expr="labeled_input.labeled_yes_no_combobox(label='Set all to default',name='user_default_values',enabled=enabled,has_empty=False,selected=1)"/>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#sharedDefaultHidden').hide();
+    $("#sharedID").change(function(event){
+        var value = $("#sharedID").val();
+        if (value == 1) {
+            $('#sharedDefaultHidden').show();
+          //Append combobox!
+        } else {
+            $('#sharedDefaultHidden').hide();
+        }
+        
+    });
+});
+</script>
+
 %endif
 </%def>

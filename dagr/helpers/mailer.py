@@ -47,6 +47,8 @@ class Mail(object):
 
 class Mailer(object):
 
+  pgp = None
+
   """System for sending mails"""
   def __init__(self, config):
     self.__config_section = config.get_section('Mailer')
@@ -57,9 +59,14 @@ class Mailer(object):
     self.gpg = self.get_gpg()
 
   def get_gpg(self):
-    self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
-    gpg = gnupg.GPG(gnupghome=self.__key_path)
-    return gpg
+    if Mailer.pgp:
+      return Mailer.pgp
+    else:
+      self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
+      if self.__key_path:
+        gpg = gnupg.GPG(gnupghome=self.__key_path)
+        Mailer.pgp = gpg
+      return gpg
 
   def __sign_message(self, text):
     if self.__key_path:

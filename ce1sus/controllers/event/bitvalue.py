@@ -43,12 +43,19 @@ class BitValueController(Ce1susBaseController):
       instance.bit_value.is_validated = False
 
   @staticmethod
-  def __set_share_object(obj, share):
+  def __set_share_object(obj, share, use_default):
     BitValueController.__set_shared(obj, share)
 
     if (obj.bit_value.is_shareable):
-      # TODO: If selected set all the attribute values to default
-      pass
+      if use_default == '1':
+        for attribute in obj.attributes:
+          if attribute.definition.share == 1:
+            attribute.bit_value.is_shareable = True
+          else:
+            attribute.bit_value.is_shareable = False
+      else:
+        # Dont change the values
+        pass
     else:
       # if the value changed change also all share values of its attributes
       for attribute in obj.attributes:
@@ -60,11 +67,11 @@ class BitValueController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def set_object_values(self, user, event, obj, share, validated='1'):
+  def set_object_values(self, user, event, obj, share, validated='1', use_default=None):
     try:
       user = self._get_user(user.username)
       self.event_broker.update_event(user, event, False)
-      BitValueController.__set_share_object(obj, share)
+      BitValueController.__set_share_object(obj, share, use_default)
       BitValueController.__set_validated(obj, validated)
       self.object_broker.update_object(user, obj, commit=False)
       self.object_broker.do_commit(True)

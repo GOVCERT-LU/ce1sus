@@ -176,13 +176,15 @@ class ObjectsView(Ce1susBaseView):
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       user = self._get_user()
+      proposal = not (event.creator_group.identifier == user.default_group.identifier)
       obj = self.objects_controller.populate_web_object(None,
                                                         event,
                                                         object_id,
                                                         definition,
                                                         self._get_user(),
                                                         shared,
-                                                        'insert')
+                                                        'insert',
+                                                        proposal)
       obj, valid = self.objects_controller.insert_object(user, event, obj)
       if not valid:
           self._get_logger().info('Event is invalid')
