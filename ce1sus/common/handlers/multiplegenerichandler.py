@@ -13,6 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
+from ce1sus.common.handlers.base import HandlerException
 
 
 class MultipleGenericHandler(GenericHandler):
@@ -36,15 +37,17 @@ class MultipleGenericHandler(GenericHandler):
       values = self.__get_string_attribtues(params)
     else:
       values = self.__get_list_attribtues(params)
-
-    for value in values:
-      value = value.strip('\n\r')
-      if value:
-        params['value'] = value
-        attribute = self.create_attribute(params, obj, definition, user)
-        attributes.append(attribute)
-    attribute = attributes.pop(0)
-    return attribute, attributes
+    if value:
+      for value in values:
+        value = value.strip('\n\r')
+        if value:
+          params['value'] = value
+          attribute = self.create_attribute(params, obj, definition, user)
+          attributes.append(attribute)
+      attribute = attributes.pop(0)
+      return attribute, attributes
+    else:
+      raise HandlerException('No attribute specified. Please Try again.')
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/multGeneric.html',
