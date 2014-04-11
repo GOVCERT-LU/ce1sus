@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+
+<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
+<%namespace name="forms" file="/ce1sus/components/forms.html"/>
+<%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
+
+
+%if not attributes is None:
+    %for attribute in attributes:
+    <div id="value${attribute.div_id}">
+      <%call expr="labeled_input.generic_labeler('Value',enabled)">
+        <div style="width:96%;float:left;">
+          <input class="form-control" name="value" type="text" value="${attribute.plain_value}"/>
+          <%
+          if hasattr(attribute.plain_value,'error'):
+              validation_msg = getattr(attribute.plain_value,'error')
+          else:
+              validation_msg = None
+          %>
+          % if (not (validation_msg is None)) and enabled:
+            <%call expr="messages_and_text.error(validation_msg)"/>
+          % endif
+        </div>
+        <div style="width:4%;float:left;padding-left:5px">
+          <button type="button" class="btn btn-danger" onclick="removeInputField('value${attribute.div_id}');">x</button>
+        </div>
+      </%call>
+    </div>
+    %endfor
+    <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+    <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
+%else:
+  <%call expr="messages_and_text.error('Cannot find attribtues to display.')"/>
+%endif

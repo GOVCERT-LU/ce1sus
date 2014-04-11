@@ -19,8 +19,8 @@ import json
 # The releases are formated as A.B.C where A,B,C are defined as follows
 # A: Major Release
 # B: Release feature changes
-# C: Bug fixes
-APP_REL = '0.8.10'
+# C: Bug fixes/Small features
+APP_REL = '0.8.13'
 DB_REL = '0.8.3'
 REST_REL = '0.2.0'
 

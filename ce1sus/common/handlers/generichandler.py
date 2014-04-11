@@ -115,11 +115,7 @@ class GenericHandler(HandlerBase):
                              enable_share=False)
 
   def render_gui_edit(self, template_renderer, attribute, additional_attributes, share_enabled):
-    return template_renderer('/common/handlers/generic.html',
-                             attribute=attribute,
-                             enabled=True,
-                             default_share_value=attribute.shared,
-                             enable_share=share_enabled)
+    return self.render_gui_input(template_renderer, attribute, additional_attributes, share_enabled)
 
   def process_gui_post(self, obj, definitions, user, params):
     definition = self._get_main_definition(definitions)

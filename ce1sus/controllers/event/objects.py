@@ -191,6 +191,10 @@ class ObjectsController(Ce1susBaseController):
         obj.parent_object_id = None
         obj.parent_event_id = None
       else:
+        # check if parent objects are connected on the event! else raise an error
+        valid = self.__check_if_valid_parent(parent_obj_id, obj.identifier)
+        if not valid:
+          self._raise_exception('No connection from this object to the event. Please select a different one.')
         obj.event_id = None
         obj.event = None
         obj.parent_object_id = parent_obj_id
@@ -198,6 +202,20 @@ class ObjectsController(Ce1susBaseController):
       self.object_broker.update(obj)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def __check_if_valid_parent(self, parent_obj_id, concernet_obj_id):
+
+    parent_obj = self.object_broker.get_by_id(parent_obj_id)
+    if (parent_obj.parent_object_id is None and parent_obj.parent_event_id is None):
+      if parent_obj.identifier == concernet_obj_id:
+        return False
+      else:
+        return True
+    else:
+      if parent_obj.parent_object_id:
+        return self.__check_if_valid_parent(parent_obj.parent_object_id, concernet_obj_id)
+      else:
+        return False
 
   def get_object_definition_by_id(self, definition_id):
     try:

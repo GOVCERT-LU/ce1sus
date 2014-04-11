@@ -28,6 +28,7 @@ from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
 from dagr.helpers.objects import get_class
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.hybrid import hybrid_method
+import re
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),
@@ -509,6 +510,16 @@ class Attribute(BASE):
       return 0
     else:
       return 1
+
+  @property
+  def div_id(self):
+    if self.plain_value:
+      text = self.plain_value
+      if hasattr(text, 'error'):
+        text = text.value
+      return re.sub(r'[^\w]', '', text)
+    else:
+      return 'NotDefined'
 
   @shared.setter
   def shared(self, value):

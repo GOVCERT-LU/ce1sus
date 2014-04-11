@@ -1,6 +1,6 @@
 # DB Configuration
 [SessionManager]
-protocol=mysql+mysqlconnector
+protocol=mysql+mysqldb
 username=
 password=
 host=127.0.0.1
@@ -39,7 +39,7 @@ receiver=
 
 [Logger]
 log=Yes
-logfile=log/logger.txt
+log_file=log/logger.txt
 logConsole = Yes
 level=DEBUG
 size=10000000

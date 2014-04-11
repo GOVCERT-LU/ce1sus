@@ -256,3 +256,6 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
     }
 }
 
+function removeInputField(id) {
+    $('#'+id).remove();
+}

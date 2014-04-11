@@ -28,7 +28,6 @@ class AttributesView(Ce1susBaseView):
     self.send_mails = config.get('ce1sus', 'sendmail', False)
     self.attributes_controller = AttributesController(config)
 
-
   @require(require_referer(('/internal')))
   @cherrypy.expose
   def add_attribute(self, event_id, object_id):
