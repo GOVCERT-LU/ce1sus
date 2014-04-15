@@ -26,9 +26,9 @@ function showSelected(identifier){
     $('.panel-collapse').each(function () {
         var id = $(this).attr('id');
         if (id === 'collapseItem'+identifier) {
-            $(this).collapse('show').delay(300);
+            $(this).collapse('show');
         } else {
-            $(this).collapse('hide').delay(300);
+            $(this).collapse('hide');
         }
     });
     $('#collapseItem'+identifier).scrollView();

@@ -64,7 +64,6 @@ class JSONConverter(object):
     return self.generate_json(dictionary)
 
   def __get_data(self, dictionary):
-    # TODO: Has to be done beforehand!!!! place this somewhere else
     self._get_logger().debug(u'Pharsing JSON answer')
     # get the answer if on the server went everything correct
     response = dictionary.pop('response', None)

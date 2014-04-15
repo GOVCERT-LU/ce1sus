@@ -517,6 +517,7 @@ class Attribute(BASE):
       text = self.plain_value
       if hasattr(text, 'error'):
         text = text.value
+      text = u'{0}'.format(text)
       return re.sub(r'[^\w]', '', text)
     else:
       return 'NotDefined'

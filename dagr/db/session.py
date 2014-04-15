@@ -56,7 +56,6 @@ class SessionManager:
     self.__config_section = config.get_section('SessionManager')
     # setup connection string and engine
     protocol = self.__config_section.get('protocol')
-
     if (protocol == 'sqlite'):
       self.connector = SqliteConnector(self.__config_section)
     elif ('mysql' in protocol):
