@@ -9,7 +9,7 @@
 <div class="row">
     <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <input type="hidden" name="action" value="insert">
-	${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values,today=today)}
+	${forms.event_form(event=event,enabled=True, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values,today=today, insert=True)}
 	<div class="col-xs-12 col-sm-12" style="text-align:left">
 		<div class="btn-group">
 			<button id ="AddSave" class="btn btn-primary" type="submit">Create</button>

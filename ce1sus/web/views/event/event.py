@@ -46,8 +46,7 @@ class EventView(Ce1susBaseView):
                                  tlp_values=TLPLevel.get_definitions(),
                                  analysis_values=Analysis.get_definitions(),
                                  risk_values=Risk.get_definitions(),
-                                 owner=self._is_event_owner(event)
-                                 )
+                                 owner=self._is_event_owner(event))
 
   @require(require_referer(('/internal')))
   @cherrypy.expose

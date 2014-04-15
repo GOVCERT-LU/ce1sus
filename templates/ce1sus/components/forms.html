@@ -137,7 +137,7 @@
 
 </%def>
 
-<%def name="event_form(event, enabled, status_values, tlp_values, analysis_values, risk_values, today=None)">
+<%def name="event_form(event, enabled, status_values, tlp_values, analysis_values, risk_values, today=None,insert=False)">
 %if enabled:
 % if event is None:
   
@@ -168,7 +168,7 @@
   
   
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=event.description,enabled=enabled)"/>
-  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=enabled,has_empty=True,selected=event.published)"/>
+  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=not insert,has_empty=True,selected=event.published)"/>
   
   <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=True,selected=event.status_id)"/>
   <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=True,selected=event.analysis_status_id)"/>

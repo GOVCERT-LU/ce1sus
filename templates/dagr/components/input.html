@@ -26,6 +26,9 @@
 	    <div style="text-align:left;overflow:auto; height:${rows*25}px">
 	      ${dagr.plaintext2html(text=message)}
 	    </div>
+        %if message:
+        <input type="hidden" id="${name}ID" name="${name}" value="${message}">
+        %endif
 	%endif
 	
 	% if (not (validation_msg is None)):
@@ -104,6 +107,9 @@
 	      ${dagr.plaintext2html(text=value)}
 	    %endif
 	    </div>
+        %if value:
+        <input type="hidden" id="${name}ID" name="${name}" value="${value}">
+        %endif
 	%endif
 	% if (not (validation_msg is None)) and enabled:
 	  <%call expr="messages_and_text.error(validation_msg)"/>
@@ -183,7 +189,7 @@
 	        
 	            %if not selected is None and value == selected:
 	              ${key}
-	              <input type="hidden" id="${name}ID" value="${value}"/>
+	              <input type="hidden" id="${name}ID" name="${name}" value="${value}">
 	            %endif
 	        %endfor
 	    </div>
@@ -235,7 +241,10 @@
             %else:
             <div style="text-align:left;">
                       ${dagr.plaintext2html(text=dateTime)}
-                    </div>
+            </div>
+              %if value:
+              <input type="hidden" id="${name}ID" name="${name}" value="${value}">
+              %endif
             %endif
 
     % if (not (validation_msg is None)):
