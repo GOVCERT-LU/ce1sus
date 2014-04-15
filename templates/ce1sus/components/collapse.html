@@ -218,7 +218,8 @@ else:
 <%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None)">
     %if not object_list is None:
 	<%
-    spana = ident
+    #spana = ident
+    spana = 1
     spanb = 12 - spana
 	%>
             %for object in object_list:
@@ -253,7 +254,7 @@ else:
 <%def name="menu_item(object_list,owner,ident=0)">
 %if not object_list is None:
   <%
-   ident_string = 20 * ident
+   ident_string = 10 * ident
   %>
   %for object in object_list:
      <li id="menu${object.identifier}LI" style="margin-left:${ident_string}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
