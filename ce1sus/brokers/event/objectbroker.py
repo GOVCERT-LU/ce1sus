@@ -20,6 +20,7 @@ from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.permission.permissionclasses import User, Group
 from ce1sus.helpers.bitdecoder import BitValue
 import uuid as uuidgen
+from sqlalchemy import and_
 
 
 class ObjectBroker(BrokerBase):
@@ -86,11 +87,8 @@ class ObjectBroker(BrokerBase):
       if not definition is None:
         obj.def_object_id = definition.identifier
     obj.created = DatumZait.utcnow()
-    if parent_object_id is None:
-      obj.event_id = event_id
-    else:
-      obj.parent_object_id = parent_object_id
-      obj.parent_event_id = event_id
+    obj.event_id = event_id
+    obj.parent_object_id = parent_object_id
     obj.creator_id = user.identifier
     obj.modified = DatumZait.utcnow()
     obj.bit_value = BitValue('0', obj)
@@ -108,12 +106,9 @@ class ObjectBroker(BrokerBase):
     """
     try:
       result = self.session.query(Object).filter(
-                                            or_(
-                                              Object.parent_event_id == event_id,
-                                              Object.event_id == event_id
-                                               ),
+                                              Object.event_id == event_id,
                                               Object.identifier != object_id
-                                                          )
+                                                )
       objs = result.all()
 
       values = dict()
@@ -133,7 +128,7 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(Object.parent_event_id
+      result = self.session.query(Object).filter(Object.event_id
                                                  == event_id).all()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
@@ -148,7 +143,7 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(Object.parent_event_id
+      result = self.session.query(Object).filter(Object.event_id
                                                  == event_id,
                                                 Object.dbcode.op('&')(12) == 12
                                                  )
@@ -186,8 +181,9 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(Object.event_id
-                                                 == event_id
+
+      result = self.session.query(Object).filter(and_(Object.event_id
+                                                 == event_id, Object.parent_object_id == None)
                                                  )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
@@ -200,9 +196,7 @@ class ObjectBroker(BrokerBase):
     Return all the objects belonging to an event even the object children
     """
     try:
-      result = self.session.query(Object).filter(or_(Object.event_id == event_id,
-                                                     Object.parent_event_id == event_id)
-                                                 )
+      result = self.session.query(Object).filter(Object.event_id == event_id)
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
         return list()

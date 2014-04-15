@@ -218,12 +218,12 @@ class ObjectsView(Ce1susBaseView):
       self._check_if_event_is_viewable(event)
       obj = self.objects_controller.get_object_by_id(object_id)
 
-      if obj.event_id:
-        is_event_parent = True
-        selected = None
-      else:
+      if obj.parent_object_id:
         is_event_parent = False
         selected = obj.parent_object_id
+      else:
+        is_event_parent = True
+        selected = None
 
       cb_values = self.objects_controller.get_cb_event_objects(event.identifier, obj.identifier)
       return self._render_template('/events/event/objects/parentModal.html',

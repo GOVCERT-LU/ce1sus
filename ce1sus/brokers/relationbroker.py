@@ -79,7 +79,7 @@ class RelationBroker(BrokerBase):
                                             attribute.definition.identifier,
                                             '==',
                                             True)
-      event = attribute.object.get_parent_event()
+      event = attribute.object.event
       for relation in relations:
 
         # make insert foo

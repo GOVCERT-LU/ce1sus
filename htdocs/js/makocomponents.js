@@ -104,7 +104,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
         data : formData,
         contentType: false,
         processData: false,
-        timeout: 30000 //3secs
+        //timeout: 30000 //3secs
     });
     request.fail(function(response, textStatus, XMLHttpRequest) {
         var message = getResponseConent(response);

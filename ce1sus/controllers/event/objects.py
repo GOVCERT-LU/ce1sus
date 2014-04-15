@@ -140,7 +140,7 @@ class ObjectsController(Ce1susBaseController):
         obj.event = event
       else:
         parent_object.children.append(obj)
-        obj.parent_event = event
+        obj.event = event
       obj.bit_value.is_validated = False
       obj.bit_value.is_rest_instert = True
       return obj
@@ -186,19 +186,15 @@ class ObjectsController(Ce1susBaseController):
   def set_parent_relation(self, obj, event, parent_obj_id):
     try:
       if parent_obj_id is None:
-        obj.event_id = event.identifier
-        obj.event = event
         obj.parent_object_id = None
-        obj.parent_event_id = None
+        obj.event_id = None
       else:
         # check if parent objects are connected on the event! else raise an error
         valid = self.__check_if_valid_parent(parent_obj_id, obj.identifier)
         if not valid:
           self._raise_exception('No connection from this object to the event. Please select a different one.')
-        obj.event_id = None
-        obj.event = None
         obj.parent_object_id = parent_obj_id
-        obj.parent_event_id = event.identifier
+        obj.event_id = event.identifier
       self.object_broker.update(obj)
     except BrokerException as error:
       self._raise_exception(error)
@@ -206,7 +202,7 @@ class ObjectsController(Ce1susBaseController):
   def __check_if_valid_parent(self, parent_obj_id, concernet_obj_id):
 
     parent_obj = self.object_broker.get_by_id(parent_obj_id)
-    if (parent_obj.parent_object_id is None and parent_obj.parent_event_id is None):
+    if (parent_obj.parent_object_id is None and parent_obj.event_id is None):
       if parent_obj.identifier == concernet_obj_id:
         return False
       else:

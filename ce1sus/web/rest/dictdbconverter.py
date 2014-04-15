@@ -267,7 +267,7 @@ class DictDBConverter(object):
     self._get_logger().debug('Converting object')
     rest_object = RestObject()
     rest_object.parent_object_id = obj.parent_object_id
-    rest_object.parent_event_id = obj.parent_event_id
+    rest_object.event_id = obj.event_id
     rest_object.definition = self.__convert_obj_def(obj.definition, False, with_definition)
     rest_object.attributes = list()
     if full:

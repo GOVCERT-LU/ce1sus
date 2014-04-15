@@ -106,7 +106,7 @@ class FileHandler(GenericHandler):
 
   def render_gui_get(self, template_renderer, action, attribute, user):
     rel_path = attribute.plain_value
-    event = attribute.object.get_parent_event()
+    event = attribute.object.event
     user_can_download = can_user_download(event, user)
     if not user_can_download:
       raise cherrypy.HTTPError(403)
@@ -146,7 +146,7 @@ class FileHandler(GenericHandler):
       raise  HandlerException('There was an error getting the file')
 
   def render_gui_view(self, template_renderer, attribute, user):
-    event = attribute.object.get_parent_event()
+    event = attribute.object.event
     user_can_download = can_user_download(event, user)
     if not user_can_download:
       raise cherrypy.HTTPError(403)
@@ -312,13 +312,13 @@ class FileHandler(GenericHandler):
   def convert_to_gui_value(self, attribute):
     user = self._get_user()
     if user:
-      event = attribute.object.get_parent_event()
+      event = attribute.object.event
       can_download = can_user_download(event, user)
       if can_download:
         file_path = self._get_base_path() + '/' + attribute.plain_value
         if isfile(file_path):
           url = FileHandler.URLSTR.format('download',
-                                          attribute.object.get_parent_event_id(),
+                                          attribute.object.event,
                                           attribute.identifier)
           filename = FileHandler.__get_orig_filename(attribute)
           if not filename:
@@ -334,7 +334,7 @@ class FileHandler(GenericHandler):
   def convert_to_rest_value(self, attribute):
     user = self._get_user()
     if user:
-      event = attribute.object.get_parent_event()
+      event = attribute.object.event
       can_download = can_user_download(event, user)
       if can_download:
         file_path = self._get_base_path() + '/' + attribute.plain_value

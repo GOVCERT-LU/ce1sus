@@ -61,8 +61,8 @@ class Event(BASE):
   maingroups = relationship(Group, secondary='Groups_has_Events', backref="events")
   subgroups = relationship(SubGroup,
                             secondary='SubGroups_has_Events')
-  objects = relationship('Object', primaryjoin='Event.identifier' +
-                       '==Object.event_id')
+  objects = relationship('Object', primaryjoin='and_(Event.identifier' +
+                       '==Object.event_id, Object.parent_object_id==None)')
   created = Column('created', DateTime(timezone=True))
   modified = Column('modified', DateTime(timezone=True))
   # creators and modifiers will be gorups
@@ -321,10 +321,6 @@ class Object(BASE):
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
                             '==Object.def_object_id', lazy='joined')
-
-  event_id = Column(Integer, ForeignKey('Events.event_id'))
-  event = relationship("Event", uselist=False, primaryjoin='Event.identifier' +
-                       '==Object.event_id')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
   creator_id = Column('creator_id', Integer,
@@ -336,11 +332,11 @@ class Object(BASE):
   parent_object = relationship('Object',
                       primaryjoin="Object.parent_object_id==Object.identifier")
 
-  parent_event_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
-  parent_event = relationship("Event",
+  event_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
+  event = relationship("Event",
                              uselist=False,
                              primaryjoin='Event.identifier' +
-                             '==Object.parent_event_id')
+                             '==Object.event_id')
   children = relationship("Object", primaryjoin='Object.identifier' +
                          '==Object.parent_object_id')
   dbcode = Column('code', Integer)
@@ -429,28 +425,8 @@ class Object(BASE):
     ObjectValidator.validateDigits(self, 'def_object_id')
     if not self.parent_object_id is None:
       ObjectValidator.validateDigits(self, 'parent_object_id')
-    if not self.event_id is None:
-      ObjectValidator.validateDigits(self, 'event_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
-
-  def get_parent_event(self):
-    """
-    Returns the parent event of an object
-    """
-    if self.event:
-      return self.event
-    else:
-      return self.parent_event
-
-  def get_parent_event_id(self):
-    """
-    Returns the parent event ID of an object
-    """
-    if self.event:
-      return self.event_id
-    else:
-      return self.parent_event_id
 
 
 class Attribute(BASE):
@@ -641,7 +617,7 @@ class Attribute(BASE):
       value_instance.attribute = self
       value_instance.value = value
       if self.object:
-        value_instance.event = getattr(self.object, 'get_parent_event')()
+        value_instance.event = getattr(self.object, 'event')
       else:
         raise Exception(u'No object was specified')
       # set the value

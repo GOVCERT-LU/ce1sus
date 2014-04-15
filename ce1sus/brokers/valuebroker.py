@@ -244,7 +244,7 @@ class ValueBroker(BrokerBase):
       value_instance.identifier = attribute.value_id
     value_instance.attribute_id = attribute.identifier
     value_instance.attribute = attribute
-    value_instance.event_id = attribute.object.get_parent_event_id()
+    value_instance.event_id = attribute.object.event_id
     return value_instance
 
   def get_by_attribute(self, attribute):
