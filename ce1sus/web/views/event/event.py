@@ -67,7 +67,11 @@ class EventView(Ce1susBaseView):
       return self._render_template('/events/event/overview.html',
                                    event=event,
                                    owner=self._is_event_owner(event),
-                                   relations=relations)
+                                   relations=relations,
+                                   status_values=Status.get_definitions(),
+                                   tlp_values=TLPLevel.get_definitions(),
+                                   analysis_values=Analysis.get_definitions(),
+                                   risk_values=Risk.get_definitions())
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -85,22 +89,6 @@ class EventView(Ce1susBaseView):
       return self._render_template('/events/event/eventBase.html',
                                    event_id=event_id,
                                    owner=self._is_event_owner(event))
-    except ControllerException as error:
-      return self._render_error_page(error)
-
-  @require(require_referer(('/internal')))
-  @cherrypy.expose
-  def details(self, event_id):
-    """
-    renders the event page for displaying a single event
-
-    :returns: generated HTML
-    """
-    try:
-      event = self.event_controller.get_event_by_id(event_id)
-      self._check_if_event_is_viewable(event)
-
-      return self.__render_event_details('/events/event/details.html', event)
     except ControllerException as error:
       return self._render_error_page(error)
 

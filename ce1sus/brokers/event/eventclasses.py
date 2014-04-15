@@ -229,11 +229,11 @@ class Event(BASE):
                                   withSpaces=True,
                                   minLength=3,
                                   withSymbols=True)
-    ObjectValidator.validateDigits(self, 'tlp_level_id')
-    ObjectValidator.validateDigits(self, 'status_id')
-    ObjectValidator.validateDigits(self, 'published')
-    ObjectValidator.validateDigits(self, 'risk_id')
-    ObjectValidator.validateDigits(self, 'analysis_status_id')
+    ObjectValidator.validateDigits(self, 'tlp_level_id', minimal=0, maximal=3)
+    ObjectValidator.validateDigits(self, 'status_id', minimal=0, maximal=3)
+    ObjectValidator.validateDigits(self, 'published', minimal=0, maximal=1)
+    ObjectValidator.validateDigits(self, 'risk_id', minimal=0, maximal=3)
+    ObjectValidator.validateDigits(self, 'analysis_status_id', minimal=0, maximal=3)
     ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDigits(self, 'modifier_id')
     ObjectValidator.validateDateTime(self, 'created')

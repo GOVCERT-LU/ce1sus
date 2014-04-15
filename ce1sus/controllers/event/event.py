@@ -83,6 +83,8 @@ class EventController(Ce1susBaseController):
     description = kwargs.get('description', None)
     name = kwargs.get('name', None)
     published = kwargs.get('published', None)
+    if not published:
+      published = None
     first_seen = kwargs.get('first_seen', None)
     last_seen = kwargs.get('last_seen', None)
     risk = kwargs.get('risk', None)
@@ -121,8 +123,6 @@ class EventController(Ce1susBaseController):
     event.bit_value.is_web_insert = True
     event.bit_value.is_validated = True
     event.bit_value.is_shareable = True
-    if not event.published:
-      event.published = 0
     return event
 
   def populate_rest_event(self, user, dict, action):

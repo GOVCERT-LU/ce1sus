@@ -32,13 +32,16 @@ def get_dict_element_by_id(dictionary, identifier):
 
   return object
   """
-  identifier = int(identifier)
-  if identifier in dictionary.keys():
-    value = dictionary[identifier]
-  if value:
-    return value
+  if hasattr(identifier, 'error'):
+    return identifier
   else:
-    raise Exception(u'Invalid input "{0}"'.format(identifier))
+    identifier = int(identifier)
+    if identifier in dictionary.keys():
+      value = dictionary[identifier]
+    if value:
+      return value
+    else:
+      raise Exception(u'Invalid input "{0}"'.format(identifier))
 
 
 def get_dict_element_by_value(dictionary, value):
