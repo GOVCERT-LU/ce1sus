@@ -193,6 +193,8 @@ class ObjectsView(Ce1susBaseView):
                                                     obj_definitions=obj_definitions,
                                                     event_id=event_id,
                                                     object=obj))
+      # save id to session to open the last inserted object
+      self._put_to_session('instertedObject', obj.identifier)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
