@@ -327,18 +327,22 @@ class Object(BASE):
                             ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
+  modifier_id = Column('modifier_id', Integer,
+                            ForeignKey('Users.user_id'))
+  modifier = relationship(User,
+                          primaryjoin="Object.modifier_id==User.identifier")
   parent_object_id = Column('parentObject', Integer,
                             ForeignKey('Objects.object_id'))
-  parent_object = relationship('Object',
-                      primaryjoin="Object.parent_object_id==Object.identifier")
-
+  parent_object = relationship('Object', uselist=False,
+                               primaryjoin='Object.parent_object_id==Object.identifier')
+  children = relationship("Object", primaryjoin='Object.identifier' +
+                         '==Object.parent_object_id')
   event_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
   event = relationship("Event",
                              uselist=False,
                              primaryjoin='Event.identifier' +
                              '==Object.event_id')
-  children = relationship("Object", primaryjoin='Object.identifier' +
-                         '==Object.parent_object_id')
+
   dbcode = Column('code', Integer)
   uuid = Column('uuid', String)
   __bit_code = None

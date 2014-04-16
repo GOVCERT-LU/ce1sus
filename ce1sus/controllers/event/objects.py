@@ -187,31 +187,26 @@ class ObjectsController(Ce1susBaseController):
     try:
       if parent_obj_id is None:
         obj.parent_object_id = None
-        obj.event_id = None
       else:
         # check if parent objects are connected on the event! else raise an error
         valid = self.__check_if_valid_parent(parent_obj_id, obj.identifier)
         if not valid:
-          self._raise_exception('No connection from this object to the event. Please select a different one.')
+          self._raise_exception('The intended move action is not permitted as it would disconnect the object from the event. Please consider restructuring. the tree before trying again.')
         obj.parent_object_id = parent_obj_id
-        obj.event_id = event.identifier
       self.object_broker.update(obj)
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __check_if_valid_parent(self, parent_obj_id, concernet_obj_id):
-
+  def __check_if_valid_parent(self, parent_obj_id, concerned_obj_id):
+    # Get Parent
     parent_obj = self.object_broker.get_by_id(parent_obj_id)
-    if (parent_obj.parent_object_id is None and parent_obj.event_id is None):
-      if parent_obj.identifier == concernet_obj_id:
+    if parent_obj.parent_object_id:
+      if parent_obj.parent_object_id == concerned_obj_id:
         return False
       else:
-        return True
+        return self.__check_if_valid_parent(parent_obj.parent_object_id, concerned_obj_id)
     else:
-      if parent_obj.parent_object_id:
-        return self.__check_if_valid_parent(parent_obj.parent_object_id, concernet_obj_id)
-      else:
-        return False
+      return True
 
   def get_object_definition_by_id(self, definition_id):
     try:

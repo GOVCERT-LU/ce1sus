@@ -79,6 +79,8 @@ class ObjectBroker(BrokerBase):
     obj = Object()
     if action == 'insert':
       obj.uuid = unicode(uuidgen.uuid4())
+      obj.creator_id = user.identifier
+      obj.created = DatumZait.utcnow()
     else:
       obj.identifier = identifier
 
@@ -86,10 +88,10 @@ class ObjectBroker(BrokerBase):
       obj.definition = definition
       if not definition is None:
         obj.def_object_id = definition.identifier
-    obj.created = DatumZait.utcnow()
+
     obj.event_id = event_id
     obj.parent_object_id = parent_object_id
-    obj.creator_id = user.identifier
+    obj.modifier_id = user.identifier
     obj.modified = DatumZait.utcnow()
     obj.bit_value = BitValue('0', obj)
     if shared == '1':
