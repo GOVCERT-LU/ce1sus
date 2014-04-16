@@ -108,7 +108,7 @@
               <td>${comment.creator.username}</td>
               <td>
                 <div class="btn-group">
-                    <a href="#editCommentModal" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="glyphicon glyphicon-pencil" title="Edit"/></i></a>  
+                    <a href="#" role="button" data-toggle="modal" onclick="editComment(${event.identifier},${comment.identifier})"><i class="glyphicon glyphicon-pencil" title="Edit"/></i></a>  
                       <a href="#"  role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                             dialogCall('/events/event/comment/modify_comment?comment_id=${comment.identifier}&event_id=${event.identifier}&action=remove',
@@ -122,17 +122,17 @@
         </tbody>
       </table>
       <div class="btn-group">
-        <a href="#addCommentModal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add new Comment</a>
+        <a href="#addComment${event.identifier}Modal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add new Comment</a>
       </div>
 
       <%call expr="base_forms.generic_modal_form(modal_id='addComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
         <input type="hidden" name="action" value="insert">
-        <%call expr="modals.save_button_modal(id='addCommentModal',title='Add a comment',content_url='/events/event/comment/add_comment/{0}'.format(event.identifier))"/>
+        <%call expr="modals.save_button_modal(id='addComment{0}Modal'.format(event.identifier),title='Add a comment',content_url='/events/event/comment/add_comment/{0}'.format(event.identifier))"/>
       </%call>
 
       <%call expr="base_forms.generic_modal_form(modal_id='editComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
         <input type="hidden" name="action" value="update">
-        <%call expr="modals.save_button_modal(id='editCommentModal',title='Add a comment',content_url=None)"/>
+        <%call expr="modals.save_button_modal(id='editComment{0}Modal'.format(event.identifier),title='Edit comment',content_url=None)"/>
       </%call>
     %endif
 
@@ -142,8 +142,13 @@
 </div>
 <script type="text/javascript">
 %if owner:
-function editComment(eventID,commentID) {   
-    loadContent('editCommentModalbody','/events/event/comment/view_comment/'+eventID+'/'+commentID)
+function editComment(eventID,commentID) {
+    //clear the contents
+    $('#editComment'+eventID+'Modalbody').text('');
+    $('#editComment'+eventID+'Modal').modal('show');
+    //load the contents
+    loadContent('editComment'+eventID+'Modalbody','/events/event/comment/view_comment/'+eventID+'/'+commentID);
+    
 }
 %endif
 

@@ -10,5 +10,5 @@ else:
 %>
 <input type="hidden" name="identifier" value="${identifier_value}"/>
 <input type="hidden" name="event_id" value="${event_id}"/>
-<%call expr="forms.bit_value_form(bit_value,enabled=enabled)"/>
+<%call expr="forms.bit_value_form(bit_value,enabled=enabled, is_attribute=is_attribute)"/>
 

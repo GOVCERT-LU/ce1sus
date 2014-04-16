@@ -35,6 +35,16 @@
 	  <%call expr="messages_and_text.error(validation_msg)"/>
 	% endif
 	<!-- END textBox -->
+    <script type="text/javascript">
+       $(document).ready(function() {
+          $('#${name}ID').keydown(function(event){
+            if(event.keyCode == 13) {
+              event.preventDefault();
+              return false;
+            }
+          });
+        });
+    </script>
 </%def>
 
 

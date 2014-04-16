@@ -184,7 +184,7 @@ else:
                               </a>
                             %endif
                             %if owner or (attribute_owner and not attribute.bit_value.is_validated):
-                              <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventObjects${event_id}','/events/event/objects/objects/${event_id}/${object.identifier}/');"
+                              <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventObjects${event_id}','/events/event/objects/objects/${event_id}/');"
                                  <span class="glyphicon glyphicon-pencil" title="Modify properties"></span>
                               </a>
                               <a href="#" role="button"
@@ -235,7 +235,7 @@ else:
             %endfor
     %endif
     %if ident == 1:
-    <form id="paginatorModalAttributeFormObjectsStruct">
+    <form id="paginatorModalAttributeObjectsStructForm">
     <%call expr="modals.generic_modal(id='paginatorModalAttributeObjectsStruct',title='No Title',content_url=None)">
     </%call>
     </form>

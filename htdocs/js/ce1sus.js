@@ -182,77 +182,13 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
     if (postUrl) {
         $("#" + id + "Form").unbind('submit');
         $("#" + id + "Form").submit(function(event) {
-
-            // setup some local variables
-            var form = $('#' + id + 'Form');
-            // let's select and cache all the fields
-            var inputs = form.find("input, select, button, textarea");
-            // serialize the data in the form
-            var serializedData = form.serialize();
-
-            // magic to get the button value
-            var name = event.originalEvent.explicitOriginalTarget.name;
-            if (name) {
-                var value = event.originalEvent.explicitOriginalTarget.value;
-                serializedData += '&' + name + '=' + value;
-            }
-
-            // let's disable the inputs for the duration of the ajax request
-            inputs.prop("disabled", true);
-
-            // fire off the request
-            var request = $.ajax({
-                url : postUrl,
-                type : "post",
-                data : serializedData
-            });
-
-            // callback handler that will be called on success
-            request.done(function(responseText, textStatus, XMLHttpRequest) {
-                var message = getResonseTextContent(responseText);
-                if (message.match(/^<!--OK--/gi)) {
-                    $('#' + id).modal("hide");
-                    // refrehshPage & container if needed
-                    if (refresh) {
-                        loadContent(refreshContentID, refreshContentUrl);
-                    }
-                    // workaround---
-                    $('.modal-backdrop').remove();
-                    document.documentElement.style.overflow = "auto";
-                    document.body.style.marginRight = '0px';
-                } else {
-                    if (message.match(/^<!--PostError-->/gi)) {
-                        //post errors are mainly validations issues
-                        var resultText = responseText;
-                    } else {
-                        var resultText = createErrorsMsg(null, message);
-                    }
-                    $("#'+id+'body").html(resultText);
-                }
-            });
-            // callback handler that will be called on failure
-            request.fail(function(response, textStatus, XMLHttpRequest) {
-                var message = getResponseConent(response);
-                $("#" + id + "body").html(message);
-            });
-            // callback handler that will be called regardless
-            // if the request failed or succeeded
-            request.always(function() {
-                // reenable the inputs
-                inputs.prop("disabled", false);
-            });
-            // prevent default posting of form
-            event.preventDefault();
+            formSubmit(this,event,id , postUrl,refresh,refreshContentID,refreshContentUrl);
         });
         $('#' + id + 'Footer')
                 .html(
                         '<input class="btn btn-primary" value="'
                                 + 'Save changes" type="submit"><button class="btn btn-default" data-'
                                 + 'dismiss="modal">Close</button>');
-    } else {
-        $('#' + id + 'Footer').html(
-                '<button class="btn btn-default" data-dismiss="'
-                        + 'modal">Close</button>');
     }
 }
 

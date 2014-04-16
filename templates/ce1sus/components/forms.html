@@ -283,8 +283,8 @@ $(document).ready(function(){
   <%call expr="labeled_input.labeled_textbox(label='Comment',name='comment_text',message='',enabled=enabled)"/>
 %else:
   <input type="hidden" name="event_id" value="${event_id}">
-  <input type="hidden" name="comment_id" value="${commentObj.identifier}">
   %if not commentObj.identifier is None:
+  <input type="hidden" name="comment_id" value="${commentObj.identifier}">
   <%call expr="labeled_input.labeled_editbox(label='Identifier',name='',value=commentObj.identifier,enabled=False)"/>
   %endif
   <%call expr="labeled_input.labeled_textbox(label='Comment',name='comment_text',message=commentObj.comment,enabled=enabled)"/>

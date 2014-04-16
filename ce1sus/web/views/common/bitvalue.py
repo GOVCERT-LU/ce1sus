@@ -26,6 +26,14 @@ class BitValueView(Ce1susBaseView):
     Ce1susBaseView.__init__(self, config)
     self.bit_value_controller = BitValueController(config)
 
+  def __generate_template(self, event_id, instance, parentDisabled, is_attribute):
+    return self._render_template('/events/event/bitvalue/bitvalueModal.html',
+                           identifier=instance.identifier,
+                           bit_value=instance.bit_value,
+                           event_id=event_id,
+                           enabled=parentDisabled,
+                           is_attribute=is_attribute)
+
   @cherrypy.expose
   @require(require_referer(('/internal')))
   def set_object_properties(self, event_id, object_id):
@@ -33,11 +41,7 @@ class BitValueView(Ce1susBaseView):
       event = self.bit_value_controller.get_event_by_id(event_id)
       obj = self.bit_value_controller.get_object_by_id(object_id)
       self._check_if_allowed_event_object(event, obj)
-      return self._render_template('/events/event/bitvalue/bitvalueObjectModal.html',
-                           identifier=obj.identifier,
-                           bit_value=obj.bit_value,
-                           event_id=event_id,
-                           enabled=True)
+      return self.__generate_template(event_id, obj, True, False)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -62,18 +66,13 @@ class BitValueView(Ce1susBaseView):
       obj = self.bit_value_controller.get_object_by_id(object_id)
       attribute = self.bit_value_controller.get_attribute_by_id(attribute_id)
       self._check_if_allowed_event_object(event, attribute)
-      return self._render_template('/events/event/bitvalue/bitvalueAttributeModal.html',
-                           identifier=attribute.identifier,
-                           bit_value=attribute.bit_value,
-                           event_id=event_id,
-                           enabled=obj.bit_value.is_shareable)
-
+      return self.__generate_template(event_id, attribute, obj.bit_value.is_shareable, True)
     except ControllerException as error:
       return self._render_error_page(error)
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
-  def modify_attribute_properties(self, event_id, identifier, shared):
+  def modify_attribute_properties(self, event_id, identifier, shared, user_default_values=None):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
       user = self._get_user()

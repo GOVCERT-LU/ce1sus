@@ -59,11 +59,14 @@ class CommentsController(Ce1susBaseController):
 
   def update_comment(self, user, event, comment):
     try:
-      user = self._get_user(user.username)
-      self.event_broker.update_event(user, event, commit=False)
-      self.comment_broker.update(comment, commit=False)
-      self.comment_broker.do_commit(True)
-      return comment, True
+      try:
+        user = self._get_user(user.username)
+        self.event_broker.update_event(user, event, commit=False)
+        self.comment_broker.update(comment, commit=False)
+        self.comment_broker.do_commit(True)
+        return comment, True
+      except ValidationException:
+        return comment, False
     except BrokerException as error:
       self._raise_exception(error)
 
