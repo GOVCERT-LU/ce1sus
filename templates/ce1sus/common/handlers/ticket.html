@@ -5,21 +5,28 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
 <input type="hidden" name="definition_id" value="${definition_id}">
 %if enabled:
-%if attribute is None:
-    <div id="RTTable">
-   <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value='',enabled=enabled)"/>
-   <%call expr="labeled_input.generic_labeler('',enabled)">
-   <div class="btn-group">
-    <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/call_handler_get?action=list&definition_id=${definition_id}')">Reference Ticket</a>
-   </div>
-   </%call>
-   <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
-   <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
-   </div>
-  
-%else:
-  <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value=attribute.gui_value.identifier,enabled=enabled)"/>
-%endif
+  %if attribute is None:
+      <div id="RTTable">
+     <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value='',enabled=enabled)"/>
+     <%call expr="labeled_input.generic_labeler('',enabled)">
+     <div class="btn-group">
+      <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/call_handler_get?action=list&definition_id=${definition_id}')">Reference Ticket</a>
+     </div>
+     </%call>
+     <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+     </div>
+    
+  %else:
+   <div id="RTTable">
+    <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value=attribute.value,enabled=enabled)"/>
+    <%call expr="labeled_input.generic_labeler('',enabled)">
+     <div class="btn-group">
+      <a href="#" role="button" class="btn btn-default" onclick="loadContent('RTTable','/events/event/attribute/call_handler_get?action=list&definition_id=${definition_id}')">Reference Ticket</a>
+     </div>
+     </%call>
+      <%call expr="forms.bit_value_form(bit_value=attribute.bit_value, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
+     </div>
+  %endif
 %else:
   <%call expr="labeled_input.generic_labeler('Value',enabled)">
   <div style="margin-top:15px;margin-left:30px;margin-right:30px;text-align:left;">

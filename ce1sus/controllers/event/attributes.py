@@ -21,6 +21,7 @@ from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from dagr.helpers.converters import ValueConverter, ConversionException
 import ast
+from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
 class AttributesController(Ce1susBaseController):
@@ -100,7 +101,10 @@ class AttributesController(Ce1susBaseController):
       user = self._get_user(user.username)
       valid = True
       try:
-        self.attribute_broker.insert(attribute, commit=False)
+        if isinstance(attribute.value, FailedValidation):
+          valid = False
+        else:
+          self.attribute_broker.insert(attribute, commit=False)
       except ValidationException:
         valid = False
       if not additional_attributes is None:

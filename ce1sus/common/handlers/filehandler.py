@@ -30,6 +30,7 @@ import zipfile
 from os import remove
 import hashlib
 from dagr.helpers.converters import convert_string_to_value
+from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
@@ -102,7 +103,22 @@ class FileHandler(GenericHandler):
                              event_id=0,
                              enabled=True,
                              default_share_value=default_share_value,
-                             enable_share=share_enabled)
+                             enable_share=share_enabled,
+                             error_msg=None)
+
+  def render_gui_edit(self, template_renderer, attribute, additional_attributes, share_enabled):
+    if attribute.bit_value.is_shareable:
+      default_share_value = '1'
+    else:
+      default_share_value = '0'
+    return template_renderer('/common/handlers/file.html',
+                             url='',
+                             can_download=False,
+                             event_id=0,
+                             enabled=True,
+                             default_share_value=default_share_value,
+                             enable_share=share_enabled,
+                             error_msg='No File selected. Please select one before uploading.')
 
   def render_gui_get(self, template_renderer, action, attribute, user):
     rel_path = attribute.plain_value
@@ -212,7 +228,7 @@ class FileHandler(GenericHandler):
     """
 
     filename = uploaded_file.filename.encode('ISO-8859-1')
-    if uploaded_file:
+    if uploaded_file and uploaded_file.file:
       size = 0
       tmp_path = self._get_tmp_folder()
       # TODO: save with sha1
@@ -253,37 +269,43 @@ class FileHandler(GenericHandler):
     Creates ans inserts the file and its attributes (only used by the GUI)
     """
     main_definition = self._get_main_definition(definitions)
-    uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
+    try:
+      uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
 
-    attributes = list()
-    convertedFilename = filename.decode('utf8')
-    attributes.append(FileHandler._create_attribute(convertedFilename,
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
-                                                   user,
-                                                   '0'))
-    sha1 = hasher.fileHashSHA1(uploaded_file_path)
-    attributes.append(FileHandler._create_attribute(sha1,
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
-                                                   user,
-                                                   '0'))
+      attributes = list()
+      convertedFilename = filename.decode('utf8')
+      attributes.append(FileHandler._create_attribute(convertedFilename,
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
+                                                     user,
+                                                     '0'))
+      sha1 = hasher.fileHashSHA1(uploaded_file_path)
+      attributes.append(FileHandler._create_attribute(sha1,
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_HASH_SHA1, definitions),
+                                                     user,
+                                                     '0'))
 
-    rel_folder = FileHandler._get_rel_folder()
-    dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
-    move(uploaded_file_path, dest_path)
+      rel_folder = FileHandler._get_rel_folder()
+      dest_path = self._get_dest_folder(rel_folder) + '/' + sha1
+      move(uploaded_file_path, dest_path)
 
-    # remove temp folder
-    rmtree(dirname(uploaded_file_path))
+      # remove temp folder
+      rmtree(dirname(uploaded_file_path))
 
-    main_attribute = FileHandler._create_attribute(rel_folder + '/' + sha1,
-                                                    obj,
-                                                    main_definition,
-                                                    user,
-                                                    '0')
+      main_attribute = FileHandler._create_attribute(rel_folder + '/' + sha1,
+                                                      obj,
+                                                      main_definition,
+                                                      user,
+                                                      '0')
 
-    # return attributes
-    return main_attribute, attributes
+      # return attributes
+      return main_attribute, attributes
+    except HandlerException:
+      params['value'] = ''
+      attribute = self.create_attribute(params, obj, main_definition, user)
+      attribute.value = FailedValidation('', 'No input given. Please enter something.')
+      return attribute, None
 
   def process_gui_post(self, obj, definitions, user, params):
     action = params.get('action')
@@ -421,58 +443,64 @@ class FileWithHashesHandler(FileHandler):
 
   def insert(self, obj, definitions, user, params):
     attribute, attributes = FileHandler.insert(self, obj, definitions, user, params)
-    filepath = self._get_base_path() + '/' + attribute.plain_value
-    attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(filepath),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_MD5, definitions),
-                                                   user,
-                                                   '1'))
+    if isinstance(attribute.value, FailedValidation):
+      params['value'] = ''
+      attribute = self.create_attribute(params, obj, attribute.definition, user)
+      attribute.value = FailedValidation('', 'No input given. Please enter something.')
+      return attribute, None
+    else:
+      filepath = self._get_base_path() + '/' + attribute.plain_value
+      attributes.append(FileHandler._create_attribute(hasher.fileHashMD5(filepath),
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_HASH_MD5, definitions),
+                                                     user,
+                                                     '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(filepath),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_SHA256, definitions),
-                                                   user,
-                                                   '1'))
+      attributes.append(FileHandler._create_attribute(hasher.fileHashSHA256(filepath),
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_HASH_SHA256, definitions),
+                                                     user,
+                                                     '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(filepath),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_SHA384, definitions),
-                                                   user,
-                                                   '1'))
+      attributes.append(FileHandler._create_attribute(hasher.fileHashSHA384(filepath),
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_HASH_SHA384, definitions),
+                                                     user,
+                                                     '1'))
 
-    attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(filepath),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_HASH_SHA512, definitions),
-                                                   user,
-                                                   '1'))
+      attributes.append(FileHandler._create_attribute(hasher.fileHashSHA512(filepath),
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_HASH_SHA512, definitions),
+                                                     user,
+                                                     '1'))
 
-    attributes.append(FileHandler._create_attribute(getsize(filepath),
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_SIZE_IN_BYTES, definitions),
-                                                   user,
-                                                   '0'))
-    mime_type = magic.from_file(filepath, mime=True)
-    if mime_type:
-      attributes.append(FileHandler._create_attribute(mime_type,
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_MIME_TYPE, definitions),
-                                                   user,
-                                                   '0'))
+      attributes.append(FileHandler._create_attribute(getsize(filepath),
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_SIZE_IN_BYTES, definitions),
+                                                     user,
+                                                     '0'))
+      mime_type = magic.from_file(filepath, mime=True)
+      if mime_type:
+        attributes.append(FileHandler._create_attribute(mime_type,
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_MIME_TYPE, definitions),
+                                                     user,
+                                                     '0'))
 
-    file_id = magic.from_file(filepath)
-    if file_id:
-      attributes.append(FileHandler._create_attribute(file_id,
-                                                   obj,
-                                                   FileHandler._get_definition(CHK_SUM_FILE_ID, definitions),
-                                                   user,
-                                                   '0'))
+      file_id = magic.from_file(filepath)
+      if file_id:
+        attributes.append(FileHandler._create_attribute(file_id,
+                                                     obj,
+                                                     FileHandler._get_definition(CHK_SUM_FILE_ID, definitions),
+                                                     user,
+                                                     '0'))
 
-    definition = self._get_main_definition(definitions)
-    main_attribute = self._create_attribute(attribute.plain_value,
-                                                    obj,
-                                                    definition,
-                                                    user,
-                                                    '0')
+      definition = self._get_main_definition(definitions)
+      main_attribute = self._create_attribute(attribute.plain_value,
+                                                      obj,
+                                                      definition,
+                                                      user,
+                                                      '0')
 
-    # return attributes
-    return main_attribute, attributes
+      # return attributes
+      return main_attribute, attributes

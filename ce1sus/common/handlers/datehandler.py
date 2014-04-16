@@ -37,8 +37,12 @@ class DateHandler(GenericHandler):
 
   # pylint: disable=R0913,W0613
   def render_gui_edit(self, template_renderer, attribute, additional_attributes, share_enabled):
+    if attribute.bit_value.is_shareable:
+      default_share_value = '1'
+    else:
+      default_share_value = '0'
     return template_renderer('/common/handlers/datetime.html',
                              attribute=attribute,
                              enabled=True,
-                             default_share_value=0,
+                             default_share_value=default_share_value,
                              enable_share=share_enabled)

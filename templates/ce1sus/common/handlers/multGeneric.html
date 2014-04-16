@@ -9,4 +9,6 @@
     <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
 %else:
   <%call expr="labeled_input.labeled_textbox(label='Value',name='value',message=attribute.gui_value,enabled=enabled)"/>
+  <%call expr="forms.bit_value_form(bit_value=attribute.bit_value, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
+  <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=attribute.ioc)"/>
 %endif

@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
 from ce1sus.common.handlers.base import HandlerException
+from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
 class MultipleGenericHandler(GenericHandler):
@@ -47,7 +48,10 @@ class MultipleGenericHandler(GenericHandler):
       attribute = attributes.pop(0)
       return attribute, attributes
     else:
-      raise HandlerException('No attribute specified. Please Try again.')
+      params['value'] = ''
+      attribute = self.create_attribute(params, obj, definition, user)
+      attribute.value = FailedValidation('', 'No input given. Please enter something. Note that the multiline feature is not available anymore.')
+      return attribute, None
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/multGeneric.html',

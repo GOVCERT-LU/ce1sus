@@ -5,12 +5,12 @@
 
 %if attribute is None:
   <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value='',enabled=enabled)"/>
-  <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+  <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
 %else:
   <%call expr="labeled_input.labeled_editbox(label='Value',name='value',value=attribute.plain_value,enabled=enabled)"/>
   %if enabled:
-    <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+    <%call expr="forms.bit_value_form(bit_value=attribute.bit_value, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
     <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=attribute.ioc)"/>
   %endif
 %endif

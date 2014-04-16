@@ -4,9 +4,15 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/>
 <%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 
-
+<%
+bit_value = None
+%>
 %if not attributes is None:
     %for attribute in attributes:
+    <%
+    if not bit_value:
+       bit_value = attribute.bit_value
+    %>
     <div id="value${attribute.div_id}">
       <%call expr="labeled_input.generic_labeler('Value',enabled)">
         <div style="width:96%;float:left;">
@@ -27,7 +33,7 @@
       </%call>
     </div>
     %endfor
-    <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
+    <%call expr="forms.bit_value_form(bit_value=bit_value, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
     <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
 %else:
   <%call expr="messages_and_text.error('Cannot find attribtues to display.')"/>

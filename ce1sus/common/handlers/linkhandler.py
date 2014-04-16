@@ -16,6 +16,7 @@ import types
 from dagr.helpers.rt import RTTickets
 from ce1sus.common.handlers.base import HandlerException
 from dagr.web.views.classes import Link
+from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
 class RTHandler(GenericHandler):
@@ -34,14 +35,31 @@ class RTHandler(GenericHandler):
     return template_renderer('/common/handlers/ticket.html',
                              attribute=None,
                              enabled=True,
-                             default_share_value=0,
+                             default_share_value=default_share_value,
                              enable_share=False,
                              definition_id=definition.identifier)
 
+  def render_gui_edit(self, template_renderer, attribute, additional_attributes, share_enabled):
+    if attribute.bit_value.is_shareable:
+      default_share_value = '1'
+    else:
+      default_share_value = '0'
+    # merge additional attribtues
+    if not isinstance(attribute.value, FailedValidation):
+      value = '{0}'.format(attribute.plain_value)
+      if additional_attributes:
+        for attribute in additional_attributes:
+          value = '{0},{1}'.format(value, attribute.plain_value)
+      attribute.value = value
+    return template_renderer('/common/handlers/ticket.html',
+                             attribute=attribute,
+                             enabled=True,
+                             default_share_value=default_share_value,
+                             enable_share=False,
+                             definition_id=attribute.definition.identifier)
+
   def process_gui_post(self, obj, definitions, user, params):
     # check if params contains value
-    params['ioc'] = '0'
-    params['shared'] = '0'
     definition = self._get_main_definition(definitions)
     values = params.get('value', None)
     if values:
@@ -68,7 +86,10 @@ class RTHandler(GenericHandler):
             attributes.append(attribute)
         return main_attribute, attributes
     else:
-      raise HandlerException('Please select something before saveing.')
+      params['value'] = ''
+      attribute = self.create_attribute(params, obj, definition, user)
+      attribute.value = FailedValidation('', 'No input given. Please enter something.')
+      return attribute, None
 
   def render_gui_view(self, template_renderer, attribute, user):
     # convert attribute's value

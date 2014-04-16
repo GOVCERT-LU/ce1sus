@@ -559,8 +559,11 @@ class Attribute(BASE):
     """
     if self.__value_obj is None:
       self.__value_obj = self.__get_value_obj()
-      if self.__value_obj:
-        self.internal_value = self.__value_obj.value
+    # Take into account the failed validation objects
+    if isinstance(self.__value_obj, FailedValidation):
+      self.internal_value = self.__value_obj
+    else:
+      self.internal_value = self.__value_obj.value
     return self.internal_value
 
   @property
