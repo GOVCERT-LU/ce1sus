@@ -291,7 +291,7 @@ $(document).ready(function(){
 %endif
 </%def>
 
-<%def name="bit_value_form(bit_value, default_share_value=0, enabled=True,show_details=True)">
+<%def name="bit_value_form(bit_value, default_share_value=0, enabled=True,show_details=True, is_attribute=False)">
 % if bit_value is None:
 <% if not enabled:
   shared = 0
@@ -330,7 +330,7 @@ else:
 <script type="text/javascript">
 $(document).ready(function(){
     $('#sharedDefaultHidden').hide();
-    %if show_details:
+    %if (show_details and shared==0) and not is_attribute:
     $("#sharedID").change(function(event){
         var value = $("#sharedID").val();
         if (value == 1) {
