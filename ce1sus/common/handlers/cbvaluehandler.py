@@ -75,7 +75,7 @@ class CBValueHandler(GenericHandler):
     CBValueHandler.__check_vailidity_regex(regex)
     items = regex.split('|')
     for item in items:
-      temp = item.replace('$', ' ')
-      temp = temp.replace('^', ' ')
+      temp = item.replace('$', '')
+      temp = temp.replace('^', '')
       result[temp] = temp
     return result

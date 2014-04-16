@@ -10,5 +10,5 @@
   <%call expr="forms.bit_value_form(bit_value=None, default_share_value=default_share_value, enabled=enable_share)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
 %else:
-  <%call expr="labeled_input.labeled_combobox(label='Value',name='value',values=cbValues,enabled=enabled,has_empty=False,selected=attribute.gui_value)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Value',name='value',values=cb_values,enabled=enabled,has_empty=False,selected=attribute.plain_value)"/>
 %endif
