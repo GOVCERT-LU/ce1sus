@@ -7,6 +7,10 @@ tools.staticdir.root='/path/to/ce1sus/htdocs'
 tools.staticdir.dir=''
 tools.sessions.on=True
 tools.sessions.timeout=60
+#For http only use
+tools.sessions.httponly = True
+#uncomment if using https
+#tools.sessions.secure = True
 tools.auth.on=True
 #Do not set caching to true
 tools.caching.on=False
