@@ -24,7 +24,7 @@ class InputException(Exception):
 pass
 
 
-def plaintext2html(text, tabstop=4):
+def plaintext2html(text, tabstop=4, make_br=True):
   """
   returns the given text in HTML Code
 
@@ -51,7 +51,10 @@ def plaintext2html(text, tabstop=4):
     if characters['htmlchars']:
       return cgi.escape(characters['htmlchars'])
     if characters['lineend']:
-      return '<br/>'
+      if make_br:
+        return '<br/>'
+      else:
+        return characters['lineend']
     elif characters['space']:
       tabs = string.group().replace('\tabs', '&nbsp;' * tabstop)
       tabs = tabs.replace(' ', '&nbsp;')
@@ -67,7 +70,8 @@ def plaintext2html(text, tabstop=4):
         prefix = ''
         last = string.groups()[-1]
         if last in ['\n', '\r', '\r\n']:
-          last = '<br/>'
+          if make_br:
+            last = '<br/>'
         # I dont want links!
         # return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
         return '%s%s%s' % (prefix, url, last)
