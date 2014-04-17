@@ -109,7 +109,8 @@ class Analysis(object):
   __tableDefinitions = {0: 'None',
                      1: 'Opened',
                      2: 'Stalled',
-                     3: 'Completed'}
+                     3: 'Completed',
+                     4: 'Unknown'}
 
   def __init__(self, identifier):
     self.identifier = identifier
@@ -152,7 +153,8 @@ class Risk(object):
   __tableDefinitions = {0: 'None',
                      1: 'Low',
                      2: 'Medium',
-                     3: 'High'}
+                     3: 'High',
+                     4: 'Undefined'}
 
   def __init__(self, identifier):
     self.identifier = identifier
