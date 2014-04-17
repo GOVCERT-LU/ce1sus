@@ -29,6 +29,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -41,6 +42,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def left_content(self):
     """
     renders the left content of the attribute index page
@@ -61,6 +63,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def right_content(self, attribute_id):
     """
     renders the right content of the attribute index page
@@ -89,6 +92,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_attribute(self):
     """
     renders the add an attribute page
@@ -104,6 +108,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_attribute_attributes(self, identifier, operation,
                      existing=None, remaining=None):
     """
@@ -132,6 +137,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_attribute(self, identifier=None, name=None, description='',
                       regex='^.*$', class_index=0, action='insert',
                       handler_index=0, share=None, relation=None):
@@ -184,6 +190,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_attribute(self, attributeid):
     """
     renders the edit an attribute page

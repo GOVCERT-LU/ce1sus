@@ -29,6 +29,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -41,6 +42,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def left_content(self):
     """
     renders the left content of the object index page
@@ -61,6 +63,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def right_content(self, object_id):
     """
     renders the right content of the object index page
@@ -85,6 +88,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_object(self):
     """
     renders the add an object page
@@ -96,6 +100,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_object_attributes(self, identifier, operation,
                      existing=None, remaining=None):
     """
@@ -124,6 +129,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_object(self, identifier=None, name=None,
                   description=None, action='insert', share=None):
     """
@@ -168,6 +174,7 @@ class AdminObjectsView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_object(self, objectid):
     """
     renders the edit an object page

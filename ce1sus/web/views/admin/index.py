@@ -25,6 +25,7 @@ class AdminView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section

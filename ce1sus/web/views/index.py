@@ -37,6 +37,7 @@ class IndexView(Ce1susBaseView):
     return env
 
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self, error_msg=None):
     """
     The index page of ce1sus. Mainly only an login page
@@ -52,6 +53,7 @@ class IndexView(Ce1susBaseView):
     return self.login(error_msg)
 
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def login(self, error_msg=None):
     """
     Renders the login Page
@@ -67,6 +69,7 @@ class IndexView(Ce1susBaseView):
                                  is_authenticated=False)
 
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def dologin(self, username=None, password=None):
     """
     Login of the page. This function checks if the credentials are valid and
@@ -101,6 +104,7 @@ class IndexView(Ce1susBaseView):
 
   @cherrypy.expose
   @require()
+  @cherrypy.tools.allow(methods=['GET'])
   def logout(self):
     """
     Log out method
@@ -111,6 +115,7 @@ class IndexView(Ce1susBaseView):
 
   @require()
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def internal(self):
     """
     Renders the base for the whole page in the internal section
@@ -123,6 +128,7 @@ class IndexView(Ce1susBaseView):
                                  is_authenticated=True)
 
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def activate(self, activation_str=None):
     try:
       if activation_str:

@@ -29,6 +29,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -41,6 +42,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def left_content(self):
     """
     renders the left content of the user index page
@@ -58,6 +60,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def right_content(self, user_id):
     """
     renders the right content of the user index page
@@ -82,6 +85,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_user(self):
     """
     renders the add an user page
@@ -99,6 +103,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def ldap_users_table(self):
     try:
       ldap_users = self.user_controller.get_all_ldap_users()
@@ -110,6 +115,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_user(self, identifier=None, username=None, password=None,
                  priv=None, email=None, action='insert', disabled=None,
                  maingroup=None, ldap_users_table_length=None, apikey=None,
@@ -160,6 +166,7 @@ class AdminUserView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_user(self, userid):
     """
     renders the edit an user page

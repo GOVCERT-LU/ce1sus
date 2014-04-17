@@ -29,6 +29,7 @@ class AdminMailView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -41,6 +42,7 @@ class AdminMailView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def left_content(self):
     try:
       mail_templates = self.mail_controller.get_all()
@@ -56,6 +58,7 @@ class AdminMailView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def right_content(self, mail_id):
     try:
       mail_template = self.mail_controller.get_by_id(mail_id)
@@ -66,6 +69,7 @@ class AdminMailView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_mail(self, mail_id):
     try:
       mail_template = self.mail_controller.get_by_id(mail_id)
@@ -76,6 +80,7 @@ class AdminMailView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_mail(self, identifier=None, subject=None,
                   body=None, action='insert'):
     try:

@@ -28,6 +28,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -38,6 +39,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def unvalidated(self):
     try:
       events = self.validation_controller.get_all_unvalidated_events()
@@ -52,6 +54,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def event(self, event_id):
     """
     renders the base page for displaying events
@@ -74,6 +77,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def event_details(self, event_id):
     """
     renders the event page for displaying a single event
@@ -96,6 +100,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def event_objects(self, eventid):
     try:
       event = self.validation_controller.get_event_by_id(eventid)
@@ -114,6 +119,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def flat_event_objects(self, event_id):
     try:
       event = self.validation_controller.get_event_by_id(event_id)
@@ -128,6 +134,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def validate_event(self, event_id):
     try:
       event = self.validation_controller.get_event_by_id(event_id)
@@ -139,6 +146,7 @@ class AdminValidationView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def delete_unvalidated_event(self, event_id):
     try:
       event = self.validation_controller.get_event_by_id(event_id)
@@ -146,4 +154,3 @@ class AdminValidationView(Ce1susBaseView):
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
-

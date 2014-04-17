@@ -29,6 +29,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     index page of the administration section
@@ -41,6 +42,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def left_content(self):
     """
     renders the left content of the group index page
@@ -61,6 +63,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def right_content(self, subgroup_id):
     """
     renders the right content of the group index page
@@ -89,6 +92,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_subgroup(self):
     """
     renders the add an group page
@@ -102,6 +106,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def edit_subgroup_groups(self, identifier, operation,
                      existing=None, remaining=None):
     """
@@ -128,6 +133,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_subgroup(self, identifier=None, name=None,
                   description=None, action='insert'):
     """
@@ -170,6 +176,7 @@ class AdminSubGroupView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_subgroup(self, subgroup_id):
     """
     renders the edit an group page

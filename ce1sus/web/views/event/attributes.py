@@ -30,6 +30,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_attribute(self, event_id, object_id):
     """
      renders the file for adding attributes
@@ -66,6 +67,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def render_handler_input(self, defattrib_id, event_id, object_id):
     """
     Renders the view for the handler input
@@ -90,6 +92,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def render_handler_view(self, event_id, attribute_id):
     """
     Renders the view for the handler input
@@ -108,6 +111,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def call_handler_get(self, action, event_id=None, attribute_id=None, definition_id=None):
     """
     Renders the view for and additional handler get handler method
@@ -140,6 +144,7 @@ class AttributesView(Ce1susBaseView):
   # pylint: disable=C0301
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def call_handler_post(self, **kwargs):
     """
     Renders the view for a handling the post by the handler
@@ -191,6 +196,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def view(self, event_id, object_id, attribute_id):
     try:
       event = self.attributes_controller.get_event_by_id(event_id)
@@ -209,6 +215,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def remove_attribute(self, event_id, attribute_id):
     try:
       # Clear Session variable
@@ -223,6 +230,7 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def validate_attribute(self, event_id, attribute_id):
     try:
       self._put_to_session('instertAttribute', None)

@@ -28,6 +28,7 @@ class CommentsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_comment(self, event_id):
     """
     renders the add a comment page
@@ -45,6 +46,7 @@ class CommentsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['GET'])
   def view_comment(self, event_id, comment_id):
     """
      renders the file with the requested comment
@@ -63,6 +65,7 @@ class CommentsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_comment(self, event_id=None, comment_id=None,
                          comment_text=None, action=None):
     try:

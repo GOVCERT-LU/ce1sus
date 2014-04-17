@@ -27,6 +27,7 @@ class EventsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     renders the events page
@@ -38,6 +39,7 @@ class EventsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def recent(self, limit=200, offset=0):
     """
     Renders the event Page (list of all events)

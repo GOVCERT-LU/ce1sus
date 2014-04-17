@@ -36,6 +36,7 @@ class BitValueView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['GET'])
   def set_object_properties(self, event_id, object_id):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
@@ -47,6 +48,7 @@ class BitValueView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_object_properties(self, event_id, identifier, shared, user_default_values=None):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
@@ -60,6 +62,7 @@ class BitValueView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['GET'])
   def set_attribute_properties(self, event_id, object_id, attribute_id):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)
@@ -72,6 +75,7 @@ class BitValueView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_attribute_properties(self, event_id, identifier, shared, user_default_values=None):
     try:
       event = self.bit_value_controller.get_event_by_id(event_id)

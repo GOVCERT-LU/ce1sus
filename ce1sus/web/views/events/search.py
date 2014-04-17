@@ -30,6 +30,7 @@ class SearchView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     """
     renders the events page
@@ -42,6 +43,7 @@ class SearchView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def search_results(self, definition_id, needle, operant):
     """
     Generates the page with the search results

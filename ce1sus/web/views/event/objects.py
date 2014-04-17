@@ -28,6 +28,7 @@ class ObjectsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['GET'])
   def objects(self, event_id, object_id=None):
     """
      renders the file with the base layout of the main object page
@@ -74,6 +75,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_object(self, event_id):
     """
      renders the file for displaying the add an attribute form
@@ -94,6 +96,7 @@ class ObjectsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_object(self, event_id, definition=None, shared=None, action='insert'):
     """
     Attaches an object to an event
@@ -145,6 +148,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_child_object(self, event_id, object_id):
     """
     renders the add an object page
@@ -167,6 +171,7 @@ class ObjectsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def attach_child_object(self,
                           object_id=None,
                           event_id=None,
@@ -201,6 +206,7 @@ class ObjectsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['GET'])
   def set_parent(self, event_id, object_id):
     """
     Renders page for setting the relations between objects,objects and events
@@ -237,6 +243,7 @@ class ObjectsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_parent(self,
                     event_id=None,
                     object_id=None,
@@ -257,6 +264,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def remove_object(self, event_id, object_id):
     """
      renders the file for displaying the add an attribute form
@@ -275,6 +283,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def render_properties(self, definition_id, event_id):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
@@ -292,6 +301,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def flat_objects(self, event_id):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
@@ -309,6 +319,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def validate_object_modal(self, event_id, object_id):
     try:
       event = self.objects_controller.get_event_by_id(event_id)
@@ -322,6 +333,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def validate_object(self, event_id, object_id, operation):
     try:
       event = self.objects_controller.get_event_by_id(event_id)

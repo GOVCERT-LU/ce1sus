@@ -50,6 +50,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def event(self, event_id):
     """
     renders the event page for displaying a single event
@@ -76,6 +77,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def view(self, event_id):
     """
     renders the base page for displaying events
@@ -93,6 +95,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def edit_event(self, event_id):
     """
     renders the base page for editing a single event
@@ -109,6 +112,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def modify_event(self, **kwargs):
     """
     modifies or inserts an event with the data of the post
@@ -156,6 +160,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def add_event(self):
     """
     Renders the page for adding an event
@@ -169,6 +174,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def relations(self, event_id):
     """
     Renders the relation page of an event
@@ -192,6 +198,7 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def extview(self, uuid):
     try:
       event = self.event_controller.get_by_uuid(uuid)
