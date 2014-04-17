@@ -79,6 +79,8 @@ class User(BASE):
 
     :returns: Boolean
     """
+    if not (self.password or self.username):
+      return False
     ObjectValidator.validateAlNum(self, 'username', minLength=3)
     # Don't update if the password is already a hash
     if not (self.password == 'EXTERNALAUTH') and re.match('^[0-9a-f]{40}$',

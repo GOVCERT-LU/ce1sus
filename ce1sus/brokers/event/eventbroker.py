@@ -354,6 +354,7 @@ class EventBroker(BrokerBase):
       event.description = cleanPostValue(description)
       if not event.description:
         event.description = 'no description'
+      # TODO: make checks if they are not an integer!
       ObjectConverter.set_integer(event, 'tlp_level_id', tlp_index)
       ObjectConverter.set_integer(event, 'status_id', status)
       ObjectConverter.set_integer(event, 'published', published)
