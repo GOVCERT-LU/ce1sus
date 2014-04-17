@@ -21,13 +21,13 @@
 	     message = ''
 	%>
 	%if enabled or message is None:
-	    <textarea class="form-control" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${message}</textarea>
+	    <textarea class="form-control" id="${name}ID" name="${name}" cols="${cols}" rows="${rows}"  ${enabledStr} >${dagr.plaintext2html(text=message)}</textarea>
 	%else:
 	    <div style="text-align:left;overflow:auto; height:${rows*25}px">
 	      ${dagr.plaintext2html(text=message)}
 	    </div>
         %if message:
-        <input type="hidden" id="${name}ID" name="${name}" value="${message}">
+        <input type="hidden" id="${name}ID" name="${name}" value="${dagr.plaintext2html(text=message)}">
         %endif
 	%endif
 	
@@ -64,11 +64,11 @@
 	  value = ''
 	%>
 	%if enabled or value is None:
-	    <input class="form-control" id="${name}ID" name="${name}" type="password" value="${value}" ${enabledStr}/>
+	    <input class="form-control" id="${name}ID" name="${name}" type="password" value="${dagr.plaintext2html(text=value)}" ${enabledStr}/>
 	%else:
 	    <div style="text-align:left;">
 	      %if value == 'EXTERNALAUTH':
-	      ${value}
+	      ${dagr.plaintext2html(text=value)}
 	      %else:
 	      ************
 	      %endif
@@ -108,17 +108,17 @@
 	%>
 	
 	%if enabled or value is None:
-	    <input class="form-control" id="${name}ID" name="${name}" type="text" value="${value}" ${enabledStr}"/>
+	    <input class="form-control" id="${name}ID" name="${name}" type="text" value="${dagr.plaintext2html(text=value)}" ${enabledStr}"/>
 	%else:
 	    <div style="text-align:left;">
 	    %if hasattr(value,'url'):
-	       <a href="${value.url}"  target="_blank">${value.identifier}</a>
+	       <a href="${dagr.plaintext2html(text=value.url)}"  target="_blank">${value.identifier}</a>
 	    %else:
 	      ${dagr.plaintext2html(text=value)}
 	    %endif
 	    </div>
         %if value:
-        <input type="hidden" id="${name}ID" name="${name}" value="${value}">
+        <input type="hidden" id="${name}ID" name="${name}" value="${dagr.plaintext2html(text=value)}">
         %endif
 	%endif
 	% if (not (validation_msg is None)) and enabled:
@@ -180,9 +180,9 @@
 	               title = ''
 	            %>
 	            %if not selected is None and value == selected:
-	              <option value="${value}" ${dataToggle} ${title} selected>${key}</option>
+	              <option value="${dagr.plaintext2html(text=value)}" ${dataToggle} ${title} selected>${key}</option>
 	            %else:
-	              <option value="${value}" ${dataToggle} ${title} >${key}</option>
+	              <option value="${dagr.plaintext2html(text=value)}" ${dataToggle} ${title} >${key}</option>
 	            %endif
 	        %endfor
 	    %endif
@@ -199,7 +199,7 @@
 	        
 	            %if not selected is None and value == selected:
 	              ${key}
-	              <input type="hidden" id="${name}ID" name="${name}" value="${value}">
+	              <input type="hidden" id="${name}ID" name="${name}" value="${dagr.plaintext2html(text=value)}">
 	            %endif
 	        %endfor
 	    </div>
@@ -253,7 +253,7 @@
                       ${dagr.plaintext2html(text=dateTime)}
             </div>
               %if value:
-              <input type="hidden" id="${name}ID" name="${name}" value="${value}">
+              <input type="hidden" id="${name}ID" name="${name}" value="${dagr.plaintext2html(text=value)}">
               %endif
             %endif
 

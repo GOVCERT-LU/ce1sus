@@ -191,7 +191,7 @@ class ObjectsController(Ce1susBaseController):
         # check if parent objects are connected on the event! else raise an error
         valid = self.__check_if_valid_parent(parent_obj_id, obj.identifier)
         if not valid:
-          self._raise_exception('The intended move action is not permitted as it would disconnect the object from the event. Please consider restructuring. the tree before trying again.')
+          self._raise_exception('The intended move action is not permitted as it would disconnect the object from the event. Please consider restructuring the tree before trying again.')
         obj.parent_object_id = parent_obj_id
       self.object_broker.update(obj)
     except BrokerException as error:
