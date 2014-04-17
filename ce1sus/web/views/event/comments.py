@@ -69,6 +69,7 @@ class CommentsView(Ce1susBaseView):
   def modify_comment(self, event_id=None, comment_id=None,
                          comment_text=None, action=None):
     try:
+      self._check_if_valid_action(action)
       event = self.comments_controller.get_event_by_id(event_id)
       self._check_if_event_owner(event)
       user = self._get_user()

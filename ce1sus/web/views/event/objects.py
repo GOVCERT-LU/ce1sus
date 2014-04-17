@@ -111,6 +111,7 @@ class ObjectsView(Ce1susBaseView):
     :returns: String
     """
     try:
+      self._check_if_valid_action(action)
       event = self.objects_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       user = self._get_user()
@@ -127,21 +128,24 @@ class ObjectsView(Ce1susBaseView):
       if action == 'insert':
         obj, valid = self.objects_controller.insert_object(user, event, obj)
 
+        if not valid:
+            self._get_logger().info('Event is invalid')
+            obj_definitions = self.objects_controller.get_cb_object_definitions()
+            return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
+                                                      obj_definitions=obj_definitions,
+                                                      event_id=event_id,
+                                                      object=obj))
+        else:
+          # save id to session to open the last inserted object
+          self._put_to_session('instertedObject', obj.identifier)
+
       if self.send_mails and (event.creator_group.identifier != user.default_group.identifier):
           self.send_notification_mail(event)
 
       if action == 'remove':
         self._check_if_allowed_event_object(event, obj)
         self.objects_controller.remove_object(user, event, obj)
-      if not valid:
-          self._get_logger().info('Event is invalid')
-          obj_definitions = self.objects_controller.get_cb_object_definitions()
-          return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
-                                                    obj_definitions=obj_definitions,
-                                                    event_id=event_id,
-                                                    object=obj))
-      # save id to session to open the last inserted object
-      self._put_to_session('instertedObject', obj.identifier)
+
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

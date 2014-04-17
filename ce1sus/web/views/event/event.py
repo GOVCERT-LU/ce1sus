@@ -133,10 +133,11 @@ class EventView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    user = self._get_user()
-    action = kwargs.get('action', None)
-    event = self.event_controller.populate_web_event(user, **kwargs)
     try:
+      user = self._get_user()
+      action = kwargs.get('action', None)
+      self._check_if_valid_action(action)
+      event = self.event_controller.populate_web_event(user, **kwargs)
       if action == 'insert':
         event, valid = self.event_controller.insert_event(user, event)
         if not valid:

@@ -149,6 +149,7 @@ class AdminObjectsView(Ce1susBaseView):
     """
 
     try:
+      self._check_if_valid_action(action)
       obj = self.object_controller.populate_object(identifier,
                                                    name,
                                                    description,

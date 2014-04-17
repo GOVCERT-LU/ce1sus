@@ -209,3 +209,13 @@ class Ce1susBaseView(BaseView):
         self._put_to_session('_cp_send_mails', send_mails)
     except MailHandlerException as error:
       self._get_logger().debug(error)
+
+  def _check_if_valid_action(self, action):
+    if not (action in ['insert', 'remove', 'update']):
+      self._get_logger().warning(u'User {0} tried to call method with action {1}'.format(self._get_user().username, action))
+      raise cherrypy.HTTPError(403, 'Action is not allowed')
+
+  def _check_if_valid_operation(self, operation):
+    if not (operation in ['add', 'remove']):
+      self._get_logger().warning(u'User {0} tried to call method with operation {1}'.format(self._get_user().username, operation))
+      raise cherrypy.HTTPError(403, 'Operation is not allowed')

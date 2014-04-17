@@ -151,10 +151,10 @@ class AttributesView(Ce1susBaseView):
     """
     try:
       # Clear Session variable
+      action = kwargs.get('action')
       event = self.attributes_controller.get_event_by_id(kwargs.pop('event_id'))
       self._check_if_event_is_viewable(event)
       obj = self.attributes_controller.get_object_by_id(kwargs.pop('object_id'))
-      action = kwargs.get('action')
       def_id = kwargs.pop('definition')
       user = self._get_user()
       params = dict()

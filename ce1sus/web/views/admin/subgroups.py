@@ -126,6 +126,7 @@ class AdminSubGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+      self._check_if_valid_operation(operation)
       self.subgroup_controller.modify_subgroup_group_relations(operation, identifier, remaining, existing)
       return self._return_ajax_ok()
     except ControllerException as error:
@@ -152,6 +153,7 @@ class AdminSubGroupView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+      self._check_if_valid_action(action)
       subgroup = self.subgroup_controller.populate_subgroup(identifier,
                                                       name,
                                                       description,

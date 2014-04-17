@@ -128,6 +128,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+      self._check_if_valid_operation(operation)
       self.attribute_controller.modify_object_attribute_relations(operation, identifier, remaining, existing)
       return self._return_ajax_ok()
     except SpecialControllerException as error:
@@ -157,6 +158,7 @@ class AdminAttributeView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+      self._check_if_valid_action(action)
       attribute = self.attribute_controller.populate_attribute(identifier,
                                                               name,
                                                               description,

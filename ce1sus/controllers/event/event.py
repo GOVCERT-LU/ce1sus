@@ -19,6 +19,7 @@ from dagr.db.broker import ValidationException, BrokerException, NothingFoundExc
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
 from ce1sus.common.mailhandler import MailHandlerException
+from dagr.helpers.converters import ConversionException
 
 
 class EventController(Ce1susBaseController):
@@ -65,39 +66,41 @@ class EventController(Ce1susBaseController):
     """
     Populates an event
     """
-
-    action = kwargs.get('action', None)
-    identifier = kwargs.get('identifier', None)
-    status = kwargs.get('status', None)
-    tlp_index = kwargs.get('tlp_index', None)
-    description = kwargs.get('description', None)
-    name = kwargs.get('name', None)
-    published = kwargs.get('published', None)
-    if not published:
-      published = None
-    first_seen = kwargs.get('first_seen', None)
-    last_seen = kwargs.get('last_seen', None)
-    risk = kwargs.get('risk', None)
-    analysis = kwargs.get('analysis', None)
-    uuid = kwargs.get('uuid', None)
-    user = kwargs.get('user', None)
-    # fill in the values
-    if hasattr(user, 'session'):
-      user = self._get_user(user.username)
-    event = self.event_broker.build_event(identifier,
-                                        action,
-                                        status,
-                                        tlp_index,
-                                        description,
-                                        name,
-                                        published,
-                                        first_seen,
-                                        last_seen,
-                                        risk,
-                                        analysis,
-                                        user,
-                                        uuid)
-    return event
+    try:
+      action = kwargs.get('action', None)
+      identifier = kwargs.get('identifier', None)
+      status = kwargs.get('status', None)
+      tlp_index = kwargs.get('tlp_index', None)
+      description = kwargs.get('description', None)
+      name = kwargs.get('name', None)
+      published = kwargs.get('published', None)
+      if not published:
+        published = None
+      first_seen = kwargs.get('first_seen', None)
+      last_seen = kwargs.get('last_seen', None)
+      risk = kwargs.get('risk', None)
+      analysis = kwargs.get('analysis', None)
+      uuid = kwargs.get('uuid', None)
+      user = kwargs.get('user', None)
+      # fill in the values
+      if hasattr(user, 'session'):
+        user = self._get_user(user.username)
+      event = self.event_broker.build_event(identifier,
+                                          action,
+                                          status,
+                                          tlp_index,
+                                          description,
+                                          name,
+                                          published,
+                                          first_seen,
+                                          last_seen,
+                                          risk,
+                                          analysis,
+                                          user,
+                                          uuid)
+      return event
+    except (BrokerException, ConversionException) as error:
+      self._raise_exception(error)
 
   def populate_web_event(self, user, **kwargs):
     """

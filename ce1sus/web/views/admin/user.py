@@ -140,10 +140,12 @@ class AdminUserView(Ce1susBaseView):
     :returns: generated HTML
     """
     try:
+
       if action == 'insertLDAP':
         user = self.user_controller.get_ldap_user(identifier)
         user, valid = self.user_controller.insert_ldap_user(user)
       else:
+        self._check_if_valid_action(action)
         user = self.user_controller.populate_user(identifier, username, password,
                  priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname)
         if action == 'insert':

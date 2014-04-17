@@ -84,6 +84,7 @@ class AdminMailView(Ce1susBaseView):
   def modify_mail(self, identifier=None, subject=None,
                   body=None, action='insert'):
     try:
+      self._check_if_valid_action(action)
       if action == 'update':
         user = self._get_user()
         mail_template = self.mail_controller.get_by_id(identifier)

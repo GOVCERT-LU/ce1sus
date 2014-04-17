@@ -49,7 +49,7 @@ class GroupsView(Ce1susBaseView):
 
   @cherrypy.expose
   @require(require_referer(('/internal')))
-  @cherrypy.tools.allow(methods=['POST'])
+  # @cherrypy.tools.allow(methods=['POST'])
   def modify_groups(self, identifier, operation, remaining=None, existing=None):
     """
     modifies the relation between a user and his groups
@@ -69,6 +69,7 @@ class GroupsView(Ce1susBaseView):
     """
     # right checks
     try:
+      self._check_if_valid_operation(operation)
       event = self.groups_controller.get_event_by_id(identifier)
       self._check_if_event_owner(event)
       self.groups_controller.modify_groups(operation, identifier, remaining, existing)
@@ -98,6 +99,7 @@ class GroupsView(Ce1susBaseView):
     """
     # right checks
     try:
+      self._check_if_valid_operation(operation)
       event = self.groups_controller.get_event_by_id(identifier)
       self._check_if_event_owner(event)
       self.groups_controller.modify_subgroups(operation, identifier, remaining, existing)
