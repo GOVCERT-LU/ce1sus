@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
 
 
@@ -19,7 +20,6 @@ class Log(object):
   """Log class"""
 
   def __init__(self, config=None):
-    self.loggers = dict()
 
     if config:
       self.__config_section = config.get_section('Logger')
@@ -38,17 +38,19 @@ class Log(object):
       # create formatter
       log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
       datefmt = '%m/%d/%Y %I:%M:%S %p'
-      self.__formatter = logging.Formatter(fmt=log_format, datefmt=datefmt)
+      self.__formatter = logging.Formatter(log_format)
 
   def __set_console_handler(self, logger):
     """
     Sets the console handler with the parameters to the given logger
     """
     if self.log_console:
+      logger.setLevel(self.log_lvl)
       console_handler = logging.StreamHandler()
-      console_handler.setLevel(self.log_lvl)
       console_handler.setFormatter(self.__formatter)
       logger.addHandler(console_handler)
+      logger.setLevel(self.log_lvl)
+      logger.handler_set = True
 
   def __set_logfile(self, logger):
     """
@@ -61,13 +63,15 @@ class Log(object):
       log_file_size = 100000
       nbr_backups = 2
     if self.log_file:
+      logger.setLevel(self.log_lvl)
       max_bytes = getattr(logger, "rot_maxBytes", log_file_size)
       backup_count = getattr(logger, "rot_backupCount", nbr_backups)
       file_rotater = RotatingFileHandler(self.log_file, 'a', max_bytes,
                                         backup_count)
-      file_rotater.setLevel(self.log_lvl)
       file_rotater.setFormatter(self.__formatter)
       logger.addHandler(file_rotater)
+      logger.setLevel(self.log_lvl)
+      logger.handler_set = True
 
   def get_logger(self, classname):
     """
@@ -75,15 +79,11 @@ class Log(object):
 
     :returns: Logger
     """
-    # check if logger exists
-    logger = self.loggers.get(classname, None)
-    if not logger:
-      logger = logging.getLogger(classname)
-      logger.setLevel(self.log_lvl)
+    logger = logging.getLogger(classname)
+    if not getattr(logger, 'handler_set', None):
       if self.__config_section:
         self.__set_logfile(logger)
       self.__set_console_handler(logger)
-      self.loggers[classname] = logger
     return logger
 
   def is_logger_cached(self, classname):

@@ -187,6 +187,9 @@ class ObjectsController(Ce1susBaseController):
       self._raise_exception(error)
 
   def __check_if_valid_parent(self, parent_obj_id, concerned_obj_id):
+    # One cannot be it's own child or parent
+    if parent_obj_id == concerned_obj_id:
+      return False
     # Get Parent
     parent_obj = self.object_broker.get_by_id(parent_obj_id)
     if parent_obj.parent_object_id:
