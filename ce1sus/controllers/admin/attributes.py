@@ -24,12 +24,12 @@ class AttributeController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.attribute_broker = self.broker_factory(AttributeDefinitionBroker)
+    self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
 
   def get_attribute_by_id(self, attribute_id):
     try:
-      return self.attribute_broker.get_by_id(attribute_id)
+      return self.attr_def_broker.get_by_id(attribute_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -38,7 +38,7 @@ class AttributeController(Ce1susBaseController):
     Returns all attribute definitions
     """
     try:
-      return self.attribute_broker.get_all(AttributeDefinition.name.asc())
+      return self.attr_def_broker.get_all(AttributeDefinition.name.asc())
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -47,7 +47,7 @@ class AttributeController(Ce1susBaseController):
     Returns the attribute definition by the given id
     """
     try:
-      return self.attribute_broker.get_by_id(object_id)
+      return self.attr_def_broker.get_by_id(object_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -56,7 +56,7 @@ class AttributeController(Ce1susBaseController):
     Returns all no associated objects
     """
     try:
-      return self.attribute_broker.get_objects_by_attribute(attribute.identifier, False)
+      return self.attr_def_broker.get_objects_by_attribute(attribute.identifier, False)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -75,12 +75,12 @@ class AttributeController(Ce1susBaseController):
   def modify_object_attribute_relations(self, operation, object_id, remaining_attributes, object_attributes):
     try:
       if operation == 'add':
-        AttributeController.__handle_input(self.attribute_broker.add_object_to_attribute,
+        AttributeController.__handle_input(self.attr_def_broker.add_object_to_attribute,
                                            object_id, remaining_attributes)
       else:
-        AttributeController.__handle_input(self.attribute_broker.remove_object_from_attribute,
+        AttributeController.__handle_input(self.attr_def_broker.remove_object_from_attribute,
                                            object_id, object_attributes)
-      self.attribute_broker.do_commit(True)
+      self.attr_def_broker.do_commit(True)
     except IntegrityException as error:
       raise SpecialControllerException(error)
     except BrokerException as error:
@@ -90,7 +90,7 @@ class AttributeController(Ce1susBaseController):
                       regex='^.*$', class_index=0, action='insert',
                       handler_index=0, share=None, relation=None):
     try:
-      return self.attribute_broker.build_attribute_definition(identifier,
+      return self.attr_def_broker.build_attribute_definition(identifier,
                                                               name,
                                                               description,
                                                               regex,
@@ -104,7 +104,7 @@ class AttributeController(Ce1susBaseController):
 
   def insert_attribute_definition(self, attribute):
     try:
-      attribute = self.attribute_broker.insert(attribute)
+      attribute = self.attr_def_broker.insert(attribute)
       return attribute, True
     except ValidationException as error:
       return attribute, False
@@ -113,7 +113,7 @@ class AttributeController(Ce1susBaseController):
 
   def update_attribtue_definition(self, attribute):
     try:
-      attribute = self.attribute_broker.update(attribute)
+      attribute = self.attr_def_broker.update(attribute)
       return attribute, True
     except ValidationException as error:
       return attribute, False
@@ -122,7 +122,7 @@ class AttributeController(Ce1susBaseController):
 
   def remove_attribute_definition(self, attribute):
     try:
-      attribute = self.attribute_broker.remove_by_id(attribute.identifier)
+      attribute = self.attr_def_broker.remove_by_id(attribute.identifier)
       return attribute, True
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')

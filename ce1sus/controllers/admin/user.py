@@ -15,7 +15,7 @@ from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
 from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, DeletionException
 from ce1sus.brokers.permission.userbroker import UserBroker
-from ce1sus.brokers.permission.groupbroker import GroupBroker
+
 from dagr.controllers.base import ControllerException
 from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 from dagr.helpers.datumzait import DatumZait
@@ -27,11 +27,8 @@ class UserController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.user_broker = self.broker_factory(UserBroker)
-    self.group_broker = self.broker_factory(GroupBroker)
     self.ldap_handler = LDAPHandler(config)
     self.__use_ldap = config.get('ce1sus', 'useldap', False)
-    self.mail_handler = MailHandler(config)
 
   @property
   def use_ldap(self):

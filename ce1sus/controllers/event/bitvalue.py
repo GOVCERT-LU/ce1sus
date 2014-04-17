@@ -13,9 +13,6 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import BrokerException
-from ce1sus.brokers.event.attributebroker import AttributeBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
-from ce1sus.brokers.event.eventbroker import EventBroker
 
 
 class BitValueController(Ce1susBaseController):
@@ -23,9 +20,6 @@ class BitValueController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
-    self.event_broker = self.broker_factory(EventBroker)
 
   @staticmethod
   def __set_shared(instance, share):

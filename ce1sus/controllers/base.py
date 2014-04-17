@@ -21,6 +21,10 @@ from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from dagr.db.broker import BrokerException
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+from ce1sus.common.mailhandler import MailHandler
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 
 
 class ControllerNothingFoundException(ControllerException):
@@ -39,6 +43,10 @@ class Ce1susBaseController(BaseController):
     self.event_broker = self.broker_factory(EventBroker)
     self.object_broker = self.broker_factory(ObjectBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
+    self.group_broker = self.broker_factory(GroupBroker)
+    self.mail_handler = MailHandler(config)
+    self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
+    self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
 
   def _get_user(self, username):
     return self.user_broker.getUserByUserName(username)

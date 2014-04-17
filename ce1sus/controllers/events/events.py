@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.event.eventbroker import EventBroker
 from dagr.db.broker import BrokerException
 
 
@@ -21,7 +20,6 @@ class EventsController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.event_broker = self.broker_factory(EventBroker)
 
   def get_user_events(self, user, limit=200, offset=0):
     """

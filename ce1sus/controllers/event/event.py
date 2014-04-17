@@ -11,18 +11,14 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker
+
 from ce1sus.brokers.event.commentbroker import CommentBroker
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
-from ce1sus.common.mailhandler import MailHandler, MailHandlerException
+from ce1sus.common.mailhandler import MailHandlerException
 
 
 class EventController(Ce1susBaseController):
@@ -31,14 +27,8 @@ class EventController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.send_mails = config.get('ce1sus', 'sendmail', False)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
-    self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
-    self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
-    self.mail_handler = MailHandler(config)
 
   def get_related_events(self, event, user, cache):
     """

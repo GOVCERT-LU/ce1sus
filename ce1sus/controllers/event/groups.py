@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 import types
 from dagr.db.broker import BrokerException
-from ce1sus.brokers.event.eventbroker import EventBroker
 
 
 class GroupsController(Ce1susBaseController):
@@ -22,7 +21,6 @@ class GroupsController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.event_broker = self.broker_factory(EventBroker)
 
   def get_available_groups(self, event):
     try:

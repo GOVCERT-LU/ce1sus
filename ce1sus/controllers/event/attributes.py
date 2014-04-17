@@ -12,13 +12,10 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from dagr.db.broker import ValidationException, BrokerException
 from ce1sus.common.handlers.base import HandlerException
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
 from dagr.helpers.converters import ValueConverter, ConversionException
 import ast
 from dagr.helpers.validator.objectvalidator import FailedValidation
@@ -29,11 +26,8 @@ class AttributesController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
     self.value_broker = self.broker_factory(ValueBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
 
   def remove_by_id(self, attribute_id):
     """
@@ -54,7 +48,7 @@ class AttributesController(Ce1susBaseController):
     Returns the values for combobox displaying attributes definitions
     """
     try:
-      return self.def_attributes_broker.get_cb_values(obj.def_object_id)
+      return self.attr_def_broker.get_cb_values(obj.def_object_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -63,7 +57,7 @@ class AttributesController(Ce1susBaseController):
     Returns the attribute definition by its id
     """
     try:
-      return self.def_attributes_broker.get_by_id(attribute_defintion_id)
+      return self.attr_def_broker.get_by_id(attribute_defintion_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -72,7 +66,7 @@ class AttributesController(Ce1susBaseController):
     Returns the attribute definition by its chksum
     """
     try:
-      return self.def_attributes_broker.get_defintion_by_chksum(chksum)
+      return self.attr_def_broker.get_defintion_by_chksum(chksum)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -87,7 +81,7 @@ class AttributesController(Ce1susBaseController):
     Returns the attribute definitions matching the list of chksums
     """
     try:
-      return self.def_attributes_broker.get_defintion_by_chksums(chksums)
+      return self.attr_def_broker.get_defintion_by_chksums(chksums)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -144,7 +138,7 @@ class AttributesController(Ce1susBaseController):
         # get additional definitions if required
         additional_definitions_chksums = handler_instance.get_additinal_attribute_chksums()
         if additional_definitions_chksums:
-          additional_definitions = self.def_attributes_broker.get_defintion_by_chksums(additional_definitions_chksums)
+          additional_definitions = self.attr_def_broker.get_defintion_by_chksums(additional_definitions_chksums)
           for additional_definition in additional_definitions:
             definitions[additional_definition.chksum] = additional_definition
         if rest:
@@ -197,7 +191,7 @@ class AttributesController(Ce1susBaseController):
     Populates the attributes to be inserted coming from the web interface
     """
     try:
-      definition = self.def_attributes_broker.get_by_id(definition_id)
+      definition = self.attr_def_broker.get_by_id(definition_id)
       attribute, additional_attributes = self.__populate_attributes(user,
                                                                     obj,
                                                                     definition,
@@ -235,7 +229,7 @@ class AttributesController(Ce1susBaseController):
             definition = attr_def
           else:
             # TODO: Support auto inserts of definitions
-            definition = self.def_attributes_broker.get_defintion_by_chksum(chksum)
+            definition = self.attr_def_broker.get_defintion_by_chksum(chksum)
             attr_defs[chksum] = definition
         else:
           raise BrokerException('No chksum specified')
@@ -285,7 +279,7 @@ class AttributesController(Ce1susBaseController):
     Returns all the attribute definitions
     """
     try:
-      return self.def_attributes_broker.get_all()
+      return self.attr_def_broker.get_all()
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -295,7 +289,7 @@ class AttributesController(Ce1susBaseController):
     """
     self._get_logger().debug('User {0} inserts an attribute definition'.format(user.username))
     try:
-      self.def_attributes_broker.insert(attribute_definition, True)
+      self.attr_def_broker.insert(attribute_definition, True)
       return attribute_definition, True
     except ValidationException:
       return attribute_definition, False
@@ -320,7 +314,7 @@ class AttributesController(Ce1susBaseController):
       handler_uuid = dictionary.get('handler_uuid', None)
       if handler_uuid:
         handler = self.handler_broker.get_by_uuid(handler_uuid)
-      return self.def_attributes_broker.build_attribute_definition(identifier=None,
+      return self.attr_def_broker.build_attribute_definition(identifier=None,
                                                                    name=dictionary.get('name', None),
                                                                    description=dictionary.get('description', None),
                                                                    regex=dictionary.get('regex', None),

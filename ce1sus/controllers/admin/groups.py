@@ -15,7 +15,6 @@ from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import BrokerException, ValidationException, IntegrityException
 import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
-from ce1sus.brokers.permission.groupbroker import GroupBroker
 from ce1sus.brokers.permission.permissionclasses import Group
 from dagr.controllers.base import ControllerException
 from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
@@ -26,7 +25,6 @@ class GroupController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.group_broker = self.broker_factory(GroupBroker)
     self.subgroup_broker = self.broker_factory(SubGroupBroker)
 
   def get_all_groups(self):

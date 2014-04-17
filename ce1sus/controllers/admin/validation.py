@@ -13,14 +13,11 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import BrokerException
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import \
                   AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import \
                   ObjectDefinitionBroker
 from dagr.helpers.datumzait import DatumZait
-from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
@@ -30,11 +27,8 @@ class ValidationController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.send_mails = config.get('ce1sus', 'sendmail', False)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
-    self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
-    self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
+    self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
+    self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
     self.mail_handler = MailHandler(config)
 
@@ -80,7 +74,7 @@ class ValidationController(Ce1susBaseController):
     :returns: List of AttributeDefinitions
     """
     try:
-      return self.def_attributes_broker.get_cb_values(object_definition.identifier)
+      return self.attr_def_broker.get_cb_values(object_definition.identifier)
     except BrokerException as error:
       self._raise_exception(error)
 

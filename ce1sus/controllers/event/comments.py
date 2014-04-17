@@ -13,7 +13,6 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
-from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.brokers.event.commentbroker import CommentBroker
 
 
@@ -23,7 +22,6 @@ class CommentsController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.comment_broker = self.broker_factory(CommentBroker)
-    self.event_broker = self.broker_factory(EventBroker)
 
   def get_by_id(self, comment_id):
     try:

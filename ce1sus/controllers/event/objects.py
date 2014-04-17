@@ -12,14 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                  ObjectDefinitionBroker
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                  AttributeDefinitionBroker
-from dagr.db.broker import ValidationException, \
-BrokerException
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.event.objectbroker import ObjectBroker
+from dagr.db.broker import ValidationException, BrokerException
 from dagr.helpers.datumzait import DatumZait
 
 
@@ -28,10 +21,6 @@ class ObjectsController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.object_broker = self.broker_factory(ObjectBroker)
-    self.def_object_broker = self.broker_factory(ObjectDefinitionBroker)
-    self.def_attributes_broker = self.broker_factory(AttributeDefinitionBroker)
 
   def get_attr_def_by_obj_def(self, object_definition):
     """
@@ -43,25 +32,25 @@ class ObjectsController(Ce1susBaseController):
     :returns: List of AttributeDefinitions
     """
     try:
-      return self.def_attributes_broker.get_cb_values(object_definition.identifier)
+      return self.attr_def_broker.get_cb_values(object_definition.identifier)
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_object_definition_by_chksum(self, chksum):
     try:
-      return self.def_object_broker.get_defintion_by_chksum(chksum)
+      return self.obj_def_broker.get_defintion_by_chksum(chksum)
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_defintion_by_chksums(self, chksums):
     try:
-      return self.def_object_broker.get_defintion_by_chksums(chksums)
+      return self.obj_def_broker.get_defintion_by_chksums(chksums)
     except BrokerException as error:
       self._raise_exception(error)
 
   def get_cb_object_definitions(self):
     try:
-      return self.def_object_broker.get_cb_values()
+      return self.obj_def_broker.get_cb_values()
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -97,7 +86,7 @@ class ObjectsController(Ce1susBaseController):
 
   def populate_web_object(self, identifier, event, parent_object_id, definition_id, user, share, action, proposal):
     try:
-      definition = self.def_object_broker.get_by_id(definition_id)
+      definition = self.obj_def_broker.get_by_id(definition_id)
       obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition, user, share, action)
       obj.bit_value.is_web_insert = True
       obj.bit_value.is_validated = not proposal
@@ -122,7 +111,7 @@ class ObjectsController(Ce1susBaseController):
             definition = obj_def
           else:
             # TODO: Support auto inserts of definitions
-            definition = self.def_object_broker.get_defintion_by_chksum(chksum)
+            definition = self.obj_def_broker.get_defintion_by_chksum(chksum)
             obj_defs[chksum] = definition
         else:
           raise BrokerException('No chksum specified')
@@ -210,7 +199,7 @@ class ObjectsController(Ce1susBaseController):
 
   def get_object_definition_by_id(self, definition_id):
     try:
-      return self.def_object_broker.get_by_id(definition_id)
+      return self.obj_def_broker.get_by_id(definition_id)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -231,13 +220,13 @@ class ObjectsController(Ce1susBaseController):
 
   def get_all_definitions(self):
     try:
-      return self.def_object_broker.get_all()
+      return self.obj_def_broker.get_all()
     except BrokerException as error:
       self._raise_exception(error)
 
   def insert_definition(self, user, attribute_definition):
     try:
-      self.def_object_broker.insert(attribute_definition, True)
+      self.obj_def_broker.insert(attribute_definition, True)
       return attribute_definition, True
     except ValidationException:
       return attribute_definition, False
@@ -246,7 +235,7 @@ class ObjectsController(Ce1susBaseController):
 
   def populate_rest_obj_def(self, user, dictionary, action):
     try:
-      return self.def_object_broker.build_object_definition(identifier=None, name=dictionary.get('name', None),
+      return self.obj_def_broker.build_object_definition(identifier=None, name=dictionary.get('name', None),
                   description=dictionary.get('description', None), action=action,
                                share=dictionary.get('share', None))
     except BrokerException as error:

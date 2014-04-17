@@ -43,18 +43,14 @@ class SearchController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.value_broker = self.broker_factory(ValueBroker)
-    self.attribute_definition_broker = self.broker_factory(AttributeDefinitionBroker)
     self.object_definition_broker = self.broker_factory(ObjectDefinitionBroker)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
-    self.event_broker = self.broker_factory(EventBroker)
-    self.relation_broker = self.broker_factory(RelationBroker)
 
   def get_cb_def_values_for_all(self):
     """
     Returns all the attribtue definitions formated for the combobox
     """
     try:
-      return self.attribute_definition_broker.get_cb_values_for_all()
+      return self.attr_def_broker.get_cb_values_for_all()
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -76,8 +72,8 @@ class SearchController(Ce1susBaseController):
         if definition_id == 'Any':
           definition = None
         else:
-          definition = self.attribute_definition_broker.get_by_id(definition_id)
-        found_values = self.relation_broker.look_for_attribute_value(definition,
+          definition = self.attr_def_broker.get_by_id(definition_id)
+        found_values = self.obj_def_broker.look_for_attribute_value(definition,
                                                                     needle,
                                                                     operant)
         # prepare displayItems
@@ -146,13 +142,13 @@ class SearchController(Ce1susBaseController):
         # collect all required definitions
         for item in attribute_needles:
           for definition_name, needle in item.iteritems():
-            definition = self.attribute_definition_broker.get_defintion_by_name(definition_name)
+            definition = self.attr_def_broker.get_defintion_by_name(definition_name)
             values_to_look_for[needle] = definition
 
         # find all matching values
         matching_values = list()
         for needle, definition in values_to_look_for.iteritems():
-          found_values = self.relation_broker.look_for_attribute_value(definition,
+          found_values = self.obj_def_broker.look_for_attribute_value(definition,
                                                                       needle,
                                                                       'like')
           matching_values += found_values
@@ -167,7 +163,7 @@ class SearchController(Ce1susBaseController):
       object_attr_def_ids = list()
       if object_attributes:
         for definition_name in object_attributes:
-          definition = self.attribute_definition_broker.get_defintion_by_name(definition_name)
+          definition = self.attr_def_broker.get_defintion_by_name(definition_name)
           object_attr_def_ids.append(definition.identifier)
 
       # gather the found events

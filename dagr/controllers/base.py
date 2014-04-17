@@ -48,7 +48,6 @@ class BaseController:
     """
     raises and logs an exception
     """
-    self._get_logger().error(error)
     raise ControllerException(error)
 
   def _get_logger(self):

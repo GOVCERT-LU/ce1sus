@@ -30,7 +30,6 @@ class LoginController(Ce1susBaseController):
 
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
-    self.user_broker = self.broker_factory(UserBroker)
     self.ldap_handler = LDAPHandler(config)
 
   def get_user_by_usr_pwd(self, username, password):
