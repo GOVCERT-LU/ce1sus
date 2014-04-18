@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 import cherrypy
+from dagr.helpers.strings import plaintext2html
 
 
 class BaseViewException(Exception):
@@ -177,7 +178,7 @@ class BaseView:
 
     :returns: String
     """
-    return '<!--OK--><!-{0}-->'.format(self.__class__.__name__)
+    return u'<!--OK--><!-{0}-->'.format(self.__class__.__name__)
 
   def _return_ajax_post_error(self, message):
     """
@@ -185,7 +186,8 @@ class BaseView:
 
     :returns: String
     """
-    return '<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, message)
+    escaped_message = plaintext2html(message)
+    return u'<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, escaped_message)
 
   def _return_ajax_error(self, message):
     """
@@ -193,4 +195,5 @@ class BaseView:
 
     :returns: String
     """
-    return '<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, message)
+    escaped_message = plaintext2html(message)
+    return u'<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, escaped_message)

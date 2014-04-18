@@ -108,7 +108,7 @@ class AdminAttributeView(Ce1susBaseView):
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET'])
+  @cherrypy.tools.allow(methods=['POST'])
   def edit_attribute_attributes(self, identifier, operation,
                      existing=None, remaining=None):
     """
