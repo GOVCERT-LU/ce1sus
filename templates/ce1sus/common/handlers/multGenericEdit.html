@@ -12,6 +12,7 @@ bit_value = None
     <%
     if not bit_value:
        bit_value = attribute.bit_value
+       ioc = attribute.ioc
     %>
     <div id="value${attribute.div_id}">
       <%call expr="labeled_input.generic_labeler('Value',enabled)">
@@ -34,7 +35,7 @@ bit_value = None
     </div>
     %endfor
     <%call expr="forms.bit_value_form(bit_value=bit_value, default_share_value=default_share_value, enabled=enable_share, show_details=False)"/>
-    <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=0)"/>
+    <%call expr="labeled_input.labeled_yes_no_combobox(label='Is an IOC',name='ioc',enabled=enabled,has_empty=False, selected=ioc)"/>
 %else:
   <%call expr="messages_and_text.error('Cannot find attribtues to display.')"/>
 %endif

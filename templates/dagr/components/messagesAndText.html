@@ -13,7 +13,7 @@
 <div class="alert alert-block alert-danger fade in">
 	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 	<h4 class="alert-heading">Error occurred</h4>
-	<p>${message}</p>
+	<p>${dagr.plaintext2html(text=message)}</p>
 </div>
 %endif
 </%def>
@@ -35,7 +35,7 @@ if len(string) >= shorten_to:
 else:
   result = string
 if 'Link' in object.__class__.__name__:
-  result = u'<a href="{0}" target="_blank">{1}</a>'.format(object.url, object.identifier)
+  result = u'<a href="{0}" target="_blank">{1}</a>'.format(dagr.plaintext2html(text=object.url), object.identifier)
 else:
   if not use_plain_text: 
     result = dagr.plaintext2html(text=result)

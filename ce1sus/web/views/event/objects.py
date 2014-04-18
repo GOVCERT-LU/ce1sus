@@ -268,7 +268,7 @@ class ObjectsView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET'])
+  @cherrypy.tools.allow(methods=['POST'])
   def remove_object(self, event_id, object_id):
     """
      renders the file for displaying the add an attribute form

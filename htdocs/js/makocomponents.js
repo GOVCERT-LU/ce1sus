@@ -170,8 +170,14 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
 
 function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
         doCloseTab, tabID, tabToClose) {
+    //Note this is a post dialog call
+    var startPos = url.indexOf("?");
+    var postUrl = url.substring(0,startPos);
+    var data = url.substring(startPos+1);
     var request = $.ajax({
-        url : url,
+        url : postUrl,
+        type: 'POST',
+        data : data,
      timeout: 30000 //3secs
     });
     request.fail(function(response, textStatus, XMLHttpRequest) {
