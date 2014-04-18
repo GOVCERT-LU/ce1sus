@@ -186,8 +186,7 @@ class BaseView:
 
     :returns: String
     """
-    escaped_message = plaintext2html(message)
-    return u'<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, escaped_message)
+    return u'<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, message)
 
   def _return_ajax_error(self, message):
     """
@@ -195,5 +194,4 @@ class BaseView:
 
     :returns: String
     """
-    escaped_message = plaintext2html(message)
-    return u'<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, escaped_message)
+    return u'<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, message)
