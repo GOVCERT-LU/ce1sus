@@ -85,3 +85,6 @@ class AttributeBroker(BrokerBase):
     attribute.modified = DatumZait.utcnow()
     self.update(attribute, False)
     self.do_commit(commit)
+
+  def look_for_attribute_value(self, attribute_definition, value, operand='=='):
+    self.relation_broker.look_for_attribute_value(attribute_definition, value, operand)

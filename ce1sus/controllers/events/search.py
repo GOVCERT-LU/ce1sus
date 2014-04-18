@@ -43,7 +43,6 @@ class SearchController(Ce1susBaseController):
   def __init__(self, config):
     Ce1susBaseController.__init__(self, config)
     self.value_broker = self.broker_factory(ValueBroker)
-    self.object_definition_broker = self.broker_factory(ObjectDefinitionBroker)
 
   def get_cb_def_values_for_all(self):
     """
@@ -73,9 +72,9 @@ class SearchController(Ce1susBaseController):
           definition = None
         else:
           definition = self.attr_def_broker.get_by_id(definition_id)
-        found_values = self.obj_def_broker.look_for_attribute_value(definition,
-                                                                    needle,
-                                                                    operant)
+        found_values = self.attribute_broker.look_for_attribute_value(definition,
+                                                                      needle,
+                                                                      operant)
         # prepare displayItems
         for found_value in found_values:
           if self._is_event_viewable_for_user(found_value.event, user, cache):
@@ -148,14 +147,14 @@ class SearchController(Ce1susBaseController):
         # find all matching values
         matching_values = list()
         for needle, definition in values_to_look_for.iteritems():
-          found_values = self.obj_def_broker.look_for_attribute_value(definition,
+          found_values = self.attribute_broker.look_for_attribute_value(definition,
                                                                       needle,
                                                                       'like')
           matching_values += found_values
 
       if object_type:
         # get definition
-        obj_def = self.object_definition_broker.get_defintion_by_name(object_type)
+        obj_def = self.obj_def_broker.get_defintion_by_name(object_type)
         obj_def_id = obj_def.identifier
       else:
         obj_def_id = None
