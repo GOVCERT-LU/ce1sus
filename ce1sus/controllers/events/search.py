@@ -76,15 +76,18 @@ class SearchController(Ce1susBaseController):
                                                                       needle,
                                                                       operant)
         # prepare displayItems
-        for found_value in found_values:
-          if self._is_event_viewable_for_user(found_value.event, user, cache):
+        if found_values:
+          for found_value in found_values:
+            if self._is_event_viewable_for_user(found_value.event, user, cache):
 
-            obj = ResultItem(found_value.event_id,
-                             found_value.event,
-                             found_value.attribute.definition,
-                             found_value.attribute)
-            result.append(obj)
-        return result
+              obj = ResultItem(found_value.event_id,
+                               found_value.event,
+                               found_value.attribute.definition,
+                               found_value.attribute)
+              result.append(obj)
+          return result
+        else:
+          return list()
       else:
         raise ControllerException('Please specify something before searching.')
     except BrokerException as error:
