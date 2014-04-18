@@ -43,9 +43,8 @@
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Default Shareable',name='share',enabled=enabled,has_empty=False,selected=0)"/>
 % else:
-  <input type="hidden" name="identifier" value="${object.identifier}">
   %if not object.identifier is None:
-  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='object_id',value=object.identifier,enabled=False)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='identifier',value=object.identifier,enabled=False)"/>
   %endif
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=object.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Checksum',name='',value=object.chksum,enabled=False)"/>
@@ -83,8 +82,7 @@
   
 % else:
 %if not user.identifier is None:
-  <input type="hidden" name="identifier" value="${user.identifier}">
-  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='userID',value=user.identifier,enabled=False)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='identifier',value=user.identifier,enabled=False)"/>
 %endif
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=user.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Sir name',name='sirname',value=user.sirname,enabled=enabled)"/>
@@ -101,8 +99,9 @@
     <%call expr="labeled_input.labeled_yes_no_combobox(label='API Access',name='apikey',enabled=enabled,has_empty=False,selected=user.has_api_key)"/>
   %endif
   <%call expr="labeled_input.labeled_combobox(label='Main Group',name='maingroup',values=cb_values,enabled=enabled,has_empty=False, selected=user.group_id)"/>
+% if not enabled:
   <%call expr="labeled_input.labeled_editbox(label='Last logged in',name='last_login',value=user.last_login,enabled=False)"/>
-  
+%endif
 % endif
 </div>
 </div>
@@ -122,8 +121,7 @@
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Default Shareable',name='share',enabled=enabled,has_empty=False,selected=0)"/>
 % else:
 %if not attribute.identifier is None:
-  <input type="hidden" name="identifier" value="${attribute.identifier}">
-  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='AttrID',value=attribute.identifier,enabled=False)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='identifier',value=attribute.identifier,enabled=False)"/>
 %endif
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=attribute.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_editbox(label='Checksum',name='',value=attribute.chksum,enabled=False)"/>
@@ -158,8 +156,7 @@
 
 % else:
 	%if not event.identifier is None:
-	  <input type="hidden" name="identifier" value="${event.identifier}">
-	  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='event_id',value=event.identifier,enabled=False)"/>
+	  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='identifier',value=event.identifier,enabled=False)"/>
 	%endif
   <%call expr="labeled_input.labeled_editbox(label='UUID',name='',value=event.uuid, enabled=False)"/>
   <%call expr="labeled_input.labeled_editbox(label='Title',name='name',value=event.title, enabled=enabled)"/>
@@ -216,8 +213,7 @@
 
 % else:
 %if not object.identifier is None:
-  <input type="hidden" name="objIdentifier" value="${object.identifier}">
-  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='objID',value=object.identifier,enabled=False)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='objIdentifier',value=object.identifier,enabled=False)"/>
 %endif
   <%call expr="labeled_input.labeled_combobox(label='Definition',name='definition',values=cb_definitions,enabled=enabled,has_empty=True,selected=object.def_object_id)"/>
   
@@ -242,8 +238,7 @@
   
 %else:
 %if not attribute is None:
-  <input type="hidden" name="attribute_id" value="${attribute.identifier}">
-  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='',value=attribute.identifier,enabled=False)"/>
+  <%call expr="labeled_input.labeled_editbox(label='Identifier',name='attribute_id',value=attribute.identifier,enabled=False)"/>
 %endif
   <%
   enableCB = attribute is None

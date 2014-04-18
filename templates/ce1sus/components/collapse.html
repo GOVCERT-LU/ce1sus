@@ -48,7 +48,7 @@ else:
                 </div>
                 <div class="col-xs-1 col-sm-1" style="height: 34px; line-height: 34px;">
                      %if not object.bit_value.is_shareable:
-                        <span class="glyphicon glyphicon-lock"></span>
+                        <span class="glyphicon glyphicon-lock" data-toggle="tooltip" data-placement="top" title="This object is not shared."></span>
                      %endif
                 </div>
                 <div class="col-xs-6 col-sm-6" style="text-align: right;">

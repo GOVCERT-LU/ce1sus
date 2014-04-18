@@ -37,7 +37,7 @@ function getResonseTextContent(responseText) {
             //document.write(responseText);
             return generateErrorFromBody(responseText);;
         } else {
-            if (responseText.match(/^<!--Error-->/gi)) {
+            if (responseText.match(/<!--Error-->/gi)) {
                 return createErrorsMsg(null, responseText);
             }
             return responseText;
@@ -118,7 +118,7 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
     request.error(request.fail);
     request.done(function(responseText, textStatus, XMLHttpRequest) {
         var message = getResonseTextContent(responseText);
-        if (message.match(/^<!--OK--/gi)) {
+        if (message.match(/<!--OK--/gi)) {
             form[0].reset();
             if (modalID) {
                 $("#" + modalID).modal('hide');
@@ -140,11 +140,11 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                 }
             }
         } else {
-            if (message.match(/^<!--Error-->/gi)) {
+            if (message.match(/<!--Error-->/gi)) {
                 var resultText = createErrorsMsg(null, message);
                 form.prepend(resultText);
             } else {
-                if (message.match(/^<!--PostError-->/gi)) {
+                if (message.match(/<!--PostError-->/gi)) {
                     //post errors are mainly validations issues
                     var resultText = message;
                 } else {
@@ -181,7 +181,7 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
     request.error(request.fail);
     request.done(function(responseText, textStatus, XMLHttpRequest) {
         var message = getResonseTextContent(responseText);
-        if (message.match(/^<!--OK--/gi)) {
+        if (message.match(/<!--OK--/gi)) {
             // do refresh
             if (refreshContent) {
                 refreshContainer = getHiddenDivID(refreshContainer, null);
@@ -191,11 +191,17 @@ function genericDialogCall(url, refreshContainer, refreshUrl, refreshContent,
                 closeSideNavTab(tabID, tabToClose);
             }
         } else {
-            if (message.match(/^<!--Error-->/gi)) {
-                var startPos = message.lastIndexOf('>');
-                message = message.substring(startPos+1);
+            var dlgMessage = 'Not specified.'
+            if (message.match(/<!--Error-->/gi)) {
+                var startPos = message.lastIndexOf('-->');
+                dlgMessage = message.substring(startPos+3);
+                startPos = dlgMessage.indexOf('<');
+                dlgMessage = dlgMessage.substring(0,startPos);
             }
-            alert('Error:\n' + textStatus);
+            if (!dlgMessage) {
+                dlgMessage = message;
+            }
+            alert('Error:\n' + dlgMessage);
         }
     });
 }
