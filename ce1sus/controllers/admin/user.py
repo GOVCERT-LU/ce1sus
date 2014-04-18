@@ -124,7 +124,7 @@ class UserController(Ce1susBaseController):
 
   def update_user(self, user):
     try:
-      self.user_broker.update(user, validate=False)
+      self.user_broker.update(user)
       # add it again in case of changes
       if user.gpg_key:
         self.mail_handler.import_gpg_key(user.gpg_key)

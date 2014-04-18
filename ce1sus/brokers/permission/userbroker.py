@@ -50,16 +50,14 @@ class UserBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def update(self, instance, commit=True, validate=True):
+  def update(self, instance, commit=True):
     """
     overrides BrokerBase.insert
     """
 
-    errors = False
-    if validate:
-      errors = not instance.validate()
-      if errors:
-        raise ValidationException(u'User to be updated is invalid')
+    errors = not instance.validate()
+    if errors:
+      raise ValidationException(u'User to be updated is invalid')
 
     if instance.password != 'EXTERNALAUTH':
     # Don't update if the password is already a hash
