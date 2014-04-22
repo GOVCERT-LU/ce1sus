@@ -54,6 +54,10 @@ class FileHandler(GenericHandler):
   def get_uuid():
     return '0be5e1a0-8dec-11e3-baa8-0800200c9a66'
 
+  @staticmethod
+  def get_allowed_types():
+    return [1]
+
   def get_additinal_attribute_chksums(self):
     return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
 

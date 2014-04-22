@@ -26,6 +26,10 @@ class GenericHandler(HandlerBase):
     return 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
 
   @staticmethod
+  def get_allowed_types():
+    return [0, 1, 3]
+
+  @staticmethod
   def create_attribute(params, obj, definition, user):
     """
     Creates the attribute

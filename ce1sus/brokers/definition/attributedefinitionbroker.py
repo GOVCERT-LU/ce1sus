@@ -251,11 +251,10 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       # collect also the handler
       attribute.attribute_handler = self.handler_broker.get_by_id(attribute.handler_index)
       ObjectConverter.set_integer(attribute, 'relation', relation)
-      handler = self.handler_broker.get_by_id(attribute.handler_index)
       key = '{0}{1}{2}{3}'.format(attribute.name,
                              attribute.regex,
                              attribute.class_index,
-                             handler.uuid)
+                             attribute.attribute_handler.uuid)
       attribute.chksum = hashSHA1(key)
       trimmed_regex = cleanPostValue(regex)
       if strings.isNotNull(trimmed_regex):

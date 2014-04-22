@@ -19,6 +19,7 @@ from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.common.handlers.base import HandlerBase, HandlerException
 import json
 from dagr.helpers.objects import get_class
+from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
@@ -197,7 +198,10 @@ class AttributeDefinition(BASE):
   def classname(self):
     """The name for the class used for storing the attribute value"""
     if not self.class_index is None:
-      return self.find_classname(self.class_index)
+      if isinstance(self.class_index, FailedValidation):
+        return self.find_classname(self.class_index.value)
+      else:
+        return self.find_classname(self.class_index)
     else:
       return ''
 
@@ -278,7 +282,26 @@ class AttributeDefinition(BASE):
     ObjectValidator.validateRegularExpression(self, 'regex')
     ObjectValidator.validateDigits(self, 'class_index')
     ObjectValidator.validateDigits(self, 'handler_index')
+    # check if handler is compatible with the class_index
+    allowed_classes = self.handler.get_allowed_types()
+    if not (self.class_index in allowed_classes):
+      class_index = self.class_index
+      self.class_index = FailedValidation(class_index,
+                                          ('Class is not compatible "{0}".\n'
+                                           'Supported classes are {1}').format(self.attribute_handler.classname,
+                                                                               self.__class_numbers_to_text(allowed_classes))
+                                          )
+
     return ObjectValidator.isObjectValid(self)
+
+  def __class_numbers_to_text(self, class_array):
+    result = ''
+    for item in class_array:
+      if result:
+        result = u'{0}, {1}'.format(result, AttributeDefinition.find_classname(item))
+      else:
+        result = u'[{0}'.format(AttributeDefinition.find_classname(item))
+    return u'{0}]'.format(result)
 
   def add_object(self, obj):
     """

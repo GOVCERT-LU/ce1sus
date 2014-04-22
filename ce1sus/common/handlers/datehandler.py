@@ -21,6 +21,10 @@ class DateHandler(GenericHandler):
   def get_uuid():
     return '11406d00-8dec-11e3-baa8-0800200c9a66'
 
+  @staticmethod
+  def get_allowed_types():
+    return [2]
+
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/datetime.html',
                              attribute=None,

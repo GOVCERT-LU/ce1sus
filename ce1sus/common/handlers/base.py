@@ -77,6 +77,10 @@ class HandlerBase(object):
   def get_uuid():
     raise HandlerException('get_uuid not defined')
 
+  @staticmethod
+  def get_allowed_types():
+    raise HandlerException('get_allowed_types not defined')
+
   def render_gui_view(self, template_renderer, attribute, user):
     """
     Generates the HTML for displaying the attribute
