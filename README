@@ -17,12 +17,12 @@ Such structured events improve the understanding how the the different attribute
 Note
 ----
 
-This is still not the final release, we are still adding functionalities. The database scheme however is final and will not change.
+This is still not the final release, we are still developing ce1sus.
 
 For any questions write a mail to the developers
 
 Features
---------
+========
 
 * Creates relations between events through their attributes
 * Stores and presents the event in a structured manner
@@ -31,15 +31,15 @@ Features
 * Flexible configuration and taxonomy
 * Easy installation
 * Completely open source
-* Improved Search
+* Search
 
 Requirements
-------------
+============
 
 - python
   * python (2.7+)
   * mako (0.7+)
-  * sqlalchemy (0.7+)
+  * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
@@ -52,48 +52,27 @@ Requirements
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
+- memcached
 
 RoadMap
---------
-* Improved web interface (In progress)
-* Maintenance tools
-* Share definitions
-* Proposal mechanism
+=======
+
+* Improved web interface (REL_0.9.X)
+* Maintenance tools (REL_0.9.5+)
+* Share definitions 
+* Proposal mechanism (REL_0.9.X)
 * Password protection for compressed files
 * Profile management
 * More handlers
-* ....
+* Improved search
+* Export of events (i.e. csv, xml)
 
 Installation
------------- 
-
-The setup is quite easy :
-
-Install the requirements
-
-Clone the repository
-
-    git clone git@github.com:GOVCERT-LU/ce1sus.git
-
-Import DB scheme
-
-    The scheme can be found under ./docs/sql/scheme.sql
-
-Create configuration files ce1sus.conf and cherrypy.conf in the ./config folder
-
-    A template of the configuration files found in ./config
-    Note: All sections have to be checked and set to the accordingly
-          Replace '/path/to/ce1sus/' with the real path to ce1sus
-
-Configure ngix/uwsgi or run it locally
-
-   Example configurations can be found in the DOCUMENTATION file
-
-Run ngix/uwsgi to launch ce1sus
-
-Login as admin with password admin
+============
+ 
+For the installation please refer to the DOCUMENTATION file
 
 Remarks
--------
+=======
 
 For any questions feel free to ask.

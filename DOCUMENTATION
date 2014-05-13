@@ -3,117 +3,309 @@ Documentation
 
 The documentation is still under developpment
 
-Installation
------------- 
 
-The setup is quite easy :
+1. Installation
+=============== 
 
-Install the requirements
+1.1. Requirements
+-----------------
 
-Clone the repository
+Ce1sus need the following packages:
 
-    git clone git@github.com:GOVCERT-LU/ce1sus.git
+- python
+  * python (2.7+)
+  * mako (0.7+)
+  * sqlalchemy (0.7.8+)
+  * mysqldb (1.2.3+)
+  * python-magic (0.4.6+)
+    ** https://github.com/ahupp/python-magic
+  * python-ldap (2.4.10+)
+  * dateutil (1.5+)
+  * cherrypy3 (3.2.2+)
+  * memcache
+  * rtkit (optional)
+  * gnupg (0.3.5+)
+- mysql (5.1+)
+- nginx (1.4+)
+- uwsgi (1.2.3+, with python-2 support)
+- memcached
 
-Import DB scheme
+1.1.2 Installation of the requirements
+---------------------------------------
 
-    The scheme can be found under ./docs/sql/scheme.sql
+Debian based systems can execute the following command:
 
-Create configuration files ce1sus.conf and cherrypy.conf in the ./config folder
+$ sudo apt-get install python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
 
-    A template of the configuration files found in ./config
+1.2. Clone the repository
+-------------------------
 
-    The following sections have to be set to the correct values for ce1sus.conf
-      * [SessionManager]
-      * [ce1sus]
-      * [Handlers]
-      * [Mako]
-      * [Mailer] (only required if ErrorHandler/useMailer or ce1sus/sendmail is set)
+$ git clone https://github.com/GOVCERT-LU/ce1sus
 
-    Note: All sections have to be checked and set to the accordingly
-          Replace '/path/to/ce1sus/' with the real path to ce1sus
+1.2.1 Python magic
+------------------ 
+One possibility to install python-magic is the following
 
-Configure ngix/uwsgi or run it locally
+Go to your ce1sus installation directory and:
 
-   Here are templates for the configuration of ngix and uwsgi
+$ mkdir libs
+$ cd libs
+$ git clone https://github.com/ahupp/python-magic
+$ cd ..
+à ln -s libs/python-magic/magic.py .
 
-      uwsgi config (ce1sus.ini):
-      _______________________________________
-      [uwsgi]
-      uid = www-data
-      gid = www-data
-      pythonpath = /path/to/ce1sus
-      plugins = python27
-      module = ce1sus-run
-      workers = 2
-      vacuum = True
-      max-requests = 1000000
-      harakiri = 120
-      harakiri-verbose = true
-      need-app = true
-      buffer-size = 32768
-      listen = 200
+The important fact is that the magic package must be accessible with "import magic"
 
-      master-as-root = true
-      max-fd = 10240
-      #memory-report = true
-      #stats = /tmp/stats.socket
-      chown-socket = www-data
-      _______________________________________
+1.3. Database
+-------------
 
-      nginx config:
-      _______________________________________
-      server {
-        listen 443;
-        server_name <servername>;
-      
-        root /path/to/ce1sus/ce1sus/public;
-      
-        access_log /var/log/nginx/ce1sus_access.log common;
-        error_log /var/log/nginx/ce1sus_error.log;
+1.3.1 Database creation
+-----------------------
 
-        ssl on;
-        ssl_certificate /path/to/certificate/ssl-cert.pem;
-        ssl_certificate_key /path/to/certificate/ssl-cert.key;
-      
-        ssl_ciphers  AESGCM:SHA512:SHA384:SHA256:AES128:SHA512:SHA384:SHA256:-SSLv3:-RC4:HIGH:!MD5:!aNULL:!eNULL:!EDH;
-        ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
-        ssl_prefer_server_ciphers on;
-        ssl_session_cache    shared:SSL:10m;
-        ssl_session_timeout  5m;
+CREATE DATABASE ce1sus;
 
-        location /css {
-          root /path/to/ce1sus/ce1sus/public;
-        }
+1.3.2 DB User
+-------------
 
-        location /images {
-          root /path/to/ce1sus/ce1sus/public;
-        }
+Create a db user for ce1sus user must have the following grants:
 
-        location /img {
-          root /path/to/ce1sus/ce1sus/public;
-        }
+    - INSERT
+    - SELECT
+    - DELETE
+    - UPDATE
 
-        location /js {
-          root /path/to/ce1sus/ce1sus/public;
-        }
+CREATE USER 'ce1sus'@'localhost' IDENTIFIED BY 'password';
+GRANT INSERT, SELECT, DELETE, UPDATE  ON 'ce1sus'. * TO 'ce1sus'@'localhost';
+FLUSH PRIVILEGES;
 
-        location / {
-          uwsgi_pass unix:/run/uwsgi/app/ce1sus/socket;
-          include     uwsgi_params;
-          uwsgi_param SCRIPT_NAME "";
-          uwsgi_param HTTPS on;
-        }
-      }
-      _______________________________________
+1.3.3 BD SCHEMA
+----------------
+Import the schema to your database 'ce1sus'. The script for this can be found in docs/sql/scheme.sql 
+of your ce1sus installation directory.
 
-    Note: Replace '/path/to/ce1sus/' with the real path of ce1sus and '/path/to/certificate/' to the path of the corresponding certificate.
+$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/scheme_REL_0.8.0.sql
 
-Run ngix/uwsgi to launch ce1sus
+Note: If there are update*.sql files in the doc/sql folder these then also have to be executed Version whise one after the other.
+
+e.g: Steps for REL_0.8.18
+
+$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/scheme_REL_0.8.0.sql
+$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/update_to_REL_0.8.16.sql
+
+1.4 Ce1sus Configuration
+-------------------------
+
+1.4.1 Celsus.conf
+-----------------
+Go to your ce1sus installation directory and create configuration file ce1sus.conf in the config directory 
+use the file config/ce1sus.conf_tmpl as template
+
+$ cp config/ce1sus.conf_tmpl config/ce1sus.conf
+
+The following sections have to be modified to the settings of your system
+
+[SessionManager]
+[ce1sus]
+[Handlers]
+[Mako]
+[Mailer] 
+
+The next paragraphs will explain in more detail what has to be changed and what the different elements in the 
+configuration do and their values.
+
+The [SessionManager] section stores the settings of the database connection and has the following elements
+
+protocol=[mysql+mysqldb | sqlite] : Defines the protocol used for the connection
+username=                         : Username of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite 
+password=                         : Password of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite 
+host=127.0.0.1                    : IP address of the db server
+db=                               : Database name i.e. "ce1sus" without quotes
+                                    If the sqlite protocol is chosen the element db must correspond to the absolute path to the sqlite file
+port=3306                         : Port of the db server, is ignored for sqlite
+debug=[no | yes ]                 : If set to "yes" the sql queries will be shown in the logs 
+usecherrypy=[yes | no]            : If set to "yes" a single connection is used else multiples
+                                    Note: Do not change this value unless you know what you are doing
+
+The [ce1sus] section stores the general settings of ce1sus and has the following elements
+
+sendmails=[no|yes]                : If "yes" emails will be send to the users/groups who can access/see the event
+                                    Note baseurl has to be set when sendemail=yes
+                                    For more informations on emails send by ce1sus see section XXXX 
+useldap=no                        : If "yes" the users can also be authenticated by ldap
+                                    Note: When set [LDAP] section has to be set and look in section XXXX how ldab users needs to be configured 
+environment=LOCAL_DEV             : Text displayed in the header of the ce1sus web page. Used to separate dev environment and production.
+                                    Note This value can be empty
+enableRestAPI=[yes|no]            : If "yes" the RESTAPI is enabled   
+baseurl=http://localhost:8080     : The root url of your ce1sus server, this url is needed to build the links in the emails
+
+The [Handlers] section stores the configuration the handlers used by ce1sus and has the following elements
+
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=  : Base url for cves. (used by the CVEHandler)
+files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the uploaded files
+                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+                                                         (Used by FileHandler and FileWithHashesHandler)
+rt_user=                                               : The user used for accessing the RESTAPI for RT
+                                                         (Used by RTHandler)
+rt_password=                                           : The user password used for accessing the RESTAPI for RT
+rt_url=                                                : Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)
+
+When new handlers are added which requires a configuration they have to be added here. For more informations on handlers see section XXX
+
+The [ErrorHandler] section stores the configuration how ce1sus handles the errors and has the following elements
+
+debug=[no|yes]                                         : When set displays the error stacktrace
+                                                         Note: This value can be overridden by in the cherrypy.conf
+useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the stacktrace
+                                                         Note: When enabled the [Mailer] section has to be set!
+subject=ErrorOccureredForCelsus                        : Email subject for error mails
+receiver=                                              : Mail address of the error mail receiver
+
+The [Logger] section stores the configuration how the logs are stored/processed and has the following elements
+
+log=[Yes|No]                                           : If set ce1sus does log
+                                                         Note: It is advised that this element is set to "yes"
+log_file=log/logger.txt                                : Absolute or relative path for storage of log files
+logConsole = [Yes|No]                                  : If set ce1sus logs to the console and the file
+level=[CRITICAL|ERROR|WARNING|INFO|DEBUG]              : Log level
+size=10000000                                          : Size in bytes of the file before it gets rotated
+backups=1000                                           : Number of log backups
+
+The [Mako] section stores the configuration of Mako and has the following elements
+
+templateRoot=/path/to/ce1sus/ce1sus/templates          : Absolute path to the dagr tempaltes
+                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus installation directory
+projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus    : Absolute path of the ce1sus tempaltes
+                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus installation directory
+collectionsize=200                                     : Do not change this value unless you know what you are doing
+outputencoding=utf-8                                   : Do not change this value unless you know what you are doing
+
+
+The [LDAP] section stores the configuration of the LDAP plugin and has the following elements
+
+server=
+usetls=True
+users_dn=
+
+The [Mailer] section stores the configuration for sending mails and has the following elements
+
+from=ce1sus                                            : Sender email
+smtp=                                                  : Smtp server
+port=25                                                : Port of the smtp server
+user=                                                  : Not implemented
+password=                                              : Not implemented
+keyfile=                                               : Folder of the gpp files used to sign or encrypt (i.e. ~/gpgkey)
+passphrase=                                            : Passphrase for unlocking the gpg key
+
+1.4.2 Cherrypy.conf
+-------------------
+
+Go to your ce1sus installation directory and create configuration file cherrypy.conf in the config directory 
+use the file config/cherrypy.conf_tmpl as template
+
+$ cp config/cherrypy.conf_tmpl config/cherrypy.conf
+
+The following lines must be modified according to your installation
+
+tools.staticdir.root='/path/to/ce1sus/htdocs'
+
+The session handling can be done in two ways:
+
+For memcache (when memcached is installed) used the following:
+
+tools.sessions.storage_type = 'Memcached'
+
+For files use:
+
+tools.sessions.timeout = 15
+tools.sessions.storage_type = "file"
+tools.sessions.storage_path = "/path/to/ce1sus/sessions"
+
+But we strongly advise you to use memcache
+ 
+Note: This is a standart cherrypy configuration file. For more information on that subject see http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
+
+1.5 Test configurations
+-------------------------
+Go to your ce1sus installation directory and launch
+
+$ python ce1sus-run.py
+
+and access http://localhost:8080 
+
+This is a method to see if ce1sus can start correctly. If this is the case continue to section 1.6
+
+1.5.1 Troubleshooting
+---------------------
+If you are reading this you may have encoutered troubles when launching a local copy of ce1sus (see section 1.5). 
+
+Errors during stat:
+
+'MySQLConnection' object has no attribute 'get_characterset_info'
+-> connector issues try change it to mysql+mysqldb or mysql
+
+Canot localte template for uri 'index/login.html'
+-> the path for the templates in ce1sus.conf '[Mako]' section was not set up correctly.
+
+1.6 uwsgi
+---------
+Install uwsgi and uwsgi-plugin-python
+
+$ apt-get install uwsgi uwgsi-plugin-python
+
+In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of uwsgi. 
+
+Copy the file to uwsgi:
+
+$ cp config/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
+
+Edit /etc/uwsgi/apps-available/ce1sus.ini and replace "/path/to/ce1sus" with your ce1sus installation path
+
+Enable ce1sus in uwsgi:
+$ ln -s /etc/uwsgi/apps-available/ce1sus.ini /etc/uwsgi/apps-enabled/
+
+Restart service
+$ /etc/init.d/uwsgi restart
+
+
+1.7 nginx
+---------
+Install nginx
+
+$ apt-get install nginx
+
+In the config folder of your ce1sus installation folder you'll find ce1sus_tmpl a template for the configuration of nginx. 
+
+Copy the file to uwsgi:
+
+$ cp config/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
+
+Create a self signed certificate for ce1sus:
+
+$ openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/ce1sus.key -out /etc/ssl/certs/ce1sus.pem
+$ chmod 600 /etc/ssl/certs/ce1sus.pem
+$ chmod 600 /etc/ssl/private/ce1sus.key
+
+Edit /etc/nginx/sites-available/ce1sus and replace "/path/to/ce1sus" with your ce1sus installation path
+
+Note: If you have own already a certificat you need to adapt the confuration file of nginx accordingly.
+
+Enable the ce1sus site:
+$ ln -s /etc/nginx/sites-available/ce1sus /etc/nginx/sites-enabled/
+
+Restart service
+$ /etc/init.d/nginx restart
 
 Login as admin with password admin
 
-Interface
----------
+1.7.1 Troubleshooting
+---------------------
+Nginx shows a 404 or 403:
+
+403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from the folder
+404: the root folder was set up incorrectly
+
+2. Web Interface
+================
 
 The web interface of Ce1sus has two sections:
 
@@ -131,17 +323,22 @@ The web interface of Ce1sus has two sections:
              * Search for attributes
              * Add/Edit events
 
-Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
+2.1 Administation
+-----------------
 
-User management
----------------
+2.1.1 Validation
+----------------
 
+#TODO
+
+2.1.2 Usermanagment
+-------------------
 Note: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
       If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
       If ce1sus/sendmail is not set the account is directly activated.
 
-Mails
------
+2.1.3 Mails
+------------
 Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
 Therefore the section [Mailer] has to be configured. 
 
@@ -161,8 +358,14 @@ Note:
     * If an events gets published or updated only the users who are in the group or subgroup of an event will receive the mail, regardless which TLP level it is.
     * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP while.
     
-Attributes
-----------
+
+2.1.4 Object Definition
+------------------------
+
+#TODO
+
+2.1.5 Attributes Definition
+----------------------------
 ce1us offers the possibility to create custom attributes or edit the existing ones. 
 The attribute/object definitions are identified by their check sums (chksums).
 These chksums are computed as follows:
@@ -173,8 +376,8 @@ These chksums are computed as follows:
 However changes may cause troubles if the events are shared (i.e. duplicates). 
 Therefore it is suggested at least in the beginning not to change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate it.
 
-Handlers
---------
+2.1.5.1 Handlers
+--------------
 Ce1sus support custom handlers, these handlers are used to perfrom additional operations (i.e. parsing of the email).
 
 There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is be explained below
@@ -187,13 +390,62 @@ There is not yet an automated installation of such handlers therefore they have 
 
 The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the one specified in the handler
 
+2.2 Event View
+--------------
 
-Rest API
---------
+#TODO
+
+2.2.1 Adding/Edit an Event
+--------------------------
+
+#TODO
+
+2.2.1.1 Adding/Edit Objects
+---------------------------
+
+Options
+-------
+
+
+
+#TODO
+
+2.2.1.2 Adding/Edit Attributes
+-------------------------------
+
+#TODO
+
+2.2.2 Search
+------------
+
+#TODO
+
+2.2.3 Recent Entries
+---------------------
+
+#TODO
+
+3. REST API
+===========
+Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
+
 See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api provides all the required modules to access this API for python. 
 
 Note: The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
 
+4. Mainenance tools
+===================
+Will be implemented in REL_0.9.5+
 
-## Known Issues ##
+Features:
+- Rebuild relations
+- verify the checksums of all definitions and change them to the correct value if needed
+
+5. Developping Handlers
+=======================
+
+# TODO
+
+4. Known Issues
+===============
 * Sending encrypted mails takes some time (Action performed on save)

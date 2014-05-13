@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Release 0.9.0
+-------------
+* External link for events
+* Improved layout
+* Multiple edit
+
 Release 0.8.0
 -------------
 * Add more examples to explain implementation
