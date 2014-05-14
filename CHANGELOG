@@ -6,12 +6,15 @@ Release 0.9.0
 * External link for events
 * Improved layout
 * Multiple edit
+* Proposal mechanism
+
 
 Release 0.8.0
 -------------
 * Add more examples to explain implementation
 * Update entry point example
 * Mail support
+* Authentication of users
 
 Release 0.7.0
 -------------
