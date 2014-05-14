@@ -1,0 +1,1 @@
+UPDATE `ce1sus`.`ce1sus` SET `value`='0.9.0' WHERE `ce1sus_id`='1';
