@@ -66,6 +66,7 @@ RoadMap
 * More handlers
 * Improved search
 * Export of events (i.e. csv, xml)
+* Review right managment (REL_0.10.0+)
 
 Installation
 ============

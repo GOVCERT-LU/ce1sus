@@ -6,6 +6,10 @@ $.fn.scrollView = function() {
     });
 };
 
+function default_value(arg, def) {
+    return (typeof arg == 'undefined' ? def : arg);
+ }
+
 function getResponseConent(response) {
     if ((response.status === 403) || (response.status === 404)) {
         var message = getErrorMsg(response);
@@ -593,7 +597,8 @@ function loadTab(id, reload) {
     }
 }
 
-function findAndLoadActiveTab(id, reload=false) {
+function findAndLoadActiveTab(id, reload) {
+    reload = default_value(reload, false);
     $('#' + id).find("li").each(function() {
         var item = $(this);
         var className = item.attr('class');

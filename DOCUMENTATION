@@ -338,8 +338,8 @@ The web interface of Ce1sus has two sections:
              
     3. Event details
 
-2.1 Administation
------------------
+2.1 Administration
+------------------
 
 This section describes the administration interface. This interface is only accessible to users with with the 
 privileged flag set.
@@ -370,11 +370,11 @@ Password     : The password's minimal requirements are lower, upper case, number
 Email        : The email has to be specified if the ce1sus is configured to sendmails.
 GPGKey       : If no gpg key was specified the user receives only mails for events with TLP White.
                Note: Depending on the group settings the user may not recieve any mails. See section 2.1.6
-Priviledged  : If set the user can access the administration area
+Privileged   : If set the user can access the administration area
                Note: This will be changed for REL_0.9.20+
 Disabled     : If set the user cannot log in anymore
 API Access   : The REST API Key. If set the key is displayed else No is displayed.
-Main Group   : The main group the user belongs to. This group is also called creatior group. 
+Main Group   : The main group the user belongs to. This group is also called creator group. 
 
 Note: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
       If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
@@ -530,8 +530,8 @@ be explained below
 2.1.6 Groupmanagment
 ---------------------
 
-The group managment constists of to types of groups: Maingroups (denoted groups) and collections of groups (denoted SubGroups).
-The Groups specify the main group for users and have the follwoing properties:
+The group management consists of to types of groups: Maingroups (denoted groups) and collections of groups (denoted SubGroups).
+The Groups specify the main group for users and have the following properties:
 
 Identifier                 : Generated identifier
 Name                       : Name of the group
@@ -541,7 +541,7 @@ TLP                        : TLP level for this group. If this is set i.e. Amber
                              all amber events
 Email                      : group email
 GPGKey                     : If no gpg key was specified the group receives only mails for events with TLP White.
-                             Note: Depending on the group settings the user may not recieve any mails. See section 2.1.6
+                             Note: Depending on the group settings the user may not receive any mails. See section 2.1.6
 Send mails to users        : If set the notifications will be send to the group email instead what was specified on the
                              user level. 
                              Note: If set the field email must have a value. 
@@ -558,16 +558,17 @@ The next sections describes the elements of the user interface.
 The event details are composed of the following views:
 
 Overview          : General details of the event, show also Relations beween other events and a possibility to add event comments
-                    Note: The event comments are only viewable by priviledged users and the users of the creator group 
+                    Note: The event comments are only viewable by priviledged users and the users of the creator group
 Objects Structured: The structured view of the event objects
                     Note: Objects can only be added in this view
 Objects Flat      : A flat view of the objects and attributes
                     Note: As a suggestion search for attributes here
-Relations         : The realtions of the event. These are more detailed as the one on the overview page. These relations
-                    show the related event, object and the attribute who made the relation, it the attribute is relationable.
-                    See serction 2.1.5 for more information on relations.
-Goups             : Group managment of the event. Ech group associated to the event permits the users of that group to 
-                    view the event
+Relations         : The relations of the event. These are more detailed as the one on the overview page. These relations
+                    show the related event, object and the attribute who made the relation, it the attribute is relation-able.
+                    See section 2.1.5 for more information on relations.
+Groups             : Group management of the event. Ech group associated to the event permits the users of that group to 
+                     view the event. 
+                     Note: Only priviledged users and users of the creator group can view/change the goups.
 
 2.2.1.1 Adding/Edit an Event
 --------------------------
@@ -575,7 +576,7 @@ Goups             : Group managment of the event. Ech group associated to the ev
 The event has the following properties:
 
 UUID                                           : Generated UUID to uniquely identify an event
-Tilte*                                         : Title (or Name) of the event
+Title*                                         : Title (or Name) of the event
                                                  Note: Is mandatory
 Description                                    : Short description of the event
                                                  Note: This description will aways shown 
@@ -671,6 +672,8 @@ See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ea
 provides all the required modules to access this API for python. Moreover ce1sus_api provides a script to import MISP events. 
 
 Note: The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
+
+WORK IN PROGRESS
 
 4. Maintenance tools
 ===================
