@@ -362,10 +362,40 @@ Note:
 2.1.4 Object Definition
 ------------------------
 
-#TODO
+The objects definitions can be considered as attribute containers. These containers limit the choice of attributes and ease the use for the user to choose 
+an appropriate attribute, without beeing overwhelmed by attributes which may be disambigous. These object containers will be refered by object definions.
+
+Example: Object Email cannot have a mutex, therefore the attribute mutex is not part of the object container
+
+An object definition has the following properties:
+
+Identifier                 : Generated identifer
+Name                       : Name of the obect container (i.e. Email)
+Checksum                   : Checksum of the object container. This checksum is used to identify an object container
+                             Note: The checksum is the SHA1 hash of the name
+Description                 : Description of the object
+Associated Attributes      : Attributes which belong to the object container
+
+Objects definitions can be added, edited and deleted. The deletion only works if the object is not referenced anymore.
+
+Note: Do not forget to add attribute definitions to the object else one is only able to add the object to the event.
 
 2.1.5 Attributes Definition
 ----------------------------
+
+The attribute definition are the definition what an attribute can be.
+
+An object definition has the following properties:
+
+Identifier                 : Generated identifer
+Name                       : Name of the obect container (i.e. Email)
+Checksum                   : Checksum of the object container. This checksum is used to identify an object container
+                             Note: Checksum is SHA1(name || regex || class_index || handler.uuid)
+Description                 : Description of the attribute
+
+
+Associated Object          : Objects which contain the attribute definiton
+
 ce1us offers the possibility to create custom attributes or edit the existing ones. 
 The attribute/object definitions are identified by their check sums (chksums).
 These chksums are computed as follows:
