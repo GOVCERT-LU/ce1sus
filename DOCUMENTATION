@@ -1,7 +1,7 @@
-Documentation
+﻿Documentation
 =============
 
-The documentation is still under developpment
+The documentation is still under development
 
 
 1. Installation
@@ -52,7 +52,7 @@ $ mkdir libs
 $ cd libs
 $ git clone https://github.com/ahupp/python-magic
 $ cd ..
-à ln -s libs/python-magic/magic.py .
+$ ln -s libs/python-magic/magic.py .
 
 The important fact is that the magic package must be accessible with "import magic"
 
@@ -85,7 +85,8 @@ of your ce1sus installation directory.
 
 $ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/scheme_REL_0.8.0.sql
 
-Note: If there are update*.sql files in the doc/sql folder these then also have to be executed Version whise one after the other.
+Note: If there are update*.sql files in the doc/sql folder these then also have to be executed Version wise one after 
+      the other.
 
 e.g: Steps for REL_0.8.18
 
@@ -120,7 +121,8 @@ username=                         : Username of the db user i.e. "ce1sus" withou
 password=                         : Password of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite 
 host=127.0.0.1                    : IP address of the db server
 db=                               : Database name i.e. "ce1sus" without quotes
-                                    If the sqlite protocol is chosen the element db must correspond to the absolute path to the sqlite file
+                                    If the sqlite protocol is chosen the element db must correspond to the absolute path
+                                    to the sqlite file
 port=3306                         : Port of the db server, is ignored for sqlite
 debug=[no | yes ]                 : If set to "yes" the sql queries will be shown in the logs 
 usecherrypy=[yes | no]            : If set to "yes" a single connection is used else multiples
@@ -132,8 +134,10 @@ sendmails=[no|yes]                : If "yes" emails will be send to the users/gr
                                     Note baseurl has to be set when sendemail=yes
                                     For more informations on emails send by ce1sus see section XXXX 
 useldap=no                        : If "yes" the users can also be authenticated by ldap
-                                    Note: When set [LDAP] section has to be set and look in section XXXX how ldab users needs to be configured 
-environment=LOCAL_DEV             : Text displayed in the header of the ce1sus web page. Used to separate dev environment and production.
+                                    Note: When set [LDAP] section has to be set and look in section XXXX how ldab users 
+                                          needs to be configured 
+environment=LOCAL_DEV             : Text displayed in the header of the ce1sus web page. Used to separate dev 
+                                    environment and production.
                                     Note This value can be empty
 enableRestAPI=[yes|no]            : If "yes" the RESTAPI is enabled   
 baseurl=http://localhost:8080     : The root url of your ce1sus server, this url is needed to build the links in the emails
@@ -141,7 +145,8 @@ baseurl=http://localhost:8080     : The root url of your ce1sus server, this url
 The [Handlers] section stores the configuration the handlers used by ce1sus and has the following elements
 
 cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=  : Base url for cves. (used by the CVEHandler)
-files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the uploaded files
+files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
+                                                         uploaded files.
                                                          The user (i.e 'www-data') of ce1sus must have access on that directory
                                                          (Used by FileHandler and FileWithHashesHandler)
 rt_user=                                               : The user used for accessing the RESTAPI for RT
@@ -149,13 +154,15 @@ rt_user=                                               : The user used for acces
 rt_password=                                           : The user password used for accessing the RESTAPI for RT
 rt_url=                                                : Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)
 
-When new handlers are added which requires a configuration they have to be added here. For more informations on handlers see section XXX
+When new handlers are added which requires a configuration they have to be added here. For more informations on handlers
+see section 2.1.5.1 
 
 The [ErrorHandler] section stores the configuration how ce1sus handles the errors and has the following elements
 
 debug=[no|yes]                                         : When set displays the error stacktrace
                                                          Note: This value can be overridden by in the cherrypy.conf
-useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the stacktrace
+useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the 
+                                                         stacktrace.
                                                          Note: When enabled the [Mailer] section has to be set!
 subject=ErrorOccureredForCelsus                        : Email subject for error mails
 receiver=                                              : Mail address of the error mail receiver
@@ -173,9 +180,11 @@ backups=1000                                           : Number of log backups
 The [Mako] section stores the configuration of Mako and has the following elements
 
 templateRoot=/path/to/ce1sus/ce1sus/templates          : Absolute path to the dagr tempaltes
-                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus installation directory
-projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus    : Absolute path of the ce1sus tempaltes
-                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus installation directory
+                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus 
+                                                               installation directory
+projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus    : Absolute path of the ce1sus templates
+                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus 
+                                                               installation directory
 collectionsize=200                                     : Do not change this value unless you know what you are doing
 outputencoding=utf-8                                   : Do not change this value unless you know what you are doing
 
@@ -194,7 +203,7 @@ port=25                                                : Port of the smtp server
 user=                                                  : Not implemented
 password=                                              : Not implemented
 keyfile=                                               : Folder of the gpp files used to sign or encrypt (i.e. ~/gpgkey)
-passphrase=                                            : Passphrase for unlocking the gpg key
+passphrase=                                            : Pass-phrase for unlocking the gpg key
 
 1.4.2 Cherrypy.conf
 -------------------
@@ -203,7 +212,7 @@ Go to your ce1sus installation directory and create configuration file cherrypy.
 use the file config/cherrypy.conf_tmpl as template
 
 $ cp config/cherrypy.conf_tmpl config/cherrypy.conf
-
+minimal 
 The following lines must be modified according to your installation
 
 tools.staticdir.root='/path/to/ce1sus/htdocs'
@@ -222,7 +231,8 @@ tools.sessions.storage_path = "/path/to/ce1sus/sessions"
 
 But we strongly advise you to use memcache
  
-Note: This is a standart cherrypy configuration file. For more information on that subject see http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
+Note: This is a standart cherrypy configuration file. For more information on that subject see 
+      http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
 
 1.5 Test configurations
 -------------------------
@@ -243,7 +253,7 @@ Errors during stat:
 'MySQLConnection' object has no attribute 'get_characterset_info'
 -> connector issues try change it to mysql+mysqldb or mysql
 
-Canot localte template for uri 'index/login.html'
+Cannot locate template for uri 'index/login.html'
 -> the path for the templates in ce1sus.conf '[Mako]' section was not set up correctly.
 
 1.6 uwsgi
@@ -252,7 +262,8 @@ Install uwsgi and uwsgi-plugin-python
 
 $ apt-get install uwsgi uwgsi-plugin-python
 
-In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of uwsgi. 
+In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of 
+uwsgi. 
 
 Copy the file to uwsgi:
 
@@ -301,7 +312,8 @@ Login as admin with password admin
 ---------------------
 Nginx shows a 404 or 403:
 
-403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from the folder
+403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from
+     the folder
 404: the root folder was set up incorrectly
 
 2. Web Interface
@@ -317,22 +329,53 @@ The web interface of Ce1sus has two sections:
              * Group management
              * Editing mail templates
 
-    2. Event view
+    2. User interface
          The event view is used to:
              * View the 200 recent entries
              * Search for attributes
              * Add/Edit events
+             * View events
+             
+    3. Event details
 
 2.1 Administation
 -----------------
 
+This section describes the administration interface. This interface is only accessible to users with with the 
+privileged flag set.
+
 2.1.1 Validation
 ----------------
 
-#TODO
+This list shows the unvalidated Events inserted via REST. The operations which can be performed are similar to the one 
+described in section 2.2.3 except that the main event overview cannot be edited.
+
+To validate an event one has only to click on the "Validate All" button. 
+
+Note: Unvalidated Events will not be viewable in the RecentEvent section, nor via search, nor in relations until they got
+      validated.
 
 2.1.2 Usermanagment
 -------------------
+
+A user has the following properties:
+
+Identifier   : Generated id
+Name         : 
+SirName      : 
+Username     : 
+Password     : The password's minimal requirements are lower, upper case, numbers, symbols and have a length of 8 characters.
+               Note if the password 'EXTERNALAUTH' is dispalyed the user is authenticated by LDAP (see section 1.4.1 for 
+               LDAP Configuration)
+Email        : The email has to be specified if the ce1sus is configured to sendmails.
+GPGKey       : If no gpg key was specified the user receives only mails for events with TLP White.
+               Note: Depending on the group settings the user may not recieve any mails. See section 2.1.6
+Priviledged  : If set the user can access the administration area
+               Note: This will be changed for REL_0.9.20+
+Disabled     : If set the user cannot log in anymore
+API Access   : The REST API Key. If set the key is displayed else No is displayed.
+Main Group   : The main group the user belongs to. This group is also called creatior group. 
+
 Note: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
       If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
       If ce1sus/sendmail is not set the account is directly activated.
@@ -342,9 +385,10 @@ Note: If ce1sus/sendmail is set the user will receive an activation mail and his
 Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
 Therefore the section [Mailer] has to be configured. 
 
-Note: It is recommended to supply an GPG key for ce1sus else it is only possible to get notifications on event which have a TLP level of white. This folder/key has to be owned by the owner of ce1sus (i.e. www-data) 
+Note: It is recommended to supply an GPG key for ce1sus else it is only possible to get notifications on event which 
+      have a TLP level of white. This folder/key has to be owned by the owner of ce1sus (i.e. www-data) 
 
-If the configuration ErrorHandler/useMailer is set the configured receiver will receive mails on irregular behaviour.
+If the configuration ErrorHandler/useMailer is set the configured receiver will receive mails on irregular behavior.
 
 If the configuration ce1sus/sendmail is set then ce1sus will send out mails for the following events:
 
@@ -352,33 +396,46 @@ If the configuration ce1sus/sendmail is set then ce1sus will send out mails for 
     * Event validation if the event is published
     * Adding a user
 
-Each mail of the above events use a template which can be configured via the admin interface, for more informations see the descriptions of each template.
+Each mail of the above events use a template which can be configured via the admin interface, for more informations see 
+the descriptions of each template.
 
 Note:
-    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive the mail, regardless which TLP level it is.
-    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP while.
+    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive 
+      the mail, regardless which TLP level it is.
+    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP 
+      while.
     
 
 2.1.4 Object Definition
 ------------------------
 
-The objects definitions can be considered as attribute containers. These containers limit the choice of attributes and ease the use for the user to choose 
-an appropriate attribute, without beeing overwhelmed by attributes which may be disambigous. These object containers will be refered by object definions.
+The objects definitions can be considered as attribute containers. These containers limit the choice of attributes and 
+ease the use for the user to choose an appropriate attribute, without being overwhelmed by attributes which may be 
+ambiguous. These object containers will be refereed by object definitions.
 
 Example: Object Email cannot have a mutex, therefore the attribute mutex is not part of the object container
 
 An object definition has the following properties:
 
-Identifier                 : Generated identifer
-Name                       : Name of the obect container (i.e. Email)
+Identifier                 : Generated identifier
+Name                       : Name of the object container (i.e. Email)
 Checksum                   : Checksum of the object container. This checksum is used to identify an object container
                              Note: The checksum is the SHA1 hash of the name
-Description                 : Description of the object
+Description                : Description of the object
+Default Shareable          : The default value for sharing
+                             Note: These values can be overridden, by the user
 Associated Attributes      : Attributes which belong to the object container
 
 Objects definitions can be added, edited and deleted. The deletion only works if the object is not referenced anymore.
 
 Note: Do not forget to add attribute definitions to the object else one is only able to add the object to the event.
+
+2.1.4.1 Sharing of object definitions
+-------------------------------------
+
+The shareing of object definitions is not yet implemented. Therefore it is suggested at least in the beginning not to 
+change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
+it.
 
 2.1.5 Attributes Definition
 ----------------------------
@@ -387,83 +444,235 @@ The attribute definition are the definition what an attribute can be.
 
 An object definition has the following properties:
 
-Identifier                 : Generated identifer
-Name                       : Name of the obect container (i.e. Email)
+Identifier                 : Generated identifier
+Name                       : Name of the attribtue (i.e. mutex)
 Checksum                   : Checksum of the object container. This checksum is used to identify an object container
                              Note: Checksum is SHA1(name || regex || class_index || handler.uuid)
-Description                 : Description of the attribute
-
-
+Description                : Description of the attribute
+Regular expression         : A regex of the value which the value has to be checked against
+                             Default is "^.+$"
+Value Type                 : The type of the value of the attribute.
+                             Possible types are String, Text, Number, Date
+                             Note: Each type is stored in a different table, to keep a proper database
+Handler                    : The handler used for the attribute. For more informations on handlers see section 2.1.5.1
+Relation-able              : If this value is set relations between objects are created on entering an attribute or via 
+                             the maintenance tools 
+Default Shareable          : The default value for sharing
+                             Note: These values can be overridden, by the user
 Associated Object          : Objects which contain the attribute definiton
 
-ce1us offers the possibility to create custom attributes or edit the existing ones. 
-The attribute/object definitions are identified by their check sums (chksums).
-These chksums are computed as follows:
+2.1.4.1 Sharing of attribute definitions
+-------------------------------------
 
-* attribute chksum =  SHA1(name || regex || class_index || handler.uuid)
-* object chksum = SHA1(name)
-
-However changes may cause troubles if the events are shared (i.e. duplicates). 
-Therefore it is suggested at least in the beginning not to change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate it.
+The shearing of attribute definitions is not yet implemented. Therefore it is suggested at least in the beginning not to
+change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
+it.
 
 2.1.5.1 Handlers
---------------
-Ce1sus support custom handlers, these handlers are used to perfrom additional operations (i.e. parsing of the email).
+-----------------
+Ce1sus support custom handlers, these handlers are used to perform additional operations (i.e. parsing of the email) and
+display the attribute values depending on their configuration.
 
-There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is be explained below
+The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the 
+AttribtueHandlers table should correspond to the one specified in the handler
+
+Ce1sus supports the following handlers:
+
+Handler Name          | Supoorted Types      | Description
+---------------------------------------------------------------------------------------------------------------------------
+CBValueHandler        | String               | Handles values as combo-box. 
+                      |                      | The regex has to be under a similar form as "^yes$|^no$" for yes, no values
+---------------------------------------------------------------------------------------------------------------------------
+                      |                      | Note the number of "|^no$" blocks is not limited
+---------------------------------------------------------------------------------------------------------------------------
+CVEHandler            | String               | Handler for CVEs
+                      |                      | Creates a link to the entered CVE
+---------------------------------------------------------------------------------------------------------------------------
+DateHandler           | Date                 | Handler for dates
+                      |                      | Note: Currently supports only text dates under the form of "YYYY-mm-dd 
+                      |                      | HH:MM:SS"
+---------------------------------------------------------------------------------------------------------------------------
+FileHandler           | String               | Handles fileuploads and generates additional attributes as filename, 
+                      |                      | hash_sha1 of the file
+                      |                      | When uploaded the file can be downloaded as a zip file
+---------------------------------------------------------------------------------------------------------------------------
+FileWithHashedHandler | String               | Handles fileuploads and generates additional attributes as filename, 
+                      |                      | hash_md5, hash_sha1, hash_sha256, hash_sha384, hash_sha512 of the file
+                      |                      | When uploaded the file can be downloaded as a zip file
+---------------------------------------------------------------------------------------------------------------------------
+GernericHandler       | String, Text, Number | Generic one line handler
+---------------------------------------------------------------------------------------------------------------------------
+LinkHandler           | String               | Handler for links
+                      |                      | The link is displayed as link
+---------------------------------------------------------------------------------------------------------------------------
+MultipleGenericHandler| String, Text, Number | Generic multiple line hander
+                      |                      | Each new line is considered as new attribute with the same properties
+---------------------------------------------------------------------------------------------------------------------------
+RTHandler             | Number               | Handler for RT Tickets
+                      |                      | RT Tickets can be chosen from a table or entered manually.
+                      |                      | Multiple RT Ticket numbers can be entered in a CSV format
+---------------------------------------------------------------------------------------------------------------------------
+TextHandler           | Text                 | Handler for large text i.e. YARA Rules
+---------------------------------------------------------------------------------------------------------------------------
+
+2.1.5.1.1 Manual handler insertion
+----------------------------------
+There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is
+be explained below
 
 1. Create a handler extending either the Generichandler or HandlerBase
 2. Place it in ce1sus.commom.handlers
 3. Insert into the Table AttributeHanlders
     * The module and classname i.e. generichandler.GenericHandler
     * The uuid for the handler
+3b. (Optional) Create a configuration
 
-The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the AttribtueHandlers table should correspond to the one specified in the handler
+2.1.6 Groupmanagment
+---------------------
 
-2.2 Event View
+The group managment constists of to types of groups: Maingroups (denoted groups) and collections of groups (denoted SubGroups).
+The Groups specify the main group for users and have the follwoing properties:
+
+Identifier                 : Generated identifier
+Name                       : Name of the group
+Description                : Description of the group
+Download files             : If set the users of the group can download files
+TLP                        : TLP level for this group. If this is set i.e. Amber it is possible for this group to access 
+                             all amber events
+Email                      : group email
+GPGKey                     : If no gpg key was specified the group receives only mails for events with TLP White.
+                             Note: Depending on the group settings the user may not recieve any mails. See section 2.1.6
+Send mails to users        : If set the notifications will be send to the group email instead what was specified on the
+                             user level. 
+                             Note: If set the field email must have a value. 
+Associated SubGroups       : SubGroup the group belongs to
+
+Note: It is engough that a group is associated to a subgroup to let the users of the group view an event.
+
+2.2 User interface
 --------------
+The next sections describes the elements of the user interface.
 
-#TODO
+2.2.1 Event details
+--------------------
+The event details are composed of the following views:
 
-2.2.1 Adding/Edit an Event
+Overview          : General details of the event, show also Relations beween other events and a possibility to add event comments
+                    Note: The event comments are only viewable by priviledged users and the users of the creator group 
+Objects Structured: The structured view of the event objects
+                    Note: Objects can only be added in this view
+Objects Flat      : A flat view of the objects and attributes
+                    Note: As a suggestion search for attributes here
+Relations         : The realtions of the event. These are more detailed as the one on the overview page. These relations
+                    show the related event, object and the attribute who made the relation, it the attribute is relationable.
+                    See serction 2.1.5 for more information on relations.
+Goups             : Group managment of the event. Ech group associated to the event permits the users of that group to 
+                    view the event
+
+2.2.1.1 Adding/Edit an Event
 --------------------------
 
-#TODO
+The event has the following properties:
+
+UUID                                           : Generated UUID to uniquely identify an event
+Tilte*                                         : Title (or Name) of the event
+                                                 Note: Is mandatory
+Description                                    : Short description of the event
+                                                 Note: This description will aways shown 
+Published                                      : If set the event is visible to the users who access is granted to, if 
+                                                 not the event is only visible by the users of the same group as the creator.
+                                                 Note1: Unpublished events are marked in a reddish color
+                                                 Note2: If an event was published and changes are made i.e adding an 
+                                                        attribute the event will unpublish
+Status[Confirmed|Deleted|Draft|Expired]        : 
+Analysis[Completed|Opened|None|Unknown|Stalled]:
+Risk[High|Low|Medium|None|Undefined]           :
+TLP[Red|Amber|Green|White]                     :
+First seen                                     : When the event was first seen. Default "now()"
+Last seen                                      : When the event was last seen. Default "now()"
+                                                 Note: This value is updated by "now() as soon there are attributes/objects 
+                                                       added to the event
+
+Note: If ce1sus is configured to send mails, each time an events gets published the users allowed to see the events gets 
+a notification mail of the changes
 
 2.2.1.1 Adding/Edit Objects
 ---------------------------
 
-Options
--------
+To add an object the user must just select the object he wants and if this object should be shared. If the object is not
+shared the attribute will automatically be not shared.
 
+Note: Not shared means that they are only visible by priviledged users and the users of the creator group.
 
+The object will be displayed as a container, where the object can be modified with the following options:
 
-#TODO
+Add Attribute     (Plus sign)  : See section 2.2.1.2
+Add child object  (Arrow down) : Add a new object as child
+Modify object     (Lines)      : Offers the possibility to change the child parent relations
+Modify properties (Pencil)     : Change the value for shearing
+                                 Note: If an object is unshared all its attributes and children will also be unshared
+View details      (Eye)        : Shows the details of the object and its creation date
+Delete            (Cross)      : Removes an object
+                                 Note: If an object has children it is not possible to delete that object until its 
+                                       children are removed
+
+Notes: * If the object header has a lock icon the object is not shared
+       * If the object header is yellow the object has been proposed, for more informations on proposals see section 2.2.1.3
 
 2.2.1.2 Adding/Edit Attributes
 -------------------------------
 
-#TODO
+Attributes can only be added if an object exits. The attribtues can change for every object as they were configured in 
+the administration section (see section 2.1.4 & 2.1.5). 
+
+To add an attribute one has first to select its type, depending on which type is selected the input fields may vary. 
+The configured handler (see section 2.1.5.1) specifies how the input fields look like and how the entered values are 
+handled.
+
+These are the possible properties of an attribute:
+Type          : See attribute definitions in section 2.1.4
+Value         : The attribute value
+                Note: These values are checked against the regex specified in their definition.
+Shared        : Defines if the attribute is shared. The default value depends in the attribute definition.
+                Note: Not shared means that they are only visible by privileged users and the users of the creator group.
+Is an IOC     : Set the value if it is an IOC
+
+Notes: * If the attribute identifier is marked red the event is unpulbished.
+       * If the attribute identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
+       * Depending on the handler used the properties may vary.
+
+2.2.1.3 Proposal of objects/Attributes
+--------------------------------------
+
+WORK in progress. Available in REL_0.9.x.
 
 2.2.2 Search
 ------------
 
-#TODO
+The search supports currently only the search on attributes. The search results work the same way as the Recent events described
+in section 2.2.3.
+
+WORK IN PROGRESS
 
 2.2.3 Recent Entries
 ---------------------
 
-#TODO
+The recent events list the last 200 entered events, by clicking, either on the identifier (number) or the eye icon in the
+options column, one enters view of the event. 
+
+Notes: * If the event identifier is marked red the event is unpulbished.
+       * If the event identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
 
 3. REST API
 ===========
 Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
 
-See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api provides all the required modules to access this API for python. 
+See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api 
+provides all the required modules to access this API for python. Moreover ce1sus_api provides a script to import MISP events. 
 
 Note: The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
 
-4. Mainenance tools
+4. Maintenance tools
 ===================
 Will be implemented in REL_0.9.5+
 
@@ -471,10 +680,10 @@ Features:
 - Rebuild relations
 - verify the checksums of all definitions and change them to the correct value if needed
 
-5. Developping Handlers
+5. Developing Handlers
 =======================
 
-# TODO
+WORK IN PROGRESS
 
 4. Known Issues
 ===============
