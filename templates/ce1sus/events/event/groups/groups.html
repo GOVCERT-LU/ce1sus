@@ -4,7 +4,7 @@
 
 <h4>Groupmanagment:</h4>
 %if owner:
-<%call expr="tables.add_remove_tables(id='groupEvent',
+<%call expr="tables.add_remove_tables(id='foo1',
                                       identifier=event.identifier,
                                       identifier_name='Event',
                                       moving_name='groups',
@@ -17,7 +17,7 @@
                                       enabled=enabled
                                       )"/>
 
-<%call expr="tables.add_remove_tables(id='subgroupEvent',
+<%call expr="tables.add_remove_tables(id='foo2',
                                       identifier=event.identifier,
                                       identifier_name='Event',
                                       moving_name='subgroups',

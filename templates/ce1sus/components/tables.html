@@ -17,7 +17,7 @@
   <div id="${id}Errors"></div>
   <form id="${id}Form" class="form-horizontal role="form">
     <input type="hidden" name="identifier" value="${identifier}">
-    <input id="${id}Operation" type="hidden" name="operation" value="">
+    <input id="${id}Operation" type="input" name="operation" value="">
     <div class="row">
       <div class="col-sd-${width} col-md-${width} ">
         <table border="0" cellpadding="5" width="100%">
@@ -33,9 +33,9 @@
                    </select>
                  </td>
                  <td align="center">
-                   <button name="operation" class="btn  btn-default" type="submit" value="add">&gt;</button>
+                   <button id="${id}btnAdd" class="btn  btn-default" type="submit" foo="add" onclick="setBtnValue('${id}btnAdd', '${id}')">&gt;</button>
                    <br/>
-                   <button name="operation" class="btn  btn-default" type="submit" value="remove">&lt;</button>
+                   <button id="${id}btnRemove" class="btn  btn-default" type="submit" foo="remove" onclick="setBtnValue('${id}btnRemove', '${id}')">&lt;</button>
                  </td>
                  <td>
                    <label>Associated ${moving_name}:</label>
@@ -59,8 +59,6 @@
   $( document ).ready(function() {
       $('#${id}Form').submit(function(event){
           // magic to get the button value
-          value = event.originalEvent.explicitOriginalTarget.value;
-          $('#${id}Operation').val(value);
           formEvent(this,event,'${post_action}','${id}',true,'${refresh_container}','${refresh_url}');
       });
   });

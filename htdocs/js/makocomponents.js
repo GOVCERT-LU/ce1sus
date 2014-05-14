@@ -94,6 +94,12 @@ function formSubmit(formElement, event, modalID, uri, doRefresh,
             refreshContainer, refreshUrl);
 }
 
+function setBtnValue(element, id) {
+    $('#'+element).val('')
+    value = $('#'+element).attr("foo");
+    $('#'+id+'Operation').val(value);
+}
+
 function genericFormSubmit(formElement, event, modalID, contentid, uri,
         doRefresh, refreshContainer, refreshUrl, sidenav) {
     if(typeof(sidenav)==='undefined') sidenav = false;
