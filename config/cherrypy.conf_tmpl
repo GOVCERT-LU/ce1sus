@@ -11,6 +11,8 @@ tools.sessions.timeout=60
 tools.sessions.httponly = True
 #uncomment if using https
 #tools.sessions.secure = True
+tools.sessions.storage_type = 'Memcached'
+tools.sessions.timeout = 60
 tools.auth.on=True
 #Do not set caching to true
 tools.caching.on=False

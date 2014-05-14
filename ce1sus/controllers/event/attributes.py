@@ -333,7 +333,8 @@ class AttributesController(Ce1susBaseController):
       self.attribute_broker.update(attribute, commit=False)
       if event.published == 1:
         event.published = 0
-        self.event_broker.update_event(user, event, commit=False)
+        db_user = self._get_user(user.username)
+        self.event_broker.update_event(db_user, event, commit=False)
       self.object_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)

@@ -19,6 +19,8 @@ from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 SESSION_USER = '_cp_user'
 
+class GenObject(object):
+    pass
 
 def privileged():
   """
@@ -82,13 +84,41 @@ class Ce1susBaseView(BaseView):
     """
     cherrypy.request.login = user.username
     self._put_to_session('_cp_username', user.username)
-    # set user to session make foo to populate user
-    # TODO: make this foo better
-    if user.default_group:
-      for group in user.default_group.subgroups:
-        if group.name:
-          pass
-    self._put_to_session(SESSION_USER, user)
+    offline_user = self.__make_user_object(user)
+    self._put_to_session(SESSION_USER, offline_user)
+
+  def __make_user_object(self, user):
+    obj = GenObject()
+    obj.name = user.name
+    obj.username = user.username
+    obj.identifier = user.identifier
+    obj.privileged = user.privileged
+    obj.email = user.email
+    obj.disabled = user.disabled
+    obj.group_id = user.group_id
+    obj.activated = user.activated
+    obj.sirname = user.sirname
+    group = self.__make_main_group(user.default_group)
+    obj.default_group = group
+    return obj
+
+  def __make_main_group(self, group):
+    obj = GenObject()
+    obj.identifier = group.identifier
+    obj.name = group.name
+    obj.can_download = group.can_download
+    obj.tlp_lvl = group.tlp_lvl
+    subgroups = list()
+    for subgroup in group.subgroups:
+      subgroups.append(self.__make_sub_group(subgroup))
+    obj.subgroups = subgroups
+    return obj
+
+  def __make_sub_group(self, subgroup):
+    obj = GenObject()
+    obj.identifier = subgroup.identifier
+    obj.name = subgroup.name
+    return obj
 
   def _get_user(self, web=True):
     """
