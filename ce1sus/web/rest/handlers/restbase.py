@@ -18,6 +18,8 @@ from ce1sus.api.dictconverter import DictConverter, DictConversionException
 from ce1sus.api.common import JSONConverter, JSONException
 from dagr.helpers.validator.objectvalidator import ObjectValidator
 from ce1sus.web.rest.dictdbconverter import DictDBConverter, DictDBConversionException
+from ce1sus.brokers.permission.userbroker import UserBroker
+from dagr.db.session import SessionManager
 
 
 class RestHandlerException(Exception):
@@ -36,6 +38,8 @@ class RestBaseHandler(Ce1susBaseView):
     self.__dictconverter = DictConverter(config)
     self.__jsonconverter = JSONConverter(config)
     self.__dict_db_converter = DictDBConverter(config)
+    self.session_manager = SessionManager(config)
+    self.user_broker = self.session_manager.broker_factory(UserBroker)
 
   def create_status(self, classname=None, message=None):
     """Creates a stratus message"""
@@ -120,6 +124,8 @@ class RestBaseHandler(Ce1susBaseView):
       raw = cherrypy.request.body.read(int(content_length))
       dictionary = self.__jsonconverter.decode_json(raw)
       user = self._get_user(False)
+      # Note user must be an db object
+      user = self.user_broker.getUserByUserName(user.username)
       rest_obj = self.__dict_db_converter.convert_to_db_object(user, dictionary, action)
       return rest_obj
     except Exception as error:

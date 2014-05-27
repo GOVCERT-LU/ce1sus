@@ -19,8 +19,10 @@ from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 
 SESSION_USER = '_cp_user'
 
+
 class GenObject(object):
     pass
+
 
 def privileged():
   """
