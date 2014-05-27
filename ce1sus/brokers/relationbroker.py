@@ -110,7 +110,7 @@ class RelationBroker(BrokerBase):
           partitions[classname] = list()
           # create item list
           partitions[classname].append(list())
-      if len(partitions[classname]) > limit:
+      if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
         partitions[classname].append(list())
       partitions[classname][len(partitions[classname]) - 1].append(attribtue.plain_value)
       values_attr_id[attribtue.plain_value] = attribtue.identifier
