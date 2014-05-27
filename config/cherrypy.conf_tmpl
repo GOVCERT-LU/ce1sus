@@ -9,7 +9,7 @@ tools.sessions.on=True
 tools.sessions.timeout=60
 #For http only use
 tools.sessions.httponly = True
-#uncomment if using https
+#uncomment if using https and comment the above
 #tools.sessions.secure = True
 tools.sessions.storage_type = 'Memcached'
 tools.sessions.timeout = 60
@@ -19,3 +19,5 @@ tools.caching.on=False
 tools.db.on=True
 tools.sessions.clean_up_delay = 5
 request.show_tracebacks=False
+#set the port for cherrypy
+server.socket_port = 8080

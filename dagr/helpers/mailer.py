@@ -63,6 +63,7 @@ class Mailer(object):
       return Mailer.pgp
     else:
       self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
+      gpg = None
       if self.__key_path:
         gpg = gnupg.GPG(gnupghome=self.__key_path)
         Mailer.pgp = gpg
