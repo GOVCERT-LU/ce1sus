@@ -21,14 +21,14 @@
           <div class="btn-group">
             <button class="btn btn-default"
               onclick="if (confirm('Are you sure you want to validate ?')) {
-                dialogCloseTabCallValidated('/admin/validation/validate_event/${event.identifier}',
+                dialogCloseTabCallValidated('/admin/validation/validate_event?event_id=${event.identifier}',
                                             'validationTabs',
                                             'validationTabs${event.identifier}')}">
               Validate Event
             </button>
             <button class="btn btn-danger"
               onclick="if (confirm('Are you sure you want to delete ?')) {
-                dialogCloseTabCallValidated('/admin/validation/delete_unvalidated_event/${event.identifier}',
+                dialogCloseTabCallValidated('/admin/validation/delete_unvalidated_event?event_id=${event.identifier}',
                                             'validationTabs',
                                             'validationTabs${event.identifier}')}">
               Delete Event

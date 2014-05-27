@@ -97,44 +97,60 @@ class RelationBroker(BrokerBase):
             pass
       self.do_commit(commit)
 
-  def generate_bulk_attributes_relations(self, event, attributes, commit=False):
-    # processattribtues
-    values = dict()
+  def limited_generate_bulk_attributes(self, event, attributes, limit=10, commit=False):
+    # sport attributes by their definition
+    partitions = dict()
     classes = dict()
     values_attr_id = dict()
     for attribtue in attributes:
       classname = attribtue.definition.classname
       classes[classname] = ValueBroker.get_class_by_string(classname)
-      if not values.get(classname, None):
-        values[classname] = list()
-      values[classname].append(attribtue.plain_value)
+      if not partitions.get(classname, None):
+          # create partition list
+          partitions[classname] = list()
+          # create item list
+          partitions[classname].append(list())
+      if len(partitions[classname]) > limit:
+        partitions[classname].append(list())
+      partitions[classname][len(partitions[classname]) - 1].append(attribtue.plain_value)
       values_attr_id[attribtue.plain_value] = attribtue.identifier
-    # collect relations
-    for classname, clazz in classes.iteritems():
-      search_items = values.get(classname)
-      found_items = self.session.query(clazz).join(Attribute, AttributeDefinition).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
-                  clazz.value.in_(search_items),
-                  AttributeDefinition.relation == 1
-                        ).all()
-      for found_item in found_items:
-        # make insert foo
-        if found_item.event_id != event.identifier:
-          # make relation in both ways
-          relation_entry = EventRelation()
-          relation_entry.event_id = event.identifier
-          relation_entry.rel_event_id = found_item.event_id
-          attribute_id = values_attr_id.get(found_item.attribute.plain_value, None)
-          if attribute_id:
-            relation_entry.attribute_id = attribute_id
-          else:
-            continue
-          relation_entry.rel_attribute_id = found_item.attribute_id
-          try:
-            self.insert(relation_entry, False)
-          except IntegrityException:
-            # do nothing if duplicate
-            pass
+
+    # search in partitions
+    for classname, partitions in partitions.iteritems():
+      for search_items in partitions:
+        clazz = classes.get(classname)
+        self.find_relations_of_array(event, clazz, search_items, values_attr_id, commit)
     self.do_commit(commit)
+
+  def find_relations_of_array(self, event, clazz, search_items, values_attr_id, commit=False):
+    # collect relations
+    found_items = self.session.query(clazz).join(Attribute, AttributeDefinition).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
+                clazz.value.in_(search_items),
+                AttributeDefinition.relation == 1
+                      ).all()
+    for found_item in found_items:
+      # make insert foo
+      if found_item.event_id != event.identifier:
+        # make relation in both ways
+        relation_entry = EventRelation()
+        relation_entry.event_id = event.identifier
+        relation_entry.rel_event_id = found_item.event_id
+        attribute_id = values_attr_id.get(found_item.attribute.plain_value, None)
+        if attribute_id:
+          relation_entry.attribute_id = attribute_id
+        else:
+          continue
+        relation_entry.rel_attribute_id = found_item.attribute_id
+        try:
+          self.insert(relation_entry, False)
+        except IntegrityException:
+          # do nothing if duplicate
+          pass
+    self.do_commit(commit)
+
+  def generate_bulk_attributes_relations(self, event, attributes, commit=False):
+    # call partitions
+    self.limited_generate_bulk_attributes(event, attributes, limit=10, commit=commit)
 
   def get_relations_by_event(self, event, unique_events=True):
     """

@@ -195,3 +195,7 @@ function showPaginatorModal(id, title, contentUrl, postUrl, refresh,
 function removeInputField(id) {
     $('#'+id).remove();
 }
+
+function dialogCloseTabCallValidated(url, tabID, tabToClose) {
+    genericDialogCall(url, 'unValiEv', '/admin/validation/unvalidated', true, true, tabID, tabToClose);
+}

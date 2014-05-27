@@ -230,10 +230,6 @@ function dialogCloseTabCall(url, tabID, tabToClose) {
     genericDialogCall(url, 'recentEvents', '/events/recent', true, true, tabID, tabToClose);
 }
 
-function dialogCloseTabCallValidated(url, tabID, tabToClose) {
-    genericDialogCall(url, 'unValiEv', '/admin/validation/unvalidated', true, true, tabID, tabToClose);
-}
-
 function loadContent(contentid, url) {
     //Append new div to content
     if (contentid.match(/Hidden$/)) {
