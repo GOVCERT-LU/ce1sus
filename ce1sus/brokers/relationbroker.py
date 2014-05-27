@@ -97,23 +97,24 @@ class RelationBroker(BrokerBase):
             pass
       self.do_commit(commit)
 
-  def limited_generate_bulk_attributes(self, event, attributes, limit=10, commit=False):
+  def limited_generate_bulk_attributes(self, event, attributes, limit=1000, commit=False):
     # sport attributes by their definition
     partitions = dict()
     classes = dict()
     values_attr_id = dict()
     for attribtue in attributes:
       classname = attribtue.definition.classname
-      classes[classname] = ValueBroker.get_class_by_string(classname)
-      if not partitions.get(classname, None):
-          # create partition list
-          partitions[classname] = list()
-          # create item list
+      if attribtue.definition.relation == 1:
+        classes[classname] = ValueBroker.get_class_by_string(classname)
+        if not partitions.get(classname, None):
+            # create partition list
+            partitions[classname] = list()
+            # create item list
+            partitions[classname].append(list())
+        if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
           partitions[classname].append(list())
-      if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
-        partitions[classname].append(list())
-      partitions[classname][len(partitions[classname]) - 1].append(attribtue.plain_value)
-      values_attr_id[attribtue.plain_value] = attribtue.identifier
+        partitions[classname][len(partitions[classname]) - 1].append(attribtue.plain_value)
+        values_attr_id[attribtue.plain_value] = attribtue.identifier
 
     # search in partitions
     for classname, partitions in partitions.iteritems():
@@ -124,10 +125,7 @@ class RelationBroker(BrokerBase):
 
   def find_relations_of_array(self, event, clazz, search_items, values_attr_id, commit=False):
     # collect relations
-    found_items = self.session.query(clazz).join(Attribute, AttributeDefinition).options(joinedload(clazz.attribute, Attribute.string_value)).filter(
-                clazz.value.in_(search_items),
-                AttributeDefinition.relation == 1
-                      ).all()
+    found_items = self.session.query(clazz).filter(clazz.value.in_(search_items)).all()
     for found_item in found_items:
       # make insert foo
       if found_item.event_id != event.identifier:
