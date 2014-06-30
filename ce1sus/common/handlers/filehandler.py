@@ -344,7 +344,7 @@ class FileHandler(GenericHandler):
         file_path = self._get_base_path() + '/' + attribute.plain_value
         if isfile(file_path):
           url = FileHandler.URLSTR.format('download',
-                                          attribute.object.event,
+                                          attribute.object.event.identifier,
                                           attribute.identifier)
           filename = FileHandler.__get_orig_filename(attribute)
           if not filename:
