@@ -57,16 +57,16 @@ Requirements
 RoadMap
 =======
 
-* Improved web interface (REL_0.9.X)
 * Maintenance tools (REL_0.9.5+)
 * Share definitions 
-* Proposal mechanism (REL_0.9.X)
+* Proposal mechanism for REST API
 * Password protection for compressed files
 * Profile management
 * More handlers
 * Improved search
 * Export of events (i.e. csv, xml)
 * Review right managment (REL_0.10.0+)
+* STIX/TAXII support
 
 Installation
 ============

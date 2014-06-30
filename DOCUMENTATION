@@ -644,8 +644,11 @@ Notes: * If the attribute identifier is marked red the event is unpulbished.
 
 2.2.1.3 Proposal of objects/Attributes
 --------------------------------------
+Every user can propose attributes and objects to an event which is viewable to him. The proposals are made as if the proposing user is the owner of the event he wants to provide additional informations. The difference is that these proposed attributes will be marked (yellow color) to denote them as proposals. These proposals will only be visible by the proposing user and the event owner. As long as the proposed attribute had not been acknowledged by the owner, they can be deleted at any time, by the proposing user.
 
-WORK in progress. Available in REL_0.9.x.
+Note: These attributes will not be visible to other users, unless the owner acknowledge them and then they will be part of the event and shown normally to all the users having access to the corresponding event.
+
+Remark: A future release will provide this feature also via REST.
 
 2.2.2 Search
 ------------
