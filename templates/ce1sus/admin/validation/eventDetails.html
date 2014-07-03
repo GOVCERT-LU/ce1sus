@@ -24,21 +24,24 @@
                 dialogCloseTabCallValidated('/admin/validation/validate_event?event_id=${event.identifier}',
                                             'validationTabs',
                                             'validationTabs${event.identifier}')}">
-              Validate Event
+              Validate
             </button>
+            <button class="btn btn-default"data-toggle="modal" data-target="#eventVal${event.identifier}DetailModal">Edit</button>
             <button class="btn btn-danger"
               onclick="if (confirm('Are you sure you want to delete ?')) {
                 dialogCloseTabCallValidated('/admin/validation/delete_unvalidated_event?event_id=${event.identifier}',
                                             'validationTabs',
                                             'validationTabs${event.identifier}')}">
-              Delete Event
+              Delete
             </button>
           </div>
           ${forms.event_form(event=event,enabled=False, status_values=status_values, tlp_values=tlp_values, analysis_values=analysis_values, risk_values=risk_values)}
         </div>
       </div>
     </div>
- 
+    <%call expr="base_forms.generic_modal_form(modal_id='eventVal{0}DetailModal'.format(event.identifier),url='/events/event/modify_event',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
+      <%call expr="modals.save_button_modal(id='eventVal{0}DetailModal'.format(event.identifier),title='Add a comment',content_url='/events/event/edit_event/{0}'.format(event.identifier))"/>
+    </%call>
     <legend>Relations</legend>
     <div style="margin-bottom:35px">
       <table class="table table-striped table-bordered table-hover table-condensed" id="relationsTable${event.identifier}">
