@@ -653,7 +653,9 @@ class Attribute(BASE):
     ObjectValidator.validateRegex(value_obj,
                                   'value',
                                   getattr(self.definition, 'regex'),
-                                  'The value does not match {0}'.format(getattr(self.definition, 'regex')),
+                                  'The value "{0}" does not match {1} for definition {2}'.format(value_obj.value,
+                                                                                                 getattr(self.definition, 'regex'),
+                                                                                                 getattr(self.definition, 'name')),
                                   True)
     errors = not getattr(value_obj, 'validate')()
     if errors:

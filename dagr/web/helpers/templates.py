@@ -28,9 +28,10 @@ class MakoHandler(object):
     :returns: MakoHandler
     """
     config_section = config.get_section('Mako')
+    tmp_folder = config_section.get('tmpfolder')
     self.__mylookup = TemplateLookup(directories=[config_section.get('templateroot'),
                                                   config_section.get('projectroot')],
-                                     module_directory=gettempdir() + '/mako_modules',
+                                     module_directory=tmp_folder + '/mako_modules',
                                      collection_size=config_section.get('collectionsize'),
                                      output_encoding=config_section.get('outputencoding'),
                                      encoding_errors='replace')
@@ -52,5 +53,5 @@ class MakoHandler(object):
 
     :returns: generated HTML
     """
-    mytemplate = self.__mylookup.get_template(templatename)
+    mytemplate = self.get_template(templatename)
     return mytemplate.render_unicode(**args)

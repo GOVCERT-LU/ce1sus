@@ -51,6 +51,7 @@ templateRoot=/path/to/ce1sus/ce1sus/templates
 projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus
 collectionsize=200
 outputencoding=utf-8
+tmpfolder=/path/to/desired/tmp/folder
 
 #Configuration for the LDAP server
 [LDAP]

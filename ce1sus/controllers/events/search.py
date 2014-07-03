@@ -143,8 +143,25 @@ class SearchController(Ce1susBaseController):
       if attribute_needles:
         # collect all required definitions
         for item in attribute_needles:
-          for definition_name, needle in item.iteritems():
-            definition = self.attr_def_broker.get_defintion_by_name(definition_name)
+          for definition_name, needle_op in item.iteritems():
+            if definition_name == 'Any':
+              definition = None
+            else:
+              definition = self.attr_def_broker.get_defintion_by_name(definition_name)
+            # detect if there was an operator specified
+            # check needle_op a dictionary
+            if isinstance(needle_op, dict):
+              # if dict take it appart
+              needle = needle_op.get('value', None)
+              if not needle:
+                self._raise_exception(u'No needle was defined with this operator')
+              operator = needle_op.get('operator', None)
+              if not operator:
+                self._raise_exception(u'No operator was defined for needle {0}'.format(needle))
+            else:
+              # else it is a sinlge value
+              needle = needle_op
+              operator = '=='
             values_to_look_for[needle] = definition
 
         # find all matching values
@@ -152,7 +169,7 @@ class SearchController(Ce1susBaseController):
         for needle, definition in values_to_look_for.iteritems():
           found_values = self.attribute_broker.look_for_attribute_value(definition,
                                                                       needle,
-                                                                      'like')
+                                                                      operator)
           matching_values += found_values
 
       if object_type:
