@@ -39,7 +39,7 @@
         </div>
       </div>
     </div>
-    <%call expr="base_forms.generic_modal_form(modal_id='eventVal{0}DetailModal'.format(event.identifier),url='/events/event/modify_event',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
+    <%call expr="base_forms.generic_modal_form(modal_id='eventVal{0}DetailModal'.format(event.identifier),url='/events/event/modify_event',refresh_url='/admin/validation/event_details/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
       <%call expr="modals.save_button_modal(id='eventVal{0}DetailModal'.format(event.identifier),title='Add a comment',content_url='/events/event/edit_event/{0}'.format(event.identifier))"/>
     </%call>
     <legend>Relations</legend>
