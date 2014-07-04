@@ -17,6 +17,10 @@ from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBr
 from dagr.db.broker import BrokerException, ValidationException, IntegrityException
 import types as types
 from dagr.controllers.base import SpecialControllerException
+from dagr.helpers.converters import ObjectConverter
+import dagr.helpers.strings as strings
+from dagr.helpers.hash import hashSHA1
+from dagr.helpers.strings import cleanPostValue
 
 
 class AttributeController(Ce1susBaseController):
@@ -89,18 +93,56 @@ class AttributeController(Ce1susBaseController):
   def populate_attribute(self, identifier=None, name=None, description='',
                       regex='^.*$', class_index=0, action='insert',
                       handler_index=0, share=None, relation=None):
-    try:
-      return self.attr_def_broker.build_attribute_definition(identifier,
-                                                              name,
-                                                              description,
-                                                              regex,
-                                                              class_index,
-                                                              action,
-                                                              handler_index,
-                                                              share,
-                                                              relation)
-    except BrokerException as error:
-      self._raise_exception(error)
+    """
+    puts an attribute with the data together
+
+    :param identifier: The identifier of the attribute,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param name: The name of the attribute
+    :type name: strings
+    :param description: The description of this attribute
+    :type description: strings
+    :param regex: The regular expression to use to verify if the value is
+                  correct
+    :type regex: strings
+    :param class_index: The index of the table to use for storing or getting the
+                       attribute actual value
+    :type class_index: strings
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: strings
+
+    :returns: AttributeDefinition
+    """
+    attribute = AttributeDefinition()
+    if not action == 'insert':
+      attribute = self.get_by_id(identifier)
+      if attribute.deletable == 0:
+        self._raise_exception(u'Attribute cannot be edited or deleted')
+    if not action == 'remove':
+      if isinstance(name, list):
+        name = name[0]
+      attribute.name = cleanPostValue(name)
+      attribute.description = cleanPostValue(description)
+      ObjectConverter.set_integer(attribute, 'class_index', class_index)
+      ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
+      # collect also the handler
+      attribute.attribute_handler = self.handler_broker.get_by_id(attribute.handler_index)
+      ObjectConverter.set_integer(attribute, 'relation', relation)
+      key = '{0}{1}{2}{3}'.format(attribute.name,
+                             attribute.regex,
+                             attribute.class_index,
+                             attribute.attribute_handler.uuid)
+      attribute.chksum = hashSHA1(key)
+      trimmed_regex = cleanPostValue(regex)
+      if strings.isNotNull(trimmed_regex):
+        attribute.regex = trimmed_regex
+      else:
+        attribute.regex = '^.*$'
+      ObjectConverter.set_integer(attribute, 'share', share)
+    if action == 'insert':
+      attribute.deletable = 1
+    return attribute
 
   def insert_attribute_definition(self, attribute):
     try:

@@ -14,11 +14,15 @@ from ce1sus.controllers.base import Ce1susBaseController
 from dagr.helpers.ldaphandling import LDAPHandler, LDAPException
 from dagr.db.broker import IntegrityException, BrokerException, \
   ValidationException, DeletionException
-from ce1sus.brokers.permission.userbroker import UserBroker
-
 from dagr.controllers.base import ControllerException
-from ce1sus.common.mailhandler import MailHandler, MailHandlerException
+from ce1sus.common.mailhandler import MailHandlerException
 from dagr.helpers.datumzait import DatumZait
+from dagr.helpers.hash import hashSHA1
+from dagr.helpers.strings import cleanPostValue
+import random
+from dagr.helpers.converters import ObjectConverter
+import dagr.helpers.strings as strings
+from ce1sus.brokers.permission.permissionclasses import User
 
 
 # pylint: disable=R0904
@@ -64,11 +68,32 @@ class UserController(Ce1susBaseController):
 
   def populate_user(self, identifier, username, password,
                  priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname):
-    try:
-      return self.user_broker.build_user(identifier, username, password,
-                 priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname)
-    except BrokerException as error:
-      self._raise_exception(error)
+    user = User()
+    if action == 'insert':
+      user.password_plain = cleanPostValue(password)
+      user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
+      user.activation_sent = DatumZait.utcnow()
+    else:
+      user = self.get_by_id(identifier)
+    if not action == 'remove' and action != 'insertLDAP':
+      user.email = cleanPostValue(email)
+      user.password = cleanPostValue(password)
+      user.username = cleanPostValue(username)
+      user.gpg_key = cleanPostValue(gpgkey)
+      user.name = name
+      user.sirname = sirname
+
+      if apikey == '1' and not user.api_key:
+        # generate key
+        user.api_key = hashSHA1('{0}{1}{2}'.format(user.email, user.username, random.random()))
+
+    if strings.isNotNull(disabled):
+      ObjectConverter.set_integer(user, 'disabled', disabled)
+    if strings.isNotNull(priv):
+      ObjectConverter.set_integer(user, 'privileged', priv)
+    if strings.isNotNull(maingroup):
+      ObjectConverter.set_integer(user, 'group_id', maingroup)
+    return user
 
   def get_ldap_user(self, identifier):
     try:

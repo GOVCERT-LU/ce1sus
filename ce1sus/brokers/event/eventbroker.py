@@ -16,13 +16,9 @@ import sqlalchemy.orm.exc
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 from sqlalchemy.sql.expression import or_, and_, not_
 from dagr.helpers.datumzait import DatumZait
-from dagr.helpers.converters import ObjectConverter, ConversionException
 from ce1sus.brokers.event.eventclasses import Event
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.event.objectbroker import ObjectBroker
-import uuid as uuidgen
-from ce1sus.helpers.bitdecoder import BitValue
-from dagr.helpers.strings import cleanPostValue
 
 
 # pylint: disable=R0904
@@ -283,106 +279,6 @@ class EventBroker(BrokerBase):
     :type group_id: Integer
     """
     self.__modify_event_subgroups(event_id, group_id, commit, False)
-
-  def build_event(self,
-                 identifier,
-                 action,
-                 status,
-                 tlp_index,
-                 description,
-                 name,
-                 published,
-                 first_seen,
-                 last_seen,
-                 risk,
-                 analysis,
-                 user,
-                 uuid=None):
-    """
-    puts an event with the data together
-
-    :param identifier: The identifier of the event,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
-    :param status: The identifier of the statuts
-    :type status: Integer
-    :param tlp_index: The identifier of the TLP level
-    :type tlp_index: Integer
-    :param description: The description
-    :type description: String
-    :param name: name or title of the event
-    :type name: String
-    :param published: the flag if the event is published
-    :type published: Integer
-    :param first_seen: DateTime of the fist occurrence of this event
-    :type first_seen: DateTime
-    :param last_seen: DateTime of the last occurrence of this event
-    :type last_seen: DateTime
-    :param risk: Id of the risk of this event
-    :type risk: Integer
-    :param analysis: Id of the analysis of this event
-    :type analysis: Integer
-    :param user: The user doing the action
-    :type user: User
-
-    :returns: Event
-    """
-    event = Event()
-    if action == 'insert':
-        if uuid is None:
-          event.uuid = unicode(uuidgen.uuid4())
-        else:
-          event.uuid = uuid
-        event.creator_group_id = user.default_group.identifier
-        event.maingroups = list()
-        event.maingroups.append(user.default_group)
-        event.bit_value = BitValue('0', event)
-        event.bit_value.is_shareable = True
-        event.created = DatumZait.utcnow()
-        event.creator_id = user.identifier
-        event.creator = user
-        event.creator_group = user.default_group
-    else:
-      # dont want to change the original in case the user cancel!
-      event = self.get_by_id(identifier)
-      # right checks only if there is a change!!!!
-
-    if not action == 'remove':
-      event.title = cleanPostValue(name)
-      event.description = cleanPostValue(description)
-      if not event.description:
-        event.description = 'no description'
-      # TODO: make checks if they are not an integer!
-      ObjectConverter.set_integer(event, 'tlp_level_id', tlp_index)
-      ObjectConverter.set_integer(event, 'status_id', status)
-      ObjectConverter.set_integer(event, 'published', published)
-      # if published
-      if event.published == 1:
-        event.last_publish_date = DatumZait.utcnow()
-      event.modified = DatumZait.utcnow()
-      event.modifier = user
-      event.modifier_id = event.modifier.identifier
-
-      if first_seen:
-        try:
-          ObjectConverter.set_date(event, 'first_seen', first_seen)
-        except ConversionException:
-          event.first_seen = first_seen
-      else:
-        event.first_seen = DatumZait.utcnow()
-      if last_seen:
-        try:
-          ObjectConverter.set_date(event, 'last_seen', last_seen)
-        except ConversionException:
-          event.last_seen = last_seen
-      else:
-        event.last_seen = event.first_seen
-      ObjectConverter.set_integer(event, 'analysis_status_id', analysis)
-      ObjectConverter.set_integer(event, 'risk_id', risk)
-
-    return event
 
   def get_by_uuid(self, identifier):
     """

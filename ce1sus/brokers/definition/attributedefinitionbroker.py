@@ -10,14 +10,10 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException, DeletionException
+from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
 import sqlalchemy.orm.exc
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition, AttributeHandler
-from dagr.helpers.converters import ObjectConverter
-import dagr.helpers.strings as strings
-from dagr.helpers.hash import hashSHA1
-from dagr.helpers.strings import cleanPostValue
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 
 
@@ -204,64 +200,3 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
 
     self.do_commit(commit)
 
-  # pylint: disable=R0913
-  def build_attribute_definition(self,
-                               identifier=None,
-                               name=None,
-                               description='',
-                               regex='^.*$',
-                               class_index=0,
-                               action='insert',
-                               handler_index=1,
-                               share=None,
-                               relation=None):
-    """
-    puts an attribute with the data together
-
-    :param identifier: The identifier of the attribute,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param name: The name of the attribute
-    :type name: strings
-    :param description: The description of this attribute
-    :type description: strings
-    :param regex: The regular expression to use to verify if the value is
-                  correct
-    :type regex: strings
-    :param class_index: The index of the table to use for storing or getting the
-                       attribute actual value
-    :type class_index: strings
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: strings
-
-    :returns: AttributeDefinition
-    """
-    attribute = AttributeDefinition()
-    if not action == 'insert':
-      attribute = self.get_by_id(identifier)
-      if attribute.deletable == 0:
-        raise DeletionException(u'Attribute cannot be edited or deleted')
-    if not action == 'remove':
-      if isinstance(name, list):
-        name = name[0]
-      attribute.name = cleanPostValue(name)
-      attribute.description = cleanPostValue(description)
-      ObjectConverter.set_integer(attribute, 'class_index', class_index)
-      ObjectConverter.set_integer(attribute, 'handler_index', handler_index)
-      # collect also the handler
-      attribute.attribute_handler = self.handler_broker.get_by_id(attribute.handler_index)
-      ObjectConverter.set_integer(attribute, 'relation', relation)
-      key = '{0}{1}{2}{3}'.format(attribute.name,
-                             attribute.regex,
-                             attribute.class_index,
-                             attribute.attribute_handler.uuid)
-      attribute.chksum = hashSHA1(key)
-      trimmed_regex = cleanPostValue(regex)
-      if strings.isNotNull(trimmed_regex):
-        attribute.regex = trimmed_regex
-      else:
-        attribute.regex = '^.*$'
-      ObjectConverter.set_integer(attribute, 'share', share)
-    if action == 'insert':
-      attribute.deletable = 1
-    return attribute

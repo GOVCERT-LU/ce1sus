@@ -17,14 +17,8 @@ import sqlalchemy.orm.exc
 import dagr.helpers.hash as hasher
 from dagr.db.broker import BrokerException
 import re
-from dagr.helpers.converters import ObjectConverter
-import dagr.helpers.strings as strings
 from ce1sus.brokers.permission.permissionclasses import User, Group
-from dagr.helpers.hash import hashSHA1
-from dagr.helpers.strings import cleanPostValue
-import random
-from dagr.helpers.datumzait import DatumZait
-from sqlalchemy.orm import joinedload, joinedload_all
+from sqlalchemy.orm import joinedload
 
 
 class UserBroker(BrokerBase):
@@ -142,56 +136,6 @@ class UserBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
-    return user
-
-  # pylint: disable=R0913
-  def build_user(self, identifier=None, username=None, password=None,
-                 priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None, apikey=None, gpgkey=None, name=None, sirname=None):
-    """
-    puts a user with the data together
-
-    :param identifier: The identifier of the user,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param username: The username of the user
-    :type username: strings
-    :param password: The password of the user
-    :type password: strings
-    :param email: The email of the user
-    :type email: strings
-    :param priv: Is the user privileged to access the administration section
-    :type priv: Integer
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: strings
-
-    :returns: generated HTML
-    """
-    user = User()
-    if action == 'insert':
-      user.password_plain = cleanPostValue(password)
-      user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
-      user.activation_sent = DatumZait.utcnow()
-    else:
-      user = self.get_by_id(identifier)
-    if not action == 'remove' and action != 'insertLDAP':
-      user.email = cleanPostValue(email)
-      user.password = cleanPostValue(password)
-      user.username = cleanPostValue(username)
-      user.gpg_key = cleanPostValue(gpgkey)
-      user.name = name
-      user.sirname = sirname
-
-      if apikey == '1' and not user.api_key:
-        # generate key
-        user.api_key = hashSHA1('{0}{1}{2}'.format(user.email, user.username, random.random()))
-
-    if strings.isNotNull(disabled):
-      ObjectConverter.set_integer(user, 'disabled', disabled)
-    if strings.isNotNull(priv):
-      ObjectConverter.set_integer(user, 'privileged', priv)
-    if strings.isNotNull(maingroup):
-      ObjectConverter.set_integer(user, 'group_id', maingroup)
     return user
 
   def get_user_by_api_key(self, api_key):

@@ -13,9 +13,7 @@ __license__ = 'GPL v3+'
 
 from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, IntegrityException
 import sqlalchemy.orm.exc
-from dagr.helpers.converters import ObjectConverter
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
-from dagr.helpers.strings import cleanPostValue
 
 
 class GroupBroker(BrokerBase):
@@ -103,42 +101,6 @@ class GroupBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  # pylint: disable=R0903,R0913
-  def build_group(self,
-                 identifier=None,
-                 name=None,
-                 description=None,
-                 download=None,
-                 action='insert',
-                 tlp_lvl=None,
-                 email=None,
-                 usermails=None):
-    """
-    puts a group with the data together
-
-    :param identifier: The identifier of the group,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param name: The name of the group
-    :type name: String
-    :param description: The description of this group
-    :type description: String
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
-
-    :returns: Group
-    """
-    group = Group()
-    if not action == 'insert':
-      group = self.get_by_id(identifier)
-    if not action == 'remove':
-      group.name = cleanPostValue(name)
-      group.email = cleanPostValue(email)
-      ObjectConverter.set_integer(group, 'can_download', download)
-      ObjectConverter.set_integer(group, 'tlp_lvl', tlp_lvl)
-      ObjectConverter.set_integer(group, 'usermails', usermails)
-      group.description = cleanPostValue(description)
-    return group
 
   def remove_by_id(self, group_id, commit=True):
     if group_id == 1 or group_id == '1':

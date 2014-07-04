@@ -15,7 +15,6 @@ from dagr.db.broker import BrokerBase, NothingFoundException, IntegrityException
 import sqlalchemy.orm.exc
 from dagr.db.broker import BrokerException
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
-from dagr.helpers.strings import cleanPostValue
 
 
 class SubGroupBroker(BrokerBase):
@@ -101,35 +100,6 @@ class SubGroupBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
-
-  # pylint: disable=R0903,R0913
-  def build_subgroup(self,
-                 identifier=None,
-                 name=None,
-                 description=None,
-                 action='insert'):
-    """
-    puts a subgroup with the data together
-
-    :param identifier: The identifier of the subgroup,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param name: The name of the subgroup
-    :type name: String
-    :param description: The description of this subgroup
-    :type description: String
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
-
-    :returns: Group
-    """
-    subgroup = SubGroup()
-    if not action == 'insert':
-      subgroup = self.get_by_id(identifier)
-    if not action == 'remove':
-      subgroup.name = cleanPostValue(name)
-      subgroup.description = cleanPostValue(description)
-    return subgroup
 
   def remove_by_id(self, subgroup_id, commit=True):
     if subgroup_id == 1 or subgroup_id == '1':

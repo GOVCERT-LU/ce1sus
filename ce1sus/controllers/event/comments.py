@@ -14,6 +14,8 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
 from ce1sus.brokers.event.commentbroker import CommentBroker
+from dagr.helpers.strings import cleanPostValue
+from dagr.helpers.datumzait import DatumZait
 
 
 class CommentsController(Ce1susBaseController):
@@ -71,7 +73,22 @@ class CommentsController(Ce1susBaseController):
   def populate_web_comment(self, identifier, text, event, user, action):
     try:
       user = self._get_user(user.username)
-      return self.comment_broker.build_comment(event, user, identifier,
-                         text, action)
+      """
+      Modifications of a comment
+      """
+      comment = Comment()
+      if not action == 'insert':
+        comment = self.get_by_id(comment_id)
+      comment.modified = DatumZait.utcnow()
+      comment.modifier = user
+      comment.modifier_id = comment.modifier.identifier
+      comment.comment = cleanPostValue(comment_text)
+      if action == 'insert':
+        comment.creator = user
+        comment.creator_id = comment.creator.identifier
+        comment.event = event
+        comment.event_id = event.identifier
+        comment.created = DatumZait.utcnow()
+      return comment
     except BrokerException as error:
       self._raise_exception(error)

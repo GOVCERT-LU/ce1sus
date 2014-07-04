@@ -16,6 +16,9 @@ from dagr.db.broker import IntegrityException, BrokerException, ValidationExcept
 import types
 from dagr.controllers.base import SpecialControllerException
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
+from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.hash import hashSHA1
+from dagr.helpers.strings import cleanPostValue
 
 
 class ObjectController(Ce1susBaseController):
@@ -72,14 +75,30 @@ class ObjectController(Ce1susBaseController):
       self._raise_exception(error)
 
   def populate_object(self, identifier, name, description, action, share):
-    try:
-      return self.obj_def_broker.build_object_definition(identifier,
-                                                        name,
-                                                        description,
-                                                        action,
-                                                        share)
-    except BrokerException as error:
-      self._raise_exception(error)
+    """
+    puts an object with the data together
+
+    :param identifier: The identifier of the object,
+                       is only used in case the action is edit or remove
+    :type identifier: Integer
+    :param name: The name of the object
+    :type name: String
+    :param description: The description of this object
+    :type description: String
+    :param action: action which is taken (i.e. edit, insert, remove)
+    :type action: String
+
+    :returns: ObjectDefinition
+    """
+    obj = ObjectDefinition()
+    if not action == 'insert':
+      obj = self.get_by_id(identifier)
+    if not action == 'remove':
+      obj.name = cleanPostValue(name)
+      obj.description = cleanPostValue(description)
+      ObjectConverter.set_integer(obj, 'share', share)
+      obj.chksum = hashSHA1(obj.name)
+    return obj
 
   def insert_object_definition(self, obj):
     try:

@@ -18,8 +18,6 @@ from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.event.eventclasses import Object
 from ce1sus.brokers.event.attributebroker import AttributeBroker
 from ce1sus.brokers.permission.permissionclasses import User, Group
-from ce1sus.helpers.bitdecoder import BitValue
-import uuid as uuidgen
 from sqlalchemy import and_
 
 
@@ -53,52 +51,6 @@ class ObjectBroker(BrokerBase):
     except BrokerException as error:
       self.session.rollback()
       raise BrokerException(error)
-
-  @staticmethod
-  def build_object(identifier,
-                  event_id,
-                  definition,
-                  user,
-                  parent_object_id=None,
-                  shared=0,
-                  action='insert'):
-    """
-    puts an object together
-
-    :param identifier: ID of the object
-    :type identifier: Ineger
-    :param event: event which the object belongs to
-    :type event: Event
-    :param definition: Definition of the object
-    :type definition: ObjectDefinition
-    :param user: User performing the action
-    :type user: User
-
-    :returns: Object
-    """
-    obj = Object()
-    if action == 'insert':
-      obj.uuid = unicode(uuidgen.uuid4())
-      obj.creator_id = user.identifier
-      obj.created = DatumZait.utcnow()
-    else:
-      obj.identifier = identifier
-
-    if action != 'remove':
-      obj.definition = definition
-      if not definition is None:
-        obj.def_object_id = definition.identifier
-
-    obj.event_id = event_id
-    obj.parent_object_id = parent_object_id
-    obj.modifier_id = user.identifier
-    obj.modified = DatumZait.utcnow()
-    obj.bit_value = BitValue('0', obj)
-    if shared == '1':
-      obj.bit_value.is_shareable = True
-    else:
-      obj.bit_value.is_shareable = False
-    return obj
 
   def get_cb_values_object_parents(self, event_id, object_id):
     """

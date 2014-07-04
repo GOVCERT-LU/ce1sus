@@ -18,6 +18,8 @@ from ce1sus.brokers.staticbroker import TLPLevel
 from ce1sus.brokers.permission.permissionclasses import Group
 from dagr.controllers.base import ControllerException
 from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
+from dagr.helpers.strings import cleanPostValue
+from dagr.helpers.converters import ObjectConverter
 
 
 class GroupController(Ce1susBaseController):
@@ -82,17 +84,17 @@ class GroupController(Ce1susBaseController):
                      tlp_lvl,
                      email,
                      usermails):
-    try:
-      return self.group_broker.build_group(identifier,
-                                        name,
-                                        description,
-                                        download,
-                                        action,
-                                        tlp_lvl,
-                                        email,
-                                        usermails)
-    except BrokerException as error:
-      self._raise_exception(error)
+    group = Group()
+    if not action == 'insert':
+      group = self.get_by_id(identifier)
+    if not action == 'remove':
+      group.name = cleanPostValue(name)
+      group.email = cleanPostValue(email)
+      ObjectConverter.set_integer(group, 'can_download', download)
+      ObjectConverter.set_integer(group, 'tlp_lvl', tlp_lvl)
+      ObjectConverter.set_integer(group, 'usermails', usermails)
+      group.description = cleanPostValue(description)
+    return group
 
   def insert_group(self, group):
     try:

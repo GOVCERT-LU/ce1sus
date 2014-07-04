@@ -19,7 +19,12 @@ from dagr.db.broker import ValidationException, BrokerException, NothingFoundExc
 from ce1sus.brokers.relationbroker import RelationBroker
 from datetime import datetime
 from ce1sus.common.mailhandler import MailHandlerException
-from dagr.helpers.converters import ConversionException
+import uuid as uuidgen
+from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.strings import cleanPostValue
+from dagr.helpers.converters import ObjectConverter, ConversionException
+from ce1sus.brokers.event.eventclasses import Event
+from dagr.helpers.datumzait import DatumZait
 
 
 class EventController(Ce1susBaseController):
@@ -85,21 +90,61 @@ class EventController(Ce1susBaseController):
       # fill in the values
       if hasattr(user, 'session'):
         user = self._get_user(user.username)
-      event = self.event_broker.build_event(identifier,
-                                          action,
-                                          status,
-                                          tlp_index,
-                                          description,
-                                          name,
-                                          published,
-                                          first_seen,
-                                          last_seen,
-                                          risk,
-                                          analysis,
-                                          user,
-                                          uuid)
+      event = Event()
+      if action == 'insert':
+          if uuid is None:
+            event.uuid = unicode(uuidgen.uuid4())
+          else:
+            event.uuid = uuid
+          event.creator_group_id = user.default_group.identifier
+          event.maingroups = list()
+          event.maingroups.append(user.default_group)
+          event.bit_value = BitValue('0', event)
+          event.bit_value.is_shareable = True
+          event.created = DatumZait.utcnow()
+          event.creator_id = user.identifier
+          event.creator = user
+          event.creator_group = user.default_group
+      else:
+        # dont want to change the original in case the user cancel!
+        event = self.get_by_id(identifier)
+        # right checks only if there is a change!!!!
+
+      if not action == 'remove':
+        event.title = cleanPostValue(name)
+        event.description = cleanPostValue(description)
+        if not event.description:
+          event.description = 'no description'
+        # TODO: make checks if they are not an integer!
+        ObjectConverter.set_integer(event, 'tlp_level_id', tlp_index)
+        ObjectConverter.set_integer(event, 'status_id', status)
+        ObjectConverter.set_integer(event, 'published', published)
+        # if published
+        if event.published == 1:
+          event.last_publish_date = DatumZait.utcnow()
+        event.modified = DatumZait.utcnow()
+        event.modifier = user
+        event.modifier_id = event.modifier.identifier
+
+        if first_seen:
+          try:
+            ObjectConverter.set_date(event, 'first_seen', first_seen)
+          except ConversionException:
+            event.first_seen = first_seen
+        else:
+          event.first_seen = DatumZait.utcnow()
+        if last_seen:
+          try:
+            ObjectConverter.set_date(event, 'last_seen', last_seen)
+          except ConversionException:
+            event.last_seen = last_seen
+        else:
+          event.last_seen = event.first_seen
+        ObjectConverter.set_integer(event, 'analysis_status_id', analysis)
+        ObjectConverter.set_integer(event, 'risk_id', risk)
+
       return event
-    except (BrokerException, ConversionException) as error:
+    except ConversionException as error:
       self._raise_exception(error)
 
   def populate_web_event(self, user, **kwargs):
@@ -118,7 +163,7 @@ class EventController(Ce1susBaseController):
     event.bit_value.is_shareable = True
     return event
 
-  def populate_rest_event(self, user, dict, action):
+  def populate_rest_event(self, user, dictionary, action):
     """
     populates an event object with the given rest_event
 
@@ -127,19 +172,19 @@ class EventController(Ce1susBaseController):
 
     :returns: Event
     """
-    tlp_index = TLPLevel.get_by_name(dict.get('tlp', None))
-    risk_index = Risk.get_by_name(dict.get('risk', None))
-    analysis_index = Analysis.get_by_name(dict.get('analysis', None))
-    status_index = Status.get_by_name(dict.get('status', None))
-    uuid = dict.get('uuid', None)
+    tlp_index = TLPLevel.get_by_name(dictionary.get('tlp', None))
+    risk_index = Risk.get_by_name(dictionary.get('risk', None))
+    analysis_index = Analysis.get_by_name(dictionary.get('analysis', None))
+    status_index = Status.get_by_name(dictionary.get('status', None))
+    uuid = dictionary.get('uuid', None)
     if not uuid:
       uuid = None
     if action == 'insert':
       identifier = None
-      first_seen = dict.get('first_seen', None)
+      first_seen = dictionary.get('first_seen', None)
       if not first_seen:
         first_seen = datetime.now()
-      last_seen = dict.get('last_seen', None)
+      last_seen = dictionary.get('last_seen', None)
       if not last_seen:
         last_seen = first_seen
     else:
@@ -153,9 +198,9 @@ class EventController(Ce1susBaseController):
               'action': action,
               'status': status_index,
               'tlp_index': tlp_index,
-              'description': dict.get('description', 'No description'),
-              'name': dict.get('title', 'No Title'),
-              'published': dict.get('published', '0'),
+              'description': dictionary.get('description', 'No description'),
+              'name': dictionary.get('title', 'No Title'),
+              'published': dictionary.get('published', '0'),
               'first_seen': first_seen,
               'last_seen': last_seen,
               'risk': risk_index,
@@ -168,7 +213,7 @@ class EventController(Ce1susBaseController):
 
     event.bit_value.is_rest_instert = True
 
-    share = dict.get('share', None)
+    share = dictionary.get('share', None)
     if share == '1':
       event.bit_value.is_shareable = True
     else:

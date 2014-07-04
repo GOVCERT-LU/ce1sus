@@ -17,6 +17,7 @@ import types as types
 from ce1sus.brokers.staticbroker import TLPLevel
 from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
 from ce1sus.brokers.permission.permissionclasses import SubGroup
+from dagr.helpers.strings import cleanPostValue
 
 
 class SubGroupController(Ce1susBaseController):
@@ -76,13 +77,13 @@ class SubGroupController(Ce1susBaseController):
                         name,
                         description,
                         action):
-    try:
-      return self.subgroup_broker.build_subgroup(identifier,
-                                                name,
-                                                description,
-                                                action)
-    except BrokerException as error:
-      self._raise_exception(error)
+    subgroup = SubGroup()
+    if not action == 'insert':
+      subgroup = self.get_by_id(identifier)
+    if not action == 'remove':
+      subgroup.name = cleanPostValue(name)
+      subgroup.description = cleanPostValue(description)
+    return subgroup
 
   def insert_group(self, subgroup):
     try:

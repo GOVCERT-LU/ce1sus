@@ -13,9 +13,6 @@ __license__ = 'GPL v3+'
 from dagr.db.broker import NothingFoundException, BrokerException, IntegrityException
 import sqlalchemy.orm.exc
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
-from dagr.helpers.converters import ObjectConverter
-from dagr.helpers.hash import hashSHA1
-from dagr.helpers.strings import cleanPostValue
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.brokers.definition.definitionbase import DefinitionBrokerBase
@@ -142,31 +139,3 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  # pylint:disable=R0913
-  def build_object_definition(self, identifier=None, name=None,
-                  description=None, action='insert',
-                               share=None):
-    """
-    puts an object with the data together
-
-    :param identifier: The identifier of the object,
-                       is only used in case the action is edit or remove
-    :type identifier: Integer
-    :param name: The name of the object
-    :type name: String
-    :param description: The description of this object
-    :type description: String
-    :param action: action which is taken (i.e. edit, insert, remove)
-    :type action: String
-
-    :returns: ObjectDefinition
-    """
-    obj = ObjectDefinition()
-    if not action == 'insert':
-      obj = self.get_by_id(identifier)
-    if not action == 'remove':
-      obj.name = cleanPostValue(name)
-      obj.description = cleanPostValue(description)
-      ObjectConverter.set_integer(obj, 'share', share)
-      obj.chksum = hashSHA1(obj.name)
-    return obj

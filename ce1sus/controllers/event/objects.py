@@ -14,6 +14,9 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
 from dagr.helpers.datumzait import DatumZait
+from ce1sus.helpers.bitdecoder import BitValue
+import uuid as uuidgen
+from ce1sus.brokers.event.eventclasses import Object
 
 
 class ObjectsController(Ce1susBaseController):
@@ -74,13 +77,29 @@ class ObjectsController(Ce1susBaseController):
     try:
       if hasattr(user, 'session'):
         user = self._get_user(user.username)
-      return self.object_broker.build_object(identifier,
-                                            event_id,
-                                            definition,
-                                            user,
-                                            parent_object_id,
-                                            shared=share,
-                                            action=action)
+      obj = Object()
+      if action == 'insert':
+        obj.uuid = unicode(uuidgen.uuid4())
+        obj.creator_id = user.identifier
+        obj.created = DatumZait.utcnow()
+      else:
+        obj.identifier = identifier
+
+      if action != 'remove':
+        obj.definition = definition
+        if not definition is None:
+          obj.def_object_id = definition.identifier
+
+      obj.event_id = event_id
+      obj.parent_object_id = parent_object_id
+      obj.modifier_id = user.identifier
+      obj.modified = DatumZait.utcnow()
+      obj.bit_value = BitValue('0', obj)
+      if share == '1':
+        obj.bit_value.is_shareable = True
+      else:
+        obj.bit_value.is_shareable = False
+      return obj
     except BrokerException as error:
       self._raise_exception(error)
 
