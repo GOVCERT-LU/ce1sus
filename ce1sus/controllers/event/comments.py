@@ -14,6 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
 from ce1sus.brokers.event.commentbroker import CommentBroker
+from ce1sus.brokers.event.eventclasses import Comment
 from dagr.helpers.strings import cleanPostValue
 from dagr.helpers.datumzait import DatumZait
 
@@ -78,11 +79,11 @@ class CommentsController(Ce1susBaseController):
       """
       comment = Comment()
       if not action == 'insert':
-        comment = self.get_by_id(comment_id)
+        comment = self.comment_broker.get_by_id(identifier)
       comment.modified = DatumZait.utcnow()
       comment.modifier = user
       comment.modifier_id = comment.modifier.identifier
-      comment.comment = cleanPostValue(comment_text)
+      comment.comment = cleanPostValue(text)
       if action == 'insert':
         comment.creator = user
         comment.creator_id = comment.creator.identifier

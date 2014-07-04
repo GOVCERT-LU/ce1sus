@@ -74,7 +74,7 @@ class UserController(Ce1susBaseController):
       user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
       user.activation_sent = DatumZait.utcnow()
     else:
-      user = self.get_by_id(identifier)
+      user = self.user_broker.get_by_id(identifier)
     if not action == 'remove' and action != 'insertLDAP':
       user.email = cleanPostValue(email)
       user.password = cleanPostValue(password)

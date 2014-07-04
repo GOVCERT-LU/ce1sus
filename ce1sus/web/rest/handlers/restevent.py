@@ -73,8 +73,10 @@ class RestEventHandler(RestBaseHandler):
         else:
           # action when not valid
           self._raise_invalid_error(event)
+        # get the check to create relations
+        mkrelations = options.get('mkrelations', True)
         # ok the event is valid so continue
-        event, valid = self.event_controller.insert_event(user, event)
+        event, valid = self.event_controller.insert_event(user, event, mkrelations)
         with_definition = options.get('fulldefinitions', False)
         event.maingroups = list()
         event.subgroups = list()

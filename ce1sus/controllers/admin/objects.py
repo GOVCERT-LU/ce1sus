@@ -92,7 +92,7 @@ class ObjectController(Ce1susBaseController):
     """
     obj = ObjectDefinition()
     if not action == 'insert':
-      obj = self.get_by_id(identifier)
+      obj = self.obj_def_broker.get_by_id(identifier)
     if not action == 'remove':
       obj.name = cleanPostValue(name)
       obj.description = cleanPostValue(description)

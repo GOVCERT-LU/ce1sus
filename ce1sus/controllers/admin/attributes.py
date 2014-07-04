@@ -116,7 +116,7 @@ class AttributeController(Ce1susBaseController):
     """
     attribute = AttributeDefinition()
     if not action == 'insert':
-      attribute = self.get_by_id(identifier)
+      attribute = self.attr_def_broker.get_by_id(identifier)
       if attribute.deletable == 0:
         self._raise_exception(u'Attribute cannot be edited or deleted')
     if not action == 'remove':

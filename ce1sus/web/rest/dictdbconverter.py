@@ -123,7 +123,7 @@ class DictDBConverter(object):
             event.objects.append(obj)
         return event
       else:
-        raise DictDBConversionException('Converter only supports insert')
+        raise DictDBConversionException(u'Converter only supports insert')
     except ControllerException as error:
       raise DictDBConversionException(error)
 

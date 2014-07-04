@@ -79,7 +79,7 @@ class SubGroupController(Ce1susBaseController):
                         action):
     subgroup = SubGroup()
     if not action == 'insert':
-      subgroup = self.get_by_id(identifier)
+      subgroup = self.subgroup_broker.get_by_id(identifier)
     if not action == 'remove':
       subgroup.name = cleanPostValue(name)
       subgroup.description = cleanPostValue(description)

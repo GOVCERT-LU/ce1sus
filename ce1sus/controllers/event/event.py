@@ -107,7 +107,7 @@ class EventController(Ce1susBaseController):
           event.creator_group = user.default_group
       else:
         # dont want to change the original in case the user cancel!
-        event = self.get_by_id(identifier)
+        event = self.event_broker.get_by_id(identifier)
         # right checks only if there is a change!!!!
 
       if not action == 'remove':
@@ -223,7 +223,7 @@ class EventController(Ce1susBaseController):
 
     return event
 
-  def insert_event(self, user, event):
+  def insert_event(self, user, event, mkrelations=True):
     """
     inserts an event
 
@@ -241,7 +241,7 @@ class EventController(Ce1susBaseController):
       attributes = list()
       for obj in event.objects:
         attributes += obj.attributes
-      if attributes:
+      if mkrelations and attributes:
         self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       self.event_broker.do_commit(True)
       return event, True

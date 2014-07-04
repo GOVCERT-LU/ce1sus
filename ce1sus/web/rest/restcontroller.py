@@ -51,7 +51,8 @@ class RestController(RestBaseHandler):
                           'attributes',
                           'key',
                           'uuids',
-                          'chksum']
+                          'chksum',
+                          'mkrelations']
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)

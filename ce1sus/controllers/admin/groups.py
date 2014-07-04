@@ -86,7 +86,7 @@ class GroupController(Ce1susBaseController):
                      usermails):
     group = Group()
     if not action == 'insert':
-      group = self.get_by_id(identifier)
+      group = self.group_broker.get_by_id(identifier)
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
