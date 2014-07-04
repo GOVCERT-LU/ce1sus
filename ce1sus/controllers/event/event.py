@@ -241,7 +241,7 @@ class EventController(Ce1susBaseController):
       attributes = list()
       for obj in event.objects:
         attributes += obj.attributes
-      if mkrelations and attributes:
+      if (mkrelations == 'True' or mkrelations == True) and attributes:
         self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       self.event_broker.do_commit(True)
       return event, True
