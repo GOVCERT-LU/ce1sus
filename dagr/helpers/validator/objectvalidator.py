@@ -384,7 +384,6 @@ class ObjectValidator:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
       return False
 
-
   @staticmethod
   def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=True):
     """

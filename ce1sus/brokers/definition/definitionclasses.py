@@ -42,8 +42,8 @@ class AttributeHandler(BASE):
   description = Column('description', String)
   uuid = Column('uuid', String)
   attributes = relationship('AttributeDefinition',
-                            primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
-                            lazy='joined'
+                            primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index'
+
                             )
   ce1sus_id = Column('config', Integer, ForeignKey('ce1sus.ce1sus_id'))
   configuration = relationship('Ce1susConfig')
@@ -174,7 +174,7 @@ class AttributeDefinition(BASE):
                          back_populates='attributes',
                          primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
                          cascade='all',
-                         order_by="AttributeDefinition.name", lazy='joined')
+                         order_by="AttributeDefinition.name")
   deletable = Column('deletable', Integer)
   # note class relationTable attribute
   objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',

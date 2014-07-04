@@ -60,7 +60,7 @@ class MySqlConnector(Connector):
     if self.config.get('usecherrypy'):
       # check if not already instantiated
       try:
-        cherrypy.tools.db
+        getattr(cherrypy.tools, 'db')
       except AttributeError:
         self.__check_if_existing(hostname, port)
         SAEnginePlugin(cherrypy.engine, self).subscribe()
@@ -83,6 +83,7 @@ class MySqlConnector(Connector):
       raise SessionManagerException('Service on "{hostname}:{port}"' +
                                     ' not available'.format(hostname=hostname,
                                                             port=port))
+
   def get_engine(self):
     """
     Returns the engine
@@ -118,7 +119,7 @@ class MySqlConnector(Connector):
       socket_obj.settimeout(1)
       socket_obj.connect((host, port))
       socket_obj.close()
-    except socket.error as error:
+    except socket.error:
       return False
     return True
 

@@ -25,6 +25,7 @@ def __genericHash(string, hashType, salt=''):
   hasher.update(hash_str.encode('utf-8'))
   return hasher.hexdigest()
 
+
 def hashMD5(string, salt=''):
   """
   Returns an MD5 Hash string

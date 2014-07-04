@@ -214,7 +214,7 @@ class EventController(Ce1susBaseController):
     event.bit_value.is_rest_instert = True
 
     share = dictionary.get('share', None)
-    if share == '1':
+    if share == '1' or share == 1:
       event.bit_value.is_shareable = True
     else:
       event.bit_value.is_shareable = False
