@@ -223,7 +223,7 @@ class RelationBroker(BrokerBase):
     if bypass_validation:
       code = 0
     else:
-      code = 12
+      code = 4
     try:
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(
@@ -269,10 +269,11 @@ class RelationBroker(BrokerBase):
     """
     Searches the tables for the value using an attribute definition id
     """
+    # will return only valid ones
     if bypass_validation:
       code = 0
     else:
-      code = 12
+      code = 4
     try:
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(

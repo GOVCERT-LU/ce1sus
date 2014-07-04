@@ -173,6 +173,7 @@ class AttributeDefinition(BASE):
   attribute_handler = relationship(AttributeHandler,
                          back_populates='attributes',
                          primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
+                         lazy='joined',
                          cascade='all',
                          order_by="AttributeDefinition.name")
   deletable = Column('deletable', Integer)
