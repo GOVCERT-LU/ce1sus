@@ -14,13 +14,12 @@ __license__ = 'GPL v3+'
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from dagr.db.broker import BrokerBase, IntegrityException, BrokerException, NothingFoundException
+from dagr.db.broker import BrokerBase, IntegrityException, BrokerException
 from ce1sus.brokers.valuebroker import ValueBroker
 import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute
 from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from sqlalchemy.orm import joinedload, joinedload_all
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from sqlalchemy import not_
 
@@ -150,9 +149,6 @@ class RelationBroker(BrokerBase):
   def generate_bulk_attributes_relations(self, event, attributes, commit=False):
     # call partitions
     self.limited_generate_bulk_attributes(event, attributes, limit=10, commit=commit)
-
-  def remove_all_relations(self):
-    nbr_deleted = models.User.query.delete()
 
   def get_relations_by_event(self, event, unique_events=True):
     """
