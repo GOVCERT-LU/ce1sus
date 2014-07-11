@@ -151,6 +151,9 @@ class RelationBroker(BrokerBase):
     # call partitions
     self.limited_generate_bulk_attributes(event, attributes, limit=10, commit=commit)
 
+  def remove_all_relations(self):
+    nbr_deleted = models.User.query.delete()
+
   def get_relations_by_event(self, event, unique_events=True):
     """
     Returns the relations for a given event
@@ -206,6 +209,12 @@ class RelationBroker(BrokerBase):
       return results
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
+
+  def clear_relations_table(self):
+    try:
+      self.session.query(EventRelation).delete()
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 

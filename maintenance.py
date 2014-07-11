@@ -17,7 +17,7 @@ from dagr.db.session import SessionManager
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.brokers.relationbroker import RelationBroker
-from dagr.db.broker import BrokerException
+from dagr.db.broker import BrokerException, NothingFoundException
 import os
 from dagr.helpers.config import Configuration
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
@@ -124,19 +124,43 @@ class Maintenance(object):
         self.def_obj_broker.update(not_matching_obj, False, True)
       self.def_obj_broker.do_commit(True)
       # find attribute chksums not matching the one stored
-      attributes = self.def_obj_broker.get_all()
+      attributes = self.def_attr_broker.get_all()
       not_matching_attrs = list()
       for attribute in attributes:
-        if attribute.chksum != gen_obj_chksum(attribute):
+        if attribute.chksum != gen_attr_chksum(attribute):
           not_matching_attrs.append(attribute)
       if verbose:
         print 'Found {0} not matching object chksums'.format(len(not_matching_objs))
       # fix checksums
       for not_matching_attr in not_matching_attrs:
-        not_matching_attr.chksum = gen_obj_chksum(not_matching_attr)
+        not_matching_attr.chksum = gen_attr_chksum(not_matching_attr)
         self.def_attr_broker.update(not_matching_attr, False, True)
       self.def_attr_broker.do_commit(True)
 
+    except BrokerException as error:
+      raise MaintenanceException(error)
+
+  def rebuild_event_relations(self, event_uuid, verbose):
+    try:
+      if verbose:
+        print u'Rebuilding relations for event {0}'.format(event_uuid)
+      # find event by uuid
+      event = self.event_broker.get_by_uuid(event_uuid)
+      attributes = get_all_attribtues_from_event(event)
+      self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
+      self.relation_broker.do_commit(True)
+    except NothingFoundException as error:
+      print error
+    except BrokerException as error:
+      raise MaintenanceException(error)
+
+  def drop_relations(self, verbose):
+    try:
+      if verbose:
+        print u'Truncate relations table'
+      # get Table
+      self.relation_broker.clear_relations_table()
+      self.relation_broker.do_commit(True)
     except BrokerException as error:
       raise MaintenanceException(error)
 
@@ -144,21 +168,32 @@ if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option('-r', dest='rebuild_opt', action='store_true', default=False,
                     help='Rebuild relations according to the definitions')
+  parser.add_option('-e', dest='event_uuid', type='string', default='',
+                    help='Operation on a special event\nUse with option -r')
   parser.add_option('-d', dest='check_def_opt', action='store_true', default=False,
                     help='Check and correct definition checksums')
   parser.add_option('-v', dest='verbose_opt', action='store_true', default=False,
                     help='Verbose')
-
+  parser.add_option('--drop_rel', dest='drop_rel', action='store_true', default=False,
+                    help='Removes all existing relations')
   (options, args) = parser.parse_args()
 
   basePath = os.path.dirname(os.path.abspath(__file__))
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   config = Configuration(ce1susConfigFile)
-  maintenance = Maintenance(config)
 
-  if options.rebuild_opt:
-    maintenance.rebuild_relations(options.verbose_opt)
-  elif options.check_def_opt:
-    maintenance.recheck_definition_chksums(options.verbose_opt)
+  if options.event_uuid and not options.rebuild_opt:
+    print 'Option -e xxx has to be used with option -r.'
   else:
-    parser.print_help()
+    maintenance = Maintenance(config)
+    if options.rebuild_opt:
+      if options.event_uuid:
+        maintenance.rebuild_event_relations(options.event_uuid, options.verbose_opt)
+      else:
+        maintenance.rebuild_relations(options.verbose_opt)
+    elif options.check_def_opt:
+      maintenance.recheck_definition_chksums(options.verbose_opt)
+    elif options.drop_rel:
+      maintenance.drop_relations(options.verbose_opt)
+    else:
+      parser.print_help()
