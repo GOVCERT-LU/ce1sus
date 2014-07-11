@@ -15,6 +15,7 @@ __license__ = 'GPL v3+'
 from optparse import OptionParser
 from dagr.db.session import SessionManager
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.brokers.relationbroker import RelationBroker
 from dagr.db.broker import BrokerException
 import os
@@ -22,6 +23,8 @@ from dagr.helpers.config import Configuration
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
 from ce1sus.brokers.event.eventbroker import EventBroker
 from ce1sus.controllers.event.event import get_all_attribtues_from_event
+from ce1sus.controllers.admin.objects import gen_obj_chksum
+from ce1sus.controllers.admin.attributes import gen_attr_chksum
 
 
 class MaintenanceException(Exception):
@@ -38,6 +41,7 @@ class Maintenance(object):
     self.connector = SessionManager(config).connector
     directconnection = self.connector.get_direct_session()
     self.def_attr_broker = AttributeDefinitionBroker(directconnection)
+    self.def_obj_broker = ObjectDefinitionBroker(directconnection)
     self.relation_broker = RelationBroker(directconnection)
     self.ce1sus_broker = Ce1susBroker(directconnection)
     self.event_broker = EventBroker(directconnection)
@@ -102,11 +106,46 @@ class Maintenance(object):
     except BrokerException as error:
       raise MaintenanceException(error)
 
+  def recheck_definition_chksums(self, verbose=False):
+    try:
+      if verbose:
+        print 'Checking definitions'
+      # find all object definitions
+      objects = self.def_obj_broker.get_all()
+      not_matching_objs = list()
+      for obj in objects:
+        if obj.chksum != gen_obj_chksum(obj):
+          not_matching_objs.append(obj)
+      if verbose:
+        print 'Found {0} not matching object chksums'.format(len(not_matching_objs))
+      # fix checksums
+      for not_matching_obj in not_matching_objs:
+        not_matching_obj.chksum = gen_obj_chksum(not_matching_obj)
+        self.def_obj_broker.update(not_matching_obj, False, True)
+      self.def_obj_broker.do_commit(True)
+      # find attribute chksums not matching the one stored
+      attributes = self.def_obj_broker.get_all()
+      not_matching_attrs = list()
+      for attribute in attributes:
+        if attribute.chksum != gen_obj_chksum(attribute):
+          not_matching_attrs.append(attribute)
+      if verbose:
+        print 'Found {0} not matching object chksums'.format(len(not_matching_objs))
+      # fix checksums
+      for not_matching_attr in not_matching_attrs:
+        not_matching_attr.chksum = gen_obj_chksum(not_matching_attr)
+        self.def_attr_broker.update(not_matching_attr, False, True)
+      self.def_attr_broker.do_commit(True)
+
+    except BrokerException as error:
+      raise MaintenanceException(error)
 
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option('-r', dest='rebuild_opt', action='store_true', default=False,
                     help='Rebuild relations according to the definitions')
+  parser.add_option('-d', dest='check_def_opt', action='store_true', default=False,
+                    help='Check and correct definition checksums')
   parser.add_option('-v', dest='verbose_opt', action='store_true', default=False,
                     help='Verbose')
 
@@ -119,5 +158,7 @@ if __name__ == '__main__':
 
   if options.rebuild_opt:
     maintenance.rebuild_relations(options.verbose_opt)
+  elif options.check_def_opt:
+    maintenance.recheck_definition_chksums(options.verbose_opt)
   else:
     parser.print_help()

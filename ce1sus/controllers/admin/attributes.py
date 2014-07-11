@@ -23,6 +23,14 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 
 
+def gen_attr_chksum(attribute):
+  key = '{0}{1}{2}{3}'.format(attribute.name,
+                       attribute.regex,
+                       attribute.class_index,
+                       attribute.attribute_handler.uuid)
+  return hashSHA1(key)
+
+
 class AttributeController(Ce1susBaseController):
   """Controller handling all the requests for attributes"""
 
@@ -129,11 +137,7 @@ class AttributeController(Ce1susBaseController):
       # collect also the handler
       attribute.attribute_handler = self.handler_broker.get_by_id(attribute.handler_index)
       ObjectConverter.set_integer(attribute, 'relation', relation)
-      key = '{0}{1}{2}{3}'.format(attribute.name,
-                             attribute.regex,
-                             attribute.class_index,
-                             attribute.attribute_handler.uuid)
-      attribute.chksum = hashSHA1(key)
+      attribute.chksum = gen_attr_chksum(attribute)
       trimmed_regex = cleanPostValue(regex)
       if strings.isNotNull(trimmed_regex):
         attribute.regex = trimmed_regex

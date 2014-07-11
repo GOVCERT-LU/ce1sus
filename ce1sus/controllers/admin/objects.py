@@ -21,6 +21,10 @@ from dagr.helpers.hash import hashSHA1
 from dagr.helpers.strings import cleanPostValue
 
 
+def gen_obj_chksum(obj):
+  return hashSHA1(obj.name)
+
+
 class ObjectController(Ce1susBaseController):
   """Controller handling all the requests for objects"""
 
@@ -97,7 +101,7 @@ class ObjectController(Ce1susBaseController):
       obj.name = cleanPostValue(name)
       obj.description = cleanPostValue(description)
       ObjectConverter.set_integer(obj, 'share', share)
-      obj.chksum = hashSHA1(obj.name)
+      obj.chksum = gen_obj_chksum(obj)
     return obj
 
   def insert_object_definition(self, obj):
