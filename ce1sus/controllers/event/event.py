@@ -27,6 +27,19 @@ from ce1sus.brokers.event.eventclasses import Event
 from dagr.helpers.datumzait import DatumZait
 
 
+def get_all_attribtues_from_event(event):
+  attributes = list()
+  for obj in event.objects:
+    __get_all_attributes_from_obj(attributes, obj)
+  return attributes
+
+
+def __get_all_attributes_from_obj(attributes, obj):
+  attributes += obj.attributes
+  for child in obj.children:
+    __get_all_attributes_from_obj(attributes, child)
+
+
 class EventController(Ce1susBaseController):
   """event controller handling all actions in the event section"""
 
@@ -238,9 +251,7 @@ class EventController(Ce1susBaseController):
     try:
       self.event_broker.insert(event, False)
       # generate relations if needed!
-      attributes = list()
-      for obj in event.objects:
-        attributes += obj.attributes
+      attributes = get_all_attribtues_from_event(event)
       if (mkrelations == 'True' or mkrelations == True) and attributes:
         self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       self.event_broker.do_commit(True)

@@ -200,3 +200,15 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
 
     self.do_commit(commit)
 
+  def get_all_relationable_definitions(self):
+    try:
+      definitions = self.session.query(AttributeDefinition).filter(AttributeDefinition.relation == 1).all()
+      if definitions:
+        return definitions
+      else:
+        raise sqlalchemy.orm.exc.NoResultFound
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'No {0} is set as relationable'.format(self.get_broker_class().__class__.__name__))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

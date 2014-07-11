@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from dagr.db.session import BASE
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from dagr.db.broker import BrokerBase, IntegrityException, BrokerException
+from dagr.db.broker import BrokerBase, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.brokers.valuebroker import ValueBroker
 import sqlalchemy.orm.exc
 from ce1sus.brokers.event.eventclasses import Attribute
@@ -22,6 +22,7 @@ from sqlalchemy import or_
 from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
 from sqlalchemy.orm import joinedload, joinedload_all
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from sqlalchemy import not_
 
 
 # pylint: disable=R0903,R0902,W0232
@@ -348,3 +349,17 @@ class RelationBroker(BrokerBase):
                                             False)
 
     return result
+
+  def get_all_rel_with_not_def_list(self, def_ids):
+    try:
+
+      relations = self.session.query(EventRelation).join(Attribute, EventRelation.attribute_id == Attribute.identifier).join(AttributeDefinition, Attribute.def_attribute_id == AttributeDefinition.identifier).filter(not_(AttributeDefinition.identifier.in_(def_ids))).all()
+      if relations:
+        return relations
+      else:
+        return list()
+    except sqlalchemy.orm.exc.NoResultFound:
+      return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

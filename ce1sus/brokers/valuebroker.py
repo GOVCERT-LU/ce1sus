@@ -34,7 +34,7 @@ class StringValue(BASE):
   identifier = Column('StringValue_id', Integer, primary_key=True)
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
-  attribute = relationship("Attribute", uselist=False, lazy='joined')
+  attribute = relationship("Attribute", uselist=False)
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False)
 
@@ -65,9 +65,7 @@ class DateValue(BASE):
   value = Column('value', DateTime)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute",
-                           uselist=False,
-                           innerjoin=True,
-                           lazy='joined')
+                           uselist=False)
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False)
 
@@ -94,9 +92,7 @@ class TextValue(BASE):
   value = Column('value', String)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute",
-                           uselist=False,
-                           innerjoin=True,
-                           lazy='joined')
+                           uselist=False)
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False)
 
@@ -127,9 +123,7 @@ class NumberValue(BASE):
   value = Column('value', Integer)
   attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   attribute = relationship("Attribute",
-                           uselist=False,
-                           innerjoin=True,
-                           lazy='joined')
+                           uselist=False)
   event_id = Column(Integer, ForeignKey('Events.event_id'))
   event = relationship("Event", uselist=False)
 

@@ -320,7 +320,7 @@ class Object(BASE):
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
                             primaryjoin='ObjectDefinition.identifier' +
-                            '==Object.def_object_id', lazy='joined')
+                            '==Object.def_object_id')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
   creator_id = Column('creator_id', Integer,
@@ -442,7 +442,7 @@ class Attribute(BASE):
                             ForeignKey('DEF_Attributes.def_attribute_id'))
   definition = relationship(AttributeDefinition,
               primaryjoin='AttributeDefinition.identifier==' +
-              'Attribute.def_attribute_id', lazy='joined')
+              'Attribute.def_attribute_id')
   object_id = Column(Integer, ForeignKey('Objects.object_id'))
   object = relationship("Object",
                         primaryjoin='Object.identifier==Attribute.object_id')
@@ -463,13 +463,13 @@ class Attribute(BASE):
                   lazy='joined', uselist=False)
   date_value = relationship(DateValue,
                   primaryjoin="Attribute.identifier==DateValue.attribute_id",
-                  lazy='joined', uselist=False)
+                  uselist=False)
   text_value = relationship(TextValue,
                   primaryjoin="Attribute.identifier==TextValue.attribute_id",
-                  lazy='joined', uselist=False)
+                  uselist=False)
   number_value = relationship(NumberValue,
                   primaryjoin="Attribute.identifier==NumberValue.attribute_id",
-                  lazy='joined', uselist=False)
+                  uselist=False)
   attr_parent_id = Column('parent_attr_id', ForeignKey('Attributes.attribute_id'))
   children = relationship('Attribute',
                           primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
@@ -567,7 +567,10 @@ class Attribute(BASE):
     if isinstance(self.__value_obj, FailedValidation):
       self.internal_value = self.__value_obj
     else:
-      self.internal_value = self.__value_obj.value
+      try:
+        self.internal_value = self.__value_obj.value
+      except AttributeError:
+        pass
     return self.internal_value
 
   @property
