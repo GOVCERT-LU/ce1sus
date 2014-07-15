@@ -21,6 +21,10 @@ from dagr.controllers.base import ControllerException
 class EventsView(Ce1susBaseView):
   """events view handling all display in the index section"""
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
+    return [('Recent Events', 0, '/events/recent', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.events_controller = EventsController(config)
@@ -35,7 +39,12 @@ class EventsView(Ce1susBaseView):
     :returns: generated HTML
     """
     self.set_admin_area(False)
-    return self._render_template('/events/eventsBase.html')
+    if self.view_handler:
+      main_tabs = self.view_handler.main_tabs
+    else:
+      main_tabs = list()
+    return self._render_template('/events/eventsBase.html',
+                                 main_tabs=main_tabs)
 
   @require(require_referer(('/internal')))
   @cherrypy.expose

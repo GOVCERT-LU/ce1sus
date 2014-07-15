@@ -23,6 +23,9 @@ class AdminUserView(Ce1susBaseView):
 
   ID = 'User'
 
+  def tabs(self):
+    return [('Users', -1, '/admin/users', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.user_controller = UserController(config)

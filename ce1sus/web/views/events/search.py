@@ -24,6 +24,10 @@ class SearchView(Ce1susBaseView):
   View handler for searches
   """
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
+    return [('Search Attributes', 0, '/events/search', None)]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.search_controller = SearchController(config)

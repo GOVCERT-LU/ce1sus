@@ -23,6 +23,9 @@ class AdminAttributeView(Ce1susBaseView):
 
   ID = 'Attribute'
 
+  def tabs(self):
+    return [('Attributes', -1, '/admin/attributes', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.attribute_controller = AttributeController(config)

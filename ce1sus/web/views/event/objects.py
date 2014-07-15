@@ -21,6 +21,11 @@ from dagr.controllers.base import ControllerException
 class ObjectsView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
+    return [('Objects Structured', 1, '/events/event/objects/objects', 'reload'),
+            ('Objects Flat', 1, '/events/event/objects/flat_objects', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.send_mails = config.get('ce1sus', 'sendmail', False)
@@ -317,7 +322,8 @@ class ObjectsView(Ce1susBaseView):
                                    flat_objects=flat_objects,
                                    event_id=event_id,
                                    owner=owner,
-                                   published=event.published)
+                                   published=event.published,
+                                   user=user)
     except ControllerException as error:
       return self._render_error_page(error)
 

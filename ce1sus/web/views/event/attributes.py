@@ -23,6 +23,9 @@ from dagr.controllers.base import ControllerException
 class AttributesView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
+  def tabs(self):
+    return None
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.send_mails = config.get('ce1sus', 'sendmail', False)

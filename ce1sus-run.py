@@ -30,6 +30,8 @@ from ce1sus.web.views.common.decorators import require, check_auth
 from logging import handlers
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
 import logging
+from dagr.web.views.viewhandler import ViewHandler
+
 
 def my_log_traceback(severity=logging.CRITICAL):
     """Write the last error's headers and traceback to the cherrypy error log witih a CRITICAL severity."""
@@ -89,28 +91,33 @@ def bootstrap():
   system.close()
 
   logger.get_logger('BootStrap').debug("Loading Views...")
-  # Load 'Modules'
-  cherrypy.tree.mount(IndexView(config), '/')
-  cherrypy.tree.mount(EventsView(config), '/events')
-  cherrypy.tree.mount(SearchView(config), '/events/search')
-  cherrypy.tree.mount(EventView(config), '/events/event')
-  cherrypy.tree.mount(ObjectsView(config), '/events/event/objects')
-  cherrypy.tree.mount(CommentsView(config), '/events/event/comment')
-  cherrypy.tree.mount(BitValueView(config), '/events/event/bit_value')
-  cherrypy.tree.mount(AttributesView(config), '/events/event/attribute')
-  cherrypy.tree.mount(GroupsView(config), '/events/event/groups')
-  cherrypy.tree.mount(AdminView(config), '/admin')
-  cherrypy.tree.mount(AdminUserView(config), '/admin/users')
-  cherrypy.tree.mount(AdminGroupView(config), '/admin/groups')
-  cherrypy.tree.mount(AdminObjectsView(config), '/admin/objects')
-  cherrypy.tree.mount(AdminAttributeView(config), '/admin/attributes')
-  cherrypy.tree.mount(AdminSubGroupView(config), '/admin/subgroups')
-  cherrypy.tree.mount(AdminValidationView(config), '/admin/validation')
-  cherrypy.tree.mount(AdminMailView(config), '/admin/mails')
+
+  view_handler = ViewHandler()
+  # Load 'Views'
+
+
+
+  view_handler.add_view(IndexView(config), '/')
+  view_handler.add_view(EventsView(config), '/events')
+  view_handler.add_view(SearchView(config), '/events/search')
+  view_handler.add_view(EventView(config), '/events/event')
+  view_handler.add_view(ObjectsView(config), '/events/event/objects')
+  view_handler.add_view(CommentsView(config), '/events/event/comment')
+  view_handler.add_view(BitValueView(config), '/events/event/bit_value')
+  view_handler.add_view(AttributesView(config), '/events/event/attribute')
+  view_handler.add_view(GroupsView(config), '/events/event/groups')
+  view_handler.add_view(AdminView(config), '/admin')
+  view_handler.add_view(AdminValidationView(config), '/admin/validation')
+  view_handler.add_view(AdminUserView(config), '/admin/users')
+  view_handler.add_view(AdminGroupView(config), '/admin/groups')
+  view_handler.add_view(AdminObjectsView(config), '/admin/objects')
+  view_handler.add_view(AdminAttributeView(config), '/admin/attributes')
+  view_handler.add_view(AdminSubGroupView(config), '/admin/subgroups')
+  view_handler.add_view(AdminMailView(config), '/admin/mails')
 
   if load_rest_api:
     logger.get_logger('BootStrap').debug("Loading Rest...")
-    cherrypy.tree.mount(RestController(config), '/REST/')
+    # view_handler.add_view(RestController(config), '/REST/')
   else:
     logger.get_logger('BootStrap').debug("Loading Rest skipped. Disabled in config")
 

@@ -3,7 +3,19 @@
 <%namespace name="sidenav" file="/dagr/components/sidenav.html"/>
 
 <%call expr="sidenav.list(id='eventsTab')"> 
-    <%call expr="sidenav.entry(id='recentEvents', url='/events/recent',          name='Recent Events' , reload=False, reloadBotton=True, active=True )"/> 
-    <%call expr="sidenav.entry(id='searchEvent',  url='/events/search',          name='Search Attributes',  reload=False, reloadBotton=False)"/> 
-    <%call expr="sidenav.entry(id='addEvent',     url='/events/event/add_event', name='Add Event',      reload=False, reloadBotton=False)"/> 
+    <% first=True %>
+    %for main_tab in main_tabs:
+        <%
+        reload = True
+        reloadButton = False
+        if main_tab[2] == 'reload':
+            reload = False
+            reloadButton = True
+        %>
+        <%call expr="sidenav.entry(id=main_tab[0].replace(' ',''), url=main_tab[1],          name=main_tab[0] , reload=reload, reloadBotton=reloadButton, active=first )"/>
+        <%
+        if first:
+          first=False
+        %> 
+    %endfor 
 </%call>

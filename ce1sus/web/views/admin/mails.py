@@ -23,6 +23,9 @@ class AdminMailView(Ce1susBaseView):
 
   ID = 'Mail'
 
+  def tabs(self):
+    return [('Mail Templates', -1, '/admin/mails', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.mail_controller = MailController(config)

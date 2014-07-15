@@ -23,6 +23,9 @@ class AdminGroupView(Ce1susBaseView):
 
   ID = 'Group'
 
+  def tabs(self):
+    return [('Groups', -1, '/admin/groups', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.group_controller = GroupController(config)

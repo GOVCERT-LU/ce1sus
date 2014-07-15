@@ -191,7 +191,9 @@ projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus    : Absolute path of the ce
                                                                installation directory
 collectionsize=200                                     : Do not change this value unless you know what you are doing
 outputencoding=utf-8                                   : Do not change this value unless you know what you are doing
-
+tmpfolder=/path/to/desired/tmp/folder                  : The absolute file path where mako can store its 
+                                                         temporary files.
+                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
 
 The [LDAP] section stores the configuration of the LDAP plugin and has the following elements
 

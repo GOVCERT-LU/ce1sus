@@ -23,6 +23,9 @@ class AdminSubGroupView(Ce1susBaseView):
 
   ID = 'Subgroup'
 
+  def tabs(self):
+    return [('SubGroups', -1, '/admin/subgroups', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.subgroup_controller = SubGroupController(config)

@@ -26,6 +26,9 @@ class CommentsView(Ce1susBaseView):
     Ce1susBaseView.__init__(self, config)
     self.comments_controller = CommentsController(config)
 
+  def tabs(self):
+    return None
+
   @require(require_referer(('/internal')))
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])

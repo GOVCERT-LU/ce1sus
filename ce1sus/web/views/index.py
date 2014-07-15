@@ -28,6 +28,10 @@ class IndexView(Ce1susBaseView):
     Ce1susBaseView.__init__(self, config)
     self.login_controller = LoginController(config)
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
+    return None
+
   def __get_environment_string(self):
     """
     Returns the string for displaying the environment

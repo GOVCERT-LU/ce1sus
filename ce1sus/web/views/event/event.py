@@ -24,6 +24,12 @@ from cherrypy import HTTPRedirect
 class EventView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
+    return [('Add Event', 0, '/events/event/add_event', None),
+            ('Overview', 1, '/events/event/event', 'reload'),
+            ('Relations', 1, '/events/event/relations', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.event_controller = EventController(config)
@@ -87,9 +93,13 @@ class EventView(Ce1susBaseView):
     try:
       event = self.event_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
+      tabs = list()
+      if self.view_handler:
+        tabs = self.view_handler.event_tabs
       return self._render_template('/events/event/eventBase.html',
                                    event_id=event_id,
-                                   owner=self._is_event_owner(event))
+                                   owner=self._is_event_owner(event),
+                                   tabs=tabs)
     except ControllerException as error:
       return self._render_error_page(error)
 

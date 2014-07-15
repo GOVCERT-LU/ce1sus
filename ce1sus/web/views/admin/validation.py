@@ -22,6 +22,10 @@ from dagr.helpers.datumzait import DatumZait
 
 class AdminValidationView(Ce1susBaseView):
   """index view handling all display in the index section"""
+
+  def tabs(self):
+    return [('Validation', -1, '/admin/validation', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.validation_controller = ValidationController(config)

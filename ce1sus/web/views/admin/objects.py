@@ -23,6 +23,9 @@ class AdminObjectsView(Ce1susBaseView):
 
   ID = 'Object'
 
+  def tabs(self):
+    return [('Objects', -1, '/admin/objects', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.object_controller = ObjectController(config)

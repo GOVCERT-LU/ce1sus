@@ -22,6 +22,10 @@ import types
 
 class GroupsView(Ce1susBaseView):
   """index view handling all display in the index section"""
+
+  def tabs(self):
+    return [('Groups', 1, '/events/event/groups/groups', 'reload')]
+
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.groups_controller = GroupsController(config)

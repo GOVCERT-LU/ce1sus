@@ -20,6 +20,10 @@ from ce1sus.common.mailhandler import MailHandler, MailHandlerException
 SESSION_USER = '_cp_user'
 
 
+class ViewException(Exception):
+  pass
+
+
 class GenObject(object):
     pass
 
@@ -49,9 +53,14 @@ class Ce1susBaseView(BaseView):
   Base class for ce1sus views
   """
 
+  def tabs(self):
+    """Should return [('name', lvl, 'url', ['close'|'reload'|None])]"""
+    raise ViewException('tab_name is not defined')
+
   def __init__(self, config):
     BaseView.__init__(self, config)
     self.mail_handler = MailHandler(config)
+    self.view_handler = None
 
   def admin_area(self):
     """
