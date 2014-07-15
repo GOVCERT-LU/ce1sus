@@ -16,6 +16,7 @@ from ce1sus.controllers.admin.user import UserController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminUserView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminUserView(Ce1susBaseView):
   ID = 'User'
 
   def tabs(self):
-    return [('Users', -1, '/admin/users', 'reload')]
+    usr_tab = AdminTab(title='Users',
+                       url='/admin/users',
+                       options='reload',
+                       position=0)
+    return [usr_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

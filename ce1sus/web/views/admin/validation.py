@@ -18,13 +18,38 @@ from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
 from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from dagr.helpers.datumzait import DatumZait
+from ce1sus.web.views.helpers.tabs import AdminTab, ValidationTab
 
 
 class AdminValidationView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
   def tabs(self):
-    return [('Validation', -1, '/admin/validation', 'reload')]
+    val_tab = AdminTab(title='Validation',
+                       url='/admin/validation',
+                       options='reload',
+                       position=0)
+    overview_tab = ValidationTab(title='Overview',
+                                 url='/admin/validation/event_details',
+                                 options='reload',
+                                 position=0)
+    strobj_tab = ValidationTab(title='Structured Objects',
+                                 url='/admin/validation/event_objects',
+                                 options='reload',
+                                 position=1)
+    flat_obj_tab = ValidationTab(title='Flat Objects',
+                                 url='/admin/validation/flat_event_objects',
+                                 options='reload',
+                                 position=2)
+    rel_tab = ValidationTab(title='Relations',
+                                 url='/events/event/relations',
+                                 options='reload',
+                                 position=3)
+    groups_tab = ValidationTab(title='Groups',
+                                 url='/events/event/groups/groups',
+                                 options='reload',
+                                 position=4)
+    return [val_tab, overview_tab, strobj_tab, flat_obj_tab, rel_tab, groups_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
@@ -65,7 +90,13 @@ class AdminValidationView(Ce1susBaseView):
 
     :returns: generated HTML
     """
-    return self._render_template('/admin/validation/eventValBase.html', event_id=event_id)
+    if self.view_handler:
+      tabs = self.view_handler.validation_tabs
+    else:
+      tabs = list()
+    return self._render_template('/admin/validation/eventValBase.html',
+                                 event_id=event_id,
+                                 tabs=tabs)
 
   def __render_event_details(self, template_name, event):
     """

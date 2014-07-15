@@ -17,6 +17,7 @@ from ce1sus.controllers.admin.mails import MailController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminMailView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminMailView(Ce1susBaseView):
   ID = 'Mail'
 
   def tabs(self):
-    return [('Mail Templates', -1, '/admin/mails', 'reload')]
+    mail_tab = AdminTab(title='Mail Templates',
+                       url='/admin/mails',
+                       options='reload',
+                       position=6)
+    return [mail_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

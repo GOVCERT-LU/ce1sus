@@ -16,6 +16,7 @@ from ce1sus.controllers.admin.subgroups import SubGroupController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminSubGroupView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminSubGroupView(Ce1susBaseView):
   ID = 'Subgroup'
 
   def tabs(self):
-    return [('SubGroups', -1, '/admin/subgroups', 'reload')]
+    subgr_tab = AdminTab(title='SubGroups',
+                       url='/admin/subgroups',
+                       options='reload',
+                       position=4)
+    return [subgr_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

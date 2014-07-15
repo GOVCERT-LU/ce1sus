@@ -17,14 +17,18 @@ from ce1sus.controllers.event.groups import GroupsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
-import types
+from ce1sus.web.views.helpers.tabs import EventTab
 
 
 class GroupsView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
   def tabs(self):
-    return [('Groups', 1, '/events/event/groups/groups', 'reload')]
+    groups = EventTab(title='Groups',
+                          url='/events/event/groups/groups',
+                          options='reload',
+                          position=4)
+    return [groups]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

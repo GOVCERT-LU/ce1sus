@@ -8,11 +8,11 @@
         <%
         reload = True
         reloadButton = False
-        if main_tab[2] == 'reload':
+        if main_tab.options == 'reload':
             reload = False
             reloadButton = True
         %>
-        <%call expr="sidenav.entry(id=main_tab[0].replace(' ',''), url=main_tab[1],          name=main_tab[0] , reload=reload, reloadBotton=reloadButton, active=first )"/>
+        <%call expr="sidenav.entry(id=main_tab.identifier, url=main_tab.url, name=main_tab.title , reload=reload, reloadBotton=reloadButton, active=first )"/>
         <%
         if first:
           first=False

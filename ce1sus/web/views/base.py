@@ -15,6 +15,7 @@ import cherrypy
 from dagr.web.views.base import BaseView
 from ce1sus.common.checks import check_if_event_is_viewable, check_viewable_message, is_event_owner
 from ce1sus.common.mailhandler import MailHandler, MailHandlerException
+from abc import ABCMeta, abstractmethod
 
 
 SESSION_USER = '_cp_user'
@@ -52,9 +53,13 @@ class Ce1susBaseView(BaseView):
   """
   Base class for ce1sus views
   """
-
   def tabs(self):
-    """Should return [('name', lvl, 'url', ['close'|'reload'|None])]"""
+    """
+    Should return an object implementing TabsBase
+    see ce1sus.web.views.helpers.tabs for the possibilities
+
+    if this is not applicable return None
+    """
     raise ViewException('tab_name is not defined')
 
   def __init__(self, config):

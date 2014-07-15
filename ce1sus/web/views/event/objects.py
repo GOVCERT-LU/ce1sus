@@ -16,15 +16,22 @@ from ce1sus.controllers.event.objects import ObjectsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import EventTab
 
 
 class ObjectsView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
   def tabs(self):
-    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
-    return [('Objects Structured', 1, '/events/event/objects/objects', 'reload'),
-            ('Objects Flat', 1, '/events/event/objects/flat_objects', 'reload')]
+    struct_obj = EventTab(title='Objects Structured',
+                          url='/events/event/objects/objects',
+                          options='reload',
+                          position=1)
+    flat_obj = EventTab(title='Objects Flat',
+                          url='/events/event/objects/flat_objects',
+                          options='reload',
+                          position=2)
+    return [struct_obj, flat_obj]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

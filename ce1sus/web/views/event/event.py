@@ -19,16 +19,26 @@ from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
 from dagr.helpers.datumzait import DatumZait
 from dagr.controllers.base import ControllerException
 from cherrypy import HTTPRedirect
+from ce1sus.web.views.helpers.tabs import MainTab, EventTab
 
 
 class EventView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
   def tabs(self):
-    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
-    return [('Add Event', 0, '/events/event/add_event', None),
-            ('Overview', 1, '/events/event/event', 'reload'),
-            ('Relations', 1, '/events/event/relations', 'reload')]
+    add_event_tab = MainTab(title='Add Event',
+                                url='/events/event/add_event',
+                                options=None,
+                                position=2)
+    overview_tab = EventTab(title='Overview',
+                                url='/events/event/event',
+                                options='reload',
+                                position=0)
+    relations_tab = EventTab(title='Relations',
+                                url='/events/event/relations',
+                                options='reload',
+                                position=3)
+    return [add_event_tab, overview_tab, relations_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

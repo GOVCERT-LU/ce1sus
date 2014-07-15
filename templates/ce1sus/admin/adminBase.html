@@ -7,10 +7,10 @@
   %for tab in tabs:
   <%
   reload = True
-  if tab[2] == 'reload':
+  if tab.options == 'reload':
     reload = False
   %>
-  <%call expr="tabulator.tab(id=tab[0].replace(' ',''), url=tab[1], name=tab[0],     active=first)"/>
+  <%call expr="tabulator.tab(id=tab.identifier, url=tab.url, name=tab.title, active=first)"/>
   <%
   if first:
     first=False

@@ -16,6 +16,7 @@ from ce1sus.controllers.admin.groups import GroupController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminGroupView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminGroupView(Ce1susBaseView):
   ID = 'Group'
 
   def tabs(self):
-    return [('Groups', -1, '/admin/groups', 'reload')]
+    group_tab = AdminTab(title='Groups',
+                       url='/admin/groups',
+                       options='reload',
+                       position=0)
+    return [group_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

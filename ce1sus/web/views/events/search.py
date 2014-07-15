@@ -17,6 +17,7 @@ import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.helpers.strings import InputException
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import MainTab
 
 
 class SearchView(Ce1susBaseView):
@@ -25,8 +26,11 @@ class SearchView(Ce1susBaseView):
   """
 
   def tabs(self):
-    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
-    return [('Search Attributes', 0, '/events/search', None)]
+    serach_tab = MainTab(title='Search Attributes',
+                                url='/events/search',
+                                options=None,
+                                position=1)
+    return [serach_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

@@ -16,14 +16,18 @@ from ce1sus.controllers.events.events import EventsController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException
+from ce1sus.web.views.helpers.tabs import MainTab
 
 
 class EventsView(Ce1susBaseView):
   """events view handling all display in the index section"""
 
   def tabs(self):
-    """Should return [('name', lvl, 'url', ['close'|'reload'|None])] or None"""
-    return [('Recent Events', 0, '/events/recent', 'reload')]
+    recent_events_tab = MainTab(title='Recent Events',
+                                url='/events/recent',
+                                options='reload',
+                                position=0)
+    return [recent_events_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

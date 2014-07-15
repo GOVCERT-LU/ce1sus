@@ -16,6 +16,7 @@ from ce1sus.controllers.admin.attributes import AttributeController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException, SpecialControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminAttributeView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminAttributeView(Ce1susBaseView):
   ID = 'Attribute'
 
   def tabs(self):
-    return [('Attributes', -1, '/admin/attributes', 'reload')]
+    attr_tab = AdminTab(title='Attributes',
+                       url='/admin/attributes',
+                       options='reload',
+                       position=2)
+    return [attr_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)

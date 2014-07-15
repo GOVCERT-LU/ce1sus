@@ -16,6 +16,7 @@ from ce1sus.controllers.admin.objects import ObjectController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
 from dagr.controllers.base import ControllerException, SpecialControllerException
+from ce1sus.web.views.helpers.tabs import AdminTab
 
 
 class AdminObjectsView(Ce1susBaseView):
@@ -24,7 +25,11 @@ class AdminObjectsView(Ce1susBaseView):
   ID = 'Object'
 
   def tabs(self):
-    return [('Objects', -1, '/admin/objects', 'reload')]
+    obj_tab = AdminTab(title='Objects',
+                       url='/admin/objects',
+                       options='reload',
+                       position=1)
+    return [obj_tab]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
