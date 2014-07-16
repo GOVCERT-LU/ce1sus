@@ -653,6 +653,7 @@ class Attribute(BASE):
     ObjectValidator.validateDigits(self, 'def_attribute_id')
     # validate attribute value
     value_obj = self.__get_value_obj()
+    # TODO: encoding error
     ObjectValidator.validateRegex(value_obj,
                                   'value',
                                   getattr(self.definition, 'regex'),

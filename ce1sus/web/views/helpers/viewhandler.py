@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 import cherrypy
 from ce1sus.web.views.helpers.tabs import MainTab, EventTab, AdminTab, ValidationTab
+from ce1sus.common.system import put_to_array
 
 
 class ViewHandler(object):
@@ -30,25 +31,12 @@ class ViewHandler(object):
     if tabs:
       for tab in tabs:
         if isinstance(tab, MainTab):
-          ViewHandler.__put_to_array(self.main_tabs, tab.position, tab)
+          put_to_array(self.main_tabs, tab.position, tab)
         if isinstance(tab, EventTab):
-          ViewHandler.__put_to_array(self.event_tabs, tab.position, tab)
+          put_to_array(self.event_tabs, tab.position, tab)
         if isinstance(tab, AdminTab):
-          ViewHandler.__put_to_array(self.admin_tabs, tab.position, tab)
+          put_to_array(self.admin_tabs, tab.position, tab)
         if isinstance(tab, ValidationTab):
-          ViewHandler.__put_to_array(self.validation_tabs, tab.position, tab)
+          put_to_array(self.validation_tabs, tab.position, tab)
     view.view_handler = self
     self.tree.mount(view, url)
-
-  @staticmethod
-  def __put_to_array(array, position, value):
-    if position:
-      real_pos = None
-      if position < 0:
-        real_pos = len(array) + position
-      else:
-        real_pos = position
-
-      array.insert(real_pos, value)
-    else:
-      array.append(value)

@@ -218,6 +218,12 @@ class AttributesView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def edit(self, event_id, object_id, attribute_id):
+    return 'Edit form'
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def remove_attribute(self, event_id, attribute_id):
     try:

@@ -170,31 +170,30 @@ else:
                           <td><%call expr="messages_and_text.object_to_html(attribute.gui_value, shorten_to=100,use_plain_text=False)"/></td>
                           <td style="text-align:center">${iocicon}</td>
                           <td style="width: 60px;">
-                            <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Details','/events/event/attribute/view/${event_id}/${object.identifier}/${attribute.identifier}',null,false,'eventObjects${event_id}','/events/event/objects/objects/${event_id}/${object.identifier}');">
-                               <span class="glyphicon glyphicon-eye-open" title="View details"></span>
-                            </a>
-                            
-                            %if owner and attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
-                              <a href="#" role="button"
-                                onclick="if (confirm('Are you sure you want to validate this attribute?')) {
-                                    dialogCall('/events/event/attribute/validate_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
-                                               'eventObjects${event_id}',
-                                               '/events/event/objects/objects/${event_id}')}" title="delete">
-                                 <span class="glyphicon glyphicon-saved" title="Remove"></span>
-                              </a>
-                            %endif
-                            %if owner or (attribute_owner and not attribute.bit_value.is_validated):
-                              <a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','Attribute #${attribute.identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${object.identifier}/${attribute.identifier}','/events/event/bit_value/modify_attribute_properties','True','eventObjects${event_id}','/events/event/objects/objects/${event_id}/');"
-                                 <span class="glyphicon glyphicon-pencil" title="Modify properties"></span>
-                              </a>
-                              <a href="#" role="button"
-                                onclick="if (confirm('Are you sure you want to delete?')) {
-                                    dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${attribute.identifier}',
-                                               'eventObjects${event_id}',
-                                               '/events/event/objects/objects/${event_id}')}" title="delete">
-                                 <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
-                              </a>
-                            %endif
+                            %for option in attribute.definition.handler.get_ordered_view_options(event_id,object.identifier,attribute.identifier):
+                                <%
+                                show = option.show_always
+                                if not show:
+                                  if option.validation_option:
+                                    show = owner and attribute.bit_value.is_proposal and not attribute.bit_value.is_validated
+                                  elif option.owner_option:
+                                    show = owner
+                                  elif option.attribute_owner_option:
+                                    show = attribtue_owner and not attribute.bit_value.is_validated 
+                                  else:
+                                    show = False 
+                                    
+                                %>
+                                %if show:
+                                  %if option.class_name == 'ModalOption':
+                                    <%call expr="modalDialog(option, event_id, object.identifier)"/>
+                                  %elif option.class_name == 'YesNoDialogOption':
+                                    <%call expr="yesnoDialog(option, event_id, object.identifier)"/>
+                                  %else:
+                                    UdO
+                                  %endif
+                                %endif
+                            %endfor
                           </td>
                         </tr>
                         %endif
@@ -214,6 +213,43 @@ else:
     </div>
   %endif
 </%def>
+
+<%def name="modalDialog(option, event_id, obj_id)">
+
+<% 
+if option.refresh:
+  refresh_str = 'true'
+else:
+  refresh_str = 'false'
+post_url_str='null'
+if option.post_url:
+  post_url_str = "'"+ option.post_url + "'"
+%>
+<a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','${option.title}','${option.content_url}',${post_url_str},${refresh_str},'eventObjects${event_id}','/events/event/objects/objects/${event_id}/${obj_id}');">
+  <span class="${option.icon_name}" title="${option.description}"></span>
+</a>
+
+</%def>
+
+<%def name="yesnoDialog(option, event_id, obj_id)">
+<% 
+if option.refresh:
+  refresh_str = 'true'
+else:
+  refresh_str = 'false'
+post_url_str='null'
+if option.post_url:
+  post_url_str = "'"+ option.post_url + "'"
+%>
+<a href="#" role="button"
+  onclick="if (confirm('${option.message}')) {
+      dialogCall('${option.post_url}',
+                 'eventObjects${event_id}',
+                 '/events/event/objects/objects/${event_id}/${obj_id}')}" title="${option.description}">
+   <span class="${option.icon_name}" title="${option.description}"></span>
+</a>
+</%def>
+
 
 <%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None)">
     %if not object_list is None:

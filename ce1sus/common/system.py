@@ -202,3 +202,16 @@ class System(object):
     Close system
     """
     self.connector.close()
+
+
+def put_to_array(array, position, value):
+  if position:
+    real_pos = None
+    if position < 0:
+      real_pos = len(array) + position
+    else:
+      real_pos = position
+
+    array.insert(real_pos, value)
+  else:
+    array.append(value)

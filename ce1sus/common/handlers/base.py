@@ -10,6 +10,8 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+from ce1sus.web.views.helpers.tabs import ModalOption, YesNoDialogOption
+from ce1sus.common.system import put_to_array
 
 
 class HandlerException(Exception):
@@ -28,6 +30,60 @@ class HandlerBase(object):
 
   def __init__(self, config):
     self.config = config
+
+  def __default_handler_view_options(self, event_id, obj_id, attr_id):
+    eye = ModalOption(title=u'Attribute #{0} Details'.format(attr_id),
+                      owner_option=False,
+                      attribute_owner_option=False,
+                      refresh=False,
+                      position=0,
+                      icon_name='glyphicon glyphicon-eye-open',
+                      post_url=None,
+                      content_url='/events/event/attribute/view/{0}/{1}/{2}'.format(event_id, obj_id, attr_id),
+                      description='View details'
+                      )
+    pencil = ModalOption(title=u'Edit Attribute #{0}'.format(attr_id),
+                      owner_option=True,
+                      attribute_owner_option=True,
+                      refresh=True,
+                      position=1,
+                      icon_name='glyphicon glyphicon-pencil',
+                      post_url='/events/event/bit_value/modify_attribute_properties',
+                      content_url='/events/event/attribute/edit/{0}/{1}/{2}'.format(event_id, obj_id, attr_id),
+                      description='Modify Attribute'
+                      )
+    validation = YesNoDialogOption(owner_option=True,
+                               validation_option=True,
+                               attribute_owner_option=False,
+                               refresh=True,
+                               position=-1,
+                               icon_name='glyphicon glyphicon-saved',
+                               message=u'Are you sure you want to validate Attribute #{0}?'.format(attr_id),
+                               post_url=u'/events/event/attribute/validate_attribute?event_id={0}&attribute_id={1}'.format(event_id, attr_id),
+                               description='Validate Attribute')
+    remove = YesNoDialogOption(owner_option=True,
+                               attribute_owner_option=True,
+                               refresh=True,
+                               position=None,
+                               icon_name='glyphicon glyphicon-remove-circle',
+                               message=u'Are you sure you want to delete Attribute #{0}?'.format(attr_id),
+                               post_url=u'/events/event/attribute/remove_attribute?event_id={0}&attribute_id={1}'.format(event_id, attr_id),
+                               description='Remove Attribute')
+    return [eye, pencil, remove, validation]
+
+  def handler_view_options(self, event_id, obj_id, attr_id):
+    return None
+
+  def get_ordered_view_options(self, event_id, obj_id, attr_id):
+    result = list()
+
+    for option in self.__default_handler_view_options(event_id, obj_id, attr_id):
+      put_to_array(result, option.position, option)
+    additional_options = self.handler_view_options(event_id, obj_id, attr_id)
+    if additional_options:
+      for option in additional_options:
+        put_to_array(result, option.position, option)
+    return result
 
   def render_gui_get(self, template_renderer, action, attribute, user):
     """
