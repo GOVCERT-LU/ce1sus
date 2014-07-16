@@ -162,7 +162,8 @@ class AttributesView(Ce1susBaseView):
       user = self._get_user()
       params = dict()
       for key, value in kwargs.iteritems():
-        params[key] = value
+        # note keep everything in utf-8
+        params[key] = value.decode('utf-8', 'replace')
       proposal = not (event.creator_group.identifier == user.default_group.identifier)
 
       attribute, additional_attributes = self.attributes_controller.populate_web_attributes(user,

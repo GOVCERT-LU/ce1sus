@@ -659,7 +659,7 @@ class Attribute(BASE):
                                   getattr(self.definition, 'regex'),
                                   u'The value "{0}" does not match {1} for definition {2}'.format(value_obj.value,
                                                                                                  getattr(self.definition, 'regex'),
-                                                                                                 getattr(self.definition, 'name')),
+                                                                                                 getattr(self.definition, 'name')).encode('utf-8'),
                                   True)
     errors = not getattr(value_obj, 'validate')()
     if errors:
