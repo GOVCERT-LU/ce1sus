@@ -44,7 +44,7 @@
 <%call expr="base_forms.generic_modal_form(modal_id='addUserModal',
                                            url='/admin/users/modify_user',
                                            refresh_url='/admin/users', 
-                                           refresh_container='adminUsers')">
+                                           refresh_container='Users')">
   <input type="hidden" name="action" value="insert">
   <%call expr="modals.save_button_modal(id='addUserModal',
                                         title='Add User',
@@ -52,7 +52,7 @@
 </%call>
 
 <!-- LdapUserTable -->
-<%call expr="base_forms.generic_modal_form(modal_id='addLDAPUserModal',url='/admin/users/modify_user',refresh_url='/admin/users', refresh_container='adminUsers')">
+<%call expr="base_forms.generic_modal_form(modal_id='addLDAPUserModal',url='/admin/users/modify_user',refresh_url='/admin/users', refresh_container='Users')">
 <%call expr="modals.save_button_modal('addLDAPUserModal', title='Add LDAP User', content_url='/admin/users/ldap_users_table', big=True)"/>
 </%call>
 

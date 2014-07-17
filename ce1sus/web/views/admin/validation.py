@@ -189,3 +189,5 @@ class AdminValidationView(Ce1susBaseView):
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
+
+

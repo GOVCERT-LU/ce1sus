@@ -171,9 +171,11 @@ class EventController(Ce1susBaseController):
     """
     kwargs['user'] = user
     event = self.__popultate_event(**kwargs)
-    event.bit_value.is_web_insert = True
-    event.bit_value.is_validated = True
-    event.bit_value.is_shareable = True
+    is_validation = kwargs.get('validation', None)
+    if not is_validation:
+      event.bit_value.is_web_insert = True
+      event.bit_value.is_validated = True
+      event.bit_value.is_shareable = True
     return event
 
   def populate_rest_event(self, user, dictionary, action):

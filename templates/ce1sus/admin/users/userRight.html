@@ -15,7 +15,7 @@
    			<button class="btn btn-danger"
           onclick="if (confirm('Are you sure you want to delete?')) {
             dialogCall('/admin/users/modify_user?identifier=${user.identifier}&action=remove',
-                       'adminUsers',
+                       'Users',
                        '/admin/users')}">
           Delete
         </button>
@@ -29,7 +29,7 @@
   <!-- EditObjectForm -->
   <%call expr="base_forms.generic_modal_form(modal_id='editUserModal',
                                              url='/admin/users/modify_user',
-                                             refresh_url='/admin/users/right_content/{0}'.format(user.identifier), 
+                                             refresh_url='/admin/users/{0}'.format(user.identifier), 
                                              refresh_container='UserRightContent')">
     <input type="hidden" name="action" value="update">
     <%call expr="modals.save_button_modal(id='editUserModal',

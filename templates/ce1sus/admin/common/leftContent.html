@@ -41,7 +41,7 @@
 <%call expr="base_forms.generic_modal_form(modal_id='add{0}Modal'.format(id),
                                            url=action_url,
                                            refresh_url=refresh_url, 
-                                           refresh_container='admin{0}'.format(id))">
+                                           refresh_container='{0}s'.format(id))">
 <input type="hidden" name="action" value="insert">
 <%call expr="modals.save_button_modal(id='add{0}Modal'.format(id),
                                       title='Add {0}'.format(id),

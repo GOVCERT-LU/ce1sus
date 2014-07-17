@@ -22,7 +22,7 @@ from ce1sus.web.views.helpers.tabs import AdminTab
 class AdminSubGroupView(Ce1susBaseView):
   """index view handling all display in the index section"""
 
-  ID = 'Subgroup'
+  ID = 'SubGroup'
 
   def tabs(self):
     subgr_tab = AdminTab(title='SubGroups',
