@@ -1,5 +1,6 @@
 <%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 <%namespace name="modals" file="/dagr/components/modals.html"/>
+<%namespace name="collapse" file="/ce1sus/components/collapse.html"/>
 
 <legend>Flat view</legend>
 <script type="text/javascript">
@@ -58,33 +59,31 @@
       <td style="text-align:center">${iocicon}</td>
       <td><%call expr="messages_and_text.object_to_html(flat_object[1].created, shorten_to=60,use_plain_text=False)"/></td>
       <td style="width: 60px;">
-        <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Details','/events/event/attribute/view/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}',null,false,'flatView${event_id}','/events/event/objects/flat_objects/${event_id}');">
-           <span class="glyphicon glyphicon-eye-open" title="View details"></span>
-        </a>
-        
-        %if flat_object[1].bit_value.is_validated_and_shared or owner or attribute_owner:
-          <a href="#" onclick="showPaginatorModal('paginatorModalAttribute','Attribute #${flat_object[1].identifier} Properties','/events/event/bit_value/set_attribute_properties/${event_id}/${flat_object[1].object.identifier}/${flat_object[1].identifier}','/events/event/bit_value/modify_attribute_properties','True','flatView${event_id}','/events/event/objects/flat_objects/${event_id}');">
-             <span class="glyphicon glyphicon-fullscreen" title="Modify properties"></span>
-          </a>
-          %if owner and flat_object[1].bit_value.is_proposal and not flat_object[1].bit_value.is_validated:
-          <a href="#" role="button"
-                    onclick="if (confirm('Are you sure you want to validate this attribute?')) {
-                        dialogCall('/events/event/attribute/validate_attribute?event_id=${event_id}&attribute_id=${flat_object[1].identifier}',
-                                   'eventObjects${event_id}',
-                                   '/events/event/objects/objects/${event_id}')}" title="delete">
-                     <span class="glyphicon glyphicon-saved" title="Remove"></span>
-          </a>
-          %endif
-          %if owner or (attribute_owner and not flat_object[1].bit_value.is_validated):
-          <a href="#" role="button"
-            onclick="if (confirm('Are you sure you want to delete?')) {
-                dialogCall('/events/event/attribute/remove_attribute?event_id=${event_id}&attribute_id=${flat_object[1].identifier}',
-                           'flatView${event_id}',
-                           '/events/event/objects/flat_objects/${event_id}')}" title="delete">
-             <span class="glyphicon glyphicon-remove-circle" title="Remove"></span>
-          </a>
-          %endif
-        %endif
+            %for option in flat_object[1].definition.handler.get_ordered_view_options(event_id,flat_object[0].identifier,flat_object[1].identifier):
+                <%
+                show = option.show_always
+                if not show:
+                  if option.validation_option:
+                    show = owner and flat_object[1].bit_value.is_proposal and not flat_object[1].bit_value.is_validated
+                  elif option.owner_option:
+                    show = owner
+                  elif option.attribute_owner_option:
+                    show = attribtue_owner and not flat_object[1].bit_value.is_validated 
+                  else:
+                    show = False 
+                    
+                %>
+                %if show:
+                  %if option.class_name == 'ModalOption':
+                    <%call expr="collapse.modalDialog(option, event_id, 'ObjectsFlat','/events/event/objects/flat_objects/{0}'.format(event_id))"/>
+                  %elif option.class_name == 'YesNoDialogOption':
+                    <%call expr="collapse.yesnoDialog(option, event_id, 'ObjectsFlat','/events/event/objects/flat_objects/{0}'.format(event_id))"/>
+                  %else:
+                    UdO
+                  %endif
+                %endif
+            %endfor
+       
         </td>
         
                       

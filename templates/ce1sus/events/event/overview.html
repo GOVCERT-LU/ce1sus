@@ -37,8 +37,8 @@
   </div>
 </div>
 <!-- Edit Modal -->
-      <%call expr="base_forms.generic_modal_form(modal_id='event{0}DetailModal'.format(event.identifier),url='/events/event/modify_event',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
-        <%call expr="modals.save_button_modal(id='event{0}DetailModal'.format(event.identifier),title='Add a comment',content_url='/events/event/edit_event/{0}'.format(event.identifier))"/>
+      <%call expr="base_forms.generic_modal_form(modal_id='event{0}DetailModal'.format(event.identifier),url='/events/event/modify_event',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='Overview{0}'.format(event.identifier))">
+        <%call expr="modals.save_button_modal(id='event{0}DetailModal'.format(event.identifier),title='Edit Event{0}'.format(event.identifier),content_url='/events/event/edit_event/{0}'.format(event.identifier))"/>
       </%call>
 
 
@@ -112,7 +112,7 @@
                       <a href="#"  role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                             dialogCall('/events/event/comment/modify_comment?comment_id=${comment.identifier}&event_id=${event.identifier}&action=remove',
-                                       'eventOverView${event.identifier}',
+                                       'Overview${event.identifier}',
                                        '/events/event/event/${event.identifier}')}"><i class="glyphicon glyphicon-remove" title="Remove"/></a>
                 </div>
               </td>
@@ -125,12 +125,12 @@
         <a href="#addComment${event.identifier}Modal" role="button" class="btn btn-default" data-toggle="modal" onclick="">Add new Comment</a>
       </div>
 
-      <%call expr="base_forms.generic_modal_form(modal_id='addComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
+      <%call expr="base_forms.generic_modal_form(modal_id='addComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='Overview{0}'.format(event.identifier))">
         <input type="hidden" name="action" value="insert">
         <%call expr="modals.save_button_modal(id='addComment{0}Modal'.format(event.identifier),title='Add a comment',content_url='/events/event/comment/add_comment/{0}'.format(event.identifier))"/>
       </%call>
 
-      <%call expr="base_forms.generic_modal_form(modal_id='editComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='eventOverView{0}'.format(event.identifier))">
+      <%call expr="base_forms.generic_modal_form(modal_id='editComment{0}Modal'.format(event.identifier),url='/events/event/comment/modify_comment',refresh_url='/events/event/event/{0}'.format(event.identifier),refresh_container='Overview{0}'.format(event.identifier))">
         <input type="hidden" name="action" value="update">
         <%call expr="modals.save_button_modal(id='editComment{0}Modal'.format(event.identifier),title='Edit comment',content_url=None)"/>
       </%call>

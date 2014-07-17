@@ -4,7 +4,7 @@
 
 <h4>Groupmanagment:</h4>
 %if owner:
-<%call expr="tables.add_remove_tables(id='foo1',
+<%call expr="tables.add_remove_tables(id='MainGroups',
                                       identifier=event.identifier,
                                       identifier_name='Event',
                                       moving_name='groups',
@@ -13,11 +13,11 @@
                                       attribute_name='name',
                                       post_action='/events/event/groups/modify_groups',
                                       refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
-                                      refresh_container='eventGroups{0}'.format(event.identifier),
+                                      refresh_container='Groups{0}'.format(event.identifier),
                                       enabled=enabled
                                       )"/>
 
-<%call expr="tables.add_remove_tables(id='foo2',
+<%call expr="tables.add_remove_tables(id='SubGroups',
                                       identifier=event.identifier,
                                       identifier_name='Event',
                                       moving_name='subgroups',
@@ -26,7 +26,7 @@
                                       attribute_name='name',
                                       post_action='/events/event/groups/modify_subgroups',
                                       refresh_url='/events/event/groups/groups/{0}'.format(event.identifier),
-                                      refresh_container='eventGroups{0}'.format(event.identifier),
+                                      refresh_container='Groups{0}'.format(event.identifier),
                                       enabled=enabled
                                       )"/>
 %else:

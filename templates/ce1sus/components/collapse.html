@@ -71,7 +71,7 @@ else:
                          <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
 -                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
                        %endif
-                       
+                       e
                        %if allowed:
                        <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify object"><span class="glyphicon glyphicon-list"></span></a>
                        <a href="#setPropertiesModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify properties"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -81,14 +81,14 @@ else:
                        <a href="#" class="btn btn-danger" role="button"
                         onclick="if (confirm('Are you sure you want to delete?')) {
                                 dialogCall('/events/event/objects/remove_object?event_id=${event_id}&object_id=${object.identifier}',
-                                           'eventObjects${event_id}',
+                                           'ObjectsStructured${event_id}',
                                            '/events/event/objects/objects/${event_id}')}"><span class="glyphicon glyphicon-remove-circle"  title="delete"></span></a>
                         <!--  dont remove this -->
                         %endif
                      </div>
                      </div>
 
-			                <%call expr="attribute_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),content_id='editBox_eventAttributeFromNoneHidden',url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+			                <%call expr="attribute_modal_form(modal_id='addObjectAttributeModal{0}'.format(object.identifier),content_id='editBox_eventAttributeFromNoneHidden',url='/events/event/attribute/call_handler_post',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
 			                  <input type="hidden" name="action" value="insert">
 			                  <%call expr="modals.save_button_modal(id='addObjectAttributeModal{0}'.format(object.identifier),title='Add attribute',content_url='/events/event/attribute/add_attribute/{0}/{1}'.format(event_id, object.identifier), big=True)"/>
 			                </%call>
@@ -97,20 +97,20 @@ else:
 			                  <%call expr="forms.eventObjectForm(event_id,object, False,obj_definitions)"/>
 			                </%call>
 			           %if allowed:
-			                <%call expr="base_forms.generic_modal_form(modal_id='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attach_child_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+			                <%call expr="base_forms.generic_modal_form(modal_id='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attach_child_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
 			                    <%call expr="modals.save_button_modal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',content_url='/events/event/objects/add_child_object/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
-			                <%call expr="base_forms.generic_modal_form(modal_id='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modify_parent',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+			                <%call expr="base_forms.generic_modal_form(modal_id='setParentModal{0}'.format(object.identifier),url='/events/event/objects/modify_parent',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
 			                    <%call expr="modals.save_button_modal(id='setParentModal{0}'.format(object.identifier),title='Set Object Parent',content_url='/events/event/objects/set_parent/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
                       
                             %if owner and object.bit_value.is_proposal and not object.bit_value.is_validated:
-                              <%call expr="base_forms.generic_modal_form(modal_id='validateObjectModal{0}'.format(object.identifier),url='/events/event/objects/validate_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+                              <%call expr="base_forms.generic_modal_form(modal_id='validateObjectModal{0}'.format(object.identifier),url='/events/event/objects/validate_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
                                   <%call expr="modals.save_button_modal(id='validateObjectModal{0}'.format(object.identifier),title='Validate Object',content_url='/events/event/objects/validate_object_modal/{0}/{1}'.format(event_id, object.identifier))"/>
                               </%call>
                             %endif
                             
-			                <%call expr="base_forms.generic_modal_form(modal_id='setPropertiesModal{0}'.format(object.identifier),url='/events/event/bit_value/modify_object_properties',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='eventObjects{0}'.format(event_id))">
+			                <%call expr="base_forms.generic_modal_form(modal_id='setPropertiesModal{0}'.format(object.identifier),url='/events/event/bit_value/modify_object_properties',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
                                 <%call expr="modals.save_button_modal(id='setPropertiesModal{0}'.format(object.identifier),title='Set Object Properties',content_url='/events/event/bit_value/set_object_properties/{0}/{1}'.format(event_id, object.identifier))"/>
                             </%call>
                        %endif
@@ -186,9 +186,9 @@ else:
                                 %>
                                 %if show:
                                   %if option.class_name == 'ModalOption':
-                                    <%call expr="modalDialog(option, event_id, object.identifier)"/>
+                                    <%call expr="modalDialog(option, event_id,'ObjectsStructured','/events/event/objects/objects/{0}/{1}'.format(event_id,object.identifier))"/>
                                   %elif option.class_name == 'YesNoDialogOption':
-                                    <%call expr="yesnoDialog(option, event_id, object.identifier)"/>
+                                    <%call expr="yesnoDialog(option, event_id, 'ObjectsStructured','/events/event/objects/objects/{0}/{1}'.format(event_id,object.identifier))"/>
                                   %else:
                                     UdO
                                   %endif
@@ -214,7 +214,7 @@ else:
   %endif
 </%def>
 
-<%def name="modalDialog(option, event_id, obj_id)">
+<%def name="modalDialog(option, event_id, container_prefix, refresh_url)">
 
 <% 
 if option.refresh:
@@ -225,13 +225,13 @@ post_url_str='null'
 if option.post_url:
   post_url_str = "'"+ option.post_url + "'"
 %>
-<a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','${option.title}','${option.content_url}',${post_url_str},${refresh_str},'eventObjects${event_id}','/events/event/objects/objects/${event_id}/${obj_id}');">
+<a href="#" onclick="showPaginatorModal('paginatorModalAttributeObjectsStruct','${option.title}','${option.content_url}',${post_url_str},${refresh_str},'${container_prefix}${event_id}','${refresh_url}');">
   <span class="${option.icon_name}" title="${option.description}"></span>
 </a>
 
 </%def>
 
-<%def name="yesnoDialog(option, event_id, obj_id)">
+<%def name="yesnoDialog(option, event_id, container_prefix, refresh_url)">
 <% 
 if option.refresh:
   refresh_str = 'true'
@@ -244,8 +244,8 @@ if option.post_url:
 <a href="#" role="button"
   onclick="if (confirm('${option.message}')) {
       dialogCall('${option.post_url}',
-                 'eventObjects${event_id}',
-                 '/events/event/objects/objects/${event_id}/${obj_id}')}" title="${option.description}">
+                 '${container_prefix}${event_id}',
+                 '${refresh_url}')}" title="${option.description}">
    <span class="${option.icon_name}" title="${option.description}"></span>
 </a>
 </%def>
