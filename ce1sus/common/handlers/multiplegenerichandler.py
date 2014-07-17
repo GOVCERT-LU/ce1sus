@@ -13,7 +13,7 @@ __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
-from ce1sus.common.handlers.base import HandlerException
+from ce1sus.common.handlers.base import HandlerException, UndefinedException
 from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
@@ -30,28 +30,35 @@ class MultipleGenericHandler(GenericHandler):
     return params.get('value')
 
   def process_gui_post(self, obj, definitions, user, params):
-    definition = self._get_main_definition(definitions)
-    attributes = list()
-    value = params.get('value')
-    # the value can either be a list or a string
-    if isinstance(value, types.StringTypes):
-      values = self.__get_string_attribtues(params)
-    else:
-      values = self.__get_list_attribtues(params)
-    if value:
-      for value in values:
-        value = value.strip('\n\r')
+    action = params.get('action', None)
+    if action:
+      if action == 'insert':
+        definition = self._get_main_definition(definitions)
+        attributes = list()
+        value = params.get('value')
+        # the value can either be a list or a string
+        if isinstance(value, types.StringTypes):
+          values = self.__get_string_attribtues(params)
+        else:
+          values = self.__get_list_attribtues(params)
         if value:
-          params['value'] = value
+          for value in values:
+            value = value.strip('\n\r')
+            if value:
+              params['value'] = value
+              attribute = self.create_attribute(params, obj, definition, user)
+              attributes.append(attribute)
+          attribute = attributes.pop(0)
+          return attribute, attributes
+        else:
+          params['value'] = ''
           attribute = self.create_attribute(params, obj, definition, user)
-          attributes.append(attribute)
-      attribute = attributes.pop(0)
-      return attribute, attributes
-    else:
-      params['value'] = ''
-      attribute = self.create_attribute(params, obj, definition, user)
-      attribute.value = FailedValidation('', 'No input given. Please enter something. Note that the multiline feature is not available anymore.')
-      return attribute, None
+          attribute.value = FailedValidation('', 'No input given. Please enter something. Note that the multiline feature is not available anymore.')
+          return attribute, None
+      elif action == 'update':
+        return GenericHandler.process_gui_post(self, obj, definitions, user, params)
+      else:
+        raise UndefinedException(u'Action {0} is not defined'.format(action))
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/multGeneric.html',

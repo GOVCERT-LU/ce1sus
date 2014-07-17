@@ -15,11 +15,11 @@ from ce1sus.web.views.base import SESSION_USER
 from cherrypy.lib.static import serve_file
 from dagr.helpers.config import ConfigException
 import cherrypy
+from ce1sus.common.handlers.base import HandlerException, UndefinedException
 from ce1sus.common.handlers.generichandler import GenericHandler
 from dagr.helpers.datumzait import DatumZait
 from os.path import isfile, getsize, basename, exists, dirname
 import dagr.helpers.hash as hasher
-from ce1sus.common.handlers.base import HandlerException
 from shutil import move, rmtree
 from os import makedirs
 import magic
@@ -312,9 +312,14 @@ class FileHandler(GenericHandler):
       return attribute, None
 
   def process_gui_post(self, obj, definitions, user, params):
-    action = params.get('action')
-    if action == 'insert':
-      return self.insert(obj, definitions, user, params)
+    action = params.get('action', None)
+    if action:
+      if action == 'insert':
+        return self.insert(obj, definitions, user, params)
+      elif action == 'update':
+        raise HandlerException(u'File Handlers do not support editing.')
+      else:
+        raise UndefinedException(u'Action {0} is not defined'.format(action))
 
   @staticmethod
   def __get_orig_filename(attribtue):

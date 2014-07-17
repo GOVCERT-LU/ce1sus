@@ -155,7 +155,10 @@ class AttributesView(Ce1susBaseView):
     try:
       # Clear Session variable
       action = kwargs.get('action')
-      event = self.attributes_controller.get_event_by_id(kwargs.pop('event_id'))
+      event_id = kwargs.pop('event_id', None)
+      if not event_id:
+        return self._render_error_page('You tried to save an empty page please close and begin anew')
+      event = self.attributes_controller.get_event_by_id(event_id)
       self._check_if_event_is_viewable(event)
       obj = self.attributes_controller.get_object_by_id(kwargs.pop('object_id'))
       def_id = kwargs.pop('definition')
@@ -186,13 +189,15 @@ class AttributesView(Ce1susBaseView):
                                                               attribute,
                                                               additional_attributes,
                                                               obj.bit_value.is_shareable))
+      if action == 'update':
+        # TODO: modify attribute
+        attribute, valid = self.attributes_controller.udpate_attributes(user, attribute)
+
+        if not valid:
+          return 'Invalid'
 
       if self.send_mails and (event.creator_group.identifier != user.default_group.identifier):
           self.send_notification_mail(event)
-
-      if action == 'update':
-        # TODO: modify attribute
-        pass
 
       return self._return_ajax_ok()
     except (ControllerException, HandlerException) as error:
@@ -221,7 +226,24 @@ class AttributesView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def edit(self, event_id, object_id, attribute_id):
-    return 'Edit form'
+    try:
+      event = self.attributes_controller.get_event_by_id(event_id)
+      self._is_event_owner(event)
+      attribute = self.attributes_controller.get_attribute_by_id(attribute_id)
+      handler = attribute.definition.handler
+      additional_attributes = list()
+      obj = attribute.object
+      handler_content = handler.render_gui_edit(self._render_template,
+                                   attribute,
+                                   additional_attributes,
+                                   obj.bit_value.is_shareable)
+      return self._render_template('/events/event/attributes/editAttributesModal.html',
+                                   event_id=event_id,
+                                   object_id=object_id,
+                                   attribute=attribute,
+                                   handler_content=handler_content)
+    except ControllerException as error:
+      return self._render_error_page(error)
 
   @require(require_referer(('/internal')))
   @cherrypy.expose

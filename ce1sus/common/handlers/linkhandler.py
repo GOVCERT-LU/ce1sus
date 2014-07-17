@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 from ce1sus.common.handlers.generichandler import GenericHandler
 import types
 from dagr.helpers.rt import RTTickets
-from ce1sus.common.handlers.base import HandlerException
+from ce1sus.common.handlers.base import HandlerException, UndefinedException
 from dagr.web.views.classes import Link
 from dagr.helpers.validator.objectvalidator import FailedValidation
 
@@ -64,36 +64,43 @@ class RTHandler(GenericHandler):
 
   def process_gui_post(self, obj, definitions, user, params):
     # check if params contains value
-    definition = self._get_main_definition(definitions)
-    values = params.get('value', None)
-    if values:
-      value_arry = values.split(',')
-      if len(value_arry) == 1:
-        attribute = GenericHandler.create_attribute(params,
-                                                    obj,
-                                                    definition,
-                                                    user)
-        return attribute, None
-      else:
-        attributes = list()
-        first = True
-        for value in value_arry:
-          params['value'] = value
-          attribute = GenericHandler.create_attribute(params,
-                                                  obj,
-                                                  definition,
-                                                  user)
-          if first:
-            main_attribute = attribute
-            first = False
+    action = params.get('action', None)
+    if action:
+      if action == 'insert':
+        definition = self._get_main_definition(definitions)
+        values = params.get('value', None)
+        if values:
+          value_arry = values.split(',')
+          if len(value_arry) == 1:
+            attribute = GenericHandler.create_attribute(params,
+                                                        obj,
+                                                        definition,
+                                                        user)
+            return attribute, None
           else:
-            attributes.append(attribute)
-        return main_attribute, attributes
-    else:
-      params['value'] = ''
-      attribute = self.create_attribute(params, obj, definition, user)
-      attribute.value = FailedValidation('', 'No input given. Please enter something.')
-      return attribute, None
+            attributes = list()
+            first = True
+            for value in value_arry:
+              params['value'] = value
+              attribute = GenericHandler.create_attribute(params,
+                                                      obj,
+                                                      definition,
+                                                      user)
+              if first:
+                main_attribute = attribute
+                first = False
+              else:
+                attributes.append(attribute)
+            return main_attribute, attributes
+        else:
+          params['value'] = ''
+          attribute = self.create_attribute(params, obj, definition, user)
+          attribute.value = FailedValidation('', 'No input given. Please enter something.')
+          return attribute, None
+      elif action == 'update':
+        return GenericHandler.process_gui_post(self, obj, definitions, user, params)
+      else:
+        raise UndefinedException(u'Action {0} is not defined'.format(action))
 
   def render_gui_view(self, template_renderer, attribute, user):
     # convert attribute's value

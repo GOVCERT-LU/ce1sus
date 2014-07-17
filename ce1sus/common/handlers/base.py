@@ -21,6 +21,10 @@ class HandlerException(Exception):
   pass
 
 
+class UndefinedException(HandlerException):
+  pass
+
+
 class HandlerBase(object):
   """
   Base class for handlers
@@ -48,7 +52,7 @@ class HandlerBase(object):
                       refresh=True,
                       position=1,
                       icon_name='glyphicon glyphicon-pencil',
-                      post_url='/events/event/bit_value/modify_attribute_properties',
+                      post_url='/events/event/attribute/call_handler_post',
                       content_url='/events/event/attribute/edit/{0}/{1}/{2}'.format(event_id, obj_id, attr_id),
                       description='Modify Attribute'
                       )

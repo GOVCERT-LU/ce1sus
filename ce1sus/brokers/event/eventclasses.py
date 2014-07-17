@@ -573,6 +573,19 @@ class Attribute(BASE):
         pass
     return self.internal_value
 
+  def __set_value(self, value):
+    if self.__value_obj is None:
+      self.__value_obj = self.__get_value_obj()
+    # Take into account the failed validation objects
+    if isinstance(self.__value_obj, FailedValidation):
+      self.internal_value = self.__value_obj
+    else:
+      try:
+        self.__value_obj.value = value
+        self.internal_value = self.__value_obj.value
+      except AttributeError:
+        pass
+
   @property
   def value_id(self):
     """
@@ -616,25 +629,33 @@ class Attribute(BASE):
     return self.plain_value
 
   @value.setter
-  def value(self, value):
+  def value(self, new_value):
     """
     Plain value setter, somehow :)
     """
-    if self.definition:
-      classname = getattr(self.definition, 'classname')
-      value_instance = get_class('ce1sus.brokers.valuebroker', classname)()
-      value_instance.attribute_id = self.identifier
-      value_instance.attribute = self
-      value_instance.value = value
-      if self.object:
-        value_instance.event = getattr(self.object, 'event')
-      else:
-        raise Exception(u'No object was specified')
-      # set the value
-      attr_name = classname.replace('V', '_v').lower()
-      setattr(self, attr_name, value_instance)
+    # check first if not already set
+    try:
+      value = self.plain_value
+    except Exception:
+      value = None
+    if value:
+      self.__set_value(new_value)
     else:
-      raise Exception(u'No definition was specified')
+      if self.definition:
+        classname = getattr(self.definition, 'classname')
+        value_instance = get_class('ce1sus.brokers.valuebroker', classname)()
+        value_instance.attribute_id = self.identifier
+        value_instance.attribute = self
+        value_instance.value = new_value
+        if self.object:
+          value_instance.event = getattr(self.object, 'event')
+        else:
+          raise Exception(u'No object was specified')
+        # set the value
+        attr_name = classname.replace('V', '_v').lower()
+        setattr(self, attr_name, value_instance)
+      else:
+        raise Exception(u'No definition was specified')
 
   def __get_handler_instance(self):
     """

@@ -11,6 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+from dagr.controllers.base import ControllerException
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import ValidationException, BrokerException
 from ce1sus.common.handlers.base import HandlerException
@@ -85,6 +86,32 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  def udpate_attributes(self, user, attribute):
+    try:
+      user = self._get_user(user.username)
+      valid = True
+      try:
+        if isinstance(attribute.value, FailedValidation):
+          valid = False
+        else:
+          self.attribute_broker.update(attribute, commit=False)
+      except ValidationException:
+        valid = False
+      if valid:
+        obj = attribute.object
+        self.object_broker.update_object(user, obj, commit=False)
+        event = obj.event
+        if self.is_event_owner(event, user):
+          event.published = 0
+        self.event_broker.update_event(user, event, commit=False)
+        self.attribute_broker.do_commit(True)
+      else:
+        self.attribute_broker.do_rollback()
+      return attribute, valid
+
+    except BrokerException as error:
+      self._raise_exception(error)
+
   def insert_attributes(self, user, obj, attribute, additional_attributes):
     """
     inserts the attributes to the DB
@@ -131,29 +158,45 @@ class AttributesController(Ce1susBaseController):
     try:
       if hasattr(user, 'session'):
         user = self._get_user(user.username)
+      definitions = dict()
+      definitions[definition.chksum] = definition
+      handler_instance = definition.handler
       if action == 'insert':
-        definitions = dict()
-        definitions[definition.chksum] = definition
-        handler_instance = definition.handler
         # get additional definitions if required
         additional_definitions_chksums = handler_instance.get_additinal_attribute_chksums()
         if additional_definitions_chksums:
           additional_definitions = self.attr_def_broker.get_defintion_by_chksums(additional_definitions_chksums)
           for additional_definition in additional_definitions:
             definitions[additional_definition.chksum] = additional_definition
-        if rest:
-          attribute, additional_attributes = handler_instance.process_rest_post(obj,
-                                                                             definitions,
-                                                                             # self._get_user(user.username),
-                                                                             user,
-                                                                             params)
+      elif action == 'update':
+        attr_id = params.pop('attribute_id', None)
+        if attr_id:
+          attribute = self.attribute_broker.get_by_id(attr_id)
+          params['attribute'] = attribute
         else:
-          attribute, additional_attributes = handler_instance.process_gui_post(obj,
-                                                                             definitions,
-                                                                             # self._get_user(user.username),
-                                                                             user,
-                                                                             params)
+          raise ControllerException('Attribute id is not defined')
+      else:
+        raise ControllerException('Action is not defined')
+      if rest:
+        attribute, additional_attributes = handler_instance.process_rest_post(obj,
+                                                                           definitions,
+                                                                           # self._get_user(user.username),
+                                                                           user,
+                                                                           params)
+      else:
+        attribute, additional_attributes = handler_instance.process_gui_post(obj,
+                                                                           definitions,
+                                                                           # self._get_user(user.username),
+                                                                           user,
+                                                                           params)
+      if action == 'insert':
         return attribute, additional_attributes
+      elif action == 'update':
+        # edit works only on a single attribute
+        return attribute, list()
+      else:
+        raise Exception('Foo error')
+
     except (BrokerException, HandlerException) as error:
       self._raise_exception(error)
 

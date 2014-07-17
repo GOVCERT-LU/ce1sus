@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.common.handlers.base import HandlerBase
+from ce1sus.common.handlers.base import HandlerBase, UndefinedException
 from ce1sus.brokers.event.eventclasses import Attribute
 from dagr.helpers.datumzait import DatumZait
 from dagr.helpers.converters import ObjectConverter
@@ -82,12 +82,7 @@ class GenericHandler(HandlerBase):
     attribute.object = obj
     attribute.object_id = obj.identifier
 
-    if isinstance(value, list):
-      value = value[0]
-    if hasattr(value, 'strip'):
-      attribute.value = value.strip()
-    else:
-      attribute.value = value
+    GenericHandler.set_value_to_attr(attribute, value)
 
     attribute.definition = definition
     attribute.created = DatumZait.utcnow()
@@ -99,6 +94,15 @@ class GenericHandler(HandlerBase):
     attribute.creator = user
 
     return attribute
+
+  @staticmethod
+  def set_value_to_attr(attribute, value):
+    if isinstance(value, list):
+      value = value[0]
+    if hasattr(value, 'strip'):
+      attribute.value = value.strip()
+    else:
+      attribute.value = value
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     return template_renderer('/common/handlers/generic.html',
@@ -130,9 +134,22 @@ class GenericHandler(HandlerBase):
                              enable_share=share_enabled)
 
   def process_gui_post(self, obj, definitions, user, params):
-    definition = self._get_main_definition(definitions)
-    attribute = self.create_attribute(params, obj, definition, user)
-    return attribute, None
+    action = params.get('action', None)
+    if action:
+      if action == 'insert':
+        definition = self._get_main_definition(definitions)
+        attribute = self.create_attribute(params, obj, definition, user)
+        return attribute, None
+      elif action == 'update':
+        attribute = params.get('attribute', None)
+        if attribute:
+          value = params.get('value', None)
+          GenericHandler.set_value_to_attr(attribute, value)
+          return attribute, None
+        else:
+          raise UndefinedException(u'Attribute is not defined')
+      else:
+        raise UndefinedException(u'Action {0} is not defined'.format(action))
 
   def get_additinal_attribute_chksums(self):
     return list()
