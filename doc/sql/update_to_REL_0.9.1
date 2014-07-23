@@ -1,2 +1,12 @@
 ALTER TABLE `ce1sus`.`DEF_Objects` 
 ADD COLUMN `stix_container` VARCHAR(255) NULL DEFAULT NULL AFTER `sharable`;
+ALTER TABLE `ce1sus`.`Attributes` 
+ADD COLUMN `uuid` VARCHAR(45) NULL AFTER `multiValue`;
+UPDATE `ce1sus`.`Attributes` SET `uuid`=UUID() WHERE uuid is NULL;
+ALTER TABLE `ce1sus`.`Attributes` 
+CHANGE COLUMN `uuid` `uuid` VARCHAR(45) NOT NULL ,
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+ALTER TABLE `ce1sus`.`Objects` 
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+ALTER TABLE `ce1sus`.`Events` 
+ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);

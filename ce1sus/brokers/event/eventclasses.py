@@ -480,6 +480,7 @@ class Attribute(BASE):
   dbcode = Column('code', Integer)
   __bit_code = None
   config = None
+  uuid = Column('uuid', String)
 
   @property
   def shared(self):

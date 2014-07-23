@@ -16,6 +16,7 @@ from ce1sus.brokers.event.eventclasses import Attribute
 from dagr.helpers.datumzait import DatumZait
 from dagr.helpers.converters import ObjectConverter
 from ce1sus.helpers.bitdecoder import BitValue
+import uuid as uuidgen
 
 
 class GenericHandler(HandlerBase):
@@ -47,6 +48,7 @@ class GenericHandler(HandlerBase):
     """
     attribute = Attribute()
     attribute.identifier = None
+    attribute.uuid = unicode(uuidgen.uuid4())
     value = params.get('value', None)
     share = params.get('shared', None)
     attribute.bit_value = BitValue('0', attribute)
