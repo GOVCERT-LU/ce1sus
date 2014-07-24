@@ -65,6 +65,9 @@ class RestController(RestBaseHandler):
     self.instances['definition'] = RestDefinitionHanldler(config)
     self.instances['definitions'] = RestDefinitionsHanldler(config)
 
+  def tabs(self):
+    return None
+
   def __check_version(self, version):
     """checks if the requested version is compatible with this version"""
     try:
