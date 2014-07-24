@@ -31,6 +31,7 @@ from logging import handlers
 from ce1sus.brokers.ce1susbroker import Ce1susBroker
 import logging
 from ce1sus.web.views.helpers.viewhandler import ViewHandler
+from ce1sus.web.views.admin.mappers import AdminMapperView
 
 
 def my_log_traceback(severity=logging.CRITICAL):
@@ -114,6 +115,7 @@ def bootstrap():
   view_handler.add_view(AdminObjectsView(config), '/admin/objects')
   view_handler.add_view(AdminAttributeView(config), '/admin/attributes')
   view_handler.add_view(AdminMailView(config), '/admin/mails')
+  # view_handler.add_view(AdminMapperView(config), '/admin/mappers')
 
 
   # view_handler.add_attribute_view()
@@ -121,7 +123,7 @@ def bootstrap():
 
   if load_rest_api:
     logger.get_logger('BootStrap').debug("Loading Rest...")
-    # view_handler.add_view(RestController(config), '/REST/')
+    view_handler.add_view(RestController(config), '/REST/')
   else:
     logger.get_logger('BootStrap').debug("Loading Rest skipped. Disabled in config")
 
