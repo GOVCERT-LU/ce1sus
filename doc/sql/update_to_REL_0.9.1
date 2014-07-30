@@ -10,3 +10,9 @@ ALTER TABLE `ce1sus`.`Objects`
 ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
 ALTER TABLE `ce1sus`.`Events` 
 ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
+
+UPDATE `ce1sus`.`Attributes` SET `uuid`=(Select UUID());
+
+ALTER TABLE `ce1sus`.`Objects` 
+ADD COLUMN `stix_mapper` VARCHAR(255) NULL AFTER `modified`;
+

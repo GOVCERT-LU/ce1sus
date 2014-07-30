@@ -217,6 +217,9 @@ class DictDBConverter(object):
     """Converts Attribute to RestAttribtue"""
     rest_attribute = RestAttribute()
     rest_attribute.definition = self.__convert_attr_def(attribute.definition, False, with_definition)
+    rest_attribute.group = attribute.creator.default_group.name
+    rest_attribute.created = attribute.created
+    rest_attribute.modified = attribute.modified
     # determine how to rest value
     try:
       handler = attribute.definition.handler
@@ -248,6 +251,9 @@ class DictDBConverter(object):
     rest_event.uuid = event.uuid
     rest_event.published = event.published
     rest_event.group = event.creator_group.name
+    rest_event.created = event.created
+    rest_event.modified = event.modified
+
     rest_event.objects = list()
     if full:
       for obj in event.objects:
@@ -269,6 +275,9 @@ class DictDBConverter(object):
     rest_object.parent_object_id = obj.parent_object_id
     rest_object.event_id = obj.event_id
     rest_object.definition = self.__convert_obj_def(obj.definition, False, with_definition)
+    rest_object.group = obj.creator.default_group.name
+    rest_object.created = obj.created
+    rest_object.modified = obj.modified
     rest_object.attributes = list()
     if full:
       for attribute in obj.attributes:

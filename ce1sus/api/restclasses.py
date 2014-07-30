@@ -17,6 +17,7 @@ from dagr.helpers.hash import hashSHA1
 import base64
 import os
 import json
+from datetime import datetime
 
 
 class RestClass(object):
@@ -38,6 +39,8 @@ class RestClass(object):
     if value or value == 0:
       if isinstance(value, Ce1susWrappedFile):
         return value.get_api_wrapped_value()
+      if isinstance(value, datetime):
+        return value.strftime('%m/%d/%Y %H:%M:%S %Z')
       return value
     else:
       return ''
@@ -62,6 +65,8 @@ class RestEvent(RestClass):
     self.uuid = None
     self.share = 1
     self.group = ''
+    self.created = None
+    self.modified = None
 
   def __set_value(self, dictionary, attributename, value):
     """sets the value for the given attribute if existing else raise an exception"""
@@ -100,6 +105,8 @@ class RestEvent(RestClass):
     result[self.get_classname()]['objects'] = RestClass.convert_value(objs)
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
     result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
+    result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
 
 
@@ -114,6 +121,10 @@ class RestObject(RestClass):
     self.children = list()
     self.share = 1
     self.author = None
+    self.uuid = None
+    self.created = None
+    self.modified = None
+    self.group = None
 
   def to_dict(self):
     result = dict()
@@ -133,6 +144,10 @@ class RestObject(RestClass):
 
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
     result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
+    result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
+    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
+    result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
 
 
@@ -146,6 +161,10 @@ class RestAttribute(RestClass):
     self.ioc = None
     self.share = 1
     self.author = None
+    self.uuid = None
+    self.created = None
+    self.modified = None
+    self.group = None
 
   def to_dict(self):
     result = dict()
@@ -155,6 +174,10 @@ class RestAttribute(RestClass):
     result[self.get_classname()]['ioc'] = u'{0}'.format(RestClass.convert_value(self.ioc))
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
     result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
+    result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
+    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
+    result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
 
 
