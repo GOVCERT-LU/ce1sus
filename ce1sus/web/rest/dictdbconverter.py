@@ -17,7 +17,7 @@ from ce1sus.controllers.event.event import EventController
 from ce1sus.controllers.event.objects import ObjectsController
 from ce1sus.controllers.event.attributes import AttributesController
 from dagr.helpers.hash import hashMD5
-from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute, RestObjectDefinition, RestAttributeDefinition
+from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute, RestObjectDefinition, RestAttributeDefinition, RestGroup
 from ce1sus.brokers.event.eventclasses import Event, Object, Attribute
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
 from ce1sus.common.handlers.base import HandlerException
@@ -213,11 +213,17 @@ class DictDBConverter(object):
       rest_object = self.__convert_attr_def(instance, full, with_definition)
     return rest_object
 
+  def __convert_group(self, group):
+    rest_group = RestGroup()
+    rest_group.name = group.name
+    rest_group.uuid = group.uuid
+    return rest_group
+
   def convert_attribute(self, attribute, owner, full, with_definition):
     """Converts Attribute to RestAttribtue"""
     rest_attribute = RestAttribute()
     rest_attribute.definition = self.__convert_attr_def(attribute.definition, False, with_definition)
-    rest_attribute.group = attribute.creator.default_group.name
+    rest_attribute.group = self.__convert_group(attribute.creator.default_group)
     rest_attribute.created = attribute.created
     rest_attribute.modified = attribute.modified
     # determine how to rest value
@@ -232,8 +238,7 @@ class DictDBConverter(object):
       rest_attribute.share = 1
     else:
       rest_attribute.share = 0
-
-    rest_attribute.author = attribute.creator.default_group.name
+    rest_attribute.uuid = attribute.uuid
     return rest_attribute
 
   def convert_event(self, event, owner, full, with_definition):
@@ -250,7 +255,7 @@ class DictDBConverter(object):
     rest_event.status = event.status
     rest_event.uuid = event.uuid
     rest_event.published = event.published
-    rest_event.group = event.creator_group.name
+    rest_event.group = self.__convert_group(event.creator_group)
     rest_event.created = event.created
     rest_event.modified = event.modified
 
@@ -275,10 +280,13 @@ class DictDBConverter(object):
     rest_object.parent_object_id = obj.parent_object_id
     rest_object.event_id = obj.event_id
     rest_object.definition = self.__convert_obj_def(obj.definition, False, with_definition)
-    rest_object.group = obj.creator.default_group.name
+    rest_object.group = self.__convert_group(obj.creator.default_group)
     rest_object.created = obj.created
     rest_object.modified = obj.modified
     rest_object.attributes = list()
+    rest_object.uuid = obj.uuid
+    if obj.parent_object:
+      rest_object.parent = obj.parent_object.uuid
     if full:
       for attribute in obj.attributes:
         if (attribute.bit_value.is_shareable and attribute.bit_value.is_validated) or owner:
@@ -294,7 +302,6 @@ class DictDBConverter(object):
       rest_object.share = 1
     else:
       rest_object.share = 0
-    rest_object.author = obj.creator.default_group.name
     return rest_object
 
   def __convert_obj_def(self, definition, full, with_definition):

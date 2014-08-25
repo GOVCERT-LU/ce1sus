@@ -129,6 +129,7 @@ class Group(BASE):
   users = relationship('User',
                        primaryjoin='User.group_id==Group.identifier')
   gpg_key = Column('gpg_key', String)
+  uuid = Column('uuid', String)
 
   def validate(self):
     """

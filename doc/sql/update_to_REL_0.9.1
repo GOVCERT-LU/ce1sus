@@ -16,3 +16,10 @@ UPDATE `ce1sus`.`Attributes` SET `uuid`=(Select UUID());
 ALTER TABLE `ce1sus`.`Objects` 
 ADD COLUMN `stix_mapper` VARCHAR(255) NULL AFTER `modified`;
 
+ALTER TABLE `ce1sus`.`Groups` 
+ADD COLUMN `uuid` VARCHAR(45) NULL AFTER `gpg_key`;
+
+UPDATE `ce1sus`.`Groups` SET `uuid`=(Select UUID());
+
+ALTER TABLE `ce1sus`.`Groups` 
+CHANGE COLUMN `uuid` `uuid` VARCHAR(45) NOT NULL ;

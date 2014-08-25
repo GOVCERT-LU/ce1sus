@@ -20,6 +20,7 @@ from dagr.controllers.base import ControllerException
 from ce1sus.brokers.permission.subgroupbroker import SubGroupBroker
 from dagr.helpers.strings import cleanPostValue
 from dagr.helpers.converters import ObjectConverter
+import uuid as uuidgen
 
 
 class GroupController(Ce1susBaseController):
@@ -87,6 +88,8 @@ class GroupController(Ce1susBaseController):
     group = Group()
     if not action == 'insert':
       group = self.group_broker.get_by_id(identifier)
+    if not action == 'update':
+      group.uuid == unicode(uuidgen.uuid4())
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
@@ -94,6 +97,7 @@ class GroupController(Ce1susBaseController):
       ObjectConverter.set_integer(group, 'tlp_lvl', tlp_lvl)
       ObjectConverter.set_integer(group, 'usermails', usermails)
       group.description = cleanPostValue(description)
+
     return group
 
   def insert_group(self, group):

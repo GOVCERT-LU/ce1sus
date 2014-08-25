@@ -12,8 +12,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from abc import abstractmethod
-from ce1sus.api.exceptions import RestClassException, Ce1susInvalidParameter
-from dagr.helpers.hash import hashSHA1
+from ce1sus_api.api.exceptions import RestClassException, Ce1susInvalidParameter
+from ce1sus_api.helpers.hash import hashSHA1
 import base64
 import os
 import json
@@ -46,6 +46,20 @@ class RestClass(object):
       return ''
 
 
+class RestGroup(RestClass):
+  def __init__(self):
+    RestClass.__init__(self)
+    self.name = None
+    self.uuid = None
+
+  def to_dict(self):
+    result = dict()
+    result[self.get_classname()] = dict()
+    result[self.get_classname()]['name'] = RestClass.convert_value(self.name)
+    result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
+    return result
+
+
 # pylint: disable=R0902
 class RestEvent(RestClass):
   """Rest class of an event"""
@@ -64,7 +78,7 @@ class RestEvent(RestClass):
     self.status = None
     self.uuid = None
     self.share = 1
-    self.group = ''
+    self.group = None
     self.created = None
     self.modified = None
 
@@ -104,7 +118,8 @@ class RestEvent(RestClass):
         objs.append(obj.to_dict())
     result[self.get_classname()]['objects'] = RestClass.convert_value(objs)
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
-    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    if self.group:
+      result[self.get_classname()]['group'] = self.group.to_dict()
     result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
     result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
@@ -120,7 +135,6 @@ class RestObject(RestClass):
     self.parent = None
     self.children = list()
     self.share = 1
-    self.author = None
     self.uuid = None
     self.created = None
     self.modified = None
@@ -143,9 +157,9 @@ class RestObject(RestClass):
     result[self.get_classname()]['attributes'] = RestClass.convert_value(attributes)
 
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
-    result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
     result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
-    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    if self.group:
+      result[self.get_classname()]['group'] = self.group.to_dict()
     result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
     result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
@@ -160,11 +174,11 @@ class RestAttribute(RestClass):
     self.value = None
     self.ioc = None
     self.share = 1
-    self.author = None
     self.uuid = None
     self.created = None
     self.modified = None
     self.group = None
+
 
   def to_dict(self):
     result = dict()
@@ -173,9 +187,9 @@ class RestAttribute(RestClass):
     result[self.get_classname()]['value'] = RestClass.convert_value(self.value)
     result[self.get_classname()]['ioc'] = u'{0}'.format(RestClass.convert_value(self.ioc))
     result[self.get_classname()]['share'] = u'{0}'.format(RestClass.convert_value(self.share))
-    result[self.get_classname()]['author'] = RestClass.convert_value(self.author)
     result[self.get_classname()]['uuid'] = RestClass.convert_value(self.uuid)
-    result[self.get_classname()]['group'] = RestClass.convert_value(self.group)
+    if self.group:
+      result[self.get_classname()]['group'] = self.group.to_dict()
     result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
     result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
     return result
