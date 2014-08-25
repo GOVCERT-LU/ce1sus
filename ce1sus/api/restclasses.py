@@ -12,8 +12,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from abc import abstractmethod
-from ce1sus_api.api.exceptions import RestClassException, Ce1susInvalidParameter
-from ce1sus_api.helpers.hash import hashSHA1
+from ce1sus.api.exceptions import RestClassException, Ce1susInvalidParameter
+from dagr.helpers.hash import hashSHA1
 import base64
 import os
 import json
