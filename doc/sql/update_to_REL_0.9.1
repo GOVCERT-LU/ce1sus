@@ -24,4 +24,5 @@ UPDATE `Groups` SET `uuid`=(Select UUID());
 ALTER TABLE `Groups` 
 CHANGE COLUMN `uuid` `uuid` VARCHAR(45) NOT NULL ;
 
-UPDATE ce1sus SET `value`='0.9.1' WHERE `ce1sus_id`='1';
+UPDATE ce1sus SET `value`='0.9.1' WHERE `key`='app_rev';
+UPDATE ce1sus SET `value`='0.9.1' WHERE `key`='db_shema';
