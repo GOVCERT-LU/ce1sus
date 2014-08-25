@@ -1,25 +1,27 @@
-ALTER TABLE `ce1sus`.`DEF_Objects` 
+ALTER TABLE `DEF_Objects` 
 ADD COLUMN `stix_container` VARCHAR(255) NULL DEFAULT NULL AFTER `sharable`;
-ALTER TABLE `ce1sus`.`Attributes` 
+ALTER TABLE `Attributes` 
 ADD COLUMN `uuid` VARCHAR(45) NULL AFTER `multiValue`;
-UPDATE `ce1sus`.`Attributes` SET `uuid`=UUID() WHERE uuid is NULL;
-ALTER TABLE `ce1sus`.`Attributes` 
+UPDATE `Attributes` SET `uuid`=UUID() WHERE uuid is NULL;
+ALTER TABLE `Attributes` 
 CHANGE COLUMN `uuid` `uuid` VARCHAR(45) NOT NULL ,
 ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
-ALTER TABLE `ce1sus`.`Objects` 
+ALTER TABLE `Objects` 
 ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
-ALTER TABLE `ce1sus`.`Events` 
+ALTER TABLE `Events` 
 ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
 
-UPDATE `ce1sus`.`Attributes` SET `uuid`=(Select UUID());
+UPDATE `Attributes` SET `uuid`=(Select UUID());
 
-ALTER TABLE `ce1sus`.`Objects` 
+ALTER TABLE `Objects` 
 ADD COLUMN `stix_mapper` VARCHAR(255) NULL AFTER `modified`;
 
-ALTER TABLE `ce1sus`.`Groups` 
+ALTER TABLE `Groups` 
 ADD COLUMN `uuid` VARCHAR(45) NULL AFTER `gpg_key`;
 
-UPDATE `ce1sus`.`Groups` SET `uuid`=(Select UUID());
+UPDATE `Groups` SET `uuid`=(Select UUID());
 
-ALTER TABLE `ce1sus`.`Groups` 
+ALTER TABLE `Groups` 
 CHANGE COLUMN `uuid` `uuid` VARCHAR(45) NOT NULL ;
+
+UPDATE ce1sus SET `value`='0.9.1' WHERE `ce1sus_id`='1';

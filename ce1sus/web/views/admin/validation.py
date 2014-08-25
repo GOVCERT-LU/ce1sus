@@ -163,7 +163,8 @@ class AdminValidationView(Ce1susBaseView):
       return self._render_template('/events/event/objects/flatview.html',
                                    flat_objects=flat_objects,
                                    event_id=event_id,
-                                   owner=True)
+                                   owner=True,
+                                   user=self._get_user())
     except ControllerException as error:
       return self._render_error_page(error)
 
