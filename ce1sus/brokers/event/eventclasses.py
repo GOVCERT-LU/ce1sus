@@ -17,28 +17,24 @@ from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
 from dagr.db.broker import DateTime
 from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
-from dagr.helpers.validator.objectvalidator import ObjectValidator, \
-                                                   FailedValidation
+from dagr.helpers.validator.objectvalidator import ObjectValidator, FailedValidation
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
 from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
 from ce1sus.helpers.bitdecoder import BitValue
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, \
-                                       NumberValue
+from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
 from dagr.helpers.objects import get_class
-from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.hybrid import hybrid_method
 import re
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),
-    Column('event_id', Integer, ForeignKey('Events.event_id')),
-    Column('group_id', Integer, ForeignKey('Groups.group_id'))
-)
+                           Column('event_id', Integer, ForeignKey('Events.event_id')),
+                           Column('group_id', Integer, ForeignKey('Groups.group_id'))
+                           )
 _REL_SUBGROUPS_EVENTS = Table('SubGroups_has_Events', getattr(BASE, 'metadata'),
-    Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
-    Column('event_id', Integer, ForeignKey('Events.event_id'))
-)
+                              Column('subgroup_id', Integer, ForeignKey('Subgroups.subgroup_id')),
+                              Column('event_id', Integer, ForeignKey('Events.event_id'))
+                              )
 
 
 # pylint: disable=R0902,W0232
@@ -58,27 +54,34 @@ class Event(BASE):
   risk_id = Column('risk_id', Integer)
   analysis_status_id = Column('analysis_status_id', Integer)
   comments = relationship("Comment")
-  maingroups = relationship(Group, secondary='Groups_has_Events', backref="events")
+  maingroups = relationship(Group,
+                            secondary='Groups_has_Events',
+                            backref="events")
   subgroups = relationship(SubGroup,
-                            secondary='SubGroups_has_Events')
-  objects = relationship('Object', primaryjoin='and_(Event.identifier' +
-                       '==Object.event_id, Object.parent_object_id==None)')
-  created = Column('created', DateTime(timezone=True))
-  modified = Column('modified', DateTime(timezone=True))
-  # creators and modifiers will be gorups
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
+                           secondary='SubGroups_has_Events')
+  objects = relationship('Object',
+                         primaryjoin='and_(Event.identifier==Object.event_id, Object.parent_object_id==None)')
+  created = Column('created',
+                   DateTime(timezone=True))
+  modified = Column('modified',
+                    DateTime(timezone=True))
+  # creators and modifiers will be groups
+  creator_id = Column('creator_id',
+                      Integer,
+                      ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Event.creator_id==User.identifier")
-  modifier_id = Column('modifier_id', Integer,
-                            ForeignKey('Users.user_id'))
+  modifier_id = Column('modifier_id',
+                       Integer,
+                       ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Event.modifier_id==User.identifier")
-  creator_group_id = Column('creatorGroup', Integer,
+  creator_group_id = Column('creatorGroup',
+                            Integer,
                             ForeignKey('Groups.group_id'))
   creator_group = relationship(Group,
-                        primaryjoin="Event.creator_group_id==Group.identifier",
-                        backref="created_events")
+                               primaryjoin="Event.creator_group_id==Group.identifier",
+                               backref="created_events")
   __tlp_obj = None
   uuid = Column('uuid', String)
   dbcode = Column('code', Integer)
@@ -238,14 +241,11 @@ class Event(BASE):
     ObjectValidator.validateDigits(self, 'modifier_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDateTime(self, 'modified')
-    if not self.first_seen is None:
+    if self.first_seen is not None:
       ObjectValidator.validateDateTime(self, 'first_seen')
-    if not self.last_seen is None:
+    if self.last_seen is not None:
       ObjectValidator.validateDateTime(self, 'last_seen')
-    if ((not self.first_seen is None and not self.last_seen is None) and
-        not isinstance(self.first_seen, FailedValidation) and
-        not isinstance(self.last_seen, FailedValidation)
-        ):
+    if ((self.first_seen is not None and self.last_seen is not None) and not isinstance(self.first_seen, FailedValidation) and not isinstance(self.last_seen, FailedValidation)):
       if self.first_seen > self.last_seen:
         setattr(self, 'first_seen',
                 FailedValidation(self.first_seen,
@@ -253,7 +253,7 @@ class Event(BASE):
         setattr(self, 'last_seen',
                 FailedValidation(self.last_seen,
                                  'Last seen is before last seen.'))
-    if self.first_seen is None and not self.last_seen is None:
+    if self.first_seen is None and self.last_seen is not None:
         setattr(self, 'first_seen',
                 FailedValidation(self.first_seen,
                                  'First seen cannot be empty when last seen is'
@@ -279,12 +279,14 @@ class Comment(BASE):
   comment = Column('comment', String)
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
+  creator_id = Column('creator_id',
+                      Integer,
+                      ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Comment.creator_id==User.identifier")
-  modifier_id = Column('modifier_id', Integer,
-                            ForeignKey('Users.user_id'))
+  modifier_id = Column('modifier_id',
+                       Integer,
+                       ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Comment.modifier_id==User.identifier")
 
@@ -319,29 +321,38 @@ class Object(BASE):
   attributes = relationship('Attribute')
   def_object_id = Column(Integer, ForeignKey('DEF_Objects.def_object_id'))
   definition = relationship(ObjectDefinition,
-                            primaryjoin='ObjectDefinition.identifier' +
-                            '==Object.def_object_id')
+                            primaryjoin='ObjectDefinition.identifier==Object.def_object_id')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
+  creator_id = Column('creator_id',
+                      Integer,
+                      ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Object.creator_id==User.identifier")
-  modifier_id = Column('modifier_id', Integer,
-                            ForeignKey('Users.user_id'))
+  modifier_id = Column('modifier_id',
+                       Integer,
+                       ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Object.modifier_id==User.identifier")
-  parent_object_id = Column('parentObject', Integer,
+  parent_object_id = Column('parentObject',
+                            Integer,
                             ForeignKey('Objects.object_id'))
-  parent_object = relationship('Object', uselist=False,
+  parent_object = relationship('Object',
+                               uselist=False,
                                primaryjoin='Object.parent_object_id==Object.identifier')
-  children = relationship("Object", primaryjoin='Object.identifier' +
-                         '==Object.parent_object_id')
+  children = relationship("Object",
+                          primaryjoin='Object.identifier==Object.parent_object_id')
   event_id = Column('parentEvent', Integer, ForeignKey('Events.event_id'))
   event = relationship("Event",
-                             uselist=False,
-                             primaryjoin='Event.identifier' +
-                             '==Object.event_id')
+                       uselist=False,
+                       primaryjoin='Event.identifier' +
+                       '==Object.event_id')
+
+  creator_group_id = Column('creator_group_id', Integer,
+                            ForeignKey('Groups.group_id'))
+  creator_group = relationship(Group,
+                               primaryjoin="Object.creator_group_id==Group.identifier",
+                               backref="created_objects")
 
   dbcode = Column('code', Integer)
   uuid = Column('uuid', String)
@@ -427,7 +438,7 @@ class Object(BASE):
     ObjectValidator.validateDigits(self, 'creator_id')
     ObjectValidator.validateDateTime(self, 'created')
     ObjectValidator.validateDigits(self, 'def_object_id')
-    if not self.parent_object_id is None:
+    if self.parent_object_id is not None:
       ObjectValidator.validateDigits(self, 'parent_object_id')
     ObjectValidator.validateDateTime(self, 'created')
     return ObjectValidator.isObjectValid(self)
@@ -441,38 +452,45 @@ class Attribute(BASE):
   def_attribute_id = Column(Integer,
                             ForeignKey('DEF_Attributes.def_attribute_id'))
   definition = relationship(AttributeDefinition,
-              primaryjoin='AttributeDefinition.identifier==' +
-              'Attribute.def_attribute_id')
+                            primaryjoin='AttributeDefinition.identifier==' +
+                            'Attribute.def_attribute_id')
   object_id = Column(Integer, ForeignKey('Objects.object_id'))
   object = relationship("Object",
                         primaryjoin='Object.identifier==Attribute.object_id')
   created = Column('created', DateTime)
   modified = Column('modified', DateTime)
-  creator_id = Column('creator_id', Integer,
-                            ForeignKey('Users.user_id'))
+  creator_id = Column('creator_id',
+                      Integer,
+                      ForeignKey('Users.user_id'))
   creator = relationship(User,
                          primaryjoin="Attribute.creator_id==User.identifier")
-  modifier_id = Column('modifier_id', Integer,
-                            ForeignKey('Users.user_id'))
+  modifier_id = Column('modifier_id',
+                       Integer,
+                       ForeignKey('Users.user_id'))
   modifier = relationship(User,
                           primaryjoin="Attribute.modifier_id==User.identifier")
   ioc = Column('ioc', Integer)
   # valuerelations
   string_value = relationship(StringValue,
-                  primaryjoin="Attribute.identifier==StringValue.attribute_id",
-                  lazy='joined', uselist=False)
+                              primaryjoin="Attribute.identifier==StringValue.attribute_id",
+                              lazy='joined', uselist=False)
   date_value = relationship(DateValue,
-                  primaryjoin="Attribute.identifier==DateValue.attribute_id",
-                  uselist=False)
+                            primaryjoin="Attribute.identifier==DateValue.attribute_id",
+                            uselist=False)
   text_value = relationship(TextValue,
-                  primaryjoin="Attribute.identifier==TextValue.attribute_id",
-                  uselist=False)
+                            primaryjoin="Attribute.identifier==TextValue.attribute_id",
+                            uselist=False)
   number_value = relationship(NumberValue,
-                  primaryjoin="Attribute.identifier==NumberValue.attribute_id",
-                  uselist=False)
+                              primaryjoin="Attribute.identifier==NumberValue.attribute_id",
+                              uselist=False)
   attr_parent_id = Column('parent_attr_id', ForeignKey('Attributes.attribute_id'))
   children = relationship('Attribute',
                           primaryjoin="Attribute.identifier==Attribute.attr_parent_id")
+  creator_group_id = Column('creator_group_id', Integer,
+                            ForeignKey('Groups.group_id'))
+  creator_group = relationship(Group,
+                               primaryjoin="Attribute.creator_group_id==Group.identifier",
+                               backref="created_attributes")
   __value_id = None
   internal_value = None
   __value_obj = None
@@ -546,13 +564,13 @@ class Attribute(BASE):
     """
     Returns the value object of an attibute
     """
-    if not self.string_value  is None:
+    if self.string_value is not None:
       value = self.string_value
-    elif not self.date_value  is None:
+    elif self.date_value is not None:
       value = self.date_value
-    elif not self.text_value is None:
+    elif self.text_value is not None:
       value = self.text_value
-    elif not self.number_value is None:
+    elif self.number_value is not None:
       value = self.number_value
     else:
       value = None
@@ -680,8 +698,8 @@ class Attribute(BASE):
                                   'value',
                                   getattr(self.definition, 'regex'),
                                   u'The value "{0}" does not match {1} for definition {2}'.format(value_obj.value,
-                                                                                                 getattr(self.definition, 'regex'),
-                                                                                                 getattr(self.definition, 'name')).encode('utf-8'),
+                                                                                                  getattr(self.definition, 'regex'),
+                                                                                                  getattr(self.definition, 'name')).encode('utf-8'),
                                   True)
     errors = not getattr(value_obj, 'validate')()
     if errors:

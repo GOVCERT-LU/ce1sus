@@ -55,8 +55,8 @@ class RTTickets(object):
     """Returns all the tickets"""
     try:
       query = ("Queue%3D'SOC'%20OR%20Queue%3D'Investigations'%20OR%20Queue%3D'"
-              + "Notifications'%20OR%20Queue%3D'Informations'%20OR%20Queue%3D'"
-              + "Sub-Incidents'")
+               + "Notifications'%20OR%20Queue%3D'Informations'%20OR%20Queue%3D'"
+               + "Sub-Incidents'")
       response = self.__resource.get(path='search/ticket?query=' + query)
       ticket_list = list()
       if len(response.parsed) > 0:
@@ -64,7 +64,7 @@ class RTTickets(object):
           for ticket_id, ticket_title in text_list:
             ticket = Ticket(ticket_id)
             ticket.url = (self.__url + '/Ticket/Display.html?id='
-                                + unicode(ticket_id, 'utf-8', errors='replace'))
+                          + unicode(ticket_id, 'utf-8', errors='replace'))
             ticket.title = unicode(ticket_title, 'utf-8', errors='replace')
             ticket_list.append(ticket)
         return ticket_list
@@ -95,7 +95,7 @@ class RTTickets(object):
         ticket.created = unicode(rsp_dict['Created'],
                                  'utf-8', errors='replace')
         ticket.last_updated = unicode(rsp_dict['LastUpdated'],
-                                     'utf-8', errors='replace')
+                                      'utf-8', errors='replace')
         # froen mech waat daat mecht?
         if 'Resolved' in rsp_dict:
           ticket.resolved = rsp_dict['Resolved']

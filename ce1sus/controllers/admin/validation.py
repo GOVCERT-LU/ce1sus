@@ -13,10 +13,8 @@ __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
 from dagr.db.broker import BrokerException
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                  AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import \
-                  ObjectDefinitionBroker
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 from dagr.helpers.datumzait import DatumZait
 from ce1sus.brokers.relationbroker import RelationBroker
 from ce1sus.common.mailhandler import MailHandler, MailHandlerException

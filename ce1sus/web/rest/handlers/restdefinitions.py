@@ -57,12 +57,12 @@ class RestDefinitionsHanldler(RestBaseHandler):
     full_definition = options.get('fulldefinitions', False)
     chksums = options.get('chksum', list())
     return self.__get_definition(self.attributes_controller,
-                                chksums,
-                                full_definition)
+                                 chksums,
+                                 full_definition)
 
   def view_obejcts_definitions(self, identifier, **options):
     full_definition = options.get('fulldefinitions', False)
     chksums = options.get('chksum', list())
     return self.__get_definition(self.objects_controller,
-                                chksums,
-                                full_definition)
+                                 chksums,
+                                 full_definition)

@@ -27,17 +27,17 @@ class EventView(Ce1susBaseView):
 
   def tabs(self):
     add_event_tab = MainTab(title='Add Event',
-                                url='/events/event/add_event',
-                                options=None,
-                                position=2)
+                            url='/events/event/add_event',
+                            options=None,
+                            position=2)
     overview_tab = EventTab(title='Overview',
-                                url='/events/event/event',
-                                options='reload',
-                                position=0)
+                            url='/events/event/event',
+                            options='reload',
+                            position=0)
     relations_tab = EventTab(title='Relations',
-                                url='/events/event/relations',
-                                options='reload',
-                                position=3)
+                             url='/events/event/relations',
+                             options='reload',
+                             position=3)
     return [add_event_tab, overview_tab, relations_tab]
 
   def __init__(self, config):
@@ -163,7 +163,7 @@ class EventView(Ce1susBaseView):
         if not valid:
           self._get_logger().info('Event is invalid')
           return self._return_ajax_post_error(self.__render_event_details('/events/event/addEvent.html',
-                                                          event))
+                                                                          event))
       if action == 'remove':
         self._check_if_event_owner(event)
         self.event_controller.remove_event(user, event)
@@ -174,7 +174,7 @@ class EventView(Ce1susBaseView):
         if not valid:
           self._get_logger().info('Event is invalid')
           return self._return_ajax_post_error(self.__render_event_details('/events/event/editDetails.html',
-                                                            event))
+                                                                          event))
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

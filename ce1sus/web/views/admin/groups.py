@@ -26,9 +26,9 @@ class AdminGroupView(Ce1susBaseView):
 
   def tabs(self):
     group_tab = AdminTab(title='Groups',
-                       url='/admin/groups',
-                       options='reload',
-                       position=0)
+                         url='/admin/groups',
+                         options='reload',
+                         position=0)
     return [group_tab]
 
   def __init__(self, config):
@@ -115,7 +115,7 @@ class AdminGroupView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def edit_group_subgroups(self, identifier, operation,
-                     existing=None, remaining=None):
+                           existing=None, remaining=None):
     """
     modifies the relation between a group and its groups
 
@@ -143,8 +143,8 @@ class AdminGroupView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def modify_group(self, identifier=None, name=None,
-                  description=None, download=None, action='insert',
-                  tlp_lvl=None, email=None, usermails=None):
+                   description=None, download=None, action='insert',
+                   tlp_lvl=None, email=None, usermails=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -163,13 +163,13 @@ class AdminGroupView(Ce1susBaseView):
     try:
       self._check_if_valid_action(action)
       group = self.group_controller.populate_group(identifier,
-                                                  name,
-                                                  description,
-                                                  download,
-                                                  action,
-                                                  tlp_lvl,
-                                                  email,
-                                                  usermails)
+                                                   name,
+                                                   description,
+                                                   download,
+                                                   action,
+                                                   tlp_lvl,
+                                                   email,
+                                                   usermails)
 
       if action == 'insert':
         group, valid = self.group_controller.insert_group(group)
@@ -183,8 +183,8 @@ class AdminGroupView(Ce1susBaseView):
       else:
         cb_values = self.group_controller.get_cb_tlp_lvls()
         return self._return_ajax_post_error(self._render_template('/admin/groups/groupModal.html',
-                                 group=group,
-                                 cb_values=cb_values))
+                                                                  group=group,
+                                                                  cb_values=cb_values))
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -204,7 +204,7 @@ class AdminGroupView(Ce1susBaseView):
       group = self.group_controller.get_group_by_id(group_id)
       cb_values = self.group_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/groups/groupModal.html',
-                                 group=group,
-                                 cb_values=cb_values)
+                                   group=group,
+                                   cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)

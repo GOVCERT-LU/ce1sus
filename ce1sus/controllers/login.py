@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.controllers.base import Ce1susBaseController
-from ce1sus.brokers.permission.userbroker import UserBroker
 from dagr.helpers.datumzait import DatumZait
 from dagr.db.broker import BrokerException, NothingFoundException
 from dagr.helpers.ldaphandling import LDAPHandler
@@ -49,7 +48,7 @@ class LoginController(Ce1susBaseController):
         if self._get_config_variable('useldap'):
           try:
             user = self.user_broker.getUserByUsernameAndPassword(username,
-                                                               'EXTERNALAUTH')
+                                                                 'EXTERNALAUTH')
           except NothingFoundException as error:
             user = None
 

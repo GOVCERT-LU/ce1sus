@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, IntegrityException
+from dagr.db.broker import BrokerBase, NothingFoundException, BrokerException, IntegrityException, TooManyResultsFoundException
 import sqlalchemy.orm.exc
 from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
 
@@ -24,6 +24,30 @@ class GroupBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Group
+
+  def get_by_uuid(self, uuid):
+    try:
+
+      result = self.session.query(self.get_broker_class()).filter(Group.uuid == uuid).one()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with uuid :{0}'.format(uuid))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for uuid :{0}'.format(uuid))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
+
+  def get_by_name(self, name):
+    try:
+
+      result = self.session.query(self.get_broker_class()).filter(Group.name == name).one()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with name :{0}'.format(name))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for name :{0}'.format(name))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
   def get_subgroups_by_group(self, identifier, belong_in=True):
     """
@@ -38,18 +62,12 @@ class GroupBroker(BrokerBase):
     :returns: list of Users
     """
     try:
-      subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(
-                                        Group.identifier == identifier
-                                        ).order_by(SubGroup.name).all()
+      subgroups = self.session.query(SubGroup).join(Group.subgroups).filter(Group.identifier == identifier).order_by(SubGroup.name).all()
       if not belong_in:
         subgroups_ids = list()
         for subgroup in subgroups:
           subgroups_ids.append(subgroup.identifier)
-        subgroups = self.session.query(SubGroup).filter(
- ~SubGroup.identifier.in_(
-                            subgroups_ids
-                          )
-                          ).order_by(SubGroup.name).all()
+        subgroups = self.session.query(SubGroup).filter(~SubGroup.identifier.in_(subgroups_ids)).order_by(SubGroup.name).all()
       return subgroups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
@@ -101,10 +119,8 @@ class GroupBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-
   def remove_by_id(self, group_id, commit=True):
     if group_id == 1 or group_id == '1':
-      raise IntegrityException(u'Cannot delete this group. The group is essential to '
-                  + 'the application.')
+      raise IntegrityException(u'Cannot delete this group. The group is essential to the application.')
     else:
       BrokerBase.remove_by_id(self, group_id, commit)

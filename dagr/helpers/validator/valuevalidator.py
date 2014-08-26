@@ -11,8 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.validator.objectvalidator import ObjectValidator, \
-                                                   validateRegex
+from dagr.helpers.validator.objectvalidator import ObjectValidator, validateRegex
 
 
 # pylint: disable=R0903
@@ -62,13 +61,13 @@ class ValueValidator:
 
     obj = Container(string)
     return ObjectValidator.validateAlNum(obj,
-                                    'value',
-                          minLength=minLength,
-                          maxLength=maxLength,
-                          withSpaces=withSpaces,
-                          withNonPrintableCharacters=withNonPrintableCharacters,
-                          withSymbols=withSymbols,
-                          changeAttribute=False)
+                                         'value',
+                                         minLength=minLength,
+                                         maxLength=maxLength,
+                                         withSpaces=withSpaces,
+                                         withNonPrintableCharacters=withNonPrintableCharacters,
+                                         withSymbols=withSymbols,
+                                         changeAttribute=False)
 
   @staticmethod
   def validateAlpha(string,
@@ -97,12 +96,12 @@ class ValueValidator:
 
     obj = Container(string)
     return ObjectValidator.validateAlpha(obj,
-                                    'value',
-                                    minLength,
-                                    maxLength,
-                                    withSpaces,
-                                    withNonPrintableCharacters,
-                                    changeAttribute=False)
+                                         'value',
+                                         minLength,
+                                         maxLength,
+                                         withSpaces,
+                                         withNonPrintableCharacters,
+                                         changeAttribute=False)
 
   @staticmethod
   def validateDigits(string,
@@ -125,10 +124,10 @@ class ValueValidator:
 
     obj = Container(string)
     return ObjectValidator.validateDigits(obj,
-                                    'value',
-                                    minimal,
-                                    maximal,
-                                    changeAttribute=False)
+                                          'value',
+                                          minimal,
+                                          maximal,
+                                          changeAttribute=False)
 
   @staticmethod
   def validateEmailAddress(string):
@@ -148,8 +147,8 @@ class ValueValidator:
 
     obj = Container(string)
     return ObjectValidator.validateEmailAddress(obj,
-                                                  'value',
-                                                  changeAttribute=False)
+                                                'value',
+                                                changeAttribute=False)
 
   @staticmethod
   def validateIP(string):

@@ -26,7 +26,7 @@ $( document ).ready(function() {
 
 <%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None)">
 <%
-allowed = owner or (user.default_group.identifier == object.creator.default_group.identifier and not object.bit_value.is_validated)
+allowed = owner or (user.default_group.identifier == object.creator_group.identifier and not object.bit_value.is_validated)
 %>
 % if (not object is None) and (object.bit_value.is_validated or allowed ):
 <%
@@ -155,7 +155,7 @@ else:
                         else:
                            shareicon = '<span class="glyphicon glyphicon-remove"></span>'
                         
-                        attribute_owner = (user.default_group.identifier == attribute.creator.default_group.identifier)
+                        attribute_owner = (user.default_group.identifier == attribute.creator_group.identifier)
                         if attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
                           tdstyle = 'style="background-color: yellow;"'
                         else:

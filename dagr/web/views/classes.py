@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-
 class Link(object):
   """Class representing a link"""
 

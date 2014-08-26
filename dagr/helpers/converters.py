@@ -34,7 +34,7 @@ def convert_string_to_value(string):
       return_value = ValueConverter.set_date(string)
     # TODO: use JSON instead
     elif (re.match(r'^\[.*\]$', string, re.MULTILINE) is not None or
-      re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
+          re.match(r'^\{.*\}$', string, re.MULTILINE) is not None):
       return_value = ast.literal_eval(string)
     else:
       return_value = string

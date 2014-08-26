@@ -61,8 +61,8 @@ class CommentsView(Ce1susBaseView):
       self._check_if_event_is_viewable(event)
       comment = self.comments_controller.get_by_id(comment_id)
       return self._render_template('/events/event/comments/commentModal.html',
-                                     event_id=event_id,
-                                     comment=comment)
+                                   event_id=event_id,
+                                   comment=comment)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -70,7 +70,7 @@ class CommentsView(Ce1susBaseView):
   @require(require_referer(('/internal')))
   @cherrypy.tools.allow(methods=['POST'])
   def modify_comment(self, event_id=None, comment_id=None,
-                         comment_text=None, action=None):
+                     comment_text=None, action=None):
     try:
       self._check_if_valid_action(action)
       event = self.comments_controller.get_event_by_id(event_id)
@@ -82,15 +82,15 @@ class CommentsView(Ce1susBaseView):
         if not valid:
           self._get_logger().info('Comment is invalid')
           return self._return_ajax_post_error(self._render_template('/events/event/comments/commentModal.html',
-                                                          event_id=event_id,
-                                                          comment=comment))
+                                              event_id=event_id,
+                                              comment=comment))
       if action == 'update':
         comment, valid = self.comments_controller.update_comment(user, event, comment)
         if not valid:
           self._get_logger().info('Comment is invalid')
           return self._return_ajax_post_error(self._render_template('/events/event/comments/commentModal.html',
-                                                          event_id=event_id,
-                                                          comment=comment))
+                                              event_id=event_id,
+                                              comment=comment))
       if action == 'remove':
         self.comments_controller.remove_comment(user, event, comment)
       return self._return_ajax_ok()

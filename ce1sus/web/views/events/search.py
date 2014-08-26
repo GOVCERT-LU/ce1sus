@@ -27,9 +27,9 @@ class SearchView(Ce1susBaseView):
 
   def tabs(self):
     serach_tab = MainTab(title='Search Attributes',
-                                url='/events/search',
-                                options=None,
-                                position=1)
+                         url='/events/search',
+                         options=None,
+                         position=1)
     return [serach_tab]
 
   def __init__(self, config):
@@ -67,7 +67,7 @@ class SearchView(Ce1susBaseView):
       results = self.search_controller.search_results(needle, definition_id, operant, user, cache)
       # Prepare paginator
       return self._return_ajax_ok() + self._render_template('/events/search/results.html',
-                                                              results=results
-                                                              )
+                                                            results=results
+                                                            )
     except (InputException, ControllerException) as error:
       return '{0}'.format(error)

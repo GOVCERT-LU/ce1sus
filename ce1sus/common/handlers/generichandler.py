@@ -31,7 +31,7 @@ class GenericHandler(HandlerBase):
     return [0, 1, 3]
 
   @staticmethod
-  def create_attribute(params, obj, definition, user):
+  def create_attribute(params, obj, definition, user, group):
     """
     Creates the attribute
 
@@ -73,8 +73,7 @@ class GenericHandler(HandlerBase):
       # take default value
       attribute.ioc = 0
     else:
-      ObjectConverter.set_integer(attribute,
-                               'ioc', is_ioc)
+      ObjectConverter.set_integer(attribute, 'ioc', is_ioc)
 
     # Note first the definition has to be specified
     attribute.definition = definition
@@ -94,6 +93,11 @@ class GenericHandler(HandlerBase):
     attribute.modifier_id = user.identifier
     attribute.modifier = user
     attribute.creator = user
+
+    if group:
+      attribute.creator_group_id = group.identifier
+    else:
+      attribute.creator_group_id = user.default_group.identifier
 
     return attribute
 
@@ -140,7 +144,7 @@ class GenericHandler(HandlerBase):
     if action:
       if action == 'insert':
         definition = self._get_main_definition(definitions)
-        attribute = self.create_attribute(params, obj, definition, user)
+        attribute = self.create_attribute(params, obj, definition, user, None)
         return attribute, None
       elif action == 'update':
         attribute = params.get('attribute', None)
@@ -160,7 +164,7 @@ class GenericHandler(HandlerBase):
     value = attribute.plain_value
     return value
 
-  def process_rest_post(self, obj, definitions, user, params):
+  def process_rest_post(self, obj, definitions, user, group, params):
     definition = self._get_main_definition(definitions)
-    attribute = self.create_attribute(params, obj, definition, user)
+    attribute = self.create_attribute(params, obj, definition, user, group)
     return attribute, None

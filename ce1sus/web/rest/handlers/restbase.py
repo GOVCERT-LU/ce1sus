@@ -129,9 +129,10 @@ class RestBaseHandler(Ce1susBaseView):
       rest_obj = self.__dict_db_converter.convert_to_db_object(user, dictionary, action)
       return rest_obj
     except Exception as error:
+      raise
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))
       self._raise_error('UnRecoverableException',
-                      msg='An unrecoverable error occurred. {0}'.format(error))
+                        msg='An unrecoverable error occurred. {0}'.format(error))
 
   def _raise_invalid_error(self, obj):
     error_msg = ObjectValidator.getFirstValidationError(obj)

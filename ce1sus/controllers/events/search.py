@@ -125,15 +125,15 @@ class SearchController(Ce1susBaseController):
       self.__remove_form_objs(obj, event.objects, obj_def_id, object_attr_def_ids)
 
   def filtered_search_for_rest(self,
-                              object_type,
-                              object_attributes,
-                              attribute_needles,
-                              start_date,
-                              end_date,
-                              user,
-                              cache=None,
-                              limit=20,
-                              offset=0):
+                               object_type,
+                               object_attributes,
+                               attribute_needles,
+                               start_date,
+                               end_date,
+                               user,
+                               cache=None,
+                               limit=20,
+                               offset=0):
     if not ((attribute_needles) or (object_type or object_attributes)):
       raise ControllerException('More parameters required for search')
     # TODO: include start_date, end_date
@@ -168,8 +168,8 @@ class SearchController(Ce1susBaseController):
         matching_values = list()
         for needle, definition in values_to_look_for.iteritems():
           found_values = self.attribute_broker.look_for_attribute_value(definition,
-                                                                      needle,
-                                                                      operator)
+                                                                        needle,
+                                                                        operator)
           matching_values += found_values
 
       if object_type:

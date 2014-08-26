@@ -189,9 +189,9 @@ class AttributesView(Ce1susBaseView):
           self._get_logger().info('Attributes are invalid')
           handler = attribute.definition.handler
           return self._return_ajax_post_error(handler.render_gui_edit(self._render_template,
-                                                              attribute,
-                                                              additional_attributes,
-                                                              obj.bit_value.is_shareable))
+                                                                      attribute,
+                                                                      additional_attributes,
+                                                                      obj.bit_value.is_shareable))
       if action == 'update':
         # TODO: modify attribute
         attribute, valid = self.attributes_controller.udpate_attributes(user, attribute)
@@ -237,9 +237,9 @@ class AttributesView(Ce1susBaseView):
       additional_attributes = list()
       obj = attribute.object
       handler_content = handler.render_gui_edit(self._render_template,
-                                   attribute,
-                                   additional_attributes,
-                                   obj.bit_value.is_shareable)
+                                                attribute,
+                                                additional_attributes,
+                                                obj.bit_value.is_shareable)
       return self._render_template('/events/event/attributes/editAttributesModal.html',
                                    event_id=event_id,
                                    object_id=object_id,

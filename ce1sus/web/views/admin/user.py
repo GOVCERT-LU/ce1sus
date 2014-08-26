@@ -125,9 +125,9 @@ class AdminUserView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def modify_user(self, identifier=None, username=None, password=None,
-                 priv=None, email=None, action='insert', disabled=None,
-                 maingroup=None, ldap_users_table_length=None, apikey=None,
-                 gpgkey=None, name=None, sirname=None):
+                  priv=None, email=None, action='insert', disabled=None,
+                  maingroup=None, ldap_users_table_length=None, apikey=None,
+                  gpgkey=None, name=None, sirname=None):
     """
     modifies or inserts a user with the data of the post
 
@@ -155,7 +155,7 @@ class AdminUserView(Ce1susBaseView):
       else:
         self._check_if_valid_action(action)
         user = self.user_controller.populate_user(identifier, username, password,
-                 priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname)
+                                                  priv, email, action, disabled, maingroup, apikey, gpgkey, name, sirname)
         if action == 'insert':
           user, valid = self.user_controller.insert_user(user)
         if action == 'update':
@@ -168,9 +168,9 @@ class AdminUserView(Ce1susBaseView):
       else:
         cb_values = self.user_controller.get_cb_group_values()
         return self._render_template('/admin/users/userModal.html',
-                                 user=user,
-                                 cb_values=cb_values,
-                                 enabled=True)
+                                     user=user,
+                                     cb_values=cb_values,
+                                     enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -190,8 +190,8 @@ class AdminUserView(Ce1susBaseView):
       user = self.user_controller.get_user_by_id(userid)
       cb_values = self.user_controller.get_cb_group_values()
       return self._render_template('/admin/users/userModal.html',
-                                 user=user,
-                                 cb_values=cb_values,
-                                 enabled=True)
+                                   user=user,
+                                   cb_values=cb_values,
+                                   enabled=True)
     except ControllerException as error:
       return self._render_error_page(error)

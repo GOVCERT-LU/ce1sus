@@ -118,16 +118,13 @@ class BrokerBase(object):
     """
     try:
 
-      result = self.session.query(self.get_broker_class()).filter(
-                        getattr(self.get_broker_class(),
-                                'identifier') == identifier).one()
+      result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                          'identifier') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(
-                                                                  identifier))
+      raise NothingFoundException('Nothing found with ID :{0}'.format(identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for ID :{0}'.format(identifier))
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
@@ -143,7 +140,7 @@ class BrokerBase(object):
     """
     try:
       result = self.session.query(self.get_broker_class())
-      if not order is None:
+      if order is not None:
         result = result.order_by(order)
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
@@ -161,10 +158,9 @@ class BrokerBase(object):
     :type identifier: integer
     """
     try:
-      self.session.query(self.get_broker_class()).filter(
-                      getattr(self.get_broker_class(),
-                                'identifier') == identifier
-                      ).delete(synchronize_session='fetch')
+      self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                 'identifier') == identifier
+                                                         ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.IntegrityError as error:
       self.session.rollback()
       raise IntegrityException(error)
@@ -219,12 +215,7 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid.{0}'.format(
-                                                                        ObjectValidator.getFirstValidationError(
-                                                                                                            instance
-                                                                                                            )
-                                                                                  )
-                                  )
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
     try:
       self.session.add(instance)
       self.do_commit(commit)
@@ -248,12 +239,7 @@ class BrokerBase(object):
     if validate:
       errors = not instance.validate()
       if errors:
-        raise ValidationException('Instance to be inserted is invalid.{0}'.format(
-                                                                        ObjectValidator.getFirstValidationError(
-                                                                                                              instance
-                                                                                                              )
-                                                                                  )
-                                  )
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
     # an elo den update
     try:
       self.session.merge(instance)

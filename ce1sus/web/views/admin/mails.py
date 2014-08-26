@@ -26,9 +26,9 @@ class AdminMailView(Ce1susBaseView):
 
   def tabs(self):
     mail_tab = AdminTab(title='Mail Templates',
-                       url='/admin/mails',
-                       options='reload',
-                       position=6)
+                        url='/admin/mails',
+                        options='reload',
+                        position=6)
     return [mail_tab]
 
   def __init__(self, config):
@@ -102,7 +102,7 @@ class AdminMailView(Ce1susBaseView):
         if not valid:
             self._get_logger().info('Event is invalid')
             return self._return_ajax_post_error(self._render_template('/admin/mails/mailModal.html',
-                                                      mail_template=mail_template))
+                                                                      mail_template=mail_template))
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

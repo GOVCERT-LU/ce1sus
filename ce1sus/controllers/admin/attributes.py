@@ -25,9 +25,9 @@ from dagr.helpers.strings import cleanPostValue
 
 def gen_attr_chksum(attribute):
   key = '{0}{1}{2}{3}'.format(attribute.name,
-                       attribute.regex,
-                       attribute.class_index,
-                       attribute.attribute_handler.uuid)
+                              attribute.regex,
+                              attribute.class_index,
+                              attribute.attribute_handler.uuid)
   return hashSHA1(key)
 
 
@@ -99,8 +99,8 @@ class AttributeController(Ce1susBaseController):
       self._raise_exception(error)
 
   def populate_attribute(self, identifier=None, name=None, description='',
-                      regex='^.*$', class_index=0, action='insert',
-                      handler_index=0, share=None, relation=None):
+                         regex='^.*$', class_index=0, action='insert',
+                         handler_index=0, share=None, relation=None):
     """
     puts an attribute with the data together
 

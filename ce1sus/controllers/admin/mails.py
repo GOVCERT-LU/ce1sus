@@ -13,13 +13,7 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.controllers.base import Ce1susBaseController
-from dagr.db.broker import BrokerException, ValidationException, IntegrityException
-import types as types
-from ce1sus.brokers.staticbroker import TLPLevel
-from ce1sus.brokers.permission.groupbroker import GroupBroker
-from ce1sus.brokers.permission.permissionclasses import Group
-from dagr.controllers.base import ControllerException
-from dagr.helpers.mailer import Mailer, Mail, MailerException
+from dagr.db.broker import BrokerException, ValidationException
 from ce1sus.brokers.mailbroker import MailTemplateBroker
 
 

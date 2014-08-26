@@ -43,8 +43,7 @@ class ObjectBroker(BrokerBase):
       # check if objects does not have children
       children = self.get_object_childern_for_obj_id(obj.identifier)
       if len(children) > 0:
-        raise BrokerException(u'Object has children. '
-                + 'The object cannot be removed if there are still children.')
+        raise BrokerException(u'Object has children. The object cannot be removed if there are still children.')
       else:
         BrokerBase.remove_by_id(self, obj.identifier, False)
         self.do_commit(commit)
@@ -59,10 +58,9 @@ class ObjectBroker(BrokerBase):
     :returns: List of Objects
     """
     try:
-      result = self.session.query(Object).filter(
-                                              Object.event_id == event_id,
-                                              Object.identifier != object_id
-                                                )
+      result = self.session.query(Object).filter(Object.event_id == event_id,
+                                                 Object.identifier != object_id
+                                                 )
       objs = result.all()
 
       values = dict()
@@ -71,8 +69,7 @@ class ObjectBroker(BrokerBase):
         values[key] = obj.identifier
       return values
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
-                                                                  event_id))
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(event_id))
 
   def get_event_objects_children(self, event_id):
     """
@@ -86,8 +83,7 @@ class ObjectBroker(BrokerBase):
                                                  == event_id).all()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
-                                                                  event_id))
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(event_id))
 
   def get_viewable_event_obj_children(self, event_id):
     """
@@ -97,14 +93,12 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(Object.event_id
-                                                 == event_id,
-                                                Object.dbcode.op('&')(12) == 12
+      result = self.session.query(Object).filter(Object.event_id == event_id,
+                                                 Object.dbcode.op('&')(12) == 12
                                                  )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with ID :{0}'.format(
-                                                                  event_id))
+      raise NothingFoundException(u'Nothing found with ID :{0}'.format(event_id))
 
   def get_object_childern_for_obj_id(self, object_id):
     """
@@ -114,16 +108,14 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).filter(
-                        Object.parent_object_id == object_id).all()
+      result = self.session.query(Object).filter(Object.parent_object_id == object_id).all()
       for obj in result:
         sub_children = self.get_object_childern_for_obj_id(obj.identifier)
-        if not sub_children is None:
+        if sub_children is not None:
           result = result + sub_children
       return result
     except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException(u'Nothing found with ID :{0}'.format(
-                                                                  object_id))
+        raise NothingFoundException(u'Nothing found with ID :{0}'.format(object_id))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
@@ -135,10 +127,7 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-
-      result = self.session.query(Object).filter(and_(Object.event_id
-                                                 == event_id, Object.parent_object_id == None)
-                                                 )
+      result = self.session.query(Object).filter(and_(Object.event_id == event_id, Object.parent_object_id == None))
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
         return list()
@@ -165,13 +154,11 @@ class ObjectBroker(BrokerBase):
     """
     try:
       # first level
-      result = self.session.query(Object).join(Object.creator, User.default_group).filter(Object.event_id
-                                                 == event_id,
-                                                 or_(
-                                                     Object.dbcode.op('&')(12) == 12,
-                                                     Group.identifier == group_id
-                                                     )
-                                                 )
+      result = self.session.query(Object).join(Object.creator, User.default_group).filter(Object.event_id == event_id,
+                                                                                          or_(Object.dbcode.op('&')(12) == 12,
+                                                                                              Group.identifier == group_id
+                                                                                              )
+                                                                                          )
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
         return list()

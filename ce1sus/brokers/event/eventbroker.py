@@ -94,9 +94,7 @@ class EventBroker(BrokerBase):
   def get_all_limited(self, limit, offset):
     """Returns only a subset of entries"""
     try:
-      result = self.session.query(self.get_broker_class()
-                        ).filter(Event.dbcode.op('&')(4) == 4).order_by(
-                        Event.created.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -105,9 +103,9 @@ class EventBroker(BrokerBase):
     return result
 
   def __get_all_according_permissions(self,
-                                     user,
-                                     limit,
-                                     offset):
+                                      user,
+                                      limit,
+                                      offset):
     """
     Returns all the events taking into account the users groups
     """
@@ -123,19 +121,17 @@ class EventBroker(BrokerBase):
       try:
         # prepare list of event matching the groups
         try:
-          maingroups = self.session.query(Event.identifier).join(Event.maingroups).filter(
-                                           Event.dbcode.op('&')(12) == 12,
-                                           Group.identifier == main_group_id
-                                    ).all()
+          maingroups = self.session.query(Event.identifier).join(Event.maingroups).filter(Event.dbcode.op('&')(12) == 12,
+                                                                                          Group.identifier == main_group_id
+                                                                                          ).all()
         except sqlalchemy.orm.exc.NoResultFound:
           maingroups = list()
 
         if len(sub_group_ids) > 0:
           try:
-            subgroups = self.session.query(Event.identifier).join(Event.subgroups).filter(
-                                             Event.dbcode.op('&')(12) == 12,
-                                             Group.identifier.in_(sub_group_ids)
-                                      ).all()
+            subgroups = self.session.query(Event.identifier).join(Event.subgroups).filter(Event.dbcode.op('&')(12) == 12,
+                                                                                          Group.identifier.in_(sub_group_ids)
+                                                                                          ).all()
           except sqlalchemy.orm.exc.NoResultFound:
             subgroups = list()
         else:
@@ -143,20 +139,15 @@ class EventBroker(BrokerBase):
         event_ids = list()
         for item in maingroups + subgroups:
           event_ids.append(item[0])
-        result = self.session.query(Event).filter(
-                                                    or_(
-                                                        and_(
-                                                           Event.dbcode.op('&')(4) == 4,
+        result = self.session.query(Event).filter(or_(and_(Event.dbcode.op('&')(4) == 4,
                                                            Event.creator_group_id == main_group_id
-                                                        ),
-                                                        and_(
-                                                             or_(
-                                                                   Event.identifier.in_(event_ids),
-                                                                   Event.tlp_level_id >= tlp_lvl
-                                                                 ),
+                                                           ),
+                                                      and_(or_(Event.identifier.in_(event_ids),
+                                                               Event.tlp_level_id >= tlp_lvl
+                                                               ),
                                                            Event.published == 1
-                                                        )
-                                                    )
+                                                           )
+                                                      )
                                                   )
         if limit is None and offset is None:
           result = result.order_by(Event.created.desc()).all()
@@ -174,9 +165,7 @@ class EventBroker(BrokerBase):
     Returns all unvalidated events
     """
     try:
-      result = self.session.query(Event).filter(
-                                            Event.dbcode.op('&')(4) != 4
-                                               ).all()
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -193,8 +182,8 @@ class EventBroker(BrokerBase):
       return self.get_all_limited(limit, offset)
     else:
       return self.__get_all_according_permissions(user,
-                                                 limit,
-                                                 offset)
+                                                  limit,
+                                                  offset)
 
   def __modify_event_groups(self, event_id, group_id, commit=True, insert=True):
     """
@@ -243,10 +232,8 @@ class EventBroker(BrokerBase):
     Performs changes in the event's subgroups
     """
     try:
-      group = self.session.query(SubGroup).filter(SubGroup.identifier ==
-                                               group_id).one()
-      event = self.session.query(Event).filter(Event.identifier ==
-                                               event_id).one()
+      group = self.session.query(SubGroup).filter(SubGroup.identifier == group_id).one()
+      event = self.session.query(Event).filter(Event.identifier == event_id).one()
       if insert:
         event.subgroups.append(group)
       else:
@@ -293,15 +280,12 @@ class EventBroker(BrokerBase):
     """
     try:
 
-      result = self.session.query(Event).filter(
-                        Event.uuid == identifier).one()
+      result = self.session.query(Event).filter(Event.uuid == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with uuid :{0}'.format(
-                                                                  identifier))
+      raise NothingFoundException(u'Nothing found with uuid :{0}'.format(identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for uuid :{0}'.format(identifier))
+      raise TooManyResultsFoundException('Too many results found for uuid :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
@@ -331,16 +315,13 @@ class EventBroker(BrokerBase):
         for subgroup in user.default_group.subgroups:
           subgroups_ids.append(subgroup.identifier)
       # Dont forget to consider the permission
-      query.filter(or_(
-                      Event.creator_group_id == main_group_id,
-                      and_(
-                        or_(
-                          Event.tlp_level_id >= tlp_lvl,
-                          Event.dbcode.op('&')(12) == 12
-                        ),
-                        Event.published == 1)
-                      )
-                  )
+      query.filter(or_(Event.creator_group_id == main_group_id,
+                       and_(or_(Event.tlp_level_id >= tlp_lvl,
+                                Event.dbcode.op('&')(12) == 12
+                                ),
+                            Event.published == 1)
+                       )
+                   )
       query.filter()
       query = query.order_by(Event.created.desc())
       query = query.limit(limit).offset(offset)

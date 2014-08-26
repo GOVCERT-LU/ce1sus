@@ -23,10 +23,10 @@ DIGITS = r'^[\d.]+$'
 EMAILADDRESS = r'^.+@.+\..{2,3}$'
 IP = r'^[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}$'
 HASHES = {'MD5': r'^[0-9a-fA-F]{32}$',
-               'SHA1': r'^[0-9a-fA-F]{40}$',
-               'SHA256': r'^[0-9a-fA-F]{64}$',
-               'SHA384': r'^[0-9a-fA-F]{96}$',
-               'SHA512': r'^[0-9a-fA-F]{128}$'}
+          'SHA1': r'^[0-9a-fA-F]{40}$',
+          'SHA256': r'^[0-9a-fA-F]{64}$',
+          'SHA384': r'^[0-9a-fA-F]{96}$',
+          'SHA512': r'^[0-9a-fA-F]{128}$'}
 
 
 def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
@@ -56,7 +56,7 @@ def validateRegex(obj, attributeName, regex, errorMsg, changeAttribute=False):
     return result
   else:
     raise ValidationException('The given object has no attribute ' +
-                               attributeName)
+                              attributeName)
 
 
 class ValidationException(Exception):
@@ -322,10 +322,10 @@ class ObjectValidator:
       :return Boolean
     """
     return validateRegex(obj,
-                  attributeName,
-                  EMAILADDRESS,
-                  'The email has to be under the form (.*)@(.*).(.*){2,3}',
-                  changeAttribute)
+                         attributeName,
+                         EMAILADDRESS,
+                         'The email has to be under the form (.*)@(.*).(.*){2,3}',
+                         changeAttribute)
 
   @staticmethod
   def validateIP(obj, attributeName, changeAttribute=True):
@@ -345,10 +345,10 @@ class ObjectValidator:
       :return Boolean
     """
     return validateRegex(obj,
-                  attributeName,
-                  IP,
-                  'The IP address has to be under the form of X.X.X.X',
-                  changeAttribute)
+                         attributeName,
+                         IP,
+                         'The IP address has to be under the form of X.X.X.X',
+                         changeAttribute)
 
   @staticmethod
   def validateDateTime(obj, attributeName, changeAttribute=True):
@@ -369,7 +369,7 @@ class ObjectValidator:
       :return Boolean
     """
     errorMsg = ('The date is not under the right form as i.e. ' +
-                 '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
+                '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
 
     value = getattr(obj, attributeName)
     if isinstance(value, datetime.datetime):
@@ -379,7 +379,7 @@ class ObjectValidator:
         return False
       stringToDateTime(value)
       return True
-    except InputException as e:
+    except InputException as error:
       if changeAttribute:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
       return False
@@ -419,10 +419,10 @@ class ObjectValidator:
     regex = HASHES[typeUpper]
 
     return validateRegex(obj,
-                  attributeName,
-                  regex,
-                  'The entered hash is not a valid {0} hash'.format(typeUpper),
-                  changeAttribute)
+                         attributeName,
+                         regex,
+                         'The entered hash is not a valid {0} hash'.format(typeUpper),
+                         changeAttribute)
 
   @staticmethod
   def validateRegularExpression(obj, attributeName, changeAttribute=True):
@@ -456,9 +456,7 @@ class ObjectValidator:
         setattr(obj,
                 attributeName,
                 FailedValidation(regex,
-                                 ('The given regex is invalid '
-                                 + 'due to: {0}').format(errorMsg)))
+                                 ('The given regex is invalid due to: {0}').format(errorMsg)))
       return result
     else:
-      raise ValidationException('The given object has no attribute ' +
-                                 attributeName)
+      raise ValidationException('The given object has no attribute ' + attributeName)

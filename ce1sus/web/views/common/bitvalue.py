@@ -31,11 +31,11 @@ class BitValueView(Ce1susBaseView):
 
   def __generate_template(self, event_id, instance, parentDisabled, is_attribute):
     return self._render_template('/events/event/bitvalue/bitvalueModal.html',
-                           identifier=instance.identifier,
-                           bit_value=instance.bit_value,
-                           event_id=event_id,
-                           enabled=parentDisabled,
-                           is_attribute=is_attribute)
+                                 identifier=instance.identifier,
+                                 bit_value=instance.bit_value,
+                                 event_id=event_id,
+                                 enabled=parentDisabled,
+                                 is_attribute=is_attribute)
 
   @cherrypy.expose
   @require(require_referer(('/internal')))

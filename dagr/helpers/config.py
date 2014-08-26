@@ -51,7 +51,7 @@ class Configuration(object):
     self.config_file = config_file
     if not isfile(config_file):
       raise ConfigFileNotFoundException('Could not find config file ' +
-                            config_file + ' in ' + getcwd())
+                                        config_file + ' in ' + getcwd())
     try:
       self.config_parser.read(config_file)
     except ParsingError as error:
@@ -96,7 +96,7 @@ class Configuration(object):
       return items
     else:
       raise ConfigSectionNotFoundException('Section ' + section +
-                                             ' is not found in ' + self.config_file)
+                                           ' is not found in ' + self.config_file)
 
   def get(self, section, key, default_value='@@NotSet'):
     """

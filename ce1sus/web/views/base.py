@@ -197,7 +197,7 @@ class Ce1susBaseView(BaseView):
       if obj:
         creator_grp_id = obj.creator.default_group.identifier
         user_grp_id = self._get_user().default_group.identifier
-        if  (not obj.bit_value.is_validated and  creator_grp_id != user_grp_id):
+        if (not obj.bit_value.is_validated and creator_grp_id != user_grp_id):
           username = self.__get_username()
           raise cherrypy.HTTPError(403, 'User {0} has no rights on {1} {2}'.format(username, obj, obj.identifier))
       else:

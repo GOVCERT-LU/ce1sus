@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import logging
-import sys
 from logging.handlers import RotatingFileHandler
 
 
@@ -67,7 +66,7 @@ class Log(object):
       max_bytes = getattr(logger, "rot_maxBytes", log_file_size)
       backup_count = getattr(logger, "rot_backupCount", nbr_backups)
       file_rotater = RotatingFileHandler(self.log_file, 'a', max_bytes,
-                                        backup_count)
+                                         backup_count)
       file_rotater.setFormatter(self.__formatter)
       logger.addHandler(file_rotater)
       logger.setLevel(self.log_lvl)

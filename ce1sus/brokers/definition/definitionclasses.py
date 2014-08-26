@@ -11,7 +11,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from dagr.db.broker import  ValidationException
+from dagr.db.broker import ValidationException
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from dagr.db.session import BASE
@@ -24,10 +24,9 @@ from dagr.helpers.validator.objectvalidator import FailedValidation
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'DObj_has_DAttr', getattr(BASE, 'metadata'),
-    Column('def_attribute_id', Integer, ForeignKey(
-                                          'DEF_Attributes.def_attribute_id')),
+    Column('def_attribute_id', Integer, ForeignKey('DEF_Attributes.def_attribute_id')),
     Column('def_object_id', Integer, ForeignKey('DEF_Objects.def_object_id'))
-    )
+)
 
 
 class AttributeHandler(BASE):
@@ -158,9 +157,9 @@ class AttributeDefinition(BASE):
     pass
 
   tableDefinitions = {0: 'TextValue',
-                 1: 'StringValue',
-                 2: 'DateValue',
-                 3: 'NumberValue'}
+                      1: 'StringValue',
+                      2: 'DateValue',
+                      3: 'NumberValue'}
 
   __tablename__ = "DEF_Attributes"
   # table class mapping
@@ -171,16 +170,18 @@ class AttributeDefinition(BASE):
   class_index = Column('classIndex', Integer)
   handler_index = Column('handlerIndex', ForeignKey(AttributeHandler.identifier))
   attribute_handler = relationship(AttributeHandler,
-                         back_populates='attributes',
-                         primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
-                         lazy='joined',
-                         cascade='all',
-                         order_by="AttributeDefinition.name")
+                                   back_populates='attributes',
+                                   primaryjoin='AttributeHandler.identifier==AttributeDefinition.handler_index',
+                                   lazy='joined',
+                                   cascade='all',
+                                   order_by="AttributeDefinition.name")
   deletable = Column('deletable', Integer)
   # note class relationTable attribute
-  objects = relationship('ObjectDefinition', secondary='DObj_has_DAttr',
-                         back_populates='attributes', cascade='all',
-                            order_by="ObjectDefinition.name")
+  objects = relationship('ObjectDefinition',
+                         secondary='DObj_has_DAttr',
+                         back_populates='attributes',
+                         cascade='all',
+                         order_by="ObjectDefinition.name")
   share = Column('sharable', Integer)
   relation = Column('relationable', Integer)
   chksum = Column('chksum', String)
@@ -198,7 +199,7 @@ class AttributeDefinition(BASE):
   @property
   def classname(self):
     """The name for the class used for storing the attribute value"""
-    if not self.class_index is None:
+    if self.class_index is not None:
       if isinstance(self.class_index, FailedValidation):
         return self.find_classname(self.class_index.value)
       else:

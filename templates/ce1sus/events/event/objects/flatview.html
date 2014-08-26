@@ -39,13 +39,13 @@
         shareicon = '<span class="glyphicon glyphicon-ok"></span>'
       else:
         shareicon = '<span class="glyphicon glyphicon-remove"></span>'
-      attribute_owner = (user.default_group.identifier == flat_object[1].creator.default_group.identifier)
+      attribute_owner = (user.default_group.identifier == flat_object[1].creator_group.identifier)
       if flat_object[1].bit_value.is_proposal and not flat_object[1].bit_value.is_validated:
         tdstyle = 'style="background-color: yellow;"'
       else:
         tdstyle = ''
         
-      attribute_owner = (user.default_group.identifier == flat_object[1].creator.default_group.identifier)
+      attribute_owner = (user.default_group.identifier == flat_object[1].creator_group.identifier)
       %>
       <%counter=counter+1%>
       <tr>

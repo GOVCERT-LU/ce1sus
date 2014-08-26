@@ -109,6 +109,7 @@ class EventController(Ce1susBaseController):
             event.uuid = unicode(uuidgen.uuid4())
           else:
             event.uuid = uuid
+          # TODO: Check if creator_group_id was not passed
           event.creator_group_id = user.default_group.identifier
           event.maingroups = list()
           event.maingroups.append(user.default_group)
@@ -178,7 +179,7 @@ class EventController(Ce1susBaseController):
       event.bit_value.is_shareable = True
     return event
 
-  def populate_rest_event(self, user, dictionary, action):
+  def populate_rest_event(self, user, group, dictionary, action):
     """
     populates an event object with the given rest_event
 
@@ -226,6 +227,9 @@ class EventController(Ce1susBaseController):
     # pylint:disable=W0142
     event = self.__popultate_event(**params)
 
+    if group:
+      event.creator_group = group
+
     event.bit_value.is_rest_instert = True
 
     share = dictionary.get('share', None)
@@ -254,7 +258,7 @@ class EventController(Ce1susBaseController):
       self.event_broker.insert(event, False)
       # generate relations if needed!
       attributes = get_all_attribtues_from_event(event)
-      if (mkrelations == 'True' or mkrelations == True) and attributes:
+      if (mkrelations == 'True' or mkrelations is True) and attributes:
         self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       self.event_broker.do_commit(True)
       return event, True

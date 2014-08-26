@@ -45,7 +45,7 @@ class GroupController(Ce1susBaseController):
   def get_available_subgroups(self, group):
     try:
       return self.group_broker.get_subgroups_by_group(group.identifier,
-                                                          False)
+                                                      False)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -68,10 +68,10 @@ class GroupController(Ce1susBaseController):
     try:
       if operation == 'add':
         GroupController.__handle_input(self.group_broker.add_subgroup_to_group,
-                                           group_id, remaining_subgroups)
+                                       group_id, remaining_subgroups)
       else:
         GroupController.__handle_input(self.group_broker.remove_subgroup_from_group,
-                                           group_id, group_subgroups)
+                                       group_id, group_subgroups)
       self.group_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)
@@ -125,7 +125,6 @@ class GroupController(Ce1susBaseController):
       self.group_broker.remove_by_id(group.identifier)
       return group, True
     except IntegrityException as error:
-      raise ControllerException('Cannot delete this group. The group is referenced by elements.'
-                    + ' Remove the events of this group first.')
+      raise ControllerException('Cannot delete this group. The group is referenced by elements. Remove the events of this group first.')
     except BrokerException as error:
       self._raise_exception(error)

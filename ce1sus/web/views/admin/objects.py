@@ -110,7 +110,7 @@ class AdminObjectsView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def edit_object_attributes(self, identifier, operation,
-                     existing=None, remaining=None):
+                             existing=None, remaining=None):
     """
     modifies the relation between a object and its attributes
 
@@ -139,7 +139,7 @@ class AdminObjectsView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def modify_object(self, identifier=None, name=None,
-                  description=None, action='insert', share=None):
+                    description=None, action='insert', share=None):
     """
     modifies or inserts a object with the data of the post
 
@@ -175,7 +175,7 @@ class AdminObjectsView(Ce1susBaseView):
         return self._return_ajax_ok()
       else:
         return self._return_ajax_post_error(self._render_template('/admin/objects/objectModal.html',
-                                 object=obj))
+                                                                  object=obj))
     except SpecialControllerException as error:
       return self._return_ajax_error(error.message)
     except ControllerException as error:
@@ -196,6 +196,6 @@ class AdminObjectsView(Ce1susBaseView):
     try:
       obj = self.object_controller.get_object_definitions_by_id(objectid)
       return self._render_template('/admin/objects/objectModal.html',
-                                 object=obj)
+                                   object=obj)
     except ControllerException as error:
       return self._render_error_page(error)

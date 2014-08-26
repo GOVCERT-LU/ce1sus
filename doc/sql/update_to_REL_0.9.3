@@ -1,0 +1,52 @@
+START TRANSACTION;
+
+ALTER TABLE `Objects` 
+ADD COLUMN `creator_group_id` INT(11) NULL AFTER `creator_id`;
+
+ALTER TABLE `Attributes` 
+ADD COLUMN `creator_group_id` INT(11) NULL AFTER `uuid`;
+
+update `Objects` left join Users on creator_id = user_id left join Groups on Users.group_id = Groups.group_id 
+set
+creator_group_id = Groups.group_id;
+
+update `Attributes` left join Users on creator_id = user_id left join Groups on Users.group_id = Groups.group_id 
+set
+creator_group_id = Groups.group_id;
+
+ALTER TABLE `Objects` 
+CHANGE COLUMN `creator_group_id` `creator_group_id` INT(11) NOT NULL ;
+
+ALTER TABLE `Attributes` 
+CHANGE COLUMN `creator_group_id` `creator_group_id` INT(11) NOT NULL ;
+
+ALTER TABLE `Attributes` 
+ADD INDEX `FK_Attr_Group_idx` (`creator_group_id` ASC);
+ALTER TABLE `Attributes` 
+ADD CONSTRAINT `FK_Attr_Group`
+  FOREIGN KEY (`creator_group_id`)
+  REFERENCES `Groups` (`group_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+  
+ALTER TABLE `Attributes` 
+ADD CONSTRAINT `FK_Attr_Group`
+  FOREIGN KEY (`creator_group_id`)
+  REFERENCES `Groups` (`group_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+UPDATE ce1sus SET `value`='0.10.0' WHERE `key`='app_rev';
+UPDATE ce1sus SET `value`='0.9.3' WHERE `key`='db_shema';
+
+ALTER TABLE `Attributes` 
+CHANGE COLUMN `code` `code` INT(1) NOT NULL ;
+
+ALTER TABLE ``Users` 
+CHANGE COLUMN `privileged` `code` INT(1) NOT NULL DEFAULT '0' ;
+
+ALTER TABLE `Groups` 
+CHANGE COLUMN `email` `email` VARCHAR(255) CHARACTER SET 'utf32' NULL ;
+
+
+COMMIT;

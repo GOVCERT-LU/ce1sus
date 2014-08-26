@@ -128,7 +128,7 @@ class AttributesController(Ce1susBaseController):
           self.attribute_broker.insert(attribute, commit=False)
       except ValidationException:
         valid = False
-      if not additional_attributes is None:
+      if additional_attributes is not None:
         for additional_attribute in additional_attributes:
           try:
             additional_attribute.attr_parent_id = attribute.identifier
@@ -151,7 +151,7 @@ class AttributesController(Ce1susBaseController):
       self._raise_exception(error)
 
   # pylint: disable=R0913
-  def __populate_attributes(self, user, obj, definition, action, params, rest=False):
+  def __populate_attributes(self, user, group, obj, definition, action, params, rest=False):
     """
     Populates the attributes to be inserted
     """
@@ -179,16 +179,17 @@ class AttributesController(Ce1susBaseController):
         raise ControllerException('Action is not defined')
       if rest:
         attribute, additional_attributes = handler_instance.process_rest_post(obj,
-                                                                           definitions,
-                                                                           # self._get_user(user.username),
-                                                                           user,
-                                                                           params)
+                                                                              definitions,
+                                                                              # self._get_user(user.username),
+                                                                              user,
+                                                                              group,
+                                                                              params)
       else:
         attribute, additional_attributes = handler_instance.process_gui_post(obj,
-                                                                           definitions,
-                                                                           # self._get_user(user.username),
-                                                                           user,
-                                                                           params)
+                                                                             definitions,
+                                                                             # self._get_user(user.username),
+                                                                             user,
+                                                                             params)
       if action == 'insert':
         return attribute, additional_attributes
       elif action == 'update':
@@ -236,6 +237,7 @@ class AttributesController(Ce1susBaseController):
     try:
       definition = self.attr_def_broker.get_by_id(definition_id)
       attribute, additional_attributes = self.__populate_attributes(user,
+                                                                    None,
                                                                     obj,
                                                                     definition,
                                                                     action,
@@ -254,7 +256,7 @@ class AttributesController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_rest_attributes(self, user, obj, dictionary, action, attr_defs=dict()):
+  def populate_rest_attributes(self, user, group, obj, dictionary, action, attr_defs=dict()):
     """
     Populates the attributes to be inserted coming from the rest api
     """
@@ -291,7 +293,10 @@ class AttributesController(Ce1susBaseController):
           raise BrokerException(u'Could not convert date for attribute with type {0} and value {1}'.format(definition.name, str_value))
       elif definition.class_index == 3:
         # number
-        value = ast.literal_eval(str_value)
+        try:
+          value = ast.literal_eval(str_value)
+        except ValueError:
+          value = str_value
       else:
         raise BrokerException('Could not determine type of value')
       params = dict()
@@ -299,6 +304,7 @@ class AttributesController(Ce1susBaseController):
       params['ioc'] = dictionary.get('ioc', None)
       params['shared'] = dictionary.get('share', None)
       attribute, additional_attributes = self.__populate_attributes(user,
+                                                                    group,
                                                                     obj,
                                                                     definition,
                                                                     action,
@@ -358,15 +364,15 @@ class AttributesController(Ce1susBaseController):
       if handler_uuid:
         handler = self.handler_broker.get_by_uuid(handler_uuid)
       return self.attr_def_broker.build_attribute_definition(identifier=None,
-                                                                   name=dictionary.get('name', None),
-                                                                   description=dictionary.get('description', None),
-                                                                   regex=dictionary.get('regex', None),
-                                                                   class_index=dictionary.get('class_index', None),
-                                                                   action=action,
-                                                                   handler_index=handler.identifier,
-                                                                   share=dictionary.get('share', None),
-                                                                   relation=dictionary.get('relation', None)
-                                                                   )
+                                                             name=dictionary.get('name', None),
+                                                             description=dictionary.get('description', None),
+                                                             regex=dictionary.get('regex', None),
+                                                             class_index=dictionary.get('class_index', None),
+                                                             action=action,
+                                                             handler_index=handler.identifier,
+                                                             share=dictionary.get('share', None),
+                                                             relation=dictionary.get('relation', None)
+                                                             )
     except BrokerException as error:
       self._raise_exception(error)
 

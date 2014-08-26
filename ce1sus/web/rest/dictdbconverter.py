@@ -21,6 +21,10 @@ from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute, RestObj
 from ce1sus.brokers.event.eventclasses import Event, Object, Attribute
 from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
 from ce1sus.common.handlers.base import HandlerException
+from ce1sus.brokers.permission.permissionclasses import Group
+import uuid
+from ce1sus.controllers.admin.groups import GroupController
+from ce1sus.controllers.event.groups import GroupsController
 
 
 class DictDBConversionException(Exception):
@@ -36,6 +40,8 @@ class DictDBConverter(object):
     self.event_controller = EventController(config)
     self.object_controller = ObjectsController(config)
     self.attribtue_controller = AttributesController(config)
+    self.group_controller = GroupController(config)
+    self.groups_controller = GroupsController(config)
 
   def _get_logger(self):
     """Returns the class logger"""
@@ -106,13 +112,62 @@ class DictDBConverter(object):
     else:
       raise DictDBConversionException('Only insert is supported')
 
+  def __convert_dict_to_group(self, user, contents):
+    # check if you can set groups
+    if user.rights.set_group:
+      # check if group exists else create it
+      restclassname, contents = self.__get_object_data(contents)
+      if restclassname != u'RestGroup':
+        raise DictDBConversionException(u'Expected RestGroup but got {0}'.format(restclassname))
+      group_name = contents.get('name', None)
+      group_uuid = contents.get('uuid', None)
+      # TODO: Check if uuid is valid
+      group = None
+      try:
+        # check if string is a correct uuid
+        if group_uuid:
+          try:
+            group = self.groups_controller.get_group_by_uuid(group_uuid)
+          except ControllerException:
+            if group_name:
+              group = self.groups_controller.get_group_by_name(group_name)
+      except ControllerException:
+        pass
+
+      if not group:
+        self._get_logger().debug(u'Group {0} not found creating it'.format(group_name))
+        # Create group in db
+        group = Group()
+        group.name = group_name
+        if group_uuid:
+          group.uuid = group_uuid
+        else:
+          group_uuid = uuid.uuid4()
+        group.description = u'This group was generated automatically as it was not existing.'
+        group.email = None
+        group.gpg_key = None
+        group.subgroups = list()
+        group.users = list()
+        group.can_download = 0
+        # send mails to users as email of group is not set
+        group.usermails = 1
+        # Auto create groups are always white
+        group.tlp_lvl = 3
+        group = self.group_controller.insert_group(group)[1]
+
+      return group
+    else:
+      return None
+
   def __convert_dict_event(self, user, contents, action):
     try:
       attr_defs = dict()
       obj_defs = dict()
       if action == 'insert':
         self._get_logger().debug('Starting event conversion')
-        event = self.event_controller.populate_rest_event(user, contents, action)
+        # getting event group
+        group = self.__convert_dict_to_group(user, contents.get('group', None))
+        event = self.event_controller.populate_rest_event(user, group, contents, action)
         objects_dictlist = contents.get('objects', list())
         event.objects = list()
         if objects_dictlist:
@@ -135,10 +190,14 @@ class DictDBConverter(object):
   def __convert_dict_object(self, user, event, parent_object, contents, action, obj_defs, attr_defs):
     self._get_logger().debug('Starting conversion of object')
     try:
+
+      group = self.__convert_dict_to_group(user, contents.get('group', None))
+
       obj = self.object_controller.populate_rest_object(event,
                                                         contents,
                                                         parent_object,
                                                         user,
+                                                        group,
                                                         action,
                                                         obj_defs)
       seen_attributes = list()
@@ -152,13 +211,13 @@ class DictDBConverter(object):
           attribute, additional_attributes = self.__convert_dict_attribute(obj, attribute_dict, user, action, attr_defs)
           # check if attribute was not already seen and append it
           hash_value = self.__gen_attr_hash(attribute)
-          if not hash_value in seen_attributes:
+          if hash_value not in seen_attributes:
             seen_attributes.append(hash_value)
             obj.attributes.append(attribute)
           if additional_attributes:
             for additional_attribute in additional_attributes:
               hash_value = self.__gen_attr_hash(additional_attribute)
-              if not hash_value in seen_attributes:
+              if hash_value not in seen_attributes:
                 seen_attributes.append(hash_value)
                 # attach to parent
                 attribute.children.append(additional_attribute)
@@ -187,7 +246,8 @@ class DictDBConverter(object):
   def __convert_dict_attribute(self, obj, dictionary, user, action, attr_defs):
     self._get_logger().debug('Starting conversion of object')
     try:
-      attribute, additional_attributes = self.attribtue_controller.populate_rest_attributes(user, obj, dictionary, action, attr_defs)
+      group = self.__convert_dict_to_group(user, dictionary.get('group', None))
+      attribute, additional_attributes = self.attribtue_controller.populate_rest_attributes(user, group, obj, dictionary, action, attr_defs)
       return attribute, additional_attributes
     except ControllerException as error:
       self._get_logger().error(error)
@@ -265,7 +325,8 @@ class DictDBConverter(object):
         # share only the objects which are shareable or are owned by the user
         if (obj.bit_value.is_shareable and obj.bit_value.is_validated) or owner:
           rest_object = self.convert_object(obj, owner, full, with_definition)
-          rest_event.objects.append(rest_object)
+          if rest_object.attributes:
+            rest_event.objects.append(rest_object)
     rest_event.comments = list()
     if event.bit_value.is_shareable:
       rest_event.share = 1

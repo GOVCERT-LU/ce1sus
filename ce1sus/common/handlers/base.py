@@ -243,7 +243,7 @@ class HandlerBase(object):
     else:
       raise HandlerException('Could not determine main definition for {0}').format(self.__class__.__name__)
 
-  def process_rest_post(self, obj, definitions, user, rest_attribute):
+  def process_rest_post(self, obj, definitions, user, group, rest_attribute):
     """
     Process of the post over the RestAPI
 
@@ -263,4 +263,5 @@ class HandlerBase(object):
                                                        obj,
                                                        definitions,
                                                        user,
+                                                       group,
                                                        rest_attribute))

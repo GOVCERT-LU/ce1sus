@@ -90,7 +90,7 @@ def check_if_event_is_viewable(event, user, cache=None):
       result = is_viewable(event, user.default_group, user.privileged == 1)
     else:
       viewable = cache.get(event.identifier, None)
-      if viewable == True:
+      if viewable is True:
         return True
       else:
         result = is_viewable(event, user.default_group, user.privileged == 1)

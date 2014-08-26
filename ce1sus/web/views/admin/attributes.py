@@ -26,9 +26,9 @@ class AdminAttributeView(Ce1susBaseView):
 
   def tabs(self):
     attr_tab = AdminTab(title='Attributes',
-                       url='/admin/attributes',
-                       options='reload',
-                       position=2)
+                        url='/admin/attributes',
+                        options='reload',
+                        position=2)
     return [attr_tab]
 
   def __init__(self, config):
@@ -118,7 +118,7 @@ class AdminAttributeView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def edit_attribute_attributes(self, identifier, operation,
-                     existing=None, remaining=None):
+                                existing=None, remaining=None):
     """
     modifies the relation between a attribute and its attributes
 
@@ -148,8 +148,8 @@ class AdminAttributeView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def modify_attribute(self, identifier=None, name=None, description='',
-                      regex='^.*$', class_index=0, action='insert',
-                      handler_index=0, share=None, relation=None):
+                       regex='^.*$', class_index=0, action='insert',
+                       handler_index=0, share=None, relation=None):
     """
     modifies or inserts a attribute with the data of the post
 
@@ -168,14 +168,14 @@ class AdminAttributeView(Ce1susBaseView):
     try:
       self._check_if_valid_action(action)
       attribute = self.attribute_controller.populate_attribute(identifier,
-                                                              name,
-                                                              description,
-                                                              regex,
-                                                              class_index,
-                                                              action,
-                                                              handler_index,
-                                                              share,
-                                                              relation)
+                                                               name,
+                                                               description,
+                                                               regex,
+                                                               class_index,
+                                                               action,
+                                                               handler_index,
+                                                               share,
+                                                               relation)
 
       if action == 'insert':
         attribute, valid = self.attribute_controller.insert_attribute_definition(attribute)
@@ -190,9 +190,9 @@ class AdminAttributeView(Ce1susBaseView):
         cb_values = self.attribute_controller.get_cb_table_definitions()
         cb_handler_values = self.attribute_controller.get_cb_handler_definitions()
         return self._return_ajax_post_error(self._render_template('/admin/attributes/attributeModal.html',
-                                 attribute=attribute,
-                                 cb_values=cb_values,
-                                 cb_handler_values=cb_handler_values))
+                                                                  attribute=attribute,
+                                                                  cb_values=cb_values,
+                                                                  cb_handler_values=cb_handler_values))
     except SpecialControllerException as error:
       return self._return_ajax_error(error.message)
     except ControllerException as error:

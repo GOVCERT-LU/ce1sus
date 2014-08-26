@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 from dagr.web.helpers.templates import MakoHandler
 from dagr.helpers.debug import Log
 import cherrypy
-from dagr.helpers.strings import plaintext2html
 
 
 class BaseViewException(Exception):
@@ -81,7 +80,7 @@ class BaseView:
 
     """
     session = self._get_session()
-    if not key in session.keys():
+    if key not in session.keys():
       self._get_logger().debug('Key {0} is not defined in session'.format(key))
       raise SessionNotFoundException('Key {0} was not defined in session'.format(key))
 

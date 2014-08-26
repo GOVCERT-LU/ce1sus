@@ -73,7 +73,7 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def __populate_object(self, identifier, event_id, parent_object_id, definition, user, share, action):
+  def __populate_object(self, identifier, event_id, parent_object_id, definition, user, group, share, action):
     try:
       if hasattr(user, 'session'):
         user = self._get_user(user.username)
@@ -85,9 +85,14 @@ class ObjectsController(Ce1susBaseController):
       else:
         obj.identifier = identifier
 
+      if group:
+        obj.creator_group_id = group.identifier
+      else:
+        obj.creator_group_id = user.default_group.identifier
+
       if action != 'remove':
         obj.definition = definition
-        if not definition is None:
+        if definition is not None:
           obj.def_object_id = definition.identifier
 
       obj.event_id = event_id
@@ -106,7 +111,7 @@ class ObjectsController(Ce1susBaseController):
   def populate_web_object(self, identifier, event, parent_object_id, definition_id, user, share, action, proposal):
     try:
       definition = self.obj_def_broker.get_by_id(definition_id)
-      obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition, user, share, action)
+      obj = self.__populate_object(identifier, event.identifier, parent_object_id, definition, user, None, share, action)
       obj.bit_value.is_web_insert = True
       obj.bit_value.is_validated = not proposal
       obj.bit_value.is_proposal = proposal
@@ -114,7 +119,7 @@ class ObjectsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def populate_rest_object(self, event, dictinary, parent_object, user, action, obj_defs=dict()):
+  def populate_rest_object(self, event, dictinary, parent_object, user, group, action, obj_defs=dict()):
     try:
       # first get the definition
       definition_dict_obj = dictinary.get('definition', None)
@@ -142,7 +147,7 @@ class ObjectsController(Ce1susBaseController):
         parent_obj_id = parent_object.identifier
 
       share = dictinary.get('share', '0')
-      obj = self.__populate_object(None, event.identifier, parent_obj_id, definition, user, share, action)
+      obj = self.__populate_object(None, event.identifier, parent_obj_id, definition, user, group, share, action)
 
       if parent_object is None:
         obj.event = event
@@ -257,9 +262,11 @@ class ObjectsController(Ce1susBaseController):
 
   def populate_rest_obj_def(self, user, dictionary, action):
     try:
-      return self.obj_def_broker.build_object_definition(identifier=None, name=dictionary.get('name', None),
-                  description=dictionary.get('description', None), action=action,
-                               share=dictionary.get('share', None))
+      return self.obj_def_broker.build_object_definition(identifier=None,
+                                                         name=dictionary.get('name', None),
+                                                         description=dictionary.get('description', None),
+                                                         action=action,
+                                                         share=dictionary.get('share', None))
     except BrokerException as error:
       self._raise_exception(error)
 

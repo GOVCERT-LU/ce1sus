@@ -85,7 +85,7 @@ def get_fields(obj):
     for name in obj.__dict__:
       # if not a private or protected value and not a method
       if not name.startswith('_') and not callable(getattr(obj, name, None)):
-        if not name in fields:
+        if name not in fields:
           fields.append(name)
   return fields
 
@@ -108,7 +108,8 @@ def compare_objects(object1, object2, raise_exceptions=True):
   list_issue = False
   input_issue = False
   if (type(object1) != type(object2)) and not (isinstance(object1,
-      types.StringTypes) and isinstance(object2, types.StringTypes)):
+                                                          types.StringTypes) and
+                                               isinstance(object2, types.StringTypes)):
     result = False
     type_issue = True
     attr_value1 = type(object1)
@@ -116,8 +117,8 @@ def compare_objects(object1, object2, raise_exceptions=True):
   else:
     # check if not a baseType
     if (isinstance(object1, Iterable) and not isinstance(object1,
-                types.StringTypes)) and (isinstance(object1, Iterable) and
-                not isinstance(object1, types.StringTypes)):
+                                                         types.StringTypes)) and (isinstance(object1, Iterable) and
+                                                                                  not isinstance(object1, types.StringTypes)):
       list_issue = True
       input_issue = True
       if (len(object1) != len(object2)):
@@ -126,8 +127,7 @@ def compare_objects(object1, object2, raise_exceptions=True):
         attr_value2 = len(object2)
         result = False
       else:
-        if (isinstance(object1, types.DictionaryType) and
-                      isinstance(object2, types.DictionaryType)):
+        if (isinstance(object1, types.DictionaryType) and isinstance(object2, types.DictionaryType)):
           for key, item1 in object1.iteritems():
             if key in object2:
               # This is just to know what was the problem
@@ -145,31 +145,26 @@ def compare_objects(object1, object2, raise_exceptions=True):
               attr_value1 = object1[i]
               attr_value2 = object2[i]
               break
-    elif ((isinstance(object1, types.StringTypes) or isinstance(object1,
-                                                                types.IntType)
-                or isinstance(object1, types.FloatType) or isinstance(object1,
-                                                                types.LongType)
-                or isinstance(object1, types.TupleType)) and
-                (isinstance(object2, types.StringTypes) or isinstance(object2,
-                                                                types.IntType)
-                or isinstance(object2, types.FloatType) or isinstance(object2,
-                                                                types.LongType)
-                or isinstance(object2, types.TupleType))):
+    elif ((isinstance(object1, types.StringTypes) or
+           isinstance(object1, types.IntType) or
+           isinstance(object1, types.FloatType) or
+           isinstance(object1, types.LongType) or
+           isinstance(object1, types.TupleType)) and
+          (isinstance(object2, types.StringTypes) or isinstance(object2, types.IntType) or
+           isinstance(object2, types.FloatType) or isinstance(object2, types.LongType) or
+           isinstance(object2, types.TupleType))):
       input_issue = True
       if object1 != object2:
         attr_value1 = object1
         attr_value2 = object2
         result = False
-    elif  (isinstance(object1, datetime.datetime)) and (isinstance(object2,
-                                                          datetime.datetime)):
-      if (object1.strftime('%Y%m%d_%H%M%S') !=
-                                          object2.strftime('%Y%m%d_%H%M%S')):
+    elif (isinstance(object1, datetime.datetime)) and (isinstance(object2, datetime.datetime)):
+      if (object1.strftime('%Y%m%d_%H%M%S') != object2.strftime('%Y%m%d_%H%M%S')):
         attr_value1 = object1
         attr_value2 = object2
         result = False
     else:
-      if not ((isinstance(object1, types.NoneType) and isinstance(object2,
-                                                            types.NoneType))):
+      if not ((isinstance(object1, types.NoneType) and isinstance(object2, types.NoneType))):
         for name in get_fields(object1):
           # only compare public attributes/functions
           value1 = None
@@ -180,12 +175,10 @@ def compare_objects(object1, object2, raise_exceptions=True):
               value1 = getattr(object1, name)
               value2 = getattr(object2, name)
               # functions/methods will not be compared
-              if (not isfunction(value1) and not isinstance(value1,
-                                                            types.FunctionType)
-                and not ismethod(value1)) and (not isfunction(value2) and
-                                      not isinstance(value2,
-                                                     types.FunctionType)
-                and not ismethod(value2)):
+              if (not isfunction(value1) and not isinstance(value1, types.FunctionType)
+                  and not ismethod(value1)) and (not isfunction(value2) and
+                                                 not isinstance(value2, types.FunctionType)
+                                                 and not ismethod(value2)):
                 attr_name = name
                 attr_value1 = value1
                 attr_value2 = value2
@@ -200,22 +193,18 @@ def compare_objects(object1, object2, raise_exceptions=True):
   if not result:
     if raise_exceptions:
       if (type_issue):
-        raise TypeMismatchException(
-                      'Types differ, got {0} expected {1}'.format(attr_value1,
-                                                                  attr_value2))
+        raise TypeMismatchException('Types differ, got {0} expected {1}'.format(attr_value1,
+                                                                                attr_value2))
       elif (list_issue):
-        raise ArrayMismatchException(
-                      'Arrays differ, got {0} expected {1}'.format(attr_value1,
-                                                                   attr_value2))
+        raise ArrayMismatchException('Arrays differ, got {0} expected {1}'.format(attr_value1,
+                                                                                  attr_value2))
       elif (input_issue):
         raise ValueMismatchException('Got {0} expected {1}'.format(attr_value1,
                                                                    attr_value2))
       else:
-        raise AttributeMismatchException(
-                    'Attribute {0} is not equal, got {1} expected {2}'.format(
-                                                                   attr_name,
-                                                                   attr_value1,
-                                                                   attr_value2))
+        raise AttributeMismatchException('Attribute {0} is not equal, got {1} expected {2}'.format(attr_name,
+                                                                                                   attr_value1,
+                                                                                                   attr_value2))
   # if this is reached they have to be equal.
   return result
 
@@ -239,7 +228,7 @@ def print_object(obj, indent=0, max_rec_lvl=3):
   indent_str = '\t' * indent
   if (indent == 0):
     print '{indentation}{variableName}'.format(indentation=indent_str,
-                                                 variableName=type(obj))
+                                               variableName=type(obj))
   if (indent > max_rec_lvl):
     print '{indentation}...'.format(indentation=indent_str)
     return
@@ -254,48 +243,43 @@ def print_object(obj, indent=0, max_rec_lvl=3):
       if (isinstance(value, types.NoneType)):
         value = 'None'
       # Not interested in functions or methods
-      if (not isfunction(value) and not isinstance(value, types.FunctionType)
-          and not ismethod(value)):
+      if (not isfunction(value) and not isinstance(value, types.FunctionType)and not ismethod(value)):
         # If it is an list or array
         if isinstance(value, Iterable) and not isinstance(value,
                                                           types.StringTypes):
           if len(value) == 0:
-            print '{indentation}{variableName}: Empty'.format(
-                                                        indentation=indent_str,
-                                                        variableName=name)
+            print '{indentation}{variableName}: Empty'.format(indentation=indent_str,
+                                                              variableName=name)
           else:
             for item in value:
-              print '{indentation}{variableName} {type} :'.format(
-                                                  indentation=indent_str,
-                                                  variableName=name,
-                                                  type=type(item))
+              print '{indentation}{variableName} {type} :'.format(indentation=indent_str,
+                                                                  variableName=name,
+                                                                  type=type(item))
               print_object(item, indent + 1, max_rec_lvl)
         elif isinstance(value, object):
           # It should be one base type only the following ones are supported
           # to give a direct output
-          if (isinstance(value, types.StringTypes) or isinstance(value,
-                                                                 types.IntType)
-              or isinstance(value, types.FloatType) or isinstance(value,
-                                                                types.LongType)
-              or isinstance(value, types.TupleType) or type(value) ==
-                                                            datetime.datetime):
-            print '{indentation}{variableName}\t: "{variableValue}"'.format(
-                                                        indentation=indent_str,
-                                                        variableName=name,
-                                                        variableValue=value)
+          if (isinstance(value, types.StringTypes) or
+              isinstance(value, types.IntType) or
+              isinstance(value, types.FloatType) or
+              isinstance(value, types.LongType) or
+              isinstance(value, types.TupleType) or
+              type(value) == datetime.datetime
+              ):
+            print '{indentation}{variableName}\t: "{variableValue}"'.format(indentation=indent_str,
+                                                                            variableName=name,
+                                                                            variableValue=value)
           else:
             # Ok it is a custom object
-            print '{indentation}{variableName} {type} :'.format(
-                                                      indentation=indent_str,
-                                                      variableName=name,
-                                                      type=type(value))
+            print '{indentation}{variableName} {type} :'.format(indentation=indent_str,
+                                                                variableName=name,
+                                                                type=type(value))
             print_object(value, indent + 1)
         else:
           # in any other case print it directly
-          print '{indentation}{variableName}\t: "{variableValue}"'.format(
-                                                      indentation=indent_str,
-                                                      variableName=name,
-                                                      variableValue=value)
+          print '{indentation}{variableName}\t: "{variableValue}"'.format(indentation=indent_str,
+                                                                          variableName=name,
+                                                                          variableValue=value)
 
 
 def print_dictionary(dictionary):

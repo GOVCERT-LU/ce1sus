@@ -91,10 +91,9 @@ class IndexView(Ce1susBaseView):
         # validate user and user name
       printable_chars = string.printable[:-5]
       regex = '[{0}]'.format(printable_chars) + '{1,64}'
-      if  (not ValueValidator.validateRegex(username, regex, 'errorMsg')
-           and
-           not ValueValidator.validateRegex(password, regex, 'errorMsg')
-           ):
+      if (not ValueValidator.validateRegex(username, regex, 'errorMsg')
+         and
+         not ValueValidator.validateRegex(password, regex, 'errorMsg')):
         return self.index('Invalid input.')
       user = self.login_controller.get_user_by_usr_pwd(username, password)
       self.login_controller.update_last_login(user)
@@ -137,8 +136,8 @@ class IndexView(Ce1susBaseView):
       if activation_str:
         self.login_controller.activate_user(activation_str)
         return self._render_template('/index/authenticate.html',
-                                   env=self.__get_environment_string(),
-                                   error_msg=None)
+                                     env=self.__get_environment_string(),
+                                     error_msg=None)
       raise HTTPRedirect('/')
     except ActivationTimedOut as error:
       return self._render_template('/index/authenticate.html',

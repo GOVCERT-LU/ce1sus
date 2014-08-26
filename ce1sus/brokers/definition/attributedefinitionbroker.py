@@ -46,20 +46,12 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     """
     try:
 
-      objects = self.session.query(ObjectDefinition).join(
-                                              AttributeDefinition.objects
-                                              ).filter(
-                                        AttributeDefinition.identifier ==
-                                        identifier).order_by(
-                                                    ObjectDefinition.name.asc()
-                                                    ).all()
+      objects = self.session.query(ObjectDefinition).join(AttributeDefinition.objects).filter(AttributeDefinition.identifier == identifier).order_by(ObjectDefinition.name.asc()).all()
       if not belong_in:
         obj_ids = list()
         for obj in objects:
           obj_ids.append(obj.identifier)
-        objects = self.session.query(ObjectDefinition).filter(
- ~ObjectDefinition.identifier.in_(obj_ids)).order_by(ObjectDefinition.name.asc()
-                                                    ).all()
+        objects = self.session.query(ObjectDefinition).filter(~ObjectDefinition.identifier.in_(obj_ids)).order_by(ObjectDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found for ID: {0}',
                                   format(identifier))
@@ -89,12 +81,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     """
     definitions = list()
     try:
-      definitions = self.session.query(AttributeDefinition).join(
-                                              AttributeDefinition.objects
-                                              ).filter(
-                                        ObjectDefinition.identifier ==
-                                        obj_identifier).order_by(
-                                        AttributeDefinition.name).all()
+      definitions = self.session.query(AttributeDefinition).join(AttributeDefinition.objects).filter(ObjectDefinition.identifier == obj_identifier).order_by(AttributeDefinition.name).all()
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
@@ -114,10 +101,8 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     :type attr_id: Integer
     """
     try:
-      obj = self.session.query(ObjectDefinition).filter(
-                                ObjectDefinition.identifier == obj_id).one()
-      attribute = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.identifier == attr_id).one()
+      obj = self.session.query(ObjectDefinition).filter(ObjectDefinition.identifier == obj_id).one()
+      attribute = self.session.query(AttributeDefinition).filter(AttributeDefinition.identifier == attr_id).one()
       attribute.add_object(obj)
       additional_attribtues_chksums = attribute.handler.get_additinal_attribute_chksums()
       if additional_attribtues_chksums:
@@ -159,10 +144,8 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     :type attr_id: Integer
     """
     try:
-      obj = self.session.query(ObjectDefinition).filter(
-                                ObjectDefinition.identifier == obj_id).one()
-      attribute = self.session.query(AttributeDefinition).filter(
-                                AttributeDefinition.identifier == attr_id).one()
+      obj = self.session.query(ObjectDefinition).filter(ObjectDefinition.identifier == obj_id).one()
+      attribute = self.session.query(AttributeDefinition).filter(AttributeDefinition.identifier == attr_id).one()
       # check if chksum is not required
       required_chksums = self.findallchksums(obj)
       # remove self
@@ -187,10 +170,9 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     :type identifier: integer
     """
     try:
-      self.session.query(AttributeDefinition).filter(AttributeDefinition.
-                                            identifier == identifier,
-                                            AttributeDefinition.deletable == 1
-                      ).delete(synchronize_session='fetch')
+      self.session.query(AttributeDefinition).filter(AttributeDefinition.identifier == identifier,
+                                                     AttributeDefinition.deletable == 1
+                                                     ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.OperationalError as error:
       self.session.rollback()
       raise IntegrityException(error)

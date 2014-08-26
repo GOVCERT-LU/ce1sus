@@ -28,6 +28,18 @@ class GroupsController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
+  def get_group_by_uuid(self, uuid):
+    try:
+      return self.group_broker.get_by_uuid(uuid)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_group_by_name(self, name):
+    try:
+      return self.group_broker.get_by_name(name)
+    except BrokerException as error:
+      self._raise_exception(error)
+
   def get_available_subgroups(self, event):
     try:
       return self.event_broker.get_event_subgroups(event.identifier, False)

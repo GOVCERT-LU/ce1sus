@@ -37,20 +37,20 @@ class RestEventsHandler(RestBaseHandler):
       # limit has to be between 0 and maximum value
       if limit < 0 or limit > RestEventsHandler.MAX_LIMIT:
         self._raise_error('InvalidArgument',
-                        msg='The limit value has to be between 0 and 20')
+                          msg='The limit value has to be between 0 and 20')
 
       # search only if something was specified
       if start_date or uuids:
         events = self.events_controller.get_events(uuids,
-                                      start_date,
-                                      end_date,
-                                      offset,
-                                      limit,
-                                      self._get_user(False))
+                                                   start_date,
+                                                   end_date,
+                                                   offset,
+                                                   limit,
+                                                   self._get_user(False))
       else:
         events = self.events_controller.get_user_events(user=self._get_user(False),
-                                                limit=limit,
-                                                offset=offset)
+                                                        limit=limit,
+                                                        offset=offset)
 
       result = list()
       for event in events:

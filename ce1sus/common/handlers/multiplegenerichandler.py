@@ -46,13 +46,13 @@ class MultipleGenericHandler(GenericHandler):
             value = value.strip('\n\r')
             if value:
               params['value'] = value
-              attribute = self.create_attribute(params, obj, definition, user)
+              attribute = self.create_attribute(params, obj, definition, user, None)
               attributes.append(attribute)
           attribute = attributes.pop(0)
           return attribute, attributes
         else:
           params['value'] = ''
-          attribute = self.create_attribute(params, obj, definition, user)
+          attribute = self.create_attribute(params, obj, definition, user, None)
           attribute.value = FailedValidation('', 'No input given. Please enter something. Note that the multiline feature is not available anymore.')
           return attribute, None
       elif action == 'update':

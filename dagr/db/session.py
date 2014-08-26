@@ -15,8 +15,7 @@ from dagr.db.broker import BrokerBase
 from sqlalchemy.ext.declarative import declarative_base
 from dagr.db.connectors.mysql import MySqlConnector
 from dagr.db.connectors.sqlite import SqliteConnector
-from dagr.db.common import SessionManagerException, \
-                           BrokerInstantiationException
+from dagr.db.common import SessionManagerException, BrokerInstantiationException
 from sqlalchemy.pool import Pool
 from sqlalchemy import exc, event
 

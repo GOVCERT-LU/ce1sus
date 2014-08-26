@@ -12,9 +12,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.common.handlers.generichandler import GenericHandler
-import types
 from dagr.helpers.rt import RTTickets
-from ce1sus.common.handlers.base import HandlerException, UndefinedException
+from ce1sus.common.handlers.base import UndefinedException
 from dagr.web.views.classes import Link
 from dagr.helpers.validator.objectvalidator import FailedValidation
 
@@ -24,8 +23,8 @@ class RTHandler(GenericHandler):
   def __init__(self, config):
     GenericHandler.__init__(self, config)
     self.rt_system = RTTickets(self.config.get('rt_url'),
-                        self.config.get('rt_user'),
-                        self.config.get('rt_password'))
+                               self.config.get('rt_user'),
+                               self.config.get('rt_password'))
 
   @staticmethod
   def get_uuid():
@@ -83,9 +82,10 @@ class RTHandler(GenericHandler):
             for value in value_arry:
               params['value'] = value
               attribute = GenericHandler.create_attribute(params,
-                                                      obj,
-                                                      definition,
-                                                      user)
+                                                          obj,
+                                                          definition,
+                                                          user,
+                                                          None)
               if first:
                 main_attribute = attribute
                 first = False

@@ -48,15 +48,13 @@ class MySqlConnector(Connector):
     hostname = self.config.get('host')
     port = self.config.get('port')
     self.engine = None
-    self.connection_string = ('{prot}://{user}:{password}@'
-                             + '{host}:{port}/{db}').format(
-                                          prot=self.protocol,
-                                          user=self.config.get('username'),
-                                          password=self.config.get('password'),
-                                          host=hostname,
-                                          db=self.config.get('db'),
-                                          port=port
-                                        )
+    self.connection_string = ('{prot}://{user}:{password}@{host}:{port}/{db}').format(prot=self.protocol,
+                                                                                      user=self.config.get('username'),
+                                                                                      password=self.config.get('password'),
+                                                                                      host=hostname,
+                                                                                      db=self.config.get('db'),
+                                                                                      port=port
+                                                                                      )
     if self.config.get('usecherrypy'):
       # check if not already instantiated
       try:
@@ -76,22 +74,20 @@ class MySqlConnector(Connector):
     # check if host is available
     response = os.system("ping -c 1 " + hostname)
     if response != 0:
-      raise SessionManagerException('Host "{hostname}" not ' +
-                                     'available'.format(hostname=hostname))
+      raise SessionManagerException('Host "{hostname}" not available'.format(hostname=hostname))
     # check if socket available
     if not self.is_service_existing(hostname, port):
-      raise SessionManagerException('Service on "{hostname}:{port}"' +
-                                    ' not available'.format(hostname=hostname,
-                                                            port=port))
+      raise SessionManagerException('Service on "{hostname}:{port}" not available'.format(hostname=hostname,
+                                                                                          port=port))
 
   def get_engine(self):
     """
     Returns the engine
     """
     return create_engine(self.connection_string + '?charset=utf8',
-                                  echo=self.debug,
-                                  echo_pool=self.debug,
-                                  encoding='utf-8')
+                         echo=self.debug,
+                         echo_pool=self.debug,
+                         encoding='utf-8')
 
   def get_direct_session(self):
     """
@@ -99,8 +95,8 @@ class MySqlConnector(Connector):
     """
     self.engine = self.get_engine()
     session = scoped_session(sessionmaker(bind=self.engine,
-                                       autocommit=False,
-                                       autoflush=False))()
+                                          autocommit=False,
+                                          autoflush=False))()
     return MySqlSession(session)
 
   def is_service_existing(self, host, port):
@@ -145,6 +141,6 @@ class MySqlConnector(Connector):
     Returns the engine
     """
     return create_engine(self.connection_string + '?charset=utf8',
-                                  echo=self.debug,
-                                  echo_pool=self.debug,
-                                  encoding='utf-8')
+                         echo=self.debug,
+                         echo_pool=self.debug,
+                         encoding='utf-8')

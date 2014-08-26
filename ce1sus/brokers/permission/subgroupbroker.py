@@ -39,17 +39,12 @@ class SubGroupBroker(BrokerBase):
     :returns: list of Users
     """
     try:
-      groups = self.session.query(Group).join(SubGroup.groups).filter(
-                                              SubGroup.identifier == identifier
-                                                  ).order_by(Group.name).all()
+      groups = self.session.query(Group).join(SubGroup.groups).filter(SubGroup.identifier == identifier).order_by(Group.name).all()
       if not belong_in:
         group_ids = list()
         for subgroup in groups:
           group_ids.append(subgroup.identifier)
-        groups = self.session.query(Group).filter(~Group.identifier.in_(
-                                                                  group_ids
-                                                                            )
-                                                  ).order_by(Group.name).all()
+        groups = self.session.query(Group).filter(~Group.identifier.in_(group_ids)).order_by(Group.name).all()
       return groups
     except sqlalchemy.orm.exc.NoResultFound:
       return list()
@@ -103,7 +98,6 @@ class SubGroupBroker(BrokerBase):
 
   def remove_by_id(self, subgroup_id, commit=True):
     if subgroup_id == 1 or subgroup_id == '1':
-      raise IntegrityException(u'Cannot delete this subgroup. The subgroup is essential to '
-                  + 'the application.')
+      raise IntegrityException(u'Cannot delete this subgroup. The subgroup is essential to the application.')
     else:
       BrokerBase.remove_by_id(self, subgroup_id, commit)

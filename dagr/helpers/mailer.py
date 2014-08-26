@@ -41,8 +41,8 @@ class Mail(object):
   def message(self):
     """Formated plain message"""
     return u"""From: {0}\nTo: {1}\nSubject:{2}\n\n {3}""".format(self.sender,
-                                                                self.reciever,
-                                                                self.body)
+                                                                 self.reciever,
+                                                                 self.body)
 
 
 class Mailer(object):
@@ -80,8 +80,8 @@ class Mailer(object):
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
             signed_data = gpg.sign(text,
-                     keyid=signer_fingerprint,
-                     passphrase=self.__passphrase)
+                                   keyid=signer_fingerprint,
+                                   passphrase=self.__passphrase)
             message = str(signed_data)
             if message:
               return message
@@ -142,7 +142,7 @@ class Mailer(object):
         message = MIMEText(text)
 
       message['Subject'] = mail.subject
-      if  mail.sender:
+      if mail.sender:
         sender = mail.sender
       else:
         sender = self.sender

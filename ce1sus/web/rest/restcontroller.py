@@ -32,8 +32,8 @@ class RestController(RestBaseHandler):
   """ Main class for REST calls"""
 
   REST_mapper = {'DELETE': 'remove',
-       'GET': 'view',
-       'POST': 'update'}
+                 'GET': 'view',
+                 'POST': 'update'}
 
   REST_Allowed_Parameters = ['metadata',
                              'attributes',
@@ -90,14 +90,14 @@ class RestController(RestBaseHandler):
       regex = r'^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$'
 
       result = ValueValidator.validateRegex(string,
-                                          regex,
-                                          'Not a valid UUID')
+                                            regex,
+                                            'Not a valid UUID')
       if not result:
         # then it may be a checksum
         regex = r'^[0-9a-fA-F]{40}$'
         result = ValueValidator.validateRegex(string,
-                                          regex,
-                                          'Not a valid chksum')
+                                              regex,
+                                              'Not a valid chksum')
       return result
     except ValidationException as error:
       self._raise_error('SystemError', error=error)
@@ -146,7 +146,7 @@ class RestController(RestBaseHandler):
         self._raise_error('SystemError', msg='Unspecified')
       else:
         # check if the parameter is allowed
-        if not parameter in RestController.REST_Allowed_Parameters:
+        if parameter not in RestController.REST_Allowed_Parameters:
           self._raise_error('InvalidParameter ',
                             msg='Parameter {0}'.format(parameter))
     else:
@@ -182,7 +182,7 @@ class RestController(RestBaseHandler):
     # prepare api error
     # path = request.script_name + request.path_info
     temp = dict(self.create_status('RestException',
-                               error.message))
+                                   error.message))
     self._destroy_session()
     return json.dumps(temp)
 
@@ -255,6 +255,6 @@ class RestController(RestBaseHandler):
             self._raise_fatal_error(msg='Called function returned Noting')
       else:
         self._raise_error('SystemError', msg='Method {0} is not defined for {1}'.format(method_name,
-                                                                  controller))
+                                                                                        controller))
     except RestHandlerException as error:
       return self.__handle_handler_exceptions(error)

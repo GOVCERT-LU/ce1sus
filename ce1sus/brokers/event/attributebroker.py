@@ -44,12 +44,12 @@ class AttributeBroker(BrokerBase):
     try:
       attribute = self.get_by_id(identifier)
       self.value_broker.remove_by_attribute(attribute, False)
-        # first remove values
+      # first remove values
       self.do_commit(False)
-        # remove attribute
+      # remove attribute
       BrokerBase.remove_by_id(self,
-                            identifier=attribute.identifier,
-                            commit=False)
+                              identifier=attribute.identifier,
+                              commit=False)
       self.do_commit(commit)
     except BrokerException as error:
       self.session.rollback()

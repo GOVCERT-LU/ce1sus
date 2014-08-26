@@ -64,9 +64,9 @@ def get_dict_element_by_value(dictionary, value):
 class Status(object):
   """Static class defining the status of an event"""
   __tableDefinitions = {0: 'Confirmed',
-                     1: 'Draft',
-                     2: 'Deleted',
-                     3: 'Expired'}
+                        1: 'Draft',
+                        2: 'Deleted',
+                        3: 'Expired'}
 
   def __init__(self, identifier):
     self.identifier = identifier
@@ -107,10 +107,10 @@ class Status(object):
 class Analysis(object):
   """Static class defining the status the analysis of an event"""
   __tableDefinitions = {0: 'None',
-                     1: 'Opened',
-                     2: 'Stalled',
-                     3: 'Completed',
-                     4: 'Unknown'}
+                        1: 'Opened',
+                        2: 'Stalled',
+                        3: 'Completed',
+                        4: 'Unknown'}
 
   def __init__(self, identifier):
     self.identifier = identifier
@@ -151,10 +151,10 @@ class Analysis(object):
 class Risk(object):
   """Static class defining the risk of an event"""
   __tableDefinitions = {0: 'None',
-                     1: 'Low',
-                     2: 'Medium',
-                     3: 'High',
-                     4: 'Undefined'}
+                        1: 'Low',
+                        2: 'Medium',
+                        3: 'High',
+                        4: 'Undefined'}
 
   def __init__(self, identifier):
     self.identifier = identifier
@@ -195,13 +195,13 @@ class Risk(object):
 class TLPLevel(object):
   """Static class defining the TLP levels of an event"""
   __tlp_levels = {0: 'Red',
-                1: 'Amber',
-                2: 'Green',
-                3: 'White'}
+                  1: 'Amber',
+                  2: 'Green',
+                  3: 'White'}
   __tlp_colors = {0: '#FF0000',
-                1: '#FFBF00',
-                2: '#66B032',
-                3: '#FFFFFF'}
+                  1: '#FFBF00',
+                  2: '#66B032',
+                  3: '#FFFFFF'}
 
   def __init__(self, identifier):
     self.identifier = identifier

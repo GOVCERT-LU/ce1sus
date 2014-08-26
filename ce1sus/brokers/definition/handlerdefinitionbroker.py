@@ -44,10 +44,8 @@ class AttributeHandlerBroker(BrokerBase):
     try:
       return self.session.query(AttributeHandler).filter(AttributeHandler.uuid == uuid).one()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with uuid :{0}'.format(
-                                                                  uuid))
+      raise NothingFoundException(u'Nothing found with uuid :{0}'.format(uuid))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for uuid :{0}'.format(uuid))
+      raise TooManyResultsFoundException('Too many results found for uuid :{0}'.format(uuid))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)

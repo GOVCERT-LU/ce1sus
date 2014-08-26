@@ -31,7 +31,7 @@ class RestSearchHandler(RestBaseHandler):
     # limit has to be between 0 and maximum value
     if limit < 0 or limit > RestSearchHandler.MAX_LIMIT:
       self._raise_error('InvalidArgument',
-                      'The limit value has to be between 0 and 20')
+                        'The limit value has to be between 0 and 20')
     return limit
 
   def view_events(self, uuid, **options):

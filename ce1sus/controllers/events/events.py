@@ -33,10 +33,10 @@ class EventsController(Ce1susBaseController):
   def get_events(self, uuids, start_date, end_date, offset, limit, user):
     try:
       return self.event_broker.get_events(uuids,
-                                      start_date,
-                                      end_date,
-                                      offset,
-                                      limit,
-                                      user)
+                                          start_date,
+                                          end_date,
+                                          offset,
+                                          limit,
+                                          user)
     except BrokerException as error:
       self._raise_exception(error)

@@ -179,7 +179,6 @@ class RestAttribute(RestClass):
     self.modified = None
     self.group = None
 
-
   def to_dict(self):
     result = dict()
     result[self.get_classname()] = dict()
@@ -252,16 +251,16 @@ class RestAttributeDefinition(RestClass):
 
 class Ce1susWrappedFile(object):
   def __init__(self, stream=None, str_=None, name=''):
-    if (stream is None and str_ is None) or (not stream is None and not str_ is None):
+    if (stream is None and str_ is None) or (stream is not None and str_ is not None):
       raise Ce1susInvalidParameter()
-    elif not stream is None:
+    elif stream is not None:
       self.value = stream.read()
 
       if name and not name == '':
         self.name = name
       else:
         self.name = os.path.basename(stream.name)
-    elif not str_ is None:
+    elif str_ is not None:
       self.value = str_
 
       if name and not name == '':

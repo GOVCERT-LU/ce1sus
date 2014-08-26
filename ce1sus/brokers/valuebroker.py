@@ -11,9 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, ValidationException, \
-NothingFoundException, TooManyResultsFoundException, IntegrityException, \
-BrokerException
+from dagr.db.broker import BrokerBase, ValidationException, NothingFoundException, TooManyResultsFoundException, IntegrityException, BrokerException
 import sqlalchemy.orm.exc
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
@@ -182,8 +180,7 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Class
     """
-    return ValueBroker.get_class_by_attr_def(
-                                                attribute.definition)
+    return ValueBroker.get_class_by_attr_def(attribute.definition)
 
   @staticmethod
   def get_class_by_string(classname):
@@ -255,16 +252,14 @@ class ValueBroker(BrokerBase):
 
     try:
       clazz = self.get_broker_class()
-      result = self.session.query(clazz).filter(
-              clazz.attribute_id == attribute.identifier).one()
+      result = self.session.query(clazz).filter(clazz.attribute_id == attribute.identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'No value found with ID :{0} in {1}'.format(
                                   attribute.identifier, self.get_broker_class()))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-        'Too many value found for ID :{0} in {1}'.format(attribute.identifier,
-           self.get_broker_class()))
+      raise TooManyResultsFoundException('Too many value found for ID :{0} in {1}'.format(attribute.identifier,
+                                                                                          self.get_broker_class()))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
@@ -317,9 +312,8 @@ class ValueBroker(BrokerBase):
     self.__set_class_by_attribute(attribute)
 
     try:
-      self.session.query(self.get_broker_class()).filter(
-                    self.get_broker_class().attribute_id == attribute.identifier
-                      ).delete(synchronize_session='fetch')
+      self.session.query(self.get_broker_class()).filter(self.get_broker_class().attribute_id == attribute.identifier
+                                                         ).delete(synchronize_session='fetch')
       self.do_commit(commit)
     except sqlalchemy.exc.OperationalError as error:
       self.session.rollback()
@@ -340,9 +334,7 @@ class ValueBroker(BrokerBase):
     :returns: List of clazz
     """
     try:
-      return self.session.query(clazz).filter(
-                      clazz.value == value
-                      ).all()
+      return self.session.query(clazz).filter(clazz.value == value).all()
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

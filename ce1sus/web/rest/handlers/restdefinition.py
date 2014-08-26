@@ -13,7 +13,6 @@ __license__ = 'GPL v3+'
 
 
 from ce1sus.web.rest.handlers.restbase import RestBaseHandler
-from dagr.db.broker import BrokerException, NothingFoundException
 from ce1sus.controllers.event.attributes import AttributesController
 from ce1sus.controllers.event.objects import ObjectsController
 from dagr.controllers.base import ControllerException
@@ -33,7 +32,7 @@ class RestDefinitionHanldler(RestBaseHandler):
   def get_function_name(self, parameter, action):
     if action == 'POST':
       return RestDefinitionHanldler.PARAMETER_INSERT_MAPPER.get(parameter,
-                                                                   None)
+                                                                None)
     return None
 
   def insert_attribute_definitions(self, identifier, **options):

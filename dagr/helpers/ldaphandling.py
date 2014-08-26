@@ -122,8 +122,7 @@ class LDAPHandler(object):
           connection.simple_bind_s(user_dn, password)
           self.__close_connection(connection)
       except ldap.INVALID_CREDENTIALS:
-        self._get_logger().info('Username or password is invalid for {0}'.format(
-                                                                          uid))
+        self._get_logger().info('Username or password is invalid for {0}'.format(uid))
         raise InvalidCredentialsException('Username or password is invalid.')
     except ldap.LDAPError as error:
       self._get_logger().fatal(error)
@@ -174,7 +173,7 @@ class LDAPHandler(object):
     try:
       connection = self.__get_connection()
       result = connection.search_s(self.__users_dn, ldap.SCOPE_SUBTREE,
-                               filter_, attributes)
+                                   filter_, attributes)
 
       user_list = list()
       for user in result:
@@ -213,9 +212,9 @@ class LDAPHandler(object):
     try:
       connection = self.__get_connection()
       result = connection.search_s(self.__users_dn,
-                                          ldap.SCOPE_SUBTREE,
-                                          filter_,
-                                          attributes)
+                                   ldap.SCOPE_SUBTREE,
+                                   filter_,
+                                   attributes)
       self.__close_connection(connection)
       # forcibly take only first user
       user = LDAPHandler.__map_user(result[0])

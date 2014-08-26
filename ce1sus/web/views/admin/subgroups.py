@@ -26,9 +26,9 @@ class AdminSubGroupView(Ce1susBaseView):
 
   def tabs(self):
     subgr_tab = AdminTab(title='SubGroups',
-                       url='/admin/subgroups',
-                       options='reload',
-                       position=4)
+                         url='/admin/subgroups',
+                         options='reload',
+                         position=4)
     return [subgr_tab]
 
   def __init__(self, config):
@@ -116,7 +116,7 @@ class AdminSubGroupView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def edit_subgroup_groups(self, identifier, operation,
-                     existing=None, remaining=None):
+                           existing=None, remaining=None):
     """
     modifies the relation between a group and its subgroups
 
@@ -144,7 +144,7 @@ class AdminSubGroupView(Ce1susBaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
   def modify_subgroup(self, identifier=None, name=None,
-                  description=None, action='insert'):
+                      description=None, action='insert'):
     """
     modifies or inserts a group with the data of the post
 
@@ -163,9 +163,9 @@ class AdminSubGroupView(Ce1susBaseView):
     try:
       self._check_if_valid_action(action)
       subgroup = self.subgroup_controller.populate_subgroup(identifier,
-                                                      name,
-                                                      description,
-                                                      action)
+                                                            name,
+                                                            description,
+                                                            action)
 
       if action == 'insert':
         subgroup, valid = self.subgroup_controller.insert_group(subgroup)
@@ -179,8 +179,8 @@ class AdminSubGroupView(Ce1susBaseView):
       else:
         cb_values = self.subgroup_controller.get_cb_tlp_lvls()
         return self._return_ajax_post_error(self._render_template('/admin/subgroups/subgroupModal.html',
-                                 subgroup=subgroup,
-                                 cb_values=cb_values))
+                                                                  subgroup=subgroup,
+                                                                  cb_values=cb_values))
     except ControllerException as error:
       return self._render_error_page(error)
 
@@ -200,7 +200,7 @@ class AdminSubGroupView(Ce1susBaseView):
       subgroup = self.subgroup_controller.get_subgroup_by_id(subgroup_id)
       cb_values = self.subgroup_controller.get_cb_tlp_lvls()
       return self._render_template('/admin/subgroups/subgroupModal.html',
-                                 subgroup=subgroup,
-                                 cb_values=cb_values)
+                                   subgroup=subgroup,
+                                   cb_values=cb_values)
     except ControllerException as error:
       return self._render_error_page(error)

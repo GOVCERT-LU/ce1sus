@@ -28,9 +28,9 @@ class ObjectsView(Ce1susBaseView):
                           options='reload',
                           position=1)
     flat_obj = EventTab(title='Objects Flat',
-                          url='/events/event/objects/flat_objects',
-                          options='reload',
-                          position=2)
+                        url='/events/event/objects/flat_objects',
+                        options='reload',
+                        position=2)
     return [struct_obj, flat_obj]
 
   def __init__(self, config):
@@ -144,9 +144,9 @@ class ObjectsView(Ce1susBaseView):
             self._get_logger().info('Event is invalid')
             obj_definitions = self.objects_controller.get_cb_object_definitions()
             return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
-                                                      obj_definitions=obj_definitions,
-                                                      event_id=event_id,
-                                                      object=obj))
+                                                                      obj_definitions=obj_definitions,
+                                                                      event_id=event_id,
+                                                                      object=obj))
         else:
           # save id to session to open the last inserted object
           self._put_to_session('instertedObject', obj.identifier)
@@ -211,9 +211,9 @@ class ObjectsView(Ce1susBaseView):
           self._get_logger().info('Event is invalid')
           obj_definitions = self.objects_controller.get_cb_object_definitions()
           return self._return_ajax_post_error(self._render_template('/events/event/objects/objectModal.html',
-                                                    obj_definitions=obj_definitions,
-                                                    event_id=event_id,
-                                                    object=obj))
+                                                                    obj_definitions=obj_definitions,
+                                                                    event_id=event_id,
+                                                                    object=obj))
       # save id to session to open the last inserted object
       self._put_to_session('instertedObject', obj.identifier)
       return self._return_ajax_ok()

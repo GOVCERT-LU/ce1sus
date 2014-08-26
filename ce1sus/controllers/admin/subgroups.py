@@ -41,7 +41,7 @@ class SubGroupController(Ce1susBaseController):
   def get_available_subgroups(self, subgroup):
     try:
       return self.subgroup_broker.get_groups_by_subgroup(subgroup.identifier,
-                                                          False)
+                                                         False)
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -64,10 +64,10 @@ class SubGroupController(Ce1susBaseController):
     try:
       if operation == 'add':
         SubGroupController.__handle_input(self.subgroup_broker.add_group_to_subgroup,
-                                           group_id, remaining_subgroups)
+                                          group_id, remaining_subgroups)
       else:
         SubGroupController.__handle_input(self.subgroup_broker.remove_group_from_subgroup,
-                                           group_id, group_subgroups)
+                                          group_id, group_subgroups)
       self.subgroup_broker.do_commit(True)
     except BrokerException as error:
       self._raise_exception(error)

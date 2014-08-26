@@ -90,10 +90,10 @@ class SqliteConnector(Connector):
     Returns the engine
     """
     return create_engine(self.connetion_string,
-                                  listeners=[ForeignKeysListener()],
-                                  echo=self.debug,
-                                  echo_pool=self.debug,
-                                  strategy='plain')
+                         listeners=[ForeignKeysListener()],
+                         echo=self.debug,
+                         echo_pool=self.debug,
+                         strategy='plain')
 
   def get_direct_session(self):
     """
@@ -101,8 +101,8 @@ class SqliteConnector(Connector):
     """
     self.engine = self.get_engine()
     session = sessionmaker(bind=self.engine,
-                        autocommit=False,
-                        autoflush=False)()
+                           autocommit=False,
+                           autoflush=False)()
     return SqliteSession(session)
 
   def close(self):
@@ -119,7 +119,7 @@ class SqliteConnector(Connector):
     Returns a new engine
     """
     return create_engine(self.connetion_string,
-                                  listeners=[ForeignKeysListener()],
-                                  echo=self.debug,
-                                  echo_pool=self.debug,
-                                  strategy='plain')
+                         listeners=[ForeignKeysListener()],
+                         echo=self.debug,
+                         echo_pool=self.debug,
+                         strategy='plain')

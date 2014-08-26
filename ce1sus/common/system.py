@@ -20,8 +20,8 @@ import json
 # A: Major Release
 # B: Release feature changes
 # C: Bug fixes/Small features
-APP_REL = '0.9.5'
-DB_REL = '0.9.1'
+APP_REL = '0.10.0'
+DB_REL = '0.9.3'
 REST_REL = '0.2.0'
 
 
@@ -127,9 +127,8 @@ class System(object):
     try:
       value = self.ce1sus_broker.get_by_key('db_shema')
       if System.__compare_releases(DB_REL, value.value) != 0:
-        raise SantityCheckerException(u'DB scheme release mismatch '
-                          + 'expected {0} got {1}'.format(DB_REL,
-                                                         value.value))
+        raise SantityCheckerException(u'DB scheme release mismatch expected {0} got {1}'.format(DB_REL,
+                                                                                                value.value))
     except BrokerException as error:
       raise SystemException(error)
 
@@ -141,10 +140,9 @@ class System(object):
     try:
       value = self.ce1sus_broker.get_by_key('app_rev')
       if System.__compare_releases(APP_REL,
-                                        value.value) != 0:
-        raise SantityCheckerException(u'Application release mismatch '
-                          + 'expected {0} got {1}'.format(APP_REL,
-                                                         value.value))
+                                   value.value) != 0:
+        raise SantityCheckerException(u'Application release mismatch expected {0} got {1}'.format(APP_REL,
+                                                                                                  value.value))
     except BrokerException as error:
       raise SystemException(error)
 
@@ -156,9 +154,8 @@ class System(object):
     try:
       # check app rel
       if System.__compare_releases(REST_REL, release) != 0:
-        raise SantityCheckerException(u'RestAPI release mismatch '
-                          + 'expected {1} got {0}'.format(REST_REL,
-                                                          release))
+        raise SantityCheckerException(u'RestAPI release mismatch expected {1} got {0}'.format(REST_REL,
+                                                                                              release))
     except BrokerException as error:
       raise SystemException(error)
 

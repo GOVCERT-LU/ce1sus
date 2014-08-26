@@ -25,9 +25,9 @@ class GroupsView(Ce1susBaseView):
 
   def tabs(self):
     groups = EventTab(title='Groups',
-                          url='/events/event/groups/groups',
-                          options='reload',
-                          position=4)
+                      url='/events/event/groups/groups',
+                      options='reload',
+                      position=4)
     return [groups]
 
   def __init__(self, config):

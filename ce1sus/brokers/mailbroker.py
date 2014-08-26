@@ -76,15 +76,12 @@ class MailTemplateBroker(BrokerBase):
     """
     try:
 
-      result = self.session.query(MailTemplate).filter(
-                        MailTemplate.function_id == identifier).one()
+      result = self.session.query(MailTemplate).filter(MailTemplate.function_id == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found for function_id :{0}'.format(
-                                                                  identifier))
+      raise NothingFoundException(u'Nothing found for function_id :{0}'.format(identifier))
     except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException(
-                    'Too many results found for function_id :{0}'.format(identifier))
+      raise TooManyResultsFoundException('Too many results found for function_id :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 

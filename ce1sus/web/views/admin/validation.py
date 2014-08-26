@@ -34,21 +34,21 @@ class AdminValidationView(Ce1susBaseView):
                                  options='reload',
                                  position=0)
     strobj_tab = ValidationTab(title='Structured Objects',
-                                 url='/admin/validation/event_objects',
-                                 options='reload',
-                                 position=1)
+                               url='/admin/validation/event_objects',
+                               options='reload',
+                               position=1)
     flat_obj_tab = ValidationTab(title='Flat Objects',
                                  url='/admin/validation/flat_event_objects',
                                  options='reload',
                                  position=2)
     rel_tab = ValidationTab(title='Relations',
-                                 url='/events/event/relations',
-                                 options='reload',
-                                 position=3)
+                            url='/events/event/relations',
+                            options='reload',
+                            position=3)
     groups_tab = ValidationTab(title='Groups',
-                                 url='/events/event/groups/groups',
-                                 options='reload',
-                                 position=4)
+                               url='/events/event/groups/groups',
+                               options='reload',
+                               position=4)
     return [val_tab, overview_tab, strobj_tab, flat_obj_tab, rel_tab, groups_tab]
 
   def __init__(self, config):
@@ -190,5 +190,3 @@ class AdminValidationView(Ce1susBaseView):
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
-
-
