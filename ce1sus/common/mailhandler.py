@@ -241,7 +241,7 @@ class MailHandler(object):
       else:
         self._get_logger().debug(u'Mail sending plain text mail to {0}'.format(reciever.email))
         self.mailer.send_mail(mail)
-    except MailerException as error:
+    except (MailerException, TypeError) as error:
       if ignore_errors:
         self._get_logger().info(u'Mail could not be send to mail to {0} due to {1}'.format(reciever.email, error))
       else:

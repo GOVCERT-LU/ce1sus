@@ -84,6 +84,7 @@ class GroupController(Ce1susBaseController):
                      action,
                      tlp_lvl,
                      email,
+                     gpg_key,
                      usermails):
     group = Group()
     if not action == 'insert':
@@ -97,7 +98,7 @@ class GroupController(Ce1susBaseController):
       ObjectConverter.set_integer(group, 'tlp_lvl', tlp_lvl)
       ObjectConverter.set_integer(group, 'usermails', usermails)
       group.description = cleanPostValue(description)
-
+      group.gpg_key = gpg_key
     return group
 
   def insert_group(self, group):

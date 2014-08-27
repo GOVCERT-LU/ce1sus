@@ -31,6 +31,10 @@ from os import remove
 import hashlib
 from dagr.helpers.converters import convert_string_to_value
 from dagr.helpers.validator.objectvalidator import FailedValidation
+from dagr.helpers.hash import hashMD5
+from datetime import datetime
+from dagr.helpers.converters import ObjectConverter
+from ce1sus.helpers.bitdecoder import BitValue
 
 
 CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
@@ -116,10 +120,9 @@ class FileHandler(GenericHandler):
       default_share_value = '1'
     else:
       default_share_value = '0'
-    return template_renderer('/common/handlers/file.html',
-                             url='',
-                             can_download=False,
-                             event_id=0,
+
+    return template_renderer('/common/handlers/file_edit.html',
+                             attribute=attribute,
                              enabled=True,
                              default_share_value=default_share_value,
                              enable_share=share_enabled,
@@ -321,7 +324,39 @@ class FileHandler(GenericHandler):
       if action == 'insert':
         return self.insert(obj, definitions, user, None, params)
       elif action == 'update':
-        raise HandlerException(u'File Handlers do not support editing.')
+        attribute = params.get('attribute', None)
+        if attribute:
+          # update only share and ioc value
+          definition = self._get_main_definition(definitions)
+          share = params.get('shared', None)
+          attribute.bit_value = BitValue('0', attribute)
+          if share is None:
+            # use the default value from the definition
+            if definition.share == 1:
+              attribute.bit_value.is_shareable = True
+            else:
+              attribute.bit_value.is_shareable = False
+          else:
+            # check if parent is sharable
+            if attribute.bit_value.is_shareable:
+              if share == '0':
+                attribute.bit_value.is_shareable = False
+              else:
+                attribute.bit_value.is_shareable = True
+            else:
+              attribute.bit_value.is_shareable = False
+
+          is_ioc = params.get('ioc', None)
+          if is_ioc is None:
+            # take default value
+            attribute.ioc = 0
+          else:
+            ObjectConverter.set_integer(attribute, 'ioc', is_ioc)
+
+          return attribute, None
+        else:
+          raise UndefinedException(u'Attribute is not defined')
+
       else:
         raise UndefinedException(u'Action {0} is not defined'.format(action))
 
@@ -333,7 +368,8 @@ class FileHandler(GenericHandler):
     for child in attribtue.children:
       if child.definition.chksum == CHK_SUM_FILE_NAME:
         return child.plain_value
-    return None
+    # ok no filename has been found using the one from the attribute value
+    return basename(attribtue.value)
 
   # pylint: disable=R0201
   def _get_user(self):
@@ -404,6 +440,10 @@ class FileHandler(GenericHandler):
     params = dict()
     # create and store file
     filename = value[0]
+    filename_none = False
+    if not filename:
+      filename = hashMD5(datetime.now())
+      filename_none = True
     binary_data = base64.b64decode(value[1])
     tmp_path = self._get_tmp_folder() + '/' + filename
     # create file in tmp
@@ -426,12 +466,13 @@ class FileHandler(GenericHandler):
 
     attribute = self.create_attribute(params, obj, definition, user, group)
     attributes = list()
-    attributes.append(FileHandler._create_attribute(filename,
-                                                    obj,
-                                                    FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
-                                                    user,
-                                                    group,
-                                                    '0'))
+    if not filename_none:
+      attributes.append(FileHandler._create_attribute(filename,
+                                                      obj,
+                                                      FileHandler._get_definition(CHK_SUM_FILE_NAME, definitions),
+                                                      user,
+                                                      group,
+                                                      '0'))
 
     return attribute, attributes
 

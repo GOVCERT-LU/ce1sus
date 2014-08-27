@@ -88,9 +88,12 @@ class Mailer(object):
             else:
               info_log = getattr(self.get_logger(), 'info')
               info_log('Something went wrong while signing')
-      except ImportError as error:
+      except IndexError as error:
         info_log = getattr(self.get_logger(), 'info')
         info_log(error)
+      except IndexError:
+        info_log = getattr(self.get_logger(), 'info')
+        info_log('No private key found. Not sending Mails')
 
     info_log = getattr(self.get_logger(), 'info')
     info_log('GPG Path not specified sending unsinged mail')

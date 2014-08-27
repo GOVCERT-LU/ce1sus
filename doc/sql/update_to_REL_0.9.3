@@ -48,5 +48,24 @@ CHANGE COLUMN `privileged` `code` INT(1) NOT NULL DEFAULT '0' ;
 ALTER TABLE `Groups` 
 CHANGE COLUMN `email` `email` VARCHAR(255) CHARACTER SET 'utf32' NULL ;
 
+CREATE TABLE `Attribute_Properties` (
+  `attr_prop_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `confidence` VARCHAR(8) NULL,
+  `description` TEXT NULL,
+  `valid_time_position` TIMESTAMP NULL,
+  `attribute_id` BIGINT NOT NULL,
+  PRIMARY KEY (`attr_prop_id`),
+  INDEX `FK_Attr_Prop_Attributes_idx` (`attribute_id` ASC),
+  CONSTRAINT `FK_Attr_Prop_Attributes`
+    FOREIGN KEY (`attribute_id`)
+    REFERENCES `Attributes` (`attribute_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+ALTER TABLE `Attribute_Properties` 
+CHANGE COLUMN `confidence` `confidence` VARCHAR(8) NULL DEFAULT 'High' ;
+
+ALTER TABLE `Attribute_Properties` 
+CHANGE COLUMN `valid_time_position` `valid_time_position` TIMESTAMP NULL DEFAULT now() ;
 
 COMMIT;

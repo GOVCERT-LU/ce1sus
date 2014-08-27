@@ -144,7 +144,7 @@ class AdminGroupView(Ce1susBaseView):
   @cherrypy.tools.allow(methods=['POST'])
   def modify_group(self, identifier=None, name=None,
                    description=None, download=None, action='insert',
-                   tlp_lvl=None, email=None, usermails=None):
+                   tlp_lvl=None, email=None, usermails=None, gpgkey=None):
     """
     modifies or inserts a group with the data of the post
 
@@ -169,6 +169,7 @@ class AdminGroupView(Ce1susBaseView):
                                                    action,
                                                    tlp_lvl,
                                                    email,
+                                                   gpgkey,
                                                    usermails)
 
       if action == 'insert':

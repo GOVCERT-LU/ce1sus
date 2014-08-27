@@ -8,6 +8,7 @@
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Download files',name='download',enabled=enabled,has_empty=False)"/>
   <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_lvl',values=cb_values,enabled=enabled,has_empty=True,selected=3)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',value='',enabled=enabled)"/>
+  <%call expr="labeled_input.labeled_textbox(label='GPG key',name='gpgkey',message='',enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Send mails to users',name='usermails',enabled=enabled,has_empty=False)"/>
 % else:
   <input type="hidden" name="identifier" value="${group.identifier}">
@@ -17,8 +18,9 @@
   <%call expr="labeled_input.labeled_editbox(label='Name',name='name',value=group.name,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=group.description,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Download files',name='download',enabled=enabled,has_empty=False,selected=group.can_download)"/>
-  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_lvl',values=cb_values,enabled=enabled,has_empty=True,selected=group.tlp_lvl)"/>
+  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_lvl',values=cb_values,enabled=enabled,has_empty=False,selected=group.tlp_lvl)"/>
   <%call expr="labeled_input.labeled_editbox(label='Email',name='email',enabled=enabled,value=group.email)"/>
+  <%call expr="labeled_input.labeled_textbox(label='GPG key',name='gpgkey',message=group.gpg_key,enabled=enabled)"/>
   <%call expr="labeled_input.labeled_yes_no_combobox(label='Send mails to users',name='usermails',enabled=enabled,has_empty=False,selected=group.usermails)"/>
 % endif
 </%def>
@@ -165,12 +167,12 @@
   
   
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=event.description,enabled=enabled)"/>
-  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=not insert,has_empty=True,selected=event.published)"/>
+  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=not insert,has_empty=False,selected=event.published)"/>
   
-  <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=True,selected=event.status_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=True,selected=event.analysis_status_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Risk',name='risk',values=risk_values,enabled=enabled,has_empty=True,selected=event.risk_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_index',values=tlp_values,enabled=enabled,has_empty=True,selected=event.tlp_level_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=False,selected=event.status_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=False,selected=event.analysis_status_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Risk',name='risk',values=risk_values,enabled=enabled,has_empty=False,selected=event.risk_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_index',values=tlp_values,enabled=enabled,has_empty=False,selected=event.tlp_level_id)"/>
   
   <%call expr="labeled_input.labeled_datetime_picker(label='Created',name='created',value=event.created,enabled=False)"/>
   <%call expr="labeled_input.labeled_datetime_picker(label='First seen',name='first_seen',value=event.first_seen,enabled=enabled)"/>
@@ -187,14 +189,14 @@
   <%call expr="labeled_input.labeled_editbox(label='Title',name='name',value=event.title, enabled=enabled)"/>
   
   <%call expr="labeled_input.labeled_editbox(label='Creator Group',name='',value=event.creator_group.name,enabled=False)"/>
-  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=enabled,has_empty=True,selected=event.published)"/>
+  <%call expr="labeled_input.labeled_yes_no_combobox(label='Published',name='published',enabled=enabled,has_empty=False,selected=event.published)"/>
   <%call expr="labeled_input.labeled_textbox(label='Description',name='description',message=event.description,enabled=enabled)"/>
   </div>
   <div class="col-xs-6 col-md-6">
-  <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=True,selected=event.status_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=True,selected=event.analysis_status_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='Risk',name='risk',values=risk_values,enabled=enabled,has_empty=True,selected=event.risk_id)"/>
-  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_index',values=tlp_values,enabled=enabled,has_empty=True,selected=event.tlp_level_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Status',name='status',values=status_values,enabled=enabled,has_empty=False,selected=event.status_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Analysis',name='analysis',values=analysis_values,enabled=enabled,has_empty=False,selected=event.analysis_status_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='Risk',name='risk',values=risk_values,enabled=enabled,has_empty=False,selected=event.risk_id)"/>
+  <%call expr="labeled_input.labeled_combobox(label='TLP',name='tlp_index',values=tlp_values,enabled=enabled,has_empty=False,selected=event.tlp_level_id)"/>
   <%call expr="labeled_input.labeled_datetime_picker(label='Created',name='created',value=event.created,enabled=False)"/>
   <%call expr="labeled_input.labeled_datetime_picker(label='Modified',name='created',value=event.modified,enabled=False)"/>
   <%call expr="labeled_input.labeled_datetime_picker(label='First seen',name='first_seen',value=event.first_seen,enabled=enabled)"/>
