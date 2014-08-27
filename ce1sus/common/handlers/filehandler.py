@@ -506,6 +506,7 @@ class FileWithHashesHandler(FileHandler):
                                                         obj,
                                                         FileHandler._get_definition(CHK_SUM_MIME_TYPE, definitions),
                                                         user,
+                                                        group,
                                                         '0'))
 
       file_id = magic.from_file(filepath)
@@ -514,6 +515,7 @@ class FileWithHashesHandler(FileHandler):
                                                         obj,
                                                         FileHandler._get_definition(CHK_SUM_FILE_ID, definitions),
                                                         user,
+                                                        group,
                                                         '0'))
 
       definition = self._get_main_definition(definitions)
@@ -521,6 +523,7 @@ class FileWithHashesHandler(FileHandler):
                                               obj,
                                               definition,
                                               user,
+                                              group,
                                               '0')
 
       # return attributes
