@@ -115,6 +115,8 @@ class DictDBConverter(object):
   def __convert_dict_to_group(self, user, contents):
     # check if you can set groups
     if user.rights.set_group:
+      if not contents:
+        return None
       # check if group exists else create it
       restclassname, contents = self.__get_object_data(contents)
       if restclassname != u'RestGroup':
@@ -286,6 +288,9 @@ class DictDBConverter(object):
     rest_attribute.group = self.__convert_group(attribute.creator.default_group)
     rest_attribute.created = attribute.created
     rest_attribute.modified = attribute.modified
+    if attribute.parent:
+      if len(attribute.parent) > 0:
+        rest_attribute.parent = attribute.parent[0].uuid
     # determine how to rest value
     try:
       handler = attribute.definition.handler

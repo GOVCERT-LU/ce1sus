@@ -365,11 +365,14 @@ class FileHandler(GenericHandler):
     """
     Returns the original filename
     """
-    for child in attribtue.children:
-      if child.definition.chksum == CHK_SUM_FILE_NAME:
-        return child.plain_value
-    # ok no filename has been found using the one from the attribute value
-    return basename(attribtue.value)
+    if attribtue.children:
+      for child in attribtue.children:
+        if child.definition.chksum == CHK_SUM_FILE_NAME:
+          return child.plain_value
+      # ok no filename has been found using the one from the attribute value
+      return basename(attribtue.value)
+    else:
+      return None
 
   # pylint: disable=R0201
   def _get_user(self):
@@ -431,9 +434,11 @@ class FileHandler(GenericHandler):
     if value:
       if not isinstance(value, list):
         value = convert_string_to_value(value)
-    share = dictionary.get('share', '0')
-    ioc = dictionary.get('ioc', '0')
-    if len(value) != 2:
+      share = dictionary.get('share', '0')
+      ioc = dictionary.get('ioc', '0')
+      if len(value) != 2:
+        raise HandlerException('Value is invalid format has to be ("filename","{base64 encoded file}")')
+    else:
       raise HandlerException('Value is invalid format has to be ("filename","{base64 encoded file}")')
 
     # create Params
@@ -539,7 +544,7 @@ class FileWithHashesHandler(FileHandler):
                                                       FileHandler._get_definition(CHK_SUM_SIZE_IN_BYTES, definitions),
                                                       user,
                                                       group,
-                                                     '0'))
+                                                      '0'))
 
       mime_type = magic.from_file(filepath, mime=True)
       if mime_type:

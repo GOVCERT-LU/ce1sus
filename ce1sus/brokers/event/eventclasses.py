@@ -499,6 +499,7 @@ class Attribute(BASE):
   __bit_code = None
   config = None
   uuid = Column('uuid', String)
+  parent = None
 
   @property
   def shared(self):

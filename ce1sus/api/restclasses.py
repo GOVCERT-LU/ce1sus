@@ -162,6 +162,7 @@ class RestObject(RestClass):
       result[self.get_classname()]['group'] = self.group.to_dict()
     result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
     result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
+    result[self.get_classname()]['parent'] = RestClass.convert_value(self.parent)
     return result
 
 
@@ -178,6 +179,7 @@ class RestAttribute(RestClass):
     self.created = None
     self.modified = None
     self.group = None
+    self.parent = None
 
   def to_dict(self):
     result = dict()
@@ -191,6 +193,7 @@ class RestAttribute(RestClass):
       result[self.get_classname()]['group'] = self.group.to_dict()
     result[self.get_classname()]['created'] = RestClass.convert_value(self.created)
     result[self.get_classname()]['modified'] = RestClass.convert_value(self.modified)
+    result[self.get_classname()]['parent'] = RestClass.convert_value(self.parent)
     return result
 
 

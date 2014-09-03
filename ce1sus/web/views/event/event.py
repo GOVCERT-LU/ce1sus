@@ -29,7 +29,7 @@ class EventView(Ce1susBaseView):
     add_event_tab = MainTab(title='Add Event',
                             url='/events/event/add_event',
                             options=None,
-                            position=2)
+                            position=4)
     overview_tab = EventTab(title='Overview',
                             url='/events/event/event',
                             options='reload',

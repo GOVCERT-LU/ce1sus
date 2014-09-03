@@ -256,3 +256,9 @@ class BrokerBase(object):
       raise BrokerException(error)
 
     self.do_commit(commit)
+
+  def clean_list(self, result):
+    output = list()
+    for item in result:
+      output.append(item[0])
+    return output

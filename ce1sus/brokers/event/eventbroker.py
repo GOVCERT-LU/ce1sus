@@ -11,14 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 import sqlalchemy.orm.exc
-from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
-from sqlalchemy.sql.expression import or_, and_, not_
-from dagr.helpers.datumzait import DatumZait
-from ce1sus.brokers.event.eventclasses import Event
+from sqlalchemy.sql.expression import or_, and_, not_, distinct
+
 from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.event.eventclasses import Event, Attribute, Object
 from ce1sus.brokers.event.objectbroker import ObjectBroker
+from ce1sus.brokers.permission.permissionclasses import Group, SubGroup
+from dagr.db.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
+from dagr.helpers.datumzait import DatumZait
 
 
 # pylint: disable=R0904
@@ -105,7 +106,8 @@ class EventBroker(BrokerBase):
   def __get_all_according_permissions(self,
                                       user,
                                       limit,
-                                      offset):
+                                      offset,
+                                      published=1):
     """
     Returns all the events taking into account the users groups
     """
@@ -119,42 +121,58 @@ class EventBroker(BrokerBase):
       for subgroup in user.default_group.subgroups:
         sub_group_ids.append(subgroup.identifier)
       try:
-        # prepare list of event matching the groups
-        try:
-          maingroups = self.session.query(Event.identifier).join(Event.maingroups).filter(Event.dbcode.op('&')(12) == 12,
-                                                                                          Group.identifier == main_group_id
-                                                                                          ).all()
-        except sqlalchemy.orm.exc.NoResultFound:
-          maingroups = list()
+        if published == 0:
+          result = self.session.query(Event).filter(and_(Event.dbcode.op('&')(4) == 4,
+                                                         or_(Event.creator_group_id == main_group_id,
+                                                             user.privileged,
+                                                             ),
+                                                         Event.published == 0
+                                                         )
+                                                    )
 
-        if len(sub_group_ids) > 0:
-          try:
-            subgroups = self.session.query(Event.identifier).join(Event.subgroups).filter(Event.dbcode.op('&')(12) == 12,
-                                                                                          Group.identifier.in_(sub_group_ids)
-                                                                                          ).all()
-          except sqlalchemy.orm.exc.NoResultFound:
-            subgroups = list()
         else:
-          subgroups = list()
-        event_ids = list()
-        for item in maingroups + subgroups:
-          event_ids.append(item[0])
-        result = self.session.query(Event).filter(or_(and_(Event.dbcode.op('&')(4) == 4,
-                                                           Event.creator_group_id == main_group_id
-                                                           ),
-                                                      and_(or_(Event.identifier.in_(event_ids),
-                                                               Event.tlp_level_id >= tlp_lvl
-                                                               ),
-                                                           Event.published == 1
-                                                           )
-                                                      )
-                                                  )
+
+          # prepare list of event matching the groups
+          try:
+            maingroups = self.session.query(Event.identifier).join(Event.maingroups).filter(Event.dbcode.op('&')(12) == 12,
+                                                                                            Group.identifier == main_group_id
+                                                                                            ).all()
+          except sqlalchemy.orm.exc.NoResultFound:
+            maingroups = list()
+
+          if len(sub_group_ids) > 0:
+            try:
+              subgroups = self.session.query(Event.identifier).join(Event.subgroups).filter(Event.dbcode.op('&')(12) == 12,
+                                                                                            Group.identifier.in_(sub_group_ids)
+                                                                                            ).all()
+            except sqlalchemy.orm.exc.NoResultFound:
+              subgroups = list()
+          else:
+            subgroups = list()
+          event_ids = list()
+          for item in maingroups + subgroups:
+            event_ids.append(item[0])
+
+          result = self.session.query(Event).filter(or_(and_(Event.dbcode.op('&')(4) == 4,
+                                                             Event.creator_group_id == main_group_id,
+                                                             ),
+                                                        and_(or_(Event.identifier.in_(event_ids),
+                                                                 Event.tlp_level_id >= tlp_lvl
+                                                                 ),
+                                                             and_(Event.published == 1,
+                                                             Event.dbcode.op('&')(4) == 4)
+                                                             )
+                                                        )
+                                                    )
         if limit is None and offset is None:
           result = result.order_by(Event.created.desc()).all()
         else:
           result = result.order_by(Event.created.desc()).limit(limit).offset(offset).all()
       except sqlalchemy.orm.exc.NoResultFound:
-        raise NothingFoundException(u'Nothing found')
+        if published == 0:
+          return list()
+        else:
+          raise NothingFoundException(u'Nothing found')
       except sqlalchemy.exc.SQLAlchemyError as error:
         self.session.rollback()
         raise BrokerException(error)
@@ -172,6 +190,12 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
     return result
+
+  def get_unpublished_for_user(self, user):
+    return self.__get_all_according_permissions(user,
+                                                None,
+                                                None,
+                                                published=0)
 
   def get_all_for_user(self, user, limit=None, offset=None):
     """Returns all the events that the user can see"""
@@ -345,3 +369,31 @@ class EventBroker(BrokerBase):
     event.modified = DatumZait.utcnow()
     self.update(event, False)
     self.do_commit(commit)
+
+
+
+  def get_unvalidated_events_for_user(self, user):
+    try:
+      main_group_id = user.default_group.identifier
+      # get all events
+      result = self.session.query(distinct(Attribute.object_id)).filter(Attribute.dbcode.op('&')(16) == 16).all()
+      if result:
+        # get related objects
+        result = self.session.query(distinct(Object.event_id)).filter(Object.identifier.in_(self.clean_list(result))).all()
+        if result:
+          # get the results
+          result = self.session.query(Event).filter(and_(Event.identifier.in_(self.clean_list(result)),
+                                                         or_(Event.creator_group_id == main_group_id,
+                                                             user.privileged,
+                                                             ),
+                                                         )
+                                                    )
+      if result:
+        return result.all()
+      else:
+        return list()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Group or event not found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

@@ -40,3 +40,15 @@ class EventsController(Ce1susBaseController):
                                           user)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def get_unpublished_user_events(self, user):
+    try:
+      return self.event_broker.get_unpublished_for_user(user)
+    except BrokerException as error:
+      self._raise_exception(error)
+
+  def get_unvalidated_user_events(self, user):
+    try:
+      return self.event_broker.get_unvalidated_events_for_user(user)
+    except BrokerException as error:
+      self._raise_exception(error)

@@ -27,7 +27,17 @@ class EventsView(Ce1susBaseView):
                                 url='/events/recent',
                                 options='reload',
                                 position=0)
-    return [recent_events_tab]
+
+    unpublished_events = MainTab(title='Unpublished Events',
+                                 url='/events/unpublished_events',
+                                 options='reload',
+                                 position=2)
+
+    unvalidated_proposals = MainTab(title='Unvalidated Proposals',
+                                    url='/events/unvalidated_proposals',
+                                    options='reload',
+                                    position=3)
+    return [recent_events_tab, unpublished_events, unvalidated_proposals]
 
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
@@ -69,6 +79,48 @@ class EventsView(Ce1susBaseView):
       user = self._get_user()
       events = self.events_controller.get_user_events(user, limit, offset)
       return self._render_template('/events/recent.html',
+                                   events=events,
+                                   url='/events/event/view',
+                                   tab_id='eventsTabTabContent',
+                                   error=error,
+                                   ext_event_id=ext_event_id)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def unpublished_events(self):
+    try:
+      error = self._pull_from_session('extViewEventError', None)
+      if error:
+        error = error.message
+      ext_event_id = self._pull_from_session('extViewEvent', None)
+
+      user = self._get_user()
+      events = self.events_controller.get_unpublished_user_events(user)
+      return self._render_template('/events/unpublished.html',
+                                   events=events,
+                                   url='/events/event/view',
+                                   tab_id='eventsTabTabContent',
+                                   error=error,
+                                   ext_event_id=ext_event_id)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def unvalidated_proposals(self):
+    try:
+      error = self._pull_from_session('extViewEventError', None)
+      if error:
+        error = error.message
+      ext_event_id = self._pull_from_session('extViewEvent', None)
+
+      user = self._get_user()
+      events = self.events_controller.get_unvalidated_user_events(user)
+      return self._render_template('/events/unvalidated.html',
                                    events=events,
                                    url='/events/event/view',
                                    tab_id='eventsTabTabContent',
