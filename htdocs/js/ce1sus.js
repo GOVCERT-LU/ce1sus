@@ -264,7 +264,6 @@ function add_event(formElement, event, uri, containerid){
 }
 
 function inforUnpublished(modalID, eventID, show) {
-	var result = false;
 	if (show) {
       if(confirm("Modifications on event will unpublish it. Don't forget to republish.")) {
     	  // unpublish event
@@ -273,7 +272,6 @@ function inforUnpublished(modalID, eventID, show) {
     	    request.fail(function(response, textStatus, XMLHttpRequest) {
     	        var messages = getErrorTextMessage(response)
     	        alert(messages[1]);
-    	        result=false;
     	    });
     	    request.error(request.fail);
     	    request.done(function(responseText, textStatus, XMLHttpRequest) {
@@ -283,19 +281,28 @@ function inforUnpublished(modalID, eventID, show) {
     	            //reload events view if successfull
     	      	  loadContent('Overview'+eventID+'Hidden','/events/event/event/'+eventID);
     	      	  $('#'+modalID).modal('show');
-    	          result=true;
-    	        } else {
-    	          result=false;
     	        }
     	    });
 
       } 
 	} else {
 		$('#'+modalID).modal('show');
-		result = true;
 	}
-	if (result) {
-		
-	}
-	return result;
+}
+
+function publish(eventID) {
+	var request = $.post("/events/event/publish", { event_id: eventID });
+    request.fail(function(response, textStatus, XMLHttpRequest) {
+        var messages = getErrorTextMessage(response)
+        alert(messages[1]);
+    });
+    request.error(request.fail);
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
+        var message = getResonseTextContent(responseText);
+        if (message.match(/<!--OK--/gi)) {
+        	//clear form
+            //reload events view if successfull
+      	  loadContent('Overview'+eventID+'Hidden','/events/event/event/'+eventID);
+        }
+    });
 }

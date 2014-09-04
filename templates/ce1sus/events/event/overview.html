@@ -28,6 +28,11 @@
                             'eventsTab${event.identifier}');}">
        Delete
      </button>
+     %if event.published == 0:
+      <button class="btn btn-primary" onclick="publish(${event.identifier});">
+       Publish
+      </button>
+     %endif
    </div>
    %endif
 </legend>

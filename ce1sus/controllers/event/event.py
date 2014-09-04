@@ -347,11 +347,17 @@ class EventController(Ce1susBaseController):
     except BrokerException as error:
       self._raise_exception(error)
 
-  def unpublish_event(self, event, user):
+  def __pub_unpub_event(self, event, user, publish):
     try:
       if self.is_event_owner(event, user):
-        event.published = 0
+        event.published = publish
       user_db = self.user_broker.getUserByUserName(user.username)
       self.event_broker.update_event(user_db, event, commit=True)
     except BrokerException as error:
       self._raise_exception(error)
+
+  def unpublish_event(self, event, user):
+    self.__pub_unpub_event(event, user, 0)
+
+  def publish_event(self, event, user):
+    self.__pub_unpub_event(event, user, 1)

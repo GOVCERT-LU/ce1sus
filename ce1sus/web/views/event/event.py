@@ -233,11 +233,24 @@ class EventView(Ce1susBaseView):
 
   @require(require_referer(('/internal')))
   @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
   def unpublish(self, event_id):
     try:
       event = self.event_controller.get_event_by_id(event_id)
       user = self._get_user()
       self.event_controller.unpublish_event(event, user)
+      return self._return_ajax_ok()
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  def publish(self, event_id):
+    try:
+      event = self.event_controller.get_event_by_id(event_id)
+      user = self._get_user()
+      self.event_controller.publish_event(event, user)
       return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)

@@ -155,7 +155,7 @@ else:
                         else:
                            shareicon = '<span class="glyphicon glyphicon-remove"></span>'
                         
-                        attribute_owner = (user.default_group.identifier == attribute.creator_group.identifier)
+                        attribute_owner = (user.default_group.identifier == attribute.creator_group_id)
                         if attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
                           tdstyle = 'style="background-color: yellow;"'
                         else:
