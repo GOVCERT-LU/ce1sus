@@ -22,31 +22,29 @@ CHANGE COLUMN `creator_group_id` `creator_group_id` INT(11) NOT NULL ;
 
 ALTER TABLE `Attributes` 
 ADD INDEX `FK_Attr_Group_idx` (`creator_group_id` ASC);
+
 ALTER TABLE `Attributes` 
-ADD CONSTRAINT `FK_Attr_Group`
-  FOREIGN KEY (`creator_group_id`)
-  REFERENCES `Groups` (`group_id`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
-  
-ALTER TABLE `Attributes` 
-ADD CONSTRAINT `FK_Attr_Group`
-  FOREIGN KEY (`creator_group_id`)
-  REFERENCES `Groups` (`group_id`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
+ADD FOREIGN KEY `FK_Attr_Group`(`creator_group_id`)
+REFERENCES `Groups` (`group_id`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION;
+
+ALTER TABLE `Objects` 
+ADD FOREIGN KEY `FK_Obj_Group`(`creator_group_id`)
+REFERENCES `Groups` (`group_id`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION;
 
 UPDATE ce1sus SET `value`='0.10.0' WHERE `key`='app_rev';
 UPDATE ce1sus SET `value`='0.9.3' WHERE `key`='db_shema';
 
-ALTER TABLE `Attributes` 
-CHANGE COLUMN `code` `code` INT(1) NOT NULL ;
+ALTER TABLE `Attributes` CHANGE COLUMN code code INT(1) NOT NULL ;
 
-ALTER TABLE ``Users` 
-CHANGE COLUMN `privileged` `code` INT(1) NOT NULL DEFAULT '0' ;
+ALTER TABLE `Users` 
+CHANGE COLUMN privileged code INT(1) NOT NULL DEFAULT '0' ;
 
 ALTER TABLE `Groups` 
-CHANGE COLUMN `email` `email` VARCHAR(255) CHARACTER SET 'utf32' NULL ;
+CHANGE COLUMN email email VARCHAR(255) CHARACTER SET 'utf32' NULL ;
 
 CREATE TABLE `Attribute_Properties` (
   `attr_prop_id` BIGINT NOT NULL AUTO_INCREMENT,
@@ -63,9 +61,9 @@ CREATE TABLE `Attribute_Properties` (
     ON UPDATE CASCADE);
 
 ALTER TABLE `Attribute_Properties` 
-CHANGE COLUMN `confidence` `confidence` VARCHAR(8) NULL DEFAULT 'High' ;
+CHANGE COLUMN confidence confidence VARCHAR(8) NULL DEFAULT 'High' ;
 
 ALTER TABLE `Attribute_Properties` 
-CHANGE COLUMN `valid_time_position` `valid_time_position` TIMESTAMP NULL DEFAULT now() ;
+CHANGE COLUMN valid_time_position valid_time_position TIMESTAMP NULL DEFAULT now() ;
 
 COMMIT;
