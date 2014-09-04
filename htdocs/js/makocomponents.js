@@ -165,9 +165,9 @@ function genericFormSubmit(formElement, event, modalID, contentid, uri,
                     var resultText = createErrorsMsg(null, message);
                 }
                 if (modalID && !contentid) {
-                    $("#" + modalID + "body").html(message);
+                    $("#" + modalID + "body").html(resultText);
                 } else {
-                    $("#" + contentid).html(message);
+                    $("#" + contentid).html(resultText);
                 }
             }
         }

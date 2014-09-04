@@ -175,7 +175,7 @@ class EventView(Ce1susBaseView):
           self._get_logger().info('Event is invalid')
           return self._return_ajax_post_error(self.__render_event_details('/events/event/editDetails.html',
                                                                           event))
-      return self._return_ajax_ok()
+      return u'{0}<!--{1},{2}-->'.format(self._return_ajax_ok(), event.identifier, event.title)
     except ControllerException as error:
       return self._render_error_page(error)
 

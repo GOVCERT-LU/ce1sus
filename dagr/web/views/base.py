@@ -177,7 +177,7 @@ class BaseView:
 
     :returns: String
     """
-    return u'<!--OK--><!-{0}-->'.format(self.__class__.__name__)
+    return u'<!--OK--><!--{0}-->'.format(self.__class__.__name__)
 
   def _return_ajax_post_error(self, message):
     """
@@ -185,7 +185,7 @@ class BaseView:
 
     :returns: String
     """
-    return u'<!--PostError--><!-{0}-->{1}'.format(self.__class__.__name__, message)
+    return u'<!--PostError--><!--{0}-->{1}'.format(self.__class__.__name__, message)
 
   def _return_ajax_error(self, message):
     """
@@ -193,4 +193,4 @@ class BaseView:
 
     :returns: String
     """
-    return u'<!--Error--><!-{0}-->{1}'.format(self.__class__.__name__, message)
+    return u'<!--Error--><!--{0}-->{1}'.format(self.__class__.__name__, message)

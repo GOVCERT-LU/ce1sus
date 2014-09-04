@@ -199,3 +199,67 @@ function removeInputField(id) {
 function dialogCloseTabCallValidated(url, tabID, tabToClose) {
     genericDialogCall(url, 'unValiEv', '/admin/validation/unvalidated', true, true, tabID, tabToClose);
 }
+
+function add_event(formElement, event, uri, containerid){
+	var form = $(formElement);
+    var inputs = form.find("input, select, button, textarea");
+    var formData = new FormData(form[0]);
+    //disable the inputs
+    inputs.prop("disabled", true);
+    var request = $.ajax({
+        url : uri,
+        type : "POST",
+        data : formData,
+        contentType: false,
+        processData: false,
+        //timeout: 30000 //3secs
+    });
+    request.fail(function(response, textStatus, XMLHttpRequest) {
+    	  
+        var message = getResponseConent(response);
+        
+        alert(message);
+    });
+    request.error(request.fail);
+    request.done(function(responseText, textStatus, XMLHttpRequest) {
+        var message = getResonseTextContent(responseText);
+        if (message.match(/<!--OK--/gi)) {
+        	//clear form
+        	loadContent(containerid,"/events/event/add_event");
+        	//extract id
+        	matches = message.match(/<!--OK--><!--EventView--><!--(\d{1,},.*)-->/);
+        	
+        	if (matches && matches.length == 2) {
+        		//open sive nav
+        		split = matches[1].split(',');
+        		eventId = split[0];
+        		title = split[1];
+        		loadNewSideNavTab(eventId, 'eventsTabTabContent', '/events/event/view/'+eventId, true, 'Event #'+eventId+' - '+title);
+        	} else {
+        		loadSideNav("RecentEvents", false);
+        	}
+            
+        } else {
+            if (message.match(/<!--Error-->/gi)) {
+                form.prepend(message);
+            } else {
+                if (message.match(/<!--PostError-->/gi)) {
+                    //post errors are mainly validations issues
+                    var resultText = message;
+                    
+                } else {
+                    var resultText = createErrorsMsg(null, message);
+                }
+                $("#"+containerid).html(resultText);
+
+            }
+        }
+    });
+
+    request.always(function() {
+        // reenable the inputs
+        inputs.prop("disabled", false);
+    });
+    // prevent default posting of form
+    event.preventDefault();
+}

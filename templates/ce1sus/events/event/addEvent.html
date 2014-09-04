@@ -5,7 +5,7 @@
 
 <h2>Add an Event</h2>
 
-<%call expr="base_forms.reload_tab_form(id='addEventHidden', url='/events/event/modify_event',tab_url='/events/event/add_event',reload_tab_id='addEvent', sidenav='recentEvents')">
+<form id="addEventHiddenForm" class="form-horizontal" role="form">
 <div class="row">
     <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <input type="hidden" name="action" value="insert">
@@ -17,6 +17,8 @@
 		</div>
 	</div>
 </div>
+</div>
+</form>
 <script type="text/javascript">
 $(document).ready(function() {
     $('#AddSave').keydown(function(event){
@@ -31,7 +33,11 @@ $(document).ready(function() {
           return false;
         }
       });
+    $('#addEventHiddenForm').submit(function(event){
+    	add_event(this, event, "/events/event/modify_event","AddEventHidden");
+        
+    });
   });
 </script>
-</%call>
+
 

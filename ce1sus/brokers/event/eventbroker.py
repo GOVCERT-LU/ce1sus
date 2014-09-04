@@ -370,8 +370,6 @@ class EventBroker(BrokerBase):
     self.update(event, False)
     self.do_commit(commit)
 
-
-
   def get_unvalidated_events_for_user(self, user):
     try:
       main_group_id = user.default_group.identifier
