@@ -217,8 +217,7 @@ function add_event(formElement, event, uri, containerid){
     request.fail(function(response, textStatus, XMLHttpRequest) {
     	  
         var message = getResponseConent(response);
-        
-        alert(message);
+        $('#' + containerid + 'Errors').html(message);
     });
     request.error(request.fail);
     request.done(function(responseText, textStatus, XMLHttpRequest) {
@@ -262,4 +261,41 @@ function add_event(formElement, event, uri, containerid){
     });
     // prevent default posting of form
     event.preventDefault();
+}
+
+function inforUnpublished(modalID, eventID, show) {
+	var result = false;
+	if (show) {
+      if(confirm("Modifications on event will unpublish it. Don't forget to republish.")) {
+    	  // unpublish event
+    	  var request = $.post("/events/event/unpublish", { event_id: eventID });
+
+    	    request.fail(function(response, textStatus, XMLHttpRequest) {
+    	        var messages = getErrorTextMessage(response)
+    	        alert(messages[1]);
+    	        result=false;
+    	    });
+    	    request.error(request.fail);
+    	    request.done(function(responseText, textStatus, XMLHttpRequest) {
+    	        var message = getResonseTextContent(responseText);
+    	        if (message.match(/<!--OK--/gi)) {
+    	        	//clear form
+    	            //reload events view if successfull
+    	      	  loadContent('Overview'+eventID+'Hidden','/events/event/event/'+eventID);
+    	      	  $('#'+modalID).modal('show');
+    	          result=true;
+    	        } else {
+    	          result=false;
+    	        }
+    	    });
+
+      } 
+	} else {
+		$('#'+modalID).modal('show');
+		result = true;
+	}
+	if (result) {
+		
+	}
+	return result;
 }

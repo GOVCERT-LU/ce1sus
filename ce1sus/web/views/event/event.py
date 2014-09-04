@@ -230,3 +230,14 @@ class EventView(Ce1susBaseView):
       self._get_logger().error(error)
       self._put_to_session('extViewEventError', error)
       raise HTTPRedirect('/internal')
+
+  @require(require_referer(('/internal')))
+  @cherrypy.expose
+  def unpublish(self, event_id):
+    try:
+      event = self.event_controller.get_event_by_id(event_id)
+      user = self._get_user()
+      self.event_controller.unpublish_event(event, user)
+      return self._return_ajax_ok()
+    except ControllerException as error:
+      return self._render_error_page(error)

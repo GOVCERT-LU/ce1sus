@@ -137,10 +137,6 @@ class AttributesController(Ce1susBaseController):
             valid = False
       if valid:
         self.object_broker.update_object(user, obj, commit=False)
-        event = obj.event
-        if self.is_event_owner(event, user):
-          event.published = 0
-        self.event_broker.update_event(user, event, commit=False)
         self.attribute_broker.do_commit(True)
       else:
         self.attribute_broker.do_rollback()

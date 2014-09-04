@@ -66,19 +66,24 @@ function createErrorsMsg(code, message) {
     return resultText;
 }
 
-function getErrorMsg(resonseText) {
-
-    if (typeof (resonseText.statusText) !== 'undefined') {
-        var message = resonseText.statusText;
+function getErrorTextMessage(responseText){
+    if (typeof (responseText.statusText) !== 'undefined') {
+        var message = responseText.statusText;
     } else {
-        var message = resonseText;
+        var message = responseText;
     }
-    if (typeof (resonseText.status) !== 'undefined') {
-        var code = resonseText.status;
+    if (typeof (responseText.status) !== 'undefined') {
+        var code = responseText.status;
     } else {
         var code = null;
     }
-    return createErrorsMsg(resonseText.status,message);
+    return [responseText.status, message]
+}
+
+function getErrorMsg(responseText) {
+
+	var messages = getErrorTextMessage(responseText)
+    return createErrorsMsg(messages[0],messages[1]);
 }
 
 function formEvent(element, event, uri, contentid, doRefresh, refreshContainer,

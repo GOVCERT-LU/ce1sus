@@ -165,9 +165,6 @@ class ObjectsController(Ce1susBaseController):
       try:
         user = self._get_user(user.username)
         # only do this when the owner is doing this
-        if self.is_event_owner(event, user):
-          event.published = 0
-        self.event_broker.update_event(user, event, commit=False)
         obj.modified = DatumZait.now()
         self.object_broker.insert(obj, commit=False)
         self.object_broker.do_commit(True)
