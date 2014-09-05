@@ -49,7 +49,7 @@ def plaintext2html(text, tabstop=4, make_br=True):
     """
     characters = string.groupdict()
     if characters['htmlchars']:
-      return cgi.escape(characters['htmlchars'])
+      return cgi.escape(characters['htmlchars']).encode('utf-8', 'xmlcharrefreplace')
     if characters['lineend']:
       if make_br:
         return '<br/>'
@@ -75,13 +75,16 @@ def plaintext2html(text, tabstop=4, make_br=True):
         # I dont want links!
         # return '%s<a href="%s">%s</a>%s' % (prefix, url, url, last)
         return '%s%s%s' % (prefix, url, last)
+
   # convert to text to be compliant
   string_text = u'{0}'.format(text)
+
   if len(string_text) > 0:
     string_text = re.sub(re_string, replacements, string_text)
     string_text = string_text.replace('\"', '&quot;')
   else:
     string_text = ''
+  string_text = re.escape(string_text)
   return string_text
 
 

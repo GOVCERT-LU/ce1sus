@@ -1,6 +1,24 @@
 Changelog
 =========
 
+Release 0.10.1
+--------------
+* Added MailHandler
+* One can create objects inside handlers along their attributes
+
+Release 0.10.0
+--------------
+* Global views for unpublished events and one for events with proposals
+* Add event jumps now directly into the event
+* Added a publish button
+* Fixed bugs in FileHandler
+
+Release 0.9.5
+-------------
+* REST API keeps track of the originating source and the sender
+* Interface for attribute buttons
+* uuid for attributes
+
 Release 0.9.4
 -------------
 * Maintenance supports correction of checksums
