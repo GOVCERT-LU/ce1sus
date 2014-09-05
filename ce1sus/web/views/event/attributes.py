@@ -164,6 +164,7 @@ class AttributesView(Ce1susBaseView):
       def_id = kwargs.pop('definition')
       user = self._get_user()
       params = dict()
+
       for key, value in kwargs.iteritems():
         # note keep everything in utf-8
         try:

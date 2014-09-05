@@ -7,12 +7,14 @@ Created on Sep 5, 2014
 """
 from eml_parser import decode_email
 from os.path import dirname
-from shutil import move, rmtree
+from os import remove
+from shutil import rmtree
 
 from ce1sus.common.handlers.base import HandlerException, UndefinedException
 from ce1sus.common.handlers.filehandler import FileWithHashesHandler, CHK_SUM_FILE_NAME
 from ce1sus.common.handlers.generichandler import GenericHandler
 import dagr.helpers.hash as hasher
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -53,67 +55,60 @@ class EmailHandler(GenericHandler):
     action = params.get('action', None)
     if action == 'insert':
       uploaded_file_path, filename = self.file_handler._process_file_upload(params.get('value', None))
+      del filename
       mail = decode_email(uploaded_file_path, include_attachment_data=True)
 
       # eml file attribute
       main_definition = self._get_main_definition(definitions)
 
-      sha1 = hasher.fileHashSHA1(uploaded_file_path)
-      rel_folder = FileWithHashesHandler._get_rel_folder()
-      dest_path = self.file_handler._get_dest_folder(rel_folder) + '/' + sha1
-      move(uploaded_file_path, dest_path)
-
+      # remvoe file
+      remove(uploaded_file_path)
       # remove temp folder
       rmtree(dirname(uploaded_file_path))
 
-      main_attribute = FileWithHashesHandler._create_attribute(rel_folder + '/' + sha1,
-                                                               obj,
-                                                               main_definition,
-                                                               user,
-                                                               None,
-                                                               '0')
       attributes = list()
-      # create Email attributes
-      attributes.append(FileWithHashesHandler._create_attribute(mail['from'],
-                                                                obj,
-                                                                FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_FROM, definitions),
-                                                                user,
-                                                                None,
-                                                                '0'))
-      attributes.append(FileWithHashesHandler._create_attribute(mail['subject'],
-                                                                obj,
-                                                                FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_SUBJECT, definitions),
-                                                                user,
-                                                                None,
-                                                                '0'))
+      cc_value = mail.get('cc', None)
+      fields = (mail.get('from', None), mail.get('subject', None), cc_value, mail.get('date', None), mail.get('message_id', None))
 
-      cc_value = mail.get('bcc', None)
-      if cc_value:
-        attributes.append(FileWithHashesHandler._create_attribute(cc_value,
+      # create Email attributes
+      if fields[0]:
+        main_attribute = FileWithHashesHandler._create_attribute(fields[0],
+                                                                 obj,
+                                                                 FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_FROM, definitions),
+                                                                 user,
+                                                                 None,
+                                                                 '0')
+      if fields[1]:
+        attributes.append(FileWithHashesHandler._create_attribute(fields[1],
+                                                                  obj,
+                                                                  FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_SUBJECT, definitions),
+                                                                  user,
+                                                                  None,
+                                                                  '0'))
+
+      if fields[2]:
+        attributes.append(FileWithHashesHandler._create_attribute(fields[2],
                                                                   obj,
                                                                   FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_CC, definitions),
                                                                   user,
                                                                   None,
                                                                   '0'))
-      attributes.append(FileWithHashesHandler._create_attribute(mail['date'],
-                                                                obj,
-                                                                FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_SEND_DATE, definitions),
-                                                                user,
-                                                                None,
-                                                                '0'))
-      attributes.append(FileWithHashesHandler._create_attribute(mail['subject'],
-                                                                obj,
-                                                                FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_SUBJECT, definitions),
-                                                                user,
-                                                                None,
-                                                                '0'))
-
-      attributes.append(FileWithHashesHandler._create_attribute(mail['message_id'],
-                                                                obj,
-                                                                FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_MESSAGE_ID, definitions),
-                                                                user,
-                                                                None,
-                                                                '0'))
+      if fields[3]:
+        attributes.append(FileWithHashesHandler._create_attribute(fields[3],
+                                                                  obj,
+                                                                  FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_SEND_DATE, definitions),
+                                                                  user,
+                                                                  None,
+                                                                  '0'))
+      if fields[4]:
+        attributes.append(FileWithHashesHandler._create_attribute(fields[4],
+                                                                  obj,
+                                                                  FileWithHashesHandler._get_definition(CHK_SUM_EMAIL_MESSAGE_ID, definitions),
+                                                                  user,
+                                                                  None,
+                                                                  '0'))
+      if not (fields[0] and fields[1] and fields[3]):
+        raise HandlerException('Invalid eml file, eml file must contain FROM, SUBJECT and DATE')
 
       obj_def = FileWithHashesHandler._get_definition(CHK_SUM_GENERIC_FILE, definitions)
 

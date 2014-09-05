@@ -246,6 +246,7 @@ class AttributesController(Ce1susBaseController):
                                                                     params,
                                                                     False)
       # set bit values
+
       AttributesController.set_web_attribute(attribute)
       if proposal:
         AttributesController.set_proposet_attribute(attribute)
@@ -255,18 +256,19 @@ class AttributesController(Ce1susBaseController):
           if proposal:
             AttributesController.set_proposet_attribute(additional_attribute)
 
-      # check if object has children and perform the check if they are not set
-      for child in obj.children:
-        if not child.bit_value.is_rest_instert and not child.bit_value.is_web_insert:
-          AttributesController.set_web_attribute(child)
-          if proposal:
-            AttributesController.set_proposet_attribute(child)
-          # do the same for it's children
-          for attr in child.attributes:
-            if not attr.bit_value.is_rest_instert and not attr.bit_value.is_web_insert:
-              AttributesController.set_web_attribute(attr)
-              if proposal:
-                AttributesController.set_proposet_attribute(child)
+      if obj.children:
+        # check if object has children and perform the check if they are not set
+        for child in obj.children:
+          if not child.bit_value.is_rest_instert and not child.bit_value.is_web_insert:
+            AttributesController.set_web_attribute(child)
+            if proposal:
+              AttributesController.set_proposet_attribute(child)
+            # do the same for it's children
+            for attr in child.attributes:
+              if not attr.bit_value.is_rest_instert and not attr.bit_value.is_web_insert:
+                AttributesController.set_web_attribute(attr)
+                if proposal:
+                  AttributesController.set_proposet_attribute(child)
 
       return attribute, additional_attributes
     except BrokerException as error:
