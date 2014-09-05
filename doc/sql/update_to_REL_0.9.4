@@ -21,7 +21,7 @@ CHANGE COLUMN `event_id` `event_id` BIGINT(20) NOT NULL;
 
 UPDATE ce1sus SET `value`='0.9.4' WHERE `key`='db_shema';
 
-INSERT INTO DEF_Attributes (`name`, `description`, `regex`, `classIndex`, `handlerIndex`, `deletable`, `sharable`, `relationable`) VALUES ('ce1sus eml file handler', 'EML File handler. This attribute lets you upload an eml file and all the attributes which can be extracted from this file are beeing generated. Note also child objects will be created ofr the attachments.', '^.+$', '1', '12', '0', '0', '0');
+INSERT INTO DEF_Attributes (`name`, `description`, `regex`, `classIndex`, `handlerIndex`, `deletable`, `sharable`, `relationable`, `chksum`) VALUES ('ce1sus eml file handler', 'EML File handler. This attribute lets you upload an eml file and all the attributes which can be extracted from this file are beeing generated. Note also child objects will be created ofr the attachments.', '^.+$', '1', '12', '0', '0', '0','3916c37af13afe86e3ebddc858ab6284c16f0e2b');
 
 
 COMMIT;
