@@ -14,10 +14,10 @@ import dagr.helpers.strings as strings
 
 
 # pylint: disable=W0613
-def plaintext2html(context, text, tabstop=4, make_br=True):
+def plaintext2html(context, text, tabstop=4, make_br=True, remove_if_escaped=False):
   """
   Converts plain text string to html
   """
-  stringText = strings.plaintext2html(text, tabstop, make_br)
+  stringText = strings.plaintext2html(text, tabstop, make_br, remove_if_escaped)
 
   return stringText

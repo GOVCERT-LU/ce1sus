@@ -21,7 +21,7 @@
 
 
 
-<%def name="object_to_html(object,shorten_to=0, use_plain_text=False)"><%
+<%def name="object_to_html(object,shorten_to=0, use_plain_text=False, remove_if_escape=False)"><%
 classname = type(object).__name__
 
 if hasattr(object,'isoformat'):
@@ -35,8 +35,8 @@ if len(string) >= shorten_to:
 else:
   result = string
 if 'Link' in object.__class__.__name__:
-  result = u'<a href="{0}" target="_blank">{1}</a>'.format(dagr.plaintext2html(text=object.url), object.identifier)
+  result = u'<a href="{0}" target="_blank">{1}</a>'.format(dagr.plaintext2html(text=object.url), object.identifier,remove_if_escaped=remove_if_escape)
 else:
   if not use_plain_text: 
-    result = dagr.plaintext2html(text=result)
+    result = dagr.plaintext2html(text=result,remove_if_escaped=remove_if_escape)
 %>${result}</%def>

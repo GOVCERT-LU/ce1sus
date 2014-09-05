@@ -33,6 +33,13 @@ import logging
 from ce1sus.web.views.helpers.viewhandler import ViewHandler
 
 
+
+def secureheaders():
+    headers = cherrypy.response.headers
+    headers['X-Frame-Options'] = 'DENY'
+    headers['X-XSS-Protection'] = '1; mode=block'
+    headers['Content-Security-Policy'] = "default-src='self'"
+
 def my_log_traceback(severity=logging.CRITICAL):
     """Write the last error's headers and traceback to the cherrypy error log witih a CRITICAL severity."""
     from cherrypy import _cperror
@@ -64,6 +71,8 @@ def bootstrap():
   config = Configuration(ce1susConfigFile)
 
   cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
+
+  cherrypy.tools.secureheaders = cherrypy.Tool('before_finalize', secureheaders, priority=60)
 
   # set up an SMTP handler to mail when the CRITICAL error occurs
   use_mailer = config.get('ErrorHandler', 'usemailer', False)

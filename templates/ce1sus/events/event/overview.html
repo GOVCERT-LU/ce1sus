@@ -69,12 +69,12 @@
           counter = counter + 1
           %>
           <tr>
-            <td style="${style}" onclick="loadNewSideNavTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', false, 'Event #${relation.identifier}');"><%call expr="messages_and_text.object_to_html(counter, shorten_to=100,use_plain_text=False)"/></td>
+            <td style="${style}" onclick="loadNewSideNavTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', false, 'Event #${relation.identifier} - ${messages_and_text.object_to_html(event.title,shorten_to=100,use_plain_text=False,remove_if_escape=True)}');"><%call expr="messages_and_text.object_to_html(counter, shorten_to=100,use_plain_text=False)"/></td>
             <td><%call expr="messages_and_text.object_to_html(relation.identifier, shorten_to=100,use_plain_text=False)"/></td>
             <td><%call expr="messages_and_text.object_to_html(relation.title, shorten_to=100,use_plain_text=False)"/></td>
             
             <td style="width: 60px;">
-              <a href="#" onclick="loadNewSideNavTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', false, 'Event #${relation.identifier}');">
+              <a href="#" onclick="loadNewSideNavTab('${relation.identifier}', 'eventsTabTabContent', '/events/event/view/${relation.identifier}', false, 'Event #${relation.identifier} - ${messages_and_text.object_to_html(event.title,shorten_to=100,use_plain_text=False,remove_if_escape=True)}');">
                  <span class="glyphicon glyphicon-eye-open" title="View event"></span>
               </a>
             </td>
