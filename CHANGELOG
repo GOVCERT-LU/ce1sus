@@ -3,7 +3,7 @@ Changelog
 
 Release 0.10.1
 --------------
-* Added MailHandler
+* Added MailHandler (requires eml_parser see doc for more informations)
 * One can create objects inside handlers along their attributes
 
 Release 0.10.0

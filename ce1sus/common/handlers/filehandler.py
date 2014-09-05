@@ -272,13 +272,17 @@ class FileHandler(GenericHandler):
     """
     return definitions.get(chksum)
 
-  def insert(self, obj, definitions, user, group, params):
+  def insert(self, obj, definitions, user, group, params, uploaded_file=None):
     """
     Creates ans inserts the file and its attributes (only used by the GUI)
     """
     main_definition = self._get_main_definition(definitions)
     try:
-      uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
+      if uploaded_file:
+        uploaded_file_path = uploaded_file[1]
+        filename = uploaded_file[0]
+      else:
+        uploaded_file_path, filename = self._process_file_upload(params.get('value', None))
 
       attributes = list()
       convertedFilename = filename.decode('utf8')
@@ -502,8 +506,8 @@ class FileWithHashesHandler(FileHandler):
             CHK_SUM_FILE_ID,
             CHK_SUM_HASH_MD5]
 
-  def insert(self, obj, definitions, user, group, params):
-    attribute, attributes = FileHandler.insert(self, obj, definitions, user, group, params)
+  def insert(self, obj, definitions, user, group, params, uploaded_file=None):
+    attribute, attributes = FileHandler.insert(self, obj, definitions, user, group, params, uploaded_file)
     if isinstance(attribute.value, FailedValidation):
       params['value'] = ''
       attribute = self.create_attribute(params, obj, attribute.definition, user)

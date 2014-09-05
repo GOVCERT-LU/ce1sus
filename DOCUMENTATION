@@ -56,6 +56,16 @@ $ ln -s libs/python-magic/magic.py .
 
 The important fact is that the magic package must be accessible with "import magic"
 
+1.2.2 Email parser
+------------------
+One possibility to install eml_parser is the following
+
+$ mkdir libs
+$ cd libs
+$ git clone https://github.com/sim0nx/eml_parser
+$ cd ..
+$ ln -s libs/eml_parser/eml_parser/eml_parser.py .
+
 1.3. Database
 -------------
 

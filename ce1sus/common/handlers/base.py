@@ -228,20 +228,23 @@ class HandlerBase(object):
     """
     raise HandlerException(('get_additinal_attribute_chksums not defined for {0}').format(self.__class__.__name__))
 
+  def get_additional_object_chksums(self):
+    raise HandlerException(('get_additional_object_chksums not defined for {0}').format(self.__class__.__name__))
+
   def _get_main_definition(self, definitions):
     """
     Returns the definition using this handler
     """
-    chksums = self.get_additinal_attribute_chksums()
+    chksums = self.get_additinal_attribute_chksums() + self.get_additional_object_chksums()
     diff = list(set(definitions.keys()) - set(chksums))
     if len(diff) == 1:
       main_definition = definitions.get(diff[0], None)
       if main_definition:
         return main_definition
       else:
-        raise HandlerException('Error determining main definition for {0}').format(self.__class__.__name__)
+        raise HandlerException((u'Error determining main definition for {0}').format(self.__class__.__name__))
     else:
-      raise HandlerException('Could not determine main definition for {0}').format(self.__class__.__name__)
+      raise HandlerException((u'Could not determine main definition for {0}').format(self.__class__.__name__))
 
   def process_rest_post(self, obj, definitions, user, group, rest_attribute):
     """

@@ -1,0 +1,24 @@
+START TRANSACTION;
+
+INSERT INTO AttributeHandlers (`AttributeHandler_id`, `moduleClassName`, `description`, `config`, `uuid`) VALUES ('12', 'emailhandler.EmailHandler', 'Generates all the required email attributes when an eml file is uploaded. Note also the attachment are beeing processed', '31', '5665bf50-34d3-11e4-8c21-0800200c9a66');
+
+
+ALTER TABLE NumberValues
+CHANGE COLUMN `event_id` `event_id` BIGINT(20) NOT NULL ;
+
+ALTER TABLE TextValues
+CHANGE COLUMN `event_id` `event_id` BIGINT(20) NOT NULL ;
+
+ALTER TABLE TextValues
+ADD CONSTRAINT `FK_TextValues_Events`
+  FOREIGN KEY (`event_id`)
+  REFERENCES Events (`event_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE DateValues
+CHANGE COLUMN `event_id` `event_id` BIGINT(20) NOT NULL;
+
+UPDATE ce1sus SET `value`='0.9.4' WHERE `key`='db_shema';
+
+COMMIT;

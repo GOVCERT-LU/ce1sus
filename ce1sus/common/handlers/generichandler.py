@@ -6,17 +6,21 @@ module handing the generic handler
 Created: Aug 22, 2013
 """
 
+
+from ce1sus.brokers.event.eventclasses import Attribute
+from ce1sus.common.handlers.base import HandlerBase, UndefinedException
+from ce1sus.helpers.bitdecoder import BitValue
+from dagr.helpers.converters import ObjectConverter
+from dagr.helpers.datumzait import DatumZait
+import uuid as uuidgen
+from ce1sus.brokers.event.eventclasses import Object
+
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.common.handlers.base import HandlerBase, UndefinedException
-from ce1sus.brokers.event.eventclasses import Attribute
-from dagr.helpers.datumzait import DatumZait
-from dagr.helpers.converters import ObjectConverter
-from ce1sus.helpers.bitdecoder import BitValue
-import uuid as uuidgen
 
 
 class GenericHandler(HandlerBase):
@@ -26,9 +30,51 @@ class GenericHandler(HandlerBase):
   def get_uuid():
     return 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
 
+  def get_additional_object_chksums(self):
+    return list()
+
   @staticmethod
   def get_allowed_types():
     return [0, 1, 3]
+
+  @staticmethod
+  def create_object(parent, definition, user, group, share=None):
+    obj = Object()
+    obj.bit_value = BitValue('0', obj)
+    if share is None:
+      # use the default value from the definition
+      if definition.share == 1:
+        obj.bit_value.is_shareable = True
+      else:
+        obj.bit_value.is_shareable = False
+    else:
+      # check if parent is sharable
+      if parent.bit_value.is_shareable:
+        if share == '0':
+          obj.bit_value.is_shareable = False
+        else:
+          obj.bit_value.is_shareable = True
+      else:
+        obj.bit_value.is_shareable = False
+
+    obj.identifier = None
+    obj.uuid = unicode(uuidgen.uuid4())
+    obj.definition = definition
+    obj.created = DatumZait.utcnow()
+    obj.modified = DatumZait.utcnow()
+    obj.creator = user
+    obj.creator_id = user.identifier
+    obj.modifier_id = user.identifier
+    obj.modifier = user
+    obj.creator = user
+    obj.event = parent.event
+
+    if group:
+      obj.creator_group_id = group.identifier
+    else:
+      obj.creator_group_id = user.default_group.identifier
+
+      return obj
 
   @staticmethod
   def create_attribute(params, obj, definition, user, group):

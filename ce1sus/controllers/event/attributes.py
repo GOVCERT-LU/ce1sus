@@ -11,14 +11,15 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.controllers.base import ControllerException
-from ce1sus.controllers.base import Ce1susBaseController
-from dagr.db.broker import ValidationException, BrokerException
-from ce1sus.common.handlers.base import HandlerException
-from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
-from dagr.helpers.converters import ValueConverter, ConversionException
 import ast
+
+from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.brokers.valuebroker import ValueBroker
+from ce1sus.common.handlers.base import HandlerException, HandlerBase
+from ce1sus.controllers.base import Ce1susBaseController
+from dagr.controllers.base import ControllerException
+from dagr.db.broker import ValidationException, BrokerException
+from dagr.helpers.converters import ValueConverter, ConversionException
 from dagr.helpers.validator.objectvalidator import FailedValidation
 
 
@@ -29,6 +30,34 @@ class AttributesController(Ce1susBaseController):
     Ce1susBaseController.__init__(self, config)
     self.value_broker = self.broker_factory(ValueBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
+
+  @staticmethod
+  def set_web_attribute(attribute):
+    """
+    sets the parameters for a web attribute
+    """
+    attribute.bit_value.is_web_insert = True
+    attribute.bit_value.is_validated = True
+    attribute.bit_value.is_rest_instert = False
+    attribute.bit_value.is_proposal = False
+
+  @staticmethod
+  def set_rest_attribute(attribute):
+    """
+    sets the parameters for a rest attribute
+    """
+    attribute.bit_value.is_web_insert = False
+    attribute.bit_value.is_rest_instert = True
+    attribute.bit_value.is_validated = False
+    attribute.bit_value.is_proposal = False
+
+  @staticmethod
+  def set_proposet_attribute(attribute):
+    """
+    sets the parameters for a web attribute
+    """
+    attribute.bit_value.is_proposal = True
+    attribute.bit_value.is_validated = False
 
   def remove_by_id(self, attribute_id):
     """
@@ -164,6 +193,11 @@ class AttributesController(Ce1susBaseController):
           additional_definitions = self.attr_def_broker.get_defintion_by_chksums(additional_definitions_chksums)
           for additional_definition in additional_definitions:
             definitions[additional_definition.chksum] = additional_definition
+        additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
+        if additional_obj_defs_chksums:
+          additional_obj_definitions = self.obj_def_broker.get_defintion_by_chksums(additional_obj_defs_chksums)
+          for additional_obj_definition in additional_obj_definitions:
+            definitions[additional_obj_definition.chksum] = additional_obj_definition
       elif action == 'update':
         attr_id = params.pop('attribute_id', None)
         if attr_id:
@@ -197,34 +231,6 @@ class AttributesController(Ce1susBaseController):
     except (BrokerException, HandlerException) as error:
       self._raise_exception(error)
 
-  @staticmethod
-  def __set_web_attribute(attribute):
-    """
-    sets the parameters for a web attribute
-    """
-    attribute.bit_value.is_web_insert = True
-    attribute.bit_value.is_validated = True
-    attribute.bit_value.is_rest_instert = False
-    attribute.bit_value.is_proposal = False
-
-  @staticmethod
-  def __set_rest_attribute(attribute):
-    """
-    sets the parameters for a rest attribute
-    """
-    attribute.bit_value.is_web_insert = False
-    attribute.bit_value.is_rest_instert = True
-    attribute.bit_value.is_validated = False
-    attribute.bit_value.is_proposal = False
-
-  @staticmethod
-  def __set_proposet_attribute(attribute):
-    """
-    sets the parameters for a web attribute
-    """
-    attribute.bit_value.is_proposal = True
-    attribute.bit_value.is_validated = False
-
   # pylint: disable=R0913
   def populate_web_attributes(self, user, obj, definition_id, action, params, proposal):
     """
@@ -240,14 +246,28 @@ class AttributesController(Ce1susBaseController):
                                                                     params,
                                                                     False)
       # set bit values
-      AttributesController.__set_web_attribute(attribute)
+      AttributesController.set_web_attribute(attribute)
       if proposal:
-        AttributesController.__set_proposet_attribute(attribute)
+        AttributesController.set_proposet_attribute(attribute)
       if additional_attributes:
         for additional_attribute in additional_attributes:
-          AttributesController.__set_web_attribute(additional_attribute)
+          AttributesController.set_web_attribute(additional_attribute)
           if proposal:
-            AttributesController.__set_proposet_attribute(additional_attribute)
+            AttributesController.set_proposet_attribute(additional_attribute)
+
+      # check if object has children and perform the check if they are not set
+      for child in obj.children:
+        if not child.bit_value.is_rest_instert and not child.bit_value.is_web_insert:
+          AttributesController.set_web_attribute(child)
+          if proposal:
+            AttributesController.set_proposet_attribute(child)
+          # do the same for it's children
+          for attr in child.attributes:
+            if not attr.bit_value.is_rest_instert and not attr.bit_value.is_web_insert:
+              AttributesController.set_web_attribute(attr)
+              if proposal:
+                AttributesController.set_proposet_attribute(child)
+
       return attribute, additional_attributes
     except BrokerException as error:
       self._raise_exception(error)
@@ -309,11 +329,11 @@ class AttributesController(Ce1susBaseController):
       # Set parent object
       attribute.object = obj
       # set bit values
-      AttributesController.__set_rest_attribute(attribute)
+      AttributesController.set_rest_attribute(attribute)
       if additional_attributes:
         for additional_attribute in additional_attributes:
           additional_attribute.object = obj
-          AttributesController.__set_rest_attribute(additional_attribute)
+          AttributesController.set_rest_attribute(additional_attribute)
       return attribute, additional_attributes
 
     except BrokerException as error:
