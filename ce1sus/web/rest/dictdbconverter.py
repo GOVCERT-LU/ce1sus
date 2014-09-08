@@ -131,8 +131,9 @@ class DictDBConverter(object):
           try:
             group = self.groups_controller.get_group_by_uuid(group_uuid)
           except ControllerException:
-            if group_name:
-              group = self.groups_controller.get_group_by_name(group_name)
+            pass
+        if group is None and group_name:
+          group = self.groups_controller.get_group_by_name(group_name)
       except ControllerException:
         pass
 
@@ -144,7 +145,7 @@ class DictDBConverter(object):
         if group_uuid:
           group.uuid = group_uuid
         else:
-          group_uuid = uuid.uuid4()
+          group.uuid = uuid.uuid4()
         group.description = u'This group was generated automatically as it was not existing.'
         group.email = None
         group.gpg_key = None
@@ -155,7 +156,7 @@ class DictDBConverter(object):
         group.usermails = 1
         # Auto create groups are always white
         group.tlp_lvl = 3
-        group = self.group_controller.insert_group(group)[1]
+        group = self.group_controller.insert_group(group)[0]
 
       return group
     else:

@@ -5,10 +5,8 @@ Created on Jul 4, 2013
 '''
 import unittest
 from dagr.db.session import SessionManager
-from ce1sus.brokers.definition.attributedefinitionbroker import \
-                                                  AttributeDefinitionBroker
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, \
-                                                        ObjectDefinition
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition, ObjectDefinition
 import dagr.helpers.objects as helpers
 from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
 from dagr.helpers.config import Configuration
@@ -28,8 +26,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.object.description = 'A description'
     self.object.share = long(1)
 
-    self.attributebroker = self.session_manager.broker_factory(
-                                                      AttributeDefinitionBroker)
+    self.attributebroker = self.session_manager.broker_factory(AttributeDefinitionBroker)
     self.attribute = AttributeDefinition()
     self.attribute.description = 'Description'
     self.attribute.identifier = long(666)
@@ -43,8 +40,7 @@ class TestDefinitionBrokers(unittest.TestCase):
     self.attribute.relation = long(1)
     self.attribute.objects = list()
 
-    self.objectbroker = self.session_manager.broker_factory(
-                                                      ObjectDefinitionBroker)
+    self.objectbroker = self.session_manager.broker_factory(ObjectDefinitionBroker)
 
 
     self.object.attributes.append(self.attribute)
