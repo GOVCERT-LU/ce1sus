@@ -6,6 +6,13 @@ Release 0.10.1
 * Added MailHandler (requires eml_parser see doc for more informations)
   NOTE: the Attribute is not associated to any object.
 * One can create objects inside handlers along their attributes
+* Imporved Search by the following fields
+      - Event Title
+      - Event Description
+      - Event TLP
+      - Event Analysis
+      - Event Status
+      - uuid (Looks up in Attributes,Object and Events
 
 Release 0.10.0
 --------------

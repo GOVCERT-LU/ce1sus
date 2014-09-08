@@ -12,6 +12,10 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+class StaticMappingException(Exception):
+  pass
+
+
 def invert_dict(dictionary):
   """
   Inverts Key value of a dictionary
@@ -41,7 +45,7 @@ def get_dict_element_by_id(dictionary, identifier):
     if value:
       return value
     else:
-      raise Exception(u'Invalid input "{0}"'.format(identifier))
+      raise StaticMappingException(u'Invalid input "{0}"'.format(identifier))
 
 
 def get_dict_element_by_value(dictionary, value):
@@ -57,7 +61,7 @@ def get_dict_element_by_value(dictionary, value):
       result = key
       break
   if result is None:
-    raise Exception(u'Invalid input "{0}"'.format(value))
+    raise StaticMappingException(u'Invalid input "{0}"'.format(formatted_input))
   return result
 
 
@@ -251,3 +255,23 @@ class TLPLevel(object):
     :returns: String
     """
     return get_dict_element_by_id(TLPLevel.__tlp_colors, identifier)
+
+
+class EventAttribtues(object):
+  """Static class defining the risk of an event"""
+  __tableDefinitions = {'title': 'Event_title',
+                        'description': 'Event_description',
+                        'creator_group': 'Event_creator_group',
+                        'tlp': 'Event_tlp',
+                        'analysis': 'Event_analysis',
+                        'status': 'Event_status'
+                        }
+
+  @staticmethod
+  def get_definitions():
+    """
+    Returns all definitions where the key is the index and the value the key
+
+    :returns: Dictionary
+    """
+    return invert_dict(EventAttribtues.__tableDefinitions)

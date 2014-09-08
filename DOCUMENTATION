@@ -25,6 +25,7 @@ Ce1sus need the following packages:
   * memcache
   * rtkit (optional)
   * gnupg (0.3.5+)
+  * eml_parser (https://github.com/sim0nx/eml_parser/commit/ce16467f8e3ba3002afe0fe11ff887c13602b56f)
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)

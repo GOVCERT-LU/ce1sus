@@ -5,19 +5,20 @@
 
 Created on Jan 30, 2014
 """
+import cherrypy
+
+from ce1sus.controllers.events.search import SearchController
+from ce1sus.web.views.base import Ce1susBaseView
+from ce1sus.web.views.common.decorators import require, require_referer
+from ce1sus.web.views.helpers.tabs import MainTab
+from dagr.controllers.base import ControllerException
+from dagr.helpers.strings import InputException
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-from ce1sus.web.views.base import Ce1susBaseView
-from ce1sus.controllers.events.search import SearchController
-import cherrypy
-from ce1sus.web.views.common.decorators import require, require_referer
-from dagr.helpers.strings import InputException
-from dagr.controllers.base import ControllerException
-from ce1sus.web.views.helpers.tabs import MainTab
 
 
 class SearchView(Ce1susBaseView):
@@ -47,6 +48,10 @@ class SearchView(Ce1susBaseView):
     """
     cb_definitions = self.search_controller.get_cb_def_values_for_all()
     cb_definitions['Any'] = 'Any'
+    # add uuid in general
+    cb_definitions['uuid'] = 'uuid'
+    # add search for events description, title, creator group, tlp, analysis, status)
+
     return self._render_template('/events/search/index.html', cb_definitions=cb_definitions)
 
   @require(require_referer(('/internal')))
@@ -67,7 +72,9 @@ class SearchView(Ce1susBaseView):
       results = self.search_controller.search_results(needle, definition_id, operant, user, cache)
       # Prepare paginator
       return self._return_ajax_ok() + self._render_template('/events/search/results.html',
-                                                            results=results
+                                                            results=results,
+                                                            tab_id='eventsTabTabContent',
+                                                            url='/events/event/view'
                                                             )
     except (InputException, ControllerException) as error:
       return '{0}'.format(error)

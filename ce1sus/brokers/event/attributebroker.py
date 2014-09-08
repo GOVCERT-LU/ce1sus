@@ -5,18 +5,20 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.event.eventclasses import Attribute, Event, Object
+from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.brokers.staticbroker import EventAttribtues
+from ce1sus.brokers.valuebroker import ValueBroker
+from dagr.db.broker import BrokerBase, BrokerException
+from dagr.helpers.datumzait import DatumZait
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.broker import BrokerBase, BrokerException
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.brokers.relationbroker import RelationBroker
-from ce1sus.brokers.event.eventclasses import Attribute
-from dagr.helpers.datumzait import DatumZait
 
 
 class AttributeBroker(BrokerBase):
@@ -88,3 +90,21 @@ class AttributeBroker(BrokerBase):
 
   def look_for_attribute_value(self, attribute_definition, value, operand='=='):
     return self.relation_broker.look_for_attribute_value(attribute_definition, value, operand)
+
+  def look_for_event_attribute_values(self, operand, attribute, needle):
+    return self.relation_broker.look_for_event_attribtues(Event, operand, attribute, needle)
+
+  def look_for_any_value(self, value, operand):
+    # first look inside attributes
+    found_values = self.relation_broker.look_for_attribute_value(None, value, operand)
+    # the look in events
+    for item in EventAttribtues.get_definitions().values():
+      found_values = found_values + self.look_for_event_attribute_values(Event, operand, item, value)
+    return found_values
+
+  def look_for_uuids(self, value, operand):
+    found_values = list()
+    for clazz in [Object, Attribute, Event]:
+      found_values = found_values + self.relation_broker.look_for_event_attribtues(clazz, operand, 'uuid', value)
+    return found_values
+

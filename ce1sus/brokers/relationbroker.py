@@ -5,23 +5,30 @@
 
 Created on Dec 19, 2013
 """
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import not_
+from sqlalchemy import or_
+from sqlalchemy.orm import relationship
+import sqlalchemy.orm.exc
+
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from ce1sus.brokers.event.eventclasses import Attribute, Event
+from ce1sus.brokers.permission.groupbroker import GroupBroker
+from ce1sus.brokers.staticbroker import TLPLevel, Analysis, Status, \
+  StaticMappingException
+from ce1sus.brokers.valuebroker import ValueBroker
+from dagr.db.broker import BrokerBase, IntegrityException, BrokerException, \
+  NothingFoundException
+from dagr.db.session import BASE
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.db.session import BASE
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
-from dagr.db.broker import BrokerBase, IntegrityException, BrokerException
-from ce1sus.brokers.valuebroker import ValueBroker
-import sqlalchemy.orm.exc
-from ce1sus.brokers.event.eventclasses import Attribute
-from sqlalchemy import or_
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from sqlalchemy import not_
+
 
 
 # pylint: disable=R0903,R0902,W0232
@@ -62,6 +69,7 @@ class RelationBroker(BrokerBase):
   def __init__(self, session):
     BrokerBase.__init__(self, session)
     self.attribute_definition_broker = AttributeDefinitionBroker(session)
+    self.group_broker = GroupBroker(session)
 
   def generate_attribute_relations(self, attribute, commit=False):
     """
@@ -258,6 +266,51 @@ class RelationBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
+  def look_for_event_attribtues(self, clazz, operand, attribute, needle):
+    code = 4
+    try:
+      if attribute == 'tlp':
+        obj = TLPLevel.get_by_name(needle)
+        value = obj.identifier
+      elif attribute == 'analysis':
+        obj = Analysis.get_by_name(needle)
+        value = obj.identifier
+      elif attribute == 'status':
+        obj = Status.get_by_name(needle)
+        value = obj.identifier
+      elif attribute == 'creator_group':
+        obj = self.group_broker.get_by_name(needle)
+        value = obj.identifier
+      else:
+        value = needle
+    except (StaticMappingException, NothingFoundException):
+      # can only happen if there is no group by that name
+      return list()
+    try:
+      if operand == '==':
+        return self.session.query(clazz).filter(getattr(clazz, attribute) == value,
+                                                Event.dbcode.op('&')(code) == code).all()
+      if operand == '<':
+        return self.session.query(clazz).filter(getattr(clazz, attribute) <= value,
+                                                Event.dbcode.op('&')(code) == code).all()
+      if operand == '>':
+        return self.session.query(clazz).filter(getattr(clazz, attribute) > value,
+                                                Event.dbcode.op('&')(code) == code).all()
+      if operand == '<=':
+        return self.session.query(clazz).filter(getattr(clazz, attribute) <= value,
+                                                Event.dbcode.op('&')(code) == code).all()
+      if operand == '>=':
+        return self.session.query(clazz).filter(getattr(clazz, attribute) >= value,
+                                                Event.dbcode.op('&')(code) == code).all()
+      if operand == 'like':
+        return self.session.query(clazz).filter(getattr(clazz, attribute).like('%{0}%'.format(value)),
+                                                Event.dbcode.op('&')(code) == code).all()
+    except ValueError:
+      return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
   # pylint: disable=R0913
   def __look_for_value_by_attrib_id(self,
                                     clazz,
@@ -327,7 +380,8 @@ class RelationBroker(BrokerBase):
       try:
         clazzes = ValueBroker.get_all_classes()
         for clazz in clazzes:
-          result = result + self.__look_for_value_by_class(clazz, value, operand, False)
+          temp = self.__look_for_value_by_class(clazz, value, operand, False)
+          result = result + temp
 
       except BrokerException:
         pass

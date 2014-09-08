@@ -5,23 +5,26 @@ module handing the search pages
 
 Created: Aug 22, 2013
 """
+import types
+
+from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
+from ce1sus.brokers.event.attributebroker import AttributeBroker
+from ce1sus.brokers.event.eventbroker import EventBroker
+from ce1sus.brokers.event.eventclasses import Event, Attribute, Object
+from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.brokers.staticbroker import EventAttribtues
+from ce1sus.brokers.valuebroker import ValueBroker
+from ce1sus.controllers.base import Ce1susBaseController, ControllerException
+from dagr.db.broker import BrokerException
+from dagr.helpers.validator.valuevalidator import ValueValidator
+from ce1sus.web.views.base import GenObject
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-
-from ce1sus.controllers.base import Ce1susBaseController, ControllerException
-from ce1sus.brokers.valuebroker import ValueBroker
-from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinitionBroker
-from ce1sus.brokers.definition.objectdefinitionbroker import ObjectDefinitionBroker
-from ce1sus.brokers.event.attributebroker import AttributeBroker
-import types
-from ce1sus.brokers.event.eventbroker import EventBroker
-from ce1sus.brokers.relationbroker import RelationBroker
-from dagr.helpers.objects import get_class
-from dagr.db.broker import BrokerException
 
 
 # pylint:disable=R0903
@@ -49,7 +52,8 @@ class SearchController(Ce1susBaseController):
     Returns all the attribtue definitions formated for the combobox
     """
     try:
-      return self.attr_def_broker.get_cb_values_for_all()
+      def_attr = self.attr_def_broker.get_cb_values_for_all()
+      return dict(def_attr.items() + EventAttribtues.get_definitions().items())
     except BrokerException as error:
       self._raise_exception(error)
 
@@ -66,25 +70,54 @@ class SearchController(Ce1susBaseController):
           needle = needle[0]
         # GetClass
         needle = needle.strip()
+
+        found_values = list()
         if len(needle) < 2:
           raise ControllerException('Needle has to be larger than 2')
         if definition_id == 'Any':
-          definition = None
+          found_values = self.attribute_broker.look_for_any_value(needle, operant)
+        elif definition_id == 'uuid':
+          found_values = self.attribute_broker.look_for_uuids(needle, operant)
+        elif not ValueValidator.validateDigits(definition_id):
+          found_values = self.attribute_broker.look_for_event_attribute_values(operant, definition_id, needle)
         else:
           definition = self.attr_def_broker.get_by_id(definition_id)
-        found_values = self.attribute_broker.look_for_attribute_value(definition,
-                                                                      needle,
-                                                                      operant)
+          found_values = self.attribute_broker.look_for_attribute_value(definition,
+                                                                        needle,
+                                                                        operant)
+
         # prepare displayItems
         if found_values:
           for found_value in found_values:
-            if self._is_event_viewable_for_user(found_value.event, user, cache):
-
-              obj = ResultItem(found_value.event_id,
-                               found_value.event,
-                               found_value.attribute.definition,
-                               found_value.attribute)
-              result.append(obj)
+            if isinstance(found_value, Event):
+              if self._is_event_viewable_for_user(found_value, user, cache):
+                result.append(found_value)
+            elif isinstance(found_value, Attribute):
+                obj = ResultItem(found_value.object.event_id,
+                                 found_value.object.event,
+                                 found_value.definition,
+                                 found_value)
+                result.append(obj)
+            elif isinstance(found_value, Object):
+                obj = ResultItem(found_value.event_id,
+                                 found_value.event,
+                                 found_value.definition,
+                                 found_value)
+                dummy = GenObject()
+                dummy.attribute = GenObject()
+                dummy.attribute.definition = GenObject()
+                dummy.attribute.definition.name = 'This is an object'
+                dummy.attribute.gui_value = u'{0} Attribtues'.format(len(found_value.attributes))
+                dummy.attribute.object = found_value
+                dummy.event = obj.event
+                result.append(dummy)
+            else:
+              if self._is_event_viewable_for_user(found_value.event, user, cache):
+                obj = ResultItem(found_value.event_id,
+                                 found_value.event,
+                                 found_value.attribute.definition,
+                                 found_value.attribute)
+                result.append(obj)
           return result
         else:
           return list()
