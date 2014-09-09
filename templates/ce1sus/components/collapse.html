@@ -260,7 +260,7 @@ if option.post_url:
 </%def>
 
 
-<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None,show=False)">
+<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None,show=False, user_group_id=0)">
     %if not object_list is None:
 	<%
     #spana = ident
@@ -268,7 +268,7 @@ if option.post_url:
     spanb = 12 - spana
 	%>
             %for object in object_list:
-	            %if object.dbcode & 12 == 12 or allowed:
+	            %if object.dbcode & 12 == 12 or object.creator_group_id == user_group_id:
 				        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner, user, show)"/>
 			            <div class="row">
 			            %if spana > 0:
@@ -298,14 +298,14 @@ if option.post_url:
     %endif
 </%def>
 
-<%def name="menu_item(object_list,owner,ident=0)">
+<%def name="menu_item(object_list,owner,ident=0, user_group_id=0)">
 %if not object_list is None:
   <%
    ident_string = 10 * ident
   %>
   
 	  %for object in object_list:
-		  %if object.dbcode & 12 == 12 or allowed:
+		  %if object.dbcode & 12 == 12 or owner or object.creator_group_id == user_group_id:
 		     <li id="menu${object.identifier}LI" style="margin-left:${ident_string}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
 		     <%call expr="menu_item(object.children,owner, ident+1)"/>
 		  %endif

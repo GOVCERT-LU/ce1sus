@@ -30,7 +30,7 @@ else:
           <legend>Objects</legend>
           <%call expr="nav.left_menu('leftMenu')">
             <ul class="nav nav-pills nav-stacked" style="max-width: 300px;" >
-              <%call expr="collapse.menu_item(object_list=object_list,owner=owner)"/>
+              <%call expr="collapse.menu_item(object_list=object_list,owner=owner, user_group_id=user.default_group.identifier)"/>
             </ul>
           </%call>
         </div>
@@ -46,7 +46,7 @@ else:
         </div>
       </div>
       <div class="panel-group" id="accordion">
-        <%call expr="collapse.node(event_id, object_list, owner=owner, user=user,show=show)"/>
+        <%call expr="collapse.node(event_id, object_list, owner=owner, user=user,show=show,user_group_id=user.default_group.identifier)"/>
       </div>
     </div>
   </div>
