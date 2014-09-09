@@ -157,8 +157,7 @@ class ObjectBroker(BrokerBase):
       result = self.session.query(Object).join(Object.creator, User.default_group).filter(and_(Object.event_id == event_id,
                                                                                                or_(Object.dbcode.op('&')(12) == 12,
                                                                                                    Group.identifier == group_id
-                                                                                                   ),
-                                                                                               Object.parent_object_id == None,
+                                                                                                   )
                                                                                                )
                                                                                           )
       return result.all()

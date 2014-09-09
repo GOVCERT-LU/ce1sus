@@ -24,7 +24,7 @@ class InputException(Exception):
 pass
 
 
-def plaintext2html(text, tabstop=4, make_br=True, remove_if_escaped=False):
+def plaintext2html(text, tabstop=4, make_br=True, mask=False):
   """
   returns the given text in HTML Code
 
@@ -84,10 +84,14 @@ def plaintext2html(text, tabstop=4, make_br=True, remove_if_escaped=False):
     string_text = string_text.replace('\"', '&quot;')
   else:
     string_text = ''
-  if remove_if_escaped:
-    test_str = re.escape(string_text)
-    if test_str != string_text:
-      string_text = 'String contains Illegal Characters'
+  # remove quotes
+  if mask:
+    string_text = string_text.replace('"', '\"')
+    string_text = string_text.replace('\'', '\'')
+  else:
+    string_text = string_text.replace('"', '&quot;')
+    string_text = string_text.replace('\'', '&#39;')
+
   return string_text
 
 

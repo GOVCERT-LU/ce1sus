@@ -74,7 +74,7 @@ class ObjectsView(Ce1susBaseView):
       if object_id is None:
         object_id = self._pull_from_session('instertedObject')
       return self._render_template('/events/event/objects/objectsBase.html',
-                                   event_id=event_id,
+                                   event=event,
                                    object_list=object_list,
                                    obj_definitions=self.objects_controller.get_cb_object_definitions(),
                                    attribute_definitions=attribute_definitions,

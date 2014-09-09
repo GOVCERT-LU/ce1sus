@@ -11,17 +11,17 @@ if published:
 else:
   show='false'
 %>
-<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal{0}'.format(event_id),url='/events/event/objects/modify_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
-  <%call expr="modals.save_button_modal(id='addObjectModal{0}'.format(event_id),title='Add object',content_url='/events/event/objects/add_object/{0}'.format(event_id))"/>
+<%call expr="base_forms.generic_modal_form(modal_id='addObjectModal{0}'.format(event.identifier),url='/events/event/objects/modify_object',refresh_url='/events/event/objects/objects/{0}'.format(event.identifier),refresh_container='ObjectsStructured{0}'.format(event.identifier))">
+  <%call expr="modals.save_button_modal(id='addObjectModal{0}'.format(event.identifier),title='Add object',content_url='/events/event/objects/add_object/{0}'.format(event.identifier))"/>
 </%call>
 <div class="row">
   <div class="col-xs-3 col-sm-3">
     <div id="objectLeft">
       <div class="btn-group">
               %if owner:
-                <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal${event_id}','${event_id}',${show});">Add new Object</a>
+                <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal${event.identifier}','${event.identifier}',${show});">Add new Object</a>
               %else:
-                <a href="#addObjectModal${event_id}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
+                <a href="#addObjectModal${event.identifier}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
               %endif
       </div>
       <div style="height:15px"/>     
@@ -46,7 +46,7 @@ else:
         </div>
       </div>
       <div class="panel-group" id="accordion">
-        <%call expr="collapse.node(event_id, object_list, owner=owner, user=user,show=show,user_group_id=user.default_group.identifier)"/>
+        <%call expr="collapse.node(event.identifier, event.objects, owner=owner, user=user,show=show,user_group_id=user.default_group.identifier)"/>
       </div>
     </div>
   </div>

@@ -48,6 +48,7 @@
       attribute_owner = (user.default_group.identifier == flat_object[1].creator_group.identifier)
       %>
       <%counter=counter+1%>
+      %if owner or attribute_owner or (flat_object[1].bit_value.is_shareable and flat_object[0].bit_value.is_shareable):
       <tr>
       <td ${tdstyle}><%call expr="messages_and_text.object_to_html(counter, shorten_to=60,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(flat_object[0].identifier, shorten_to=60,use_plain_text=False)"/></td>
@@ -84,7 +85,9 @@
                 %endif
             %endfor
         </td>
+        
       </tr>
+      %endif
     %endfor
     </tbody>
   </table>

@@ -82,6 +82,8 @@ class User(BASE):
   def privileged(self, value):
     if value:
       self.rights.privileged = True
+    else:
+      self.rights.privileged = False
 
   @property
   def display_name(self):

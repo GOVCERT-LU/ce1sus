@@ -268,14 +268,14 @@ if option.post_url:
     spanb = 12 - spana
 	%>
             %for object in object_list:
-	            %if object.dbcode & 12 == 12 or object.creator_group_id == user_group_id:
+	            %if object.dbcode & 12 == 12 or object.creator_group_id == user_group_id or owner:
 				        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner, user, show)"/>
 			            <div class="row">
 			            %if spana > 0:
 			            <div class="col-xs-${spana} col-sm-${spana}">&nbsp;</div>
 			            %endif
 			            <div class="col-xs-${spanb} col-sm-${spanb}">
-			               <%call expr="node(event_id, object.children,ident+1, show_menu, owner, user)"/>
+			               <%call expr="node(event_id, object.children,ident+1, show_menu, owner, user, show, user_group_id)"/>
 			            </div>
 			            </div>
 		           %endif
@@ -305,7 +305,7 @@ if option.post_url:
   %>
   
 	  %for object in object_list:
-		  %if object.dbcode & 12 == 12 or owner or object.creator_group_id == user_group_id:
+		  %if object.dbcode & 12 == 12 or owner or object.creator_group_id == user_group_id or owner:
 		     <li id="menu${object.identifier}LI" style="margin-left:${ident_string}px;"><a  id="menu${object.identifier}Link" href="#" onclick="activateMenuLi(this.id);showSelected('${object.identifier}')">${object.definition.name} - ${object.identifier}</a></li>
 		     <%call expr="menu_item(object.children,owner, ident+1)"/>
 		  %endif

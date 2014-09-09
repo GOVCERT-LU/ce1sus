@@ -131,16 +131,21 @@ class UserController(Ce1susBaseController):
         self.mail_handler.import_gpg_key(user.gpg_key)
 
       send_mail = self._get_config().get('ce1sus', 'sendmail', False)
-
-      if send_mail:
-        # send activation mail
-        self.mail_handler.send_activation_mail(user)
-        # activate the user directly
-      else:
-        user.activated = DatumZait.utcnow()
+      try:
+        if send_mail:
+          # send activation mail
+          self.mail_handler.send_activation_mail(user)
+          # activate the user directly
+        else:
+          user.activated = DatumZait.utcnow()
+          user.activation_str = None
+          self.user_broker.update(user)
+        return user, True
+      except Exception as error:
         user.activation_str = None
         self.user_broker.update(user)
-      return user, True
+        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+        self._raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except ValidationException as error:
       return user, False
     except (BrokerException, MailHandlerException) as error:
