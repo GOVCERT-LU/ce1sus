@@ -16,9 +16,11 @@ import ast
 from ce1sus.brokers.definition.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.brokers.valuebroker import ValueBroker
 from ce1sus.common.handlers.base import HandlerException, HandlerBase
-from ce1sus.controllers.base import Ce1susBaseController
+from ce1sus.controllers.base import Ce1susBaseController,\
+  ControllerNothingFoundException
 from dagr.controllers.base import ControllerException
-from dagr.db.broker import ValidationException, BrokerException
+from dagr.db.broker import ValidationException, BrokerException, \
+  NothingFoundException
 from dagr.helpers.converters import ValueConverter, ConversionException
 from dagr.helpers.validator.objectvalidator import FailedValidation
 
@@ -292,8 +294,11 @@ class AttributesController(Ce1susBaseController):
             definition = attr_def
           else:
             # TODO: Support auto inserts of definitions
-            definition = self.attr_def_broker.get_defintion_by_chksum(chksum)
-            attr_defs[chksum] = definition
+            try:
+              definition = self.attr_def_broker.get_defintion_by_chksum(chksum)
+              attr_defs[chksum] = definition
+            except NothingFoundException:
+              raise ControllerNothingFoundException(u'No definition can be found for checksum "{0}"'.format(chksum))
         else:
           raise BrokerException('No chksum specified')
       else:
@@ -337,7 +342,6 @@ class AttributesController(Ce1susBaseController):
           additional_attribute.object = obj
           AttributesController.set_rest_attribute(additional_attribute)
       return attribute, additional_attributes
-
     except BrokerException as error:
       self._raise_exception(error)
 

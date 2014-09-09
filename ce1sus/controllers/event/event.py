@@ -5,6 +5,23 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
+from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+
+from ce1sus.brokers.event.commentbroker import CommentBroker
+from ce1sus.brokers.event.eventclasses import Event
+from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
+from ce1sus.common.mailhandler import MailHandlerException
+from ce1sus.controllers.base import Ce1susBaseController
+from ce1sus.helpers.bitdecoder import BitValue
+from dagr.db.broker import ValidationException, BrokerException, NothingFoundException, \
+  IntegrityException
+from dagr.helpers.converters import ObjectConverter, ConversionException
+from dagr.helpers.datumzait import DatumZait
+from dagr.helpers.strings import cleanPostValue
+import uuid as uuidgen
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -12,19 +29,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from ce1sus.brokers.event.commentbroker import CommentBroker
-from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
-from ce1sus.controllers.base import Ce1susBaseController
-from dagr.db.broker import ValidationException, BrokerException, NothingFoundException
-from ce1sus.brokers.relationbroker import RelationBroker
-from datetime import datetime
-from ce1sus.common.mailhandler import MailHandlerException
-import uuid as uuidgen
-from ce1sus.helpers.bitdecoder import BitValue
-from dagr.helpers.strings import cleanPostValue
-from dagr.helpers.converters import ObjectConverter, ConversionException
-from ce1sus.brokers.event.eventclasses import Event
-from dagr.helpers.datumzait import DatumZait
 
 
 def get_all_attribtues_from_event(event):
@@ -264,6 +268,9 @@ class EventController(Ce1susBaseController):
       return event, True
     except ValidationException:
       return event, False
+    except IntegrityException:
+      self._get_logger().info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.uuid))
+      self._raise_duplicate_found_exception(u'An event with uuid "{0}" already exists'.format(event.uuid))
     except BrokerException as error:
       self._raise_exception(error)
 

@@ -32,6 +32,11 @@ class ControllerNothingFoundException(ControllerException):
   pass
 
 
+class ControllerDouplicateException(ControllerException):
+  """Raised when nothing can be found"""
+  pass
+
+
 class Ce1susBaseController(BaseController):
   """
   Base for ce1sus controllers
@@ -57,6 +62,13 @@ class Ce1susBaseController(BaseController):
     """
     self._get_logger().error(error)
     raise ControllerNothingFoundException(error)
+
+  def _raise_duplicate_found_exception(self, error):
+    """
+    raises and logs an exception
+    """
+    self._get_logger().error(error)
+    raise ControllerDouplicateException(error)
 
   def _get_config_variable(self, key, default_value=None):
     """

@@ -99,7 +99,7 @@ class AttributeBroker(BrokerBase):
     found_values = self.relation_broker.look_for_attribute_value(None, value, operand)
     # the look in events
     for item in EventAttribtues.get_definitions().values():
-      found_values = found_values + self.look_for_event_attribute_values(Event, operand, item, value)
+      found_values = found_values + self.look_for_event_attribute_values(operand, item, value)
     return found_values
 
   def look_for_uuids(self, value, operand):

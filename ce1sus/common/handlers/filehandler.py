@@ -510,7 +510,7 @@ class FileWithHashesHandler(FileHandler):
     attribute, attributes = FileHandler.insert(self, obj, definitions, user, group, params, uploaded_file)
     if isinstance(attribute.value, FailedValidation):
       params['value'] = ''
-      attribute = self.create_attribute(params, obj, attribute.definition, user)
+      attribute = self.create_attribute(params, obj, attribute.definition, user, group)
       attribute.value = FailedValidation('', 'No input given. Please enter something.')
       return attribute, None
     else:

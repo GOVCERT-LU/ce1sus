@@ -20,7 +20,7 @@ import json
 # A: Major Release
 # B: Release feature changes
 # C: Bug fixes/Small features
-APP_REL = '0.10.1'
+APP_REL = '0.10.2'
 DB_REL = '0.9.4'
 REST_REL = '0.2.0'
 

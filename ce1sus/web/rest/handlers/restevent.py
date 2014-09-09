@@ -4,6 +4,14 @@
 
 Created on Oct 8, 2013
 """
+from sqlalchemy.exc import IntegrityError
+
+from ce1sus.controllers.base import ControllerNothingFoundException, \
+  ControllerDouplicateException
+from ce1sus.controllers.event.event import EventController
+from ce1sus.web.rest.handlers.restbase import RestBaseHandler
+from dagr.controllers.base import ControllerException
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -11,10 +19,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from ce1sus.web.rest.handlers.restbase import RestBaseHandler
-from ce1sus.controllers.event.event import EventController
-from dagr.controllers.base import ControllerException
-from ce1sus.controllers.base import ControllerNothingFoundException
 
 
 class RestEventHandler(RestBaseHandler):
@@ -82,6 +86,8 @@ class RestEventHandler(RestBaseHandler):
         event.subgroups = list()
         event.objects = list()
         return self.return_object(event, True, False, with_definition)
+      except ControllerDouplicateException as error:
+        return self._raise_douplicate_found(error)
       except ControllerException as error:
         return self._raise_error('ControllerException', error=error)
 

@@ -11,15 +11,17 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.views.base import Ce1susBaseView
-from dagr.helpers.debug import Log
 import cherrypy
-from ce1sus.api.dictconverter import DictConverter, DictConversionException
+
 from ce1sus.api.common import JSONConverter, JSONException
-from dagr.helpers.validator.objectvalidator import ObjectValidator
-from ce1sus.web.rest.dictdbconverter import DictDBConverter, DictDBConversionException
+from ce1sus.api.dictconverter import DictConverter, DictConversionException
 from ce1sus.brokers.permission.userbroker import UserBroker
+from ce1sus.web.rest.dictdbconverter import DictDBConverter, DictDBConversionException, \
+  DefinitionNotFoundException
+from ce1sus.web.views.base import Ce1susBaseView
 from dagr.db.session import SessionManager
+from dagr.helpers.debug import Log
+from dagr.helpers.validator.objectvalidator import ObjectValidator
 
 
 class RestHandlerException(Exception):
@@ -81,6 +83,9 @@ class RestBaseHandler(Ce1susBaseView):
     """Raises a nothing found execption"""
     return self._raise_error('NothingFoundException', error=error)
 
+  def _raise_douplicate_found(self, error):
+    return self._raise_error('DouplicateFoundException', error=error)
+
   def _get_logger(self):
     """returns the class logger"""
     return self.logger.get_logger(self.__class__.__name__)
@@ -128,6 +133,10 @@ class RestBaseHandler(Ce1susBaseView):
       user = self.user_broker.getUserByUserName(user.username)
       rest_obj = self.__dict_db_converter.convert_to_db_object(user, dictionary, action)
       return rest_obj
+    except DefinitionNotFoundException as error:
+      self._raise_error('DefinitionNotFoundException', error)
+    except DictDBConversionException as error:
+      self._raise_error('ConversionException', error)
     except Exception as error:
       raise
       self._get_logger().error('An error occurred by getting the post object {0}'.format(error))

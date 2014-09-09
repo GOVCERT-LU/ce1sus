@@ -74,7 +74,8 @@ class RTHandler(GenericHandler):
             attribute = GenericHandler.create_attribute(params,
                                                         obj,
                                                         definition,
-                                                        user)
+                                                        user,
+                                                        None)
             return attribute, None
           else:
             attributes = list()
@@ -94,7 +95,7 @@ class RTHandler(GenericHandler):
             return main_attribute, attributes
         else:
           params['value'] = ''
-          attribute = self.create_attribute(params, obj, definition, user)
+          attribute = self.create_attribute(params, obj, definition, user, None)
           attribute.value = FailedValidation('', 'No input given. Please enter something.')
           return attribute, None
       elif action == 'update':

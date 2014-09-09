@@ -5,29 +5,37 @@
 
 Created on Feb 25, 2014
 """
+from datetime import datetime
+import uuid
+
+from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute, RestObjectDefinition, RestAttributeDefinition, RestGroup
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
+from ce1sus.brokers.event.eventclasses import Event, Object, Attribute
+from ce1sus.brokers.permission.permissionclasses import Group
+from ce1sus.common.handlers.base import HandlerException
+from ce1sus.controllers.admin.groups import GroupController
+from ce1sus.controllers.base import ControllerNothingFoundException
+from ce1sus.controllers.event.attributes import AttributesController
+from ce1sus.controllers.event.event import EventController
+from ce1sus.controllers.event.groups import GroupsController
+from ce1sus.controllers.event.objects import ObjectsController
+from dagr.controllers.base import ControllerException
+from dagr.helpers.debug import Log
+from dagr.helpers.hash import hashMD5
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-from dagr.helpers.debug import Log
-from datetime import datetime
-from dagr.controllers.base import ControllerException
-from ce1sus.controllers.event.event import EventController
-from ce1sus.controllers.event.objects import ObjectsController
-from ce1sus.controllers.event.attributes import AttributesController
-from dagr.helpers.hash import hashMD5
-from ce1sus.api.restclasses import RestEvent, RestObject, RestAttribute, RestObjectDefinition, RestAttributeDefinition, RestGroup
-from ce1sus.brokers.event.eventclasses import Event, Object, Attribute
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition, AttributeDefinition
-from ce1sus.common.handlers.base import HandlerException
-from ce1sus.brokers.permission.permissionclasses import Group
-import uuid
-from ce1sus.controllers.admin.groups import GroupController
-from ce1sus.controllers.event.groups import GroupsController
 
 
 class DictDBConversionException(Exception):
+  """Base exception for this class"""
+  pass
+
+
+class DefinitionNotFoundException(DictDBConversionException):
   """Base exception for this class"""
   pass
 
@@ -252,6 +260,8 @@ class DictDBConverter(object):
       group = self.__convert_dict_to_group(user, dictionary.get('group', None))
       attribute, additional_attributes = self.attribtue_controller.populate_rest_attributes(user, group, obj, dictionary, action, attr_defs)
       return attribute, additional_attributes
+    except ControllerNothingFoundException as error:
+      raise DefinitionNotFoundException(error)
     except ControllerException as error:
       self._get_logger().error(error)
       raise DictDBConversionException(error)
