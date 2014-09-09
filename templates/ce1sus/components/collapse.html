@@ -26,6 +26,13 @@ $( document ).ready(function() {
 
 <%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None,show=False)">
 <%
+if show:
+  show_js = 'true'
+else:
+  show_js = 'false'
+%>
+
+<%
 allowed = owner or (user.default_group.identifier == object.creator_group.identifier and not object.bit_value.is_validated)
 %>
 % if (not object is None) and (object.bit_value.is_validated or allowed ):
@@ -62,16 +69,18 @@ else:
                     %> 
                     %if show_menu:
                        %if owner:
-                         <a  onclick="inforUnpublished('addObjectAttributeModal${object.identifier}','${event_id}',${show});" href="#" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
-                         <a onclick="inforUnpublished('addChildObjectModal${object.identifier}','${event_id}',${show});" href="#" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                         <a  onclick="inforUnpublished('addObjectAttributeModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+                         <a onclick="inforUnpublished('addChildObjectModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
                          %if owner and object.bit_value.is_proposal and not object.bit_value.is_validated:
-                         <a onclick="inforUnpublished('validateObjectModal${object.identifier}','${event_id}',${show});" href="#" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-saved" title="Validate object"></span></a>
+                         <a onclick="inforUnpublished('validateObjectModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-saved" title="Validate object"></span></a>
                          %endif
                        %else:
-                         <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
--                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+	                       %if allowed:
+	                         <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+	-                        <a href="#addChildObjectModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+	                       %endif
                        %endif
-                       e
+                       
                        %if allowed:
                        <a href="#setParentModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify object"><span class="glyphicon glyphicon-list"></span></a>
                        <a href="#setPropertiesModal${object.identifier}" role="button" class="btn btn-default" data-toggle="modal" title="Modify properties"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -96,7 +105,7 @@ else:
 			                <%call expr="modals.generic_dialog_modal('infoModal{0}'.format(object.identifier), 'Details of {0} {1}'.format(object.definition.name,object.identifier), big=False)">
 			                  <%call expr="forms.eventObjectForm(event_id,object, False,obj_definitions)"/>
 			                </%call>
-			           %if allowed:
+			           %if allowed or owner:
 			                <%call expr="base_forms.generic_modal_form(modal_id='addChildObjectModal{0}'.format(object.identifier),url='/events/event/objects/attach_child_object',refresh_url='/events/event/objects/objects/{0}'.format(event_id),refresh_container='ObjectsStructured{0}'.format(event_id))">
 			                    <%call expr="modals.save_button_modal(id='addChildObjectModal{0}'.format(object.identifier),title='Add child object',content_url='/events/event/objects/add_child_object/{0}/{1}'.format(event_id, object.identifier))"/>
 			                </%call>
