@@ -17,7 +17,6 @@ else:
 <div class="row">
   <div class="col-xs-3 col-sm-3">
     <div id="objectLeft">
-      %if owner:
       <div class="btn-group">
               %if owner:
                 <a href="#" role="button" class="btn btn-default" data-toggle="modal" onclick="inforUnpublished('addObjectModal${event_id}','${event_id}',${show});">Add new Object</a>
@@ -25,7 +24,6 @@ else:
                 <a href="#addObjectModal${event_id}" role="button" class="btn btn-default" data-toggle="modal">Add new Object</a>
               %endif
       </div>
-      %endif
       <div style="height:15px"/>     
       <div class="row">
         <div class="col-xs-12 col-sm-12">
