@@ -100,6 +100,9 @@ class AttributeBroker(BrokerBase):
     # the look in events
     for item in EventAttribtues.get_definitions().values():
       found_values = found_values + self.look_for_event_attribute_values(operand, item, value)
+    # check for uuids
+    found_values = found_values + self.look_for_uuids(value, operand)
+
     return found_values
 
   def look_for_uuids(self, value, operand):
