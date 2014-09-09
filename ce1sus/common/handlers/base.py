@@ -47,24 +47,24 @@ class HandlerBase(object):
                       description='View details'
                       )
     pencil = ModalOption(title=u'Edit Attribute #{0}'.format(attr_id),
-                      owner_option=True,
-                      attribute_owner_option=True,
-                      refresh=True,
-                      position=1,
-                      icon_name='glyphicon glyphicon-pencil',
-                      post_url='/events/event/attribute/call_handler_post',
-                      content_url='/events/event/attribute/edit/{0}/{1}/{2}'.format(event_id, obj_id, attr_id),
-                      description='Modify Attribute'
-                      )
+                         owner_option=True,
+                         attribute_owner_option=True,
+                         refresh=True,
+                         position=1,
+                         icon_name='glyphicon glyphicon-pencil',
+                         post_url='/events/event/attribute/call_handler_post',
+                         content_url='/events/event/attribute/edit/{0}/{1}/{2}'.format(event_id, obj_id, attr_id),
+                         description='Modify Attribute'
+                         )
     validation = YesNoDialogOption(owner_option=True,
-                               validation_option=True,
-                               attribute_owner_option=False,
-                               refresh=True,
-                               position=-1,
-                               icon_name='glyphicon glyphicon-saved',
-                               message=u'Are you sure you want to validate Attribute #{0}?'.format(attr_id),
-                               post_url=u'/events/event/attribute/validate_attribute?event_id={0}&attribute_id={1}'.format(event_id, attr_id),
-                               description='Validate Attribute')
+                                   validation_option=True,
+                                   attribute_owner_option=False,
+                                   refresh=True,
+                                   position=-1,
+                                   icon_name='glyphicon glyphicon-saved',
+                                   message=u'Are you sure you want to validate Attribute #{0}?'.format(attr_id),
+                                   post_url=u'/events/event/attribute/validate_attribute?event_id={0}&attribute_id={1}'.format(event_id, attr_id),
+                                   description='Validate Attribute')
     remove = YesNoDialogOption(owner_option=True,
                                attribute_owner_option=True,
                                refresh=True,
@@ -159,9 +159,9 @@ class HandlerBase(object):
     """
     raise HandlerException(('render_gui_view not defined for {0} with parameters '
                            + '{1},{2},{3}').format(self.__class__.__name__,
-                                                       template_renderer,
-                                                       attribute,
-                                                       user))
+                                                   template_renderer,
+                                                   attribute,
+                                                   user))
 
   def render_gui_input(self, template_renderer, definition, default_share_value, share_enabled):
     """

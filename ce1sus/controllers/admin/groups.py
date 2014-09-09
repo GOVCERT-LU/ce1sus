@@ -90,7 +90,7 @@ class GroupController(Ce1susBaseController):
     if not action == 'insert':
       group = self.group_broker.get_by_id(identifier)
     if not action == 'update':
-      group.uuid == unicode(uuidgen.uuid4())
+      group.uuid = unicode(uuidgen.uuid4())
     if not action == 'remove':
       group.name = cleanPostValue(name)
       group.email = cleanPostValue(email)
