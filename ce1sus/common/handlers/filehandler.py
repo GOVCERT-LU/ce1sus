@@ -332,30 +332,7 @@ class FileHandler(GenericHandler):
         if attribute:
           # update only share and ioc value
           definition = self._get_main_definition(definitions)
-          share = params.get('shared', None)
-          attribute.bit_value = BitValue('0', attribute)
-          if share is None:
-            # use the default value from the definition
-            if definition.share == 1:
-              attribute.bit_value.is_shareable = True
-            else:
-              attribute.bit_value.is_shareable = False
-          else:
-            # check if parent is sharable
-            if attribute.bit_value.is_shareable:
-              if share == '0':
-                attribute.bit_value.is_shareable = False
-              else:
-                attribute.bit_value.is_shareable = True
-            else:
-              attribute.bit_value.is_shareable = False
-
-          is_ioc = params.get('ioc', None)
-          if is_ioc is None:
-            # take default value
-            attribute.ioc = 0
-          else:
-            ObjectConverter.set_integer(attribute, 'ioc', is_ioc)
+          GenericHandler.set_ioc_share_values(attribute, definition, params)
 
           return attribute, None
         else:

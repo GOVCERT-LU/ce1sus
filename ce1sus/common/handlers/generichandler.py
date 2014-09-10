@@ -22,7 +22,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-
 class GenericHandler(HandlerBase):
   """The generic handler for handling known atomic values"""
 
@@ -36,6 +35,32 @@ class GenericHandler(HandlerBase):
   @staticmethod
   def get_allowed_types():
     return [0, 1, 3]
+
+  @staticmethod
+  def set_ioc_share_values(attribute, definition, params):
+    share = params.get('shared', None)
+    if share is None:
+      # use the default value from the definition
+      if definition.share == 1:
+        attribute.bit_value.is_shareable = True
+      else:
+        attribute.bit_value.is_shareable = False
+    else:
+      # check if parent is sharable
+      if attribute.object.bit_value.is_shareable:
+        if share == '0':
+          attribute.bit_value.is_shareable = False
+        else:
+          attribute.bit_value.is_shareable = True
+      else:
+        attribute.bit_value.is_shareable = False
+
+    is_ioc = params.get('ioc', None)
+    if is_ioc is None:
+      # take default value
+      attribute.ioc = 0
+    else:
+      ObjectConverter.set_integer(attribute, 'ioc', is_ioc)
 
   @staticmethod
   def create_object(parent, definition, user, group, share=None):
@@ -96,38 +121,16 @@ class GenericHandler(HandlerBase):
     attribute.identifier = None
     attribute.uuid = unicode(uuidgen.uuid4())
     value = params.get('value', None)
-    share = params.get('shared', None)
     attribute.bit_value = BitValue('0', attribute)
-    if share is None:
-      # use the default value from the definition
-      if definition.share == 1:
-        attribute.bit_value.is_shareable = True
-      else:
-        attribute.bit_value.is_shareable = False
-    else:
-      # check if parent is sharable
-      if obj.bit_value.is_shareable:
-        if share == '0':
-          attribute.bit_value.is_shareable = False
-        else:
-          attribute.bit_value.is_shareable = True
-      else:
-        attribute.bit_value.is_shareable = False
-
-    is_ioc = params.get('ioc', None)
-    if is_ioc is None:
-      # take default value
-      attribute.ioc = 0
-    else:
-      ObjectConverter.set_integer(attribute, 'ioc', is_ioc)
-
-    # Note first the definition has to be specified
-    attribute.definition = definition
-    attribute.def_attribute_id = definition.identifier
 
     # Note second the object has to be specified
     attribute.object = obj
     attribute.object_id = obj.identifier
+
+    GenericHandler.set_ioc_share_values(attribute, definition, params)
+    # Note first the definition has to be specified
+    attribute.definition = definition
+    attribute.def_attribute_id = definition.identifier
 
     GenericHandler.set_value_to_attr(attribute, value)
 
@@ -187,9 +190,9 @@ class GenericHandler(HandlerBase):
 
   def process_gui_post(self, obj, definitions, user, params):
     action = params.get('action', None)
+    definition = self._get_main_definition(definitions)
     if action:
       if action == 'insert':
-        definition = self._get_main_definition(definitions)
         attribute = self.create_attribute(params, obj, definition, user, None)
         return attribute, None
       elif action == 'update':
@@ -197,6 +200,8 @@ class GenericHandler(HandlerBase):
         if attribute:
           value = params.get('value', None)
           GenericHandler.set_value_to_attr(attribute, value)
+          # set share and ioc values
+          GenericHandler.set_ioc_share_values(attribute, definition, params)
           return attribute, None
         else:
           raise UndefinedException(u'Attribute is not defined')

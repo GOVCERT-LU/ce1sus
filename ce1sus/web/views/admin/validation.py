@@ -142,7 +142,7 @@ class AdminValidationView(Ce1susBaseView):
       self._check_if_event_is_viewable(event)
 
       return self._render_template('/events/event/objects/objectsBase.html',
-                                   event_id=eventid,
+                                   event=event,
                                    object_list=event.objects,
                                    obj_definitions=dict(),
                                    attribute_definitions=dict(),
