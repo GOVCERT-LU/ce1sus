@@ -19,6 +19,7 @@
 </%def>
 
 
+<%def name="b64(text)">${dagr.base64(dagr.plaintext2html(text=text))}</%def>
 
 
 <%def name="object_to_html(object,shorten_to=0, use_plain_text=False, remove_if_escape=False)"><%

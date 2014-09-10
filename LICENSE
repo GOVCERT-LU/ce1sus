@@ -27,11 +27,17 @@ URL: https://github.com/twitter/bootstrap
 jQuery v1.10.2:
 (c) 2005, 2013 jQuery Foundation, Inc.
 jquery.org/license
-https://jquery.org
+URL: https://jquery.org
 
 DataTables:
 Allan Jardine (www.sprymedia.co.uk)
 GPL v2 license
 Copyright 2008-2012 Allan Jardine, all rights reserved
-http://www.datatables.net
+URL: http://www.datatables.net
+
+jsbase64
+Copyright Vassilis Petroulias [DRDigit]
+under the Apache v2.0 license.
+This code has not been modified
+URL: https://jsbase64.codeplex.com/
 

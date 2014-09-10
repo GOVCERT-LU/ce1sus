@@ -11,6 +11,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import dagr.helpers.strings as strings
+from base64 import b64encode
 
 
 # pylint: disable=W0613
@@ -21,3 +22,8 @@ def plaintext2html(context, text, tabstop=4, make_br=True, remove_if_escaped=Fal
   stringText = strings.plaintext2html(text, tabstop, make_br, remove_if_escaped)
 
   return stringText
+
+
+def base64(context, text):
+  message = text.encode('ascii', 'replace')
+  return b64encode(message)

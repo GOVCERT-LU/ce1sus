@@ -81,16 +81,14 @@ def plaintext2html(text, tabstop=4, make_br=True, mask=False):
 
   if len(string_text) > 0:
     string_text = re.sub(re_string, replacements, string_text)
-    string_text = string_text.replace('\"', '&quot;')
+    if mask:
+      string_text = re.escape(string_text)
+    else:
+      string_text = string_text.replace('\"', '&quot;')
+      string_text = string_text.replace('\'', '&#39;')
   else:
     string_text = ''
   # remove quotes
-  if mask:
-    string_text = string_text.replace('"', '\"')
-    string_text = string_text.replace('\'', '\'')
-  else:
-    string_text = string_text.replace('"', '&quot;')
-    string_text = string_text.replace('\'', '&#39;')
 
   return string_text
 

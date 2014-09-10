@@ -26,7 +26,7 @@
       style = ''
     %>
     <tr>
-      <td style="${style} cursor: pointer;" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', false, 'Event #${event.identifier} - ${messages_and_text.object_to_html(event.title,shorten_to=100,use_plain_text=False,remove_if_escape=True)}');"><%call expr="messages_and_text.object_to_html(event.identifier, shorten_to=100,use_plain_text=False)"/></td>
+      <td style="${style} cursor: pointer;" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', false, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(event.identifier, event.title))}');"><%call expr="messages_and_text.object_to_html(event.identifier, shorten_to=100,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(event.title, shorten_to=100,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(event.analysis, shorten_to=100,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(event.risk, shorten_to=100,use_plain_text=False)"/></td>
@@ -35,7 +35,7 @@
       <td><%call expr="messages_and_text.object_to_html(event.creator_group.name, shorten_to=100,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(event.created, shorten_to=100,use_plain_text=False)"/></td>
       <td style="width: 60px;">
-        <a href="#" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', true, 'Event #${event.identifier} - ${messages_and_text.object_to_html(event.title,shorten_to=100,use_plain_text=False,remove_if_escape=True)}');">
+        <a href="#" onclick="loadNewSideNavTab('${event.identifier}', '${tab_id}', '${url}/${event.identifier}', true, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(event.identifier, event.title))}');">
            <span class="glyphicon glyphicon-eye-open" title="View event"></span>
         </a>
       </td>

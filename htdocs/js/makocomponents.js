@@ -518,7 +518,7 @@ function findAndLoadActiveSideNav(id) {
     });
 }
 
-function loadNewSideNavTab(pk, id, url, reload, title) {
+function loadNewSideNavTab(pk, id, url, reload, b64_encoded_title) {
     // getTabID
     var tabID = id.replace("TabContent", "");
     // deactivate Tabs
@@ -535,11 +535,13 @@ function loadNewSideNavTab(pk, id, url, reload, title) {
         var tab = $("<div/>")
         .attr("class", 'list-group-item active');
         
+        var title_str = B64.decode(b64_encoded_title);
+        
         var link = $("<div/>")
         .attr("class", 'link')
         .attr("src", url)
         .attr("id", keyValue)
-        .html(title);
+        .html(title_str);
         if (reload) {
             link.attr("onclick", 'loadSideNav(this.id, true)');
         } else {
