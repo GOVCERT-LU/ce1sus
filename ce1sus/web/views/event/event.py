@@ -6,12 +6,13 @@
 Created on Jan 30, 2014
 """
 
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.views.base import Ce1susBaseView
+from ce1sus.web.views.base import Ce1susBaseView, privileged
 from ce1sus.controllers.event.event import EventController
 import cherrypy
 from ce1sus.web.views.common.decorators import require, require_referer
@@ -20,6 +21,7 @@ from dagr.helpers.datumzait import DatumZait
 from dagr.controllers.base import ControllerException
 from cherrypy import HTTPRedirect
 from ce1sus.web.views.helpers.tabs import MainTab, EventTab
+from ce1sus.controllers.admin.user import UserController
 
 
 class EventView(Ce1susBaseView):
@@ -43,6 +45,7 @@ class EventView(Ce1susBaseView):
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.event_controller = EventController(config)
+    self.admin_user_controller = UserController(config)
 
   def __render_event_details(self, template_name, event):
     """
@@ -82,12 +85,37 @@ class EventView(Ce1susBaseView):
       relations = self.event_controller.get_related_events(event, user, cache)
       return self._render_template('/events/event/overview.html',
                                    event=event,
+                                   admin=user.privileged,
                                    owner=self._is_event_owner(event),
                                    relations=relations,
                                    status_values=Status.get_definitions(),
                                    tlp_values=TLPLevel.get_definitions(),
                                    analysis_values=Analysis.get_definitions(),
                                    risk_values=Risk.get_definitions())
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def change_owner_view(self, event_id):
+    event = self.event_controller.get_event_by_id(event_id)
+    groups = self.admin_user_controller.get_cb_group_values()
+    return self._render_template('/events/event/change_owner.html',
+                                 event_id=event_id,
+                                 groups=groups,
+                                 owner_grp_id=event.creator_group_id
+                                 )
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  def change_owner(self, event_id, group_id):
+    try:
+
+      self.event_controller.change_owner(event_id, group_id, self._get_user())
+
+      return self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
 

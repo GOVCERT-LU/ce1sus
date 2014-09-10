@@ -53,6 +53,16 @@ class EventController(Ce1susBaseController):
     self.comment_broker = self.broker_factory(CommentBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 
+  def change_owner(self, event_id, group_id, user):
+    try:
+      group = self.group_broker.get_by_id(group_id)
+      event = self.event_broker.get_by_id(event_id)
+      user = self.user_broker.getUserByUserName(user.username)
+      event.creator_group = group
+      self.event_broker.update_event(user, event, commit=True)
+    except BrokerException as error:
+      self._raise_exception(error)
+
   def get_related_events(self, event, user, cache):
     """
     Returns the relations which the user can see
