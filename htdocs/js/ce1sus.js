@@ -264,8 +264,8 @@ function add_event(formElement, event, uri, containerid){
 }
 
 function inforUnpublished(modalID, eventID) {
-	var show = $('#Overview101Hidden  input#publishedID:first').val();
-	if (show != "0") {
+	var show = $('#Overview'+eventID+'Hidden  input#publishedID:first').val();
+	if (show == 1) {
       if(confirm("Modifications on event will unpublish it. Don't forget to republish.")) {
     	  // unpublish event
     	  var request = $.post("/events/event/unpublish", { event_id: eventID });
