@@ -70,8 +70,6 @@ class UserController(Ce1susBaseController):
     user = User()
     if action == 'insert':
       user.password_plain = cleanPostValue(password)
-      user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
-      user.activation_sent = DatumZait.utcnow()
     else:
       user = self.user_broker.get_by_id(identifier)
     if not action == 'remove' and action != 'insertLDAP':
@@ -142,9 +140,8 @@ class UserController(Ce1susBaseController):
           self.user_broker.update(user)
         return user, True
       except Exception as error:
-        user.activation_str = None
         self.user_broker.update(user)
-        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
         self._raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except ValidationException as error:
       return user, False
@@ -172,4 +169,15 @@ class UserController(Ce1susBaseController):
     except DeletionException:
       raise ControllerException('This user cannot be deleted')
     except BrokerException as error:
+      self._raise_exception(error)
+
+  def resend_mail(self, user):
+    try:
+      self.mail_handler.send_activation_mail(user)
+      self.user_broker.update(user)
+    except Exception as error:
+        self.user_broker.update(user)
+        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
+        self._raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+    except (BrokerException, MailHandlerException) as error:
       self._raise_exception(error)

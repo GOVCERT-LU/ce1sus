@@ -55,6 +55,10 @@ class User(BASE):
   __bit_code = None
 
   @property
+  def is_activated(self):
+    return self.activated and self.activation_str is None
+
+  @property
   def rights(self):
     """
     Property for the bit_value

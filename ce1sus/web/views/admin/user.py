@@ -5,6 +5,7 @@
 
 Created on Feb 3, 2014
 """
+from ce1sus.controllers.login import LoginController
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -34,6 +35,7 @@ class AdminUserView(Ce1susBaseView):
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.user_controller = UserController(config)
+    self.login_controller = LoginController(config)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
@@ -118,6 +120,28 @@ class AdminUserView(Ce1susBaseView):
 
       return self._render_template('/admin/users/ldapUserTable.html',
                                    ldap_users=ldap_users)
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  def resend_mail(self, user_id):
+    try:
+      user = self.user_controller.get_user_by_id(user_id)
+      self.user_controller.resend_mail(user)
+      self._return_ajax_ok()
+    except ControllerException as error:
+      return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  def activate(self, user_id):
+    try:
+      user = self.user_controller.get_user_by_id(user_id)
+      self.login_controller.activate_user(user.activation_str)
+      self._return_ajax_ok()
     except ControllerException as error:
       return self._render_error_page(error)
 

@@ -1,18 +1,34 @@
 Changelog
 =========
 
+Release 0.10.2
+--------------
+* Bug Fixes
+  - Editing ioc, share is taken into account
+  - Object view:
+    - Add buttons are shown to non owners
+    - Displaying issues for non owners
+  - Fixed display issues for event titles
+  - User adding/editing
+* Admins can change the event owner groups
+* Rest throws new custom messages for
+  - double uuids
+  - Unkown definition
+* Admins can activate users manually
+* Admins can resend activation mail if the user was not validated
+
 Release 0.10.1
 --------------
 * Added MailHandler (requires eml_parser see doc for more informations)
   NOTE: the Attribute is not associated to any object.
 * One can create objects inside handlers along their attributes
-* Imporved Search by the following fields
+* Improved Search by the following fields
       - Event Title
       - Event Description
       - Event TLP
       - Event Analysis
       - Event Status
-      - uuid (Looks up in Attributes,Object and Events
+      - uuid (Looks up in Attributes,Object and Events)
 
 Release 0.10.0
 --------------

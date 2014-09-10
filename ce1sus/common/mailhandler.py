@@ -5,21 +5,25 @@
 
 Created on Feb 23, 2014
 """
+import random
+import re
+
+from ce1sus.brokers.mailbroker import MailTemplateBroker
+from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.common.checks import is_viewable
+from dagr.db.broker import BrokerException
+from dagr.db.session import SessionManager
+from dagr.helpers.config import ConfigException
+from dagr.helpers.datumzait import DatumZait
+from dagr.helpers.debug import Log
+from dagr.helpers.hash import hashSHA1
+from dagr.helpers.mailer import Mailer, Mail, MailerException
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-from dagr.db.broker import BrokerException
-from dagr.helpers.mailer import Mailer, Mail, MailerException
-from ce1sus.brokers.mailbroker import MailTemplateBroker
-from dagr.helpers.debug import Log
-from dagr.db.session import SessionManager
-from dagr.helpers.config import ConfigException
-from ce1sus.brokers.relationbroker import RelationBroker
-from ce1sus.common.checks import is_viewable
-import re
 
 
 class MailHandlerException(Exception):
@@ -304,7 +308,8 @@ class MailHandler(object):
       body = body.replace(u'${ce1sus_url}', u'{0}'.format(url))
       body = body.replace(u'${activation_link}', u'{0}'.format(activation_url))
       mail.body = body
-
+      user.activation_str = hashSHA1('{0}{1}'.format(user.password_plain, random.random()))
+      user.activation_sent = DatumZait.utcnow()
       if user.gpg_key:
         mail.encrypt = True
 

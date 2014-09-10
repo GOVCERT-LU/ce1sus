@@ -8,10 +8,24 @@
 <h3>User details:</h3>
 <%call expr="forms.user_form(user, cb_values, False)"/>
 <div class="row">
-	<div class="col-xs-3 col-sm-3" style="text-align: right">
+	<div class="col-xs-offset-2 col-sm-offset-2">
 		% if not user is None:
 		  <div class="btn-group">
 			  <a href="#editUserModal" role="button" class="btn  btn-default" data-toggle="modal">Edit</a>
+			  %if not user.is_activated:
+          <button class="btn btn-primary"
+            onclick="if (confirm('Are you sure you want to resent activation mail to this user?')) {
+              resentMail(${user.identifier});
+            };">
+            Re-send activation mail
+          </button>
+				  <button class="btn btn-warning"
+	          onclick="if (confirm('Are you sure you want to activate this user?')) {
+	        	  activateUser(${user.identifier});
+	          };">
+	          Activate
+	        </button>
+        %endif
    			<button class="btn btn-danger"
           onclick="if (confirm('Are you sure you want to delete?')) {
             dialogCall('/admin/users/modify_user?identifier=${user.identifier}&action=remove',

@@ -77,7 +77,8 @@ function getErrorTextMessage(responseText){
     } else {
         var code = null;
     }
-    return [responseText.status, message]
+    message = message.replace('<!--Error-->','');
+    return [code, message]
 }
 
 function getErrorMsg(responseText) {

@@ -263,8 +263,9 @@ function add_event(formElement, event, uri, containerid){
     event.preventDefault();
 }
 
-function inforUnpublished(modalID, eventID, show) {
-	if (show) {
+function inforUnpublished(modalID, eventID) {
+	var show = $('#Overview101Hidden  input#publishedID:first').val();
+	if (show != "0") {
       if(confirm("Modifications on event will unpublish it. Don't forget to republish.")) {
     	  // unpublish event
     	  var request = $.post("/events/event/unpublish", { event_id: eventID });
@@ -290,8 +291,8 @@ function inforUnpublished(modalID, eventID, show) {
 	}
 }
 
-function publish(eventID) {
-	var request = $.post("/events/event/publish", { event_id: eventID });
+function generic_single_post(url, params, contentID, contentURL){
+	var request = $.post(url, params);
     request.fail(function(response, textStatus, XMLHttpRequest) {
         var messages = getErrorTextMessage(response)
         alert(messages[1]);
@@ -302,7 +303,29 @@ function publish(eventID) {
         if (message.match(/<!--OK--/gi)) {
         	//clear form
             //reload events view if successfull
-      	  loadContent('Overview'+eventID+'Hidden','/events/event/event/'+eventID);
+        	if (contentID && contentURL){
+        		loadContent(contentID,contentURL);
+        	}
+        } else {
+        	message = getErrorTextMessage(responseText)
+        	if (message) {
+        		alert('Error: '+$("<p>").html(message).text());
+        	} else {
+        		alert('Error: Could send POST request');
+        	}
+        	
         }
     });
+}
+
+function publish(eventID) {
+	generic_single_post("/events/event/publish", { event_id: eventID },'Overview'+eventID+'Hidden','/events/event/event/'+eventID);
+}
+
+function activateUser(userID){
+	generic_single_post("/admin/users/activate", { user_id: userID },'UserRightContent','/admin/users/right_content/'+userID);
+}
+
+function resentMail(userID){
+	generic_single_post("/admin/users/resend_mail", { user_id: userID },null,null);
 }

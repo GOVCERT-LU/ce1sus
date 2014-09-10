@@ -24,14 +24,7 @@ $( document ).ready(function() {
 </script>
 </%def>
 
-<%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None,show=False)">
-<%
-if show:
-  show_js = 'true'
-else:
-  show_js = 'false'
-%>
-
+<%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None)">
 <%
 allowed = owner or (user.default_group.identifier == object.creator_group.identifier and not object.bit_value.is_validated)
 %>
@@ -69,10 +62,10 @@ else:
                     %> 
                     %if show_menu:
                        %if owner:
-                         <a  onclick="inforUnpublished('addObjectAttributeModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
-                         <a onclick="inforUnpublished('addChildObjectModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
+                         <a  onclick="inforUnpublished('addObjectAttributeModal${object.identifier}','${event_id}');" href="#" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
+                         <a onclick="inforUnpublished('addChildObjectModal${object.identifier}','${event_id}');" href="#" role="button" class="btn btn-default" data-toggle="modal" title="add child object"><span class="glyphicon glyphicon-download"></span></a>
                          %if owner and object.bit_value.is_proposal and not object.bit_value.is_validated:
-                         <a onclick="inforUnpublished('validateObjectModal${object.identifier}','${event_id}',${show_js});" href="#" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-saved" title="Validate object"></span></a>
+                         <a onclick="inforUnpublished('validateObjectModal${object.identifier}','${event_id}');" href="#" role="button" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-saved" title="Validate object"></span></a>
                          %endif
                        %else:
 	                         <a href="#addObjectAttributeModal${object.identifier}" role="button" class="btn btn-default ${disabled_str}" data-toggle="modal" title="add attribute"><span class="glyphicon glyphicon-plus-sign"></span></a>
@@ -260,7 +253,7 @@ if option.post_url:
 </%def>
 
 
-<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None,show=False, user_group_id=0)">
+<%def name="node(event_id, object_list, ident=1, show_menu=True, owner=False, user=None,user_group_id=0)">
     %if not object_list is None:
 	<%
     #spana = ident
@@ -269,13 +262,13 @@ if option.post_url:
 	%>
             %for object in object_list:
 	            %if object.dbcode & 12 == 12 or object.creator_group_id == user_group_id or owner:
-				        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner, user, show)"/>
+				        <%call expr="object_collapse_item('collapseItem{0}'.format(object.identifier),'accordion{0}'.format(object.identifier),event_id, object, ident, show_menu, owner, user)"/>
 			            <div class="row">
 			            %if spana > 0:
 			            <div class="col-xs-${spana} col-sm-${spana}">&nbsp;</div>
 			            %endif
 			            <div class="col-xs-${spanb} col-sm-${spanb}">
-			               <%call expr="node(event_id, object.children,ident+1, show_menu, owner, user, show, user_group_id)"/>
+			               <%call expr="node(event_id, object.children,ident+1, show_menu, owner, user, user_group_id)"/>
 			            </div>
 			            </div>
 		           %endif
