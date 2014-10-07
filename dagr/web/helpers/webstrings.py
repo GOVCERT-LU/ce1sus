@@ -25,5 +25,5 @@ def plaintext2html(context, text, tabstop=4, make_br=True, remove_if_escaped=Fal
 
 
 def base64(context, text):
-  message = text.encode('ascii', 'replace')
+  message = text.encode('utf-8', 'replace')
   return b64encode(message)

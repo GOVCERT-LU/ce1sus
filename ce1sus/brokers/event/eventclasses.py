@@ -5,26 +5,32 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
+from datetime import datetime
+import dateutil.tz
+import re
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy.orm import relationship
+
+from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
+from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
+from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
+from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
+from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
+from ce1sus.helpers.bitdecoder import BitValue
+from dagr.db.broker import DateTime
+from dagr.db.broker import ValidationException
+from dagr.db.session import BASE
+from dagr.helpers.objects import get_class
+from dagr.helpers.validator.objectvalidator import ObjectValidator, FailedValidation
+
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-from dagr.db.broker import ValidationException
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import relationship
-from dagr.db.session import BASE
-from dagr.db.broker import DateTime
-from ce1sus.brokers.permission.permissionclasses import User, Group, SubGroup
-from dagr.helpers.validator.objectvalidator import ObjectValidator, FailedValidation
-from ce1sus.brokers.definition.definitionclasses import ObjectDefinition
-from ce1sus.brokers.staticbroker import Status, Risk, Analysis, TLPLevel
-from ce1sus.helpers.bitdecoder import BitValue
-from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
-from ce1sus.brokers.valuebroker import StringValue, DateValue, TextValue, NumberValue
-from dagr.helpers.objects import get_class
-import re
+
 
 
 _REL_GROUPS_EVENTS = Table('Groups_has_Events', getattr(BASE, 'metadata'),
@@ -218,6 +224,10 @@ class Event(BASE):
     function = getattr(self.maingroups, 'remove')
     function(group)
 
+  def __create_tzaware_datetime(self, date_time):
+    utc_datetime = date_time.replace(tzinfo=dateutil.tz.tzutc())
+    return utc_datetime
+
   def validate(self):
     """
     Checks if the attributes of the class are valid
@@ -246,6 +256,12 @@ class Event(BASE):
     if self.last_seen is not None:
       ObjectValidator.validateDateTime(self, 'last_seen')
     if ((self.first_seen is not None and self.last_seen is not None) and not isinstance(self.first_seen, FailedValidation) and not isinstance(self.last_seen, FailedValidation)):
+      # check if date is time zone avare
+      if not self.first_seen.tzinfo:
+        self.first_seen = self.__create_tzaware_datetime(self.first_seen)
+      if not self.last_seen.tzinfo:
+        self.last_seen = self.__create_tzaware_datetime(self.last_seen)
+
       if self.first_seen > self.last_seen:
         setattr(self, 'first_seen',
                 FailedValidation(self.first_seen,
