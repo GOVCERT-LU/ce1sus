@@ -29,7 +29,7 @@ class SearchView(Ce1susBaseView):
   def tabs(self):
     serach_tab = MainTab(title='Search Attributes',
                          url='/events/search',
-                         options=None,
+                         options='reload',
                          position=1)
     return [serach_tab]
 
