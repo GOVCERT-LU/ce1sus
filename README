@@ -66,6 +66,15 @@ RoadMap
 * Export of events (i.e. csv, xml)
 * Review right managment (REL_0.10.0+)
 * STIX/TAXII support (REL_0.10.0+)
+* Web-interface sync-server management
+* Enhanced attributes modifications
+* Custom attributes properties
+* External request
+* Modify events via REST API: object/attribute add/remove
+* Enhanced ACL, for admins and users
+* submit proposals for adding objects/attributes via REST
+* Enhanced relation finder
+
 
 Installation
 ============

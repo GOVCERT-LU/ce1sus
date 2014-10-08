@@ -243,6 +243,7 @@ class EventView(Ce1susBaseView):
                                    event=event,
                                    relations=relations,
                                    url='/events/event/view',
+                                   validation_url=None,
                                    tab_id='eventsTabTabContent')
     except ControllerException as error:
       self._get_logger().error(error)

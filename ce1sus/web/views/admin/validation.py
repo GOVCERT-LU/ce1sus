@@ -5,20 +5,23 @@
 
 Created on Feb 3, 2014
 """
+import cherrypy
+
+from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
+from ce1sus.controllers.admin.validation import ValidationController
+from ce1sus.controllers.event.event import EventController
+from ce1sus.web.views.base import Ce1susBaseView, privileged
+from ce1sus.web.views.common.decorators import require, require_referer
+from ce1sus.web.views.helpers.tabs import AdminTab, ValidationTab
+from dagr.controllers.base import ControllerException
+from dagr.helpers.datumzait import DatumZait
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from ce1sus.web.views.base import Ce1susBaseView, privileged
-from ce1sus.controllers.admin.validation import ValidationController
-import cherrypy
-from ce1sus.web.views.common.decorators import require, require_referer
-from dagr.controllers.base import ControllerException
-from ce1sus.brokers.staticbroker import Status, TLPLevel, Analysis, Risk
-from dagr.helpers.datumzait import DatumZait
-from ce1sus.web.views.helpers.tabs import AdminTab, ValidationTab
 
 
 class AdminValidationView(Ce1susBaseView):
@@ -42,7 +45,7 @@ class AdminValidationView(Ce1susBaseView):
                                  options='reload',
                                  position=2)
     rel_tab = ValidationTab(title='Relations',
-                            url='/events/event/relations',
+                            url='/admin/validation/relations',
                             options='reload',
                             position=3)
     groups_tab = ValidationTab(title='Groups',
@@ -54,6 +57,7 @@ class AdminValidationView(Ce1susBaseView):
   def __init__(self, config):
     Ce1susBaseView.__init__(self, config)
     self.validation_controller = ValidationController(config)
+    self.event_controller = EventController(config)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose
@@ -80,6 +84,33 @@ class AdminValidationView(Ce1susBaseView):
                                    ext_event_id=None)
     except ControllerException as error:
       return self._render_error_page(error)
+
+  @require(privileged(), require_referer(('/internal')))
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def relations(self, event_id):
+    """
+    Renders the relation page of an event
+
+    :param event_id: Identifier of the event
+    :type event_id: Integer
+
+    :returns: generated HTML
+    """
+    try:
+      event = self.event_controller.get_event_by_id(event_id)
+      self._check_if_event_is_viewable(event)
+      user = self._get_user()
+      cache = self._get_authorized_events_cache()
+      relations = self.event_controller.get_full_event_relations(event, user, cache)
+      return self._render_template('/events/event/relations.html',
+                                   event=event,
+                                   relations=relations,
+                                   url='/admin/validation/event/',
+                                   validation_url='/admin/validation/event',
+                                   tab_id='validationTabsTabContent')
+    except ControllerException as error:
+      self._get_logger().error(error)
 
   @require(privileged(), require_referer(('/internal')))
   @cherrypy.expose

@@ -48,11 +48,17 @@
           <tr>
         %endif
 	      <td><%call expr="messages_and_text.object_to_html(relation.rel_attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
-	      <td style="${style}" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', '${tab_id}', '${url}/${relation.rel_event.identifier}', false, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(relation.rel_event.identifier, relation.rel_event.title))}');"><%call expr="messages_and_text.object_to_html(relation.rel_event.identifier, shorten_to=100,use_plain_text=False)"/></td>
+	      <%
+	      if relation.rel_event.bit_value.is_validated:
+	        url_ = url
+	      else:
+	        url_ = validation_url
+	      %>
+	      <td style="${style}" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', '${tab_id}', '${url_}/${relation.rel_event.identifier}', false, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(relation.rel_event.identifier, relation.rel_event.title))}');"><%call expr="messages_and_text.object_to_html(relation.rel_event.identifier, shorten_to=100,use_plain_text=False)"/></td>
 	      <td><%call expr="messages_and_text.object_to_html(relation.rel_event.title, shorten_to=100,use_plain_text=False)"/></td>
 	      
 	      <td style="width: 60px;">
-	        <a href="#" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', '${tab_id}', '${url}/${relation.rel_event.identifier}', false, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(relation.rel_event.identifier, relation.rel_event.title))}');">
+	        <a href="#" onclick="loadNewSideNavTab('${relation.rel_event.identifier}', '${tab_id}', '${url_}/${relation.rel_event.identifier}', false, '${messages_and_text.b64(text=u'Event #{0} - {1}'.format(relation.rel_event.identifier, relation.rel_event.title))}');">
 	           <span class="glyphicon glyphicon-eye-open" title="View event"></span>
 	        </a>
 	      </td>
