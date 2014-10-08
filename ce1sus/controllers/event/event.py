@@ -6,10 +6,13 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 from datetime import datetime
+
 from ce1sus.brokers.event.commentbroker import CommentBroker
 from ce1sus.brokers.event.eventclasses import Event
-from ce1sus.brokers.relationbroker import RelationBroker
+from ce1sus.brokers.relationbroker import RelationBroker, RelationContainer
 from ce1sus.brokers.staticbroker import TLPLevel, Risk, Analysis, Status
+from ce1sus.common.checks import check_if_event_is_viewable, \
+  is_attribute_viewable
 from ce1sus.common.mailhandler import MailHandlerException
 from ce1sus.controllers.base import Ce1susBaseController
 from ce1sus.helpers.bitdecoder import BitValue
@@ -321,18 +324,22 @@ class EventController(Ce1susBaseController):
     Returns the complete event relations with attributes and all
     """
     try:
-      result = list()
+      result = RelationContainer()
       relations = self.relation_broker.get_relations_by_event(event, False)
-      seen_events = list()
+      seen_attrs = list()
       for relation in relations:
           rel_event = relation.rel_event
-          # check if is viewable for user
-          if relation.rel_event_id in seen_events:
-            result.append(relation)
-          else:
-            if self._is_event_viewable_for_user(rel_event, user, cache):
-              result.append(relation)
-              seen_events.append(relation.rel_event_id)
+          # check if attribute belongs to the event
+          rel_attribtue = relation.rel_attribute
+          # check if event viewable for user
+          if check_if_event_is_viewable(rel_event, user, cache):
+            # check if attribute is viewable
+            if is_attribute_viewable(rel_event, rel_attribtue, user):
+              # put it to the container if it was not already seen
+              # to avoid duplicates
+              if rel_attribtue.identifier not in seen_attrs:
+                seen_attrs.append(rel_attribtue.identifier)
+                result.add(rel_event, rel_attribtue)
       return result
     except NothingFoundException as error:
       self._raise_nothing_found_exception(error)

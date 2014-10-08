@@ -15,11 +15,9 @@ from ce1sus.brokers.definition.attributedefinitionbroker import AttributeDefinit
 from ce1sus.brokers.definition.definitionclasses import AttributeDefinition
 from ce1sus.brokers.event.eventclasses import Attribute, Event
 from ce1sus.brokers.permission.groupbroker import GroupBroker
-from ce1sus.brokers.staticbroker import TLPLevel, Analysis, Status, \
-  StaticMappingException
+from ce1sus.brokers.staticbroker import TLPLevel, Analysis, Status, StaticMappingException
 from ce1sus.brokers.valuebroker import ValueBroker
-from dagr.db.broker import BrokerBase, IntegrityException, BrokerException, \
-  NothingFoundException
+from dagr.db.broker import BrokerBase, IntegrityException, BrokerException, NothingFoundException
 from dagr.db.session import BASE
 
 
@@ -29,6 +27,60 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+class RelationContainer(object):
+
+  def __init__(self):
+    self.container = dict()
+
+  def add(self, event, attribtue):
+    web_rel = Relation(event, attribtue)
+    if not self.container.get(web_rel.key, None):
+      self.container[web_rel.key] = list()
+    self.container[web_rel.key].append(web_rel)
+
+  def get_keys(self):
+    return self.container.keys()
+
+  def get_relations_by_key(self, key):
+    return self.container.get(key)
+
+  def get_type_value(self, key):
+    value = self.container.get(key)[0].value
+    return (Relation.get_type(key), value)
+
+
+class Relation(object):
+
+  def __init__(self, event, attribute):
+
+    self.__set_key(attribute)
+    self.rel_event = event
+    self.rel_attribute = attribute
+
+  def __set_key(self, attribute):
+    self.key = u'{0}&&{1}'.format(attribute.definition.name, attribute.plain_value)
+
+  @staticmethod
+  def limit_pos(key):
+    return key.find('&&')
+
+  @staticmethod
+  def get_type(key):
+    limit_pos = Relation.limit_pos(key)
+    return key[0:limit_pos]
+
+  @staticmethod
+  def get_value(key):
+    limit_pos = Relation.limit_pos(key)
+    return key[limit_pos + 2:]
+
+  @property
+  def type(self):
+    return Relation.get_type(self.key)
+
+  @property
+  def value(self):
+    return self.rel_attribute.gui_value
 
 
 # pylint: disable=R0903,R0902,W0232
@@ -53,7 +105,7 @@ class EventRelation(BASE):
   rel_attribute_id = Column(Integer, ForeignKey('Attributes.attribute_id'))
   rel_attribute = relationship("Attribute",
                                uselist=False,
-                               primaryjoin='Attribute.identifier==EventRelation.attribute_id',
+                               primaryjoin='Attribute.identifier==EventRelation.rel_attribute_id',
                                lazy='joined')
 
   def validate(self):
@@ -203,6 +255,7 @@ class RelationBroker(BrokerBase):
           match.attribute = relation.rel_attribute
           match.rel_attribute_id = relation.attribute_id
           match.rel_attribute = relation.attribute
+
         if unique_events:
           if relation.rel_event_id not in seen_events:
             results.append(match)

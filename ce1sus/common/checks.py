@@ -54,6 +54,15 @@ def is_viewable(event, user_default_group, user_priv=False):
   return result
 
 
+def is_allowed(event, user):
+  owner = is_event_owner(event, user)
+  return owner or (user.default_group.identifier == object.creator_group.identifier and not object.bit_value.is_validated)
+
+
+def is_attribtue_owner(attribute, user):
+  return (user.default_group.identifier == attribute.creator_group_id)
+
+
 def check_viewable_message(result, event_id, username):
   """
   Returns the message for loggin
@@ -136,3 +145,9 @@ def can_user_download(event, user, cache=None):
     # check if the default group can download
     result = user.default_group.can_download
   return result
+
+
+def is_attribute_viewable(event, attribute, user):
+  owner = is_event_owner(event, user)
+  attribute_owner = is_attribtue_owner(attribute, user)
+  return attribute.bit_value.is_validated_and_shared or owner or attribute_owner

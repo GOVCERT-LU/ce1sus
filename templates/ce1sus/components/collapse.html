@@ -3,6 +3,7 @@
 <%namespace name="forms" file="/ce1sus/components/forms.html"/> 
 <%namespace name="objectsHelper" module="dagr.web.helpers.objects"/>
 <%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
+<%namespace name="checks" module="ce1sus.web.views.helpers.webchecks"/>
 
 
 <%def name="attribute_modal_form(modal_id, url, content_id, refresh_url=None, refresh_container=None)">
@@ -26,7 +27,7 @@ $( document ).ready(function() {
 
 <%def name="object_collapse_item(id, parent_id, event_id, object, indent=0, show_menu=True, owner=False, user=None)">
 <%
-allowed = owner or (user.default_group.identifier == object.creator_group.identifier and not object.bit_value.is_validated)
+allowed = checks.is_allowed(event, user)
 %>
 % if (not object is None) and (object.bit_value.is_validated or allowed ):
 <%
@@ -155,14 +156,14 @@ else:
                         else:
                            shareicon = '<span class="glyphicon glyphicon-remove"></span>'
                         
-                        attribute_owner = (user.default_group.identifier == attribute.creator_group_id)
+                        attribute_owner = checks.is_attribute_owner(attribute, user)
                         if attribute.bit_value.is_proposal and not attribute.bit_value.is_validated:
                           tdstyle = 'style="background-color: yellow;"'
                         else:
                           tdstyle = ''
                         %>
                         
-                        %if attribute.bit_value.is_validated_and_shared or owner or attribute_owner:
+                        %if checks.is_attribute_viewable(event, attribute, user):
                         <tr >
                           <td ${tdstyle}><%call expr="messages_and_text.object_to_html(attribute.identifier, shorten_to=100,use_plain_text=False)"/></td>
                           <td style="text-align:center">${shareicon}</td>

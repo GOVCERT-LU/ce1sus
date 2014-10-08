@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Release 0.10.3
+--------------
+* Bug Fixes
+  - Encoding issues take 2
+  - Relations are shown only once
+* Relations detail view changed:
+  - Attributes values are regrouped, however the feature of datatables is currently unavailable
+
 Release 0.10.2
 --------------
 * Bug Fixes

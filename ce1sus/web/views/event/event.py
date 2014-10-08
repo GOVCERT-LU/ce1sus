@@ -241,7 +241,9 @@ class EventView(Ce1susBaseView):
       relations = self.event_controller.get_full_event_relations(event, user, cache)
       return self._render_template('/events/event/relations.html',
                                    event=event,
-                                   relations=relations)
+                                   relations=relations,
+                                   url='/events/event/view',
+                                   tab_id='eventsTabTabContent')
     except ControllerException as error:
       self._get_logger().error(error)
 

@@ -1,6 +1,8 @@
 <%namespace name="messages_and_text" file="/dagr/components/messagesAndText.html"/>
 <%namespace name="modals" file="/dagr/components/modals.html"/>
 <%namespace name="collapse" file="/ce1sus/components/collapse.html"/>
+<%namespace name="checks" module="ce1sus.web.views.helpers.webchecks"/>
+
 
 <legend>Flat view</legend>
 <script type="text/javascript">
@@ -39,16 +41,16 @@
         shareicon = '<span class="glyphicon glyphicon-ok"></span>'
       else:
         shareicon = '<span class="glyphicon glyphicon-remove"></span>'
-      attribute_owner = (user.default_group.identifier == flat_object[1].creator_group.identifier)
+      attribute_owner = checks.is_attribute_owner( flat_object[1], user)
       if flat_object[1].bit_value.is_proposal and not flat_object[1].bit_value.is_validated:
         tdstyle = 'style="background-color: yellow;"'
       else:
         tdstyle = ''
         
-      attribute_owner = (user.default_group.identifier == flat_object[1].creator_group.identifier)
+      attribute_owner = checks.is_attribute_owner( flat_object[1], user)
       %>
       <%counter=counter+1%>
-      %if owner or attribute_owner or (flat_object[1].bit_value.is_shareable and flat_object[0].bit_value.is_shareable):
+      %if checks.is_attribute_viewable(event, flat_object[1], user):
       <tr>
       <td ${tdstyle}><%call expr="messages_and_text.object_to_html(counter, shorten_to=60,use_plain_text=False)"/></td>
       <td><%call expr="messages_and_text.object_to_html(flat_object[0].identifier, shorten_to=60,use_plain_text=False)"/></td>
