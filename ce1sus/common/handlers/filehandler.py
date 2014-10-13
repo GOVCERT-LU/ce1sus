@@ -485,6 +485,10 @@ class FileWithHashesHandler(FileHandler):
 
   def insert(self, obj, definitions, user, group, params, uploaded_file=None):
     attribute, attributes = FileHandler.insert(self, obj, definitions, user, group, params, uploaded_file)
+    # set sha1 as IOC
+    for attr in attributes:
+      if attr.definition.chksum == CHK_SUM_HASH_MD5:
+        attr.ioc = 1
     if isinstance(attribute.value, FailedValidation):
       params['value'] = ''
       attribute = self.create_attribute(params, obj, attribute.definition, user, group)
