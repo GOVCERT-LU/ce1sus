@@ -227,12 +227,23 @@ class DictDBConverter(object):
             obj.attributes.append(attribute)
           if additional_attributes:
             for additional_attribute in additional_attributes:
+              # Note if equal values the values of the attribute has priority
               hash_value = self.__gen_attr_hash(additional_attribute)
-              if hash_value not in seen_attributes:
-                seen_attributes.append(hash_value)
-                # attach to parent
-                attribute.children.append(additional_attribute)
-                obj.attributes.append(additional_attribute)
+              if hash_value in seen_attributes:
+                # remove the attribute first
+                counter = -1
+                for attr in obj.attributes:
+                  counter = counter + 1
+                  if attr.definition.chksum == additional_attribute.definition.chksum and attr.value == additional_attribute.value:
+                    break
+
+                if counter >= 0:
+                  obj.attributes.pop(counter)
+
+              seen_attributes.append(hash_value)
+              # attach to parent
+              attribute.children.append(additional_attribute)
+              obj.attributes.append(additional_attribute)
 
       children_dict = contents.get('children', list())
       if children_dict:

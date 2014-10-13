@@ -65,7 +65,7 @@ RoadMap
 * Improved search
 * Export of events (i.e. csv, xml)
 * Review right managment (REL_0.10.0+)
-* STIX/TAXII support (REL_0.10.0+)
+* STIX/TAXII currently only available in the ce1sus_api project
 * Web-interface sync-server management
 * Enhanced attributes modifications
 * Custom attributes properties
