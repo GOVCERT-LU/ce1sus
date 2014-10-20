@@ -1,9 +1,0 @@
-# -*- coding: utf-8 -*-
-
-<%namespace name="labeled_input" file="/dagr/components/labeledInput.html"/>
-<%namespace name="forms" file="/ce1sus/components/forms.html"/>
-
-
-  <%call expr="labeled_input.generic_labeler('Value', enabled)">
-    <a href="${attribute.gui_value.url}"  target="_blank">${attribute.gui_value.identifier}</a>
-  </%call>

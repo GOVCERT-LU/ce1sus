@@ -1,3 +1,0 @@
-"""
-General framework tools
-"""

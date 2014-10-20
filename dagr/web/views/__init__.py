@@ -1,3 +1,0 @@
-"""
-General web view helpers
-"""
