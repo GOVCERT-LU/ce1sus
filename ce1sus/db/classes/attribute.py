@@ -10,6 +10,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, Text, Boolean, BIGINT
 
 from ce1sus.db.classes.base import ExtendedLogingInformations
+from ce1sus.db.classes.common import Properties
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
@@ -47,18 +48,27 @@ class Attribute(ExtendedLogingInformations, Base):
   number_value = relationship(NumberValue,
                               primaryjoin='Attribute.identifier==NumberValue.attribute_id',
                               uselist=False)
-  type_id = Column('type_id', Integer)
+  type_id = Column('type_id', Integer(1))
   is_ioc = Column('is_ioc', Boolean)
   parent_id = Column('parent_id', BIGINT, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
+  dbcode = Column('code', Integer)
+  __bit_code = None
 
-  def __is_composed(self):
-    if self.rel_composition:
-      raise ValueError(u'Attribute is composed')
+  @property
+  def properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__bit_code is None:
+      if self.dbcode is None:
+        self.__bit_code = Properties('0', self)
+      else:
+        self.__bit_code = Properties(self.dbcode, self)
+    return self.__bit_code
 
   def __get_value_instance(self):
-    self.__is_composed()
     """
     Returns the value object of an attibute
     """
@@ -75,7 +85,6 @@ class Attribute(ExtendedLogingInformations, Base):
     return value
 
   def __get_value(self):
-    self.__is_composed()
     """
     Returns the actual value of an attribute
     """
@@ -94,7 +103,6 @@ class Attribute(ExtendedLogingInformations, Base):
       return None
 
   def __set_value(self, new_value):
-    self.__is_composed()
     if self.definition:
       value_table = self.definition.value_table
       classname = value_table.classname
@@ -104,6 +112,19 @@ class Attribute(ExtendedLogingInformations, Base):
       value_instance.attribute_id = self.identifier
       value_instance.attribute = self
       value_instance.value = new_value
+
+      if self.object:
+        event_id = self.object.event_id
+        if event_id:
+          value_instance.event_id = event_id
+        else:
+          event = self.object.event
+          if event:
+            value_instance.event = event
+          else:
+            raise ValueError(u'Cannot set the attribute value as the event for of the parent object is not yet set.')
+      else:
+        raise ValueError(u'Cannot set the attribute value as the parent object is not yet set.')
 
       setattr(self, attribute, value_instance)
 

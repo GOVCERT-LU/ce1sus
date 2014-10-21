@@ -31,6 +31,14 @@ class ValueBase(object):
   def attribute(self):
     return relationship('Attribute', uselist=False)
 
+  @declared_attr
+  def event_id(self):
+    return Column('event_id', BIGINT, ForeignKey('events.event_id'))
+
+  @declared_attr
+  def event(self):
+    return relationship("Event", uselist=False)
+
 
 # pylint: disable=R0903,W0232
 class StringValue(ValueBase, Base):

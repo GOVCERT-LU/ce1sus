@@ -11,7 +11,7 @@ from sqlalchemy.types import Unicode, Integer, Text, Boolean, BIGINT
 
 from ce1sus.db.classes.base import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
-from ce1sus.db.classes.permissions import Group, Association
+from ce1sus.db.classes.permissions import Group, EventPermissions
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
@@ -23,17 +23,21 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-_REL_EVENT_ASSOCIATIONS = Table('event_has_associations', getattr(Base, 'metadata'),
-                                Column('ehg_id', BIGINT, primary_key=True, nullable=False, index=True),
-                                Column('event_id', BIGINT, ForeignKey('events.event_id'), nullable=False, index=True),
-                                Column('association_id', BIGINT, ForeignKey('associations.association_id'), nullable=False, index=True)
-                                )
+class EventGroupPermission(ExtendedLogingInformations, Base):
+  event_id = Column('event_id', BIGINT, ForeignKey('events.event_id'), nullable=False, index=True)
+  group_id = Column('group_id', BIGINT, ForeignKey('groups.group_id'), nullable=False, index=True)
+  dbcode = Column('code', Integer, default=0, nullable=False)
+  __bit_code = None
+  group = relationship('Group')
 
-_REL_EVENT_GROUPS = Table('event_has_groups', getattr(Base, 'metadata'),
-                          Column('ehg_id', BIGINT, primary_key=True, nullable=False, index=True),
-                          Column('group_id', BIGINT, ForeignKey('groups.group_id'), nullable=False, index=True),
-                          Column('event_id', BIGINT, ForeignKey('events.event_id'), nullable=False, index=True)
-                          )
+  @property
+  def permission_object(self):
+    if self.__default_bit_code is None:
+      if self.default_dbcode is None:
+        self.__default_bit_code = EventPermissions('0', self)
+      else:
+        self.__bit_code = EventPermissions(self.default_dbcode, self)
+    return self.__default_bit_code
 
 
 class Event(ExtendedLogingInformations, Base):
@@ -48,13 +52,7 @@ class Event(ExtendedLogingInformations, Base):
 
   # TODO: Add administration of minimal objects -> checked before publishing
   required_objects = relationship('ObjectDefinition')
-
-  associations = relationship(Association,
-                              secondary='event_has_associations',
-                              backref='events')
-  groups = relationship(Group,
-                        secondary='event_has_groups',
-                        backref='events')
+  group_premissions = relationship('EventGroupPermission')
   objects = relationship('Object',
                          primaryjoin='and_(event.identifier==object.event_id, object.parent_object_id==None)')
   __tlp_obj = None

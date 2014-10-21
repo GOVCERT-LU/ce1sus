@@ -22,10 +22,10 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-_REL_MAINGROUP_GROUPS = Table('group_has_associations', Base.metadata,
-                              Column('gha_id', BIGINT, primary_key=True, nullable=False, index=True),
-                              Column('association_id', BIGINT, ForeignKey('associations.association_id', onupdate='cascade', ondelete='cascade'), index=True),
-                              Column('group_id', BIGINT, ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True))
+_REL_MAINGROUP_GROUPS = Table('group_has_groups', Base.metadata,
+                              Column('ghg_id', BIGINT, primary_key=True, nullable=False, index=True),
+                              Column('group_id', BIGINT, ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True),
+                              Column('rel_group_id', BIGINT, ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True))
 
 
 class GroupRights(BitBase):
@@ -37,6 +37,7 @@ class GroupRights(BitBase):
   """
 
   DOWNLOAD = 0
+  TLP_PROPAGATION = 1
 
   @property
   def can_download(self):
@@ -45,6 +46,91 @@ class GroupRights(BitBase):
   @can_download.setter
   def can_download(self, value):
     self._set_value(GroupRights.DOWNLOAD, value)
+
+  @property
+  def propagate_tlp(self):
+    return self._get_value(GroupRights.TLP_PROPAGATION)
+
+  @propagate_tlp.setter
+  def propagate_tlp(self, value):
+    self._set_value(GroupRights.TLP_PROPAGATION, value)
+
+
+class EventPermissions(BitBase):
+
+  VIEW = 0
+  # Add directly without validation
+  ADD = 1
+  MODIFY = 2
+  DELETE = 3
+  VALIDATE = 4
+  PROPOSE = 5
+
+  @property
+  def can_propose(self):
+    return self._get_value(EventPermissions.PROPOSE)
+
+  @can_propose.setter
+  def can_propose(self, value):
+    # Note if you can propose, you can see
+    if not self.can_view:
+      self.can_view = True
+    self._set_value(EventPermissions.PROPOSE, value)
+
+  @property
+  def can_view(self):
+    return self._get_value(EventPermissions.VIEW)
+
+  @can_view.setter
+  def can_view(self, value):
+    # if you can see you can propose
+    if not self.can_propose:
+      self.can_propose = True
+    self._set_value(EventPermissions.VIEW, value)
+
+  @property
+  def can_add(self):
+    return self._get_value(EventPermissions.ADD)
+
+  @can_add.setter
+  def can_add(self, value):
+    # if you can add you can see
+    if not self.can_view:
+      self.can_view = True
+    self._set_value(EventPermissions.ADD, value)
+
+  @property
+  def can_modify(self):
+    return self._get_value(EventPermissions.MODIFY)
+
+  @can_modify.setter
+  def can_modify(self, value):
+    # if you can modify you can see
+    if not self.can_view:
+      self.can_view = True
+    self._set_value(EventPermissions.MODIFY, value)
+
+  @property
+  def can_delete(self):
+    return self._get_value(EventPermissions.DELETE)
+
+  @can_delete.setter
+  def can_delete(self, value):
+    # if you can delete you can see
+    if not self.can_view:
+      self.can_view = True
+    self._set_value(EventPermissions.DELETE, value)
+
+  @property
+  def can_validate(self):
+    return self._get_value(EventPermissions.VALIDATE)
+
+  @can_validate.setter
+  def can_validate(self, value):
+    # if you can validate you can see
+    if not self.can_view:
+      self.can_view = True
+    self._set_value(EventPermissions.VALIDATE, value)
 
 
 class UserRights(BitBase):
@@ -99,8 +185,8 @@ class User(Base):
   activation_str = Column('activation_str', Unicode(255))
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
-  association_id = Column('association_id', BIGINT, ForeignKey('associations.association_id', onupdate='restrict', ondelete='restrict'), index=True)
-  association = relationship('Association', backref='users')
+  group_id = Column('group_id', BIGINT, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
+  group = relationship('Group', backref='users')
 
   @property
   def is_activated(self):
@@ -117,14 +203,6 @@ class User(Base):
       else:
         self.__bit_code = UserRights(self.dbcode, self)
     return self.__bit_code
-
-  @permissions.setter
-  def permissions(self, bitvalue):
-    """
-    Property for the bit_value
-    """
-    self.__bit_code = bitvalue
-    self.dbcode = bitvalue.bit_code
 
   @property
   def display_name(self):
@@ -167,16 +245,27 @@ class User(Base):
     return ObjectValidator.isObjectValid(self)
 
 
-class Association(Base):
+class Group(Base):
   name = Column('name', Unicode(255), nullable=False, unique=True)
   description = Column('description', Text)
   tlp_lvl = Column('tlplvl', Integer, default=4, nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
-  relationship('Group',
-               secondary='group_has_associations',
-               backref='groups',
-               order_by='Group.name')
+  __default_bit_code = None
+  default_dbcode = Column('default_code', Integer, default=0, nullable=False)
+  children = relationship('Group',
+                          secondary='group_has_groups',
+                          backref='parents',
+                          order_by='Group.name')
+
+  @property
+  def default_permissions(self):
+    if self.__default_bit_code is None:
+      if self.default_dbcode is None:
+        self.__default_bit_code = EventPermissions('0', self, 'default_dbcode')
+      else:
+        self.__bit_code = EventPermissions(self.default_dbcode, self, 'default_dbcode')
+    return self.__default_bit_code
 
   @property
   def permissions(self):
@@ -189,37 +278,6 @@ class Association(Base):
       else:
         self.__bit_code = GroupRights(self.dbcode, self)
     return self.__bit_code
-
-  @permissions.setter
-  def permissions(self, bitvalue):
-    """
-    Property for the bit_value
-    """
-    self.__bit_code = bitvalue
-    self.dbcode = bitvalue.bit_code
-
-  def validate(self):
-    """
-    Checks if the attributes of the class are valid
-
-    :returns: Boolean
-    """
-    # TODO: Verify validation of Group Object
-    ObjectValidator.validateAlNum(self, 'name',
-                                  withSymbols=True,
-                                  minLength=3)
-    ObjectValidator.validateAlNum(self,
-                                  'description',
-                                  minLength=5,
-                                  withSpaces=True,
-                                  withNonPrintableCharacters=True,
-                                  withSymbols=True)
-    return ObjectValidator.isObjectValid(self)
-
-
-class Group(Base):
-  name = Column('name', Unicode(255), nullable=False, unique=True)
-  description = Column('description', Text)
 
   def validate(self):
     """

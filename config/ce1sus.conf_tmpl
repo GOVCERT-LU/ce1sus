@@ -1,0 +1,69 @@
+# DB Configuration
+[SessionManager]
+protocol=mysql+mysqldb
+username=
+password=
+host=127.0.0.1
+db=
+port=3306
+debug=no
+usecherrypy=yes
+
+#General configurations for ce1sus
+[ce1sus]
+#If set to yes emails will be send to the users/groups who can access/see the event
+sendmails=no
+useldap=no
+#The following variable be displayed in the title section
+environment=LOCAL_DEV
+enableRestAPI=yes
+#Not this has to be the external address for ce1sus
+baseurl=http://localhost:8080
+
+#Handler configurations
+[Handlers]
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
+#Destination for uploaded files
+files=
+#Configuration to access the RT rest api
+rt_user=
+rt_password=
+rt_url=
+
+[ErrorHandler]
+debug=no
+#If set then do not forget to set the reciever email
+useMailer=No
+subject=ErrorOccureredForCelsus
+receiver=
+
+[Logger]
+log=Yes
+log_file=log/logger.txt
+logConsole = Yes
+level=DEBUG
+size=10000000
+backups=1000
+
+[Mako]
+#Note the absolute path have to be sepcified for templateRoot and projectRoot
+templateRoot=/path/to/ce1sus/ce1sus/templates
+projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus
+collectionsize=200
+outputencoding=utf-8
+tmpfolder=/path/to/desired/tmp/folder
+
+#Configuration for the LDAP server
+[LDAP]
+server=
+usetls=True
+users_dn=
+
+#Configuration for the smtp server
+[Mailer]
+from=ce1sus
+smtp=
+port=25
+user=
+password=
+keyfile=

@@ -8,13 +8,12 @@ Created on Oct 16, 2014
 
 
 import os
-from sqlalchemy.schema import MetaData
 
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.config import Ce1susConfig
-from ce1sus.db.classes.event import Event
+from ce1sus.db.classes.event import Event, EventGroupPermission
 from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.permissions import Group, User, Association
+from ce1sus.db.classes.permissions import Group, User
 from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
 
@@ -37,4 +36,3 @@ if __name__ == '__main__':
   engine = session.connector.get_engine()
   Base.metadata.create_all(engine, checkfirst=True)
   session.close()
-

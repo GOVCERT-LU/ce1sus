@@ -1,0 +1,87 @@
+ce1sus
+=======
+
+ce1sus is a threat information database.
+
+The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners.
+
+Ce1sus entries are modeled to represent the real-life case as as close as possible. 
+
+Example:
+Email with a malicious attachment
+
+In such cases the event should start by an email object. That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object then will get a child object representing the attachment. If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
+
+Such structured events improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
+
+Note
+----
+
+This is still not the final release, we are still developing ce1sus.
+
+For any questions write a mail to the developers
+
+Features
+========
+
+* Creates relations between events through their attributes
+* Stores and presents the event in a structured manner
+* Different levels of sharing 
+* Easy maintenance
+* Flexible configuration and taxonomy
+* Easy installation
+* Completely open source
+* Search
+
+Requirements
+============
+
+- python
+  * python (2.7+)
+  * mako (0.7+)
+  * sqlalchemy (0.7.8+)
+  * mysqldb (1.2.3)
+  * python-magic (0.4.6+)
+    ** https://github.com/ahupp/python-magic
+  * python-ldap (2.4.10+)
+  * dateutil (1.5+)
+  * cherrypy3 (3.2.2+)
+  * memcache
+  * rtkit (optional)
+  * gnupg (0.3.5+)
+- mysql (5.1+)
+- nginx (1.4+)
+- uwsgi (1.2.3+, with python-2 support)
+- memcached
+
+RoadMap
+=======
+
+* Share definitions 
+* Proposal mechanism for REST API
+* Password protection for compressed files
+* Profile management
+* More handlers
+* Improved search
+* Export of events (i.e. csv, xml)
+* Review right managment (REL_0.10.0+)
+* STIX/TAXII currently only available in the ce1sus_api project
+* Web-interface sync-server management
+* Enhanced attributes modifications
+* Custom attributes properties
+* External request
+* Modify events via REST API: object/attribute add/remove
+* Enhanced ACL, for admins and users
+* submit proposals for adding objects/attributes via REST
+* Enhanced relation finder
+
+
+Installation
+============
+ 
+For the installation please refer to the DOCUMENTATION file
+
+Remarks
+=======
+
+For any questions feel free to ask.

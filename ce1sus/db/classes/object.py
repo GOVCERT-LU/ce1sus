@@ -5,12 +5,14 @@
 
 Created on Oct 16, 2014
 """
+from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, Unicode, Text, BIGINT
 
 from ce1sus.db.classes.base import ExtendedLogingInformations
+from ce1sus.db.classes.common import Properties
 from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.db.common.session import Base
 
@@ -27,7 +29,59 @@ _REL_OBJECT_OBJECT_ = Table(
 )
 
 
-class ComposedObject(ExtendedLogingInformations, Base):
+class ObjectBase(ExtendedLogingInformations):
+
+  @declared_attr
+  def parent_id(self):
+    return Column('parent_id',
+                  BIGINT,
+                  ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), index=True)
+
+  @declared_attr
+  def parent(self):
+    return relationship('Object',
+                        uselist=False,
+                        primaryjoin='Object.parent_id==Object.identifier')
+
+  @declared_attr
+  def children(self):
+    return relationship('Object',
+                        primaryjoin='Object.identifier==Object.parent_id')
+
+  @declared_attr
+  def event_id(self):
+    return Column('parentEvent', BIGINT, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+
+  @declared_attr
+  def event(self):
+    return relationship('Event',
+                        uselist=False,
+                        primaryjoin='Event.identifier==Object.event_id')
+
+  @declared_attr
+  def dbcode(self):
+    return Column('code', Integer)
+
+  __bit_code = None
+
+  @declared_attr
+  def relation_id(self):
+    return Column('relation_id', Integer)
+
+  @property
+  def properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__bit_code is None:
+      if self.dbcode is None:
+        self.__bit_code = Properties('0', self)
+      else:
+        self.__bit_code = Properties(self.dbcode, self)
+    return self.__bit_code
+
+
+class ComposedObject(ObjectBase, Base):
   operator_id = Column('operator_id', BIGINT, default=None)
   # one to many
   objects = relationship('Object')
@@ -47,7 +101,7 @@ class ComposedObject(ExtendedLogingInformations, Base):
     return counter
 
 
-class Object(ExtendedLogingInformations, Base):
+class Object(ObjectBase, Base):
   title = Column('title', Unicode(45), index=True, unique=True, nullable=False)
   description = Column('description', Text)
   sighting = Column('sighting', Integer, default=1, nullable=False)
@@ -56,8 +110,9 @@ class Object(ExtendedLogingInformations, Base):
   rel_attributes = relationship('Attribute')
   operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)
-  definition_id = Column(BIGINT, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+  definition_id = Column('definition_id', BIGINT, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(ObjectDefinition)
+  type_id = Column('type_id', Integer(1))
 
   @hybrid_property
   def attributes_count(self):

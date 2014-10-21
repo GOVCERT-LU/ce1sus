@@ -14,7 +14,7 @@ __license__ = 'GPL v3+'
 
 class BitBase(object):
 
-  def __init__(self, bit_value, parentObj=None):
+  def __init__(self, bit_value, parentObj=None, attr_name='dbcode'):
     # TODO make an intvalue and check if between 0 and 15
     value = int('{0}'.format(bit_value))
     if (value >= 0) and (value <= 32):
@@ -24,8 +24,8 @@ class BitBase(object):
 
     self.__parent_object = parentObj
     self.__bit_value = bits
-    if hasattr(self.__parent_object, 'dbcode'):
-        self.__parent_object.dbcode = self.bit_code
+    if hasattr(self.__parent_object, attr_name):
+      setattr(self.__parent_object, attr_name, self.bit_code)
 
   @property
   def bit_code(self):
