@@ -6,6 +6,7 @@ module for session handling and brokers
 Created Jul, 2013
 """
 from abc import abstractmethod
+from ce1sus_api.api.restclasses import Ce1susWrappedFile
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
@@ -13,6 +14,7 @@ from sqlalchemy.pool import Pool
 from sqlalchemy.schema import Column
 from sqlalchemy.types import BIGINT, Unicode
 import uuid
+from datetime import datetime
 
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.common import SessionManagerException, BrokerInstantiationException, ORMException
@@ -44,6 +46,19 @@ class Base(object):
   @abstractmethod
   def validate(self):
     raise ORMException(u'Validate method not implemented for {0}'.format(self.__class__.__name__))
+
+  @staticmethod
+  def convert_value(value):
+    # TODO: rethink the wrapped file foo
+    """converts the value None to '' else it will be send as None-Text"""
+    if value or value == 0:
+      if isinstance(value, Ce1susWrappedFile):
+        return value.get_api_wrapped_value()
+      if isinstance(value, datetime):
+        return value.strftime('%m/%d/%Y %H:%M:%S %Z')
+      return value
+    else:
+      return ''
 
 Base = declarative_base(cls=Base)
 

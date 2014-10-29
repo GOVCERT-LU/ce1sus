@@ -28,7 +28,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
   group_id = Column('group_id', BIGINT, ForeignKey('groups.group_id'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
-  group = relationship('Group')
+  group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
 
   @property
   def permission_object(self):
@@ -41,17 +41,15 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
 
 
 class Event(ExtendedLogingInformations, Base):
-
   title = Column('title', Unicode(45), index=True, unique=True, nullable=False)
   description = Column('description', Text)
   tlp_level_id = Column('tlp_level_id', Boolean, default=3, nullable=False)
   status_id = Column('status_id', Boolean, default=0, nullable=False)
   risk_id = Column('risk_id', Boolean, nullable=False, default=0)
   analysis_id = Column('analysis_id', Boolean, nullable=False, default=0)
-  comments = relationship('Comment')
 
   # TODO: Add administration of minimal objects -> checked before publishing
-  required_objects = relationship('ObjectDefinition')
+
   group_premissions = relationship('EventGroupPermission')
   objects = relationship('Object',
                          primaryjoin='and_(event.identifier==object.event_id, object.parent_object_id==None)')

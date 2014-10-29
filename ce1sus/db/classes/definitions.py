@@ -104,13 +104,11 @@ class ObjectDefinition(SimpleLogingInformations, Base):
 
   possible_attributes = relationship('AttributeDefinition',
                                      secondary='objectdefinition_has_attributedefinitions',
-                                     backref='objects',
                                      order_by='AttributeDefinition.name')
   # TOOD: find a way to make a subset from possible_attributes
   # TODO: Add administration of minimal objects -> checked before publishing
   required_attributes = relationship('AttributeDefinition',
                                      secondary='objectdefinition_has_attributedefinitions',
-                                     backref='objects',
                                      order_by='AttributeDefinition.name')
 
   def validate(self):

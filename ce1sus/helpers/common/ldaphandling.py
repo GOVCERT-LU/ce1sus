@@ -11,7 +11,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-from dagr.helpers.debug import Log
+from ce1sus.helpers.common.debug import Log
 import ldap
 
 
@@ -29,6 +29,14 @@ class LDAPUser(object):
   @property
   def display_name(self):
     return u'{0} {1}'.format(self.sir_name, self.name)
+
+  def to_dict(self):
+    return {'username': self.uid,
+            'mail': self.mail,
+            'password': self.password,
+            'sirname': self.sir_name,
+            'name': self.name
+            }
 
 
 class LDAPException(Exception):

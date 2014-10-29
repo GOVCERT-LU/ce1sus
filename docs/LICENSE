@@ -21,13 +21,7 @@ This project uses the following software which is licensed as:
 Twitter Bootstrap CSS/JS framework 
 under the Apache v2.0 license.
 The license is included in the docs/licenses folder.
-The Bootstrap code has not been modified.
 URL: https://github.com/twitter/bootstrap
-
-jQuery v1.10.2:
-(c) 2005, 2013 jQuery Foundation, Inc.
-jquery.org/license
-URL: https://jquery.org
 
 DataTables:
 Allan Jardine (www.sprymedia.co.uk)
@@ -38,6 +32,28 @@ URL: http://www.datatables.net
 jsbase64
 Copyright Vassilis Petroulias [DRDigit]
 under the Apache v2.0 license.
-This code has not been modified
 URL: https://jsbase64.codeplex.com/
+
+angular-strap
+Copyright (c) 2012-2014 Olivier Louvignes http://olouv.com
+under the The MIT License
+The license is included in the docs/licenses folder.
+URL: https://github.com/mgcrea/angular-strap
+
+angular
+Copyright (c) 2010-2014 Google, Inc. http://angularjs.org
+under the The MIT License
+The license is included in the docs/licenses folder.
+URL: https://github.com/angular/angular.js
+
+restangular
+Copyright (c) 2013 Martin Gontovnikas http://www.gon.to/
+under the The MIT License
+URL: https://github.com/mgonto/restangular
+
+underscore
+Copyright (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative 
+Reporters & Editors
+under the The MIT License
+URL: https://github.com/jashkenas/underscore
 

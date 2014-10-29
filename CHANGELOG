@@ -6,6 +6,7 @@ Release 0.11.0
 * Code refactoring
 * New DB Objects, more adapted to STIX
 * Removed unused files
+* Webclient uses angularjs
 
 Release 0.10.3
 --------------

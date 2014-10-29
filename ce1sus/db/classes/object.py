@@ -30,33 +30,33 @@ _REL_OBJECT_OBJECT_ = Table(
 
 
 class ObjectBase(ExtendedLogingInformations):
-
+  """
   @declared_attr
-  def parent_id(self):
+  def parent_id(cls):
     return Column('parent_id',
                   BIGINT,
                   ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), index=True)
 
   @declared_attr
-  def parent(self):
+  def parent(cls):
     return relationship('Object',
                         uselist=False,
-                        primaryjoin='Object.parent_id==Object.identifier')
-
+                        primaryjoin='{0}.parent_id==Object.identifier'.format(cls.__name__))
+  """
   @declared_attr
-  def children(self):
+  def children(cls):
     return relationship('Object',
-                        primaryjoin='Object.identifier==Object.parent_id')
+                        primaryjoin='Object.identifier=={0}.parent_id'.format(cls.__name__))
 
   @declared_attr
-  def event_id(self):
+  def event_id(cls):
     return Column('parentEvent', BIGINT, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
 
   @declared_attr
-  def event(self):
+  def event(cls):
     return relationship('Event',
                         uselist=False,
-                        primaryjoin='Event.identifier==Object.event_id')
+                        primaryjoin='Event.identifier=={0}.event_id'.format(cls.__name__))
 
   @declared_attr
   def dbcode(self):
@@ -84,7 +84,8 @@ class ObjectBase(ExtendedLogingInformations):
 class ComposedObject(ObjectBase, Base):
   operator_id = Column('operator_id', BIGINT, default=None)
   # one to many
-  objects = relationship('Object')
+  # TODO
+  # objects = relationship('Object')
 
   @hybrid_property
   def attributes_count(self):
@@ -106,7 +107,8 @@ class Object(ObjectBase, Base):
   description = Column('description', Text)
   sighting = Column('sighting', Integer, default=1, nullable=False)
   # relationship of ObservableComposition one to many
-  rel_composition = relationship('ObservableComposition')
+  # TODO
+  # rel_composition = relationship('ComposedObject')
   rel_attributes = relationship('Attribute')
   operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)

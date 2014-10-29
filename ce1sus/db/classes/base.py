@@ -31,7 +31,7 @@ class SimpleLogingInformations(object):
 
   @declared_attr
   def creator(cls):
-    return relationship('User')
+    return relationship('User', primaryjoin='{0}.creator_id==User.identifier'.format(cls.__name__))
 
   @declared_attr
   def modifier_id(cls):
@@ -39,7 +39,7 @@ class SimpleLogingInformations(object):
 
   @declared_attr
   def modifier(cls):
-    return relationship('User')
+    return relationship('User', primaryjoin='{0}.modifier_id==User.identifier'.format(cls.__name__))
 
 
 class ExtendedLogingInformations(SimpleLogingInformations):
@@ -49,5 +49,5 @@ class ExtendedLogingInformations(SimpleLogingInformations):
 
   @declared_attr
   def creator_group(cls):
-    return relationship('Group')
+    return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(cls.__name__))
 

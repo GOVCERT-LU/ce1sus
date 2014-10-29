@@ -31,7 +31,7 @@ class Attribute(ExtendedLogingInformations, Base):
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
                             primaryjoin='AttributeDefinition.identifier==' +
-                            'Attribute.def_attribute_id')
+                            'Attribute.definition_id')
   object_id = Column('object_id', BIGINT, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
@@ -145,7 +145,7 @@ class Attribute(ExtendedLogingInformations, Base):
 
     :returns: Boolean
     """
-    ObjectValidator.validateDigits(self, 'def_attribute_id')
+    ObjectValidator.validateDigits(self, 'definition_id')
     # validate attribute value
     value_instance = self.__get_value_instance()
     # TODO: encoding error

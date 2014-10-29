@@ -18,6 +18,10 @@ from inspect import isfunction, ismethod
 from importlib import import_module
 
 
+class GenObject(object):
+    pass
+
+
 def get_class(modulename, classname):
   """returns the class name from a string"""
   splited_modulename = modulename.rsplit('.', 1)
@@ -88,6 +92,22 @@ def get_fields(obj):
         if name not in fields:
           fields.append(name)
   return fields
+
+
+def get_methods(obj):
+  """Returns the attributes of an object"""
+  methods = list()
+  for name in vars(type(obj)).iterkeys():
+    # if not a private or protected value and not a method
+      if not name.startswith('_') and callable(getattr(obj, name, None)):
+        methods.append(name)
+  if hasattr(obj, '__dict__'):
+    for name in obj.__dict__:
+      # if not a private or protected value and not a method
+      if not name.startswith('_') and callable(getattr(obj, name, None)):
+        if name not in methods:
+          methods.append(name)
+  return methods
 
 
 def compare_objects(object1, object2, raise_exceptions=True):

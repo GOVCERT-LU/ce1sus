@@ -5,14 +5,17 @@ Debugging module
 
 Created: Jul, 2013
 """
+import logging
+from logging.handlers import RotatingFileHandler
+from os import makedirs
+from os.path import exists, dirname
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import logging
-from logging.handlers import RotatingFileHandler
 
 
 class Log(object):
@@ -65,6 +68,9 @@ class Log(object):
       logger.setLevel(self.log_lvl)
       max_bytes = getattr(logger, "rot_maxBytes", log_file_size)
       backup_count = getattr(logger, "rot_backupCount", nbr_backups)
+      # TODO: create director
+      if not exists(dirname(self.log_file)):
+        makedirs(dirname(self.log_file))
       file_rotater = RotatingFileHandler(self.log_file, 'a', max_bytes,
                                          backup_count)
       file_rotater.setFormatter(self.__formatter)
