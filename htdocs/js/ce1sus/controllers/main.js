@@ -9,14 +9,23 @@
 
 
 
-ce1susApp.controller("mainController", function($scope) {
-  var $log = null;
-  //$scope.menus = menus;
-  //$scope.versionInformation = versions;
-
+ce1susApp.controller("mainController", function($scope, Restangular, messages,
+    $log, $routeSegment) {
+  
+  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
+    return handleError(response, messages);
+});
 
   
-  //scope functions
+  Restangular.one("version").get().then(function(version) {
+    $scope.version = version;
+  });
+  Restangular.oneUrl("text", "/welcome_message").get().then(function(changelog) {
+    $scope.changelog = changelog;
+  });
+  Restangular.allUrl("menus", "/menus/primary_menus").getList().then(function(menus) {
+    $scope.menus = menus;
+  });
   $scope.createSubmenus = function(submenus) {
     subMenuArray = [];
     angular.forEach(submenus, function(entry) {

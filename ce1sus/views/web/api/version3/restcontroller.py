@@ -140,7 +140,3 @@ class RestController(BaseView):
         raise
       else:
         raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))
-
-  def raise_exception(self, error, log=True):
-    self.logger.error(error)
-    return create_response(error)

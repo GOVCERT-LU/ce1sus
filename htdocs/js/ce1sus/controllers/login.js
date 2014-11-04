@@ -15,7 +15,7 @@ ce1susApp.controller("loginController", function($scope, Restangular, messages,
       if (data) {
         $log.info(data);
         // reload the whole window with the loggedin informations
-        $location.href="/";
+        window.location.href="/";
       }
     });
   };

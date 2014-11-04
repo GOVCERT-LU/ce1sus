@@ -14,15 +14,16 @@ ce1susApp.controller("objectController", function($scope, Restangular, messages,
 
 });
 
-ce1susApp.controller("objectDetailController", function($scope, Restangular, messages,
+ce1susApp.controller("objectDetailController", function($scope, $injector, Restangular, messages,
     $log, $routeSegment) {
+  $scope.object = {};
+  $scope.data = getLocals($routeSegment).data;
+  var identifier = $routeSegment.$routeParams.id;
+  Restangular.one("object",identifier).get(null,{"Complete": true}).then(function(data){
+    
+    $scope.object = data;
+  });
   
-  
-  
-  $scope.object = data;
-  
-  
-
   //scope functions
   $scope.removeObject = function(){
     //remove user from user list

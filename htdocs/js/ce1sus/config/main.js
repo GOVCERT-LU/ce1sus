@@ -40,36 +40,7 @@ ce1susApp.config(function($routeSegmentProvider, $routeProvider,
 
     .segment("home", {
       templateUrl : "pages/home.html",
-      controller : "mainController",
-      resolve: {
-        data: function($timeout) {
-        return $timeout(function() { return 'SLOW DATA CONTENT'; }, 2000);
-        }
-        /*
-        data : function(cfpLoadingBar, Restangular) {
-          cfpLoadingBar.start();
-
-            return Restangular.allUrl("menus", "/menus/primary_menus").getList().$object;
-        },
-        versions : function($timeout, cfpLoadingBar, Restangular) {
-          cfpLoadingBar.start();
-          return $timeout(function() {
-            cfpLoadingBar.complete();
-            return Restangular.one("version").get().$object;
-          }, 1);
-        },
-        welcome : function($timeout, cfpLoadingBar, Restangular) {
-          cfpLoadingBar.start();
-          return $timeout(function() {
-            cfpLoadingBar.complete();
-            return Restangular.oneUrl("text", "/welcome_message").get().$object;
-          }, 1);
-        }
-        */
-      },
-      resolveFailed : {
-        templateUrl : "pages/common/error.html"
-      }
+      controller : "mainController"
     })
 
     .segment("login", {
@@ -153,24 +124,15 @@ ce1susApp.config(function($routeSegmentProvider, $routeProvider,
             templateUrl: "pages/admin/object/objectdetail.html",
             controller: "objectDetailController",
             dependencies: ["id"],
-            resolve : {
-              data : function($timeout, cfpLoadingBar, $routeSegment, Restangular) {
-                cfpLoadingBar.start();
-                return $timeout(function() {
-                  cfpLoadingBar.complete();
-                  var identifier = $routeSegment.$routeParams.id;
-                  throw Exception('error');
-                  return Restangular.one("object",identifier).get(null,{"Complete": true}).$object;
-                }, 1);
+            resolve: {
+              data: function($timeout) {
+              return $timeout(function() { return 'SLOW DATA CONTENT'; }, 2000);
               }
-            },
-            untilResolved : {
-              templateUrl : "pages/common/loading.html"
             },
             resolveFailed : {
               templateUrl : "pages/common/error.html",
+   
             }
-            
             })
             
           .up()

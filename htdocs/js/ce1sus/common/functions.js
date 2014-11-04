@@ -39,3 +39,13 @@ function generateAPIKey(){
   var hash = shaObj.getHash("SHA-1", "HEX");
   return hash;
 }
+
+function getLocals(routeSegment){
+  //workaround
+  var lenght = routeSegment.chain.length;
+  if (lenght > 0) {
+    return routeSegment.chain[lenght-1].locals;
+  } else {
+    return {};
+  }
+}
