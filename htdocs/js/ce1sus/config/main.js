@@ -123,16 +123,7 @@ ce1susApp.config(function($routeSegmentProvider, $routeProvider,
             .segment("objectDetails", {
             templateUrl: "pages/admin/object/objectdetail.html",
             controller: "objectDetailController",
-            dependencies: ["id"],
-            resolve: {
-              data: function($timeout) {
-              return $timeout(function() { return 'SLOW DATA CONTENT'; }, 2000);
-              }
-            },
-            resolveFailed : {
-              templateUrl : "pages/common/error.html",
-   
-            }
+            dependencies: ["id"]
             })
             
           .up()
@@ -202,123 +193,6 @@ ce1susApp.config(function($routeSegmentProvider, $routeProvider,
             
           .up()
      .up();
-  // Also, we can add new item in a deep separately. This is useful when working
-  // with
-  // routes in every module individually
-
-  $routeSegmentProvider
-
-  .when("/events/:id/Z", "events.itemInfo.tab3")
-
-  .within("events").within("itemInfo").segment("tab3", {
-    templateUrl : "templates/section1/tabs/tab3.html"
-  });
-
-  // This is some usage of `resolve`, `untilResolved` and `resolveFailed`
-  // features
-
-  $routeSegmentProvider
-
-  .when("/invalid-template", "events.invalidTemplate").when("/invalid-data",
-      "events.invalidData").when("/slow-data", "events.slowDataSimple").when(
-      "/slow-data-loading", "events.slowDataLoading").when("/inline-view",
-      "events.inlineParent")
-      .when("/events/:id/slow", "events.itemInfo.tabSlow")
-
-      .within("events").segment("invalidTemplate", {
-        templateUrl : "this-does-not-exist.html", // 404
-        resolveFailed : {
-          templateUrl : "templates/error.html",
-          controller : "ErrorCtrl"
-        }
-      }).segment("invalidData", {
-        templateUrl : "templates/section1/home.html", // Correct!
-        resolve : {
-          data : function($q) {
-            return $q.reject("ERROR DESCRIPTION"); // Failed to load data
-          }
-        },
-        resolveFailed : {
-          templateUrl : "templates/error.html",
-          controller : "ErrorCtrl"
-        }
-      }).segment("slowDataSimple", {
-        templateUrl : "templates/section1/slow-data.html",
-        controller : "SlowDataCtrl",
-        resolve : {
-          data : function($timeout, cfpLoadingBar) {
-            cfpLoadingBar.start();
-            return $timeout(function() {
-              cfpLoadingBar.complete();
-              return "SLOW DATA CONTENT";
-            }, 2000);
-          }
-        }
-      })
-      // Dessen ass sou wei et sollt ausgesinn!!!!
-      .segment("slowDataLoading", {
-        templateUrl : "templates/section1/slow-data.html",
-        controller : "SlowDataCtrl",
-        resolve : {
-          data : function($timeout, cfpLoadingBar) {
-            cfpLoadingBar.start();
-            return $timeout(function() {
-              cfpLoadingBar.complete();
-              return "SLOW DATA CONTENT";
-            }, 2000);
-          }
-        },
-        untilResolved : {
-          templateUrl : "pages/common/loading.html"
-        },
-        resolveFailed : {
-          templateUrl : "templates/error.html",
-          controller : "ErrorCtrl"
-        }
-      }).segment("inlineParent", {
-        templateUrl : "templates/section1/inline-view.html"
-      }).within().segment("inlineChildren", {
-        // no template here
-        controller : "SlowDataCtrl",
-        "default" : true,
-        resolve : {
-          data : function($timeout, cfpLoadingBar) {
-            cfpLoadingBar.start();
-            return $timeout(function(cfpLoadingBar) {
-              cfpLoadingBar.complete();
-              return "SLOW DATA CONTENT";
-            }, 2000);
-          }
-        },
-        untilResolved : {
-          templateUrl : "pages/common/loading.html"
-        },
-        resolveFailed : {
-          templateUrl : "templates/error.html",
-          controller : "ErrorCtrl"
-        }
-      }).up()
-
-      .within("itemInfo").segment("tabSlow", {
-        templateUrl : "templates/section1/slow-data.html",
-        controller : "SlowDataCtrl",
-        resolve : {
-          data : function($timeout, cfpLoadingBar) {
-            cfpLoadingBar.start();
-            return $timeout(function() {
-              cfpLoadingBar.complete();
-              return "SLOW DATA CONTENT";
-            }, 2000);
-          }
-        },
-        untilResolved : {
-          templateUrl : "pages/common/loading.html"
-        },
-        resolveFailed : {
-          templateUrl : "templates/error.html",
-          controller : "ErrorCtrl"
-        }
-      });
 
   $routeProvider.otherwise({
     redirectTo : "/home"

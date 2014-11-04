@@ -16,9 +16,10 @@ ce1susApp.controller("mainController", function($scope, Restangular, messages,
     return handleError(response, messages);
 });
 
+  $scope.$routeSegment = $routeSegment;
   
   Restangular.one("version").get().then(function(version) {
-    $scope.version = version;
+    $scope.versionInformation = version;
   });
   Restangular.oneUrl("text", "/welcome_message").get().then(function(changelog) {
     $scope.changelog = changelog;
