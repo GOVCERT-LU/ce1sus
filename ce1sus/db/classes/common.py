@@ -33,8 +33,8 @@ class StaticBase(object):
       return identifier
     else:
       identifier = int(identifier)
-      if identifier in cls.get_dictionary().keys():
-        value = cls.get_dictionary()[identifier]
+      if identifier in cls.get_dictionary(cls).keys():
+        value = cls.get_dictionary(cls).get(identifier, None)
       if value:
         return value
       else:

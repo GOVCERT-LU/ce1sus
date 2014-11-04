@@ -68,7 +68,6 @@ class Log(object):
       logger.setLevel(self.log_lvl)
       max_bytes = getattr(logger, "rot_maxBytes", log_file_size)
       backup_count = getattr(logger, "rot_backupCount", nbr_backups)
-      # TODO: create director
       if not exists(dirname(self.log_file)):
         makedirs(dirname(self.log_file))
       file_rotater = RotatingFileHandler(self.log_file, 'a', max_bytes,

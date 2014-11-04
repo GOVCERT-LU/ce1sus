@@ -28,7 +28,7 @@ def plugin_web_method(method):
 
 
 def plugin_internal_method(method):
-  method.web_plugin = True
+  method.internal_plugin = True
   return method
 
 

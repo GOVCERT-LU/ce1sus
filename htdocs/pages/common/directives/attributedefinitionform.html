@@ -1,0 +1,108 @@
+<form name="addAttributeDefinitionForm" class="form-horizontal" role="form"
+  novalidate>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Identifier</label>
+    <div class="col-lg-9">
+      <input class="form-control" name="identifier"
+        ng-model="attribute.identifier" type="text" disabled>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Name *</label>
+    <div class="col-lg-9"">
+      <div
+        ng-class="{ 'has-error' : addAttributeDefinitionForm.name.$invalid && !addAttributeDefinitionForm.name.$pristine }">
+        <input class="form-control" name="name" ng-model="attribute.name"
+          type="text" required ng-minlength=3 ng-minlength=255
+          ng-pattern="/^[\d\w]+$/">
+        <p
+          ng-show="addAttributeDefinitionForm.name.$invalid && !addAttributeDefinitionForm.name.$pristine"
+          class="help-block">Name is required.</p>
+        <p ng-show="addAttributeDefinitionForm.name.$error.minlength"
+          class="help-block">Name is too short.</p>
+        <p ng-show="addAttributeDefinitionForm.name.$error.maxlength"
+          class="help-block">Name is too long.</p>
+        <p ng-show="addAttributeDefinitionForm.name.$error.pattern"
+          class="help-block">Name is not alphanumeric.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Description*</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addAttributeDefinitionForm.description.$invalid && !addAttributeDefinitionForm.description.$pristine }">
+        <textarea name="description" ng-model="attribute.description"
+          cols=48 rows=20 ng-minlength=3 required></textarea>
+        <p
+          ng-show="addAttributeDefinitionForm.description.$invalid && !addAttributeDefinitionForm.name.$pristine"
+          class="help-block">Description is required.</p>
+        <p ng-show="addAttributeDefinitionForm.description.$error.minlength"
+          class="help-block">Description is too short.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Regex *</label>
+    <div class="col-lg-9"">
+      <div
+        ng-class="{ 'has-error' : addAttributeDefinitionForm.regex.$invalid && !addAttributeDefinitionForm.regex.$pristine }">
+        <input class="form-control" name="regex" ng-model="attribute.regex"
+          type="text" required ng-minlength=3 ng-minlength=255>
+        <p
+          ng-show="addAttributeDefinitionForm.regex.$invalid && !addAttributeDefinitionForm.regex.$pristine"
+          class="help-block">Regex is required.</p>
+        <p ng-show="addAttributeDefinitionForm.regex.$error.minlength"
+          class="help-block">Regex is too short.</p>
+        <p ng-show="addAttributeDefinitionForm.regex.$error.maxlength"
+          class="help-block">Regex is too long.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">ValueTable:
+      *</label>
+    <div class="col-lg-9">
+      <select name="table_id" class="form-control"
+        ng-options="table.identifier as table.name for table in available_types"
+        ng-model="attribute.table_id">
+        <option style="display: none" value="">Select a Value</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Handler:
+      *</label>
+    <div class="col-lg-9">
+      <select name="attributehandler_id" class="form-control"
+        ng-options="handler.identifier as handler.name for handler in handlers"
+        ng-model="attribute.attributehandler_id" ng-change="handlerChange()">
+        <option style="display: none" value="">Select a Handler</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+      <label class="col-lg-3 control-label text-right">Options
+      </label>
+      <div class="col-lg-9">
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Relationable</label>
+          <div class="col-lg-9">
+            <input class="form-control" type="checkbox"
+              name="selectedOptions[]" value="relationable"
+              ng-model="attribute.relation" />
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Default Shareable</label>
+          <div class="col-lg-9">
+            <input class="form-control" type="checkbox"
+              name="selectedOptions[]" value="shareable"
+              ng-model="attribute.share" />
+          </div>
+        </div>
+      </div>
+    </div>
+</form>

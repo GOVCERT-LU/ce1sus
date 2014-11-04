@@ -1,0 +1,27 @@
+
+<div class="row">
+  <div class="col-lg-3">
+    <div class="btn-group">
+    <button type="button" class="btn btn-default" data-template="pages/admin/attribute/modals/addattributemodal.html" bs-modal="modal" >
+    Add new Attribute
+    </button>
+    </div>
+    <p/>
+  
+    <div class="well">
+
+      <ul class="nav nav-list">
+        <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
+        <li ng-class="{active: ('admin.attribute.help' | routeSegmentStartsWith)}">
+          <a href="#{{ 'admin.attribute' | routeSegmentUrl }}">Help</a>
+        </li>
+        <li class="nav-header"><i class="fa fa-bars"></i> Attribute Definitions</li>
+        <li ng-repeat="attribute_entry in attributes" ng-class="{active: ('admin.attribute.attributeDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == attribute_entry.identifier}">
+        <a ng-href="#{{ 'admin.attribute.attributeDetails' | routeSegmentUrl: {id: attribute_entry.identifier} }}">{{attribute_entry.name}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-9 anim" app-view-segment="2">
+  </div>
+</div>

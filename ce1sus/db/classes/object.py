@@ -11,9 +11,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, Unicode, Text, BIGINT
 
-from ce1sus.db.classes.base import ExtendedLogingInformations
+from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
 from ce1sus.db.classes.definitions import ObjectDefinition
+from ce1sus.db.classes.event import Event
 from ce1sus.db.common.session import Base
 
 
@@ -24,8 +25,8 @@ __license__ = 'GPL v3+'
 
 _REL_OBJECT_OBJECT_ = Table(
     'composed_object_relations', getattr(Base, 'metadata'),
-    Column('object_id', BIGINT, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade')),
-    Column('composedobject_id', BIGINT, ForeignKey('composedobjects.composedobject_id', onupdate='cascade', ondelete='cascade'))
+    Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade')),
+    Column('composedobject_id', Unicode(40), ForeignKey('composedobjects.composedobject_id', onupdate='cascade', ondelete='cascade'))
 )
 
 
@@ -50,7 +51,7 @@ class ObjectBase(ExtendedLogingInformations):
 
   @declared_attr
   def event_id(cls):
-    return Column('parentEvent', BIGINT, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+    return Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
 
   @declared_attr
   def event(cls):
@@ -67,6 +68,12 @@ class ObjectBase(ExtendedLogingInformations):
   @declared_attr
   def relation_id(self):
     return Column('relation_id', Integer)
+
+  @declared_attr
+  def parent_id(self):
+    return Column('parent_id',
+                  Unicode(40),
+                  ForeignKey('objects.object_id'))
 
   @property
   def properties(self):
@@ -109,11 +116,11 @@ class Object(ObjectBase, Base):
   # relationship of ObservableComposition one to many
   # TODO
   # rel_composition = relationship('ComposedObject')
-  rel_attributes = relationship('Attribute')
+  attributes = relationship('Attribute')
   operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)
-  definition_id = Column('definition_id', BIGINT, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship(ObjectDefinition)
+  definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+  definition = relationship('ObjectDefinition')
   type_id = Column('type_id', Integer(1))
 
   @hybrid_property

@@ -13,8 +13,7 @@ from ce1sus.controllers.login import LoginController
 from ce1sus.db.classes.user import UserRights
 from ce1sus.helpers.common.objects import GenObject
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require
-from ce1sus.views.web.common.common import create_response
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
 from ce1sus.views.web.common.decorators import SESSION_USER
 
 
@@ -47,14 +46,19 @@ class LoginHandler(RestBaseHandler):
              not ValueValidator.validateRegex(pwd, regex, 'errorMsg')):
             raise ControllerException(u'Illegal input')
           user = self.login_controller.get_user_by_usr_pwd(usr, pwd)
-          self.login_controller.update_last_login(user)
-          # put in session
-          self.__put_user_to_session(user)
-          self.logger.info('User "{0}" logged in'.format(user.username))
-      return create_response('User Logged in')
+          if user:
+            self.login_controller.update_last_login(user)
+            # put in session
+            self.__put_user_to_session(user)
+            self.logger.info('User "{0}" logged in'.format(user.username))
+          else:
+            self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
+            raise RestHandlerException('User or password are incorrect.')
+
+      return 'User Logged in'
     except ControllerException as error:
       self.logger.info(error)
-      return self.raise_exception(Exception('User or password are incorrect.'), False)
+      raise RestHandlerException('User or password are incorrect.')
 
   def __put_user_to_session(self, user):
     cherrypy.request.login = user.username
@@ -84,4 +88,4 @@ class LogoutHandler(RestBaseHandler):
   @require()
   def logout(self, **args):
     self._destroy_session()
-    return create_response('User logged out')
+    return 'User logged out'

@@ -1,0 +1,19 @@
+
+<div ng-controller="eventController">
+  <div class="row">
+    <div class="col-lg-2">
+      <div id="eventsTab" class="left-nav-group">
+
+        <div ng-repeat="entry in eventMenus" class="left-nav-group-item" ng-class="{active: ('{{entry.section}}' | routeSegmentStartsWith)}" >
+          <a href="#{{ entry.href | routeSegmentUrl }}" class="link">
+            <i class="fa {{entry.icon}}" ng-if="entry.icon"></i> {{entry.title}}
+          </a>
+          <div class="badge" ng-if="entry.reload" ng-click="reloadPage()">&#x21bb;</div>
+          <div class="badge" ng-if="event.eventID" ng-click="removeItem(event.eventID)">x</div>
+          <div style="clear: both;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-10" app-view-segment="1"></div>
+  </div>
+</div>

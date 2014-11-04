@@ -122,7 +122,7 @@ class BrokerBase(object):
                                                                           'identifier') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0}'.format(identifier))
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:

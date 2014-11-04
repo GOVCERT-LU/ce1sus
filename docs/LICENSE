@@ -23,17 +23,6 @@ under the Apache v2.0 license.
 The license is included in the docs/licenses folder.
 URL: https://github.com/twitter/bootstrap
 
-DataTables:
-Allan Jardine (www.sprymedia.co.uk)
-GPL v2 license
-Copyright 2008-2012 Allan Jardine, all rights reserved
-URL: http://www.datatables.net
-
-jsbase64
-Copyright Vassilis Petroulias [DRDigit]
-under the Apache v2.0 license.
-URL: https://jsbase64.codeplex.com/
-
 angular-strap
 Copyright (c) 2012-2014 Olivier Louvignes http://olouv.com
 under the The MIT License
@@ -49,11 +38,44 @@ URL: https://github.com/angular/angular.js
 restangular
 Copyright (c) 2013 Martin Gontovnikas http://www.gon.to/
 under the The MIT License
+The license is included in the docs/licenses folder.
 URL: https://github.com/mgonto/restangular
 
 underscore
 Copyright (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative 
 Reporters & Editors
 under the The MIT License
+The license is included in the docs/licenses folder.
 URL: https://github.com/jashkenas/underscore
+
+jsSHA
+Copyright Brian Turek 2008-2014
+under the BSD License
+The license is included in the docs/licenses folder.
+URL: http://caligatio.github.com/jsSHA
+
+jsSHA
+Copyright Brian Turek 2008-2014
+under the BSD License
+The license is included in the docs/licenses folder.
+URL: http://caligatio.github.com/jsSHA
+
+ngTable 
+Copyright Vitalii Savchuk(esvit666@gmail.com)
+under the BSD License
+The license is included in the docs/licenses folder.
+URL: https://github.com/esvit/ng-table
+
+angular-route-segment
+Artem Chivchalov
+under the The MIT License
+The license is included in the docs/licenses folder.
+URL: https://angular-route-segment.com
+
+angular-route-segment
+Copyright (c) 2014 Wes Cruver
+under the The MIT License
+The license is included in the docs/licenses folder.
+URL: ttps://chieffancypants.github.io/angular-loading-bar
+
 

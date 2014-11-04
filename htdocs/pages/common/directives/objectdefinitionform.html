@@ -1,0 +1,46 @@
+<form name="addObjectDefinitionForm" class="form-horizontal" role="form"
+  novalidate>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Identifier</label>
+    <div class="col-lg-9">
+      <input class="form-control" name="identifier"
+        ng-model="object.identifier" type="text" disabled>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Name *</label>
+    <div class="col-lg-9"">
+      <div
+        ng-class="{ 'has-error' : addObjectDefinitionForm.name.$invalid && !addObjectDefinitionForm.name.$pristine }">
+        <input class="form-control" name="name" ng-model="object.name"
+          type="text" required ng-minlength=3 ng-minlength=255
+          ng-pattern="/^[\d\w]+$/">
+        <p
+          ng-show="addObjectDefinitionForm.name.$invalid && !addObjectDefinitionForm.name.$pristine"
+          class="help-block">Name is required.</p>
+        <p ng-show="addObjectDefinitionForm.name.$error.minlength"
+          class="help-block">Name is too short.</p>
+        <p ng-show="addObjectDefinitionForm.name.$error.maxlength"
+          class="help-block">Name is too long.</p>
+        <p ng-show="addObjectDefinitionForm.name.$error.pattern"
+          class="help-block">Name is not alphanumeric.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Description*</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addObjectDefinitionForm.description.$invalid && !addObjectDefinitionForm.description.$pristine }">
+        <textarea name="description" ng-model="object.description"
+          cols=48 rows=20 ng-minlength=3 required></textarea>
+        <p
+          ng-show="addObjectDefinitionForm.description.$invalid && !addObjectDefinitionForm.name.$pristine"
+          class="help-block">Description is required.</p>
+        <p ng-show="addObjectDefinitionForm.description.$error.minlength"
+          class="help-block">Description is too short.</p>
+      </div>
+    </div>
+  </div>
+
+</form>

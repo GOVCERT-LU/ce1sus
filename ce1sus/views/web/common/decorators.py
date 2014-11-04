@@ -12,14 +12,10 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 import cherrypy
-import urllib
 
 SESSION_KEY = '_cp_username'
 SESSION_CONFIG = '_cp_config'
 SESSION_USER = '_cp_user'
-
-# TODO: Redo this
-
 
 def check_auth(*args, **kwargs):
   """A tool that looks in config for 'auth.require'. If found and it
@@ -61,3 +57,23 @@ def require(*conditions):
     return function
 
   return decorate
+
+
+def privileged():
+  """
+  Condition that verifies if the user has the privileged right set
+
+  Note: Should only be used as condition for the require decorator
+  """
+  def check():
+    """
+      Checks if the user has the privileged right
+    """
+    # should not be done like this :P
+    session = getattr(cherrypy, 'session')
+    user = session.get(SESSION_USER, None)
+    if user:
+      return user.permissions.privileged
+    else:
+      return False
+  return check

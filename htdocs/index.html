@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" ng-app="ce1susApp">
+<head>
+  <meta charset="utf-8">
+  <title>Ce1sus Library</title>
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="/css/app.css"/>
+  <link rel="stylesheet" href="/css/angularjs/loading-bar.min.css"/>
+  <link rel="stylesheet" href="/css/angularjs/ng-table.min.css"/>
+  <link rel="stylesheet" href="/css/ce1sus/ce1sus.css"/>
+
+
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular-route.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular-animate.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular-strap.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular-strap.tpl.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/angular-route-segment.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/loading-bar.min.js"></script>
+  <script type="text/javascript" src="/js/angularjs-1.3.0/ng-table.min.js"></script>
+  <script type="text/javascript" src="/js/sha1.js"></script>
+  
+  <script type="text/javascript" src="/js/restangular-1.4.0/restangular.min.js"></script>
+  <script type="text/javascript" src="/js/restangular-1.4.0/underscore-min.js"></script>
+
+  
+  <script type="text/javascript" src="/js/ce1sus/common/functions.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/ce1sus_app.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/config/main.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/main.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/login.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/event.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/admin/user.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/admin/group.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/admin/attribute.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/admin/object.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/admin/mail.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/controllers/plugins/ldaphandler.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/factories/factories.js"></script>
+  <script type="text/javascript" src="/js/ce1sus/directives/directives.js"></script>
+</head>
+<body class="ng-cloak" ng-controller="mainController">
+<div class="body-container">
+  <header>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header navbar-left">
+          <a class="navbar-brand" href="/">ce1sus Library</a>
+        </div>
+        
+        <ul class="nav navbar-nav navbar-right">
+        
+        
+          <li ng-repeat="entry in menus" ng-class="{active: (entry.section | routeSegmentStartsWith)}">
+            <a href="#{{entry.section | routeSegmentUrl}}" ng-if="!entry.submenus">
+              <i class="fa {{entry.icon}}" ng-if="entry.icon"></i> {{ entry.title}}
+            </a>
+          
+            <a data-toggle="dropdown" bs-dropdown="createSubmenus(entry.submenus)" ng-if="entry.submenus">
+              <i class="fa {{entry.icon}}" ng-if="entry.icon"></i> {{ entry.title}} <b class="caret"></b>
+              
+            </a>
+            </li>
+          </ul>
+
+         
+      </div>
+    </nav>
+  </header>
+  <div class="main-body">
+    <div id="alerts-container"></div>
+    {{ messages.getMessage() }}
+    <div ng-show="messages.getMessage()">
+      {{ messages.getMessage() }}
+    </div>
+    <div id="main" class="main-content">
+      <div class="row anim" app-view-segment="0"></div>
+    </div>
+  </div>
+    <footer>
+      <div class="row">
+        <div class="col-lg-6">
+        Version {{ versionInformation.application }}
+        </div>
+        <div class="col-lg-6">
+        Current route: <span ng-bind="$routeSegment.name"></span>
+        </div>
+      </div>
+      
+      
+    </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<div ng-controller="attributeDetailController"></div>
+<h3>Attribute details:</h3>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Identifier</label>
+  <div class="col-lg-9">{{attribute.identifier}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Name</label>
+  <div class="col-lg-9">{{attribute.name}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Description</label>
+  <div class="col-lg-9">
+    <textarea class="form-control" rows="3" disabled
+      style="background-color: #FFFFFF">{{attribute.description}}</textarea>
+  </div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Regex</label>
+  <div class="col-lg-9">{{attribute.regex}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Handler</label>
+  <div class="col-lg-9">{{attribute.attributehandler}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">ValueTable</label>
+  <div class="col-lg-9">{{attribute.table}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Options</label>
+  <div class="col-lg-9">
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Relationable:</label>
+      <div class="col-lg-9">
+        <input class="form-control" type="checkbox"
+          name="selectedOptions[]" value="relationable"
+          ng-model="attribute.relation" disabled/>
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Default
+        Shareable</label>
+      <div class="col-lg-9">
+        <input class="form-control" type="checkbox"
+          name="selectedOptions[]" value="shareable"
+          ng-model="attribute.share" disabled/>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/group/modals/editgroupmodal.html"
+        bs-modal="modal">Edit</button>
+      <button type="button" class="btn btn-danger" ng-click="removeGroup()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<add-rem-table title="'Attribute'" accociated="attribute.attributes"
+  all="attributes" add="foo" rem="foo" masked="attribute.identifier" />

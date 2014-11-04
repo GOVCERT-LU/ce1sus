@@ -7,9 +7,9 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, Text, Boolean, BIGINT
+from sqlalchemy.types import Integer, Text, Boolean, Unicode
 
-from ce1sus.db.classes.base import ExtendedLogingInformations
+from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
@@ -27,12 +27,12 @@ __license__ = 'GPL v3+'
 class Attribute(ExtendedLogingInformations, Base):
   description = Column('description', Text)
 
-  definition_id = Column('definition_id', BIGINT,
+  definition_id = Column('definition_id', Unicode(40),
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
                             primaryjoin='AttributeDefinition.identifier==' +
                             'Attribute.definition_id')
-  object_id = Column('object_id', BIGINT, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  object_id = Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
   # valuerelations
@@ -50,7 +50,7 @@ class Attribute(ExtendedLogingInformations, Base):
                               uselist=False)
   type_id = Column('type_id', Integer(1))
   is_ioc = Column('is_ioc', Boolean)
-  parent_id = Column('parent_id', BIGINT, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
+  parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
   dbcode = Column('code', Integer)
@@ -145,7 +145,6 @@ class Attribute(ExtendedLogingInformations, Base):
 
     :returns: Boolean
     """
-    ObjectValidator.validateDigits(self, 'definition_id')
     # validate attribute value
     value_instance = self.__get_value_instance()
     # TODO: encoding error

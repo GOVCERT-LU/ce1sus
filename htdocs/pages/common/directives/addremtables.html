@@ -1,0 +1,28 @@
+<h4>{{title}} Management:</h4>
+<div class="row">
+  <div class="col-sd-7 col-md-7 ">
+    <table border="0" cellpadding="5" width="100%">
+      <tbody>
+        <tr>
+          <td><label>Accociated {{title}}s:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="group.identifier as group.name for group in accociated"
+            ng-model="selected_accociated">
+          </select></td>
+          <td align="center">
+            <button class="btn btn-default" type="button"
+              ng-click="addRemTableRemove()">&gt;</button> <br>
+            <button class="btn btn-default" type="button"
+              ng-click="addRemTableAdd()">&lt;</button>
+          </td>
+          <td><label><b>Remaining</b> {{title}}s:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="rem_group.identifier as rem_group.name for rem_group in remaining"
+            ng-model="selected_remaining">
+          </select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

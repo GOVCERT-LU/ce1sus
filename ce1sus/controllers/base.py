@@ -5,8 +5,12 @@ for controllers.
 
 Created: Jul, 2013
 """
+from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
+from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.brokers.permissions.user import UserBroker
+from ce1sus.db.classes.user import User
 from ce1sus.db.common.session import SessionManager
+from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.debug import Log
 
 
@@ -47,6 +51,8 @@ class BaseController:
     self.__logger = Log(self.config)
     self.session_manager = SessionManager(config)
     self.user_broker = self.broker_factory(UserBroker)
+    self.group_broker = self.broker_factory(GroupBroker)
+    self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
 
   def broker_factory(self, clazz):
     """
@@ -74,3 +80,16 @@ class BaseController:
     # TODO: Log execption
     raise ControllerException(error)
 
+  def set_simple_logging(self, instance, user, insert=False):
+    if insert:
+      instance.creator_id = user.identifier
+      instance.created_at = DatumZait.utcnow()
+    instance.modifier_id = user.identifier
+    instance.modified_on = DatumZait.utcnow()
+
+  def set_extended_logging(self, instance, user, originating_group, insert=False):
+    self.set_simple_logging(instance, user, insert)
+    if insert:
+      group = user.group
+      instance.creator_group = group
+      instance.originating_group = originating_group

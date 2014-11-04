@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Table, Column, ForeignKey
 from sqlalchemy.types import Integer, Unicode, BIGINT, Text, Boolean
 
-from ce1sus.db.classes.base import SimpleLogingInformations
+from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
@@ -27,8 +27,8 @@ __license__ = 'GPL v3+'
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'objectdefinition_has_attributedefinitions', getattr(Base, 'metadata'),
     Column('oha_id', BIGINT, primary_key=True, nullable=False, index=True),
-    Column('attributedefinition_id', BIGINT, ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
-    Column('objectdefinition_id', BIGINT, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    Column('attributedefinition_id', Unicode(40), ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
+    Column('objectdefinition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 )
 
 
@@ -38,60 +38,6 @@ class DefinitionException(Exception):
 
 class AttributeDefinitionException(DefinitionException):
   pass
-
-
-class AttributeHandler(SimpleLogingInformations, Base):
-
-  module_classname = Column('moduleClassName', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', Text)
-  configuration = relationship('Ce1susConfig')
-  ce1sus_id = Column('ce1susconfig_id', BIGINT, ForeignKey('ce1susconfigs.ce1susconfig_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
-  __config = None
-
-  @property
-  def config(self):
-    """
-    Returns the global configuration for handlers
-    """
-    if self.__config is None:
-      config_str = getattr(self.configuration, 'value')
-      self.__config = json.loads(config_str)
-    return self.__config
-
-  @property
-  def classname(self):
-    """
-    Returns the class name of the handler
-    """
-    return self.module_classname.rsplit('.')[1]
-
-  @property
-  def module(self):
-    """
-    Returns the module of the handler
-    """
-    return self.module_classname.rsplit('.')[0]
-
-  @property
-  def clazz(self):
-    clazz = get_class('ce1sus.handlers.{0}'.format(self.module), self.classname)
-    return clazz
-
-  def create_instance(self):
-    """
-    creates an instantiated object
-    """
-    # instantiate
-    handler = self.clazz(self.config)
-    # check if handler base is implemented
-    if not isinstance(handler, HandlerBase):
-      raise HandlerException((u'{0} does not implement '
-                              + 'HandlerBase').format(self.module_classname))
-    return handler
-
-  def validate(self):
-    # TODO: Verify validation of AttributeHandler Object
-    return True
 
 
 class ObjectDefinition(SimpleLogingInformations, Base):
@@ -132,14 +78,35 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     return ObjectValidator.isObjectValid(self)
 
 
+  def to_dict(self, complete=True):
+    if complete:
+      return {'identifier': self.convert_value(self.identifier),
+              'name': self.convert_value(self.name),
+              'description': self.convert_value(self.description),
+              'chksum': self.convert_value(self.chksum)
+              }
+    else:
+      return {'identifier': self.identifier,
+              'name': self.name}
+
+  def populate(self, json):
+    self.name = json.get('name', None)
+    self.description = json.get('description', None)
+
+
 class AttributeDefinition(SimpleLogingInformations, Base):
 
   name = Column('name', Unicode(45), unique=True, nullable=False, index=True)
   description = Column('description', Text)
   chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
-  regex = Column('regex', Unicode(255), unique=True, nullable=False, default='^.+$')
+  regex = Column('regex', Unicode(255), unique=True, nullable=False, default=u'^.+$')
   table_id = Column('table_id', Integer, nullable=False, default=0)
-  attributehandler_id = Column('attributehandler_id', ForeignKey(AttributeHandler.identifier, onupdate='restrict', ondelete='restrict'), index=True)
+  attributehandler_id = Column('attributehandler_id', Unicode(40), ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
+  attribute_handler = relationship('AttributeHandler',
+                                   primaryjoin='AttributeHandler.identifier==AttributeDefinition.attributehandler_id',
+                                   lazy='joined',
+                                   cascade='all',
+                                   order_by='AttributeDefinition.name')
   deletable = Column('deletable', Boolean, default=True, nullable=False)
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
@@ -167,7 +134,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
       else:
         value = self.table_id
 
-      return ValueTable.get_by_id(value)
+      return ValueTable.get_by_id(ValueTable, value)
 
   def validate(self):
     """
@@ -186,16 +153,102 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                                   minLength=3,
                                   withSymbols=True)
     ObjectValidator.validateRegularExpression(self, 'regex')
-    ObjectValidator.validateDigits(self, 'table_id')
-    ObjectValidator.validateDigits(self, 'attributehandler_id')
+
     # check if handler is compatible with the class_index
-    allowed_classes = self.handler.get_allowed_types()
-    if not (self.class_index in allowed_classes):
-      class_index = self.class_index
-      self.class_index = FailedValidation(class_index,
+    allowed_tables = self.handler.get_allowed_types()
+    if not (self.table_id in allowed_tables):
+      self.class_index = FailedValidation(self.table_id,
                                           ('Class is not compatible "{0}".\n'
                                            'Supported classes are {1}').format(self.attribute_handler.classname,
-                                                                               self.__class_numbers_to_text(allowed_classes))
+                                                                               self.__class_numbers_to_text(allowed_tables))
                                           )
-
     return ObjectValidator.isObjectValid(self)
+
+  def to_dict(self, complete=True):
+    if complete:
+      return {'identifier': self.convert_value(self.identifier),
+              'name': self.convert_value(self.name),
+              'description': self.convert_value(self.description),
+              'attributehandler_id': self.convert_value(self.attributehandler_id),
+              'table_id': self.convert_value(self.table_id),
+              'relation': self.convert_value(self.relation),
+              'share': self.convert_value(self.share),
+              'regex': self.convert_value(self.regex),
+              }
+    else:
+      return {'identifier': self.identifier,
+              'name': self.name}
+
+  def populate(self, json):
+    self.name = json.get('name', None)
+    self.description = json.get('description', None)
+    self.attributehandler_id = json.get('attributehandler_id', None)
+    self.table_id = json.get('table_id', None)
+    relation = json.get('relation', 'false')
+    if relation == 'true':
+      relation = True
+    else:
+      relation = False
+    self.relation = relation
+    share = json.get('share', 'false')
+    if share == 'true':
+      share = True
+    else:
+      share = False
+    self.share = share
+    self.regex = json.get('regex', None)
+
+
+class AttributeHandler(Base):
+
+  module_classname = Column('moduleClassName', Unicode(255), nullable=False, unique=True, index=True)
+  description = Column('description', Text, nullable=False)
+
+  @property
+  def classname(self):
+    """
+    Returns the class name of the handler
+    """
+    return self.module_classname.rsplit('.', 1)[1]
+
+  @property
+  def module(self):
+    """
+    Returns the module of the handler
+    """
+    return self.module_classname.rsplit('.', 1)[0]
+
+  @property
+  def clazz(self):
+    clazz = get_class('ce1sus.handlers.{0}'.format(self.module), self.classname)
+    return clazz
+
+  def create_instance(self):
+    """
+    creates an instantiated object
+    """
+    # instantiate
+    handler = self.clazz()
+    # check if handler base is implemented
+    if not isinstance(handler, HandlerBase):
+      raise HandlerException((u'{0} does not implement '
+                              + 'HandlerBase').format(self.module_classname))
+    return handler
+
+  def validate(self):
+    # TODO: Verify validation of AttributeHandler Object
+    return True
+
+  def to_dict(self, complete=False):
+    result = list()
+    handler = self.create_instance()
+    allowed_tables = handler.get_allowed_types()
+    for allowed_table in allowed_tables:
+      name = ValueTable.get_by_id(ValueTable, allowed_table)
+      result.append({'identifier': allowed_table, 'name': name})
+
+    return {'description': self.convert_value(self.description),
+            'name': self.convert_value(self.classname),
+            'identifier': self.convert_value(self.identifier),
+            'allowed_tables': result
+    }

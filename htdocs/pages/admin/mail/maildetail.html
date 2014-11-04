@@ -1,0 +1,28 @@
+<div ng-controller="mailDetailController">
+<h3>Mail Template - {{mail.name}}:</h3>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Identifier</label>
+  <div class="col-lg-9">{{mail.identifier}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Subject</label>
+  <div class="col-lg-9">{{mail.subject}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Body</label>
+  <div class="col-lg-9"><textarea class="form-control" rows="20" disabled style="background-color: #FFFFFF">{{mail.body}}</textarea></div>
+</div>
+
+
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/mail/modals/editmailmodal.html"
+        bs-modal="modal">Edit</button>
+    </div>
+  </div>
+</div>
+
+</div>

@@ -142,11 +142,6 @@ class BaseView(object):
     self.logger.debug('Session returned')
     return session
 
-  def raise_exception(self, error, log=True):
-    if log:
-      self.logger.error(error)
-    return create_response(error)
-
   def user_authenticated(self):
     username = self._get_from_session(SESSION_KEY, None)
     return username

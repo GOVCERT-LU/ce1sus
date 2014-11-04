@@ -7,11 +7,11 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, Table, ForeignKey
-from sqlalchemy.types import Unicode, Integer, Text, Boolean, BIGINT
+from sqlalchemy.types import Unicode, Integer, Text, Boolean
 
-from ce1sus.db.classes.base import ExtendedLogingInformations
+from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
-from ce1sus.db.classes.permissions import Group, EventPermissions
+from ce1sus.db.classes.group import Group, EventPermissions
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
@@ -24,8 +24,8 @@ __license__ = 'GPL v3+'
 
 
 class EventGroupPermission(ExtendedLogingInformations, Base):
-  event_id = Column('event_id', BIGINT, ForeignKey('events.event_id'), nullable=False, index=True)
-  group_id = Column('group_id', BIGINT, ForeignKey('groups.group_id'), nullable=False, index=True)
+  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id'), nullable=False, index=True)
+  group_id = Column('group_id', Unicode(40), ForeignKey('groups.group_id'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
@@ -52,7 +52,7 @@ class Event(ExtendedLogingInformations, Base):
 
   group_premissions = relationship('EventGroupPermission')
   objects = relationship('Object',
-                         primaryjoin='and_(event.identifier==object.event_id, object.parent_object_id==None)')
+                         primaryjoin='and_(Event.identifier==Object.event_id, Object.parent_id==None)')
   __tlp_obj = None
   dbcode = Column('code', Integer)
   __bit_code = None

@@ -1,0 +1,29 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="groupAddController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$hide()">&times;</button>
+          <h4 class="modal-title">Add new Group</h4>
+        </div>
+        <div class="modal-body">
+          <group-form group="group" edit="false"/>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!groupChanged() || addGroupForm.$invalid"
+              ng-click="submitGroup()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetGroup()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="$hide()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

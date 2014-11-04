@@ -1,0 +1,109 @@
+<div ng-controller="userDetailController"></div>
+<h3>User details:</h3>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Identifier</label>
+  <div class="col-lg-9">{{user.identifier}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Name</label>
+  <div class="col-lg-9">{{user.name}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Sirname</label>
+  <div class="col-lg-9">{{user.sirname}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Username</label>
+  <div class="col-lg-9">{{user.username}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Password</label>
+  <div class="col-lg-9">{{user.password}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Email</label>
+  <div class="col-lg-9">{{user.email}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">GPG Key</label>
+  <div class="col-lg-9">{{user.gpg_key}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">API Key</label>
+  <div class="col-lg-9">{{user.api_key}}</div>
+</div>
+
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Permissions</label>
+  <div class="col-lg-9">
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Disabled</label>
+          <div class="col-lg-9">
+            <input type="checkbox" name="selectedPermissions[]"
+              value="disabled" ng-model="user.permissions.disabled"
+              disabled>
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Validate</label>
+          <div class="col-lg-9">
+            <input type="checkbox" name="selectedPermissions[]"
+              value="validate" ng-model="user.permissions.validate"
+              disabled>
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Priviledged</label>
+          <div class="col-lg-9">
+            <input type="checkbox" name="selectedPermissions[]"
+              value="priviledged"
+              ng-model="user.permissions.priviledged" disabled>
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Set
+            Groups</label>
+          <div class="col-lg-9">
+            <input type="checkbox" name="selectedPermissions[]"
+              value="set_group" ng-model="user.permissions.set_group"
+              disabled>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-lg-6"></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Group:</label>
+  <div class="col-lg-9">{{user.group_name}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Last logged
+    in</label>
+  <div class="col-lg-9">{{user.last_login}}</div>
+</div>
+
+
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/user/modals/editusermodal.html"
+        bs-modal="modal">Edit</button>
+      <button type="button" class="btn btn-primary">Re-send
+        mail</button>
+      <button type="button" class="btn btn-warning">Activate</button>
+      <button type="button" class="btn btn-danger" ng-click="removeUser()">Delete</button>
+    </div>
+  </div>
+</div>

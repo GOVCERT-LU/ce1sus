@@ -16,16 +16,17 @@ class BitBase(object):
 
   def __init__(self, bit_value, parentObj=None, attr_name='dbcode'):
     # TODO make an intvalue and check if between 0 and 15
+    self.__attr_name = attr_name
     value = int('{0}'.format(bit_value))
-    if (value >= 0) and (value <= 32):
+    if (value >= 0) and (value <= 64):
       bits = value
     else:
       bits = int('{0}'.format(bit_value), 2)
 
     self.__parent_object = parentObj
     self.__bit_value = bits
-    if hasattr(self.__parent_object, attr_name):
-      setattr(self.__parent_object, attr_name, self.bit_code)
+    if hasattr(self.__parent_object, self.__attr_name):
+      setattr(self.__parent_object, self.__attr_name, self.bit_code)
 
   @property
   def bit_code(self):
@@ -50,8 +51,8 @@ class BitBase(object):
       self._unset_bit(offset)
     if self.__parent_object is not None:
       # check if parent has the correct attribute
-      if hasattr(self.__parent_object, 'dbcode'):
-        self.__parent_object.dbcode = self.bit_code
+      if hasattr(self.__parent_object, self.__attr_name):
+        setattr(self.__parent_object, self.__attr_name, self.bit_code)
 
   def _count_set_bits(self, value):
     return bin(value).count('1')

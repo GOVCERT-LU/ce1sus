@@ -8,7 +8,7 @@ Created on Oct 17, 2014
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, BIGINT, Text, Numeric
+from sqlalchemy.types import Unicode, Text, Numeric
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
@@ -25,7 +25,7 @@ class ValueBase(object):
 
   @declared_attr
   def attribute_id(self):
-    return Column('attribute_id', BIGINT, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    return Column('attribute_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @declared_attr
   def attribute(self):
@@ -33,7 +33,7 @@ class ValueBase(object):
 
   @declared_attr
   def event_id(self):
-    return Column('event_id', BIGINT, ForeignKey('events.event_id'))
+    return Column('event_id', Unicode(40), ForeignKey('events.event_id'))
 
   @declared_attr
   def event(self):

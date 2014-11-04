@@ -8,7 +8,7 @@ Created on Oct 20, 2014
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Unicode, Text
 
-from ce1sus.db.classes.base import SimpleLogingInformations
+from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.common.session import Base
 
 

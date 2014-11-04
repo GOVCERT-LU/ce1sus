@@ -1,0 +1,200 @@
+@CHARSET "UTF-8";
+
+html,
+body {
+   margin:0;
+   padding:0;
+   height:100%;
+}
+
+.body-container {
+   min-height:100%;
+   position:relative;
+}
+.main-body {
+   padding-bottom:25px;
+}
+
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 20px;
+	background-color: #f5f5f5;
+}
+
+
+
+.left-nav-group {
+  padding-left: 0;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width:100%;
+}
+
+.left-nav-group-item {
+  position: relative;
+  display: block;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  cursor: pointer;
+}
+.left-nav-group-item:hover,
+.left-nav-group-item:focus {
+  text-decoration: none;
+  color: #000000;
+  background-color: #f5f5f5;
+}
+
+.left-nav-group-item:first-child {
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.left-nav-group-item:last-child {
+  margin-bottom: 0;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.left-nav-group-item > .link {
+  float: left;
+  position: relative;
+  display: block;
+  padding: 5px 10px;
+  width: 80%;
+  
+}
+
+.left-nav-group-item > .link:nth-last-child(2) {
+  width: 100%;
+}
+
+.left-nav-group-item > .badge {
+  float: right;
+  margin-top: 5px;
+  margin-right: 5px;
+  width:15%;
+  z-index:+1;
+}
+.left-nav-group-item > .badge:after {
+  clear: both;
+}
+
+.left-nav-group-item > .badge + .badge {
+  margin-right: 5px;
+}
+
+.left-nav-group-item > .badge:hover,
+.left-nav-group-item > .badge:focus {
+  text-decoration: none;
+  background-color: #880000;
+}
+
+.left-nav-group-item.active,
+.left-nav-group-item.active > .link,
+.left-nav-group-item.active > .link:hover,
+.left-nav-group-item.active > .link:focus {
+  z-index: 2;
+  color: #FFFFFF;
+  background-color: #428bca;
+  border-color: #428bca;
+}
+
+.main-content {
+  padding-right: 30px;
+  padding-left: 30px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.modal-backdrop.am-fade {
+  opacity: .5;
+  transition: opacity .15s linear;
+  &.ng-enter {
+    opacity: 0;
+    &.ng-enter-active {
+      opacity: .5;
+    }
+  }
+  &.ng-leave {
+    opacity: .5;
+    &.ng-leave-active {
+      opacity: 0;
+    }
+  }
+}
+
+.ce1sus-spinner-box {
+	padding: 10px;
+}
+
+
+.ce1sus-spinner-box .ce1sus-spinner-icon {
+  width: 14px;
+  height: 14px;
+  border: solid 2px transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 10px;
+  -webkit-animation: loading-bar-spinner 400ms linear infinite;
+  -moz-animation: loading-bar-spinner 400ms linear infinite;
+  -ms-animation: loading-bar-spinner 400ms    inear infinite;
+  -o-animation: loading-bar-spinner 400ms linear infinite;
+  animation: loading-bar-spinner 400ms linear infinite;
+}
+
+.nav-list {
+padding-left: 15px;
+padding-right: 15px;
+margin-bottom: 0;
+}
+ 
+.nav-list > li > a,
+.nav-list .nav-header {
+margin-left: -15px;
+margin-right: -15px;
+text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+}
+ 
+.nav-list > li > a {
+padding: 3px 15px;
+}
+ 
+.nav-list > .active > a,
+.nav-list > .active > a:hover,
+.nav-list > .active > a:focus {
+color: white;
+text-shadow: 0 -1px 0 rgba(0, 0, 0, .2);
+background-color: #08c;
+}
+ 
+.nav-list [class^="icon-"],
+.nav-list [class*=" icon-"] {
+margin-right: 2px;
+}
+ 
+.nav-list .divider {
+*width: 100%;
+height: 1px;
+margin: ((1.428571429 / 2) - 1) 1px; // 8px 1px
+*margin: -5px 0 5px;
+overflow: hidden;
+background-color: #428bca;
+border-bottom: 1px solid white;
+}
+ 
+.nav-header {
+display: block;
+padding: 3px 15px;
+font-size: 11px;
+font-weight: bold;
+line-height: 1.428571429;
+color: #999;
+text-shadow: 0 1px 0 rgba(255,255,255,.5);
+text-transform: uppercase;
+}
+// Space them out when they follow another list item (link)
+.nav li + .nav-header {
+margin-top: 9px;
+}

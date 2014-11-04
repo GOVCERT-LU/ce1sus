@@ -12,7 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.pool import Pool
 from sqlalchemy.schema import Column
-from sqlalchemy.types import BIGINT, Unicode
+from sqlalchemy.types import Unicode
 import uuid
 from datetime import datetime
 
@@ -37,11 +37,7 @@ class Base(object):
 
   @declared_attr
   def identifier(cls):
-    return Column(u'{0}_id'.format(cls.__name__.lower()), BIGINT, primary_key=True, nullable=False, index=True)
-
-  @declared_attr
-  def uuid(cls):
-    return Column('uuid', Unicode(45), default=uuid.uuid4(), nullable=False, index=True)
+    return Column(u'{0}_id'.format(cls.__name__.lower()), Unicode(45), primary_key=True, default=uuid.uuid4, nullable=False, index=True)
 
   @abstractmethod
   def validate(self):

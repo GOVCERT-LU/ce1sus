@@ -1,0 +1,30 @@
+
+<div class="row">
+  <div class="col-lg-3">
+    <div class="btn-group">
+    <button type="button" class="btn btn-default" data-template="pages/admin/user/modals/addusermodal.html" bs-modal="modal" >
+    Add new User
+    </button>
+    <button type="button" class="btn btn-default" data-template="pages/admin/user/modals/addldapuser.html" bs-modal="modal" ng-show="showLdapBtn">
+    Add LDAP User
+    </button>
+    </div>
+    <p/>
+    <div class="well">
+      
+      <ul class="nav nav-list">
+        <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
+        <li ng-class="{active: ('admin.user.help' | routeSegmentStartsWith)}">
+          <a href="#{{ 'admin.user' | routeSegmentUrl }}">Help</a>
+        </li>
+        <li class="nav-header"><i class="fa fa-users"></i> Users</li>
+        <li ng-repeat="user_entry in users" ng-class="{active: ('admin.user.userDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == user_entry.identifier}">
+        <a ng-href="#{{ 'admin.user.userDetails' | routeSegmentUrl: {id: user_entry.identifier} }}">{{user_entry.username}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-9 anim" app-view-segment="2">
+  </div>
+</div>
+

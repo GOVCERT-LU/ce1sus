@@ -1,0 +1,111 @@
+<div ng-controller="groupDetailController"></div>
+<h3>Group details:</h3>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Identifier</label>
+  <div class="col-lg-9">{{group.identifier}}</div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Name</label>
+  <div class="col-lg-9">{{group.name}}</div>
+</div></div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Description</label>
+  <div class="col-lg-9"><textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{group.description}}</textarea></div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Permissions:
+  </label>
+  <div class="col-lg-9">
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Can download files</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="downloadfiles"
+          ng-model="group.permissions.downloadfiles" disabled>
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">TLP Propagation</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="propagate_tlp"
+          ng-model="group.permissions.propagate_tlp" disabled>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Default Event permissions:
+  </label>
+  <div class="col-lg-9">
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">View</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="view"
+          ng-model="group.default_event_permissions.view" disabled>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Add</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="add"
+          ng-model="group.default_event_permissions.add" disabled>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">View</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="view"
+          ng-model="group.default_event_permissions.view" disabled>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Modify</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="modify"
+          ng-model="group.default_event_permissions.modify" disabled>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Validate</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="validate"
+          ng-model="group.default_event_permissions.validate" disabled>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Propose</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="selectedPermissions[]"
+          value="propose"
+          ng-model="group.default_event_permissions.propose" disabled>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/group/modals/editgroupmodal.html"
+        bs-modal="modal">Edit</button>
+      <button type="button" class="btn btn-danger" ng-click="removeGroup()">Delete</button>
+    </div>
+  </div>
+</div>
+<add-rem-table title="'Group'" accociated="group.children" all="groups" add="foo" rem="foo" masked="group.identifier"/>

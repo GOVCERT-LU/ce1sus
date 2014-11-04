@@ -5,12 +5,14 @@
 
 Created on Oct 28, 2014
 """
+from _mysql import result
 import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, DateTime, Text, Integer, BIGINT
 
-from ce1sus.db.classes.permissions import Group
+from ce1sus.db.classes.basedbobject import SimpleLogingInformations
+from ce1sus.db.classes.group import Group
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -38,7 +40,7 @@ class UserRights(BitBase):
 
   @property
   def access_admin_area(self):
-    return self.activated or self.privileged or self.validate
+    return (not self.disabled) or self.privileged or self.validate
 
   @property
   def privileged(self):
@@ -49,12 +51,12 @@ class UserRights(BitBase):
     self._set_value(UserRights.PRIVILEGED, value)
 
   @property
-  def activated(self):
-    return self._get_value(UserRights.ACTIVATED)
+  def disabled(self):
+    return not self._get_value(UserRights.ACTIVATED)
 
-  @activated.setter
-  def activated(self, value):
-    self._set_value(UserRights.ACTIVATED, value)
+  @disabled.setter
+  def disabled(self, value):
+    self._set_value(UserRights.ACTIVATED, not value)
 
   @property
   def validate(self):
@@ -72,6 +74,27 @@ class UserRights(BitBase):
   def set_group(self, value):
     self._set_value(UserRights.SET_GROUP, value)
 
+  @staticmethod
+  def append_to_string(text, string):
+    result = text
+    if len(result) > 1:
+      result = u'{0},{1}'.format(result, string)
+    else:
+      result = u'{0}{1}'.format(result, string)
+    return result
+
+  def to_dict(self):
+    return {'disabled': self.disabled,
+            'priviledged': self.privileged,
+            'set_group': self.set_group,
+            'validate': self.validate}
+
+  def populate(self, json):
+    self.privileged = json.get('priviledged', False)
+    self.disabled = json.get('disabled', False)
+    self.set_group = json.get('set_group', False)
+    self.validate = json.get('validate', False)
+
 
 class User(Base):
   name = Column('name', Unicode(255), nullable=False)
@@ -87,12 +110,13 @@ class User(Base):
   activation_str = Column('activation_str', Unicode(255))
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
-  group_id = Column('group_id', BIGINT, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
+  group_id = Column('group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
   group = relationship(Group, backref='users')
+  plain_password = None
 
   @property
   def can_access(self):
-    return self.permissions.activated and self.is_activated
+    return (not self.permissions.disabled) and self.is_activated
 
   @property
   def is_activated(self):
@@ -136,7 +160,7 @@ class User(Base):
                                     'Password has to be set and contain Upper and Lower cases, symbols and numbers and have at least a length of 8'
                                     )
 
-    # ObjectValidator.validateEmailAddress(self, 'email')
+    ObjectValidator.validateEmailAddress(self, 'email')
     ObjectValidator.validateAlNum(self, 'name', minLength=3, withSymbols=True)
     ObjectValidator.validateAlNum(self, 'sirname', minLength=3, withSymbols=True)
 
@@ -149,21 +173,44 @@ class User(Base):
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self):
-    return {'name': self.convert_value(self.name),
-            'activated': self.convert_value(self.activated),
-            'activation_send': self.convert_value(self.activation_sent),
-            'activation_str': self.convert_value(self.activation_str),
-            'api_key': self.convert_value(self.api_key),
-            'dbcode': self.convert_value(self.dbcode),
-            'email': self.convert_value(self.email),
-            'gpg_key': self.convert_value(self.gpg_key),
-            'ĝroup_id': self.convert_value(self.group_id),
-            # TODO: add group to dict fct
-            'group': self.convert_value(None),
-            'last_login': self.convert_value(self.last_login),
-            # TODO: decide if you leave that in or only show EXTERNALAUT !?
-            'password': self.convert_value(self.password),
-            'sirname': self.convert_value(self.sirname),
-            'username': self.convert_value(self.username),
-            }
+  def to_dict(self, complete=True):
+    if complete:
+      return {'identifier': self.convert_value(self.identifier),
+              'name': self.convert_value(self.name),
+              'activated': self.convert_value(self.activated),
+              'activation_send': self.convert_value(self.activation_sent),
+              'activation_str': self.convert_value(self.activation_str),
+              'api_key': self.convert_value(self.api_key),
+              'dbcode': self.convert_value(self.dbcode),
+              'email': self.convert_value(self.email),
+              'gpg_key': self.convert_value(self.gpg_key),
+              'group_id': self.convert_value(self.group_id),
+              'permissions': self.permissions.to_dict(),
+              # TODO: add group to dict fct
+              'group': None,
+              'last_login': self.convert_value(self.last_login),
+              'password': self.convert_value(self.password),
+              'sirname': self.convert_value(self.sirname),
+              'username': self.convert_value(self.username)
+              }
+    else:
+      return {'identifier': self.identifier,
+              'username': self.username
+              }
+
+  def populate(self, json):
+    self.name = json.get('name', None)
+    self.email = json.get('email', None)
+    self.gpg_key = json.get('gpg_key', None)
+    self.api_key = json.get('api_key', None)
+    self.sirname = json.get('sirname', None)
+    self.username = json.get('username', None)
+    group_id = json.get('group_id', None)
+    if group_id:
+      self.group_id = group_id
+    else:
+      self.group_id = None
+    self.plain_password = json.get('password', None)
+    # permissions setting
+    self.permissions.populate(json.get('permissions', {}))
+    # TODO add group

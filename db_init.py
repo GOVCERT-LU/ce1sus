@@ -7,12 +7,22 @@ Created on Oct 16, 2014
 """
 
 
+from datetime import datetime
 import os
+import sqlalchemy.exc
 
-from ce1sus.db.classes.config import Ce1susConfig
-from ce1sus.db.classes.permissions import Group, User
+from ce1sus.db.classes.attribute import Attribute
+from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition, AttributeHandler
+from ce1sus.db.classes.mailtemplate import MailTemplate
+from ce1sus.db.classes.object import Object
+from ce1sus.db.classes.user import User
 from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
+from apt_pkg import Group
+from ce1sus.db.classes.relation import Relation
+from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, \
+  TextValue
+from ce1sus.db.classes.event import Event
 
 
 __author__ = 'Weber Jean-Paul'
@@ -33,18 +43,77 @@ if __name__ == '__main__':
   engine = session.connector.get_engine()
   Base.metadata.create_all(engine, checkfirst=True)
 
+  mysql_session = session.connector.get_direct_session()
+  session = mysql_session.get_session()
+
   # Add admin user
   user = User()
   user.name = 'Root'
   user.sirname = 'Administrator'
   user.username = 'admin'
-  user.spassword = 'admin'
-  user.slast_login = None
-  user.semail = None
-  user.sapi_key = None
-  user.sgpg_key = None
-  user.sactivated = None
-  user.sactivation_sent = None
-  user.sactivation_str = None
-  session.connector.get_direct_session().get_session().add(user)
+  user.password = 'dd94709528bb1c83d08f3088d4043f4742891f4f'
+  user.last_login = None
+  user.email = 'admin@example.com'
+  user.api_key = None
+  user.gpg_key = None
+  user.activated = datetime.now()
+  user.dbcode = 31
+  user.activation_sent = None
+  user.activation_str = None
+  session.add(user)
+  try:
+    session.flush()
+  except sqlalchemy.exc.IntegrityError:
+    pass
+
+  mail = MailTemplate()
+  mail.name = 'Activation'
+  mail.body = 'Mail Body'
+  mail.subject = 'User Registration'
+  mail.creator = user
+  mail.modifier = user
+  session.add(mail)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  mail = MailTemplate()
+  mail.name = 'Update'
+  mail.body = 'Mail Body'
+  mail.subject = 'Event[${event_id}] ${event_uuid} Updated - ${event_tlp} - ${event_risk} - ${event_title}'
+  mail.creator = user
+  mail.modifier = user
+  session.add(mail)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  mail = MailTemplate()
+  mail.name = 'Publication'
+  mail.body = 'Mail Body'
+  mail.subject = 'Event[${event_id}] ${event_uuid} Published - ${event_tlp} - ${event_risk} - ${event_title}'
+  mail.creator = user
+  mail.modifier = user
+  session.add(mail)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  mail = MailTemplate()
+  mail.name = 'Notification'
+  mail.body = 'Mail Body'
+  mail.subject = 'Event[${event_id}] ${event_uuid} Notification - ${event_tlp} - ${event_risk} - ${event_title}'
+  mail.creator = user
+  mail.modifier = user
+  session.add(mail)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  session.commit()
+
   session.close()

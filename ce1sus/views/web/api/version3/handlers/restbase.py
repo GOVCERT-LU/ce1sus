@@ -6,7 +6,10 @@
 Created on Feb 5, 2014
 """
 
+import cherrypy
+
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.views.web.common.decorators import SESSION_USER
 
 
 __author__ = 'Weber Jean-Paul'

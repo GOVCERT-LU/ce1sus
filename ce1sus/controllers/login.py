@@ -7,8 +7,8 @@ Created on Oct 26, 2014
 """
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
-from ce1sus.helpers.common.datumzait import DatumZait
-from ce1sus.helpers.common.ldaphandling import LDAPHandler
+from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
+from ce1sus.plugins.base import PluginException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -25,7 +25,6 @@ class LoginController(BaseController):
 
   def __init__(self, config):
     BaseController.__init__(self, config)
-    self.ldap_handler = LDAPHandler(config)
 
   def get_user_by_usr_pwd(self, username, password):
     """
@@ -41,45 +40,39 @@ class LoginController(BaseController):
     try:
       user = None
       try:
-        if self.config.get('ce1sus', 'useldap', False):
+        # check if ldap plugin is available
+        if is_plugin_available('ldap', self.config):
+          ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
           try:
-            user = self.user_broker.getUserByUsernameAndPassword(username,
-                                                                 'EXTERNALAUTH')
-          except NothingFoundException as error:
+            user = self.user_broker.getUserByUsernameAndPassword(username, ldap_password_identifier)
+            # user is present in DB, check if usr and pwd matching
+            method = get_plugin_function('ldap', 'is_user_valid', self.config, 'internal_plugin')
+            valid = method(username, password)
+            if not valid:
+              user = None
+          except (NothingFoundException, PluginException) as error:
             user = None
 
+        # check if user is a pure DBUser
         if user is None:
           # the user was not specified as ldap user use traditional login
           user = self.user_broker.getUserByUsernameAndPassword(username, password)
-        else:
-          # the user was specified as ldap user
-          valid = self.ldap_handler.is_valid_user(username, password)
-          if not valid:
-            user = None
+
       except NothingFoundException as error:
         self.logger.info(('A login attempt was made with username "{0}" '
                           + 'but the user was not defined.').format(username))
       except BrokerException as error:
         self.logger.critical(error)
+
       if user:
         # check if a user was found and if it was not disabled
-        self.__check_user(user)
+        self.logger.debug('Checking if user {0} is allowed'.format(user.username))
+        if user.can_access:
+          return user
       else:
-        self.raise_exception('User was none, leads to a compromized db')
-      return user
+        self.raise_exception('No user was found matching the given username and password')
     except BrokerException as error:
       self.raise_exception(error)
-
-  def __check_user(self, user):
-    """Checks if the user is allowed to login"""
-    self.logger.debug('Checking if user {0} is allowed'.format(user.username))
-    if user:
-      if user.can_access:
-        return user
-      else:
-        raise BrokerException('User {0} is not allowed'.format(user.username))
-    else:
-      raise BrokerException('User {0} is not allowed'.format(user.username))
 
   def update_last_login(self, user):
     """

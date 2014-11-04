@@ -8,9 +8,17 @@ Created on Oct 23, 2014
 import cherrypy
 
 from ce1sus.helpers.common.objects import get_methods
+from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
+from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
+from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import AdminObjectHandler
+from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
+from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.misc import VersionHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, \
+  HandlerHandler, TablesHandler
+from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.views.web.common.common import create_response
 from ce1sus.views.web.common.decorators import SESSION_KEY
 
 
@@ -25,10 +33,17 @@ class RestController(BaseView):
   def __init__(self, config):
     BaseView.__init__(self, config)
     self.instances = dict()
-    # add instances known to rest
+    # add instances known to rest and their first URL
     self.instances['login'] = LoginHandler(config)
     self.instances['logout'] = LogoutHandler(config)
     self.instances['version'] = VersionHandler(config)
+    self.instances['user'] = AdminUserHandler(config)
+    self.instances['group'] = AdminGroupHandler(config)
+    self.instances['mail'] = MailHandler(config)
+    self.instances['object'] = AdminObjectHandler(config)
+    self.instances['attribute'] = AdminAttributeHandler(config)
+    self.instances['handlers'] = HandlerHandler(config)
+    self.instances['tables'] = TablesHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):
@@ -61,61 +76,71 @@ class RestController(BaseView):
   @cherrypy.tools.json_out()
   @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
   def default(self, *vpath, **params):
-    parameters = list()
-    handler = None
-    # the first element in vpath is the name of the handler to use
-    # the remaining elements are the parameters for the handler
-    first_element = True
-    for node in vpath:
-      if first_element:
-        handler = node
-        first_element = False
-      else:
-        parameters.append(node)
-
-    if not handler:
-      return self.raise_exception(Exception('Root requests are not allowed'))
-
-    # check if parameters are set, when then raise an error as they are not supported
-    if params:
-      return self.raise_exception(Exception('Parameters are not supported'))
-
-    # get the requested handler
-    handler_instance = self.instances.get(handler, None)
-
-    if not handler_instance:
-      return self.raise_exception(Exception('Handler "{0}" is not defined'.format(handler)))
-
-    # get default access point of the handler
-    method_name = RestController.find_default_method_name(handler_instance)
-
-    if not method_name:
-      return self.raise_exception(Exception('Handler {0} has no default method'.format(handler_instance.name)))
-
-    http_method = cherrypy.request.method
-
-    json = {}
-    if hasattr(cherrypy.request, 'json'):
-      json = cherrypy.request.json
-
-    method = getattr(handler_instance, method_name, None)
-
-    if hasattr(method, 'rest_method'):
-      # check if the is a requirement
-      if hasattr(method, 'require_auth_flag'):
-        conditions = method.require_auth
-        self.__check_requirements(conditions)
-
-      # check if http_method is allowed on function
-      if hasattr(method, 'allowed_http_methods'):
-        if http_method in method.allowed_http_methods:
-          result = method(parameters=parameters, json=json)
-          # execute method
-          return result
+    try:
+      path = list()
+      handler = None
+      # the first element in vpath is the name of the handler to use
+      # the remaining elements are the parameters for the handler
+      first_element = True
+      for node in vpath:
+        if first_element:
+          handler = node
+          first_element = False
         else:
-          return self.raise_exception(Exception('Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)))
-      else:
-        return self.raise_exception(Exception('Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)))
+          path.append(node)
 
-    else:
-      return self.raise_exception(Exception('Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)))
+      if not handler:
+        return self.raise_exception(Exception('Root requests are not allowed'))
+
+      # get the requested handler
+      handler_instance = self.instances.get(handler, None)
+
+      if not handler_instance:
+        return self.raise_exception(Exception('Handler "{0}" is not defined'.format(handler)))
+
+      # get default access point of the handler
+      method_name = RestController.find_default_method_name(handler_instance)
+
+      if not method_name:
+        return self.raise_exception(Exception('Handler {0} has no default method'.format(handler_instance.name)))
+
+      http_method = cherrypy.request.method
+
+      json = {}
+      if hasattr(cherrypy.request, 'json'):
+        json = cherrypy.request.json
+
+      method = getattr(handler_instance, method_name, None)
+
+      if hasattr(method, 'rest_method'):
+        # check if the is has requriements
+        if hasattr(method, 'require_auth_flag'):
+          conditions = method.require_auth
+          self.__check_requirements(conditions)
+
+        # check if http_method is allowed on function
+        if hasattr(method, 'allowed_http_methods'):
+          if http_method in method.allowed_http_methods:
+            try:
+              headers = cherrypy.request.headers
+              result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
+              # execute method
+              return create_response(result)
+            except RestHandlerException as error:
+              return self.raise_exception(error)
+          else:
+            return self.raise_exception(Exception('Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)))
+        else:
+          return self.raise_exception(Exception('Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)))
+
+      else:
+        return self.raise_exception(Exception('Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)))
+    except Exception as error:
+      if self.config.get('ce1sus', 'environment', None) == 'LOCAL_DEV':
+        raise
+      else:
+        return self.raise_exception(error)
+
+  def raise_exception(self, error, log=True):
+    self.logger.error(error)
+    return create_response(error)
