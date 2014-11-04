@@ -44,15 +44,14 @@ ce1susApp.factory("messages", function($rootScope, $alert, messageQueue) {
       
   };
 });
-
+/*
 ce1susApp.factory('$exceptionHandler', function( $injector, messageQueue) {
   return function(exception, cause) {
     
     var $rootScope = $injector.get("$rootScope");
     //put the unmodified data back incase there is an error
     var $routeSegment = $injector.get("$routeSegment");
-    $routeSegment.chain[$routeSegment.chain.length-1].reload();
-    
+
     var type = 'danger';
     var message = exception.message;
     if (cause) {
@@ -67,3 +66,4 @@ ce1susApp.factory('$exceptionHandler', function( $injector, messageQueue) {
     //window.location.reload();
   };
 });
+*/

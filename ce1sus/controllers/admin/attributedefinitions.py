@@ -5,12 +5,12 @@ module handing the attributes pages
 
 Created: Aug, 2013
 """
-from ce1sus.controllers.base import BaseController, SpecialControllerException
+from ce1sus.controllers.base import BaseController, SpecialControllerException, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.classes.definitions import AttributeDefinition
-from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException
+from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
@@ -44,7 +44,7 @@ class AttributeDefinitionController(BaseController):
     try:
       return self.attr_def_broker.get_all(AttributeDefinition.name.asc())
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_attribute_definitions_by_id(self, object_id):
     """
@@ -52,8 +52,10 @@ class AttributeDefinitionController(BaseController):
     """
     try:
       return self.attr_def_broker.get_by_id(object_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def insert_attribute_definition(self, attribute, user):
     try:
@@ -67,9 +69,9 @@ class AttributeDefinitionController(BaseController):
       return attribute
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(attribute)
-      self.raise_exception(u'Could not update object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def update_attribtue_definition(self, attribute, user):
     try:
@@ -79,9 +81,9 @@ class AttributeDefinitionController(BaseController):
       return attribute
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(attribute)
-      self.raise_exception(u'Could not update object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def remove_attribute_definition(self, attribute, user):
     try:
@@ -89,13 +91,15 @@ class AttributeDefinitionController(BaseController):
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_all_handlers(self):
     try:
       return self.handler_broker.get_all()
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_all_tables(self):
     values = ValueTable.get_dictionary(ValueTable)

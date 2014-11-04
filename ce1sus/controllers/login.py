@@ -72,7 +72,7 @@ class LoginController(BaseController):
       else:
         self.raise_exception('No user was found matching the given username and password')
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def update_last_login(self, user):
     """
@@ -88,4 +88,4 @@ class LoginController(BaseController):
       # user.last_login = DatumZait.utcnow()
       self.user_broker.update(user)
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)

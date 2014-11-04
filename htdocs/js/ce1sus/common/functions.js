@@ -30,7 +30,7 @@ function handleError(response, messages) {
 
   var message = {"type":"danger","message":code+" - "+message};
   messages.setMessage(message);
-  return false;
+  return true;
 }
 
 function generateAPIKey(){

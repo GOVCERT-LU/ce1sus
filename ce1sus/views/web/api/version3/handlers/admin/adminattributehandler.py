@@ -6,9 +6,9 @@
 Created on Nov 3, 2014
 """
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
-from ce1sus.controllers.base import ControllerException
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.definitions import AttributeDefinition
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
 
 
@@ -84,5 +84,7 @@ class AdminAttributeHandler(RestBaseHandler):
         else:
           raise RestHandlerException(u'Cannot delete user as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)

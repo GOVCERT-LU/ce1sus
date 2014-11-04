@@ -8,7 +8,6 @@ Created on Oct 24, 2014
 import cherrypy
 
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.common import create_response
 from ce1sus.views.web.common.decorators import require
 
 
@@ -153,7 +152,7 @@ class GuiMenus(BaseView):
       menu_item['submenus'] = child_menus
       menus.append(menu_item)
 
-    return create_response(menus)
+    return menus
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
@@ -191,7 +190,7 @@ class GuiMenus(BaseView):
     tab_item['title'] = 'Groups'
     tab_item['section'] = 'home'
     tabs.append(tab_item)
-    return create_response(tabs)
+    return tabs
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
@@ -245,4 +244,4 @@ class GuiMenus(BaseView):
     link_item['section'] = 'events.add'
     link_item['href'] = link_item['section']
     links.append(link_item)
-    return create_response(links)
+    return links

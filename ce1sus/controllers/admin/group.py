@@ -5,8 +5,8 @@ module handing the attributes pages
 
 Created: Aug 26, 2013
 """
-from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 
@@ -27,23 +27,15 @@ class GroupController(BaseController):
     try:
       return self.group_broker.get_all()
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_group_by_id(self, group_id):
     try:
       return self.group_broker.get_by_id(group_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
-
-  def get_cb_group_values(self):
-    try:
-      groups = self.group_broker.get_all()
-      cb_values = dict()
-      for group in groups:
-        cb_values[group.name] = group.identifier
-      return cb_values
-    except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def insert_group(self, group, validate=True):
     try:
@@ -51,9 +43,9 @@ class GroupController(BaseController):
 
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(group)
-      self.raise_exception(u'Could not add group due to: {0}'.format(message))
+      raise ControllerException(u'Could not add group due to: {0}'.format(message))
     except (BrokerException) as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def update_group(self, group):
     try:
@@ -61,9 +53,9 @@ class GroupController(BaseController):
       return group
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(group)
-      self.raise_exception(u'Could not update group due to: {0}'.format(message))
+      raise ControllerException(u'Could not update group due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def remove_group_by_id(self, identifier):
     try:
@@ -73,4 +65,4 @@ class GroupController(BaseController):
     except DeletionException:
       raise ControllerException('This group cannot be deleted')
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)

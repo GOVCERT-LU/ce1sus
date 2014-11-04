@@ -6,33 +6,22 @@ ce1susApp.controller("objectController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   $scope.objects = [];
   
-  Restangular.one("object").get(null,{"Complete": false}).then(function (objects) {
+  Restangular.one("object").getList(null,{"Complete": false}).then(function (objects) {
     $scope.objects = objects;
   });
   
   $scope.$routeSegment = $routeSegment;
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
 });
 
 ce1susApp.controller("objectDetailController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   
-  var identifier = $routeSegment.$routeParams.id;
   
-  $scope.object = {};
-  Restangular.one("object",identifier).get(null,{"Complete": true}).then(function (data) {
-    $scope.object = data;
-  });
+  
+  $scope.object = data;
+  
+  
 
   //scope functions
   $scope.removeObject = function(){
@@ -61,21 +50,17 @@ ce1susApp.controller("objectDetailController", function($scope, Restangular, mes
 
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
+
   $scope.start = function() {
     cfpLoadingBar.start();
   };
   $scope.complete = function() {
     cfpLoadingBar.complete();
   };
-  
 });
 
 ce1susApp.controller("objectAddController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+    $log, $routeSegment, $location) {
   var original_object = {};
 
   $scope.object={};
@@ -109,17 +94,6 @@ ce1susApp.controller("objectAddController", function($scope, Restangular, messag
     $scope.$hide();
   };
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
-  
 });
 
 

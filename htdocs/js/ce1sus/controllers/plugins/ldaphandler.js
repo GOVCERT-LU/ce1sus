@@ -76,15 +76,5 @@ ce1susApp.controller('ldapController', function($scope, ngTableParams,Restangula
       $log.error(err);
     }
   });
-  
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });

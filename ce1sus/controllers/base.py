@@ -27,6 +27,10 @@ class ControllerException(Exception):
   pass
 
 
+class ControllerNothingFoundException(ControllerException):
+  pass
+
+
 class SpecialControllerException(ControllerException):
   """
   SpecialControllerException
@@ -72,13 +76,6 @@ class BaseController:
   @property
   def logger(self):
     return self.__logger.get_logger(self.__class__.__name__)
-
-  def raise_exception(self, error):
-    """
-    raises and logs an exception
-    """
-    # TODO: Log execption
-    raise ControllerException(error)
 
   def set_simple_logging(self, instance, user, insert=False):
     if insert:

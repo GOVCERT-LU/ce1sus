@@ -9,7 +9,7 @@
 
 ce1susApp.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location, cfpLoadingBar) {
 
-  Restangular.one("group").get(null,{"Complete": false}).then(function (groups) {
+  Restangular.one("group").getList(null,{"Complete": false}).then(function (groups) {
     $scope.groups = groups;
     if (($scope.groups.length > 0) && (!$routeSegment.$routeParams.id)){
       $location.path("/admin/group/"+ $scope.groups[0].identifier);
@@ -18,16 +18,7 @@ ce1susApp.controller("groupController", function($scope, Restangular, messages, 
 
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("groupAddController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar) {
@@ -61,16 +52,7 @@ ce1susApp.controller("groupAddController", function($scope, Restangular, message
     return !angular.equals($scope.group, original_group);
   };
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 
@@ -134,16 +116,7 @@ ce1susApp.controller("groupDetailController", function($scope, Restangular, mess
   
   $scope.$routeSegment = $routeSegment;
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 
@@ -179,14 +152,5 @@ ce1susApp.controller("groupEditController", function($scope, Restangular, messag
     });
   };
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });

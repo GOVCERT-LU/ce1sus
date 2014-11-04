@@ -6,22 +6,13 @@ ce1susApp.controller("mailController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   $scope.mails = [];
   
-  Restangular.one("mail").get(null,{"Complete": false}).then(function (mails) {
+  Restangular.one("mail").getList(null,{"Complete": false}).then(function (mails) {
     $scope.mails = mails;
   });
   
   $scope.$routeSegment = $routeSegment;
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("mailDetailController", function($scope, Restangular, messages,
@@ -36,16 +27,7 @@ ce1susApp.controller("mailDetailController", function($scope, Restangular, messa
 
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("mailEditController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
@@ -74,15 +56,5 @@ ce1susApp.controller("mailEditController", function($scope, Restangular, message
     });
     $scope.$hide();
   };
-  
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });

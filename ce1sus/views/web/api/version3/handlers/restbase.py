@@ -67,6 +67,13 @@ class RestHandlerException(Exception):
   pass
 
 
+class RestHandlerNotFoundException(RestHandlerException):
+  """
+  Exception base for handler exceptions
+  """
+  pass
+
+
 class RestBaseHandler(BaseView):
   """Base class for handlers"""
 

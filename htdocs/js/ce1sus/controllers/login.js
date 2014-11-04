@@ -7,7 +7,7 @@
  * Created on Oct 29, 2014
  */
 ce1susApp.controller("loginController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+    $log, $routeSegment, $location) {
 
   $scope.user = {};
   $scope.login = function() {
@@ -15,22 +15,12 @@ ce1susApp.controller("loginController", function($scope, Restangular, messages,
       if (data) {
         $log.info(data);
         // reload the whole window with the loggedin informations
-        window.location = "/";
+        $location.href="/";
       }
     });
   };
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
 });
 
 ce1susApp.controller("logoutController", function($scope, Restangular,
@@ -46,14 +36,4 @@ ce1susApp.controller("logoutController", function($scope, Restangular,
   });
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
 });

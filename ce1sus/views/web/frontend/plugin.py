@@ -12,7 +12,6 @@ from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.plugins.base import PLUGIN_ROOT, PluginException, BasePlugin
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.common import create_response
 from ce1sus.views.web.common.decorators import require
 
 
@@ -30,9 +29,9 @@ class GuiPlugins(BaseView):
   @cherrypy.tools.allow(methods=['GET'])
   def is_plugin_avaibable(self, *vpath, **params):
     try:
-      return create_response(is_plugin_available(vpath[0], self.config))
+      return is_plugin_available(vpath[0], self.config)
     except PluginException:
-      return create_response(False)
+      return False
 
   def __get_parameters(self, http_method, **params):
     parameters = None
@@ -61,6 +60,8 @@ class GuiPlugins(BaseView):
     http_method = cherrypy.request.method
     try:
       method = get_plugin_function(vpath[0], vpath[1], self.config, 'web_plugin')
-      return create_response(method(http_method, self.__get_parameters(http_method, **params)))
-    except (ImportError, AttributeError, PluginException) as error:
-      return self.raise_exception(error)
+      return method(http_method, self.__get_parameters(http_method, **params))
+    except ImportError as error:
+      raise cherrypy.HTTPError(status=404, message=u'{0}'.format(error))
+    except (AttributeError, PluginException) as error:
+      raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))

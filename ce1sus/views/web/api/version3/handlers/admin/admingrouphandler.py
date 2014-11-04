@@ -8,11 +8,11 @@ Created on Oct 29, 2014
 import re
 
 from ce1sus.controllers.admin.group import GroupController
-from ce1sus.controllers.base import ControllerException
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.group import Group
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
 
 
@@ -104,6 +104,8 @@ class AdminGroupHandler(RestBaseHandler):
         else:
           raise RestHandlerException(u'Cannot delete group as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
 

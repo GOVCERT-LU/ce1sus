@@ -7,8 +7,10 @@ Created: Aug 26, 2013
 """
 import random
 
-from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException
+from ce1sus.controllers.base import BaseController, ControllerException, \
+  ControllerNothingFoundException
+from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, \
+  NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -31,23 +33,15 @@ class UserController(BaseController):
     try:
       return self.user_broker.get_all()
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_user_by_id(self, user_id):
     try:
       return self.user_broker.get_by_id(user_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
-
-  def get_cb_group_values(self):
-    try:
-      groups = self.group_broker.get_all()
-      cb_values = dict()
-      for group in groups:
-        cb_values[group.name] = group.identifier
-      return cb_values
-    except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def insert_user(self, user, validate=True):
     try:
@@ -79,12 +73,12 @@ class UserController(BaseController):
       except Exception as error:
         self.user_broker.update(user)
         self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
-        self.raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+        raise ControllerException(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(user)
-      self.raise_exception(u'Could not add user due to: {0}'.format(message))
+      raise ControllerException(u'Could not add user due to: {0}'.format(message))
     except (BrokerException) as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def update_user(self, user):
     try:
@@ -96,9 +90,9 @@ class UserController(BaseController):
       return user
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(user)
-      self.raise_exception(u'Could not update user due to: {0}'.format(message))
+      raise ControllerException(u'Could not update user due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def remove_user_by_id(self, identifier):
     try:
@@ -108,7 +102,7 @@ class UserController(BaseController):
     except DeletionException:
       raise ControllerException('This user cannot be deleted')
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   """
   def resend_mail(self, user):
@@ -120,5 +114,5 @@ class UserController(BaseController):
         self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
         self.raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except (BrokerException, MailHandlerException) as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
       """

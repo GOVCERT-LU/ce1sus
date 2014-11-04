@@ -6,8 +6,8 @@
 Created on Oct 30, 2014
 """
 from ce1sus.controllers.admin.mails import MailController
-from ce1sus.controllers.base import ControllerException
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
 
 
@@ -60,5 +60,7 @@ class MailHandler(RestBaseHandler):
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)

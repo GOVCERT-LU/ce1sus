@@ -9,23 +9,11 @@
 
 
 
-ce1susApp.controller("mainController", function($scope, Restangular, messages,
-    $routeSegment, $log) {
+ce1susApp.controller("mainController", function($scope) {
+  var $log = null;
+  //$scope.menus = menus;
+  //$scope.versionInformation = versions;
 
-  // Get the menu Items
-  Restangular.allUrl("menus", "/menus/primary_menus").getList().then(function(menus){
-    $scope.menus = menus;
-  });
-  
-  Restangular.one("version").get().then(function(versions) {
-    $scope.versionInformation = versions;
-  });
-
-  Restangular.oneUrl("text", "/welcome_message").get().then(function(welcome) {
-    $scope.changelog = welcome;
-  });
-
-  $scope.$routeSegment = $routeSegment;
 
   
   //scope functions
@@ -46,14 +34,4 @@ ce1susApp.controller("mainController", function($scope, Restangular, messages,
     return subMenuArray;
   };
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
 });

@@ -6,7 +6,7 @@ module handing the object pages
 Created: Aug 26, 2013
 """
 
-from ce1sus.controllers.base import BaseController, SpecialControllerException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, SpecialControllerException
 from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException, ValidationException
 from ce1sus.helpers.common.hash import hashSHA1
@@ -33,21 +33,23 @@ class ObjectDefinitionController(BaseController):
     try:
       return self.obj_def_broker.get_all(ObjectDefinition.name.asc())
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_object_definitions_by_id(self, object_id):
     try:
       return self.obj_def_broker.get_by_id(object_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def get_object_definition_by_chksum(self, chksum):
     try:
       return self.obj_def_broker.get_definition_by_chksum(chksum)
     except NothingFoundException as error:
-      self._raise_nothing_found_exception(error)
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def insert_object_definition(self, obj, user):
     try:
@@ -57,9 +59,9 @@ class ObjectDefinitionController(BaseController):
       return obj
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(obj)
-      self.raise_exception(u'Could not insert object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not insert object definition due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def update_object_definition(self, obj, user):
     try:
@@ -69,9 +71,9 @@ class ObjectDefinitionController(BaseController):
       return obj
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(obj)
-      self.raise_exception(u'Could not update object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)
 
   def remove_object_definition(self, obj, user):
     try:
@@ -79,4 +81,4 @@ class ObjectDefinitionController(BaseController):
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this object. The object is still referenced.')
     except BrokerException as error:
-      self.raise_exception(error)
+      raise ControllerException(error)

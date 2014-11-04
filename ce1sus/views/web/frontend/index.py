@@ -12,7 +12,6 @@ from os.path import exists
 
 from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.common import create_response
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,8 +46,8 @@ class IndexView(BaseView):
           if counter > 0:
             result = u'{0}\n{1}'.format(result, line)
 
-        return create_response(result)
+        return result
       else:
-        return create_response('No new messages')
+        return 'No new messages'
     else:
-      return create_response('Login')
+      return 'Login'

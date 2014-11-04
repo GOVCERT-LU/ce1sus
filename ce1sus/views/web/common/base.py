@@ -8,7 +8,6 @@ Created on Oct 26, 2014
 import cherrypy
 
 from ce1sus.helpers.common.debug import Log
-from ce1sus.views.web.common.common import create_response
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
 
 

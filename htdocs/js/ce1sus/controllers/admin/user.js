@@ -11,7 +11,7 @@ ce1susApp.controller("userController", function($rootScope, $scope, Restangular,
   
   $scope.groups = [];
   
-  Restangular.one("group").get(null,{"Complete": false}).then(function (groups) {
+  Restangular.one("group").getList(null,{"Complete": false}).then(function (groups) {
     $scope.groups = data;
   });
   
@@ -23,7 +23,7 @@ ce1susApp.controller("userController", function($rootScope, $scope, Restangular,
     }
   });
   
-  Restangular.one("user").get(null,{"Complete": false}).then(function (users) {
+  Restangular.one("user").getList(null,{"Complete": false}).then(function (users) {
     
     $scope.users = users;
     if (($scope.users.length > 0) && (!$routeSegment.$routeParams.id)) {
@@ -33,16 +33,7 @@ ce1susApp.controller("userController", function($rootScope, $scope, Restangular,
 
   $scope.$routeSegment = $routeSegment;
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("userAddController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar) {
@@ -79,16 +70,7 @@ ce1susApp.controller("userAddController", function($scope, Restangular, messages
     $scope.$hide();
   };
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("userDetailController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
@@ -139,17 +121,7 @@ ce1susApp.controller("userDetailController", function($scope, Restangular, messa
   };
 
   $scope.$routeSegment = $routeSegment;
-  
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 
 });
 
@@ -189,15 +161,5 @@ ce1susApp.controller("userEditController", function($scope, Restangular, message
   $scope.generateAPIKey = function() {
     $scope.user.api_key = generateAPIKey();
   };
-  
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });

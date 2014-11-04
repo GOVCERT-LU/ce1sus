@@ -48,12 +48,8 @@ class ObjectDefinition(SimpleLogingInformations, Base):
   default_share = Column('sharable', Boolean, default=False, nullable=False)
   default_operator = Column('default_operator', Integer, default=0, nullable=False)
 
+  # the relationship is flagged with true when it is a required attribute
   possible_attributes = relationship('AttributeDefinition',
-                                     secondary='objectdefinition_has_attributedefinitions',
-                                     order_by='AttributeDefinition.name')
-  # TOOD: find a way to make a subset from possible_attributes
-  # TODO: Add administration of minimal objects -> checked before publishing
-  required_attributes = relationship('AttributeDefinition',
                                      secondary='objectdefinition_has_attributedefinitions',
                                      order_by='AttributeDefinition.name')
 

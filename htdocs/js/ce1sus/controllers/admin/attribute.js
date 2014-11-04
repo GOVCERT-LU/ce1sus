@@ -8,7 +8,7 @@ ce1susApp.controller("attributeController", function($scope, Restangular, messag
   
   $scope.attributes = [];
   
-  Restangular.one("attribute").get(null,{"Complete": false}).then(function (attributes) {
+  Restangular.one("attribute").getList(null,{"Complete": false}).then(function (attributes) {
     $scope.attributes = attributes;
   });
   
@@ -22,16 +22,7 @@ ce1susApp.controller("attributeController", function($scope, Restangular, messag
   
   $scope.$routeSegment = $routeSegment;
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
 });
 
 ce1susApp.controller("attributeDetailController", function($scope, Restangular, messages,
@@ -71,21 +62,12 @@ ce1susApp.controller("attributeDetailController", function($scope, Restangular, 
 
   $scope.$routeSegment = $routeSegment;
   
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
   
 });
 
 ce1susApp.controller("attributeAddController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+    $log, $routeSegment, $location) {
   var original_attribute = {};
 
   $scope.attribute={};
@@ -118,16 +100,7 @@ ce1susApp.controller("attributeAddController", function($scope, Restangular, mes
     $scope.$hide();
   };
 
-  //Sdt Ending of functions
-  Restangular.setErrorInterceptor(function(response, deferred, responseHandler) {
-    return handleError(response, messages);
-  });
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
+
   
 });
 

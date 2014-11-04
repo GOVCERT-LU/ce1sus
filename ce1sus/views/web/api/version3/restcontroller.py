@@ -14,11 +14,9 @@ from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import Admi
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, \
-  HandlerHandler, TablesHandler
-from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler
+from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.common import create_response
 from ce1sus.views.web.common.decorators import SESSION_KEY
 
 
@@ -125,21 +123,23 @@ class RestController(BaseView):
               headers = cherrypy.request.headers
               result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
               # execute method
-              return create_response(result)
+              return result
             except RestHandlerException as error:
-              return self.raise_exception(error)
+              if isinstance(error, RestHandlerNotFoundException):
+                raise cherrypy.HTTPError(status=404, message=u'{0}'.format(error))
+              raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))
           else:
-            return self.raise_exception(Exception('Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)))
+            raise cherrypy.HTTPError(status=501, message='Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method))
         else:
-          return self.raise_exception(Exception('Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)))
+          raise cherrypy.HTTPError(status=405, message='Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name))
 
       else:
-        return self.raise_exception(Exception('Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)))
+        raise cherrypy.HTTPError(status=418, message='Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name))
     except Exception as error:
       if self.config.get('ce1sus', 'environment', None) == 'LOCAL_DEV':
         raise
       else:
-        return self.raise_exception(error)
+        raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))
 
   def raise_exception(self, error, log=True):
     self.logger.error(error)
