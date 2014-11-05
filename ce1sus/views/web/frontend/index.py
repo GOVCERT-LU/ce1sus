@@ -24,6 +24,12 @@ class IndexView(BaseView):
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
+  def index2(self):
+    # only for fetching the first page
+    return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index2.html'))
+
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
   def index(self):
     # only for fetching the first page
     return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index.html'))

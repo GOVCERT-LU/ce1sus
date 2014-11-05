@@ -2,7 +2,7 @@
  * 
  */
 
-ce1susApp.factory("messages", function($rootScope, $alert, messageQueue) {
+app.factory("messages", function($rootScope, $alert, messageQueue) {
   var currentMessage = "";
   $rootScope.$watch("messageSet", function(newValue, oldValue) { 
     if (newValue) {
@@ -44,8 +44,8 @@ ce1susApp.factory("messages", function($rootScope, $alert, messageQueue) {
       
   };
 });
-/*
-ce1susApp.factory('$exceptionHandler', function( $injector, messageQueue) {
+
+app.factory('$exceptionHandler', function( $injector, messageQueue) {
   return function(exception, cause) {
     
     var $rootScope = $injector.get("$rootScope");
@@ -66,4 +66,3 @@ ce1susApp.factory('$exceptionHandler', function( $injector, messageQueue) {
     //window.location.reload();
   };
 });
-*/

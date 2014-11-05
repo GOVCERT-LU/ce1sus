@@ -7,36 +7,24 @@
  * Created on Oct 29, 2014
  */
 
-ce1susApp.controller("userController", function($rootScope, $scope, Restangular, messages, $routeSegment, $location, cfpLoadingBar) {
+app.controller("userController", function($rootScope, $scope, Restangular, messages, $routeSegment, $location,  groups, showLdapBtn, users) {
   
-  $scope.groups = [];
+  $scope.groups = groups;
+  $scope.showLdapBtn = showLdapBtn;
   
-  Restangular.one("group").getList(null,{"Complete": false}).then(function (groups) {
-    $scope.groups = data;
-  });
-  
-  Restangular.oneUrl("ldapusers", "/plugins/is_plugin_avaibable/ldap").get().then(function (ldapusers) {
-    if (ldapusers) {
-      $scope.showLdapBtn = true;
-    } else {
-      $scope.showLdapBtn = false;
-    }
-  });
-  
-  Restangular.one("user").getList(null,{"Complete": false}).then(function (users) {
-    
-    $scope.users = users;
-    if (($scope.users.length > 0) && (!$routeSegment.$routeParams.id)) {
-      $location.path("/admin/user/"+ $scope.users[0].identifier);
-    }
-  });
+  $scope.users = users;
+  /*
+  if (($scope.users.length > 0) && (!$routeSegment.$routeParams.id)) {
+    $location.path("/admin/user/"+ $scope.users[0].identifier);
+  }
+  */
 
   $scope.$routeSegment = $routeSegment;
 
 
 });
 
-ce1susApp.controller("userAddController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar) {
+app.controller("userAddController", function($scope, Restangular, messages, $routeSegment,$location) {
   var original_user = {};
 
   $scope.user={};
@@ -73,14 +61,10 @@ ce1susApp.controller("userAddController", function($scope, Restangular, messages
 
 });
 
-ce1susApp.controller("userDetailController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
+app.controller("userDetailController", function($scope, $routeSegment,$user, $log) {
 
-  var identifier = $routeSegment.$routeParams.id;
-  
-  $scope.user = {};
-  Restangular.one("user",identifier).get(null,{"Complete": true}).then(function (data) {
-    $scope.user = data;
-  });
+  $scope.user = $user;
+
 
   $scope.$watch(function() {
     return $scope.user.group_id;
@@ -125,7 +109,7 @@ ce1susApp.controller("userDetailController", function($scope, Restangular, messa
 
 });
 
-ce1susApp.controller("userEditController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
+app.controller("userEditController", function($scope, Restangular, messages, $routeSegment,$location,  $log) {
   var original_user = angular.copy($scope.user);
 
   

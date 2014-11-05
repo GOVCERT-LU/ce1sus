@@ -2,18 +2,16 @@
  * 
  */
 
-
-var ce1susApp = angular.module("ce1susApp", ["chieffancypants.loadingBar",
-                                             "ngRoute",
-                                             "ngAnimate", 
-                                             "route-segment", 
-                                             "view-segment",
-                                             "restangular",
-                                             "mgcrea.ngStrap",
-                                             "ngTable"]);
+var app = angular.module('app', ['ngRoute', 
+                                 'ngAnimate', 
+                                 'route-segment', 
+                                 'view-segment',
+                                 "restangular", 
+                                 'ngSanitize', 
+                                 "mgcrea.ngStrap"]);
 
 
-ce1susApp.provider('messageQueue', function () {
+app.provider('messageQueue', function () {
   this.queue = [];
   return {
     setQueue: function (value) {
@@ -25,6 +23,17 @@ ce1susApp.provider('messageQueue', function () {
     $get: function () {
       return this.queue;
     }
-  }
+  };
 });
- 
+/*
+var app = angular.module("ce1susApp", [
+                                       "ngRoute",
+                                       "ngAnimate", 
+                                       "route-segment", 
+                                       "view-segment",
+                                       "restangular",
+                                       "mgcrea.ngStrap",
+                                       "ngTable",
+                                       "chieffancypants.loadingBar"]);
+
+*/

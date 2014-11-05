@@ -2,7 +2,7 @@
  * 
  */
 
-ce1susApp.controller("objectController", function($scope, Restangular, messages,
+app.controller("objectController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   $scope.objects = [];
   
@@ -14,9 +14,10 @@ ce1susApp.controller("objectController", function($scope, Restangular, messages,
 
 });
 
-ce1susApp.controller("objectDetailController", function($scope, $injector, Restangular, messages,
+app.controller("objectDetailController", function($scope, $injector, Restangular, messages,
     $log, $routeSegment) {
   $scope.object = {};
+  
   $scope.data = getLocals($routeSegment).data;
   var identifier = $routeSegment.$routeParams.id;
   Restangular.one("object",identifier).get(null,{"Complete": true}).then(function(data){
@@ -60,7 +61,7 @@ ce1susApp.controller("objectDetailController", function($scope, $injector, Resta
   };
 });
 
-ce1susApp.controller("objectAddController", function($scope, Restangular, messages,
+app.controller("objectAddController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
   var original_object = {};
 

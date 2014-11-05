@@ -1,0 +1,50 @@
+
+<header>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header navbar-left">
+        <a class="navbar-brand" href="/">ce1sus Library</a>
+      </div>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li ng-repeat="menu in menus"
+          ng-class="{active: (menu.section | routeSegmentStartsWith)}">
+          <a href="#{{menu.section | routeSegmentUrl}}"
+          ng-if="!menu.submenus"> <i class="fa {{menu.icon}}"
+            ng-if="menu.icon"></i> {{ menu.title}}
+          </a> 
+          <a data-toggle="dropdown"
+          bs-dropdown="createSubmenus(menu.submenus)"
+          ng-if="menu.submenus"> <i class="fa {{menu.icon}}"
+            ng-if="menu.icon"></i> {{ menu.title}} <b class="caret"></b>
+          </a>
+          
+          
+        </li>
+      </ul>
+
+
+    </div>
+  </nav>
+</header>
+<div class="main-body">
+
+  <div id="alerts-container"></div>
+  {{ messages.getMessage() }}
+  <div ng-show="messages.getMessage()">{{ messages.getMessage() }}
+  </div>
+  <div id="main" class="main-content">
+    <div class="row anim" app-view-segment="2"></div>
+  </div>
+</div>
+<footer>
+  <div class="row">
+    <div class="col-lg-6">Version {{
+      versionInformation.application }}</div>
+    <div class="col-lg-6">
+      Current route: <span ng-bind="$routeSegment.name"></span>
+    </div>
+  </div>
+
+
+</footer>

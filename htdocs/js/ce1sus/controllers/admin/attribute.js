@@ -2,7 +2,7 @@
  * 
  */
 
-ce1susApp.controller("attributeController", function($scope, Restangular, messages,
+app.controller("attributeController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   $scope.attribute = {};
   
@@ -25,7 +25,7 @@ ce1susApp.controller("attributeController", function($scope, Restangular, messag
 
 });
 
-ce1susApp.controller("attributeDetailController", function($scope, Restangular, messages,
+app.controller("attributeDetailController", function($scope, Restangular, messages,
     $log, $routeSegment) {
   
   var identifier = $routeSegment.$routeParams.id;
@@ -66,7 +66,7 @@ ce1susApp.controller("attributeDetailController", function($scope, Restangular, 
   
 });
 
-ce1susApp.controller("attributeAddController", function($scope, Restangular, messages,
+app.controller("attributeAddController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
   var original_attribute = {};
 

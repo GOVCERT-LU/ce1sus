@@ -7,7 +7,7 @@
  * Created on Oct 29, 2014
  */
 
-ce1susApp.controller('ldapController', function($scope, ngTableParams,Restangular, messages,$filter, $log) {
+app.controller('ldapController', function($scope, ngTableParams,Restangular, messages,$filter, $log) {
   var data = [];
   Restangular.oneUrl("ldapusers", "/plugins/ldap/user").get().then(function (ldapusers) {
     if (!ldapusers){

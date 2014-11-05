@@ -1,20 +1,9 @@
 
 
-ce1susApp.controller("eventController", function($scope, Restangular,$route, messages,
-    $log, $routeSegment) {
+app.controller("eventController", function($scope, Restangular,$route, messages,
+    $log, $routeSegment,eventmenus) {
   
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
-  
-  Restangular.oneUrl("menus", "/menus/event_links").get().then(function(eventMenus){
-    $scope.eventMenus = eventMenus;
-  }, function(response) {
-    handleError(response, messages);
-  });
+  $scope.eventMenus = eventmenus;
 
   $scope.pushItem = function(title, identifer) {
     $scope.menus.push({

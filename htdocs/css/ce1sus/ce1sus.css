@@ -9,13 +9,18 @@ body {
 
 .body-container {
    min-height:100%;
+   widht:100%;
+   
    position:relative;
 }
 .main-body {
+	 padding-left:30px;
+	 padding-right:30px;
    padding-bottom:25px;
 }
 
 footer {
+	padding-left:30px;
 	position: absolute;
 	bottom: 0;
 	width: 100%;

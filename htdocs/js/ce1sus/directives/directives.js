@@ -3,7 +3,7 @@
  */
 
 
-ce1susApp.directive("plainText", function() {
+app.directive("plainText", function() {
   
   return {
     restrict: "E",
@@ -23,7 +23,7 @@ ce1susApp.directive("plainText", function() {
   };
 });
 
-ce1susApp.directive("userForm", function() {
+app.directive("userForm", function() {
   
   return {
     restrict: "E",
@@ -36,7 +36,7 @@ ce1susApp.directive("userForm", function() {
   };
 });
 
-ce1susApp.directive("groupForm", function() {
+app.directive("groupForm", function() {
   
   return {
     restrict: "E",
@@ -48,7 +48,7 @@ ce1susApp.directive("groupForm", function() {
   };
 });
 
-ce1susApp.directive("addRemTable", function() {
+app.directive("addRemTable", function() {
   
   return {
     restrict: "E",
@@ -61,25 +61,29 @@ ce1susApp.directive("addRemTable", function() {
       maskedID: "=masked"
     },
     templateUrl: "pages/common/directives/addremtables.html",
-    controller: function($scope, $log){
+    controller: function($scope, $log, $timeout){
       //Split the associdated ones and available ones (definition of remaining)
       $scope.remaining = angular.copy($scope.allItems);
       
-      var index = 0;
-      angular.forEach($scope.remaining, function(item) {
-        // remove selected from the group
-        if (item.identifier === $scope.maskedID) {
-          $scope.remaining.splice(index, 1);
-        } else {
-          angular.forEach($scope.accociated, function(associatedEntry) {
-            if (item.identifier === associatedEntry.identifier){
-              $scope.remaining.splice(index, 1);
-            }
-          }, $log);
-        }
-        index++;
-      }, $log);
-      
+      $scope.setRemaining = function() {
+        var index = 0;
+        angular.forEach($scope.remaining, function(item) {
+          // remove selected from the group
+          if (item.identifier == $scope.maskedID) {
+            $scope.remaining.splice(index, 1);
+          } else {
+            angular.forEach($scope.accociated, function(associatedEntry) {
+              if (item.identifier == associatedEntry.identifier){
+                $scope.remaining.splice(index, 1);
+              }
+            }, $log);
+          }
+          index++;
+        }, $log);
+      };
+      //wait till the object was rendered
+      $timeout($scope.setRemaining);
+
       $scope.selected_accociated = [];
       $scope.selected_remaining = [];
       
@@ -92,7 +96,7 @@ ce1susApp.directive("addRemTable", function() {
           // remove selected from the group
           var index = 0;
           angular.forEach($scope.accociated, function(associatedEntry) {
-            if (removedItemId === associatedEntry.identifier){
+            if (removedItemId == associatedEntry.identifier){
               $scope.accociated.splice(index, 1);
             }
             index++;
@@ -100,7 +104,7 @@ ce1susApp.directive("addRemTable", function() {
           
           //search for the group details
           angular.forEach($scope.allItems, function(itemEntry) {
-            if (itemEntry.identifier === removedItemId){
+            if (itemEntry.identifier == removedItemId){
               $scope.remaining.push(itemEntry);
             }
           }, $log);
@@ -119,7 +123,7 @@ ce1susApp.directive("addRemTable", function() {
           // remove selected from the group
           var index = 0;
           angular.forEach($scope.remaining, function(remEntry) {
-            if (addedItemID === remEntry.identifier){
+            if (addedItemID == remEntry.identifier){
               $scope.remaining.splice(index, 1);
             }
             index++;
@@ -132,21 +136,20 @@ ce1susApp.directive("addRemTable", function() {
           }
           //search for the group details
           angular.forEach($scope.allItems, function(itemEntry) {
-            if (itemEntry.identifier === addedItemID){
+            if (itemEntry.identifier == addedItemID){
               $scope.accociated.push(itemEntry);
             }
           }, $log);
           
           
         }, $log);
-        
-        $scope.selected_remaining = [];
+
       };
     }
   };
 });
 
-ce1susApp.directive("objectDefinitionForm", function() {
+app.directive("objectDefinitionForm", function() {
   
   return {
     restrict: "E",
@@ -158,7 +161,7 @@ ce1susApp.directive("objectDefinitionForm", function() {
   };
 });
 
-ce1susApp.directive("attributeDefinitionForm", function() {
+app.directive("attributeDefinitionForm", function() {
   
   return {
     restrict: "E",

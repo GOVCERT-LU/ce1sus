@@ -22,6 +22,7 @@ class VersionHandler(RestBaseHandler):
   @rest_method(default=True)
   @methods(allowed=['GET'])
   def version(self, **args):
+
     result = dict()
     result['application'] = APP_REL
     result['dataBase'] = DB_REL

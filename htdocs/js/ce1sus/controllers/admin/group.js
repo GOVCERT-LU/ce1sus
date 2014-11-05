@@ -7,7 +7,7 @@
  * Created on Oct 29, 2014
  */
 
-ce1susApp.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location, cfpLoadingBar) {
+app.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location) {
 
   Restangular.one("group").getList(null,{"Complete": false}).then(function (groups) {
     $scope.groups = groups;
@@ -21,7 +21,7 @@ ce1susApp.controller("groupController", function($scope, Restangular, messages, 
 
 });
 
-ce1susApp.controller("groupAddController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar) {
+app.controller("groupAddController", function($scope, Restangular, messages, $routeSegment,$location) {
   
   $scope.group={};
   var original_group = {};
@@ -56,7 +56,7 @@ ce1susApp.controller("groupAddController", function($scope, Restangular, message
 });
 
 
-ce1susApp.controller("groupDetailController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
+app.controller("groupDetailController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
 
   var identifier = $routeSegment.$routeParams.id;
   
@@ -121,7 +121,7 @@ ce1susApp.controller("groupDetailController", function($scope, Restangular, mess
 
 
 
-ce1susApp.controller("groupEditController", function($scope, Restangular, messages, $routeSegment,$location, cfpLoadingBar, $log) {
+app.controller("groupEditController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
   var original_group = angular.copy($scope.group);
   
   //Scope functions

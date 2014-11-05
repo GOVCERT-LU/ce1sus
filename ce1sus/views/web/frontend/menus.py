@@ -24,19 +24,19 @@ class GuiMenus(BaseView):
   @cherrypy.tools.json_out()
   def primary_menus(self):
     user = self.get_user()
-
     menus = list()
     if self.user_authenticated():
       menu_item = dict()
       menu_item['icon'] = 'fa-home'
       menu_item['title'] = 'Home'
-      menu_item['section'] = 'home'
+      menu_item['section'] = 'main.layout.home'
       menus.append(menu_item)
 
       menu_item = dict()
       menu_item['icon'] = 'fa-database'
       menu_item['title'] = 'Events'
-      menu_item['section'] = 'events'
+      menu_item['section'] = 'main.layout.events'
+      menu_item['submenus'] = None
       menus.append(menu_item)
 
       # Todo if user can access admin area show it else not
@@ -115,7 +115,7 @@ class GuiMenus(BaseView):
       child_menus = list()
       child_menu_item = dict()
       child_menu_item['title'] = 'About'
-      child_menu_item['section'] = 'about'
+      child_menu_item['section'] = '/about'
       child_menus.append(child_menu_item)
       menu_item['submenus'] = child_menus
       menus.append(menu_item)
@@ -123,31 +123,31 @@ class GuiMenus(BaseView):
       menu_item = dict()
       menu_item['icon'] = 'fa-lock'
       menu_item['title'] = 'Logout'
-      menu_item['section'] = 'logout'
+      menu_item['section'] = 'main.layout.logout'
       menus.append(menu_item)
 
     else:
       menu_item = dict()
       menu_item['icon'] = 'fa-home'
       menu_item['title'] = 'Home'
-      menu_item['section'] = 'home'
+      menu_item['section'] = 'main.layout.home'
       menus.append(menu_item)
 
       menu_item = dict()
       menu_item['icon'] = 'fa-unlock'
       menu_item['title'] = 'Login'
-      menu_item['section'] = 'login'
+      menu_item['section'] = 'main.layout.login'
       menus.append(menu_item)
 
       menu_item = dict()
       menu_item['icon'] = 'fa-question'
       menu_item['title'] = 'Help'
-      menus.append(menu_item)
 
+      # Note: chind menu's section is the actual link
       child_menus = list()
       child_menu_item = dict()
       child_menu_item['title'] = 'About'
-      child_menu_item['section'] = 'about'
+      child_menu_item['section'] = '/about'
       child_menus.append(child_menu_item)
       menu_item['submenus'] = child_menus
       menus.append(menu_item)
@@ -202,15 +202,15 @@ class GuiMenus(BaseView):
     link_item = dict()
     link_item['icon'] = 'fa-newspaper-o'
     link_item['title'] = 'Recent Events'
-    link_item['section'] = 'events.recentEvents'
-    link_item['href'] = 'events'
+    link_item['section'] = 'main.layout.events.recent'
+    link_item['href'] = 'main.layout.events'
     link_item['reload'] = True
     links.append(link_item)
 
     link_item = dict()
     link_item['icon'] = 'fa-database'
     link_item['title'] = 'All Events'
-    link_item['section'] = 'events.allEvents'
+    link_item['section'] = 'main.layout.events.allEvents'
     link_item['reload'] = True
     link_item['href'] = link_item['section']
     links.append(link_item)
@@ -218,7 +218,7 @@ class GuiMenus(BaseView):
     link_item = dict()
 
     link_item['title'] = 'Unpublished Events'
-    link_item['section'] = 'events.unpublished'
+    link_item['section'] = 'main.layout.events.unpublished'
     link_item['reload'] = True
     link_item['href'] = link_item['section']
     links.append(link_item)
@@ -226,7 +226,7 @@ class GuiMenus(BaseView):
     link_item = dict()
 
     link_item['title'] = 'Unpublished Proposals'
-    link_item['section'] = 'events.uproposals'
+    link_item['section'] = 'main.layout.events.uproposals'
     link_item['reload'] = True
     link_item['href'] = link_item['section']
     links.append(link_item)
@@ -234,14 +234,14 @@ class GuiMenus(BaseView):
     link_item = dict()
     link_item['icon'] = 'fa-search'
     link_item['title'] = 'Search'
-    link_item['section'] = 'events.serach'
+    link_item['section'] = 'main.layout.events.serach'
     link_item['href'] = link_item['section']
     links.append(link_item)
 
     link_item = dict()
     link_item['icon'] = 'fa-plus'
     link_item['title'] = 'Add Event'
-    link_item['section'] = 'events.add'
+    link_item['section'] = 'main.layout.events.add'
     link_item['href'] = link_item['section']
     links.append(link_item)
     return links

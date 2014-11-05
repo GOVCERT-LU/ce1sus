@@ -6,7 +6,7 @@
  * 
  * Created on Oct 29, 2014
  */
-ce1susApp.controller("loginController", function($scope, Restangular, messages,
+app.controller("loginController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
 
   $scope.user = {};
@@ -23,7 +23,7 @@ ce1susApp.controller("loginController", function($scope, Restangular, messages,
   
 });
 
-ce1susApp.controller("logoutController", function($scope, Restangular,
+app.controller("logoutController", function($scope, Restangular,
     messages, $log, $routeSegment) {
   Restangular.one("logout").get().then(function(data) {
     $scope.logoutText = "You are still logged in";
