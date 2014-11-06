@@ -26,7 +26,7 @@ class AdminObjectHandler(RestBaseHandler):
     self.object_definition_controller = ObjectDefinitionController(config)
 
   @rest_method(default=True)
-  @methods(allowed=['GET', 'PUT', 'POST', 'DELETEs'])
+  @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
   @require(privileged())
   def object(self, **args):
     try:

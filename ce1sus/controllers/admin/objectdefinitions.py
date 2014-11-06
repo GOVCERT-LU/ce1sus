@@ -75,9 +75,9 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_object_definition(self, obj, user):
+  def remove_definition_by_id(self, uuid):
     try:
-      self.obj_def_broker.remove_by_id(obj.identifier)
+      self.obj_def_broker.remove_by_id(uuid)
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this object. The object is still referenced.')
     except BrokerException as error:

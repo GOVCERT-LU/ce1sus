@@ -25,7 +25,7 @@ class AdminAttributeHandler(RestBaseHandler):
     self.attribute_definition_controller = AttributeDefinitionController(config)
 
   @rest_method(default=True)
-  @methods(allowed=['GET', 'PUT', 'POST', 'DELETEs'])
+  @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
   @require(privileged())
   def attribute(self, **args):
     try:

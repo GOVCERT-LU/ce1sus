@@ -88,9 +88,9 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_attribute_definition(self, attribute, user):
+  def remove_definition_by_id(self, uuid):
     try:
-      self.attr_def_broker.remove_by_id(attribute.identifier)
+      self.attr_def_broker.remove_by_id(uuid)
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')
     except BrokerException as error:
