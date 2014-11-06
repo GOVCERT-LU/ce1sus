@@ -62,22 +62,44 @@
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">ValueTable:
+    <label class="col-lg-3 control-label text-right">Data type:
       *</label>
     <div class="col-lg-9">
       <select name="table_id" class="form-control"
-        ng-options="table.identifier as table.name for table in available_types"
-        ng-model="attribute.table_id">
+        ng-options="table.identifier as table.name for table in available_tables"
+        ng-model="attribute.table_id" ng-change="tableChange()">
         <option style="display: none" value="">Select a Value</option>
       </select>
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">Handler:
+    <label class="col-lg-3 control-label text-right">Grouping:
+      *</label>
+    <div class="col-lg-9">
+      <select name="type_id" class="form-control"
+        ng-options="entry.identifier as entry.name for entry in available_types"
+        ng-model="attribute.type_id" ng-change="typeChange()">
+        <option style="display: none" value="">Select a Value</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">View Type:
+      *</label>
+    <div class="col-lg-9">
+      <select name="viewType_id" class="form-control"
+        ng-options="viewType.identifier as viewType.name for viewType in available_viewTypes"
+        ng-model="attribute.viewType_id" ng-change="handlerChange()">
+        <option style="display: none" value="">Select a Value</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Input handler:
       *</label>
     <div class="col-lg-9">
       <select name="attributehandler_id" class="form-control"
-        ng-options="handler.identifier as handler.name for handler in handlers"
+        ng-options="handler.identifier as handler.name for handler in available_handlers"
         ng-model="attribute.attributehandler_id" ng-change="handlerChange()">
         <option style="display: none" value="">Select a Handler</option>
       </select>

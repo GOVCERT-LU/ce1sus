@@ -14,7 +14,7 @@ from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import Admi
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, AttribueTypeHandler, AttribueViewTypeHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
@@ -40,8 +40,10 @@ class RestController(BaseView):
     self.instances['mail'] = MailHandler(config)
     self.instances['object'] = AdminObjectHandler(config)
     self.instances['attribute'] = AdminAttributeHandler(config)
-    self.instances['handlers'] = HandlerHandler(config)
-    self.instances['tables'] = TablesHandler(config)
+    self.instances['attributehandlers'] = HandlerHandler(config)
+    self.instances['attributetables'] = TablesHandler(config)
+    self.instances['attributetypes'] = AttribueTypeHandler(config)
+    self.instances['attribtueviewtypes'] = AttribueViewTypeHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

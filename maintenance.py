@@ -25,6 +25,7 @@ from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.objects import get_class
+from ce1sus.db.classes.types import AttributeType, AttributeViewType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -175,13 +176,14 @@ class Maintenance(object):
 
     modulename = basename(path).replace('.py', '')
     classname = modulename.title().replace('handler', 'Handler')
-    modulename = u'ce1sus.handlers.{0}'.format(modulename)
+    modulename = u'{0}'.format(modulename)
     # move to correct place
     print u'Adding handler {0}'.format(modulename)
 
-    clazz = get_class(modulename, classname)
+    clazz = get_class(u'ce1sus.handlers.{0}'.format(modulename), classname)
     # check if class implements handler base
-    instance = clazz(self.config)
+    instance = clazz()
+
     if not isinstance(instance, HandlerBase):
       # remove file
 

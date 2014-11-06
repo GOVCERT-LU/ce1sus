@@ -6,11 +6,11 @@
           {{ attribute | json }}
       
         <div class="modal-header">
-          <button type="button" class="close" ng-click="$hide()">&times;</button>
+          <button type="button" class="close" ng-click="$hide();">&times;</button>
           <h4 class="modal-title">Add new Attribute Definition</h4>
         </div>
         <div class="modal-body">
-          <attribute-definition-form attribute="attribute" edit="false" handlers="handlers" tables="tables"/>
+          <attribute-definition-form attribute="attribute" edit="false" handlers="handlers" tables="tables" types="types" viewtypes="viewTypes" doreset="reset"/>
         </div>
         <div class="modal-footer">
           <div class="btn-group">
@@ -18,9 +18,11 @@
               ng-disabled="!attributeChanged() || addAttributeDefinitionForm.$invalid"
               ng-click="submitAttribute()">Save</button>
             <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetAttributeCBs()">Reset CBs</button>
+            <button name="reset" type="button" class="btn btn-default"
               ng-click="resetAttribute()">Reset</button>
             <button type="button" class="btn btn-default"
-              ng-click="$hide()">Close</button>
+              ng-click="$hide();">Close</button>
           </div>
         </div>
       

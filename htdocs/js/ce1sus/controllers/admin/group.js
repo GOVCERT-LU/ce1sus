@@ -23,7 +23,10 @@ app.controller("groupAddController", function($scope, Restangular, messages, $ro
   
   $scope.group={};
   var original_group = {};
-  
+  $scope.closeModal = function(){
+    $scope.$parent.group = angular.copy(original_group);
+    $scope.$hide();
+  };
   //Scope functions
   $scope.submitGroup = function(){
     Restangular.all("group").post($scope.group).then(function (data) {
@@ -113,7 +116,9 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
   
   $scope.$routeSegment = $routeSegment;
 
-
+  $scope.setGroup = function(group){
+    $scope.group = group;
+  };
 });
 
 
@@ -121,6 +126,12 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
 app.controller("groupEditController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
   var original_group = angular.copy($scope.group);
   
+  $scope.closeModal = function(){
+    var group = angular.copy(original_group);
+    $scope.$parent.setGroup(group);
+    $scope.$hide();
+
+  };
   //Scope functions
   $scope.resetGroup = function ()
   {

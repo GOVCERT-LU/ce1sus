@@ -3,14 +3,13 @@
  */
 
 app.controller("attributeController", function($scope, Restangular, messages,
-    $log, $routeSegment, attributes, handlers, tables) {
-  $scope.attribute = {};
-  
-  $scope.attributes = [];
+    $log, $routeSegment, attributes, handlers, tables, types, viewTypes) {
   
   $scope.attributes = attributes;
   $scope.handlers = handlers;
   $scope.tables = tables;
+  $scope.types = types;
+  $scope.viewTypes = viewTypes;
   
   $scope.$routeSegment = $routeSegment;
 
@@ -53,7 +52,9 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
 
   $scope.$routeSegment = $routeSegment;
   
-
+  $scope.setAttribute = function(attribute){
+    $scope.attribute = attribute;
+  };
   
 });
 
@@ -63,10 +64,17 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
 
   $scope.attribute={};
   
+  $scope.reset = false;
   //Scope functions
   $scope.resetAttribute = function ()
   {
     $scope.attribute = angular.copy(original_attribute);
+    $scope.reset = true;
+  };
+  
+  $scope.resetAttributeCBs = function ()
+  {
+    $scope.reset = true;
   };
   
   $scope.generateAPIKey = function() {

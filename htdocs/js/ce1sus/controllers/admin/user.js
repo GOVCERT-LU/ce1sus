@@ -29,6 +29,11 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
 
   $scope.user={};
   
+  $scope.closeModal = function(){
+    $scope.$parent.user = angular.copy(original_user);
+    $scope.$hide();
+  };
+  
   //Scope functions
   $scope.resetUser = function ()
   {
@@ -71,12 +76,14 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
   $scope.$watch(function() {
     return $scope.user.group_id;
     }, function(newVal, oldVal) {
-      //keep the group name shown instead the uuid
-      angular.forEach($scope.groups, function(entry) {
-        if (entry.identifier === $scope.user.group_id){
-          $scope.user.group_name = entry.name;
-        }
-      }, $log);
+      //keep the group name shown instead the uuid, but only if there are groups
+      if ($scope.groups.length > 0) {
+        angular.forEach($scope.groups, function(entry) {
+          if (entry.identifier === $scope.user.group_id){
+            $scope.user.group_name = entry.name;
+          }
+        }, $log);
+      }
     });
   
   
@@ -109,7 +116,9 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
   };
 
   $scope.$routeSegment = $routeSegment;
-
+  $scope.setUser = function(user){
+    $scope.user = user;
+  };
 
 });
 
@@ -121,7 +130,12 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
   $scope.resetUser = function ()
   {
     $scope.user = angular.copy(original_user);
-    $scope.addUserForm.$setPristine();
+  };
+  
+  $scope.closeModal = function(){
+    var user = angular.copy(original_user);
+    $scope.$parent.setUser(user);
+    $scope.$hide();
   };
   
   $scope.userChanged = function ()

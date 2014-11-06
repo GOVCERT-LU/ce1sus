@@ -13,8 +13,6 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
     $log, $routeSegment, $object) {
   $scope.object = $object;
   
-  $scope.data = getLocals($routeSegment).data;
-  
   //scope functions
   $scope.removeObject = function(){
     //remove user from user list
@@ -44,6 +42,9 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
 
   $scope.$routeSegment = $routeSegment;
 
+  $scope.setObject = function(object){
+    $scope.object = object;
+  };
 });
 
 app.controller("objectAddController", function($scope, Restangular, messages,

@@ -107,3 +107,15 @@ class AttributeDefinitionController(BaseController):
   def get_all_tables(self):
     values = ValueTable.get_dictionary(ValueTable)
     return values
+
+  def get_all_types(self):
+    try:
+      return self.type_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_all_view_types(self):
+    try:
+      return self.view_type_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)

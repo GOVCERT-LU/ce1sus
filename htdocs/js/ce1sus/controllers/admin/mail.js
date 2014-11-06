@@ -19,13 +19,28 @@ app.controller('mailDetailController', function($scope, $routeSegment,$mail, $lo
   
   $scope.$routeSegment = $routeSegment;
   
-
+  $scope.$watch(function() {
+    return $scope.mail;
+    }, function(newVal, oldVal) {
+      $scope.mail = newVal;
+    });
+  
+  $scope.setMail = function(mail){
+    $scope.mail = mail;
+  };
 });
 
 app.controller("mailEditController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
   var original_mail = angular.copy($scope.mail);
 
-  
+
+  $scope.closeModal = function(){
+
+    var mail = angular.copy(original_mail);
+    $scope.$parent.setMail(mail);
+    $scope.$hide();
+    
+  };
   //Scope functions
   $scope.resetMail = function ()
   {

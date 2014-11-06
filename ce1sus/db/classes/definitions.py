@@ -174,6 +174,8 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'relation': self.convert_value(self.relation),
               'share': self.convert_value(self.share),
               'regex': self.convert_value(self.regex),
+              'viewType_id': self.convert_value(self.view_type_id),
+              'type_id': self.convert_value(self.value_type_id),
               }
     else:
       return {'identifier': self.identifier,
@@ -184,6 +186,8 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.description = json.get('description', None)
     self.attributehandler_id = json.get('attributehandler_id', None)
     self.table_id = json.get('table_id', None)
+    self.view_type_id = json.get('viewType_id', None)
+    self.value_type_id = json.get('type_id', None)
     relation = json.get('relation', 'false')
     if relation == 'true':
       relation = True
