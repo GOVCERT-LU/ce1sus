@@ -95,7 +95,8 @@ class ValueTable(StaticBase):
             1: u'String',
             2: u'Date',
             3: u'Number',
-            4: u'TimeStamp'}
+            4: u'TimeStamp',
+            5: u'Date'}
 
   @property
   def classname(self):

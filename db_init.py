@@ -7,22 +7,23 @@ Created on Oct 16, 2014
 """
 
 
+from apt_pkg import Group
 from datetime import datetime
 import os
 import sqlalchemy.exc
 
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition, AttributeHandler
+from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.mailtemplate import MailTemplate
 from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.user import User
-from ce1sus.db.common.session import SessionManager, Base
-from ce1sus.helpers.common.config import Configuration
-from apt_pkg import Group
 from ce1sus.db.classes.relation import Relation
+from ce1sus.db.classes.types import AttributeViewType, AttributeType
+from ce1sus.db.classes.user import User
 from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, \
   TextValue
-from ce1sus.db.classes.event import Event
+from ce1sus.db.common.session import SessionManager, Base
+from ce1sus.helpers.common.config import Configuration
 
 
 __author__ = 'Weber Jean-Paul'
@@ -114,6 +115,32 @@ if __name__ == '__main__':
   except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
     session.rollback()
 
+  view_type = AttributeViewType()
+  view_type.name = 'Plain'
+  view_type.description = 'Used to display the value as plain text'
+  session.add(view_type)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  view_type = AttributeViewType()
+  view_type.name = 'Link'
+  view_type.description = 'Used to display the value as a link'
+  session.add(view_type)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
+
+  view_type = AttributeViewType()
+  view_type.name = 'Download'
+  view_type.description = 'Used to display the value as download'
+  session.add(view_type)
+  try:
+    session.flush()
+  except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
+    session.rollback()
   session.commit()
 
   session.close()

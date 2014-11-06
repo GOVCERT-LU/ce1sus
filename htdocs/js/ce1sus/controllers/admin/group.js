@@ -7,17 +7,15 @@
  * Created on Oct 29, 2014
  */
 
-app.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location) {
+app.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location, groups) {
 
-  Restangular.one("group").getList(null,{"Complete": false}).then(function (groups) {
-    $scope.groups = groups;
-    if (($scope.groups.length > 0) && (!$routeSegment.$routeParams.id)){
-      $location.path("/admin/group/"+ $scope.groups[0].identifier);
-    }
-  });
-
+  $scope.groups = groups;
+  /*
+  if (($scope.groups.length > 0) && (!$routeSegment.$routeParams.id)){
+    $location.path("/admin/group/"+ $scope.groups[0].identifier);
+  }
+  */
   $scope.$routeSegment = $routeSegment;
-  
 
 });
 
@@ -36,6 +34,8 @@ app.controller("groupAddController", function($scope, Restangular, messages, $ro
         
       }
       messages.setMessage({'type':'success','message':'Group sucessfully added'});
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };
@@ -56,34 +56,29 @@ app.controller("groupAddController", function($scope, Restangular, messages, $ro
 });
 
 
-app.controller("groupDetailController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
+app.controller("groupDetailController", function($scope, Restangular, messages, $routeSegment,$location, $log, $group) {
 
-  var identifier = $routeSegment.$routeParams.id;
+  original_group = angular.copy($group);
+  $scope.group = $group;
   
-  //get the group
-  Restangular.one("group",identifier).get(null,{"Complete": true}).then(function (data) {
-
-    original_group = angular.copy(data);
-    $scope.group = data;
-    
-    $scope.modalTitle ="Edit Group " + data.groupname;
-    $scope.group.getList("children").then(function (group_response) {
-      $scope.group.children = group_response;
-    });
-    var remaining = [];
-    var found = false;
-    angular.forEach($scope.groups, function(available_group) {
-      angular.forEach($scope.group.children, function(child_group) {
-        if (available_group.identifier === child_group.identifier){
-          found = true;
-        }
-      }, $log);
-      if (!found){
-        remaining.push(available_group);
+  $scope.modalTitle ="Edit Group " + data.groupname;
+  $scope.group.getList("children").then(function (group_response) {
+    $scope.group.children = group_response;
+  });
+  var remaining = [];
+  var found = false;
+  angular.forEach($scope.groups, function(available_group) {
+    angular.forEach($scope.group.children, function(child_group) {
+      if (available_group.identifier === child_group.identifier){
+        found = true;
       }
     }, $log);
-    $scope.remaining = remaining;
-  });
+    if (!found){
+      remaining.push(available_group);
+    }
+  }, $log);
+  $scope.remaining = remaining;
+
   
   //Scope functions
   $scope.removeGroup = function(){
@@ -106,6 +101,8 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
         messages.setMessage({'type':'success','message':'Group sucessfully removed'});
       }
       $scope.$hide();
+    }, function (response) {
+      handleError(response, messages);
     });
   };
   
@@ -149,6 +146,8 @@ app.controller("groupEditController", function($scope, Restangular, messages, $r
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
       }
       $scope.$hide();
+    }, function (response) {
+      handleError(response, messages);
     });
   };
   

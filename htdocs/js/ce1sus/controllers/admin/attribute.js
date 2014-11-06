@@ -3,22 +3,14 @@
  */
 
 app.controller("attributeController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+    $log, $routeSegment, attributes, handlers, tables) {
   $scope.attribute = {};
   
   $scope.attributes = [];
   
-  Restangular.one("attribute").getList(null,{"Complete": false}).then(function (attributes) {
-    $scope.attributes = attributes;
-  });
-  
-  Restangular.one("handlers").get(null,{"Complete": false}).then(function (handlers) {
-    $scope.handlers = handlers;
-  });
-  
-  Restangular.one("tables").get(null,{"Complete": false}).then(function (tables) {
-    $scope.tables = tables;
-  });
+  $scope.attributes = attributes;
+  $scope.handlers = handlers;
+  $scope.tables = tables;
   
   $scope.$routeSegment = $routeSegment;
 
@@ -26,14 +18,11 @@ app.controller("attributeController", function($scope, Restangular, messages,
 });
 
 app.controller("attributeDetailController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+    $log, $routeSegment, $attribute) {
   
   var identifier = $routeSegment.$routeParams.id;
   
-  $scope.attribute = {};
-  Restangular.one("attribute",identifier).get(null,{"Complete": true}).then(function (data) {
-    $scope.attribute = data;
-  });
+  $scope.attribute = $attribute;
 
   //scope functions
   $scope.removeAttribute = function(){
@@ -57,6 +46,8 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
         
       }
       $scope.$hide();
+    }, function (response) {
+      handleError(response, messages);
     });
   };
 
@@ -96,6 +87,8 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
       }
       messages.setMessage({'type':'success','message':'Attribute sucessfully added'});
       
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };

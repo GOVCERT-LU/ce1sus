@@ -17,6 +17,8 @@ app.controller("loginController", function($scope, Restangular, messages,
         // reload the whole window with the loggedin informations
         window.location.href="/";
       }
+    }, function (response) {
+      handleError(response, messages);
     });
   };
   $scope.$routeSegment = $routeSegment;
@@ -33,6 +35,8 @@ app.controller("logoutController", function($scope, Restangular,
       window.location = "/";
       $scope.logoutText = "You have logged out";
     }
+  }, function (response) {
+    handleError(response, messages);
   });
   $scope.$routeSegment = $routeSegment;
   

@@ -7,10 +7,8 @@ Created: Aug 26, 2013
 """
 import random
 
-from ce1sus.controllers.base import BaseController, ControllerException, \
-  ControllerNothingFoundException
-from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, \
-  NothingFoundException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator

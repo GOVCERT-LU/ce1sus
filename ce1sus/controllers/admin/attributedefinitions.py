@@ -8,6 +8,7 @@ Created: Aug, 2013
 from ce1sus.controllers.base import BaseController, SpecialControllerException, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker, AttributeViewTypeBroker
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
@@ -36,6 +37,8 @@ class AttributeDefinitionController(BaseController):
     BaseController.__init__(self, config)
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
+    self.type_broker = self.broker_factory(AttributeTypeBroker)
+    self.view_type_broker = self.broker_factory(AttributeViewTypeBroker)
 
   def get_all_attribute_definitions(self):
     """

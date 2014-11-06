@@ -10,7 +10,8 @@ Release 0.11.0
 * Redesing of frontend
 * Simplified handlers
 * Handlers have a seperate configuration file
-* Objects support required attributes (these then have to be created at the same time an object is created)
+* Added View Types for attributes to decapsule view and api
+* Addted Types for attributes to make relations over several types i.e ip_v4 and c&c_ip_v4
 
 Release 0.10.3
 --------------

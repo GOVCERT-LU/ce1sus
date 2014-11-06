@@ -54,6 +54,8 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
       }
       messages.setMessage({'type':'success','message':'User sucessfully added'});
       
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };
@@ -101,6 +103,8 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
         
       }
       $scope.$hide();
+    }, function (response) {
+      handleError(response, messages);
     });
   };
 
@@ -138,6 +142,8 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
         $scope.user = data;
       }
       messages.setMessage({'type':'success','message':'User sucessfully edited'});
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };

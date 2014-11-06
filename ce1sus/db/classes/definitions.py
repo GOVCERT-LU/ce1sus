@@ -73,7 +73,6 @@ class ObjectDefinition(SimpleLogingInformations, Base):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-
   def to_dict(self, complete=True):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
@@ -107,6 +106,11 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
+  value_type_id = Column('attributetype_id', Unicode(40), ForeignKey('attributetypes.attributetype_id'))
+  value_type = relationship("AttributeType", uselist=False)
+  view_type_id = Column('attributeviewtype_id', Unicode(40), ForeignKey('attributeviewtypes.attributeviewtype_id'), nullable=False, index=True)
+  view_type = relationship("AttributeViewType", uselist=False)
+
   __handler = None
 
   @property
@@ -247,4 +251,4 @@ class AttributeHandler(Base):
             'name': self.convert_value(self.classname),
             'identifier': self.convert_value(self.identifier),
             'allowed_tables': result
-    }
+            }

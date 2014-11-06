@@ -3,27 +3,17 @@
  */
 
 app.controller("objectController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
-  $scope.objects = [];
-  
-  Restangular.one("object").getList(null,{"Complete": false}).then(function (objects) {
-    $scope.objects = objects;
-  });
-  
+    $log, $routeSegment, objects) {
+  $scope.objects = objects;
   $scope.$routeSegment = $routeSegment;
 
 });
 
 app.controller("objectDetailController", function($scope, $injector, Restangular, messages,
-    $log, $routeSegment) {
-  $scope.object = {};
+    $log, $routeSegment, $object) {
+  $scope.object = $object;
   
   $scope.data = getLocals($routeSegment).data;
-  var identifier = $routeSegment.$routeParams.id;
-  Restangular.one("object",identifier).get(null,{"Complete": true}).then(function(data){
-    
-    $scope.object = data;
-  });
   
   //scope functions
   $scope.removeObject = function(){
@@ -47,18 +37,13 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
         
       }
       $scope.$hide();
+    }, function (response) {
+      handleError(response, messages);
     });
   };
 
   $scope.$routeSegment = $routeSegment;
-  
 
-  $scope.start = function() {
-    cfpLoadingBar.start();
-  };
-  $scope.complete = function() {
-    cfpLoadingBar.complete();
-  };
 });
 
 app.controller("objectAddController", function($scope, Restangular, messages,
@@ -92,6 +77,8 @@ app.controller("objectAddController", function($scope, Restangular, messages,
       }
       messages.setMessage({'type':'success','message':'Object sucessfully added'});
       
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };

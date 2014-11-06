@@ -5,7 +5,7 @@
 
 Created on Oct 26, 2014
 """
-from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.plugins.base import PluginException
@@ -70,7 +70,7 @@ class LoginController(BaseController):
         if user.can_access:
           return user
       else:
-        self.raise_exception('No user was found matching the given username and password')
+        raise ControllerException('No user was found matching the given username and password')
     except BrokerException as error:
       raise ControllerException(error)
 

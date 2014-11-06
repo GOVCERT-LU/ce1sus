@@ -48,7 +48,7 @@ class Attribute(ExtendedLogingInformations, Base):
   number_value = relationship(NumberValue,
                               primaryjoin='Attribute.identifier==NumberValue.attribute_id',
                               uselist=False)
-  type_id = Column('type_id', Integer(1))
+  table_id = Column('table_id', Integer(1))
   is_ioc = Column('is_ioc', Boolean)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',

@@ -59,4 +59,3 @@ class ExtendedLogingInformations(SimpleLogingInformations):
   @declared_attr
   def originating_group(cls):
     return relationship('Group', primaryjoin='{0}.originating_group_id==Group.identifier'.format(cls.__name__))
-

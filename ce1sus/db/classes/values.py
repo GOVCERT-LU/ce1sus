@@ -8,7 +8,7 @@ Created on Oct 17, 2014
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, Text, Numeric
+from sqlalchemy.types import Unicode, Text, Numeric, Date
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
@@ -21,6 +21,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+# TODO: recheck validation of values
 class ValueBase(object):
 
   @declared_attr
@@ -33,11 +34,19 @@ class ValueBase(object):
 
   @declared_attr
   def event_id(self):
-    return Column('event_id', Unicode(40), ForeignKey('events.event_id'))
+    return Column('event_id', Unicode(40), ForeignKey('events.event_id'), nullable=False, index=True)
 
   @declared_attr
   def event(self):
     return relationship("Event", uselist=False)
+
+  @declared_attr
+  def value_type_id(self):
+    return Column('attributetype_id', Unicode(40), ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
+
+  @declared_attr
+  def value_type(self):
+    return relationship("AttributeType", uselist=False)
 
 
 # pylint: disable=R0903,W0232
@@ -61,6 +70,20 @@ class StringValue(ValueBase, Base):
 
 # pylint: disable=R0903
 class DateValue(ValueBase, Base):
+  """This is a container class for the DATEVALES table."""
+  value = Column('value', Date, nullable=False, index=True)
+
+  def validate(self):
+    """
+    Checks if the attributes of the class are valid
+
+    :returns: Boolean
+    """
+    return True
+
+
+# pylint: disable=R0903
+class TimeStampValue(ValueBase, Base):
   """This is a container class for the DATEVALES table."""
   value = Column('value', DateTime, nullable=False, index=True)
 

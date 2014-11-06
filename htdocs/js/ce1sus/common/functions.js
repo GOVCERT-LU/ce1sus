@@ -39,9 +39,16 @@ function generateErrorMessage(response){
   return error;
 }
 
+function getTextOutOfErrorMessage(error){
+  var preStart = error.description.indexOf('<p>') +3;
+  var preEnd = error.description.indexOf('</p>');
+  text = error.description.substring(preStart,preEnd); 
+  return text;
+}
+
 function handleError(response, messages) {
   code = response.status;
-  message = response.statusText;
+  message = getTextOutOfErrorMessage(generateErrorMessage(response));
   if (code === 500) {
     message = "Internal Error occured, please contact your system administrator";
   }

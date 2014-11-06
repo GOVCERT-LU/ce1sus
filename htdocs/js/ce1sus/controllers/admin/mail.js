@@ -45,6 +45,8 @@ app.controller("mailEditController", function($scope, Restangular, messages, $ro
         $scope.mail = maildata;
       }
       messages.setMessage({'type':'success','message':'User sucessfully edited'});
+    }, function (response) {
+      handleError(response, messages);
     });
     $scope.$hide();
   };
