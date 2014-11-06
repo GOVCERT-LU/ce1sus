@@ -19,14 +19,24 @@
   <label class="col-lg-3 control-label text-right">Regex</label>
   <div class="col-lg-9">{{attribute.regex}}</div>
 </div>
+
 <div class="row">
-  <label class="col-lg-3 control-label text-right">Handler</label>
-  <div class="col-lg-9">{{attribute.attributehandler}}</div>
+  <label class="col-lg-3 control-label text-right">Data type</label>
+  <div class="col-lg-9">{{attribute.table_name}}</div>
 </div>
 <div class="row">
-  <label class="col-lg-3 control-label text-right">ValueTable</label>
-  <div class="col-lg-9">{{attribute.table}}</div>
+  <label class="col-lg-3 control-label text-right">Input handler</label>
+  <div class="col-lg-9">{{attribute.attributehandler_name}}</div>
 </div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Base type</label>
+  <div class="col-lg-9">{{attribute.type_name}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">View Type</label>
+  <div class="col-lg-9">{{attribute.viewType_name}}</div>
+</div>
+
 
 <div class="row">
   <label class="col-lg-3 control-label text-right">Options</label>
@@ -54,9 +64,9 @@
   <div class="col-lg-offset-3 col-lg-9">
     <div class="btn-group">
       <button type="button" class="btn btn-default"
-        data-template="pages/admin/group/modals/editgroupmodal.html"
+        data-template="pages/admin/attribute/modals/editattributemodal.html"
         bs-modal="modal">Edit</button>
-      <button type="button" class="btn btn-danger" ng-click="removeGroup()">Delete</button>
+      <button type="button" class="btn btn-danger" ng-click="removeAttribute()">Delete</button>
     </div>
   </div>
 </div>

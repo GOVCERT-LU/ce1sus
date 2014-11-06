@@ -44,10 +44,10 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
         }, $log);
         
       }
-      $scope.$hide();
     }, function (response) {
       handleError(response, messages);
     });
+    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;
@@ -55,6 +55,58 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
   $scope.setAttribute = function(attribute){
     $scope.attribute = attribute;
   };
+  
+  $scope.$watch(function() {
+    return $scope.attribute.table_id;
+    }, function(newVal, oldVal) {
+      //keep the group name shown instead the uuid, but only if there are groups
+      if ($scope.tables.length > 0) {
+        angular.forEach($scope.tables, function(entry) {
+          if (entry.identifier === $scope.attribute.table_id){
+            $scope.attribute.table_name = entry.name;
+          }
+        }, $log);
+      }
+    });
+  
+  $scope.$watch(function() {
+    return $scope.attribute.attributehandler_id;
+    }, function(newVal, oldVal) {
+      //keep the group name shown instead the uuid, but only if there are groups
+      if ($scope.handlers.length > 0) {
+        angular.forEach($scope.handlers, function(entry) {
+          if (entry.identifier === $scope.attribute.attributehandler_id){
+            $scope.attribute.attributehandler_name = entry.name;
+          }
+        }, $log);
+      }
+    });
+  
+  $scope.$watch(function() {
+    return $scope.attribute.type_id;
+    }, function(newVal, oldVal) {
+      //keep the group name shown instead the uuid, but only if there are groups
+      if ($scope.types.length > 0) {
+        angular.forEach($scope.types, function(entry) {
+          if (entry.identifier === $scope.attribute.type_id){
+            $scope.attribute.type_name = entry.name;
+          }
+        }, $log);
+      }
+    });
+  
+  $scope.$watch(function() {
+    return $scope.attribute.viewType_id;
+    }, function(newVal, oldVal) {
+      //keep the group name shown instead the uuid, but only if there are groups
+      if ($scope.viewTypes.length > 0) {
+        angular.forEach($scope.viewTypes, function(entry) {
+          if (entry.identifier === $scope.attribute.viewType_id){
+            $scope.attribute.viewType_name = entry.name;
+          }
+        }, $log);
+      }
+    });
   
 });
 
@@ -75,10 +127,6 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
   $scope.resetAttributeCBs = function ()
   {
     $scope.reset = true;
-  };
-  
-  $scope.generateAPIKey = function() {
-    $scope.attribute.api_key = generateAPIKey();
   };
   
   $scope.attributeChanged = function ()
@@ -104,5 +152,49 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
 
   
 });
+
+app.controller("attributeEditController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
+  var original_attribute = angular.copy($scope.attribute);
+  
+  $scope.closeModal = function(){
+    var attribute = angular.copy(original_attribute);
+    $scope.$parent.setAttribute(attribute);
+    $scope.$hide();
+
+  };
+  //Scope functions
+  $scope.resetAttribute = function ()
+  {
+    $scope.attribute = angular.copy(original_attribute);
+    $scope.addAttributeForm.$setPristine();
+  };
+  
+  $scope.attributeChanged = function ()
+  {
+    return !angular.equals($scope.attribute, original_attribute);
+  };
+  
+  $scope.submitAttribute = function(){
+    $scope.attribute.put().then(function (data) {
+      if (data) {
+        $scope.attribute = data;
+        //update name in menu
+        angular.forEach($scope.attributes, function(entry) {
+          if (entry.identifier == data.identifier) {
+            entry.name = data.name;
+          }
+        }, $log);
+        messages.setMessage({'type':'success','message':'Attribute sucessfully edited'});
+      }
+      
+    }, function (response) {
+      handleError(response, messages);
+    });
+    $scope.$hide();
+  };
+  
+
+});
+
 
 

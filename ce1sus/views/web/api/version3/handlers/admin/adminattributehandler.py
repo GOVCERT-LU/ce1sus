@@ -69,7 +69,7 @@ class AdminAttributeHandler(RestBaseHandler):
           attr_def = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
           attr_def.populate(json)
           # set the new checksum
-          self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())
+          self.attribute_definition_controller.update_attribtue_definition(attr_def, self.get_user())
           return attr_def.to_dict()
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')

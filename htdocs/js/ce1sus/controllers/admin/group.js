@@ -103,10 +103,10 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
         }, $log);
         messages.setMessage({'type':'success','message':'Group sucessfully removed'});
       }
-      $scope.$hide();
     }, function (response) {
       handleError(response, messages);
     });
+    $scope.$hide();
   };
   
   //TODO: Write actions for add and remove groups from group
@@ -156,10 +156,10 @@ app.controller("groupEditController", function($scope, Restangular, messages, $r
         }, $log);
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
       }
-      $scope.$hide();
     }, function (response) {
       handleError(response, messages);
     });
+    $scope.$hide();
   };
   
 

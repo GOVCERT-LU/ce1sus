@@ -109,10 +109,10 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
         }, $log);
         
       }
-      $scope.$hide();
     }, function (response) {
       handleError(response, messages);
     });
+    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;

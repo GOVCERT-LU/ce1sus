@@ -34,14 +34,14 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
         }, $log);
         
       }
-      $scope.$hide();
     }, function (response) {
       handleError(response, messages);
     });
+    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;
-
+  
   $scope.setObject = function(object){
     $scope.object = object;
   };
@@ -58,10 +58,6 @@ app.controller("objectAddController", function($scope, Restangular, messages,
   {
     $scope.object = angular.copy(original_object);
     $scope.addObjectDefinitionForm.$setPristine();
-  };
-  
-  $scope.generateAPIKey = function() {
-    $scope.object.api_key = generateAPIKey();
   };
   
   $scope.objectChanged = function ()
@@ -83,7 +79,51 @@ app.controller("objectAddController", function($scope, Restangular, messages,
     });
     $scope.$hide();
   };
-
+  
+  $scope.$routeSegment = $routeSegment;
+  $scope.setObject = function(object){
+    $scope.object = object;
+  };
 });
 
+app.controller("objectEditController", function($scope, Restangular, messages, $routeSegment,$location,  $log) {
+  var original_object = angular.copy($scope.object);
+
+  
+  //Scope functions
+  $scope.resetUser = function ()
+  {
+    $scope.object = angular.copy(original_object);
+  };
+  
+  $scope.closeModal = function(){
+    var object = angular.copy(original_object);
+    $scope.$parent.setObject(object);
+    $scope.$hide();
+  };
+  
+  $scope.objectChanged = function ()
+  {
+    var result = !angular.equals($scope.object, original_object);
+    return result;
+  };
+  
+  $scope.submitObject = function(){
+    $scope.object.put().then(function (data) {
+      if (data) {
+        //update username in case
+        angular.forEach($scope.objects, function(entry) {
+          if (entry.identifier === data.identifier){
+            entry.name = data.name;
+          }
+        }, $log);
+        $scope.$parent.setObject(data);
+      }
+      messages.setMessage({'type':'success','message':'Object sucessfully edited'});
+    }, function (response) {
+      handleError(response, messages);
+    });
+    $scope.$hide();
+  };
+});
 
