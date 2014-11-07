@@ -10,8 +10,9 @@ app.controller("objectController", function($scope, Restangular, messages,
 });
 
 app.controller("objectDetailController", function($scope, $injector, Restangular, messages,
-    $log, $routeSegment, $object) {
+    $log, $routeSegment, $object, attributes) {
   $scope.object = $object;
+  $scope.attributes = attributes;
   
   //scope functions
   $scope.removeObject = function(){
@@ -121,6 +122,8 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
       }
       messages.setMessage({'type':'success','message':'Object sucessfully edited'});
     }, function (response) {
+      var object = angular.copy(original_object);
+      $scope.$parent.setObject(object);
       handleError(response, messages);
     });
     $scope.$hide();

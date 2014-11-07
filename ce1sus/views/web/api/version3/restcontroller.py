@@ -18,6 +18,7 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from paste.script import cherrypy_server
 
 
 __author__ = 'Weber Jean-Paul'
@@ -90,19 +91,19 @@ class RestController(BaseView):
           path.append(node)
 
       if not handler:
-        return self.raise_exception(Exception('Root requests are not allowed'))
+        raise cherrypy.HTTPError('Root requests are not allowed')
 
       # get the requested handler
       handler_instance = self.instances.get(handler, None)
 
       if not handler_instance:
-        return self.raise_exception(Exception('Handler "{0}" is not defined'.format(handler)))
+        raise cherrypy.HTTPError('Handler "{0}" is not defined'.format(handler))
 
       # get default access point of the handler
       method_name = RestController.find_default_method_name(handler_instance)
 
       if not method_name:
-        return self.raise_exception(Exception('Handler {0} has no default method'.format(handler_instance.name)))
+        raise cherrypy.HTTPError('Handler {0} has no default method'.format(handler_instance.name))
 
       http_method = cherrypy.request.method
 

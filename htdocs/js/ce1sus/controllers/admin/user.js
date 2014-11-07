@@ -157,6 +157,8 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
       }
       messages.setMessage({'type':'success','message':'User sucessfully edited'});
     }, function (response) {
+      var user = angular.copy(original_user);
+      $scope.$parent.setUser(user);
       handleError(response, messages);
     });
     $scope.$hide();

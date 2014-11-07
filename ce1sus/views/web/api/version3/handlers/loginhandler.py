@@ -55,7 +55,7 @@ class LoginHandler(RestBaseHandler):
             self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
             raise RestHandlerException('User or password are incorrect.')
 
-      return 'User Logged in'
+      return 'OK'
     except ControllerException as error:
       self.logger.info(error)
       raise RestHandlerException('User or password are incorrect.')

@@ -49,9 +49,10 @@ class ObjectDefinition(SimpleLogingInformations, Base):
   default_operator = Column('default_operator', Integer, default=0, nullable=False)
 
   # the relationship is flagged with true when it is a required attribute
-  possible_attributes = relationship('AttributeDefinition',
-                                     secondary='objectdefinition_has_attributedefinitions',
-                                     order_by='AttributeDefinition.name')
+  attributes = relationship('AttributeDefinition',
+                            secondary='objectdefinition_has_attributedefinitions',
+                            order_by='AttributeDefinition.name',
+                            back_populates='objects')
 
   def validate(self):
     """
@@ -110,6 +111,11 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   value_type = relationship("AttributeType", uselist=False)
   view_type_id = Column('attributeviewtype_id', Unicode(40), ForeignKey('attributeviewtypes.attributeviewtype_id'), nullable=False, index=True)
   view_type = relationship("AttributeViewType", uselist=False)
+  objects = relationship('ObjectDefinition',
+                         secondary='objectdefinition_has_attributedefinitions',
+                         order_by='ObjectDefinition.name',
+                         back_populates='attributes')
+
 
   __handler = None
 

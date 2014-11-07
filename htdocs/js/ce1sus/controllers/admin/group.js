@@ -63,8 +63,7 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
 
   original_group = angular.copy($group);
   $scope.group = $group;
-  
-  $scope.modalTitle ="Edit Group " + data.groupname;
+
   $scope.group.getList("children").then(function (group_response) {
     $scope.group.children = group_response;
   });
@@ -157,6 +156,8 @@ app.controller("groupEditController", function($scope, Restangular, messages, $r
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
       }
     }, function (response) {
+      var group = angular.copy(original_group);
+      $scope.$parent.setGroup(group);
       handleError(response, messages);
     });
     $scope.$hide();

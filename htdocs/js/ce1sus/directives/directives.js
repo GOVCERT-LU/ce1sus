@@ -8,7 +8,7 @@ app.directive("plainText", function() {
   return {
     restrict: "E",
     scope: {
-      celsusText: "=text"
+      celsusText: "@text"
     },
     templateUrl: "pages/common/text.html",
     controller: function($scope){
@@ -29,8 +29,8 @@ app.directive("userForm", function() {
     restrict: "E",
     scope: {
       user: "=user",
-      editMode: "=edit",
-      groups: "=groups"
+      editMode: "@edit",
+      groups: "@groups"
     },
     templateUrl: "pages/common/directives/userform.html"
   };
@@ -53,51 +53,83 @@ app.directive("addRemTable", function() {
   return {
     restrict: "E",
     scope: {
-      title: "=title",
-      accociated: "=accociated", //group.children
+      title: "@title",
+      foo: "=foo", //group.children
       allItems: "=all", //groups
-      addAction: "=add",
-      remAction: "=rem",
-      maskedID: "=masked"
+      route: "@route",
+      owner: "=owner"
     },
     templateUrl: "pages/common/directives/addremtables.html",
-    controller: function($scope, $log, $timeout){
+    controller: function($scope, $log, $timeout, Restangular, messages){
       //Split the associdated ones and available ones (definition of remaining)
       $scope.remaining = angular.copy($scope.allItems);
-      
+      if ($scope.foo) {
+        $scope.associated = $scope.foo;
+      } else {
+        $scope.associated = [];
+      }
       $scope.setRemaining = function() {
         var index = 0;
+        var items_to_remove = [];
         angular.forEach($scope.remaining, function(item) {
           // remove selected from the group
-          if (item.identifier == $scope.maskedID) {
-            $scope.remaining.splice(index, 1);
+          if (item.identifier == $scope.owner.identifier) {
+            items_to_remove.push(index);
           } else {
-            angular.forEach($scope.accociated, function(associatedEntry) {
-              if (item.identifier == associatedEntry.identifier){
-                $scope.remaining.splice(index, 1);
-              }
-            }, $log);
+            if ($scope.associated.length > 0) {
+              angular.forEach($scope.associated, function(associatedEntry) {
+                var id1 = associatedEntry.identifier;
+                var id2 = item.identifier;
+                if (id1.toLowerCase() == id2.toLowerCase()){
+                  items_to_remove.push(index);
+                  
+                }
+                
+              }, $log);
+            } else {
+              //restangularize object
+              $scope.associated =  [];
+            }
           }
           index++;
         }, $log);
+        //sort array from big to log
+        items_to_remove = items_to_remove.reverse();
+        angular.forEach(items_to_remove, function(index){
+          $scope.remaining.splice(index, 1);
+        });
       };
       //wait till the object was rendered
       $timeout($scope.setRemaining);
 
       $scope.selected_accociated = [];
       $scope.selected_remaining = [];
-      
+      var original_associated = angular.copy($scope.associated);
       //make diff of the group and the children
       $scope.addRemTableRemove = function() {
-        if (typeof $scope.addAction != "undefined") {
-          $scope.addAction($scope.selected_accociated);
-        }
         angular.forEach($scope.selected_accociated, function(removedItemId) {
           // remove selected from the group
           var index = 0;
-          angular.forEach($scope.accociated, function(associatedEntry) {
+          angular.forEach($scope.associated, function(associatedEntry) {
             if (removedItemId == associatedEntry.identifier){
-              $scope.accociated.splice(index, 1);
+              
+              $scope.associated.splice(index, 1);
+              Restangular.one($scope.owner.route, $scope.owner.identifier).one($scope.route, removedItemId).remove().then(function (item) {
+                if (item) {
+                  messages.setMessage({'type':'success','message':'Item sucessfully removed'});
+                } else {
+                  messages.setMessage({'type':'danger','message':'Unkown error occured'});
+                }
+                $scope.selected_accociated = [];
+                $scope.selected_remaining = [];
+              }, function (response) {
+                $scope.remaining = angular.copy($scope.allItems);
+                $scope.associated = original_associated;
+                $scope.setRemaining();
+                
+                handleError(response, messages);
+              });
+              
             }
             index++;
           }, $log);
@@ -111,14 +143,10 @@ app.directive("addRemTable", function() {
           
           
         }, $log);
-        $scope.selected_accociated = [];
-        
       };
-        
+      
       $scope.addRemTableAdd = function() {
-        if (typeof $scope.remAction != "undefined") {
-          $scope.remAction($scope.selected_remaining);
-        }
+        var original_associated = angular.copy($scope.associated);
         angular.forEach($scope.selected_remaining, function(addedItemID) {
           // remove selected from the group
           var index = 0;
@@ -131,19 +159,37 @@ app.directive("addRemTable", function() {
           
           //append the selected to the remaining groups
           //check if there are children
-          if (!($scope.accociated instanceof Array)) {
-            $scope.accociated = [];
-          }
           //search for the group details
+          
           angular.forEach($scope.allItems, function(itemEntry) {
             if (itemEntry.identifier == addedItemID){
-              $scope.accociated.push(itemEntry);
+              
+              
+              $scope.associated.push(itemEntry);
+              //derestangularize the element
+              //foo as the owner is modified 
+              Restangular.one($scope.owner.route, $scope.owner.identifier).all($scope.route).post({'identifier':itemEntry.identifier,'name':itemEntry.name}).then(function (item) {
+                if (item) {
+                  messages.setMessage({'type':'success','message':'Item sucessfully associated'});
+                } else {
+                  
+                  messages.setMessage({'type':'danger','message':'Unkown error occured'});
+                }
+                $scope.selected_accociated = [];
+                $scope.selected_remaining = [];
+              }, function (response) {
+                $scope.remaining = angular.copy($scope.allItems);
+                $scope.associated = original_associated;
+                $scope.setRemaining();
+                
+                handleError(response, messages);
+              });
             }
           }, $log);
           
           
         }, $log);
-
+        
       };
     }
   };

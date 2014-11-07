@@ -85,7 +85,8 @@ class LoginController(BaseController):
     :returns: User
     """
     try:
-      user.last_login = DatumZait.utcnow()
+      # TODO: update login time
+      # user.last_login = DatumZait.utcnow()
       self.user_broker.update(user)
     except BrokerException as error:
       raise ControllerException(error)

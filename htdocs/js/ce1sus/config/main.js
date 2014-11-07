@@ -245,6 +245,13 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                          }, function(response) {
                                              throw generateErrorMessage(response);
                                          });
+                                       },
+                                       attributes: function(Restangular) {
+                                         return Restangular.one("attribute").getList(null, {"Complete": false}).then(function (attributes) {
+                                           return attributes;
+                                         }, function(response) {
+                                             throw generateErrorMessage(response);
+                                         });
                                        }
                                      },
                                      dependencies: ["id"],
@@ -318,6 +325,20 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                $attribute: function(Restangular,$routeSegment) {
                                  return Restangular.one("attribute",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (attribute) {
                                    return attribute;
+                                 }, function(response) {
+                                     throw generateErrorMessage(response);
+                                 });
+                               },
+                               $attributeObjects: function(Restangular,$routeSegment) {
+                                 return Restangular.one("attribute",$routeSegment.$routeParams.id).getList('object').then(function (attribute) {
+                                   return attribute;
+                                 }, function(response) {
+                                     throw generateErrorMessage(response);
+                                 });
+                               },
+                               objects: function(Restangular) {
+                                 return Restangular.all("object").getList(null, {"Complete": false}).then(function (objects) {
+                                   return objects;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
                                  });

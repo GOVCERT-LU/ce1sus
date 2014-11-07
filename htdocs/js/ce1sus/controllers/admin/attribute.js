@@ -17,11 +17,14 @@ app.controller("attributeController", function($scope, Restangular, messages,
 });
 
 app.controller("attributeDetailController", function($scope, Restangular, messages,
-    $log, $routeSegment, $attribute) {
+    $log, $routeSegment, $attribute, objects, $attributeObjects) {
   
   var identifier = $routeSegment.$routeParams.id;
   
   $scope.attribute = $attribute;
+  $scope.objects = objects;
+  $scope.attribute.objects = $attributeObjects;
+  $scope.attrObjs = [];
 
   //scope functions
   $scope.removeAttribute = function(){
@@ -108,6 +111,27 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
       }
     });
   
+  $scope.addObject = function(){
+    /*
+    //check if objects exists and restangularize it
+    if ($scope.attribute.objects.length === 0) {
+      var objects = Restangular.restangularizeElement($scope.attribute,[],'objects');
+      $scope.attribute.objects = objects;
+    }
+    
+    
+    //restangularize the elements and add it to the attribtue.objects
+    angular.forEach(selected, function(entry) {
+      var object = Restangular.restangularizeElement($scope.attribute,{'identifier':entry}, 'objects');
+      $scope.attribute.objects.push(object);
+    }, $log);
+    //save the changes
+    */
+    $scope.attribute.objects.put();
+  };
+  $scope.remObject = function(selected){
+    
+  };
 });
 
 app.controller("attributeAddController", function($scope, Restangular, messages,
@@ -188,11 +212,14 @@ app.controller("attributeEditController", function($scope, Restangular, messages
       }
       
     }, function (response) {
+      var attribute = angular.copy(original_attribute);
+      $scope.$parent.setAttribute(attribute);
       handleError(response, messages);
     });
     $scope.$hide();
   };
   
+
 
 });
 

@@ -61,6 +61,8 @@ app.controller("mailEditController", function($scope, Restangular, messages, $ro
       }
       messages.setMessage({'type':'success','message':'User sucessfully edited'});
     }, function (response) {
+      var mail = angular.copy(original_mail);
+      $scope.$parent.setMail(mail);
       handleError(response, messages);
     });
     $scope.$hide();
