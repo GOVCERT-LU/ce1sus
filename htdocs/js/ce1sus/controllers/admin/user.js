@@ -18,6 +18,7 @@ app.controller("userController", function($rootScope, $scope, Restangular, messa
     $location.path("/admin/user/"+ $scope.users[0].identifier);
   }
   */
+  
 
   $scope.$routeSegment = $routeSegment;
 
@@ -26,7 +27,6 @@ app.controller("userController", function($rootScope, $scope, Restangular, messa
 
 app.controller("userAddController", function($scope, Restangular, messages, $routeSegment,$location) {
   var original_user = {};
-
   $scope.user={};
   
   $scope.closeModal = function(){
@@ -41,9 +41,7 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
     $scope.addUserForm.$setPristine();
   };
   
-  $scope.generateAPIKey = function() {
-    $scope.user.api_key = generateAPIKey();
-  };
+
   
   $scope.userChanged = function ()
   {
@@ -60,6 +58,7 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
       messages.setMessage({'type':'success','message':'User sucessfully added'});
       
     }, function (response) {
+      $scope.$parent.user = angular.copy(original_user);
       handleError(response, messages);
     });
     $scope.$hide();
@@ -71,8 +70,7 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
 app.controller("userDetailController", function($scope, $routeSegment,$user, $log) {
 
   $scope.user = $user;
-
-
+  
   $scope.$watch(function() {
     return $scope.user.group_id;
     }, function(newVal, oldVal) {
@@ -162,10 +160,6 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
       handleError(response, messages);
     });
     $scope.$hide();
-  };
-  
-  $scope.generateAPIKey = function() {
-    $scope.user.api_key = generateAPIKey();
   };
 
 });

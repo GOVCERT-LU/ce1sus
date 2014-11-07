@@ -163,7 +163,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    controller : "mailController",
                                    resolve: {
                                      mails: function(Restangular) {
-                                       return Restangular.one("mail").getList(null, {"Complete": false}).then(function (mails) {
+                                       return Restangular.one("mail").getList(null, null, {"Complete": false}).then(function (mails) {
                                          return mails;
                                        }, function(response) {
                                            throw generateErrorMessage(response);
@@ -215,7 +215,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "objectController",
                                resolve: {
                                  objects: function(Restangular) {
-                                   return Restangular.one("object").getList(null, {"Complete": false}).then(function (objects) {
+                                   return Restangular.one("object").getList(null, null, {"Complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -247,7 +247,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                          });
                                        },
                                        attributes: function(Restangular) {
-                                         return Restangular.one("attribute").getList(null, {"Complete": false}).then(function (attributes) {
+                                         return Restangular.one("attribute").getList(null, null, {"Complete": false}).then(function (attributes) {
                                            return attributes;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -270,35 +270,35 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "attributeController",
                                resolve: {
                                  attributes: function(Restangular) {
-                                   return Restangular.one("attribute").getList(null, {"Complete": false}).then(function (attributes) {
+                                   return Restangular.one("attribute").getList(null, null, {"Complete": false}).then(function (attributes) {
                                      return attributes;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  handlers: function(Restangular) {
-                                   return Restangular.one("attributehandlers").getList(null, {"Complete": false}).then(function (handlers) {
+                                   return Restangular.one("attributehandlers").getList(null, null, {"Complete": false}).then(function (handlers) {
                                      return handlers;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  tables: function(Restangular) {
-                                   return Restangular.one("attributetables").getList(null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attributetables").getList(null, null, {"Complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  types: function(Restangular) {
-                                   return Restangular.one("attributetypes").getList(null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attributetypes").getList(null, null, {"Complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  viewTypes: function(Restangular) {
-                                   return Restangular.one("attribtueviewtypes").getList(null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attribtueviewtypes").getList(null, null, {"Complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -337,7 +337,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  });
                                },
                                objects: function(Restangular) {
-                                 return Restangular.all("object").getList(null, {"Complete": false}).then(function (objects) {
+                                 return Restangular.all("object").getList(null, null, {"Complete": false}).then(function (objects) {
                                    return objects;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
@@ -360,8 +360,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "userController",
                                resolve: {
                                  groups: function(Restangular) {
-                                   return Restangular.one("group").getList(null, {"Complete": false}).then(function (groups) {
-                                     return data;
+                                   return Restangular.one("group").getList(null, null, {"Complete": false}).then(function (groups) {
+                                     return groups;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
@@ -378,7 +378,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    });
                                  },
                                  users: function(Restangular,$routeSegment) {
-                                   return Restangular.one("user").getList(null, {"Complete": false}).then(function (users) {
+                                   return Restangular.one("user").getList(null, null, {"Complete": false}).then(function (users) {
                                      return users;
                                    
                                    }, function(response) {
@@ -428,7 +428,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "groupController",
                                resolve: {
                                  groups: function(Restangular) {
-                                   return Restangular.one("group").getList(null, {"Complete": false}).then(function (groups) {
+                                   return Restangular.one("group").getList(null, null, {"Complete": false}).then(function (groups) {
                                      return groups;
                                    }, function(response) {
                                        throw generateErrorMessage(response);

@@ -29,10 +29,16 @@ app.directive("userForm", function() {
     restrict: "E",
     scope: {
       user: "=user",
-      editMode: "@edit",
-      groups: "@groups"
+      editMode: "=edit",
+      groups: "=groups"
     },
-    templateUrl: "pages/common/directives/userform.html"
+    templateUrl: "pages/common/directives/userform.html",
+    controller: function($scope){
+      $scope.generateAPIKey = function() {
+        $scope.user.api_key = generateAPIKey();
+      };
+      var test = $scope.groups;
+    }
   };
 });
 
