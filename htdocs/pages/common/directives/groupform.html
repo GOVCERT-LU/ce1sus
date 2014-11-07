@@ -47,11 +47,8 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.email.$invalid && !addGroupForm.email.$pristine }">
         <input class="form-control" name="email" ng-model="group.email"
-          type="email" required ng-minlength=3 ng-minlength=255
+          type="email" ng-minlength=3 ng-minlength=255
           ng-pattern="/^.+@.+\..{2,3}$/">
-        <p
-          ng-show="addGroupForm.email.$invalid && !addGroupForm.email.$pristine"
-          class="help-block">Email is required.</p>
         <p ng-show="addGroupForm.email.$error.pattern" class="help-block">Email
           is not valid email.</p>
       </div>

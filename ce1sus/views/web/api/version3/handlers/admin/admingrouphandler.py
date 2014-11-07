@@ -77,11 +77,34 @@ class AdminGroupHandler(RestBaseHandler):
           return result
 
       elif method == 'POST':
-        # Add new group
-        group = Group()
-        group.populate(json)
-        self.group_controller.insert_group(group)
-        return group.to_dict()
+        if len(path) > 0:
+          uuid = path.pop(0)
+          group = self.group_controller.get_group_by_id(uuid)
+          if len(path) > 0:
+            type_ = path.pop(0)
+            if type_ == 'children':
+              # get the object definition
+              if isinstance(json, list):
+                # TODO: add support for lists
+                raise RestHandlerException(u'POST of group children does not support lists')
+              uuid = json.get('identifier', None)
+              if uuid:
+                child = self.group_controller.get_group_by_id(uuid)
+                group.children.append(child)
+                self.group_controller.update_group(group)
+                return 'OK'
+              else:
+                raise RestHandlerException(u'No id was specified in the json post')
+            else:
+              raise RestHandlerException(u'"{0}" is not supported'.format(type_))
+          else:
+            raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
+        else:
+          # Add new group
+          group = Group()
+          group.populate(json)
+          self.group_controller.insert_group(group)
+          return group.to_dict()
       elif method == 'PUT':
         # update group
         if len(path) > 0:
@@ -99,8 +122,19 @@ class AdminGroupHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single group
           uuid = path.pop(0)
-          self.group_controller.remove_group_by_id(uuid)
-          return 'Deleted group'
+          if len(path) > 0:
+            type_ = path.pop(0)
+            if len(path) > 0:
+              group = self.group_controller.get_group_by_id(uuid)
+              uuid = path.pop(0)
+              child = self.group_controller.get_group_by_id(uuid)
+              group.children.remove(child)
+              self.group_controller.update_group(group)
+            else:
+              raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
+          else:
+            self.group_controller.remove_group_by_id(uuid)
+          return 'OK'
         else:
           raise RestHandlerException(u'Cannot delete group as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')

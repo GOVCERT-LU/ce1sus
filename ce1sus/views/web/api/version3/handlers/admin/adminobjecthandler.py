@@ -76,19 +76,22 @@ class AdminObjectHandler(RestBaseHandler):
           definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
           if len(path) > 0:
             type_ = path.pop(0)
-            # get the object definition
-            if isinstance(json, list):
-              # TODO: add support for lists
-              raise RestHandlerException(u'POST of object attributes does not support lists')
+            if type_ == 'attribute':
+              # get the object definition
+              if isinstance(json, list):
+                # TODO: add support for lists
+                raise RestHandlerException(u'POST of object attributes does not support lists')
 
-            uuid = json.get('identifier', None)
-            if uuid:
-              attr = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
-              definition.attributes.append(attr)
-              self.object_definition_controller.update_object_definition(definition, self.get_user())
-              return 'OK'
+              uuid = json.get('identifier', None)
+              if uuid:
+                attr = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+                definition.attributes.append(attr)
+                self.object_definition_controller.update_object_definition(definition, self.get_user())
+                return 'OK'
+              else:
+                raise RestHandlerException(u'No id was specified in the json post')
             else:
-              raise RestHandlerException(u'No id was specified in the json post')
+              raise RestHandlerException(u'"{0}" is not supported'.format(type_))
           else:
             raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
         else:
