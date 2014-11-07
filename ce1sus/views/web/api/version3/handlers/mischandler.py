@@ -62,20 +62,3 @@ class TablesHandler(RestBaseHandler):
     for key, value in values.iteritems():
       result.append({'identifier': key, 'name': value})
     return result
-
-
-class AttribueViewTypeHandler(RestBaseHandler):
-
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
-
-  @rest_method(default=True)
-  @methods(allowed=['GET'])
-  @require(privileged())
-  def view_types(self, **args):
-    view_types = self.attribute_definition_controller.get_all_view_types()
-    result = list()
-    for view_type in view_types:
-      result.append(view_type.to_dict())
-    return result

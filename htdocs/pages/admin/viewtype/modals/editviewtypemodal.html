@@ -1,0 +1,29 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="viewTypeEditController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button viewType="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Edit View Type {{viewType.name}}</h4>
+        </div>
+        <div class="modal-body">
+          <viewtype-form viewtype="viewType" edit="false"/>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" viewType="submit" class="btn btn-primary"
+              ng-disabled="!viewTypeChanged() || addTypeForm.$invalid"
+              ng-click="submitType()">Save</button>
+            <button name="reset" viewType="button" class="btn btn-default"
+              ng-click="resetType()">Reset</button>
+            <button viewType="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

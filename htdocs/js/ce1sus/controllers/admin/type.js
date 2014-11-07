@@ -51,7 +51,7 @@ app.controller('typeDetailController', function($scope, $routeSegment,$type, $lo
           if (entry.identifier === $scope.type.identifier){
             $scope.types.splice(index, 1);
             if ($scope.type.length > 0) {
-              $location.path("/admin/type/"+ $scope.users[0].identifier);
+              $location.path("/admin/type/"+ $scope.types[0].identifier);
             } else {
               $location.path("/admin/type");
             }

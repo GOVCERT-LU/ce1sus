@@ -1,21 +1,21 @@
 
 
-<div class="modal" tabindex="-1" role="dialog" ng-controller="typeAddController">
+<div class="modal" tabindex="-1" role="dialog" ng-controller="viewTypeAddController">
   <div class="modal-dialog">
     <div class="modal-content">
 
       
         <div class="modal-header">
-          <button type="button" class="close" ng-click="closeModal()">&times;</button>
-          <h4 class="modal-title">Add Type</h4>
+          <button viewType="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Add View Type</h4>
         </div>
         <div class="modal-body">
-          <type-form type="type" edit="false" datatypes="datatypes"/>
+          <viewtype-form viewType="viewType" edit="false"/>
         </div>
         <div class="modal-footer">
           <div class="btn-group">
-            <button name="submit" type="submit" class="btn btn-primary"
-              ng-disabled="!typeChanged() || addTypeForm.$invalid"
+            <button name="submit" viewType="submit" class="btn btn-primary"
+              ng-disabled="!viewTypeChanged() || addTypeForm.$invalid"
               ng-click="submitType()">Save</button>
             <button name="reset" type="button" class="btn btn-default"
               ng-click="resetType()">Reset</button>

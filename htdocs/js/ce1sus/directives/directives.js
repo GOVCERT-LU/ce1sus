@@ -351,3 +351,15 @@ app.directive("typeForm", function() {
     templateUrl: "pages/common/directives/typeform.html"
   };
 });
+
+app.directive("viewtypeForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      viewType: "=viewtype",
+      editMode: "=edit"
+    },
+    templateUrl: "pages/common/directives/viewtypeform.html"
+  };
+});

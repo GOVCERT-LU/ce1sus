@@ -64,3 +64,7 @@ class AttributeViewType(Base):
             'name': self.convert_value(self.name),
             'identifier': self.convert_value(self.identifier)
             }
+
+  def populate(self, json):
+    self.name = json.get('name', None)
+    self.description = json.get('description', None)
