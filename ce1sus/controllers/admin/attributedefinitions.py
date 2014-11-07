@@ -105,7 +105,7 @@ class AttributeDefinitionController(BaseController):
       raise ControllerException(error)
 
   def get_all_tables(self):
-    values = ValueTable.get_dictionary(ValueTable)
+    values = ValueTable.get_dictionary()
     return values
 
   def get_all_types(self):

@@ -17,7 +17,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-
 class Log(object):
   """Log class"""
 
@@ -39,7 +38,7 @@ class Log(object):
     if do_log:
       # create formatter
       log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-      datefmt = '%m/%d/%Y %I:%M:%S %p'
+      # datefmt = '%m/%d/%Y %I:%M:%S %p'
       self.__formatter = logging.Formatter(log_format)
 
   def __set_console_handler(self, logger):

@@ -30,7 +30,7 @@ class AttributeType(Base):
 
   def to_dict(self, complete=False):
     if self.table_id:
-      name = ValueTable.get_by_id(ValueTable, self.table_id)
+      name = ValueTable.get_by_id(self.table_id)
     else:
       name = 'Any'
     allowed_table = {'identifier': self.table_id, 'name': name}

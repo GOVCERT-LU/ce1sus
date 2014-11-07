@@ -18,7 +18,6 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from paste.script import cherrypy_server
 
 
 __author__ = 'Weber Jean-Paul'

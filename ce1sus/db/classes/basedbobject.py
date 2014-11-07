@@ -24,6 +24,7 @@ class SimpleLogingInformations(object):
 
   created_at = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
   modified_on = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
+  # TODO: remove validation errors
 
   @declared_attr
   def creator_id(cls):

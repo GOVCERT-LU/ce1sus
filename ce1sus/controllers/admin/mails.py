@@ -5,7 +5,7 @@
 
 Created on Feb 23, 2014
 """
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.mailtemplate import MailTemplateBroker
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator

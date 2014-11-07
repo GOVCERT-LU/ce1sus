@@ -14,7 +14,6 @@ __license__ = 'GPL v3+'
 import re
 import cgi
 import dateutil.parser
-import json
 
 
 class InputException(Exception):

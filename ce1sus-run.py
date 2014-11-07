@@ -5,16 +5,13 @@
 
 Created on Oct 23, 2014
 """
-
-
-__author__ = 'Weber Jean-Paul'
-__email__ = 'jean-paul.weber@govcert.etat.lu'
-__copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
-__license__ = 'GPL v3+'
-
 import cherrypy
 import os
 import sys
+
+from ce1sus.db.classes.event import Event
+from ce1sus.db.classes.object import Object
+from ce1sus.db.classes.attribute import Attribute
 
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.views.web.api.version3.restcontroller import RestController
@@ -22,6 +19,14 @@ from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
+
+
+__author__ = 'Weber Jean-Paul'
+__email__ = 'jean-paul.weber@govcert.etat.lu'
+__copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
+__license__ = 'GPL v3+'
+
+
 
 
 def bootstrap():

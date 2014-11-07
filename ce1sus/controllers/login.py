@@ -7,9 +7,9 @@ Created on Oct 26, 2014
 """
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.plugins.base import PluginException
+from datetime import datetime
 
 
 __author__ = 'Weber Jean-Paul'
@@ -85,8 +85,7 @@ class LoginController(BaseController):
     :returns: User
     """
     try:
-      # TODO: update login time
-      # user.last_login = DatumZait.utcnow()
+      user.last_login = datetime.utcnow()
       self.user_broker.update(user)
     except BrokerException as error:
       raise ControllerException(error)

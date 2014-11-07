@@ -6,11 +6,9 @@
 Created on Oct 23, 2014
 """
 import cherrypy
-import json
 import os
 from os.path import exists
 
-from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.views.web.common.base import BaseView
 
 

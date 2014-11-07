@@ -23,24 +23,24 @@ class StaticBase(object):
   def __init__(self, identifier):
     self.identifier = identifier
 
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     raise StaticMappingException(u'Dictionary is not defined for class {0}', cls.__name___)
 
-  @staticmethod
+  @classmethod
   def get_by_id(cls, identifier):
     if hasattr(identifier, 'error'):
       return identifier
     else:
       identifier = int(identifier)
-      if identifier in cls.get_dictionary(cls).keys():
-        value = cls.get_dictionary(cls).get(identifier, None)
+      if identifier in cls.get_dictionary().keys():
+        value = cls.get_dictionary().get(identifier, None)
       if value:
         return value
       else:
         raise StaticMappingException(u'Invalid input "{0}" for class {1}'.format(identifier, cls.__name___))
 
-  @staticmethod
+  @classmethod
   def get_by_value(cls, value):
     """
     Returns they key of a dictionary by value if existing.
@@ -69,11 +69,11 @@ class StaticBase(object):
       result[value] = key
     return result
 
-  @staticmethod
+  @classmethod
   def get_all(cls):
     return cls.get_dictionary()
 
-  @staticmethod
+  @classmethod
   def get_all_inverted(cls):
     return StaticBase.invert_dict(cls.get_dictionary())
 
@@ -82,14 +82,14 @@ class StaticBase(object):
     """Gets the name of the TLP level"""
     return self.get_by_id(self.identifier)
 
-  @staticmethod
+  @classmethod
   def get_cb_values(cls):
     return cls.get_all_inverted()
 
 
 class ValueTable(StaticBase):
 
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     return {0: u'Text',
             1: u'String',
@@ -109,7 +109,8 @@ class ValueTable(StaticBase):
 
 class Analysis(StaticBase):
   """Static class defining the status the analysis of an event"""
-  @staticmethod
+
+  @classmethod
   def get_dictionary(cls):
     return {0: u'None',
             1: u'Opened',
@@ -120,7 +121,7 @@ class Analysis(StaticBase):
 
 class Confidence(StaticBase):
 
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     return {0: u'None',
             1: u'Low',
@@ -130,7 +131,7 @@ class Confidence(StaticBase):
 
 class Risk(StaticBase):
   """Static class defining the risk of an event"""
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     return {0: u'None',
             1: u'Low',
@@ -141,7 +142,7 @@ class Risk(StaticBase):
 
 class Status(StaticBase):
   """Static class defining the status of an event"""
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     return {0: u'Confirmed',
             1: u'Draft',
@@ -151,7 +152,7 @@ class Status(StaticBase):
 
 class TLP(StaticBase):
 
-  @staticmethod
+  @classmethod
   def get_dictionary(cls):
     return {0: (u'Red', u'#FF0000'),
             1: (u'Amber', u'#FFBF00'),
@@ -159,7 +160,7 @@ class TLP(StaticBase):
             3: (u'White', u'#FFFFFF')
             }
 
-  @staticmethod
+  @classmethod
   def get_by_value(cls, value):
     formatted_input = value.title()
     result = None
@@ -171,7 +172,7 @@ class TLP(StaticBase):
       raise StaticMappingException(u'Invalid input "{0}"'.format(formatted_input))
     return result
 
-  @staticmethod
+  @classmethod
   def get_cb_values(cls):
     result = dict()
     for key, value in cls.iteritems():

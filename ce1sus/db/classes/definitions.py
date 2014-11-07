@@ -115,8 +115,6 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name',
                          back_populates='attributes')
-
-
   __handler = None
 
   @property
@@ -140,7 +138,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
       else:
         value = self.table_id
 
-      return ValueTable.get_by_id(ValueTable, value)
+      return ValueTable.get_by_id(value)
 
   def validate(self):
     """
@@ -254,7 +252,7 @@ class AttributeHandler(Base):
     handler = self.create_instance()
     allowed_tables = handler.get_allowed_types()
     for allowed_table in allowed_tables:
-      name = ValueTable.get_by_id(ValueTable, allowed_table)
+      name = ValueTable.get_by_id(allowed_table)
       result.append({'identifier': allowed_table, 'name': name})
 
     return {'description': self.convert_value(self.description),

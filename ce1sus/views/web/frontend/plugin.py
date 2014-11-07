@@ -7,10 +7,8 @@ Created on Oct 28, 2014
 """
 import cherrypy
 
-from ce1sus.helpers.common.config import ConfigSectionNotFoundException
-from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
-from ce1sus.plugins.base import PLUGIN_ROOT, PluginException, BasePlugin
+from ce1sus.plugins.base import PluginException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import require
 

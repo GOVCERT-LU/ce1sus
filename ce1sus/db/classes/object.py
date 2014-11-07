@@ -13,8 +13,6 @@ from sqlalchemy.types import Integer, Unicode, Text, BIGINT
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
-from ce1sus.db.classes.definitions import ObjectDefinition
-from ce1sus.db.classes.event import Event
 from ce1sus.db.common.session import Base
 
 
@@ -44,6 +42,7 @@ class ObjectBase(ExtendedLogingInformations):
                         uselist=False,
                         primaryjoin='{0}.parent_id==Object.identifier'.format(cls.__name__))
   """
+  # TODO: remove validation errors
   @declared_attr
   def children(cls):
     return relationship('Object',
