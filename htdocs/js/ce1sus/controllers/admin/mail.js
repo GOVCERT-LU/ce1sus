@@ -19,12 +19,6 @@ app.controller('mailDetailController', function($scope, $routeSegment,$mail, $lo
   
   $scope.$routeSegment = $routeSegment;
   
-  $scope.$watch(function() {
-    return $scope.mail;
-    }, function(newVal, oldVal) {
-      $scope.mail = newVal;
-    });
-  
   $scope.setMail = function(mail){
     $scope.mail = mail;
   };
@@ -59,7 +53,7 @@ app.controller("mailEditController", function($scope, Restangular, messages, $ro
       if (maildata) {
         $scope.mail = maildata;
       }
-      messages.setMessage({'type':'success','message':'User sucessfully edited'});
+      messages.setMessage({'type':'success','message':'Mail sucessfully edited'});
     }, function (response) {
       var mail = angular.copy(original_mail);
       $scope.$parent.setMail(mail);

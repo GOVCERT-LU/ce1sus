@@ -40,6 +40,15 @@ class AttributeType(Base):
             'allowed_table': allowed_table
             }
 
+  def populate(self, json):
+    self.description = json.get('description', None)
+    self.name = json.get('name', None)
+    allowed_table = json.get('allowed_table', None)
+    if allowed_table:
+      identifier = allowed_table.get('identifier', None)
+      if identifier:
+        self.table_id = identifier
+
 
 class AttributeViewType(Base):
 

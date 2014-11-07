@@ -40,6 +40,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/mailMgt", "main.layout.admin.mailMgt")
         .when("/admin/object", "main.layout.admin.object")
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
+        .when("/admin/type", "main.layout.admin.type")
+        .when("/admin/type/:id", "main.layout.admin.type.typeDetails")
         .when("/admin/attribute", "main.layout.admin.attribute")
         .when("/admin/attribute/:id", "main.layout.admin.attribute.attributeDetails")
         .when("/admin/mail", "main.layout.admin.mail")
@@ -210,6 +212,62 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                "default": true,
                                templateUrl: "pages/admin/validation.html"
                         })
+                        .segment("type", {
+                               templateUrl: "pages/admin/typesmgt.html",
+                               controller : "typesController",
+                               resolve: {
+                                 types: function(Restangular) {
+                                   return Restangular.one("attributetypes").getList(null, null, {"Complete": false}).then(function (objects) {
+                                     return objects;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                datatypes: function(Restangular) {
+                                  return Restangular.one("attributetables").getList(null, null, {"Complete": false}).then(function (tables) {
+                                    return tables;
+                                  }, function(response) {
+                                      throw generateErrorMessage(response);
+                                  });
+                                }
+                               },
+                               untilResolved: {
+                                 templateUrl: 'pages/common/loading.html'
+                               },
+                               resolveFailed: {
+                                 templateUrl: 'pages/common/error.html',
+                                 controller: 'errorController'
+                               }
+                        })
+                          .within()
+                             .segment("help", {
+                                 "default": true,
+                                 templateUrl: "pages/admin/type/help.html"})
+                          
+                                 .segment("typeDetails", {
+                                     templateUrl: "pages/admin/type/typedetail.html",
+                                     controller: "typeDetailController",
+                                     resolve: {
+                                       $type: function(Restangular,$routeSegment) {
+                                         return Restangular.one("attributetypes",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (object) {
+                                           return object;
+                                         }, function(response) {
+                                             throw generateErrorMessage(response);
+                                         });
+                                       },
+                                     },
+                                     dependencies: ["id"],
+                                     untilResolved: {
+                                       templateUrl: 'pages/common/loading.html'
+                                     },
+                                     resolveFailed: {
+                                       templateUrl: 'pages/common/error.html',
+                                       controller: 'errorController'
+                                     }
+                                 })
+                          
+                         .up()
+                         
                         .segment("object", {
                                templateUrl: "pages/admin/objmgt.html",
                                controller : "objectController",

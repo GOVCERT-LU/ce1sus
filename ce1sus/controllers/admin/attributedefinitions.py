@@ -114,6 +114,32 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_type_by_id(self, identifier):
+    try:
+      return self.type_broker.get_by_id(identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def insert_type(self, type_):
+    try:
+      return self.type_broker.insert(type_)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_type(self, type_):
+    try:
+      return self.type_broker.update(type_)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_type_by_id(self, identifier):
+    try:
+      return self.type_broker.remove_by_id(identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all_view_types(self):
     try:
       return self.view_type_broker.get_all()

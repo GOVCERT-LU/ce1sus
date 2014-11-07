@@ -196,9 +196,8 @@ class Properties(BitBase):
   [0] : Web insert
   [1] : Rest insert
   [2] : Is validated
-  [3] : Is sharable
+  [3] : Is sharable - On event lvl it has the same meaning as published
   [4] : Is proposal
-  [5] : Is published
   """
 
   # 1
@@ -211,8 +210,6 @@ class Properties(BitBase):
   SHARABLE = 3
   # 16
   PROPOSAL = 4
-
-  PUBLISHED = 5
 
   @property
   def is_proposal(self):
@@ -257,11 +254,3 @@ class Properties(BitBase):
   @is_shareable.setter
   def is_shareable(self, value):
     self._set_value(Properties.SHARABLE, value)
-
-  @property
-  def is_published(self):
-    return self._get_value(Properties.PUBLISHED)
-
-  @is_published.setter
-  def is_published(self, value):
-    self._set_value(Properties.PUBLISHED, value)

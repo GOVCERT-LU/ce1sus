@@ -64,23 +64,6 @@ class TablesHandler(RestBaseHandler):
     return result
 
 
-class AttribueTypeHandler(RestBaseHandler):
-
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
-
-  @rest_method(default=True)
-  @methods(allowed=['GET'])
-  @require(privileged())
-  def types(self, **args):
-    types = self.attribute_definition_controller.get_all_types()
-    result = list()
-    for type_ in types:
-      result.append(type_.to_dict())
-    return result
-
-
 class AttribueViewTypeHandler(RestBaseHandler):
 
   def __init__(self, config):

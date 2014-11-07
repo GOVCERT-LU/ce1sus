@@ -287,6 +287,10 @@ app.directive("attributeDefinitionForm", function() {
         angular.forEach($scope.types, function(itemEntry) {
           if (itemEntry.allowed_table.identifier == table_id) {
             newTypes.push(itemEntry);
+          } else {
+            if (itemEntry.allowed_table.name == 'Any') {
+              newTypes.push(itemEntry);
+            }
           }
         }, $log);
         $scope.available_types = newTypes;
@@ -332,5 +336,18 @@ app.directive("attributeDefinitionForm", function() {
       });
       
     }
+  };
+});
+
+app.directive("typeForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      type: "=type",
+      datatypes: "=datatypes",
+      editMode: "=edit"
+    },
+    templateUrl: "pages/common/directives/typeform.html"
   };
 });

@@ -11,10 +11,11 @@ from ce1sus.helpers.common.objects import get_methods
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
 from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import AdminObjectHandler
+from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import AttribueTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, AttribueTypeHandler, AttribueViewTypeHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, AttribueViewTypeHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY

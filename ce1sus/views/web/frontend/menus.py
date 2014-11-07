@@ -65,7 +65,6 @@ class GuiMenus(BaseView):
           child_menus.append(child_menu_item)
           attributemgt = True
 
-        attributemgt = False
         if user.permissions.privileged:
           child_menu_item = dict()
           child_menu_item['title'] = 'Attribute management'
@@ -74,6 +73,26 @@ class GuiMenus(BaseView):
           attributemgt = True
 
         if attributemgt:
+          child_menu_item = dict()
+          child_menu_item['divider'] = True
+          child_menus.append(child_menu_item)
+
+        attributeSubTypemgt = False
+        if user.permissions.privileged:
+          child_menu_item = dict()
+          child_menu_item['title'] = 'View types mgt'
+          child_menu_item['section'] = 'admin/viewtype'
+          child_menus.append(child_menu_item)
+          attributeSubTypemgt = True
+
+        if user.permissions.privileged:
+          child_menu_item = dict()
+          child_menu_item['title'] = 'Type management'
+          child_menu_item['section'] = 'admin/type'
+          child_menus.append(child_menu_item)
+          attributeSubTypemgt = True
+
+        if attributeSubTypemgt:
           child_menu_item = dict()
           child_menu_item['divider'] = True
           child_menus.append(child_menu_item)
