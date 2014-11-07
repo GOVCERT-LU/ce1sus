@@ -13,6 +13,14 @@
   <div class="col-lg-9"><textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{group.description}}</textarea></div>
 </div>
 <div class="row">
+  <label class="col-lg-3 control-label text-right">Email</label>
+  <div class="col-lg-9">{{user.email}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">GPG Key</label>
+  <div class="col-lg-9">{{user.gpg_key}}</div>
+</div>
+<div class="row">
   <label class="col-lg-3 control-label text-right">Permissions:
   </label>
   <div class="col-lg-9">
@@ -93,7 +101,14 @@
           ng-model="group.default_event_permissions.propose" disabled>
       </div>
     </div>
-    
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Set Groups</label>
+        <div class="col-lg-9">
+          <input type="checkbox" name="selectedPermissions[]"
+            value="set_groups"
+            ng-model="group.default_event_permissions.set_groups" disabled/>
+        </div>
+      </div>
   </div>
 </div>
 

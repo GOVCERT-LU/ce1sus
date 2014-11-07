@@ -73,6 +73,7 @@ class EventPermissions(BitBase):
   DELETE = 3
   VALIDATE = 4
   PROPOSE = 5
+  SET_GROUPS = 6
 
   @property
   def can_propose(self):
@@ -128,13 +129,23 @@ class EventPermissions(BitBase):
     # if you can validate you can see
     self._set_value(EventPermissions.VALIDATE, value)
 
+  @property
+  def set_groups(self):
+    return self._get_value(EventPermissions.SET_GROUPS)
+
+  @set_groups.setter
+  def set_groups(self, value):
+    # if you can validate you can see
+    self._set_value(EventPermissions.SET_GROUPS, value)
+
   def to_dict(self):
     return {'view': self.can_view,
             'add': self.can_add,
             'modify': self.can_modify,
             'validate': self.can_validate,
             'propose': self.can_propose,
-            'delete': self.can_delete
+            'delete': self.can_delete,
+            'set_groups': self.set_groups
             }
 
   def populate(self, json):
@@ -144,6 +155,7 @@ class EventPermissions(BitBase):
     self.can_validate = json.get('validate', False)
     self.can_propose = json.get('propose', False)
     self.can_delete = json.get('delete', False)
+    self.set_groups = json.get('set_groups', False)
 
 
 class Group(Base):
@@ -154,6 +166,8 @@ class Group(Base):
   __bit_code = None
   __default_bit_code = None
   default_dbcode = Column('default_code', Integer, default=0, nullable=False)
+  email = Column('email', Unicode(255), unique=True)
+  gpg_key = Column('gpg_key', Text)
   children = relationship('Group',
                           secondary=_REL_MAINGROUP_GROUPS,
                           primaryjoin='Group.identifier == group_has_groups.c.group_id',
@@ -208,6 +222,8 @@ class Group(Base):
               'description': self.convert_value(self.description),
               'permissions': self.permissions.to_dict(),
               'default_event_permissions': self.default_permissions.to_dict(),
+              'email': self.convert_value(self.email),
+              'gpg_key': self.convert_value(self.gpg_key),
               'children': dict(),
               }
     else:
@@ -218,6 +234,8 @@ class Group(Base):
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
+    self.email = json.get('email', None)
+    self.gpg_key = json.get('gpg_key', None)
     # permissions setting
     self.permissions.populate(json.get('permissions', {}))
     self.default_permissions.populate(json.get('default_event_permissions', {}))

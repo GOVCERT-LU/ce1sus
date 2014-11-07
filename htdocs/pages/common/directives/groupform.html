@@ -41,7 +41,28 @@
       </div>
     </div>
   </div>
-
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Email *</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addGroupForm.email.$invalid && !addGroupForm.email.$pristine }">
+        <input class="form-control" name="email" ng-model="group.email"
+          type="email" required ng-minlength=3 ng-minlength=255
+          ng-pattern="/^.+@.+\..{2,3}$/">
+        <p
+          ng-show="addGroupForm.email.$invalid && !addGroupForm.email.$pristine"
+          class="help-block">Email is required.</p>
+        <p ng-show="addGroupForm.email.$error.pattern" class="help-block">Email
+          is not valid email.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">GPG Key</label>
+    <div class="col-lg-9">
+      <textarea name="gpg_key" ng-model="group.gpg_key" cols=48 rows=20></textarea>
+    </div>
+  </div>
   <div class="row">
     <label class="col-lg-3 control-label text-right">Permissions:
     </label>
@@ -125,6 +146,14 @@
         </div>
       </div>
 
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Set Groups</label>
+        <div class="col-lg-9">
+          <input type="checkbox" name="selectedPermissions[]"
+            value="set_groups"
+            ng-model="group.default_event_permissions.set_groups" />
+        </div>
+      </div>
     </div>
   </div>
 

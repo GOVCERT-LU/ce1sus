@@ -30,13 +30,13 @@ class UserRights(BitBase):
   The __bit_value is defined as follows:
   [0] : User is privileged
   [1] : User can validate
-  [2] : User can set group via rest inserts
+  [2] : User can manage it's own group
   """
 
   ACTIVATED = 0
   PRIVILEGED = 1
   VALIDATE = 2
-  SET_GROUP = 3
+  MANAGE_GROUP = 3
 
   @property
   def access_admin_area(self):
@@ -67,12 +67,12 @@ class UserRights(BitBase):
     self._set_value(UserRights.VALIDATE, value)
 
   @property
-  def set_group(self):
-    return self._get_value(UserRights.SET_GROUP)
+  def manage_group(self):
+    return self._get_value(UserRights.MANAGE_GROUP)
 
-  @set_group.setter
-  def set_group(self, value):
-    self._set_value(UserRights.SET_GROUP, value)
+  @manage_group.setter
+  def manage_group(self, value):
+    self._set_value(UserRights.MANAGE_GROUP, value)
 
   @staticmethod
   def append_to_string(text, string):
@@ -86,13 +86,13 @@ class UserRights(BitBase):
   def to_dict(self):
     return {'disabled': self.disabled,
             'priviledged': self.privileged,
-            'set_group': self.set_group,
+            'manage_group': self.manage_group,
             'validate': self.validate}
 
   def populate(self, json):
     self.privileged = json.get('priviledged', False)
     self.disabled = json.get('disabled', False)
-    self.set_group = json.get('set_group', False)
+    self.manage_group = json.get('manage_group', False)
     self.validate = json.get('validate', False)
 
 
