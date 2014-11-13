@@ -13,8 +13,7 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.indicator import Indicator, Sighting
-from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging
+from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
 from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper
 from stix.data_marking import Marking
 from stix.extensions.marking.tlp import TLPMarkingStructure
@@ -135,6 +134,7 @@ class StixCelsusMapper(BaseController):
   def create_event(self, stix_package, user):
     # First process the header
     event = self.__map_stix_package_header(stix_package, user)
+    set_properties(event)
     # TODO Make relations
     set_extended_logging(event, user, user.group)
 
@@ -164,6 +164,7 @@ class StixCelsusMapper(BaseController):
 
   def create_indicator(self, indicator, event, user):
     ce1sus_indicator = Indicator()
+    set_properties(ce1sus_indicator)
     ce1sus_indicator.identifier = extract_uuid(indicator.id_)
     ce1sus_indicator.title = indicator.title
     ce1sus_indicator.description = indicator.description
@@ -184,28 +185,3 @@ class StixCelsusMapper(BaseController):
         ce1sus_indicator.observables.append(observable)
     set_extended_logging(ce1sus_indicator, user, user.group)
     return ce1sus_indicator
-
-  def create_observable(self, observable, event, user, is_indicator=False):
-    ce1sus_observable = Observable()
-    if observable.id_:
-      # ce1sus_observable.identifier = extract_uuid(observable.id_)
-      pass
-    ce1sus_observable.event = event
-    set_extended_logging(ce1sus_observable, user, user.group)
-
-    # an observable has either a composition or a single object
-    if observable.observable_composition:
-      composition = ObservableComposition()
-      composition.operator = observable.observable_composition.operator
-      for child in observable.observable_composition.observables:
-        child_observable = self.create_observable(child, event, user, is_indicator)
-        composition.observables.append(child_observable)
-      ce1sus_observable.observable_composition = composition
-    else:
-      ce1sus_observable.identifier = extract_uuid(observable.id_)
-      # create a cybox object
-      obj = self.cybox_mapper.create_object(observable.object_, ce1sus_observable, user, is_indicator)
-      ce1sus_observable.object = obj
-      # TODO
-
-    return ce1sus_observable

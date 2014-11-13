@@ -10,6 +10,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
+from ce1sus.db.classes.common import Properties
 from ce1sus.db.common.session import Base
 
 
@@ -50,6 +51,20 @@ class Observable(ExtendedLogingInformations, Base):
   event = relationship('Event', uselist=False)
   event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
+  dbcode = Column('code', Integer)
+  __bit_code = None
+
+  @property
+  def properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__bit_code is None:
+      if self.dbcode is None:
+        self.__bit_code = Properties('0', self)
+      else:
+        self.__bit_code = Properties(self.dbcode, self)
+    return self.__bit_code
 
   def validate(self):
     return True

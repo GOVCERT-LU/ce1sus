@@ -14,6 +14,14 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+def set_properties(instance):
+  instance.properties.is_rest_instert = True
+  instance.properties.is_proposal = False
+  instance.properties.is_web_insert = False
+  instance.properties.is_validated = False
+  instance.properties.is_shareable = True
+
+
 def set_extended_logging(instance, user, group):
   if not instance.originating_group:
     instance.originating_group = group

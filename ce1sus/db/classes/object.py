@@ -43,10 +43,11 @@ class Object(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', uselist=False)
-  __bit_code = None
 
   def validate(self):
     return True
+
+  __bit_code = None
 
   @property
   def properties(self):

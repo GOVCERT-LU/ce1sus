@@ -5,15 +5,11 @@
 
 Created on Nov 12, 2014
 """
-from datetime import datetime
-
 from ce1sus.controllers.base import BaseController
-from ce1sus.controllers.events.attributecontroller import AttributeController
-from ce1sus.controllers.events.objectcontroller import ObjectController
-from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.object import Object
-from ce1sus.mappers.stix.helpers.common import extract_uuid
+from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
 from cybox.objects.address_object import Address
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
@@ -86,6 +82,7 @@ class CyboxMapper(BaseController):
 
   def __create_attribute_by_def(self, def_name, parent, value, is_indicator):
     attribute = Attribute()
+    set_properties(attribute)
     attribute.object = parent
     attribute.is_ioc = is_indicator
     attribute.definition = self.attr_defs.get(def_name, None)
@@ -161,6 +158,7 @@ class CyboxMapper(BaseController):
     attribute = Attribute()
     attribute.object = parent_object
     attribute.is_ioc = is_indicator
+    set_properties(attribute)
     if isinstance(properties, Hostname):
       prop = properties.hostname_value
     elif isinstance(properties, Address):
@@ -190,6 +188,7 @@ class CyboxMapper(BaseController):
 
   def create_object(self, cybox_object, observable, user, is_indicator):
     ce1sus_object = Object()
+    set_properties(ce1sus_object)
     # Create the container
     ce1sus_object.parent = observable
     ce1sus_object.identifier = extract_uuid(cybox_object.id_)
@@ -205,3 +204,28 @@ class CyboxMapper(BaseController):
 
     # TODO: related_objects
     return ce1sus_object
+
+  def create_observable(self, observable, event, user, is_indicator=False):
+    ce1sus_observable = Observable()
+    set_properties(ce1sus_observable)
+    if observable.id_:
+      ce1sus_observable.identifier = extract_uuid(observable.id_)
+    ce1sus_observable.event = event
+    set_extended_logging(ce1sus_observable, user, user.group)
+
+    # an observable has either a composition or a single object
+    if observable.observable_composition:
+      composition = ObservableComposition()
+      composition.operator = observable.observable_composition.operator
+      for child in observable.observable_composition.observables:
+        child_observable = self.create_observable(child, event, user, is_indicator)
+        composition.observables.append(child_observable)
+      ce1sus_observable.observable_composition = composition
+    else:
+      ce1sus_observable.identifier = extract_uuid(observable.id_)
+      # create a cybox object
+      obj = self.cybox_mapper.create_object(observable.object_, ce1sus_observable, user, is_indicator)
+      ce1sus_observable.object = obj
+      # TODO
+
+    return ce1sus_observable
