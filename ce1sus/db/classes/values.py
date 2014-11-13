@@ -8,7 +8,7 @@ Created on Oct 17, 2014
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, Text, Numeric, Date
+from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
@@ -34,7 +34,7 @@ class ValueBase(object):
 
   @declared_attr
   def event_id(self):
-    return Column('event_id', Unicode(40), ForeignKey('events.event_id'), nullable=False, index=True)
+    return Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @declared_attr
   def event(self):
@@ -99,7 +99,7 @@ class TimeStampValue(ValueBase, Base):
 # pylint: disable=R0903
 class TextValue(ValueBase, Base):
   """This is a container class for the TEXTVALUES table."""
-  value = Column('value', Text, nullable=False)
+  value = Column('value', UnicodeText, nullable=False)
 
   def validate(self):
     """

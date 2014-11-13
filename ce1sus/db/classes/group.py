@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
-from sqlalchemy.types import Unicode, Integer, Text, BIGINT
+from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.common.session import Base
@@ -23,7 +23,7 @@ __license__ = 'GPL v3+'
 
 
 _REL_MAINGROUP_GROUPS = Table('group_has_groups', Base.metadata,
-                              Column('ghg_id', BIGINT, primary_key=True, nullable=False, index=True),
+                              Column('ghg_id', BigInteger, primary_key=True, nullable=False, index=True),
                               Column('group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True),
                               Column('rel_group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True))
 
@@ -160,14 +160,14 @@ class EventPermissions(BitBase):
 
 class Group(Base):
   name = Column('name', Unicode(255), nullable=False, unique=True)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
   tlp_lvl = Column('tlplvl', Integer, default=4, nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   __default_bit_code = None
   default_dbcode = Column('default_code', Integer, default=0, nullable=False)
   email = Column('email', Unicode(255), unique=True)
-  gpg_key = Column('gpg_key', Text)
+  gpg_key = Column('gpg_key', UnicodeText)
   children = relationship('Group',
                           secondary=_REL_MAINGROUP_GROUPS,
                           primaryjoin='Group.identifier == group_has_groups.c.group_id',

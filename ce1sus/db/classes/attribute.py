@@ -6,8 +6,8 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, Text, Boolean, Unicode
+from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
@@ -24,8 +24,18 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+_REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', Base.metadata,
+                                  Column('condition_id', Unicode(40), ForeignKey('conditions.condition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                  Column('attribute_id', Unicode(40), ForeignKey('attributes.attribute_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                  )
+
+
+class Condition(Base):
+  value = Column('value', Unicode(40))
+
+
 class Attribute(ExtendedLogingInformations, Base):
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
 
   definition_id = Column('definition_id', Unicode(40),
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
@@ -48,8 +58,9 @@ class Attribute(ExtendedLogingInformations, Base):
   number_value = relationship(NumberValue,
                               primaryjoin='Attribute.identifier==NumberValue.attribute_id',
                               uselist=False)
-  table_id = Column('table_id', Integer(1))
   is_ioc = Column('is_ioc', Boolean)
+  # TODO make relation table
+  condition = relationship('Condition', uselist=False, secondary='rel_attribute_conditions')
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
@@ -105,24 +116,29 @@ class Attribute(ExtendedLogingInformations, Base):
   def __set_value(self, new_value):
     if self.definition:
       value_table = self.definition.value_table
-      classname = value_table.classname
-      attribute = value_table.attribute
+      classname = '{0}Value'.format(value_table)
+      attribute = '{0}_value'.format(value_table.lower())
 
-      value_instance = get_class('ce1sus.db.classes.values', classname)()
+      value_instance = get_class('ce1sus.db.classes.values', classname)
+      value_instance = value_instance()
       value_instance.attribute_id = self.identifier
       value_instance.attribute = self
       value_instance.value = new_value
+      value_instance.value_type_id = self.definition.value_type_id
 
       if self.object:
-        event_id = self.object.event_id
-        if event_id:
-          value_instance.event_id = event_id
-        else:
-          event = self.object.event
-          if event:
-            value_instance.event = event
+        if self.object.parent:
+          event_id = self.object.parent.event_id
+          if event_id:
+            value_instance.event_id = event_id
           else:
-            raise ValueError(u'Cannot set the attribute value as the event for of the parent object is not yet set.')
+            event = self.object.parent.event
+            if event:
+              value_instance.event = event
+            else:
+              raise ValueError(u'Cannot set the attribute value as the event for of the parent object is not yet set.')
+        else:
+          raise ValueError(u'Parent of object was not set.')
       else:
         raise ValueError(u'Cannot set the attribute value as the parent object is not yet set.')
 

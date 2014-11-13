@@ -8,7 +8,7 @@ app.directive("plainText", function() {
   return {
     restrict: "E",
     scope: {
-      celsusText: "@text"
+      celsusText: "=text"
     },
     templateUrl: "pages/common/text.html",
     controller: function($scope){

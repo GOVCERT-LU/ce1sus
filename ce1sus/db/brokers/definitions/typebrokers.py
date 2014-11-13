@@ -16,9 +16,6 @@ __license__ = 'GPL v3+'
 
 
 class AttributeTypeBroker(BrokerBase):
-  """
-  Attribute handler broker
-  """
 
   def get_broker_class(self):
     """
@@ -45,9 +42,6 @@ class AttributeTypeBroker(BrokerBase):
 
 
 class AttributeViewTypeBroker(BrokerBase):
-  """
-  Attribute handler broker
-  """
 
   def get_broker_class(self):
     """

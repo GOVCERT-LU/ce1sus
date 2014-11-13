@@ -38,17 +38,17 @@ Requirements
 
 - python
   * python (2.7+)
-  * mako (0.7+)
   * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap (2.4.10+)
+  * python-ldap (2.4.10+) (optional)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
   * rtkit (optional)
   * gnupg (0.3.5+)
+  * eml_parser (https://github.com/sim0nx/eml_parser/
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
@@ -58,22 +58,16 @@ RoadMap
 =======
 
 * Share definitions 
-* Proposal mechanism for REST API
 * Password protection for compressed files
 * Profile management
 * More handlers
 * Improved search
 * Export of events (i.e. csv, xml)
-* Review right managment (REL_0.10.0+)
 * STIX/TAXII currently only available in the ce1sus_api project
 * Web-interface sync-server management
 * Enhanced attributes modifications
 * Custom attributes properties
 * External request
-* Modify events via REST API: object/attribute add/remove
-* Enhanced ACL, for admins and users
-* submit proposals for adding objects/attributes via REST
-* Enhanced relation finder
 
 
 Installation

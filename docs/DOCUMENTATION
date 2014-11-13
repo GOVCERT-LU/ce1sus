@@ -14,18 +14,17 @@ Ce1sus need the following packages:
 
 - python
   * python (2.7+)
-  * mako (0.7+)
   * sqlalchemy (0.7.8+)
-  * mysqldb (1.2.3+)
+  * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap (2.4.10+)
+  * python-ldap (2.4.10+) (optional)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
   * rtkit (optional)
   * gnupg (0.3.5+)
-  * eml_parser (https://github.com/sim0nx/eml_parser/commit/ce16467f8e3ba3002afe0fe11ff887c13602b56f)
+  * eml_parser (https://github.com/sim0nx/eml_parser/
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)

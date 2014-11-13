@@ -6,7 +6,7 @@
 Created on Nov 6, 2014
 """
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode, Integer, Text
+from sqlalchemy.types import Unicode, Integer, UnicodeText
 
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.common.session import Base
@@ -22,7 +22,7 @@ class AttributeType(Base):
 
   name = Column('name', Unicode(255), nullable=False, index=True, unique=True)
   table_id = Column('table_id', Integer(1), index=True)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
 
   def validate(self):
     # TODO: Add validation
@@ -53,7 +53,7 @@ class AttributeType(Base):
 class AttributeViewType(Base):
 
   name = Column('name', Unicode(255), nullable=False, index=True, unique=True)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
 
   def validate(self):
     # TODO: Add validation

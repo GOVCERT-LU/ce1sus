@@ -49,9 +49,8 @@ class IndexView(BaseView):
             break
           if counter > 0:
             result = u'{0}\n{1}'.format(result, line)
-
         return result
       else:
-        return 'No new messages'
+        return u'No new messages'
     else:
-      return 'Login'
+      return u'Login'

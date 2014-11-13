@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 import json
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Table, Column, ForeignKey
-from sqlalchemy.types import Integer, Unicode, BIGINT, Text, Boolean
+from sqlalchemy.types import Integer, Unicode, BigInteger, UnicodeText, Boolean
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.common import ValueTable
@@ -26,7 +26,7 @@ __license__ = 'GPL v3+'
 
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'objectdefinition_has_attributedefinitions', getattr(Base, 'metadata'),
-    Column('oha_id', BIGINT, primary_key=True, nullable=False, index=True),
+    Column('oha_id', BigInteger, primary_key=True, nullable=False, index=True),
     Column('attributedefinition_id', Unicode(40), ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
     Column('objectdefinition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 )
@@ -43,7 +43,7 @@ class AttributeDefinitionException(DefinitionException):
 class ObjectDefinition(SimpleLogingInformations, Base):
 
   name = Column('name', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
   chksum = Column('chksum', Unicode(255), unique=True, nullable=False, index=True)
   default_share = Column('sharable', Boolean, default=False, nullable=False)
   default_operator = Column('default_operator', Integer, default=0, nullable=False)
@@ -53,6 +53,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
                             secondary='objectdefinition_has_attributedefinitions',
                             order_by='AttributeDefinition.name',
                             back_populates='objects')
+  cybox_std = Column('cybox_std', Boolean, default=False)
 
   def validate(self):
     """
@@ -93,9 +94,9 @@ class ObjectDefinition(SimpleLogingInformations, Base):
 class AttributeDefinition(SimpleLogingInformations, Base):
 
   name = Column('name', Unicode(45), unique=True, nullable=False, index=True)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
   chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
-  regex = Column('regex', Unicode(255), unique=True, nullable=False, default=u'^.+$')
+  regex = Column('regex', Unicode(255), nullable=False, default=u'^.+$')
   table_id = Column('table_id', Integer, nullable=False, default=0)
   attributehandler_id = Column('attributehandler_id', Unicode(40), ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   attribute_handler = relationship('AttributeHandler',
@@ -116,6 +117,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                          order_by='ObjectDefinition.name',
                          back_populates='attributes')
   __handler = None
+  cybox_std = Column('cybox_std', Boolean, default=False)
 
   @property
   def handler(self):
@@ -210,7 +212,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
 class AttributeHandler(Base):
 
   module_classname = Column('moduleClassName', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', Text, nullable=False)
+  description = Column('description', UnicodeText, nullable=False)
 
   @property
   def classname(self):

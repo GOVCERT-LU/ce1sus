@@ -6,7 +6,7 @@
 Created on Oct 23, 2014
 """
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode, Text
+from sqlalchemy.types import Unicode, UnicodeText
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.common.session import Base
@@ -22,7 +22,7 @@ __license__ = 'GPL v3+'
 class MailTemplate(SimpleLogingInformations, Base):
   """This is a container class for the Mails table."""
   name = Column('name', Unicode(255), nullable=False)
-  body = Column('body', Text, nullable=False)
+  body = Column('body', UnicodeText, nullable=False)
   subject = Column('subject', Unicode(255), nullable=False)
 
   def to_dict(self, complete=True):

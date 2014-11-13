@@ -12,6 +12,7 @@ from ce1sus.db.classes.user import User
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.debug import Log
+from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -57,6 +58,7 @@ class BaseController:
     self.user_broker = self.broker_factory(UserBroker)
     self.group_broker = self.broker_factory(GroupBroker)
     self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
+    self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
 
   def broker_factory(self, clazz):
     """

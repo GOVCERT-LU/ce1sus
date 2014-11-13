@@ -6,15 +6,16 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, Table, ForeignKey
-from sqlalchemy.types import Unicode, Integer, Text, Boolean
+from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.types import Unicode, Integer, UnicodeText, Boolean
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
-from ce1sus.db.classes.group import Group, EventPermissions
+from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.classes.indicator import Indicator
+from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
-from ce1sus.helpers.bitdecoder import BitBase
 
 
 __author__ = 'Weber Jean-Paul'
@@ -42,7 +43,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
 
 class Event(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(45), index=True, unique=True, nullable=False)
-  description = Column('description', Text)
+  description = Column('description', UnicodeText)
   tlp_level_id = Column('tlp_level_id', Boolean, default=3, nullable=False)
   status_id = Column('status_id', Boolean, default=0, nullable=False)
   risk_id = Column('risk_id', Boolean, nullable=False, default=0)
@@ -51,8 +52,8 @@ class Event(ExtendedLogingInformations, Base):
   # TODO: Add administration of minimal objects -> checked before publishing
 
   group_premissions = relationship('EventGroupPermission')
-  objects = relationship('Object',
-                         primaryjoin='and_(Event.identifier==Object.event_id, Object.parent_id==None)')
+  observables = relationship(Observable)
+  indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer)
   __bit_code = None
@@ -88,7 +89,7 @@ class Event(ExtendedLogingInformations, Base):
     return Status.get_by_id(self.status_id)
 
   @status.setter
-  def set_status(self, status_text):
+  def status(self, status_text):
     """
     returns the status
 
@@ -121,7 +122,7 @@ class Event(ExtendedLogingInformations, Base):
 
     :returns: String
     """
-    return Analysis.get_by_id(self.analysis_status_id)
+    return Analysis.get_by_id(self.analysis_id)
 
   @analysis.setter
   def analysis(self, text):
@@ -130,7 +131,7 @@ class Event(ExtendedLogingInformations, Base):
 
     :returns: String
     """
-    self.analysis_status_id = Analysis.get_by_value(text)
+    self.analysis_id = Analysis.get_by_value(text)
 
   @property
   def tlp(self):
@@ -152,3 +153,6 @@ class Event(ExtendedLogingInformations, Base):
     """
     self.__tlp_obj = None
     self.analysis_status_id = TLP.get_by_value(text)
+
+  def validate(self):
+    return True

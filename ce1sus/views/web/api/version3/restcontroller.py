@@ -6,6 +6,7 @@
 Created on Oct 23, 2014
 """
 import cherrypy
+from uuid import UUID
 
 from ce1sus.helpers.common.objects import get_methods
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
@@ -20,6 +21,8 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
+from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -46,6 +49,8 @@ class RestController(BaseView):
     self.instances['attributetables'] = TablesHandler(config)
     self.instances['attributetypes'] = AttribueTypeHandler(config)
     self.instances['attribtueviewtypes'] = AttribueViewTypeHandler(config)
+    self.instances['process'] = ProcessHandler(config)
+    self.instances['event'] = EventHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):
@@ -92,16 +97,28 @@ class RestController(BaseView):
           path.append(node)
 
       if not handler:
-        raise cherrypy.HTTPError('Root requests are not allowed')
+        raise cherrypy.HTTPError(status=451, message='Root requests are not allowed')
 
       # get the requested handler
       handler_instance = self.instances.get(handler, None)
 
       if not handler_instance:
-        raise cherrypy.HTTPError('Handler "{0}" is not defined'.format(handler))
+        raise cherrypy.HTTPError(status=404, message='Handler "{0}" is not defined'.format(handler))
 
-      # get default access point of the handler
-      method_name = RestController.find_default_method_name(handler_instance)
+      default_method = True
+      if len(path) > 0:
+        uuid_string = path[0]
+        # check if it is a uuid
+        try:
+          UUID(uuid_string, version=4)
+        except ValueError:
+          # it is not a uuid therefore it must be a method name
+          method_name = path.pop(0)
+          default_method = False
+
+      if default_method:
+        # get default access point of the handler
+        method_name = RestController.find_default_method_name(handler_instance)
 
       if not method_name:
         raise cherrypy.HTTPError('Handler {0} has no default method'.format(handler_instance.name))
@@ -129,18 +146,28 @@ class RestController(BaseView):
               # execute method
               return result
             except RestHandlerException as error:
+              message = u'{0}'.format(error)
+              self.logger.error(message)
               if isinstance(error, RestHandlerNotFoundException):
-                raise cherrypy.HTTPError(status=404, message=u'{0}'.format(error))
-              raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))
+                raise cherrypy.HTTPError(status=404, message=message)
+              raise cherrypy.HTTPError(status=400, message=message)
           else:
-            raise cherrypy.HTTPError(status=501, message='Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method))
+            message = u'Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)
+            self.logger.error(message)
+            raise cherrypy.HTTPError(status=501, message=message)
         else:
-          raise cherrypy.HTTPError(status=405, message='Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name))
+          message = u'Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)
+          self.logger.error(message)
+          raise cherrypy.HTTPError(status=405, message=message)
 
       else:
-        raise cherrypy.HTTPError(status=418, message='Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name))
+        message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
+        self.logger.error(message)
+        raise cherrypy.HTTPError(status=418, message=message)
     except Exception as error:
+      message = u'{0}'.format(error)
+      self.logger.error(message)
       if self.config.get('ce1sus', 'environment', None) == 'LOCAL_DEV':
         raise
       else:
-        raise cherrypy.HTTPError(status=400, message=u'{0}'.format(error))
+        raise cherrypy.HTTPError(status=400, message=message)

@@ -9,7 +9,7 @@ from _mysql import result
 import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, DateTime, Text, Integer, BIGINT
+from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.group import Group
@@ -104,7 +104,7 @@ class User(Base):
   last_login = Column('last_login', DateTime)
   email = Column('email', Unicode(255), unique=True)
   api_key = Column('apikey', Unicode(255))
-  gpg_key = Column('gpg_key', Text)
+  gpg_key = Column('gpg_key', UnicodeText)
   activated = Column('activated', DateTime)
   activation_sent = Column('activation_sent', DateTime)
   activation_str = Column('activation_str', Unicode(255))

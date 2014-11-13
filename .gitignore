@@ -37,3 +37,8 @@ magic.py
 /ce1sus_orig.sqlite
 /libtaxii
 /libs/
+/log/
+/stix/
+/cybox/
+/lib/
+/__init__.py

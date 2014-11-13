@@ -37,7 +37,7 @@ class Base(object):
 
   @declared_attr
   def identifier(cls):
-    return Column(u'{0}_id'.format(cls.__name__.lower()), Unicode(45), primary_key=True, default=uuid.uuid4, nullable=False, index=True)
+    return Column(u'{0}_id'.format(cls.__name__.lower()), Unicode(45), primary_key=True, default=uuid.uuid4, nullable=False, index=True, unique=True)
 
   @abstractmethod
   def validate(self):

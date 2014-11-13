@@ -9,9 +9,16 @@ Release 0.11.0
 * Webclient uses angularjs
 * Redesing of frontend
 * Simplified handlers
-* Handlers have a seperate configuration file
-* Added View Types for attributes to decapsule view and api
-* Addted Types for attributes to make relations over several types i.e ip_v4 and c&c_ip_v4
+* Handlers have a separate configuration file
+* Added View Types for attributes to decapsulated view and api
+* The interfaces accesses the API (the GUI now can be turned off)
+* Modify events via REST API: object/attribute add/remove
+* Proposal mechanism for REST API
+* submit proposals for adding objects/attributes via REST
+* Enhanced ACL, for admins and users
+* Enhanced relation finder (Similar attributes can be grouped, but still the relation is done by ==)
+* Review right management (REL_0.10.0+)
+* STIX support for observables, indicators, incidents, TTP
 
 Release 0.10.3
 --------------

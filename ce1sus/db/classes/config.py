@@ -6,7 +6,7 @@
 Created on Oct 20, 2014
 """
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode, Text
+from sqlalchemy.types import Unicode, UnicodeText
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.common.session import Base
@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 
 class Ce1susConfig(SimpleLogingInformations, Base):
   key = Column('key', Unicode(255), nullable=False, index=True)
-  value = Column('value', Text, nullable=False)
+  value = Column('value', UnicodeText, nullable=False)
 
   def validate(self):
     # TODO: create validation for ce1susconfig

@@ -5,16 +5,17 @@
 
 Created on Jan 6, 2014
 """
+from email.mime.text import MIMEText
+import gnupg
+from smtplib import SMTPException, SMTP
+
+from ce1sus.helpers.common.debug import Log
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-from smtplib import SMTPException, SMTP
-from email.mime.text import MIMEText
-from dagr.helpers.debug import Log
-import gnupg
 
 
 class MailerException(Exception):
@@ -68,6 +69,9 @@ class Mailer(object):
         gpg = gnupg.GPG(gnupghome=self.__key_path)
         Mailer.pgp = gpg
       return gpg
+  
+  def import_gpg(self, key):
+    
 
   def __sign_message(self, text):
     if self.__key_path:
@@ -122,7 +126,6 @@ class Mailer(object):
         error_log = getattr(self.get_logger(), 'error')
         error_log(error)
 
-    #TODO raise exception!!!
     info_log = getattr(self.get_logger(), 'info')
     info_log('GPG not installed not sending unencrypted mail')
     raise MailerException('GPG not configured.')

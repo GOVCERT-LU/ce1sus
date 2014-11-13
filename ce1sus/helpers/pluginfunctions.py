@@ -37,14 +37,14 @@ def is_plugin_available(name, config):
     raise PluginException(error)
 
 
-def get_plugin_function(name, method_name, config, type):
+def get_plugin_function(name, method_name, config, type_):
   module, classname = __get_module_classname(name)
   try:
     clazz = get_class(module, classname)
     instance = clazz(config)
     if isinstance(instance, BasePlugin):
       method = getattr(instance, method_name)
-      if hasattr(method, type):
+      if hasattr(method, type_):
         return method
 
       else:
