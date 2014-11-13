@@ -141,7 +141,7 @@ class StixCelsusMapper(BaseController):
     # First handle observables of the package
     if stix_package.observables:
       for observable in stix_package.observables.observables:
-        event.observables.append(self.create_observable(observable, event, user, False))
+        event.observables.append(self.cybox_mapper.create_observable(observable, event, user, False))
     pass
     # Then handle indicators
     if stix_package.indicators:
@@ -181,7 +181,7 @@ class StixCelsusMapper(BaseController):
     # Note observable is actually observables[0]
     if indicator.observables:
       for observable in indicator.observables:
-        observable = self.create_observable(observable, event, user, True)
+        observable = self.cybox_mapper.create_observable(observable, event, user, True)
         ce1sus_indicator.observables.append(observable)
     set_extended_logging(ce1sus_indicator, user, user.group)
     return ce1sus_indicator

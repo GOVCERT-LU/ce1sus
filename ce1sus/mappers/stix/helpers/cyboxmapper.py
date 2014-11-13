@@ -224,7 +224,7 @@ class CyboxMapper(BaseController):
     else:
       ce1sus_observable.identifier = extract_uuid(observable.id_)
       # create a cybox object
-      obj = self.cybox_mapper.create_object(observable.object_, ce1sus_observable, user, is_indicator)
+      obj = self.create_object(observable.object_, ce1sus_observable, user, is_indicator)
       ce1sus_observable.object = obj
       # TODO
 
