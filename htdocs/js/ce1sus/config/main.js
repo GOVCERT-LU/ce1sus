@@ -24,12 +24,12 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/logout", "main.layout.logout")
         .when("/about", "main.layout.about")
         .when("/events", "main.layout.events")
-        .when("/events/recent", "main.layout.events.recent")
         .when("/events/all", "main.layout.events.allEvents")
         .when("/events/unpublished", "main.layout.events.unpublished")
         .when("/events/unpublishedProposals", "main.layout.events.uproposals")
         .when("/events/search", "main.layout.events.serach")
         .when("/events/add", "main.layout.events.add")
+        .when("/events/event/:id", "main.layout.events.event")
         .when("/admin", "main.layout.admin")
         .when("/admin/validation", "main.layout.admin.validation")
         .when("/admin/objAttrMgt", "main.layout.admin.objAttrMgt")
@@ -138,12 +138,31 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                       
                   })
                       .within()
-                        .segment("recentEvents", {
-                                 'default': true,
-                                 templateUrl: "pages/events/recent.html"
-                        })
                         .segment("allEvents", {
-                                 templateUrl: "pages/events/all.html"
+                                'default': true,
+                                 templateUrl: "pages/events/all.html",
+                                 controller: 'eventsController'
+                        })
+                        .segment("event", {
+                                 templateUrl: "pages/events/event/overview.html",
+                                 controller: 'viewEventController',
+                                 resolve: {
+                                   $event: function(Restangular,$routeSegment) {
+                                     return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (data) {
+                                       return data;
+                                     }, function(response) {
+                                         throw generateErrorMessage(response);
+                                     });
+                                   }
+                                 },
+                                 dependencies: ["id"],
+                                 untilResolved: {
+                                   templateUrl: 'pages/common/loading.html'
+                                 },
+                                 resolveFailed: {
+                                   templateUrl: 'pages/common/error.html',
+                                   controller: 'errorController'
+                                 }
                         })
                         .segment("unpublished", {
                                  templateUrl: "pages/events/unpublished.html"

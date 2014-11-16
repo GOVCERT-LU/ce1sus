@@ -218,13 +218,6 @@ class GuiMenus(BaseView):
   def event_links(self):
     # links on the left side of the events menu
     links = list()
-    link_item = dict()
-    link_item['icon'] = 'fa-newspaper-o'
-    link_item['title'] = 'Recent Events'
-    link_item['section'] = 'main.layout.events.recent'
-    link_item['href'] = 'main.layout.events'
-    link_item['reload'] = True
-    links.append(link_item)
 
     link_item = dict()
     link_item['icon'] = 'fa-database'

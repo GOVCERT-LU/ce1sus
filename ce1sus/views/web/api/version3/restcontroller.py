@@ -16,13 +16,14 @@ from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import Attrib
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminviewtypehandler import AttribueViewTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
+from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
+from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
+from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
-from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -51,6 +52,7 @@ class RestController(BaseView):
     self.instances['attribtueviewtypes'] = AttribueViewTypeHandler(config)
     self.instances['process'] = ProcessHandler(config)
     self.instances['event'] = EventHandler(config)
+    self.instances['events'] = EventsHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

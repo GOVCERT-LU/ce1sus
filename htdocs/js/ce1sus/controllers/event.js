@@ -1,27 +1,46 @@
 
 
 app.controller("eventController", function($scope, Restangular,$route, messages,
-    $log, $routeSegment,eventmenus) {
+    $log, $routeSegment,eventmenus, $location) {
   
   $scope.eventMenus = eventmenus;
+  $scope.openedEvents = [];
 
-  $scope.pushItem = function(title, identifer) {
-    $scope.menus.push({
-      eventID : identifer,
-      title : identifer,
-      section : "about",
-      icon : "fa-lock"
-    });
+  $scope.pushItem = function(event) {
+    found = false;
+    angular.forEach($scope.openedEvents, function(value, index) {
+      if (value.identifier == event.identifier){
+        found = true;
+      }
+    }, $log);
+    if (!found) {
+      var url = '/events/event/'+event.identifier;
+      $scope.openedEvents.push({
+        icon: '',
+        title: event.title,
+        section: 'main.layout.events.event',
+        reload: false,
+        close: true,
+        href: url,
+        identifier: event.identifier
+      });
+      $location.path(url);
+    }
   };
 
   $scope.removeItem = function(element_id) {
-    angular.forEach($scope.menus, function(value, index) {
-      if (value.eventID) {
-        if (value.eventID == element_id) {
-          $scope.menus.splice(index, 1);
+    gotoRoot = false;
+    angular.forEach($scope.openedEvents, function(value, index) {
+      if (value.identifier) {
+        if (value.identifier == element_id) {
+          $scope.openedEvents.splice(index, 1);
+          gotoRoot = true;
         }
       }
-    });
+    }, $log);
+    if (gotoRoot){
+      $location.path("/events/all");
+    }
   };
   
   $scope.foo = function() {
@@ -31,4 +50,10 @@ app.controller("eventController", function($scope, Restangular,$route, messages,
     $route.reload();
   };
   $scope.$routeSegment = $routeSegment;
+});
+
+app.controller("viewEventController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location, ngTableParams, $event) {
+  $scope.event = $event;
+  $scope.pushItem($scope.event);
 });

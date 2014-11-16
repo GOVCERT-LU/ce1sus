@@ -8,7 +8,8 @@ var app = angular.module('app', ['ngRoute',
                                  'view-segment',
                                  "restangular", 
                                  'ngSanitize', 
-                                 "mgcrea.ngStrap"]);
+                                 "mgcrea.ngStrap",
+                                 'ngTable']);
 
 
 app.provider('messageQueue', function () {

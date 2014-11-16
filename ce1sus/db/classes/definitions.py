@@ -104,7 +104,6 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                                    lazy='joined',
                                    cascade='all',
                                    order_by='AttributeDefinition.name')
-  deletable = Column('deletable', Boolean, default=True, nullable=False)
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)

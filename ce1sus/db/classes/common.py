@@ -154,39 +154,11 @@ class TLP(StaticBase):
 
   @classmethod
   def get_dictionary(cls):
-    return {0: (u'Red', u'#FF0000'),
-            1: (u'Amber', u'#FFBF00'),
-            2: (u'Green', u'#66B032'),
-            3: (u'White', u'#FFFFFF')
+    return {0: u'Red',
+            1: u'Amber',
+            2: u'Green',
+            3: u'White'
             }
-
-  @classmethod
-  def get_by_value(cls, value):
-    formatted_input = value.title()
-    result = None
-    for key, value in cls.get_dictionary().items():
-      if formatted_input == value[0]:
-        result = key
-        break
-    if result is None:
-      raise StaticMappingException(u'Invalid input "{0}"'.format(formatted_input))
-    return result
-
-  @classmethod
-  def get_cb_values(cls):
-    result = dict()
-    for key, value in cls.iteritems():
-      result[value[0]] = key
-    return result
-
-  @property
-  def color(self):
-    """Gets the color of the TLP level"""
-    return TLP.get_color_by_id(self.identifier)[1]
-
-  @property
-  def value(self):
-    return TLP.get_color_by_id(self.identifier)[0]
 
 
 class Properties(BitBase):

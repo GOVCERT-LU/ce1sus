@@ -27,10 +27,20 @@ class EventHandler(RestBaseHandler):
     self.user_broker = self.event_controller.broker_factory(UserBroker)
 
   @rest_method(default=True)
+  @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
+  def event(self, **args):
+    method = args.get('method', None)
+    if method == 'GET':
+      uuid = args.get('path').pop(0)
+      event = self.event_controller.get_event_by_id(uuid)
+      return event.to_dict()
+
+  @rest_method()
   @methods(allowed=['GET'])
   def stix_import(self, **args):
-    stix_package = STIXPackage.from_xml('/home/jhemp/Downloads/CIMBL-150-CERTS.xml')
-    user = self.user_broker.get_all()[0]
-    event = self.stix_mapper.map_stix_package(stix_package, user)
+    #stix_package = STIXPackage.from_xml('/home/jhemp/Downloads/CIMBL-150-CERTS.xml')
+    #user = self.user_broker.get_all()[0]
+    #event = self.stix_mapper.map_stix_package(stix_package, user)
 
-    self.event_controller.insert_event(user, event)
+    # slf.event_controller.insert_event(user, event)
+    pass

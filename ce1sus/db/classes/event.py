@@ -44,10 +44,10 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
 class Event(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(45), index=True, unique=True, nullable=False)
   description = Column('description', UnicodeText)
-  tlp_level_id = Column('tlp_level_id', Boolean, default=3, nullable=False)
-  status_id = Column('status_id', Boolean, default=0, nullable=False)
-  risk_id = Column('risk_id', Boolean, nullable=False, default=0)
-  analysis_id = Column('analysis_id', Boolean, nullable=False, default=0)
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+  status_id = Column('status_id', Integer(1), default=0, nullable=False)
+  risk_id = Column('risk_id', Integer(1), nullable=False, default=0)
+  analysis_id = Column('analysis_id', Integer(1), nullable=False, default=0)
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
@@ -140,9 +140,8 @@ class Event(ExtendedLogingInformations, Base):
 
       :returns: String
     """
-    if self.__tlp_obj is None:
-      self.__tlp_obj = TLP(self.tlp_level_id)
-    return self.__tlp_obj
+
+    return TLP.get_by_id(self.tlp_level_id)
 
   @tlp.setter
   def tlp(self, text):
@@ -151,8 +150,20 @@ class Event(ExtendedLogingInformations, Base):
 
     :returns: String
     """
-    self.__tlp_obj = None
-    self.analysis_status_id = TLP.get_by_value(text)
+    self.tlp_level_id = TLP.get_by_value(text)
 
   def validate(self):
     return True
+  
+  def to_dict(self):
+    return {'identifier': self.convert_value(self.identifier),
+            'title': self.convert_value(self.title),
+            'description': self.convert_value(self.description),
+            'last_publish_date': self.convert_value(self.last_publish_date),
+            'risk': self.convert_value(self.risk),
+            'status': self.convert_value(self.status),
+            'tlp': self.convert_value(self.tlp),
+            'analysis': self.convert_value(self.analysis),
+            'creator_group': self.creator_group.to_dict(False),
+            'created_at': self.convert_value(self.created_at),
+            }

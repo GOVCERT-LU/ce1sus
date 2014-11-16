@@ -9,7 +9,8 @@ import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_, and_, not_, distinct
 
 from ce1sus.db.classes.event import Event
-from ce1sus.db.common.broker import BrokerBase
+from ce1sus.db.common.broker import BrokerBase, NothingFoundException, \
+  BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -31,3 +32,24 @@ class EventBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Event
+
+  def get_all_limited(self, limit, offset):
+    """Returns only a subset of entries"""
+    try:
+      # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(self.get_broker_class()).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+    return result
+
+  def get_total_events(self):
+    try:
+      result = self.session.query(self.get_broker_class()).count()
+      return result
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

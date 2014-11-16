@@ -67,3 +67,10 @@ class EventController(BaseController):
       raise ControllerException(u'An event with uuid "{0}" already exists'.format(event.identifier))
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_event_by_id(self, identifier):
+    try:
+      event = self.event_broker.get_by_id(identifier)
+      return event
+    except BrokerException as error:
+      raise ControllerException(error)

@@ -77,3 +77,19 @@ function getLocals(routeSegment){
     return {};
   }
 }
+
+function getTlpColor(tlptext) {
+  if (tlptext=='Amber'){
+    return '#FFBF00';
+  } else {
+    if (tlptext=='Green'){
+      return '#66B032';
+    } else {
+      if (tlptext=='Red'){
+        return '#ff0000';
+      } else {
+        return '#000000';
+      }
+    }
+  }
+}
