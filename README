@@ -25,13 +25,20 @@ Features
 ========
 
 * Creates relations between events through their attributes
+** Relation of attributes can be done over groups of attributes or the attribute itself
 * Stores and presents the event in a structured manner
-* Different levels of sharing 
+* Different levels of sharing
+** Events can be shared with groups
+** Attributes can be shared on desired basis
 * Easy maintenance
 * Flexible configuration and taxonomy
 * Easy installation
 * Completely open source
 * Search
+* STIX Compatible (Currently supports Observables, Indicators, TTPs)
+* Completely interfaceable (REST API)
+* Can be used without the graphical web interaface
+* Attribute handlers which can enrich your attribute
 
 Requirements
 ============
@@ -73,7 +80,7 @@ RoadMap
 Installation
 ============
  
-For the installation please refer to the DOCUMENTATION file
+For the installation please refer to the Documentation files
 
 Remarks
 =======

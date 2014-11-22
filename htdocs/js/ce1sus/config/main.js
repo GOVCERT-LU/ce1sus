@@ -30,6 +30,11 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events/search", "main.layout.events.serach")
         .when("/events/add", "main.layout.events.add")
         .when("/events/event/:id", "main.layout.events.event")
+        .when("/events/event/:id/overview", "main.layout.events.event.overview")
+        .when("/events/event/:id/observables", "main.layout.events.event.observables")
+        .when("/events/event/:id/indicators", "main.layout.events.event.indicators")
+        .when("/events/event/:id/relations", "main.layout.events.event.relations")
+        .when("/events/event/:id/groups", "main.layout.events.event.groups")
         .when("/admin", "main.layout.admin")
         .when("/admin/validation", "main.layout.admin.validation")
         .when("/admin/objAttrMgt", "main.layout.admin.objAttrMgt")
@@ -144,11 +149,11 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  controller: 'eventsController'
                         })
                         .segment("event", {
-                                 templateUrl: "pages/events/event/overview.html",
+                                 templateUrl: "pages/events/event/layout.html",
                                  controller: 'viewEventController',
                                  resolve: {
                                    $event: function(Restangular,$routeSegment) {
-                                     return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (data) {
+                                     return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": false}).then(function (data) {
                                        return data;
                                      }, function(response) {
                                          throw generateErrorMessage(response);
@@ -164,6 +169,73 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    controller: 'errorController'
                                  }
                         })
+                        .within()
+                          .segment("overview", {
+                            'default': true,
+                            templateUrl: "pages/events/event/overview.html",
+                            resolve: {
+                              $event: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("observables", {
+                            templateUrl: "pages/events/event/observables.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("indicators", {
+                            templateUrl: "pages/events/event/indicators.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("relations", {
+                            templateUrl: "pages/events/event/relations.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("groups", {
+                            templateUrl: "pages/events/event/groups.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                        .up()
                         .segment("unpublished", {
                                  templateUrl: "pages/events/unpublished.html"
                         })

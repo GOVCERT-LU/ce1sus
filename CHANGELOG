@@ -19,6 +19,7 @@ Release 0.11.0
 * Enhanced relation finder (Similar attributes can be grouped, but still the relation is done by ==)
 * Review right management (REL_0.10.0+)
 * STIX support for observables, indicators, incidents, TTP
+* Operators for observales
 
 Release 0.10.3
 --------------
