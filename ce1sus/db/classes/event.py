@@ -7,7 +7,7 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, Integer, UnicodeText, Boolean
+from sqlalchemy.types import Unicode, Integer, UnicodeText
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
@@ -154,8 +154,11 @@ class Event(ExtendedLogingInformations, Base):
 
   def validate(self):
     return True
-  
-  def to_dict(self):
+
+  def to_dict(self, complete=True):
+    observables = list()
+    for observable in self.observables:
+      observables.append(observable.to_dict(False))
     return {'identifier': self.convert_value(self.identifier),
             'title': self.convert_value(self.title),
             'description': self.convert_value(self.description),
@@ -166,4 +169,9 @@ class Event(ExtendedLogingInformations, Base):
             'analysis': self.convert_value(self.analysis),
             'creator_group': self.creator_group.to_dict(False),
             'created_at': self.convert_value(self.created_at),
+            'published': self.convert_value(self.properties.is_shareable),
+            'modified_on': self.convert_value(self.modified_on),
+            'first_seen': self.convert_value(None),
+            'last_seen': self.convert_value(None),
+            'observables': observables
             }

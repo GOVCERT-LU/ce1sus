@@ -1,0 +1,263 @@
+
+<div class="row">
+<div class="col-md-2">
+  <div class="btn-group">
+    <a class="btn btn-default" role="button">Add new Object</a>
+  </div>
+  <div style="height:15px"></div>
+  <legend>Objects</legend>
+
+  <ul class="nav nav-pills nav-stacked" style="max-width: 300px;">
+    <li class="active" style="margin-left:{{10*0}}px;">
+      <a>Composed Observable</a>
+    </li>
+    <li class="active" style="margin-left:{{10*1}}px;">
+      <a>Observable</a>
+    </li>
+    <li class="active" style="margin-left:{{10*2}}px;">
+      <a>Object 1</a>
+    </li>
+    <li class="active" style="margin-left:{{10*2}}px;">
+      <a>Object 2</a>
+    </li>
+  </ul>
+</div>
+
+
+<div class="col-md-10">
+
+
+<div class="panel-group" bs-collapse>
+  <div class="panel panel-default" >
+    <div class="panel-heading" style="padding:0">
+      <div class="row">
+        <div class="col-sm-7" style="padding: 8px 25px;">
+          <h4 class="panel-title">
+            <a bs-collapse-toggle>Composed observable</a>
+          </h4>
+        </div>
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-4" style="text-align: right">
+          <div class="btn-group">
+            <a class="btn btn-default">
+              <span class="glyphicon glyphicon-plus-sign"></span>
+            </a>
+            <a class="btn btn-default">
+              <span class="glyphicon glyphicon-pencil"></span>
+            </a>
+            <a class="btn btn-default">
+              <span class="glyphicon glyphicon-eye-open"></span>
+            </a>
+            <a class="btn btn-danger">
+              <span class="glyphicon glyphicon-remove-circle" title="delete"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-collapse collapse in" bs-collapse-target>
+      <div>
+        <table>
+          <tr>
+            <td style="background-color: #eaebff; width: 1%">AND</td>
+            <td style="width: 99%">
+              <div bs-collapse>
+                <div class="panel panel-default" >
+                  <div class="panel-heading" style="padding:0">
+                    <div class="row">
+                      <div class="col-sm-7" style="padding: 8px 25px;">
+                        <h4 class="panel-title">
+                          <a bs-collapse-toggle>Observable</a>
+                        </h4>
+                      </div>
+                      <div class="col-sm-1">
+                      </div>
+                      <div class="col-sm-4" style="text-align: right">
+                        <div class="btn-group">
+                          <a class="btn btn-default">
+                            <span class="glyphicon glyphicon-plus-sign"></span>
+                          </a>
+                          <a class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                          </a>
+                          <a class="btn btn-default">
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                          </a>
+                          <a class="btn btn-danger">
+                            <span class="glyphicon glyphicon-remove-circle" title="delete"></span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel-collapse collapse in"
+                    bs-collapse-target>
+                    <div class="panel-body">
+                      <div bs-collapse>
+                        <div class="panel panel-default" style="position:relative; left:{{20*0}}px; width:calc(100% - {{20*0}}px);">
+                          <div class="panel-heading" style="padding:0">
+                            
+                            <div class="row">
+                              <div class="col-sm-7" style="padding: 8px 25px;">
+                                <h4 class="panel-title">
+                                  <a bs-collapse-toggle> Object 1 </a>
+                                </h4>
+                              </div>
+                              <div class="col-sm-1">
+                              </div>
+                              <div class="col-sm-4" style="text-align: right">
+                                <div class="btn-group">
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-plus-sign"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-download"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-list"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                  </a>
+                                  <a class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-remove-circle" title="delete"></span>
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+                          <div class="panel-collapse collapse in"
+                            bs-collapse-target>
+                            <div class="panel-body">
+                              <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th>Identifier</th>
+                                    <th>S</th>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                    <th>IOC</th>
+                                    <th>Options</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                      <a>
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                      </a> 
+                                      <a>
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                      </a> 
+                                      <a> 
+                                        <span class="glyphicon glyphicon-remove-circle"></span>
+                                      </a>
+                                    </td>
+
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                        <div bs-collapse>
+                        <div class="panel panel-default" style="position:relative; left:{{20*1}}px; width:calc(100% - {{20*1}}px);">
+                          <div class="panel-heading" style="padding:0">
+                            <div class="row">
+                              <div class="col-sm-7" style="padding: 8px 25px;">
+                                <h4 class="panel-title">
+                                  <a bs-collapse-toggle> Object 1 </a>
+                                </h4>
+                              </div>
+                              <div class="col-sm-1">
+                              </div>
+                              <div class="col-sm-4" style="text-align: right">
+                                <div class="btn-group">
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-plus-sign"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-download"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-list"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                  </a>
+                                  <a class="btn btn-default">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                  </a>
+                                  <a class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-remove-circle" title="delete"></span>
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="panel-collapse collapse in"
+                            bs-collapse-target>
+                            <div class="panel-body">
+                              <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th>Identifier</th>
+                                    <th>S</th>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                    <th>IOC</th>
+                                    <th>Options</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                      <a>
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                      </a> 
+                                      <a>
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                      </a> 
+                                      <a> 
+                                        <span class="glyphicon glyphicon-remove-circle"></span>
+                                      </a>
+                                    </td>
+
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>

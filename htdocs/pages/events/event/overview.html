@@ -21,17 +21,7 @@
             <label> Identifier: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">8531</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-3"
-            style="text-align: right; padding: 3px; padding-left: 15px">
-            <label> UUID: </label>
-          </div>
-          <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">
-              b12dd29b-834b-4510-a767-a43ebc26d197</div>
+            <div style="text-align: left;">{{event.identifier}}</div>
           </div>
         </div>
         <div class="row">
@@ -40,7 +30,7 @@
             <label> Title: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">Event 2014-10</div>
+            <div style="text-align: left;">{{event.title}}</div>
           </div>
         </div>
         <div class="row">
@@ -49,7 +39,7 @@
             <label> Creator Group: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">GOVCERT.LU</div>
+            <div style="text-align: left;">{{event.creator_group.name}}</div>
           </div>
         </div>
         <div class="row">
@@ -58,7 +48,7 @@
             <label> Published: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">Yes</div>
+            <div style="text-align: left;">{{event.published}}</div>
           </div>
         </div>
         <div class="row">
@@ -68,7 +58,7 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left; overflow: auto; height: 125px">
-              no description</div>
+              {{event.description}}</div>
           </div>
         </div>
       </div>
@@ -79,7 +69,7 @@
             <label> Status: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">Confirmed</div>
+            <div style="text-align: left;">{{event.status}}</div>
           </div>
         </div>
         <div class="row">
@@ -88,7 +78,7 @@
             <label> Analysis: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">Completed</div>
+            <div style="text-align: left;">{{event.analysis}}</div>
           </div>
         </div>
         <div class="row">
@@ -97,7 +87,7 @@
             <label> Risk: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">High</div>
+            <div style="text-align: left;">{{event.risk}}</div>
           </div>
         </div>
         <div class="row">
@@ -106,7 +96,7 @@
             <label> TLP: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">Amber</div>
+            <div style="text-align: left;">{{event.tlp}}</div>
           </div>
         </div>
         <div class="row">
@@ -116,7 +106,7 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left;">
-              2014-11-21T14:13:50+00:00</div>
+              {{event.created_at}}</div>
           </div>
         </div>
         <div class="row">
@@ -126,7 +116,7 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left;">
-              2014-11-21T14:20:11+00:00</div>
+              {{event.modified_on}}</div>
           </div>
         </div>
         <div class="row">
@@ -136,7 +126,7 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left;">
-              2014-11-21T14:13:43+00:00</div>
+              {{event.first_seen}}</div>
           </div>
         </div>
         <div class="row">
@@ -146,7 +136,7 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left;">
-              2014-11-21T14:13:43+00:00</div>
+              {{event.last_seen}}</div>
           </div>
         </div>
       </div>
@@ -154,7 +144,40 @@
   </div>
 </div>
 <legend>Relations</legend>
-Table
+<table
+  class="table table-striped table-bordered table-hover table-condensed">
+  <thead>
+    <tr>
+      <th caria-controls="relationsTable${event.identifier}"
+        tabindex="0" role="columnheader" class="sorting">#</th>
+      <th caria-controls="relationsTable${event.identifier}"
+        tabindex="1" role="columnheader" class="sorting">Event #</th>
+      <th caria-controls="relationsTable${event.identifier}"
+        tabindex="2" role="columnheader" class="sorting">Event
+        Title</th>
+      <th caria-controls="relationsTable${event.identifier}"
+        tabindex="3" role="columnheader" class="sorting">Options</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
 <legend>Comments</legend>
-Table
-Add comment button
+<table class="table table-striped table-hover table-condensed">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Comment</th>
+      <th>Date</th>
+      <th>User</th>
+      <th width="150px">Options</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div class="btn-group">
+  <a href="#addComment${event.identifier}Modal" role="button"
+    class="btn btn-default" data-toggle="modal" onclick="">Add new
+    Comment</a>
+</div>

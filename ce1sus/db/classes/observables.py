@@ -68,3 +68,11 @@ class Observable(ExtendedLogingInformations, Base):
 
   def validate(self):
     return True
+
+  def to_dict(self, complete=True):
+    return {'identifier': self.convert_value(self.identifier),
+            'title': self.convert_value(self.title),
+            'description': self.convert_value(self.description),
+            'creator_group': self.creator_group.to_dict(False),
+            'created_at': self.convert_value(self.created_at),
+            }

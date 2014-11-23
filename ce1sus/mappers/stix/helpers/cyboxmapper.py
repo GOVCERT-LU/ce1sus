@@ -210,18 +210,21 @@ class CyboxMapper(BaseController):
     set_properties(ce1sus_observable)
     if observable.id_:
       ce1sus_observable.identifier = extract_uuid(observable.id_)
-    ce1sus_observable.event = event
-    set_extended_logging(ce1sus_observable, user, user.group)
 
+    set_extended_logging(ce1sus_observable, user, user.group)
+    ce1sus_observable.event = event
     # an observable has either a composition or a single object
     if observable.observable_composition:
       composition = ObservableComposition()
       composition.operator = observable.observable_composition.operator
       for child in observable.observable_composition.observables:
         child_observable = self.create_observable(child, event, user, is_indicator)
+        # As the observable is not on the root level remove the link to the parent
+        child_observable.event = None
         composition.observables.append(child_observable)
       ce1sus_observable.observable_composition = composition
     else:
+
       ce1sus_observable.identifier = extract_uuid(observable.id_)
       # create a cybox object
       obj = self.create_object(observable.object_, ce1sus_observable, user, is_indicator)

@@ -6,7 +6,7 @@ app.controller("eventController", function($scope, Restangular,$route, messages,
   $scope.eventMenus = eventmenus;
   $scope.openedEvents = [];
 
-  $scope.pushItem = function(event) {
+  $scope.pushItem = function(event, guiOpen) {
     found = false;
     angular.forEach($scope.openedEvents, function(value, index) {
       if (value.identifier == event.identifier){
@@ -24,7 +24,9 @@ app.controller("eventController", function($scope, Restangular,$route, messages,
         href: url,
         identifier: event.identifier
       });
-      $location.path(url);
+      if (guiOpen){
+        $location.path(url);
+      }
     }
   };
 

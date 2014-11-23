@@ -1,0 +1,38 @@
+<h4>Groupmanagment:</h4>
+
+<div id="MainGroupsErrors"></div>
+<form id="MainGroupsForm" class="form-horizontal role=" form"="">
+  <input name="identifier" value="8541" type="hidden"> <input
+    id="MainGroupsOperation" name="operation" value="" type="hidden">
+  <div class="row">
+    <div class="col-sd-5 col-md-5 ">
+      <table border="0" cellpadding="5" width="100%">
+        <tbody>
+          <tr>
+            <td><label><b>Remaining</b> groups:</label> <select
+              class="form-control" name="remaining" size="10"
+              multiple="multiple" tabindex="1">
+                <option value="1">Default_Group</option>
+                <option value="21">xxx.GOVCERT.LU</option>
+                <option value="31">ext3.GOVCERT.LU</option>
+            </select></td>
+            <td align="center">
+              <button id="MainGroupsbtnAdd" class="btn  btn-default"
+                type="submit" foo="add"
+                onclick="setBtnValue('MainGroupsbtnAdd', 'MainGroups')">&gt;</button>
+              <br>
+              <button id="MainGroupsbtnRemove" class="btn  btn-default"
+                type="submit" foo="remove"
+                onclick="setBtnValue('MainGroupsbtnRemove', 'MainGroups')">&lt;</button>
+            </td>
+            <td><label>Associated groups:</label> <select
+              class="form-control" name="existing" size="10"
+              multiple="multiple" tabindex="1">
+                <option value="11">GOVCERT.LU</option>
+            </select></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</form>
