@@ -89,7 +89,10 @@ class Observable(ExtendedLogingInformations, Base):
             'title': self.convert_value(self.title),
             'description': self.convert_value(self.description),
             'object': obj,
+            'version': self.convert_value(self.version),
             'observable_composition': composed,
-            # 'creator_group': self.creator_group.to_dict(False),
-            # 'created_at': self.convert_value(self.created_at),
+            'creator_group': self.creator_group.to_dict(False),
+            'created_at': self.convert_value(self.created_at),
+            'modified_on': self.convert_value(self.modified_on),
+            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
             }

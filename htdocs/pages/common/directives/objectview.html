@@ -13,33 +13,33 @@
             <a > <span
               class="glyphicon glyphicon-plus-sign"></span>
             </a> 
-            &nbsp
+            &nbsp;
             <a > <span
               class="glyphicon glyphicon-download"></span>
             </a> 
-            &nbsp
+            &nbsp;
             <a > <span
               class="glyphicon glyphicon-list"></span>
             </a> 
-            &nbsp
+            &nbsp;
             <a > <span
               class="glyphicon glyphicon-pencil"></span>
             </a> 
-            &nbsp
-            <a > <span
+            &nbsp;
+            <a ng-click="showDetails()"> <span
               class="glyphicon glyphicon-eye-open"></span>
             </a> 
-            &nbsp
-            <a> <span
+            &nbsp;
+            <a class="red" ng-click="removeObject()"> <span
               class="glyphicon glyphicon-remove-circle" title="delete"></span>
             </a>
-            &nbsp
+            &nbsp;
         </div>
       </div>
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
       <div class="collapse-body">
-        <table class="table-striped table-bordered table-hover table-condensed">
+        <table ng-if="object.attributes.length > 0" class="table-striped table-bordered table-hover table-condensed">
           <thead>
             <tr>
               <th width="2%">S</th>
@@ -60,10 +60,10 @@
               <td>
               
               <a class="hand"><span class="glyphicon glyphicon-eye-open"></span></a>
-              &nbsp
+              &nbsp;
               <a class="hand"><span class="glyphicon glyphicon-pencil"></span></a>
-              &nbsp
-              <a class="hand red"><span class="glyphicon glyphicon-remove-circle"></span></a>
+              &nbsp;
+              <a class="hand red" ng-click="removeAttribute(attribute)"><span class="glyphicon glyphicon-remove-circle"></span></a>
               </td>
             </tr>
           </tbody>

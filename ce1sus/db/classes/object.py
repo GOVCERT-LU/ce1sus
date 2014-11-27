@@ -71,5 +71,9 @@ class Object(ExtendedLogingInformations, Base):
       attributes.append(attribute.to_dict())
     return {'identifier': self.convert_value(self.identifier),
             'definition': self.definition.to_dict(True),
-            'attributes': attributes
+            'attributes': attributes,
+            'creator_group': self.creator_group.to_dict(False),
+            'created_at': self.convert_value(self.created_at),
+            'modified_on': self.convert_value(self.modified_on),
+            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
             }

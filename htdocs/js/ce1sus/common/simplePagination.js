@@ -3,7 +3,7 @@
 var paginationModule = angular.module('simplePagination', []);
 
 paginationModule.factory('Pagination', function() {
-
+  
   var pagination = {};
 
   pagination.getNew = function(perPage) {

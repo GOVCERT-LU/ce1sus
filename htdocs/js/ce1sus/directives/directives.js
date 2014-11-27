@@ -378,10 +378,24 @@ app.directive("composedobservable", function($compile) {
       indent: "=indent"
     },
     controller: function($scope, Pagination){
-      $scope.pagination = Pagination.getNew();
+      $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
       $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
-      
+      $scope.removeComposedObservable = function() {
+        var remove = false;
+        if (confirm('Are you sure you want to delete?')) {
+          if ($scope.composedobservable.observable_composition.observables.length > 0) {
+            remove = confirm('Are you sure you want also it\'s children?');
+          } else {
+            remove = true;
+          }
+        }
+        if (remove) {
+          //find a way to make this more neat see $parent
+          var index = $scope.$parent.observables.indexOf($scope.composedobservable);
+          $scope.$parent.observables.splice(index,1);
+        }
+      };
     },
     templateUrl: "pages/common/directives/composendobservableview.html",
     compile: function (element) {
@@ -410,6 +424,53 @@ app.directive("observable", function($compile) {
       observable: "=observable",
       indent: "=indent"
     },
+    controller: function($scope, $modal, $log){
+      
+      
+      
+      $scope.getTitle = function(observable){
+        if (observable.title){
+          return observable.title;
+        } else {
+          return "Observable";
+        }
+      };
+      
+      $scope.editObservable = function(){
+        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/edit.html', show: true});
+      };
+      
+      $scope.removeObservable = function(){
+        if (confirm('Are you sure you want to delete?')) {
+
+          //find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?
+          var index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
+          $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.splice(index,1);
+          //foo to get the paginaton right in case it changes
+          var oldnumPages = $scope.$parent.$parent.$parent.pagination.numPages;
+          $scope.$parent.$parent.$parent.pagination.numPages = Math.ceil($scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.length/$scope.$parent.$parent.$parent.pagination.perPage);
+          if (oldnumPages != $scope.$parent.$parent.$parent.pagination.numPages) {
+            $scope.$parent.$parent.$parent.pagination.setPages();
+            if (oldnumPages < $scope.$parent.$parent.$parent.pagination.numPages) {
+              $scope.$parent.$parent.$parent.pagination.nextPage();
+            } else {
+              $scope.$parent.$parent.$parent.pagination.prevPage();
+            }
+            
+          }
+          
+          
+        }
+      };
+      
+      $scope.addObject = function(){
+        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+      };
+      
+      $scope.showDetails = function(){
+        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+      };
+    },
     templateUrl: "pages/common/directives/observableview.html",
     compile: function(tElement, tAttr, transclude) {
       var contents = tElement.contents().remove();
@@ -437,6 +498,30 @@ app.directive("object", function($compile) {
       object: "=object",
       indent: "=indent"
     },
+    controller: function($scope, $modal){
+      $scope.showDetails = function(){
+        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
+      };
+      $scope.removeObject = function(){
+        if (confirm('Are you sure you want to delete?')) {
+          var remove = false;
+          if ($scope.object.relatedObjects) {
+            remove = confirm('Are you sure you want also it\'s children?');
+          } else {
+            remove = true;
+          }
+          if (remove){
+            //find a way to do this more neatly see $parent.$parent, perhaps this changes!?
+            $scope.$parent.observable.object = null;
+          }
+        }
+      };
+      
+      $scope.removeAttribute = function(attribtue){
+        var index = $scope.object.attributes.indexOf(attribtue);
+        $scope.object.attributes.splice(index, 1);
+      };
+    },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {
       var contents = tElement.contents().remove();
@@ -462,8 +547,31 @@ app.directive("menu", function($compile) {
     replace: true,
     scope: {
       items: "=items",
-      indent: "=indent",
       first: "=first"
+    },
+    controller: function($scope, $anchorScroll, $location){
+      $scope.getTitle = function(observable){
+        if (observable.observable_composition){
+          return "Composed observable";
+        } else {
+            if (observable.title) {
+              return observable.title;
+            } else {
+              if (observable.object) {
+                return "Observable - "+ observable.object.definition.name;
+              } else {
+                return "Observable";
+              }
+              
+            }
+          
+        }
+      };
+      
+      $scope.scrollTo = function(id) {
+        $location.hash(id);
+        $anchorScroll();
+      };
     },
     templateUrl: "pages/common/directives/menuitem.html",
     compile: function(tElement, tAttr, transclude) {

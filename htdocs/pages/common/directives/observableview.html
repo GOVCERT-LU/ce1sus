@@ -3,25 +3,25 @@
     <div class="panel-heading collapse-header">
       <div class="row">
         <div class="col-sm-7">
-          <h4 class="panel-title">
-            <a class="hand" bs-collapse-toggle>Observable</a>
-          </h4>
+            <h4 class="panel-title" id="{{observable.identifier}}">
+              <a class="hand" bs-collapse-toggle>{{getTitle(observable)}}</a>
+            </h4>
         </div>
         <div class="col-sm-1"></div>
         <div class="col-sm-4">
-            <a > <span
+            <a ng-click="addObject()"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </a> 
             &nbsp
-            <a> <span
+            <a ng-click="editObservable()"> <span
               class="glyphicon glyphicon-pencil"></span>
             </a> 
             &nbsp
-            <a > <span
+            <a ng-click="showDetails()"> <span
               class="glyphicon glyphicon-eye-open"></span>
             </a> 
             &nbsp
-            <a class="red"> <span
+            <a class="red" ng-click="removeObservable()"> <span
               class="glyphicon glyphicon-remove-circle" title="delete"></span>
             </a>
             &nbsp
@@ -30,7 +30,7 @@
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
       <div class="collapse-body">
-        <object object="observable.object" indent="0"></object>
+        <object ng-if="observable.object" object="observable.object" indent="0"></object>
       </div>
     </div>
   </div>

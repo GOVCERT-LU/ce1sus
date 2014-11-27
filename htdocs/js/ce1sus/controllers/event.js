@@ -63,11 +63,5 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 app.controller("eventObservableController", function($scope, Restangular, messages,
     $log, $routeSegment, $location, ngTableParams, observables, $anchorScroll) {
   $scope.observables = observables;
-  $scope.scrollTo = function(id) {
-    $location.hash(id);
-    $anchorScroll();
-  };
-  $scope.getComposedID = function(identifier){
-    return 'Comp';
-  };
+
 });
