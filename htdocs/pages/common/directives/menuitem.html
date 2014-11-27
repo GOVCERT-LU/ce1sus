@@ -1,0 +1,6 @@
+<ul class="{{first}}" ng-transclude>
+    <li ng-repeat="item in items">
+      <a ng-click="scrollTo(item.identifier)">{{ item.identifier.substr(0,4) }}</a>
+      <menu ng-if="item.observable_composition" items="item.observable_composition.observables" indent="indent + 1" first=""></menu>
+    </li>
+</ul> 

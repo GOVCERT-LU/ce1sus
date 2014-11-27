@@ -1,0 +1,50 @@
+<div class="panel-group" bs-collapse ng-transclude>
+  <div class="panel panel-default">
+    <div class="panel-heading collapse-header">
+      <div class="row">
+        <div class="col-sm-7">
+          <h4 class="panel-title">
+            <a  class="hand" bs-collapse-toggle>Composed observable</a>
+          </h4>
+        </div>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-4" style="text-align: right">
+        </div>
+      </div>
+    </div>
+    <div class="panel-collapse collapse" bs-collapse-target>
+      <div>
+        <table>
+          <tr>
+            <td style="background-color: #eaebff; width: 1%">{{composedobservable.observable_composition.operator}}</td>
+            <td style="width: 99%">
+              <!-- insert pagination here -->
+              <span  ng-repeat="observable in composedobservable.observable_composition.observables | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
+                <observable ng-if="!observable.observable_composition" observable="observable" indent="0"></observable>
+                <composed_observable ng-if="observable.observable_composition" composedobservable="observable" indent="0"></composed_observable>
+              </span>
+            <ul class="pagination" ng-if="1 < pagination.numPages">
+              <li ng-class="{ disabled : pagination.page == 0 }">
+                <a href="" ng-click="pagination.toPageId(0)">&laquo;</a>
+              </li>
+              <li ng-class="{ disabled : pagination.page == 0 }">
+                <a href="" ng-click="pagination.prevPage()">&lsaquo;</a>
+              </li>
+              <li ng-repeat="pageNumber in pagination.pages track by $index" ng-class="{ active : pageNumber-1 == pagination.page, disabled : pageNumber == '...' }">
+                <a href="" ng-click="pagination.toPageId(pageNumber-1)">{{ pageNumber }}</a>
+              </li>
+              <li ng-class="{ disabled : pagination.page == pagination.numPages-1}">
+                <a href="" ng-click="pagination.nextPage()">&rsaquo;</a>
+              </li>
+              <li ng-class="{ disabled : pagination.page == pagination.numPages-1 }">
+                <a href="" ng-click="pagination.toPageId(pagination.numPages-1)">&raquo;</a>
+              </li>
+            </ul>
+            
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

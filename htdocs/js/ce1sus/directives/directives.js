@@ -363,3 +363,121 @@ app.directive("viewtypeForm", function() {
     templateUrl: "pages/common/directives/viewtypeform.html"
   };
 });
+
+
+
+
+app.directive("composedobservable", function($compile) {
+  
+  return {
+    restrict: "E",
+    replace: true,
+    transclude: true,
+    scope: {
+      composedobservable: "=composedobservable",
+      indent: "=indent"
+    },
+    controller: function($scope, Pagination){
+      $scope.pagination = Pagination.getNew();
+      $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
+      $scope.pagination.setPages();
+      
+    },
+    templateUrl: "pages/common/directives/composendobservableview.html",
+    compile: function (element) {
+      var contents = element.contents().remove();
+      var compiled;
+      return function(scope,element){
+        if(!compiled)
+            compiled = $compile(contents);
+        
+        compiled(scope,function(clone){
+          element.append(clone);
+            
+        });
+      };
+    },
+  };
+});
+
+app.directive("observable", function($compile) {
+  
+  return {
+    restrict: "E",
+    replace: true,
+    transclude: true,
+    scope: {
+      observable: "=observable",
+      indent: "=indent"
+    },
+    templateUrl: "pages/common/directives/observableview.html",
+    compile: function(tElement, tAttr, transclude) {
+      var contents = tElement.contents().remove();
+      var compiledContents;
+      return function(scope, iElement, iAttr) {
+
+          if(!compiledContents) {
+              compiledContents = $compile(contents, transclude);
+          }
+          compiledContents(scope, function(clone, scope) {
+                   iElement.append(clone); 
+          });
+      };
+    }
+  };
+});
+
+app.directive("object", function($compile) {
+  
+  return {
+    restrict: "E",
+    replace: true,
+    transclude: true,
+    scope: {
+      object: "=object",
+      indent: "=indent"
+    },
+    templateUrl: "pages/common/directives/objectview.html",
+    compile: function(tElement, tAttr, transclude) {
+      var contents = tElement.contents().remove();
+      var compiledContents;
+      return function(scope, iElement, iAttr) {
+
+          if(!compiledContents) {
+              compiledContents = $compile(contents, transclude);
+          }
+          compiledContents(scope, function(clone, scope) {
+                   iElement.append(clone); 
+          });
+      };
+    }
+  };
+});
+
+app.directive("menu", function($compile) {
+  
+  return {
+    restrict: "E",
+    transclude: true,
+    replace: true,
+    scope: {
+      items: "=items",
+      indent: "=indent",
+      first: "=first"
+    },
+    templateUrl: "pages/common/directives/menuitem.html",
+    compile: function(tElement, tAttr, transclude) {
+      var contents = tElement.contents().remove();
+      var compiledContents;
+      return function(scope, iElement, iAttr) {
+
+          if(!compiledContents) {
+              compiledContents = $compile(contents, transclude);
+          }
+          compiledContents(scope, function(clone, scope) {
+                   iElement.append(clone); 
+          });
+      };
+    }
+  };
+});

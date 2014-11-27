@@ -51,13 +51,13 @@ class Attribute(ExtendedLogingInformations, Base):
                               lazy='joined', uselist=False)
   date_value = relationship(DateValue,
                             primaryjoin='Attribute.identifier==DateValue.attribute_id',
-                            uselist=False)
+                            uselist=False, lazy='joined')
   text_value = relationship(TextValue,
                             primaryjoin='Attribute.identifier==TextValue.attribute_id',
-                            uselist=False)
+                            uselist=False, lazy='joined')
   number_value = relationship(NumberValue,
                               primaryjoin='Attribute.identifier==NumberValue.attribute_id',
-                              uselist=False)
+                              uselist=False, lazy='joined')
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
   condition = relationship('Condition', uselist=False, secondary='rel_attribute_conditions')
@@ -176,3 +176,11 @@ class Attribute(ExtendedLogingInformations, Base):
       if errors:
         return False
     return ObjectValidator.isObjectValid(self)
+
+  def to_dict(self, complete=True):
+    return {'identifier': self.convert_value(self.identifier),
+            'definition': self.definition.to_dict(True),
+            'shared': self.properties.is_shareable,
+            'ioc': self.is_ioc,
+            'value': self.convert_value(self.value)
+            }

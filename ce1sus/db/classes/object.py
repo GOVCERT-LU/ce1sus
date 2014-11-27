@@ -32,7 +32,7 @@ class RelatedObject(Base):
 
 class Object(ExtendedLogingInformations, Base):
   # rel_composition = relationship('ComposedObject')
-  attributes = relationship('Attribute')
+  attributes = relationship('Attribute', lazy='joined')
   operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
@@ -64,3 +64,12 @@ class Object(ExtendedLogingInformations, Base):
   @hybrid_property
   def attributes_count(self):
       return len(self.attributes)
+
+  def to_dict(self, complete=True):
+    attributes = list()
+    for attribute in self.attributes:
+      attributes.append(attribute.to_dict())
+    return {'identifier': self.convert_value(self.identifier),
+            'definition': self.definition.to_dict(True),
+            'attributes': attributes
+            }

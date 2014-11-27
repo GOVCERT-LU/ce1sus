@@ -6,6 +6,8 @@ var queue = [];
 
 app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider) {
     
+
+  
     messageQueueProvider.setQueue(queue);
     // Configuring provider options
     RestangularProvider.setBaseUrl("/REST/0.3.0");
@@ -175,7 +177,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/overview.html",
                             resolve: {
                               $event: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (data) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": false}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);
@@ -193,6 +195,16 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           })
                           .segment("observables", {
                             templateUrl: "pages/events/event/observables.html",
+                            controller: 'eventObservableController',
+                            resolve: {
+                              observables: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList(null, {"Complete": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
                             dependencies: ["id"],
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html'

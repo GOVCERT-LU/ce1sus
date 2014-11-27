@@ -30,10 +30,23 @@ class EventHandler(RestBaseHandler):
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
   def event(self, **args):
     method = args.get('method', None)
+    path = args.get('path')
+    details = args.get('headers').get('Complete', 'false')
+    if details == 'true':
+      details = True
+    else:
+      details = False
     if method == 'GET':
-      uuid = args.get('path').pop(0)
+      uuid = path.pop(0)
       event = self.event_controller.get_event_by_id(uuid)
-      return event.to_dict()
+      if len(path) > 0:
+        items = path.pop(0)
+        if items == 'observable':
+          result = list()
+          for observable in event.observables:
+            result.append(observable.to_dict(details))
+          return result
+      return event.to_dict(details)
 
   @rest_method()
   @methods(allowed=['GET'])

@@ -9,7 +9,9 @@ var app = angular.module('app', ['ngRoute',
                                  "restangular", 
                                  'ngSanitize', 
                                  "mgcrea.ngStrap",
-                                 'ngTable']);
+                                 'ngTable',
+                                 'simplePagination'
+                                 ]);
 
 
 app.provider('messageQueue', function () {

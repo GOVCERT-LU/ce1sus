@@ -201,3 +201,36 @@ text-transform: uppercase;
 .nav li + .nav-header {
 margin-top: 9px;
 }
+
+
+.collapse-header {
+	padding: 5px;
+}
+
+.collapse-header > div > div > h4 {
+  text-align: left;
+}
+
+.collapse-header > div > div {
+  text-align: right;
+}
+
+
+.collapse-header > div > div > a {
+	text-align: right;
+  cursor: pointer; 
+  cursor: hand;
+}
+
+.collapse-body {
+	padding: 5px;
+}
+
+.hand {
+	cursor: pointer; 
+	cursor: hand;
+}
+
+.red {
+  color: red;
+}

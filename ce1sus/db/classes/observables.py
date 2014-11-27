@@ -40,13 +40,20 @@ class ObservableComposition(Base):
   def validate(self):
     return True
 
+  def to_dict(self, complete=True):
+    observables = list()
+    for observable in self.observables:
+      observables.append(observable.to_dict(False))
+    return {'operator': self.convert_value(self.operator),
+            'observables': observables}
+
 
 class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True, unique=True)
   description = Column('description', UnicodeText)
-  object = relationship('Object', back_populates='parent', uselist=False)
-  observable_composition = relationship('ObservableComposition', uselist=False)
+  object = relationship('Object', back_populates='parent', uselist=False, lazy='joined')
+  observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   keywords = relationship('ObservableKeyword', backref='observable')
   event = relationship('Event', uselist=False)
   event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
@@ -70,9 +77,19 @@ class Observable(ExtendedLogingInformations, Base):
     return True
 
   def to_dict(self, complete=True):
+    if self.object:
+      obj = self.object.to_dict(False)
+    else:
+      obj = None
+    if self.observable_composition:
+      composed = self.observable_composition.to_dict(False)
+    else:
+      composed = None
     return {'identifier': self.convert_value(self.identifier),
             'title': self.convert_value(self.title),
             'description': self.convert_value(self.description),
-            'creator_group': self.creator_group.to_dict(False),
-            'created_at': self.convert_value(self.created_at),
+            'object': obj,
+            'observable_composition': composed,
+            # 'creator_group': self.creator_group.to_dict(False),
+            # 'created_at': self.convert_value(self.created_at),
             }

@@ -156,22 +156,26 @@ class Event(ExtendedLogingInformations, Base):
     return True
 
   def to_dict(self, complete=True):
-    observables = list()
-    for observable in self.observables:
-      observables.append(observable.to_dict(False))
-    return {'identifier': self.convert_value(self.identifier),
-            'title': self.convert_value(self.title),
-            'description': self.convert_value(self.description),
-            'last_publish_date': self.convert_value(self.last_publish_date),
-            'risk': self.convert_value(self.risk),
-            'status': self.convert_value(self.status),
-            'tlp': self.convert_value(self.tlp),
-            'analysis': self.convert_value(self.analysis),
-            'creator_group': self.creator_group.to_dict(False),
-            'created_at': self.convert_value(self.created_at),
-            'published': self.convert_value(self.properties.is_shareable),
-            'modified_on': self.convert_value(self.modified_on),
-            'first_seen': self.convert_value(None),
-            'last_seen': self.convert_value(None),
-            'observables': observables
-            }
+    if complete:
+      observables = list()
+      for observable in self.observables:
+        observables.append(observable.to_dict(False))
+    else:
+      observables = None
+    result = {'identifier': self.convert_value(self.identifier),
+              'title': self.convert_value(self.title),
+              'description': self.convert_value(self.description),
+              'last_publish_date': self.convert_value(self.last_publish_date),
+              'risk': self.convert_value(self.risk),
+              'status': self.convert_value(self.status),
+              'tlp': self.convert_value(self.tlp),
+              'analysis': self.convert_value(self.analysis),
+              'creator_group': self.creator_group.to_dict(False),
+              'created_at': self.convert_value(self.created_at),
+              'published': self.convert_value(self.properties.is_shareable),
+              'modified_on': self.convert_value(self.modified_on),
+              'first_seen': self.convert_value(None),
+              'last_seen': self.convert_value(None),
+              'observables': observables
+              }
+    return result

@@ -28,10 +28,13 @@ class EventsHandler(RestBaseHandler):
     parameters = args.get('parameters')
     count = parameters.get('count', 10)
     page = parameters.get('page', 1)
-
+    details = args.get('headers').get('Complete', 'false')
+    if details == 'true':
+      details = True
+    else:
+      details = False
     events, total_events = self.events_controller.get_events(page, count, self.get_user())
     result = list()
     for event in events:
-      result.append(event.to_dict())
+      result.append(event.to_dict(details))
     return {'total': total_events, 'data': result}
-

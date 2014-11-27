@@ -1,0 +1,54 @@
+<form name="addEventForm" class="form-horizontal" role="form" novalidate>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Identifier</label>
+    <div class="col-lg-9">
+      <input class="form-control" name="identifier"
+        ng-model="event.identifier" type="text" disabled>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Title *</label>
+    <div class="col-lg-9"">
+      <div
+        ng-class="{ 'has-error' : addEventForm.title.$invalid && !addEventForm.title.$pristine }">
+        <input class="form-control" name="title" ng-model="event.title"
+          type="text" required ng-minlength=3 ng-minlength=255>
+        <p
+          ng-show="addEventForm.title.$invalid && !addEventForm.title.$pristine"
+          class="help-block">Title is required.</p>
+        <p ng-show="addEventForm.title.$error.minlength"
+          class="help-block">Title is too short.</p>
+        <p ng-show="addEventForm.title.$error.maxlength"
+          class="help-block">Title is too long.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Description*</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addEventForm.description.$invalid && !addEventForm.description.$pristine }">
+        <textarea name="description" ng-model="event.description"
+          cols=48 rows=20 ng-minlength=3 required></textarea>
+        <p
+          ng-show="addEventForm.description.$invalid && !addEventForm.name.$pristine"
+          class="help-block">Description is required.</p>
+        <p ng-show="addEventForm.description.$error.minlength"
+          class="help-block">Description is too short.</p>
+      </div>
+    </div>
+  </div>
+  
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Status *</label>
+      <div class="col-lg-9">
+        <select name="status_id" class="form-control"
+          ng-options="status.identifier as status.name for status in statuses"
+          ng-model="user.status_id">
+          <option style="display: none" value="">Select a Status</option>
+        </select>
+      </div>
+    </div>
+    
+    
+</form>
