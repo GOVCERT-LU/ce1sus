@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" ng-click="$hide()">&times;</button>
-        <h4 class="modal-title">Observable - {{observable.identifier}}</h4>
+        <h4 class="modal-title">Observable - {{observable.identifier}} - Details</h4>
       </div>
       <div class="modal-body">
         <div class="row">
@@ -20,6 +20,14 @@
           </div>
           <div class="col-md-9">
             {{observable.title}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Description:</b>
+          </div>
+          <div class="col-md-9">
+            <textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{observable.description}}</textarea>
           </div>
         </div>
         <div class="row">

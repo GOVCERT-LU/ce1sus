@@ -1,6 +1,9 @@
-<ul class="nav nav-stacked {{first}}" ng-transclude>
-    <li ng-repeat="item in items" class="active">
-      <a ng-click="scrollTo(item.identifier)">{{ getTitle(item) }}</a>
-      <menu ng-if="item.observable_composition" items="item.observable_composition.observables" first=""></menu>
+<ul class="nav {{first}}" ng-transclude>
+    <li ng-repeat="item in items | limitTo: limit" data-target="#Menu{{item.identifier}}" bs-scrollspy>
+      <a ng-click="scrollTo('Menu'+item.identifier)">{{ getTitle(item) }}</a>
+      <menu ng-if="item.observable_composition" items="item.observable_composition.observables" first="" limit="5"></menu>
+    </li>
+    <li ng-if="items.length > limit">
+      <a >...</a>
     </li>
 </ul> 

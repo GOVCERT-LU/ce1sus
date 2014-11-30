@@ -1,0 +1,134 @@
+/**
+ * angular-strap
+ * @version v2.1.4 - 2014-11-26
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+
+.bs-docs-nav {
+	border-color: #a33f3e;
+	background-color: #b94846;
+	box-shadow: 0 1px 0 rgba(255, 255, 255, .1);
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, .15)
+}
+
+.bs-docs-nav .navbar-collapse {
+	border-color: #a33f3e
+}
+
+.bs-docs-nav .navbar-brand {
+	color: #fff
+}
+
+.bs-docs-nav .navbar-nav>li>a {
+	-webkit-transition: color .15s linear;
+	transition: color .15s linear;
+	color: #f9f1f1
+}
+
+.bs-docs-nav .navbar-nav>li>a:hover {
+	color: #fff
+}
+
+.bs-docs-nav .navbar-nav>.active>a, .bs-docs-nav .navbar-nav>.active>a:hover
+	{
+	background-color: #a33f3e;
+	color: #fff
+}
+
+.bs-docs-nav .navbar-toggle {
+	border-color: #b94846
+}
+
+.bs-docs-nav .navbar-toggle:hover {
+	border-color: #a33f3e;
+	background-color: #a33f3e
+}
+
+@media ( max-width :991px) {
+	.navbar-toggle {
+		margin-left: 15px;
+		display: block !important;
+		float: left
+	}
+}
+
+@media ( max-width :991px) {
+	.bs-sidebar.affix {
+		position: static !important
+	}
+}
+
+.bs-sidenav {
+	margin-top: 40px;
+	margin-bottom: 20px;
+	width: 200px
+}
+
+.bs-sidebar .nav>li>a {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	color: #999;
+	padding: 4px 15px;
+	text-align: right
+}
+
+.bs-sidebar .nav>li>a:focus, .bs-sidebar .nav>li>a:hover {
+	padding-right: 14px;
+	color: #b94846;
+	text-decoration: none;
+	background-color: transparent;
+	border-right: 1px solid #b94846
+}
+
+.bs-sidebar .nav>.active:focus>a, .bs-sidebar .nav>.active:hover>a,
+	.bs-sidebar .nav>.active>a {
+	padding-right: 13px;
+	font-weight: 700;
+	color: #b94846;
+	background-color: transparent;
+	border-right: 2px solid #b94846
+}
+
+.bs-sidebar .nav .nav {
+	display: none;
+	padding-bottom: 10px
+}
+
+.bs-sidebar .nav .nav>li>a {
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-right: 30px;
+	font-size: 12px;
+	font-weight: 400
+}
+
+.bs-sidebar .nav .nav>li>a:focus, .bs-sidebar .nav .nav>li>a:hover {
+	padding-right: 29px
+}
+
+.bs-sidebar .nav .nav>.active:focus>a, .bs-sidebar .nav .nav>.active:hover>a,
+	.bs-sidebar .nav .nav>.active>a {
+	font-weight: 500;
+	padding-right: 28px
+}
+
+@media ( min-width :992px) {
+	.bs-sidebar .nav>.active>ul {
+		display: block
+	}
+	.bs-sidebar.affix .bs-sidenav, .bs-sidebar.affix-bottom .bs-sidenav {
+		margin-top: 0;
+		margin-bottom: 0
+	}
+}
+
+@media ( min-width :1200px) {
+	.bs-sidebar {
+		margin-right: 30px
+	}
+}
+
+}

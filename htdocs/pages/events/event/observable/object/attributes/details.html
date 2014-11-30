@@ -1,0 +1,95 @@
+<div class="modal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$hide()">&times;</button>
+        <h4 class="modal-title">Attribute - {{attribtueDetails.definition.name}}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <b>Identifier:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.identifier}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>IOC:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.ioc}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Shared:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.shared}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Definition:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.definition.name}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Condition:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.condition}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Value:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.value}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Created at:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.created_at}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>by:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.creator_group.name}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Modified on:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.modified_on}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>by:</b>
+          </div>
+          <div class="col-md-9">
+            {{attribtueDetails.modifier_group.name}}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

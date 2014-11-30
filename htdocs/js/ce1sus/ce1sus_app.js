@@ -28,15 +28,3 @@ app.provider('messageQueue', function () {
     }
   };
 });
-/*
-var app = angular.module("ce1susApp", [
-                                       "ngRoute",
-                                       "ngAnimate", 
-                                       "route-segment", 
-                                       "view-segment",
-                                       "restangular",
-                                       "mgcrea.ngStrap",
-                                       "ngTable",
-                                       "chieffancypants.loadingBar"]);
-
-*/

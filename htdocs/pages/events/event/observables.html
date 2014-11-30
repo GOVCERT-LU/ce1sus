@@ -1,19 +1,89 @@
 
-<div class="row">
-  <div class="col-md-2">
+<div ng-if="!flat"  class="row bs-docs-container">
+  <div class="col-md-3 hidden-sm hidden-xs">
     <div class="btn-group">
-      <a class="btn btn-default" role="button">Add new Object</a>
+      <a class="btn btn-primary" role="button">Add new Object</a>
+      <button type="button" class="btn btn-default" data-animation="am-flip-x" bs-dropdown="dropdown">
+        View Mode
+      </button>
     </div>
     <div style="height: 15px"></div>
     <legend>Observables</legend>
-    <nav class="bs-docs-sidebar">
-      <menu items="observables" first="'bs-docs-sidebar'"></menu>
-    </nav>
+      <div>
+        <div class="bs-sidebar hidden-print" role="complementary"  data-offset-top="-5" bs-affix>
+          <menu items="observables" first="'bs-sidenav'" limit="1000"></menu>
+        </div>
+      </div>
   </div>
-  <div class="col-md-10">
+  <div class="col-md-9">
     <span ng-repeat="observable in observables">
       <observable ng-if="!observable.observable_composition" observable="observable" indent="0"></observable>
       <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0"></composedobservable>
     </span>
   </div>
+</div>
+<div ng-if="flat">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" data-animation="am-flip-x" bs-dropdown="dropdown">
+        View Mode
+      </button>
+    </div>
+    <table class="table-striped table-bordered table-hover table-condensed">
+      <thead>
+        <tr>
+          <th width="5%">Observable</th>
+          <th width="5%">Object</th>
+          <th width="2%">S</th>
+          <th width="16%">Type</th>
+          <th width="60%">Value</th>
+          <th width="2%">IOC</th>
+          <th width="10%">Options</th>
+        </tr>
+      </thead>
+      <tbody>
+       <tr ng-repeat="attributeflat in flatAttributes | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
+          <td ng-if="attributeflat.composedoperator && writeTD(attributeflat, pagination)" rowspan="{{getRowSpan(attributeflat,pagination)}}" >
+            Composed - {{attributeflat.composedoperator}}
+          </td>
+          <td ng-if="!attributeflat.composedoperator">
+            Observable
+          </td>
+          <td>
+            {{attributeflat.object}}
+          </td>
+          <td><span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+              <span ng-if="!attributeflat.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </td>
+          <td>{{attributeflat.definition.name}}</td>
+          <td>{{attributeflat.value}}</td>
+          <td><span ng-if="attributeflat.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
+          <td>
+          
+          <a class="hand" ng-click="showAttributeDetails(attributeflat)"><span class="glyphicon glyphicon-eye-open"></span></a>
+          &nbsp;
+          <a class="hand"><span class="glyphicon glyphicon-pencil"></span></a>
+          &nbsp;
+          <a class="hand red" ng-click="removeAttribute(attributeflat)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+          </td>
+        </tr>
+      </tbody>
+    
+    </table>
+      <ul class="pagination" ng-if="1 < pagination.numPages">
+        <li ng-class="{ disabled : pagination.page == 0 }">
+          <a href="" ng-click="pagination.toPageId(0)">&laquo;</a>
+        </li>
+        <li ng-class="{ disabled : pagination.page == 0 }">
+          <a href="" ng-click="pagination.prevPage()">&lsaquo;</a>
+        </li>
+        <li ng-repeat="pageNumber in pagination.pages track by $index" ng-class="{ active : pageNumber-1 == pagination.page, disabled : pageNumber == '...' }">
+          <a href="" ng-click="pagination.toPageId(pageNumber-1)">{{ pageNumber }}</a>
+        </li>
+        <li ng-class="{ disabled : pagination.page == pagination.numPages-1}">
+          <a href="" ng-click="pagination.nextPage()">&rsaquo;</a>
+        </li>
+        <li ng-class="{ disabled : pagination.page == pagination.numPages-1 }">
+          <a href="" ng-click="pagination.toPageId(pagination.numPages-1)">&raquo;</a>
+        </li>
+      </ul>
 </div>

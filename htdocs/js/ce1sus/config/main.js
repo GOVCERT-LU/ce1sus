@@ -4,9 +4,12 @@
 
 var queue = [];
 
-app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider) {
+app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider, $scrollspyProvider) {
     
-
+  angular.extend($scrollspyProvider.defaults, {
+    animation: 'am-fade-and-slide-top',
+    placement: 'top'
+  });
   
     messageQueueProvider.setQueue(queue);
     // Configuring provider options
@@ -128,7 +131,6 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                     resolve: {
                       eventmenus: function(Restangular) {
                         return Restangular.oneUrl("eventmenus", "/menus/event_links").getList().then(function(eventmenus) {
-                          var test = eventmenus;
                           return eventmenus;
                         }, function(response) {
                           throw generateErrorMessage(response);

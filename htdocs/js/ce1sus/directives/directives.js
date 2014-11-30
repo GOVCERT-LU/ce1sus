@@ -37,7 +37,6 @@ app.directive("userForm", function() {
       $scope.generateAPIKey = function() {
         $scope.user.api_key = generateAPIKey();
       };
-      var test = $scope.groups;
     }
   };
 });
@@ -377,13 +376,13 @@ app.directive("composedobservable", function($compile) {
       composedobservable: "=composedobservable",
       indent: "=indent"
     },
-    controller: function($scope, Pagination){
+    controller: function($scope, Pagination, $modal){
       $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
       $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
       $scope.removeComposedObservable = function() {
         var remove = false;
-        if (confirm('Are you sure you want to delete?')) {
+        if (confirm('Are you sure you want to delete this composed observable?')) {
           if ($scope.composedobservable.observable_composition.observables.length > 0) {
             remove = confirm('Are you sure you want also it\'s children?');
           } else {
@@ -395,6 +394,9 @@ app.directive("composedobservable", function($compile) {
           var index = $scope.$parent.observables.indexOf($scope.composedobservable);
           $scope.$parent.observables.splice(index,1);
         }
+      };
+      $scope.addObservable = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/add.html', show: true});
       };
     },
     templateUrl: "pages/common/directives/composendobservableview.html",
@@ -437,13 +439,13 @@ app.directive("observable", function($compile) {
       };
       
       $scope.editObservable = function(){
-        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/edit.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/edit.html', show: true});
       };
       
       $scope.removeObservable = function(){
         if (confirm('Are you sure you want to delete?')) {
 
-          //find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?
+          //TODO: find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?
           var index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
           $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.splice(index,1);
           //foo to get the paginaton right in case it changes
@@ -464,11 +466,11 @@ app.directive("observable", function($compile) {
       };
       
       $scope.addObject = function(){
-        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
       };
       
       $scope.showDetails = function(){
-        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
       };
     },
     templateUrl: "pages/common/directives/observableview.html",
@@ -500,10 +502,10 @@ app.directive("object", function($compile) {
     },
     controller: function($scope, $modal){
       $scope.showDetails = function(){
-        var myOtherModal = $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
       };
       $scope.removeObject = function(){
-        if (confirm('Are you sure you want to delete?')) {
+        if (confirm('Are you sure you want to delete this object?')) {
           var remove = false;
           if ($scope.object.relatedObjects) {
             remove = confirm('Are you sure you want also it\'s children?');
@@ -518,8 +520,14 @@ app.directive("object", function($compile) {
       };
       
       $scope.removeAttribute = function(attribtue){
-        var index = $scope.object.attributes.indexOf(attribtue);
-        $scope.object.attributes.splice(index, 1);
+        if (confirm('Are you sure you want to delete this attribtue?')) {
+          var index = $scope.object.attributes.indexOf(attribtue);
+          $scope.object.attributes.splice(index, 1);
+        }
+      };
+      $scope.showAttributeDetails = function(attribtue){
+        $scope.attribtueDetails = attribtue;
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
       };
     },
     templateUrl: "pages/common/directives/objectview.html",
@@ -539,7 +547,7 @@ app.directive("object", function($compile) {
   };
 });
 
-app.directive("menu", function($compile) {
+app.directive("menu", function($compile, $timeout) {
   
   return {
     restrict: "E",
@@ -547,7 +555,8 @@ app.directive("menu", function($compile) {
     replace: true,
     scope: {
       items: "=items",
-      first: "=first"
+      first: "=first",
+      limit: "=limit"
     },
     controller: function($scope, $anchorScroll, $location){
       $scope.getTitle = function(observable){
@@ -569,8 +578,11 @@ app.directive("menu", function($compile) {
       };
       
       $scope.scrollTo = function(id) {
-        $location.hash(id);
-        $anchorScroll();
+        if ($location.hash() !== id) {
+          var hash =  $location.hash(id);
+        } else {
+          $anchorScroll();
+        }
       };
     },
     templateUrl: "pages/common/directives/menuitem.html",
@@ -587,5 +599,17 @@ app.directive("menu", function($compile) {
           });
       };
     }
+  };
+});
+
+app.directive("observableForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      observable: "=observable",
+      editMode: "=edit"
+    },
+    templateUrl: "pages/common/directives/observableform.html"
   };
 });

@@ -60,7 +60,7 @@ class Attribute(ExtendedLogingInformations, Base):
                               uselist=False, lazy='joined')
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
-  condition = relationship('Condition', uselist=False, secondary='rel_attribute_conditions')
+  condition = relationship('Condition', uselist=False, secondary='rel_attribute_conditions', lazy='joined')
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
@@ -178,9 +178,18 @@ class Attribute(ExtendedLogingInformations, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, complete=True):
+    condition = None
+    if self.condition:
+      condition = self.condition.value
+
     return {'identifier': self.convert_value(self.identifier),
             'definition': self.definition.to_dict(True),
             'shared': self.properties.is_shareable,
             'ioc': self.is_ioc,
-            'value': self.convert_value(self.value)
+            'value': self.convert_value(self.value),
+            'condition': self.convert_value(condition),
+            'creator_group': self.creator_group.to_dict(False),
+            'created_at': self.convert_value(self.created_at),
+            'modified_on': self.convert_value(self.modified_on),
+            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
             }

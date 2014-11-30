@@ -3,12 +3,16 @@
     <div class="panel-heading collapse-header">
       <div class="row">
         <div class="col-sm-7">
-          <h4 class="panel-title" id="{{composedobservable.identifier}}">
+          <h4 class="panel-title" id="Menu{{composedobservable.identifier}}">
             <a  class="hand" bs-collapse-toggle>Composed observable</a>
           </h4>
         </div>
         <div class="col-sm-1"></div>
         <div class="col-sm-4" style="text-align: right">
+          <a ng-click="addObservable()"> <span
+            class="glyphicon glyphicon-plus-sign"></span>
+          </a> 
+          &nbsp
           <a class="hand red" ng-click="removeComposedObservable()"><span class="glyphicon glyphicon-remove-circle"></span></a>
           &nbsp;
         </div>

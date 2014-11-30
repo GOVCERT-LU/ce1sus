@@ -1,0 +1,20 @@
+<div class="modal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()">&times;</button>
+        <h4 class="modal-title">Edit Observable - {{observable.identifier}}</h4>
+      </div>
+      <div class="modal-body">
+        <observable-form observable="observable" edit="true"></observable-form>
+      </div>
+      <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!observableChanged() || editObservableForm.$invalid" ng-click="submitObservable()">Save</button>
+            <button name="reset" type="button" class="btn btn-default" ng-click="resetGroup()">Reset</button>
+            <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
