@@ -13,8 +13,7 @@
     </div>
     <div class="col-md-9">
       <div ng-class="{ 'has-error' : editObservableForm.name.$invalid && !editObservableForm.name.$pristine }">
-        <input class="form-control" name="name" ng-model="group.name" type="text" required ng-minlength=3 ng-minlength=255 ng-pattern="/^[\d\w]+$/">
-        <p ng-show="editObservableForm.name.$invalid && !editObservableForm.name.$pristine" class="help-block">Name is required.</p>
+        <input class="form-control" name="name" ng-model="observable.title" type="text" ng-minlength=3 ng-minlength=255 ng-pattern="/^[\d\w]+$/">
         <p ng-show="editObservableForm.name.$error.minlength" class="help-block">Name is too short.</p>
         <p ng-show="editObservableForm.name.$error.maxlength" class="help-block">Name is too long.</p>
         <p ng-show="editObservableForm.name.$error.pattern" class="help-block">Name is not alphanumeric.</p>
@@ -27,7 +26,7 @@
     </div>
     <div class="col-md-9">
       <div ng-class="{ 'has-error' : editObservableForm.name.$invalid && !editObservableForm.name.$pristine }">
-        <textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{observable.description}}</textarea>
+        <textarea class="form-control" rows="3" style="background-color: #FFFFFF" ng-model="observable.description">{{observable.description}}</textarea>
         <p ng-show="editObservableForm.description.$invalid && !editObservableForm.name.$pristine" class="help-block">Description is required.</p>
         <p ng-show="editObservableForm.description.$error.minlength" class="help-block">Description is too short.</p>
       </div>

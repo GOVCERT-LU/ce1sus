@@ -395,9 +395,15 @@ app.directive("composedobservable", function($compile) {
           $scope.$parent.observables.splice(index,1);
         }
       };
+      
       $scope.addObservable = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/add.html', show: true});
       };
+      
+      $scope.appendObservable =  function(observable){
+        $scope.composedobservable.observable_composition.observables.push(observable);
+      };
+      
     },
     templateUrl: "pages/common/directives/composendobservableview.html",
     compile: function (element) {
@@ -442,7 +448,14 @@ app.directive("observable", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/edit.html', show: true});
       };
       
+      $scope.setObservable = function(observable){
+        //TODO make this also work if the parent is not composed!
+        var index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
+        $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables[index] = observable;
+      };
+      
       $scope.removeObservable = function(){
+      //TODO make this also work if the parent is not composed!
         if (confirm('Are you sure you want to delete?')) {
 
           //TODO: find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?

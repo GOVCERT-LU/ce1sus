@@ -1,4 +1,4 @@
-<div class="modal" role="dialog">
+<div class="modal" role="dialog" ng-controller="observableAddController">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -11,7 +11,7 @@
       <div class="modal-footer">
           <div class="btn-group">
             <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!observableChanged() || editObservableForm.$invalid" ng-click="submitObservable()">Save</button>
-            <button name="reset" type="button" class="btn btn-default" ng-click="resetGroup()">Reset</button>
+            <button name="reset" type="button" class="btn btn-default" ng-click="resetObservable()">Reset</button>
             <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
           </div>
       </div>

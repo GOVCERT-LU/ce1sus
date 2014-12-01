@@ -46,10 +46,10 @@
               <span ng-if="!attributeflat.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
           </td>
           <td ng-if="attributeflat.composedoperator && writeTD(attributeflat, pagination)" rowspan="{{getRowSpan(attributeflat,pagination)}}" >
-            Composed - {{attributeflat.composedoperator}}
+            {{getFlatTitle(attributeflat)}} - {{attributeflat.composedoperator}}
           </td>
           <td ng-if="!attributeflat.composedoperator">
-            Observable
+            {{getFlatTitle(attributeflat)}}
           </td>
           <td>
             {{attributeflat.object}}

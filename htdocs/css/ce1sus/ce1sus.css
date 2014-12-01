@@ -224,3 +224,12 @@ margin-top: 9px;
 .ce1sus-btn {
 	padding:3px 5px 3px 5px;
 }
+
+.hand {
+  cursor: pointer; 
+  cursor: hand;
+}
+
+.red {
+  color: red;
+}

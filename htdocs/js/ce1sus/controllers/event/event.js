@@ -120,6 +120,23 @@ app.controller("eventObservableController", function($scope, Restangular, messag
     } 
     return true;
   };
+  
+  $scope.getFlatTitle = function(attributeflat){
+    if (attributeflat.composedoperator){
+      if (attributeflat.composed){
+        return attributeflat.composed;
+      } else {
+        return "Composed";
+      }
+    } else {
+      if (attributeflat.observable){
+        return attributeflat.observable;
+      } else {
+        return "Observable";
+      }
+    }
+    return "Unknown";
+  };
 
   $scope.getRowSpan = function(attribute, pagination){
     var rowspan = 0;
