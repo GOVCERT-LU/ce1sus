@@ -31,9 +31,9 @@
     <table class="table-striped table-bordered table-hover table-condensed">
       <thead>
         <tr>
+          <th width="2%">S</th>
           <th width="5%">Observable</th>
           <th width="5%">Object</th>
-          <th width="2%">S</th>
           <th width="16%">Type</th>
           <th width="60%">Value</th>
           <th width="2%">IOC</th>
@@ -42,6 +42,9 @@
       </thead>
       <tbody>
        <tr ng-repeat="attributeflat in flatAttributes | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
+           <td><span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+              <span ng-if="!attributeflat.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </td>
           <td ng-if="attributeflat.composedoperator && writeTD(attributeflat, pagination)" rowspan="{{getRowSpan(attributeflat,pagination)}}" >
             Composed - {{attributeflat.composedoperator}}
           </td>
@@ -51,9 +54,7 @@
           <td>
             {{attributeflat.object}}
           </td>
-          <td><span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-              <span ng-if="!attributeflat.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-          </td>
+
           <td>{{attributeflat.definition.name}}</td>
           <td>{{attributeflat.value}}</td>
           <td><span ng-if="attributeflat.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
