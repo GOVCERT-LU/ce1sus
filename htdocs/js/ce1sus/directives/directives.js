@@ -432,7 +432,7 @@ app.directive("observable", function($compile) {
       observable: "=observable",
       indent: "=indent"
     },
-    controller: function($scope, $modal, $log){
+    controller: function($scope, $modal, $log, messages){
       
       
       
@@ -479,11 +479,19 @@ app.directive("observable", function($compile) {
       };
       
       $scope.addObject = function(){
-        $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/add.html', show: true});
       };
       
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
+      };
+      
+      $scope.appendObservableObject = function(observableObject){
+        if ($scope.observable.object) {
+          messages.setMessage({'type':'danger', 'message':'Observable has already an object'});
+        } else {
+          $scope.observable.object = observableObject;
+        }
       };
     },
     templateUrl: "pages/common/directives/observableview.html",
@@ -624,5 +632,21 @@ app.directive("observableForm", function() {
       editMode: "=edit"
     },
     templateUrl: "pages/common/directives/observableform.html"
+  };
+});
+
+app.directive("observableObjectForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      observableobject: "=observableobject",
+      editMode: "=edit",
+      definitions: '='
+    },
+    controller: function($scope, Restangular){
+
+    },
+    templateUrl: "pages/common/directives/observableobjectform.html"
   };
 });

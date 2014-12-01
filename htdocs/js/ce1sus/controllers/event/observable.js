@@ -4,7 +4,7 @@
 
 app.controller("observableAddController", function($scope, Restangular, messages, $routeSegment,$location) {
   var original_observable = {};
-  $scope.observable={'fo':'test'};
+  $scope.observable={};
   
   $scope.closeModal = function(){
     $scope.observable = angular.copy(original_observable);
