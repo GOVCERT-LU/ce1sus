@@ -556,7 +556,10 @@ app.directive("object", function($compile) {
       };
       
       $scope.appendChildObject = function(child){
-        $scope.object.relatedObjects.append(child);
+        if (!$scope.object.relatedObjects){
+          $scope.object.relatedObjects  = [];
+        }
+        $scope.object.relatedObjects.push(child);
       };
       
     },

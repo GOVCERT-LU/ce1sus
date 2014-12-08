@@ -1,6 +1,6 @@
 <div bs-collapse ng-transclude>
   <div class="panel panel-default"
-    style="position: relative; left: {{20*indent}}px">
+    style="position: relative; left: {{20*indent}}px; width:calc(100% - {{20*indent}}px);" >
     <div class="panel-heading collapse-header">
       <div class="row">
         <div class="col-sm-7">
@@ -31,7 +31,7 @@
       </div>
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
-      <div class="collapse-body">
+      <div class="collapse-body" style="padding-right:0;padding-left:0;padding-bottom:0">
         <table ng-if="object.attributes.length > 0" class="table-striped table-bordered table-hover table-condensed">
           <thead>
             <tr>
@@ -58,7 +58,12 @@
             </tr>
           </tbody>
         </table>
+        <div ng-if="object.relatedObjects" style="height:5px"></div>
+        <span ng-if="object.relatedObjects" ng-repeat="childObject in object.relatedObjects">
+          <object object="childObject" indent="1"></object>
+        </span>
       </div>
     </div>
   </div>
 </div>
+

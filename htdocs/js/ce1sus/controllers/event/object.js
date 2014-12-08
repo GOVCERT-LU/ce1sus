@@ -112,7 +112,7 @@ app.controller("objectChildAddController", function($scope, Restangular, message
       }
     }, $log);
     
-    $scope.$parent.$parent.addChildObject($scope.childObject);
+    $scope.$parent.$parent.appendChildObject($scope.childObject);
     $scope.$hide();
   };
 
