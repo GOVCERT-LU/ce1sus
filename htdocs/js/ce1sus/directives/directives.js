@@ -550,6 +550,15 @@ app.directive("object", function($compile) {
         $scope.attribtueDetails = attribtue;
         $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
       };
+      
+      $scope.addChildObject = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
+      };
+      
+      $scope.appendChildObject = function(child){
+        $scope.object.relatedObjects.append(child);
+      };
+      
     },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {

@@ -1,0 +1,20 @@
+<div class="modal" role="dialog" ng-controller="objectChildAddController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()">&times;</button>
+        <h4 class="modal-title">Add Child Object</h4>
+      </div>
+      <div class="modal-body">
+        <observable-object-form observableobject="childObject" edit="true" definitions="definitions"></observable-object-form>
+      </div>
+      <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!childObjectChanged() || editChildObjectForm.$invalid" ng-click="submitChildObject()">Save</button>
+            <button name="reset" type="button" class="btn btn-default" ng-click="resetChildObject()">Reset</button>
+            <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

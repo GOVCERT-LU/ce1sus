@@ -39,7 +39,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
       }
     }, $log);
     
-    $scope.$parent.$parent.appendObservableObject($scope.observableObject);
+    $scope.$parent.$parChildObjectableObject($scope.observableObject);
     $scope.$hide();
   };
 
@@ -69,6 +69,50 @@ app.controller("observableObjectEditController", function($scope, Restangular, m
   
   $scope.submitObservableObject = function(){
     $scope.$parent.$parent.setObservableObject($scope.working_copy);
+    $scope.$hide();
+  };
+
+
+});
+
+app.controller("objectChildAddController", function($scope, Restangular, messages, $routeSegment,$log) {
+  $scope.definitions =[];
+  Restangular.one("object").getList(null, null, {"Complete": false}).then(function (objects) {
+    $scope.definitions = objects;
+  }, function(response) {
+      throw generateErrorMessage(response);
+  });
+  
+  var original_childObject = {};
+  $scope.childObject={};
+  
+  $scope.closeModal = function(){
+    $scope.childObject = angular.copy(original_childObject);
+    $scope.$hide();
+  };
+  
+  //Scope functions
+  $scope.resetChildObject = function ()
+  {
+    $scope.childObject = angular.copy(original_childObject);
+
+  };
+  
+
+  
+  $scope.childObjectChanged = function ()
+  {
+    return !angular.equals($scope.childObject, original_childObject);
+  };
+  
+  $scope.submitChildObject = function(){
+    angular.forEach($scope.definitions, function(entry) {
+      if (entry.identifier == $scope.childObject.definition_id){
+        $scope.childObject.definition=entry;
+      }
+    }, $log);
+    
+    $scope.$parent.$parent.addChildObject($scope.childObject);
     $scope.$hide();
   };
 
