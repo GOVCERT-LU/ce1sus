@@ -562,6 +562,17 @@ app.directive("object", function($compile) {
         $scope.object.relatedObjects.push(child);
       };
       
+      $scope.addAttribute = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/add.html', show: true});
+      };
+      
+      $scope.appendAttribute = function(attribute){
+        if (!$scope.object.attributes){
+          $scope.object.attributes  = [];
+        }
+        $scope.object.attributes.push(attribute);
+      };
+      
     },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {
@@ -660,5 +671,21 @@ app.directive("observableObjectForm", function() {
 
     },
     templateUrl: "pages/common/directives/observableobjectform.html"
+  };
+});
+
+app.directive("objectAttributeForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      attribute: "=attribute",
+      editMode: "=edit",
+      definitions: '='
+    },
+    controller: function($scope, Restangular){
+
+    },
+    templateUrl: "pages/common/directives/objectattributeform.html"
   };
 });

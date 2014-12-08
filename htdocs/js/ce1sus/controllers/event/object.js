@@ -46,34 +46,6 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
 
 });
 
-app.controller("observableObjectEditController", function($scope, Restangular, messages, $routeSegment,$location) {
-  var original_observableObject = angular.copy($scope.observableObject);
-  $scope.working_copy = angular.copy($scope.observableObject);
-  $scope.closeModal = function(){
-    $scope.$hide();
-  };
-  
-  //Scope functions
-  $scope.resetObservableObject = function ()
-  {
-    $scope.working_copy = angular.copy(original_observableObject);
-
-  };
-  
-
-  
-  $scope.observableObjectChanged = function ()
-  {
-    return !angular.equals($scope.working_copy, original_observableObject);
-  };
-  
-  $scope.submitObservableObject = function(){
-    $scope.$parent.$parent.setObservableObject($scope.working_copy);
-    $scope.$hide();
-  };
-
-
-});
 
 app.controller("objectChildAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
@@ -115,6 +87,5 @@ app.controller("objectChildAddController", function($scope, Restangular, message
     $scope.$parent.$parent.appendChildObject($scope.childObject);
     $scope.$hide();
   };
-
 
 });
