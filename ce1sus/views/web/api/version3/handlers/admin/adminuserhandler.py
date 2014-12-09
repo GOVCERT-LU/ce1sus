@@ -37,8 +37,7 @@ class AdminUserHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
+      details = self.get_detail_value(args)
       json = args.get('json')
       if method == 'GET':
 
@@ -47,7 +46,7 @@ class AdminUserHandler(RestBaseHandler):
           uuid = path.pop(0)
           # TODO: add inflate
           user = self.user_controller.get_user_by_id(uuid)
-          if details == 'true':
+          if details:
             password = '*******************'
             if is_plugin_available('ldap', self.config):
               ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
@@ -65,7 +64,7 @@ class AdminUserHandler(RestBaseHandler):
           users = self.user_controller.get_all_users()
           result = list()
           for user in users:
-            if details == 'true':
+            if details:
               password = AdminUserHandler.PASSWORD_MASK
               if is_plugin_available('ldap', self.config):
                 ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()

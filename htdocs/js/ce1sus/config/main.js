@@ -157,7 +157,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  controller: 'viewEventController',
                                  resolve: {
                                    $event: function(Restangular,$routeSegment) {
-                                     return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": false}).then(function (data) {
+                                     return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": false}).then(function (data) {
                                        return data;
                                      }, function(response) {
                                          throw generateErrorMessage(response);
@@ -179,7 +179,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/overview.html",
                             resolve: {
                               $event: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).get(null, {"Complete": false}).then(function (data) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": false}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);
@@ -200,7 +200,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             controller: 'eventObservableController',
                             resolve: {
                               observables: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList(null, {"Complete": true}).then(function (data) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList(null, {"complete": true}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);
@@ -272,7 +272,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    controller : "mailController",
                                    resolve: {
                                      mails: function(Restangular) {
-                                       return Restangular.one("mail").getList(null, null, {"Complete": false}).then(function (mails) {
+                                       return Restangular.one("mail").getList(null, {"complete": false}).then(function (mails) {
                                          return mails;
                                        }, function(response) {
                                            throw generateErrorMessage(response);
@@ -297,7 +297,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               controller: 'mailDetailController',
                               resolve: {
                                 $mail: function(Restangular,$routeSegment) {
-                                  return Restangular.one("mail",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (mails) {
+                                  return Restangular.one("mail",$routeSegment.$routeParams.id).get({"complete": true}).then(function (mails) {
                                     return mails;
                                   }, function(response) {
                                       throw generateErrorMessage(response);
@@ -324,14 +324,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "typesController",
                                resolve: {
                                  types: function(Restangular) {
-                                   return Restangular.one("attributetypes").getList(null, null, {"Complete": false}).then(function (objects) {
+                                   return Restangular.one("attributetypes").getList(null, {"complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                 datatypes: function(Restangular) {
-                                  return Restangular.one("attributetables").getList(null, null, {"Complete": false}).then(function (tables) {
+                                  return Restangular.one("attributetables").getList(null, {"complete": false}).then(function (tables) {
                                     return tables;
                                   }, function(response) {
                                       throw generateErrorMessage(response);
@@ -356,7 +356,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "typeDetailController",
                                      resolve: {
                                        $type: function(Restangular,$routeSegment) {
-                                         return Restangular.one("attributetypes",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (object) {
+                                         return Restangular.one("attributetypes",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -379,7 +379,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "viewTypesController",
                                resolve: {
                                  viewTypes: function(Restangular) {
-                                   return Restangular.one("attribtueviewtypes").getList(null, null, {"Complete": false}).then(function (objects) {
+                                   return Restangular.one("attribtueviewtypes").getList(null, {"complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -404,7 +404,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "viewTypeDetailController",
                                      resolve: {
                                        $viewType: function(Restangular,$routeSegment) {
-                                         return Restangular.one("attribtueviewtypes",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (object) {
+                                         return Restangular.one("attribtueviewtypes",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -427,7 +427,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "objectController",
                                resolve: {
                                  objects: function(Restangular) {
-                                   return Restangular.one("object").getList(null, null, {"Complete": false}).then(function (objects) {
+                                   return Restangular.one("object").getList(null, {"complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -452,14 +452,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "objectDetailController",
                                      resolve: {
                                        $object: function(Restangular,$routeSegment) {
-                                         return Restangular.one("object",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (object) {
+                                         return Restangular.one("object",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
                                          });
                                        },
                                        attributes: function(Restangular) {
-                                         return Restangular.one("attribute").getList(null, null, {"Complete": false}).then(function (attributes) {
+                                         return Restangular.one("attribute").getList(null, {"complete": false}).then(function (attributes) {
                                            return attributes;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -482,35 +482,35 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "attributeController",
                                resolve: {
                                  attributes: function(Restangular) {
-                                   return Restangular.one("attribute").getList(null, null, {"Complete": false}).then(function (attributes) {
+                                   return Restangular.one("attribute").getList(null, {"complete": false}).then(function (attributes) {
                                      return attributes;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  handlers: function(Restangular) {
-                                   return Restangular.one("attributehandlers").getList(null, null, {"Complete": false}).then(function (handlers) {
+                                   return Restangular.one("attributehandlers").getList(null, {"complete": false}).then(function (handlers) {
                                      return handlers;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  tables: function(Restangular) {
-                                   return Restangular.one("attributetables").getList(null, null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attributetables").getList(null, {"complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  types: function(Restangular) {
-                                   return Restangular.one("attributetypes").getList(null, null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attributetypes").getList(null, {"complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
                                  },
                                  viewTypes: function(Restangular) {
-                                   return Restangular.one("attribtueviewtypes").getList(null, null, {"Complete": false}).then(function (tables) {
+                                   return Restangular.one("attribtueviewtypes").getList(null, {"complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -535,7 +535,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                              controller: "attributeDetailController",
                              resolve: {
                                $attribute: function(Restangular,$routeSegment) {
-                                 return Restangular.one("attribute",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (attribute) {
+                                 return Restangular.one("attribute",$routeSegment.$routeParams.id).get({"complete": true}).then(function (attribute) {
                                    return attribute;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
@@ -549,7 +549,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  });
                                },
                                objects: function(Restangular) {
-                                 return Restangular.all("object").getList(null, null, {"Complete": false}).then(function (objects) {
+                                 return Restangular.all("object").getList(null, {"complete": false}).then(function (objects) {
                                    return objects;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
@@ -572,7 +572,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "userController",
                                resolve: {
                                  groups: function(Restangular) {
-                                   return Restangular.one("group").getList(null, null, {"Complete": false}).then(function (groups) {
+                                   return Restangular.one("group").getList(null, {"complete": false}).then(function (groups) {
                                      return groups;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -590,7 +590,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    });
                                  },
                                  users: function(Restangular,$routeSegment) {
-                                   return Restangular.one("user").getList(null, null, {"Complete": false}).then(function (users) {
+                                   return Restangular.one("user").getList(null, {"complete": false}).then(function (users) {
                                      return users;
                                    
                                    }, function(response) {
@@ -618,7 +618,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           controller: "userDetailController",
                           resolve: {
                             $user: function(Restangular,$routeSegment) {
-                              return Restangular.one("user",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (user) {
+                              return Restangular.one("user",$routeSegment.$routeParams.id).get({"complete": true}).then(function (user) {
                                 return user;
                               }, function(response) {
                                   throw generateErrorMessage(response);
@@ -640,7 +640,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "groupController",
                                resolve: {
                                  groups: function(Restangular) {
-                                   return Restangular.one("group").getList(null, null, {"Complete": false}).then(function (groups) {
+                                   return Restangular.one("group").getList(null, {"complete": false}).then(function (groups) {
                                      return groups;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -665,7 +665,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           controller: "groupDetailController",
                           resolve: {
                             $group: function(Restangular,$routeSegment) {
-                              return Restangular.one("group",$routeSegment.$routeParams.id).get(null, {"Complete": true}).then(function (user) {
+                              return Restangular.one("group",$routeSegment.$routeParams.id).get({"complete": true}).then(function (user) {
                                 return user;
                               }, function(response) {
                                   throw generateErrorMessage(response);

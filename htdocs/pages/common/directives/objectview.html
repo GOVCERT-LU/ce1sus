@@ -45,7 +45,9 @@
                   <span ng-if="!attribute.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
               </td>
               <td>{{attribute.definition.name}}</td>
-              <td>{{attribute.value}}</td>
+              <td>
+                <attribute-handler attribute="attribute" usetype="'view'"></attribute-handler>
+              </td>
               <td><span ng-if="attribute.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
               <td>
                 <a class="hand" ng-click="showAttributeDetails(attribute)"><span class="glyphicon glyphicon-eye-open"></span></a>

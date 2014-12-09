@@ -28,11 +28,7 @@ class EventsHandler(RestBaseHandler):
     parameters = args.get('parameters')
     count = parameters.get('count', 10)
     page = parameters.get('page', 1)
-    details = args.get('headers').get('Complete', 'false')
-    if details == 'true':
-      details = True
-    else:
-      details = False
+    details = self.get_detail_value(args)
     events, total_events = self.events_controller.get_events(page, count, self.get_user())
     result = list()
     for event in events:

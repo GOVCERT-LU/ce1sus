@@ -679,13 +679,44 @@ app.directive("objectAttributeForm", function() {
   return {
     restrict: "E",
     scope: {
-      attribute: "=attribute",
+      objectattribute: "=objectattribute",
       editMode: "=edit",
       definitions: '='
     },
     controller: function($scope, Restangular){
-
+      
     },
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
 });
+
+app.directive("attributeHandler",['$compile', '$http', '$templateCache',  function($compile, $http, $templateCache) {
+  
+  var getTemplate = function(contentType, viewType){
+    var templateLoader;
+    var baseUrl = 'pages/handlers';
+    
+    var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html';
+    templateLoader = $http.get(templateUrl, {cache: $templateCache});
+
+    return templateLoader;
+  };
+  
+  
+  return {
+    restrict: "E",
+    scope: {
+      attribute: "=attribute",
+      usetype: "=usetype"
+    },
+    link: function(scope, element, attrs) {
+      var loader = getTemplate(scope.usetype, scope.attribute.definition.viewType.name);
+      var promise = loader.success(function(html) {
+        element.html(html);
+      }).then(function (response) {
+          element.replaceWith($compile(element.contents())(scope));
+      });
+
+    },
+  };
+}]);

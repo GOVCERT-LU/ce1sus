@@ -83,3 +83,12 @@ class RestBaseHandler(BaseView):
   @property
   def name(self):
     return self.__class__.__name__
+
+  def get_detail_value(self, args):
+    parameters = args.get('parameters')
+    details = parameters.get('complete', 'false')
+    if details == 'true':
+      details = True
+    else:
+      details = False
+    return details

@@ -3,7 +3,7 @@
  */
 app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("attribute").getList(null, null, {"Complete": false}).then(function (attributes) {
+  Restangular.one("attribute").getList(null,{"complete": true}).then(function (attributes) {
     $scope.definitions = attributes;
   }, function(response) {
       throw generateErrorMessage(response);

@@ -31,12 +31,7 @@ class MailHandler(RestBaseHandler):
       method = args.get('method')
       json = args.get('json')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
-      if details == 'true':
-        details = True
-      else:
-        details = False
+      details = self.get_detail_value(args)
       if method == 'GET':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single mail

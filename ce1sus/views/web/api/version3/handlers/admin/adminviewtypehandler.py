@@ -32,12 +32,7 @@ class AttribueViewTypeHandler(RestBaseHandler):
       method = args.get('method')
       json = args.get('json')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
-      if details == 'true':
-        details = True
-      else:
-        details = False
+      details = self.get_detail_value(args)
       if method == 'GET':
         if len(path) > 0:
           uuid = path.pop(0)
@@ -47,7 +42,7 @@ class AttribueViewTypeHandler(RestBaseHandler):
           view_types = self.attribute_definition_controller.get_all_view_types()
           result = list()
           for view_type in view_types:
-            result.append(view_type.to_dict())
+            result.append(view_type.to_dict(complete=details))
           return result
       elif method == 'POST':
         if len(path) > 0:

@@ -33,13 +33,8 @@ class AdminObjectHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
+      details = self.get_detail_value(args)
       json = args.get('json')
-      if details == 'true':
-        details = True
-      else:
-        details = False
       if method == 'GET':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
@@ -65,10 +60,7 @@ class AdminObjectHandler(RestBaseHandler):
           definitions = self.object_definition_controller.get_all_object_definitions()
           result = list()
           for definition in definitions:
-            if details == 'true':
-              result.append(definition.to_dict())
-            else:
-              result.append(definition.to_dict(complete=False))
+            result.append(definition.to_dict(complete=details))
           return result
       elif method == 'POST':
         if len(path) > 0:

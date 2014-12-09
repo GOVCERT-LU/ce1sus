@@ -1,20 +1,15 @@
-<form name="addUserForm" class="form-horizontal" role="form" novalidate>
+<form name="addObjectAttribtueForm" class="form-horizontal" role="form" novalidate>
   <div class="row">
     <label class="col-lg-3 control-label text-right">Definition *</label>
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
-        ng-model="observableobject.definition_id">
+        ng-model="objectattribute.definition_id">
         <option style="display: none" value="">Select a definition</option>
       </select>
     </div>
   </div>
-  <div class="row" ng-if="observableobject.definition_id">
-    <label class="col-lg-3 control-label text-right">Shared</label>
-    <div class="col-lg-9">
-      <input class="form-control" type="checkbox"
-        name="shared" value="shared"
-        ng-model="observableobject.shared" />
-    </div>
+  <div ng-if="objectattribute.definition_id">
+    {{definitions|json}}
   </div>
 </form>

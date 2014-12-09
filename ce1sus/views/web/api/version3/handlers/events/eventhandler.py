@@ -31,11 +31,7 @@ class EventHandler(RestBaseHandler):
   def event(self, **args):
     method = args.get('method', None)
     path = args.get('path')
-    details = args.get('headers').get('Complete', 'false')
-    if details == 'true':
-      details = True
-    else:
-      details = False
+    details = self.get_detail_value(args)
     if method == 'GET':
       uuid = path.pop(0)
       event = self.event_controller.get_event_by_id(uuid)

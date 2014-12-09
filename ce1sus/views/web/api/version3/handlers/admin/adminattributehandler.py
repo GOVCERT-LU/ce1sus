@@ -33,13 +33,8 @@ class AdminAttributeHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
       json = args.get('json')
-      if details == 'true':
-        details = True
-      else:
-        details = False
+      details = self.get_detail_value(args)
       if method == 'GET':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
@@ -62,13 +57,11 @@ class AdminAttributeHandler(RestBaseHandler):
             return definition.to_dict(complete=details)
         else:
           # else return all
+
           definitions = self.attribute_definition_controller.get_all_attribute_definitions()
           result = list()
           for definition in definitions:
-            if details == 'true':
-              result.append(definition.to_dict())
-            else:
-              result.append(definition.to_dict(complete=False))
+            result.append(definition.to_dict(details))
           return result
       elif method == 'POST':
         if len(path) > 0:

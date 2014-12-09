@@ -31,8 +31,7 @@ class AdminGroupHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      headers = args.get('headers')
-      details = headers.get('Complete', 'false')
+      details = self.get_detail_value(args)
       json = args.get('json')
       if method == 'GET':
 
@@ -41,11 +40,6 @@ class AdminGroupHandler(RestBaseHandler):
           uuid = path.pop(0)
           # TODO: add inflate
           group = self.group_controller.get_group_by_id(uuid)
-
-          if details == 'true':
-            details = True
-          else:
-            details = False
 
           if len(path) > 0:
             # check if the next path
@@ -64,10 +58,7 @@ class AdminGroupHandler(RestBaseHandler):
           groups = self.group_controller.get_all_groups()
           result = list()
           for group in groups:
-            if details == 'true':
-              result.append(group.to_dict())
-            else:
-              result.append(group.to_dict(complete=False))
+              result.append(group.to_dict(complete=details))
           return result
 
       elif method == 'POST':

@@ -169,6 +169,11 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                                           )
     return ObjectValidator.isObjectValid(self)
 
+  @staticmethod
+  def __class_numbers_to_text(class_array):
+    # TODO: Tables classes to text
+    return u'{0}'.format(class_array)
+
   def to_dict(self, complete=True):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
@@ -181,6 +186,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'regex': self.convert_value(self.regex),
               'viewType_id': self.convert_value(self.view_type_id),
               'type_id': self.convert_value(self.value_type_id),
+              'viewType': self.value_type.to_dict(complete)
               }
     else:
       return {'identifier': self.identifier,
