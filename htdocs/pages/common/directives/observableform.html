@@ -13,7 +13,7 @@
     </div>
     <div class="col-md-9">
       <div ng-class="{ 'has-error' : editObservableForm.name.$invalid && !editObservableForm.name.$pristine }">
-        <input class="form-control" name="name" ng-model="observable.title" type="text" ng-minlength=3 ng-minlength=255 ng-pattern="/^[\d\w]+$/">
+        <input class="form-control" name="name" ng-model="observable.title" type="text" ng-minlength=3 ng-maxlength=255 ng-pattern="/^[\d\w]+$/">
         <p ng-show="editObservableForm.name.$error.minlength" class="help-block">Name is too short.</p>
         <p ng-show="editObservableForm.name.$error.maxlength" class="help-block">Name is too long.</p>
         <p ng-show="editObservableForm.name.$error.pattern" class="help-block">Name is not alphanumeric.</p>

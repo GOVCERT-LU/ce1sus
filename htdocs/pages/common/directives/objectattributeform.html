@@ -1,15 +1,18 @@
+
 <form name="addObjectAttribtueForm" class="form-horizontal" role="form" novalidate>
   <div class="row">
     <label class="col-lg-3 control-label text-right">Definition *</label>
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
-        ng-model="objectattribute.definition_id">
+        ng-model="attribute.definition_id">
         <option style="display: none" value="">Select a definition</option>
       </select>
     </div>
   </div>
-  <div ng-if="objectattribute.definition_id">
-    {{definitions|json}}
+  {{addObjectAttribtueForm.value.$error.required|json}}
+  <div ng-if="attribute.definition_id">
+
+    <attribute-handler attribute="attribute" definition="getDefinition(attribute.definition_id)" type="type" form="addObjectAttribtueForm"></attribute-handler>
   </div>
 </form>

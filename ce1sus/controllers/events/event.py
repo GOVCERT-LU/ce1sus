@@ -16,7 +16,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-def get_all_attribtues_from_event(event):
+def get_all_attributes_from_event(event):
   attributes = list()
   for obj in event.objects:
     __get_all_attributes_from_obj(attributes, obj)
@@ -53,7 +53,7 @@ class EventController(BaseController):
       # generate relations if needed!
 
       """
-      attributes = get_all_attribtues_from_event(event)
+      attributes = get_all_attributes_from_event(event)
       if (mkrelations == 'True' or mkrelations is True) and attributes:
         self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
       """

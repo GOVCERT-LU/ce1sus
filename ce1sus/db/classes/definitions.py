@@ -186,7 +186,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'regex': self.convert_value(self.regex),
               'viewType_id': self.convert_value(self.view_type_id),
               'type_id': self.convert_value(self.value_type_id),
-              'viewType': self.value_type.to_dict(complete)
+              'viewType': self.view_type.to_dict(complete)
               }
     else:
       return {'identifier': self.identifier,

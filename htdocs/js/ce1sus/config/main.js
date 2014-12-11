@@ -379,7 +379,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "viewTypesController",
                                resolve: {
                                  viewTypes: function(Restangular) {
-                                   return Restangular.one("attribtueviewtypes").getList(null, {"complete": false}).then(function (objects) {
+                                   return Restangular.one("attributeviewtypes").getList(null, {"complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -404,7 +404,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "viewTypeDetailController",
                                      resolve: {
                                        $viewType: function(Restangular,$routeSegment) {
-                                         return Restangular.one("attribtueviewtypes",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
+                                         return Restangular.one("attributeviewtypes",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -510,7 +510,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    });
                                  },
                                  viewTypes: function(Restangular) {
-                                   return Restangular.one("attribtueviewtypes").getList(null, {"complete": false}).then(function (tables) {
+                                   return Restangular.one("attributeviewtypes").getList(null, {"complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);

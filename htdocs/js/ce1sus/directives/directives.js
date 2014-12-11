@@ -11,12 +11,12 @@ app.directive("plainText", function() {
       celsusText: "=text"
     },
     templateUrl: "pages/common/text.html",
-    controller: function($scope){
+    controller: function($scope, $log){
       var tempArray = $scope.celsusText.split('\n');
       var textArray = [];
       angular.forEach(tempArray, function(item) {
         textArray.push({"line": item});
-      });
+      }, $log);
 
       $scope.preparedCelsusText = textArray;
     }
@@ -540,14 +540,14 @@ app.directive("object", function($compile) {
         }
       };
       
-      $scope.removeAttribute = function(attribtue){
-        if (confirm('Are you sure you want to delete this attribtue?')) {
-          var index = $scope.object.attributes.indexOf(attribtue);
+      $scope.removeAttribute = function(attribute){
+        if (confirm('Are you sure you want to delete this attribute?')) {
+          var index = $scope.object.attributes.indexOf(attribute);
           $scope.object.attributes.splice(index, 1);
         }
       };
-      $scope.showAttributeDetails = function(attribtue){
-        $scope.attribtueDetails = attribtue;
+      $scope.showAttributeDetails = function(attribute){
+        $scope.attributeDetails = attribute;
         $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
       };
       
@@ -680,43 +680,74 @@ app.directive("objectAttributeForm", function() {
     restrict: "E",
     scope: {
       objectattribute: "=objectattribute",
-      editMode: "=edit",
+      type: "=type",
       definitions: '='
     },
-    controller: function($scope, Restangular){
-      
+    controller: function($scope, $log){
+      $scope.getDefinition = function(identifier){
+        var result = {}; 
+        angular.forEach($scope.definitions, function(definition) {
+          if (definition.identifier == identifier){
+            result = definition;
+          }
+        }, $log);
+        return result;
+      };
     },
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
 });
 
-app.directive("attributeHandler",['$compile', '$http', '$templateCache',  function($compile, $http, $templateCache) {
+app.directive("attributeHandler", function() {
   
-  var getTemplate = function(contentType, viewType){
-    var templateLoader;
-    var baseUrl = 'pages/handlers';
-    
-    var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html';
-    templateLoader = $http.get(templateUrl, {cache: $templateCache});
 
-    return templateLoader;
-  };
   
   
   return {
     restrict: "E",
     scope: {
       attribute: "=attribute",
-      usetype: "=usetype"
+      definition: "=definition",
+      type: "=type",
+      form: "=form"
     },
-    link: function(scope, element, attrs) {
-      var loader = getTemplate(scope.usetype, scope.attribute.definition.viewType.name);
-      var promise = loader.success(function(html) {
-        element.html(html);
-      }).then(function (response) {
-          element.replaceWith($compile(element.contents())(scope));
-      });
+    template : '<div ng-include="getTemplate()"></div>',
+    link: function(scope, element, attrs, ctrl) {
+      var contentType =  scope.type;
+      var viewType = scope.definition.viewType.name;
+      scope.getTemplate = function(){
 
+        var templateLoader;
+        var baseUrl = 'pages/handlers';
+        
+        var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html?'+scope.counter;
+        templateUrl = templateUrl.toLowerCase();
+        scope.removeTemplateFromCache(templateUrl);
+        return templateUrl;
+      };
+    },
+    controller: function($scope, $log, $templateCache ){
+      $scope.removeTemplateFromCache = function(url){
+        $templateCache.remove(url);
+      };
+      $scope.$watch('definition.regex', function() {
+        $scope.patternexpression = (function() {
+          if ($scope.type != 'view') {
+            var regexp =  new RegExp($scope.definition.regex);
+            return {
+                test: function(value) {
+                    if( $scope.requireVal === false ) {
+                        return true;
+                    }
+                    return regexp.test(value);
+                }
+            };
+          } else {
+            return /^.*$/;
+          }
+        })();
+      });
+      $scope.patternexpression = /^.*$/;
     },
   };
-}]);
+});

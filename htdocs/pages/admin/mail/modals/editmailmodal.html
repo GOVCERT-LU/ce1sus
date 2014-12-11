@@ -24,7 +24,7 @@
               <div
                 ng-class="{ 'has-error' : addMailForm.name.$invalid && !addMailForm.name.$pristine }">
                 <input class="form-control" name="subject" ng-model="mail.subject"
-                  type="text" required ng-minlength=3 ng-minlength=255>
+                  type="text" required ng-minlength=3 ng-maxlength=255>
                 <p
                   ng-show="addMailForm.subject.$invalid && !addMailForm.subject.$pristine"
                   class="help-block">Subject is required.</p>

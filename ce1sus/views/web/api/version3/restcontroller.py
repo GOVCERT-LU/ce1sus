@@ -49,7 +49,7 @@ class RestController(BaseView):
     self.instances['attributehandlers'] = HandlerHandler(config)
     self.instances['attributetables'] = TablesHandler(config)
     self.instances['attributetypes'] = AttribueTypeHandler(config)
-    self.instances['attribtueviewtypes'] = AttribueViewTypeHandler(config)
+    self.instances['attributeviewtypes'] = AttribueViewTypeHandler(config)
     self.instances['process'] = ProcessHandler(config)
     self.instances['event'] = EventHandler(config)
     self.instances['events'] = EventsHandler(config)

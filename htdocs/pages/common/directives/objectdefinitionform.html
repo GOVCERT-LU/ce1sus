@@ -13,7 +13,7 @@
       <div
         ng-class="{ 'has-error' : addObjectDefinitionForm.name.$invalid && !addObjectDefinitionForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="object.name"
-          type="text" required ng-minlength=3 ng-minlength=255
+          type="text" required ng-minlength=3 ng-maxlength=255
           ng-pattern="/^[\d\w]+$/">
         <p
           ng-show="addObjectDefinitionForm.name.$invalid && !addObjectDefinitionForm.name.$pristine"

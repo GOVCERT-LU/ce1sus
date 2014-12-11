@@ -92,64 +92,64 @@ class CyboxMapper(BaseController):
     return attribute
 
   def create_file_attributes(self, cybox_file, parent, is_indicator):
-    attribtues = list()
+    attributes = list()
     if cybox_file.encryption_algorithm:
-      attribtues.append(self.__create_attribute_by_def('encryption_mechanism', parent, cybox_file.encryption_algorithm, is_indicator))
+      attributes.append(self.__create_attribute_by_def('encryption_mechanism', parent, cybox_file.encryption_algorithm, is_indicator))
     if cybox_file.accessed_time:
-      attribtues.append(self.__create_attribute_by_def('file_accessed_datetime', parent, cybox_file.accessed_time, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_accessed_datetime', parent, cybox_file.accessed_time, is_indicator))
     if cybox_file.created_time:
-      attribtues.append(self.__create_attribute_by_def('file_created_datetime', parent, cybox_file.created_time, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_created_datetime', parent, cybox_file.created_time, is_indicator))
     if cybox_file.file_extension:
-      attribtues.append(self.__create_attribute_by_def('file_extension', parent, cybox_file.file_extension, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_extension', parent, cybox_file.file_extension, is_indicator))
     if cybox_file.full_path and cybox_file.full_path.condition == 'Equals':
-      attribtues.append(self.__create_attribute_by_def('file_full_path', parent, cybox_file.full_path, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_full_path', parent, cybox_file.full_path, is_indicator))
     if cybox_file.full_path and cybox_file.full_path.condition == 'Like':
-      attribtues.append(self.__create_attribute_by_def('file_full_path_pattern', parent, cybox_file.full_path, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_full_path_pattern', parent, cybox_file.full_path, is_indicator))
     if cybox_file.modified_time:
-      attribtues.append(self.__create_attribute_by_def('file_modified_time', parent, cybox_file.modified_time, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_modified_time', parent, cybox_file.modified_time, is_indicator))
     if cybox_file.file_name and cybox_file.file_name.condition:
       if cybox_file.file_name.condition == 'Equals':
-        attribtues.append(self.__create_attribute_by_def('file_name', parent, cybox_file.file_name, is_indicator))
+        attributes.append(self.__create_attribute_by_def('file_name', parent, cybox_file.file_name, is_indicator))
       if cybox_file.file_name.condition == 'Like':
-        attribtues.append(self.__create_attribute_by_def('file_name_pattern', parent, cybox_file.file_name, is_indicator))
+        attributes.append(self.__create_attribute_by_def('file_name_pattern', parent, cybox_file.file_name, is_indicator))
     elif cybox_file.file_name:
       # Default condition is EQUAL
-      attribtues.append(self.__create_attribute_by_def('file_name', parent, cybox_file.file_name, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_name', parent, cybox_file.file_name, is_indicator))
     if cybox_file.hashes:
       # TODO: clean up  when cybox implements this differently
       try:
         if cybox_file.hashes.md5:
-          attribtues.append(self.__create_attribute_by_def('hash_md5', parent, cybox_file.hashes.md5, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_md5', parent, cybox_file.hashes.md5, is_indicator))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha1:
-          attribtues.append(self.__create_attribute_by_def('hash_sha1', parent, cybox_file.hashes.sha1, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha1', parent, cybox_file.hashes.sha1, is_indicator))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha256:
-          attribtues.append(self.__create_attribute_by_def('hash_sha256', parent, cybox_file.hashes.sha256, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha256', parent, cybox_file.hashes.sha256, is_indicator))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha384:
-          attribtues.append(self.__create_attribute_by_def('hash_sha384', parent, cybox_file.hashes.sha384, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha384', parent, cybox_file.hashes.sha384, is_indicator))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha512:
-          attribtues.append(self.__create_attribute_by_def('hash_sha512', parent, cybox_file.hashes.sha512, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha512', parent, cybox_file.hashes.sha512, is_indicator))
       except AttributeError:
         pass
 
     if cybox_file.size:
-      attribtues.append(self.__create_attribute_by_def('size_in_bytes', parent, cybox_file.size, is_indicator))
+      attributes.append(self.__create_attribute_by_def('size_in_bytes', parent, cybox_file.size, is_indicator))
     if cybox_file.file_extension:
-      attribtues.append(self.__create_attribute_by_def('file_extension', parent, cybox_file.file_extension, is_indicator))
+      attributes.append(self.__create_attribute_by_def('file_extension', parent, cybox_file.file_extension, is_indicator))
 
-    if attribtues:
-      return attribtues
+    if attributes:
+      return attributes
     else:
       raise CyboxMapperException('No attribute was created for file')
 

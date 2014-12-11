@@ -1,0 +1,19 @@
+
+<div style="text-align: right;" class="form-group">
+  <label class="col-xs-3 control-label"> Value: </label>
+  <div style="text-align: left;" class="col-xs-9">
+      <div
+        ng-class="{ 'has-error' :form.value.$invalid && !form.value.$pristine }">
+        <input class="form-control" name="value" ng-model="attribute.value"
+          type="text" required ng-maxlength=255 
+          ng-pattern="patternexpression">
+        <p
+          ng-show="form.value.$invalid && !form.value.$pristine"
+          class="help-block">Value is required.</p>
+        <p ng-show="addAttributeDefinitionForm.value.$error.maxlength"
+          class="help-block">Name is too long.</p>
+        <p ng-show="form.value.$error.pattern"
+          class="help-block">Value does not match pattern "{{definition.regex}}"</p>
+      </div>
+  </div>
+</div>

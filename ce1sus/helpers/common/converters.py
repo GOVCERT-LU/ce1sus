@@ -111,7 +111,7 @@ class ObjectConverter(object):
   """Converter for objects"""
 
   @staticmethod
-  def set_string(instance, attribtue, value):
+  def set_string(instance, attribute, value):
     """
     Sets a strings attribute
 
@@ -124,10 +124,10 @@ class ObjectConverter(object):
     :param value: The value to be set
     :type value: strings (at least should be)
     """
-    setattr(instance, attribtue, ValueConverter.set_string(value))
+    setattr(instance, attribute, ValueConverter.set_string(value))
 
   @staticmethod
-  def set_integer(instance, attribtue, value):
+  def set_integer(instance, attribute, value):
     """
     Sets a Integer attribute
 
@@ -141,12 +141,12 @@ class ObjectConverter(object):
     :type value: Integer (at least should be)
     """
     try:
-      setattr(instance, attribtue, ValueConverter.set_integer(value))
+      setattr(instance, attribute, ValueConverter.set_integer(value))
     except AttributeError:
       pass
 
   @staticmethod
-  def set_date(instance, attribtue, value):
+  def set_date(instance, attribute, value):
     """
     Sets a date time attribute
 
@@ -159,4 +159,4 @@ class ObjectConverter(object):
     :param value: The value to be set
     :type value: DateTime strings (at least should be)
     """
-    setattr(instance, attribtue, ValueConverter.set_date(value))
+    setattr(instance, attribute, ValueConverter.set_date(value))

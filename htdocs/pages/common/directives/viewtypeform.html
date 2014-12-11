@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addViewTypeForm.name.$invalid && !addViewTypeForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="viewType.name"
-          type="text" required ng-minlength=3 ng-minlength=255
+          type="text" required ng-minlength=3 ng-maxlength=255
           ng-pattern="/^[\d\w]+$/">
         <p
           ng-show="addViewTypeForm.name.$invalid && !addViewTypeForm.name.$pristine"

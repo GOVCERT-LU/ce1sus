@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addEventForm.title.$invalid && !addEventForm.title.$pristine }">
         <input class="form-control" name="title" ng-model="event.title"
-          type="text" required ng-minlength=3 ng-minlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255>
         <p
           ng-show="addEventForm.title.$invalid && !addEventForm.title.$pristine"
           class="help-block">Title is required.</p>

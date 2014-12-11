@@ -76,7 +76,7 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_attribtue_definition(self, attribute, user):
+  def update_attribute_definition(self, attribute, user):
     try:
       attribute.chksum = gen_attr_chksum(attribute)
       self.set_simple_logging(attribute, user, insert=True)

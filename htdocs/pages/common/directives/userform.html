@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addUserForm.name.$invalid && !addUserForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="user.name"
-          type="text" required ng-minlength=3 ng-minlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255>
         <p
           ng-show="addUserForm.name.$invalid && !addUserForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -30,7 +30,7 @@
         ng-class="{ 'has-error' : addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine }">
         <input class="form-control" name="sirname"
           ng-model="user.sirname" type="text" required ng-minlength=3
-          ng-minlength=255>
+          ng-maxlength=255>
         <p
           ng-show="addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine"
           class="help-block">Sirname is required.</p>
@@ -48,7 +48,7 @@
         ng-class="{ 'has-error' : addUserForm.username.$invalid && !addUserForm.username.$pristine }">
         <input class="form-control" name="username"
           ng-model="user.username" type="text" required ng-minlength=3
-          ng-minlength=255 ng-pattern="/^[\d\w]+$/">
+          ng-maxlength=255 ng-pattern="/^[\d\w]+$/">
         <p
           ng-show="addUserForm.username.$invalid && !addUserForm.username.$pristine"
           class="help-block">Username is required.</p>
@@ -68,7 +68,7 @@
         ng-class="{ 'has-error' : addUserForm.password.$invalid && !addUserForm.password.$pristine }">
         <input class="form-control" name="password"
           ng-model="user.password" type="text" ng-minlength=8
-          ng-minlength=255">
+          ng-maxlength=255">
         <p ng-show="addUserForm.password.$error.minlength"
           class="help-block">Password is too short.</p>
         <p ng-show="addUserForm.password.$error.maxlength"
@@ -82,7 +82,7 @@
       <div
         ng-class="{ 'has-error' : addUserForm.email.$invalid && !addUserForm.email.$pristine }">
         <input class="form-control" name="email" ng-model="user.email"
-          type="email" required ng-minlength=3 ng-minlength=255
+          type="email" required ng-minlength=3 ng-maxlength=255
           ng-pattern="/^.+@.+\..{2,3}$/">
         <p
           ng-show="addUserForm.email.$invalid && !addUserForm.email.$pristine"
@@ -107,7 +107,7 @@
             ng-class="{ 'has-error' : addUserForm.api_key.$invalid && !addUserForm.api_key.$pristine }">
             <input class="form-control" name="api_key"
               ng-model="user.api_key" type="text" ng-minlength=20
-              ng-minlength=255>
+              ng-maxlength=255>
             <p ng-show="addUserForm.api_key.$error.minlength"
               class="help-block">API Key is too short.</p>
             <p ng-show="addUserForm.api_key.$error.maxlength"

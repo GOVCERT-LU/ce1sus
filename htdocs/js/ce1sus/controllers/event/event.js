@@ -66,7 +66,7 @@ app.controller("eventObservableController", function($scope, Restangular, messag
     function processObservavle(attributes, observable, composed){
       if (observable.observable_composition){
         angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
-          processObservavle(attribtues, compobservable, observable.observable_composition);
+          processObservavle(attributes, compobservable, observable.observable_composition);
         },$log);
       } else {
         angular.forEach(observable.object.attributes, function(attribute, index) {
@@ -87,11 +87,11 @@ app.controller("eventObservableController", function($scope, Restangular, messag
         }, $log);
       }
     }
-    var attribtues = [];
+    var attributes = [];
     angular.forEach($scope.observables, function(observable, index) {
-      processObservavle(attribtues, observable, null);
+      processObservavle(attributes, observable, null);
     }, $log);
-    return attribtues;
+    return attributes;
   };
   
   $scope.observables = observables;

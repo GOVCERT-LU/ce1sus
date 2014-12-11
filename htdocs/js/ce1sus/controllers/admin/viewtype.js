@@ -108,7 +108,7 @@ app.controller("viewTypeAddController",function($scope, Restangular, messages, $
   };
   
   $scope.submitType = function(){
-    Restangular.all("attribtueviewtypes").post($scope.viewType).then(function (viewTypedata) {
+    Restangular.all("attributeviewtypes").post($scope.viewType).then(function (viewTypedata) {
       if (viewTypedata) {
         $scope.viewTypes.push(data);
         $location.path("/admin/viewtype/"+ data.identifier);

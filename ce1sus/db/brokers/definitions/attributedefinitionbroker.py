@@ -89,12 +89,12 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       obj = self.session.query(ObjectDefinition).filter(ObjectDefinition.identifier == obj_id).one()
       attribute = self.session.query(AttributeDefinition).filter(AttributeDefinition.identifier == attr_id).one()
       attribute.add_object(obj)
-      additional_attribtues_chksums = attribute.handler.get_additinal_attribute_chksums()
-      if additional_attribtues_chksums:
+      additional_attributes_chksums = attribute.handler.get_additinal_attribute_chksums()
+      if additional_attributes_chksums:
         # collect all required attributes and add them
-        additional_attribtues = self.get_defintion_by_chksums(additional_attribtues_chksums)
-        for additional_attribtue in additional_attribtues:
-          obj.add_attribute(additional_attribtue)
+        additional_attributes = self.get_defintion_by_chksums(additional_attributes_chksums)
+        for additional_attribute in additional_attributes:
+          obj.add_attribute(additional_attribute)
       self.do_commit(commit)
     except sqlalchemy.orm.exc.NoResultFound as error:
       raise NothingFoundException(u'Attribute or Object not found')

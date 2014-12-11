@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" ng-click="$hide()">&times;</button>
-        <h4 class="modal-title">Attribute - {{attribtueDetails.definition.name}}</h4>
+        <h4 class="modal-title">Attribute - {{attributeDetails.definition.name}}</h4>
       </div>
       <div class="modal-body">
         <div class="row">
@@ -11,7 +11,7 @@
             <b>Identifier:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.identifier}}
+            {{attributeDetails.identifier}}
           </div>
         </div>
         <div class="row">
@@ -19,7 +19,7 @@
             <b>IOC:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.ioc}}
+            {{attributeDetails.ioc}}
           </div>
         </div>
         <div class="row">
@@ -27,7 +27,7 @@
             <b>Shared:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.shared}}
+            {{attributeDetails.shared}}
           </div>
         </div>
         <div class="row">
@@ -35,7 +35,7 @@
             <b>Definition:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.definition.name}}
+            {{attributeDetails.definition.name}}
           </div>
         </div>
         <div class="row">
@@ -43,7 +43,7 @@
             <b>Condition:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.condition}}
+            {{attributeDetails.condition}}
           </div>
         </div>
         <div class="row">
@@ -51,7 +51,7 @@
             <b>Value:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.value}}
+            <attribute-handler attribute="attributeDetails" definition="attributeDetails.definition" type="'view'"></attribute-handler>
           </div>
         </div>
         <div class="row">
@@ -59,7 +59,7 @@
             <b>Created at:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.created_at}}
+            {{attributeDetails.created_at}}
           </div>
         </div>
         <div class="row">
@@ -67,7 +67,7 @@
             <b>by:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.creator_group.name}}
+            {{attributeDetails.creator_group.name}}
           </div>
         </div>
         <div class="row">
@@ -75,7 +75,7 @@
             <b>Modified on:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.modified_on}}
+            {{attributeDetails.modified_on}}
           </div>
         </div>
         <div class="row">
@@ -83,7 +83,7 @@
             <b>by:</b>
           </div>
           <div class="col-md-9">
-            {{attribtueDetails.modifier_group.name}}
+            {{attributeDetails.modifier_group.name}}
           </div>
         </div>
       </div>

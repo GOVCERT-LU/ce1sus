@@ -78,7 +78,7 @@ class AdminAttributeHandler(RestBaseHandler):
               if uuid:
                 obj = self.object_definition_controller.get_object_definitions_by_id(uuid)
                 definition.objects.append(obj)
-                self.attribute_definition_controller.update_attribtue_definition(definition, self.get_user())
+                self.attribute_definition_controller.update_attribute_definition(definition, self.get_user())
                 return 'OK'
               else:
                 raise RestHandlerException(u'No id was specified in the json post')
@@ -101,7 +101,7 @@ class AdminAttributeHandler(RestBaseHandler):
           attr_def = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
           attr_def.populate(json)
           # set the new checksum
-          self.attribute_definition_controller.update_attribtue_definition(attr_def, self.get_user())
+          self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())
           return attr_def.to_dict()
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
@@ -118,7 +118,7 @@ class AdminAttributeHandler(RestBaseHandler):
               uuid = path.pop(0)
               obj = self.object_definition_controller.get_object_definitions_by_id(uuid)
               definition.objects.remove(obj)
-              self.attribute_definition_controller.update_attribtue_definition(definition, self.get_user())
+              self.attribute_definition_controller.update_attribute_definition(definition, self.get_user())
 
             else:
               raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')

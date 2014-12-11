@@ -86,7 +86,7 @@ class HandlerBase(object):
     :param obj: parent object
     :type obj: Object
     :param definitions: The reqiried definitions
-    :type definitions: List of attribtue Definitions
+    :type definitions: List of attribute Definitions
     :param user: The user calling the function
     :type user: User
     :param rest_attribute: Attribute inserting over rest

@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.name.$invalid && !addGroupForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="group.name"
-          type="text" required ng-minlength=3 ng-minlength=255
+          type="text" required ng-minlength=3 ng-maxlength=255
           ng-pattern="/^[\d\w]+$/">
         <p
           ng-show="addGroupForm.name.$invalid && !addGroupForm.name.$pristine"
@@ -47,7 +47,7 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.email.$invalid && !addGroupForm.email.$pristine }">
         <input class="form-control" name="email" ng-model="group.email"
-          type="email" ng-minlength=3 ng-minlength=255
+          type="email" ng-minlength=3 ng-maxlength=255
           ng-pattern="/^.+@.+\..{2,3}$/">
         <p ng-show="addGroupForm.email.$error.pattern" class="help-block">Email
           is not valid email.</p>

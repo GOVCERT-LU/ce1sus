@@ -23,8 +23,8 @@ class RelationContainer(object):
   def __init__(self):
     self.container = dict()
 
-  def add(self, event, attribtue):
-    web_rel = Relation(event, attribtue)
+  def add(self, event, attribute):
+    web_rel = Relation(event, attribute)
     if not self.container.get(web_rel.key, None):
       self.container[web_rel.key] = list()
     self.container[web_rel.key].append(web_rel)
@@ -122,9 +122,9 @@ class RelationBroker(BrokerBase):
     partitions = dict()
     classes = dict()
     values_attr_id = dict()
-    for attribtue in attributes:
-      classname = attribtue.definition.classname
-      if attribtue.definition.relation == 1:
+    for attribute in attributes:
+      classname = attribute.definition.classname
+      if attribute.definition.relation == 1:
         classes[classname] = ValueBroker.get_class_by_string(classname)
         if not partitions.get(classname, None):
             # create partition list
@@ -133,8 +133,8 @@ class RelationBroker(BrokerBase):
             partitions[classname].append(list())
         if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
           partitions[classname].append(list())
-        partitions[classname][len(partitions[classname]) - 1].append(attribtue.plain_value)
-        values_attr_id[attribtue.plain_value] = attribtue.identifier
+        partitions[classname][len(partitions[classname]) - 1].append(attribute.plain_value)
+        values_attr_id[attribute.plain_value] = attribute.identifier
 
     # search in partitions
     for classname, partitions in partitions.iteritems():
@@ -278,7 +278,7 @@ class RelationBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def look_for_event_attribtues(self, clazz, operand, attribute, needle):
+  def look_for_event_attributes(self, clazz, operand, attribute, needle):
     code = 4
     try:
       if attribute == 'tlp':
