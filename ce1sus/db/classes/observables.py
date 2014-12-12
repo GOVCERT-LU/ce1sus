@@ -40,12 +40,17 @@ class ObservableComposition(Base):
   def validate(self):
     return True
 
-  def to_dict(self, complete=True):
-    observables = list()
-    for observable in self.observables:
-      observables.append(observable.to_dict(False))
-    return {'operator': self.convert_value(self.operator),
-            'observables': observables}
+  def to_dict(self, complete=True, inflated=False):
+    if inflated:
+      observables = list()
+      for observable in self.observables:
+        observables.append(observable.to_dict(False))
+    else:
+      observables = None
+    return {'identifier': self.convert_value(self.identifier),
+            'operator': self.convert_value(self.operator),
+            'observables': observables,
+            'observables_count': len(self.observables)}
 
 
 class Observable(ExtendedLogingInformations, Base):
@@ -76,23 +81,39 @@ class Observable(ExtendedLogingInformations, Base):
   def validate(self):
     return True
 
-  def to_dict(self, complete=True):
-    if self.object:
-      obj = self.object.to_dict(False)
-    else:
-      obj = None
-    if self.observable_composition:
-      composed = self.observable_composition.to_dict(False)
+  def to_dict(self, complete=True, inflated=True):
+    if inflated:
+      if self.object:
+        obj = self.object.to_dict(complete, inflated)
+      else:
+        obj = None
+      if self.observable_composition:
+        composed = self.observable_composition.to_dict(complete, inflated)
+      else:
+        composed = None
     else:
       composed = None
-    return {'identifier': self.convert_value(self.identifier),
-            'title': self.convert_value(self.title),
-            'description': self.convert_value(self.description),
-            'object': obj,
-            'version': self.convert_value(self.version),
-            'observable_composition': composed,
-            'creator_group': self.creator_group.to_dict(False),
-            'created_at': self.convert_value(self.created_at),
-            'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
-            }
+      obj = None
+
+    if complete:
+      result = {'identifier': self.convert_value(self.identifier),
+                'title': self.convert_value(self.title),
+                'description': self.convert_value(self.description),
+                'object': obj,
+                'version': self.convert_value(self.version),
+                'observable_composition': composed,
+                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'created_at': self.convert_value(self.created_at),
+                'modified_on': self.convert_value(self.modified_on),
+                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                }
+    else:
+      result = {'identifier': self.convert_value(self.identifier),
+                'title': self.convert_value(self.title),
+                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'created_at': self.convert_value(self.created_at),
+                'modified_on': self.convert_value(self.modified_on),
+                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                }
+
+    return result

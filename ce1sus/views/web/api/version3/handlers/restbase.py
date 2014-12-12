@@ -92,3 +92,13 @@ class RestBaseHandler(BaseView):
     else:
       details = False
     return details
+
+  def get_inflated_value(self, args):
+    parameters = args.get('parameters')
+    inflated = parameters.get('inflated', 'false')
+    if inflated == 'true':
+      inflated = True
+    else:
+      inflated = False
+    return inflated
+

@@ -6,7 +6,6 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
 

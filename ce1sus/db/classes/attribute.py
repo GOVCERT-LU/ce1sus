@@ -177,19 +177,30 @@ class Attribute(ExtendedLogingInformations, Base):
         return False
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True):
+  def to_dict(self, complete=True, inflated=False):
     condition = None
     if self.condition:
       condition = self.condition.value
-
-    return {'identifier': self.convert_value(self.identifier),
-            'definition': self.definition.to_dict(True),
-            'shared': self.properties.is_shareable,
-            'ioc': self.is_ioc,
-            'value': self.convert_value(self.value),
-            'condition': self.convert_value(condition),
-            'creator_group': self.creator_group.to_dict(False),
-            'created_at': self.convert_value(self.created_at),
-            'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
-            }
+    if complete:
+      return {'identifier': self.convert_value(self.identifier),
+              'definition': self.definition.to_dict(complete, inflated),
+              'shared': self.properties.is_shareable,
+              'ioc': self.is_ioc,
+              'value': self.convert_value(self.value),
+              'condition': self.convert_value(condition),
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+              }
+    else:
+      return {'identifier': self.convert_value(self.identifier),
+              'shared': self.properties.is_shareable,
+              'ioc': self.is_ioc,
+              'value': self.convert_value(self.value),
+              'condition': self.convert_value(condition),
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+              }

@@ -173,7 +173,7 @@ class User(Base):
       ObjectValidator.validateDateTime(self, 'last_login')
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True):
+  def to_dict(self, complete=True, inflated=True):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),

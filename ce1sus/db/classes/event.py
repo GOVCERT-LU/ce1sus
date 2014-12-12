@@ -155,27 +155,43 @@ class Event(ExtendedLogingInformations, Base):
   def validate(self):
     return True
 
-  def to_dict(self, complete=True):
-    if complete:
+  def to_dict(self, complete=True, inflated=False):
+    if inflated:
       observables = list()
       for observable in self.observables:
-        observables.append(observable.to_dict(False))
+        observables.append(observable.to_dict(complete, inflated))
     else:
       observables = None
-    result = {'identifier': self.convert_value(self.identifier),
-              'title': self.convert_value(self.title),
-              'description': self.convert_value(self.description),
-              'last_publish_date': self.convert_value(self.last_publish_date),
-              'risk': self.convert_value(self.risk),
-              'status': self.convert_value(self.status),
-              'tlp': self.convert_value(self.tlp),
-              'analysis': self.convert_value(self.analysis),
-              'creator_group': self.creator_group.to_dict(False),
-              'created_at': self.convert_value(self.created_at),
-              'published': self.convert_value(self.properties.is_shareable),
-              'modified_on': self.convert_value(self.modified_on),
-              'first_seen': self.convert_value(None),
-              'last_seen': self.convert_value(None),
-              'observables': observables
-              }
+    if complete:
+      result = {'identifier': self.convert_value(self.identifier),
+                'title': self.convert_value(self.title),
+                'description': self.convert_value(self.description),
+                'last_publish_date': self.convert_value(self.last_publish_date),
+                'risk': self.convert_value(self.risk),
+                'status': self.convert_value(self.status),
+                'tlp': self.convert_value(self.tlp),
+                'analysis': self.convert_value(self.analysis),
+                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'created_at': self.convert_value(self.created_at),
+                'published': self.convert_value(self.properties.is_shareable),
+                'modified_on': self.convert_value(self.modified_on),
+                # TODO: add first and last seen
+                'first_seen': self.convert_value(None),
+                'last_seen': self.convert_value(None),
+                'observables': observables,
+                'observables_count': len(self.observables)
+                }
+    else:
+      result = {'identifier': self.convert_value(self.identifier),
+                'title': self.convert_value(self.title),
+                'creator_group': self.creator_group.to_dict(False),
+                'created_at': self.convert_value(self.created_at),
+                'published': self.convert_value(self.properties.is_shareable),
+                'modified_on': self.convert_value(self.modified_on),
+                # TODO: add first and last seen
+                'first_seen': self.convert_value(None),
+                'last_seen': self.convert_value(None),
+                'observables': observables,
+                'observables_count': len(self.observables)
+                }
     return result

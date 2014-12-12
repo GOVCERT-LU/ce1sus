@@ -65,15 +65,26 @@ class Object(ExtendedLogingInformations, Base):
   def attributes_count(self):
       return len(self.attributes)
 
-  def to_dict(self, complete=True):
-    attributes = list()
-    for attribute in self.attributes:
-      attributes.append(attribute.to_dict())
-    return {'identifier': self.convert_value(self.identifier),
-            'definition': self.definition.to_dict(True),
-            'attributes': attributes,
-            'creator_group': self.creator_group.to_dict(False),
-            'created_at': self.convert_value(self.created_at),
-            'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(False)),
-            }
+  def to_dict(self, complete=True, inflated=False):
+    if inflated:
+      attributes = list()
+      for attribute in self.attributes:
+        attributes.append(attribute.to_dict(complete, inflated))
+    else:
+      attributes = None
+    if complete:
+      return {'identifier': self.convert_value(self.identifier),
+              'definition': self.definition.to_dict(complete, inflated),
+              'attributes': attributes,
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+              }
+    else:
+      return {'identifier': self.convert_value(self.identifier),
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+              }

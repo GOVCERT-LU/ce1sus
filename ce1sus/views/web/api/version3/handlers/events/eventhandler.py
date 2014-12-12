@@ -32,17 +32,23 @@ class EventHandler(RestBaseHandler):
     method = args.get('method', None)
     path = args.get('path')
     details = self.get_detail_value(args)
+    inflated = self.get_inflated_value(args)
     if method == 'GET':
       uuid = path.pop(0)
       event = self.event_controller.get_event_by_id(uuid)
       if len(path) > 0:
         items = path.pop(0)
         if items == 'observable':
+          return self.__process_observable_get(event, path)
+
           result = list()
           for observable in event.observables:
             result.append(observable.to_dict(details))
           return result
-      return event.to_dict(details)
+      return event.to_dict(details, inflated)
+
+  def __process_observable_get(self, event, path):
+    pass
 
   @rest_method()
   @methods(allowed=['GET'])
