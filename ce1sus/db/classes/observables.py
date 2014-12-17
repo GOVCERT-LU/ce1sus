@@ -44,7 +44,7 @@ class ObservableComposition(Base):
     if inflated:
       observables = list()
       for observable in self.observables:
-        observables.append(observable.to_dict(False))
+        observables.append(observable.to_dict(complete, inflated))
     else:
       observables = None
     return {'identifier': self.convert_value(self.identifier),

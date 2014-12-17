@@ -5,7 +5,7 @@
 
 Created on Nov 11, 2014
 """
-from datetime import datetime
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger

@@ -200,7 +200,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             controller: 'eventObservableController',
                             resolve: {
                               observables: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList(null, {"complete": true}).then(function (data) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList({"complete": true, "inflated": true}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);

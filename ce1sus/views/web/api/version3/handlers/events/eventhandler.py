@@ -39,17 +39,17 @@ class EventHandler(RestBaseHandler):
       if len(path) > 0:
         items = path.pop(0)
         if items == 'observable':
-          return self.__process_observable_get(event, path)
+          return self.__process_observable_get(event, path, details, inflated)
 
-          result = list()
-          for observable in event.observables:
-            result.append(observable.to_dict(details))
-          return result
       return event.to_dict(details, inflated)
 
-  def __process_observable_get(self, event, path):
-    pass
+  def __process_observable_get(self, event, path, details, inflated):
+    result = list()
+    for observable in event.observables:
+      result.append(observable.to_dict(details, inflated))
+    return result
 
+  """
   @rest_method()
   @methods(allowed=['GET'])
   def stix_import(self, **args):
@@ -58,3 +58,4 @@ class EventHandler(RestBaseHandler):
     event = self.stix_mapper.map_stix_package(stix_package, user)
     self.event_controller.insert_event(user, event)
     pass
+  """
