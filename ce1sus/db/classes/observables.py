@@ -35,18 +35,15 @@ _REL_OBSERVABLE_COMPOSITION = Table('rel_observable_composition', Base.metadata,
 class ObservableComposition(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   operator = Column('operator', Unicode(3), default=u'AND')
-  observables = relationship('Observable', secondary='rel_observable_composition')
+  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
 
   def validate(self):
     return True
 
   def to_dict(self, complete=True, inflated=False):
-    if inflated:
-      observables = list()
-      for observable in self.observables:
-        observables.append(observable.to_dict(complete, inflated))
-    else:
-      observables = None
+    observables = list()
+    for observable in self.observables:
+      observables.append(observable.to_dict(complete, inflated))
     return {'identifier': self.convert_value(self.identifier),
             'operator': self.convert_value(self.operator),
             'observables': observables,
@@ -81,19 +78,15 @@ class Observable(ExtendedLogingInformations, Base):
   def validate(self):
     return True
 
-  def to_dict(self, complete=True, inflated=True):
-    if inflated:
-      if self.object:
-        obj = self.object.to_dict(complete, inflated)
-      else:
-        obj = None
-      if self.observable_composition:
-        composed = self.observable_composition.to_dict(complete, inflated)
-      else:
-        composed = None
+  def to_dict(self, complete=True, inflated=False):
+    if self.object:
+      obj = self.object.to_dict(complete, inflated)
+    else:
+      obj = None
+    if self.observable_composition:
+      composed = self.observable_composition.to_dict(complete, inflated)
     else:
       composed = None
-      obj = None
 
     if complete:
       result = {'identifier': self.convert_value(self.identifier),
@@ -110,6 +103,8 @@ class Observable(ExtendedLogingInformations, Base):
     else:
       result = {'identifier': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
+                'object': obj,
+                'observable_composition': composed,
                 'creator_group': self.creator_group.to_dict(complete, inflated),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),

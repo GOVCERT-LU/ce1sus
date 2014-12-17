@@ -36,7 +36,7 @@ class Object(ExtendedLogingInformations, Base):
   operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship('ObjectDefinition')
+  definition = relationship('ObjectDefinition', lazy='joined')
   type_id = Column('type_id', Integer(1))
 
   related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
@@ -66,25 +66,14 @@ class Object(ExtendedLogingInformations, Base):
       return len(self.attributes)
 
   def to_dict(self, complete=True, inflated=False):
-    if inflated:
-      attributes = list()
-      for attribute in self.attributes:
-        attributes.append(attribute.to_dict(complete, inflated))
-    else:
-      attributes = None
-    if complete:
-      return {'identifier': self.convert_value(self.identifier),
-              'definition': self.definition.to_dict(complete, inflated),
-              'attributes': attributes,
-              'creator_group': self.creator_group.to_dict(complete, inflated),
-              'created_at': self.convert_value(self.created_at),
-              'modified_on': self.convert_value(self.modified_on),
-              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
-              }
-    else:
-      return {'identifier': self.convert_value(self.identifier),
-              'creator_group': self.creator_group.to_dict(complete, inflated),
-              'created_at': self.convert_value(self.created_at),
-              'modified_on': self.convert_value(self.modified_on),
-              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
-              }
+    attributes = list()
+    for attribute in self.attributes:
+      attributes.append(attribute.to_dict(complete, inflated))
+    return {'identifier': self.convert_value(self.identifier),
+            'definition': self.definition.to_dict(complete, inflated),
+            'attributes': attributes,
+            'creator_group': self.creator_group.to_dict(complete, inflated),
+            'created_at': self.convert_value(self.created_at),
+            'modified_on': self.convert_value(self.modified_on),
+            'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            }

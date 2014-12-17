@@ -215,7 +215,7 @@ class Group(Base):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=True):
+  def to_dict(self, complete=True, inflated=False):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),

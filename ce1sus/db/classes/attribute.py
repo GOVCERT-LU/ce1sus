@@ -40,8 +40,7 @@ class Attribute(ExtendedLogingInformations, Base):
   definition_id = Column('definition_id', Unicode(40),
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
-                            primaryjoin='AttributeDefinition.identifier==' +
-                            'Attribute.definition_id')
+                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id')
   object_id = Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
@@ -181,26 +180,15 @@ class Attribute(ExtendedLogingInformations, Base):
     condition = None
     if self.condition:
       condition = self.condition.value
-    if complete:
-      return {'identifier': self.convert_value(self.identifier),
-              'definition': self.definition.to_dict(complete, inflated),
-              'shared': self.properties.is_shareable,
-              'ioc': self.is_ioc,
-              'value': self.convert_value(self.value),
-              'condition': self.convert_value(condition),
-              'creator_group': self.creator_group.to_dict(complete, inflated),
-              'created_at': self.convert_value(self.created_at),
-              'modified_on': self.convert_value(self.modified_on),
-              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
-              }
-    else:
-      return {'identifier': self.convert_value(self.identifier),
-              'shared': self.properties.is_shareable,
-              'ioc': self.is_ioc,
-              'value': self.convert_value(self.value),
-              'condition': self.convert_value(condition),
-              'creator_group': self.creator_group.to_dict(complete, inflated),
-              'created_at': self.convert_value(self.created_at),
-              'modified_on': self.convert_value(self.modified_on),
-              'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
-              }
+
+    return {'identifier': self.convert_value(self.identifier),
+            'definition': self.definition.to_dict(complete, inflated),
+            'shared': self.properties.is_shareable,
+            'ioc': self.is_ioc,
+            'value': self.convert_value(self.value),
+            'condition': self.convert_value(condition),
+            'creator_group': self.creator_group.to_dict(complete, inflated),
+            'created_at': self.convert_value(self.created_at),
+            'modified_on': self.convert_value(self.modified_on),
+            'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            }

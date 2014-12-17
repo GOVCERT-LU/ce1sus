@@ -7,6 +7,7 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
+from ce1sus.common.checks import is_viewable, get_view_message
 from ce1sus.helpers.common.debug import Log
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
 
@@ -153,3 +154,30 @@ class BaseView(object):
     """
     user = self._get_from_session(SESSION_USER)
     return user
+
+  def get_authorized_events_cache(self):
+    """
+    Returns the authorized cached events
+    """
+    return self._get_from_session('_cp_events_cache', dict())
+
+  def set_authorized_events_cache(self, cache):
+    self._put_to_session('_cp_events_cache', cache)
+
+  def check_if_event_is_viewable(self, event, user=None):
+    if user is None:
+      user = self.get_user()
+    viewable = self.is_event_viewable(event, user)
+    if not viewable:
+      raise cherrypy.HTTPError(403, 'User {0} is not authorized to view event {1}'.format(user.username, event.identifier))
+
+  def is_event_viewable(self, event, user=None):
+    if user is None:
+      user = self.get_user()
+    cache = self.get_authorized_events_cache()
+    viewable = is_viewable(event, user, cache)
+    log_msg = get_view_message(viewable, event.identifier, user.username)
+    # update cache
+    self.set_authorized_events_cache(cache)
+    self.logger.info(log_msg)
+    return viewable

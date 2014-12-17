@@ -101,4 +101,3 @@ class RestBaseHandler(BaseView):
     else:
       inflated = False
     return inflated
-

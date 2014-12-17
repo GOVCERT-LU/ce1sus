@@ -32,7 +32,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
 
   @property
-  def permission_object(self):
+  def permissions(self):
     if self.__default_bit_code is None:
       if self.default_dbcode is None:
         self.__default_bit_code = EventPermissions('0', self)
@@ -51,7 +51,7 @@ class Event(ExtendedLogingInformations, Base):
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
-  group_premissions = relationship('EventGroupPermission')
+  groups = relationship('EventGroupPermission')
   observables = relationship(Observable)
   indicators = relationship(Indicator)
   __tlp_obj = None

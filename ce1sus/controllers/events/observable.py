@@ -8,6 +8,9 @@ Created: Aug 28, 2013
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
+from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
+from ce1sus.db.brokers.event.objectbroker import ObjectBroker
+from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -22,6 +25,9 @@ class ObservableController(BaseController):
   def __init__(self, config):
     BaseController.__init__(self, config)
     self.observable_broker = self.broker_factory(ObservableBroker)
+    self.composed_observable_broker = self.broker_factory(ComposedObservableBroker)
+    self.object_broker = self.broker_factory(ObjectBroker)
+    self.attribute_broker = self.broker_factory(AttributeBroker)
 
   def insert_observable(self, observable, user, commit=True):
     """
@@ -53,5 +59,33 @@ class ObservableController(BaseController):
       self.logger.debug(error)
       self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, observable.identifier))
       raise ControllerException(u'An event with uuid "{0}" already exists'.format(observable.identifier))
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_observable_by_id(self, identifier):
+    try:
+      observable = self.observable_broker.get_by_id(identifier)
+      return observable
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_composed_observable_by_id(self, identifier):
+    try:
+      composed_observable = self.composed_observable_broker.get_by_id(identifier)
+      return composed_observable
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_attribute_by_id(self, identifier):
+    try:
+      obj = self.attribute_broker.get_by_id(identifier)
+      return obj
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_object_by_id(self, identifier):
+    try:
+      obj = self.object_broker.get_by_id(identifier)
+      return obj
     except BrokerException as error:
       raise ControllerException(error)

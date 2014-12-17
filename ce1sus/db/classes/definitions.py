@@ -75,7 +75,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
                                   withSymbols=True)
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=True):
+  def to_dict(self, complete=True, inflated=False):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),
@@ -174,7 +174,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     # TODO: Tables classes to text
     return u'{0}'.format(class_array)
 
-  def to_dict(self, complete=True, inflated=True):
+  def to_dict(self, complete=True, inflated=False):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),
@@ -254,7 +254,7 @@ class AttributeHandler(Base):
     # TODO: Verify validation of AttributeHandler Object
     return True
 
-  def to_dict(self, complete=False, inflated=True):
+  def to_dict(self, complete=False, inflated=False):
     result = list()
     handler = self.create_instance()
     allowed_tables = handler.get_allowed_types()
