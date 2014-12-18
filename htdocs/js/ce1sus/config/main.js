@@ -157,7 +157,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  controller: 'viewEventController',
                                  resolve: {
                                    $event: function(Restangular,$routeSegment) {
-                                     return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": false}).then(function (data) {
+                                     return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": true}).then(function (data) {
                                        return data;
                                      }, function(response) {
                                          throw generateErrorMessage(response);
@@ -178,13 +178,15 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             'default': true,
                             templateUrl: "pages/events/event/overview.html",
                             resolve: {
+                              /*
                               $event: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": false}).then(function (data) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": true}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);
                                 });
                               }
+                              */
                             },
                             dependencies: ["id"],
                             untilResolved: {
