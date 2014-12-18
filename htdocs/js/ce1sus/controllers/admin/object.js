@@ -67,7 +67,7 @@ app.controller("objectAddController", function($scope, Restangular, messages,
   };
   
   $scope.submitObject = function(){
-    Restangular.all("object").post($scope.object).then(function (object) {
+    Restangular.all("objectdefinition").post($scope.object).then(function (object) {
       
       if (data) {
         $scope.objects.push(data);

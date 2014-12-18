@@ -4,7 +4,7 @@
 
 app.controller("observableObjectAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("object").getList(null, null, {"Complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, null, {"Complete": false}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
       throw generateErrorMessage(response);
@@ -49,7 +49,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
 
 app.controller("objectChildAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("object").getList(null, null, {"Complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, null, {"Complete": false}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
       throw generateErrorMessage(response);

@@ -1,54 +1,94 @@
 <form name="addEventForm" class="form-horizontal" role="form" novalidate>
-  <div class="row">
-    <label class="col-lg-3 control-label text-right">Identifier</label>
-    <div class="col-lg-9">
-      <input class="form-control" name="identifier"
-        ng-model="event.identifier" type="text" disabled>
-    </div>
-  </div>
-  <div class="row">
-    <label class="col-lg-3 control-label text-right">Title *</label>
-    <div class="col-lg-9"">
-      <div
-        ng-class="{ 'has-error' : addEventForm.title.$invalid && !addEventForm.title.$pristine }">
-        <input class="form-control" name="title" ng-model="event.title"
-          type="text" required ng-minlength=3 ng-maxlength=255>
-        <p
-          ng-show="addEventForm.title.$invalid && !addEventForm.title.$pristine"
-          class="help-block">Title is required.</p>
-        <p ng-show="addEventForm.title.$error.minlength"
-          class="help-block">Title is too short.</p>
-        <p ng-show="addEventForm.title.$error.maxlength"
-          class="help-block">Title is too long.</p>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <label class="col-lg-3 control-label text-right">Description*</label>
-    <div class="col-lg-9">
-      <div
-        ng-class="{ 'has-error' : addEventForm.description.$invalid && !addEventForm.description.$pristine }">
-        <textarea name="description" ng-model="event.description"
-          cols=48 rows=20 ng-minlength=3 required></textarea>
-        <p
-          ng-show="addEventForm.description.$invalid && !addEventForm.name.$pristine"
-          class="help-block">Description is required.</p>
-        <p ng-show="addEventForm.description.$error.minlength"
-          class="help-block">Description is too short.</p>
-      </div>
-    </div>
-  </div>
-  
+<div class="row">
+  <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <div class="row">
-      <label class="col-lg-3 control-label text-right">Status *</label>
+      <label class="col-lg-3 control-label text-right">Identifier</label>
       <div class="col-lg-9">
-        <select name="status_id" class="form-control"
-          ng-options="status.identifier as status.name for status in statuses"
-          ng-model="user.status_id">
-          <option style="display: none" value="">Select a Status</option>
-        </select>
+        <input class="form-control" name="identifier"
+          ng-model="event.identifier" type="text" disabled>
       </div>
     </div>
-    
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Title *</label>
+      <div class="col-lg-9"">
+        <div
+          ng-class="{ 'has-error' : addEventForm.title.$invalid && !addEventForm.title.$pristine }">
+          <input class="form-control" name="title" ng-model="event.title"
+            type="text" required ng-minlength=3 ng-maxlength=255>
+          <p
+            ng-show="addEventForm.title.$invalid && !addEventForm.title.$pristine"
+            class="help-block">Title is required.</p>
+          <p ng-show="addEventForm.title.$error.minlength"
+            class="help-block">Title is too short.</p>
+          <p ng-show="addEventForm.title.$error.maxlength"
+            class="help-block">Title is too long.</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Description*</label>
+      <div class="col-lg-9">
+        <div
+          ng-class="{ 'has-error' : addEventForm.description.$invalid && !addEventForm.description.$pristine }">
+          <textarea name="description" ng-model="event.description"
+            cols=48 rows=20 ng-minlength=3 required></textarea>
+          <p
+            ng-show="addEventForm.description.$invalid && !addEventForm.description.$pristine"
+            class="help-block">Description is required.</p>
+          <p ng-show="addEventForm.description.$error.minlength"
+            class="help-block">Description is too short.</p>
+        </div>
+      </div>
+    </div>
+          <div class="row">
+        <label class="col-lg-3 control-label text-right">Published</label>
+        <div class="col-lg-9">
+            <input type="checkbox" name="published"
+              value="published" ng-model="event.published"
+            >
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Status *</label>
+        <div class="col-lg-9">
+          <select name="status_id" class="form-control"
+            ng-options="status.identifier as status.name for status in statuses"
+            ng-model="event.status_id">
+            <option style="display: none" value="">Select a Status</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Analysis *</label>
+        <div class="col-lg-9">
+          <select name="anlysis_id" class="form-control"
+            ng-options="anlysis.identifier as anlysis.name for anlysis in anlysises"
+            ng-model="event.anlysis_id">
+            <option style="display: none" value="">Select an analysis</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Risk *</label>
+        <div class="col-lg-9">
+          <select name="risk_id" class="form-control"
+            ng-options="risk.identifier as risk.name for risk in risks"
+            ng-model="event.risk_id">
+            <option style="display: none" value="">Select a risk</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">TLP *</label>
+        <div class="col-lg-9">
+          <select name="tlp_id" class="form-control"
+            ng-options="tlp.identifier as tlp.name for tlp in tlps"
+            ng-model="event.tlp_id">
+            <option style="display: none" value="">Select a TLP level</option>
+          </select>
+        </div>
+      </div>
+  </div>
+</div>
     
 </form>

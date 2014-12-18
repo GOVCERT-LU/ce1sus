@@ -144,7 +144,7 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
   };
   
   $scope.submitAttribute = function(){
-    Restangular.all("attribute").post($scope.attribute).then(function (attribute) {
+    Restangular.all("attributedefinition").post($scope.attribute).then(function (attribute) {
       
       if (data) {
         $scope.attributes.push(data);

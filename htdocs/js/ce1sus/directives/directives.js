@@ -751,3 +751,23 @@ app.directive("attributeHandler", function() {
     },
   };
 });
+
+
+app.directive("eventForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      event: "=event",
+      type: "=type",
+      statuses: '=statuses',
+      anlysises: '=anlysises',
+      risks:'=risks',
+      tlps: '=tlps'
+    },
+    controller: function($scope, $log){
+
+    },
+    templateUrl: "pages/common/directives/eventform.html"
+  };
+});

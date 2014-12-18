@@ -429,7 +429,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "objectController",
                                resolve: {
                                  objects: function(Restangular) {
-                                   return Restangular.one("object").getList(null, {"complete": false}).then(function (objects) {
+                                   return Restangular.one("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
                                      return objects;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -454,14 +454,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "objectDetailController",
                                      resolve: {
                                        $object: function(Restangular,$routeSegment) {
-                                         return Restangular.one("object",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
+                                         return Restangular.one("objectdefinition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
                                          });
                                        },
                                        attributes: function(Restangular) {
-                                         return Restangular.one("attribute").getList(null, {"complete": false}).then(function (attributes) {
+                                         return Restangular.one("attributedefinition").getList(null, {"complete": false}).then(function (attributes) {
                                            return attributes;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -484,7 +484,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                controller : "attributeController",
                                resolve: {
                                  attributes: function(Restangular) {
-                                   return Restangular.one("attribute").getList(null, {"complete": false}).then(function (attributes) {
+                                   return Restangular.one("attributedefinition").getList(null, {"complete": false}).then(function (attributes) {
                                      return attributes;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
@@ -544,14 +544,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  });
                                },
                                $attributeObjects: function(Restangular,$routeSegment) {
-                                 return Restangular.one("attribute",$routeSegment.$routeParams.id).getList('object').then(function (attribute) {
+                                 return Restangular.one("attributedefinition",$routeSegment.$routeParams.id).getList('object').then(function (attribute) {
                                    return attribute;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
                                  });
                                },
                                objects: function(Restangular) {
-                                 return Restangular.all("object").getList(null, {"complete": false}).then(function (objects) {
+                                 return Restangular.all("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
                                    return objects;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
