@@ -205,6 +205,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           .segment("overview", {
                             'default': true,
                             templateUrl: "pages/events/event/overview.html",
+                            controller: 'eventOverviewController',
                             resolve: {
                               /*
                               $event: function(Restangular,$routeSegment) {

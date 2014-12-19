@@ -101,10 +101,10 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
               $location.path("/admin/user");
             }
           }
-          messages.setMessage({'type':'success','message':'User sucessfully removed'});
+          
           index++;
         }, $log);
-        
+        messages.setMessage({'type':'success','message':'User sucessfully removed'});
       }
     }, function (response) {
       handleError(response, messages);

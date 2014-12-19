@@ -12,7 +12,6 @@ from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.brokers.permissions.user import UserBroker
 from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.observables import ObservableComposition
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException
 
@@ -126,6 +125,7 @@ class EventHandler(RestBaseHandler):
         event.populate(json)
         # TODO: make relations an populate the whole event by json
         self.event_controller.insert_event(self.get_user(), event, True, True)
+        return event.to_dict(details, inflated)
       else:
         raise RestHandlerException(u'Invalid request')
 
@@ -141,7 +141,8 @@ class EventHandler(RestBaseHandler):
       self.event_controller.update_event(self.get_user(), event, True, True)
       return event.to_dict(details, inflated)
     elif method == 'DELETE':
-      pass
+      self.event_controller.remove_event(self.get_user(), event)
+      return 'Deleted event'
 
   def __process_observable(self, method, event, requested_object, details, inflated, json):
     if method == 'GET':

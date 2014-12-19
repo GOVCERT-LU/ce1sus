@@ -76,7 +76,7 @@ class EventController(BaseController):
       raise ControllerException(error)
 
   def update_event(self, user, event, mkrelations=True, commit=True):
-    self.logger.debug('User {0} inserts a new event'.format(user.username))
+    self.logger.debug('User {0} updates a event {1}'.format(user.username, event.identifier))
     try:
       # the the creator
 
@@ -96,6 +96,13 @@ class EventController(BaseController):
     except ValidationException:
       message = ObjectValidator.getFirstValidationError(event)
       raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_event(self, user, event):
+    self.logger.debug('User {0} deleted a event {1}'.format(user.username, event.identifier))
+    try:
+      self.event_broker.remove_by_id(event.identifier)
     except BrokerException as error:
       raise ControllerException(error)
 

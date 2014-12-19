@@ -58,7 +58,7 @@ app.controller("eventController", function($scope, Restangular,$route, messages,
 });
 
 app.controller("viewEventController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, ngTableParams, $event) {
+    $log, $routeSegment, $location,$event) {
   $scope.event = $event;
   $scope.pushItem($scope.event);
   $scope.reloadPage = function(){
@@ -67,7 +67,7 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 });
 
 app.controller("eventObservableController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, ngTableParams, observables, $anchorScroll, Pagination) {
+    $log, $routeSegment, $location,observables, $anchorScroll, Pagination) {
   $scope.getAttributes=function(){
     function processObservavle(attributes, observable, composed){
       if (observable.observable_composition){
@@ -215,6 +215,8 @@ app.controller("addEventController", function($scope, Restangular, messages,
       
       if (data) {
         $location.path("/events/event/"+ data.identifier);
+      } else {
+        $location.path("/events/all");
       }
       messages.setMessage({'type':'success','message':'Event sucessfully added'});
       
@@ -267,4 +269,26 @@ app.controller("editEventController", function($scope, Restangular, messages,
     $scope.$hide();
   };
 });
-
+app.controller("eventOverviewController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location) {
+  $scope.removeEvent = function(){
+    if (confirm('Are you sure you want to delete this event?')) { 
+      $scope.event.remove().then(function (data) {
+        if (data) {
+          //remove the selected user and then go to the first one in case it exists
+          var index = 0;
+          angular.forEach($scope.openedEvents, function(entry) {
+            if (entry.identifier === $scope.event.identifier){
+              $scope.openedEvents.splice(index, 1);
+              $location.path("/events/all");
+            }
+            index++;
+          }, $log);
+          messages.setMessage({'type':'success','message':'Event sucessfully removed'});
+        }
+      }, function (response) {
+        handleError(response, messages);
+      });
+    }
+  };
+});
