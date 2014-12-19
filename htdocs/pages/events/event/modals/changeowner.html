@@ -1,0 +1,49 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="changeOwnerController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Edit Event {{event.identifier}} owner</h4>
+        </div>
+        <div class="modal-body">
+        {{ownergroup| json }}
+          <form name="ownerGroupForm" class="form-horizontal" role="form" novalidate>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Status *</label>
+              <div class="col-lg-9">
+              <div
+                ng-class="{ 'has-error' : ownerGroupForm.group.$invalid && !ownerGroupForm.group.$pristine }">
+                <select name="group" class="form-control"
+                  ng-options="group.identifier as group.name for group in groups"
+                  ng-model="ownergroup" required>
+                  <option style="display: none" value="">Select a group</option>
+                </select>
+                <p
+                  ng-show="ownerGroupForm.group.$invalid && !ownerGroupForm.group.$pristine"
+                  class="help-block">Owner Group is required.</p>
+                </div>
+              </div>
+            </div>
+          </form>
+          
+          
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!groupChanged() || ownerGroupForm.$invalid"
+              ng-click="submitGroup()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetGroup()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

@@ -112,3 +112,14 @@ class EventController(BaseController):
       return event
     except BrokerException as error:
       raise ControllerException(error)
+
+  def change_owner(self, event, group_id, user, commit=True):
+    try:
+      group = self.group_broker.get_by_id(group_id)
+      user = self.user_broker.getUserByUserName(user.username)
+      event.creator_group = group
+      self.set_extended_logging(event, user, user.group, False)
+      self.event_broker.update(event, False)
+      self.event_broker.do_commit(commit)
+    except BrokerException as error:
+      raise ControllerException(error)

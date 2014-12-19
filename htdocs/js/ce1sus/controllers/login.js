@@ -16,6 +16,7 @@ app.controller("loginController", function($scope, Restangular, messages,
         $log.info(data);
         // reload the whole window with the loggedin informations
         window.location.href="/";
+        
       }
     }, function (response) {
       handleError(response, messages);

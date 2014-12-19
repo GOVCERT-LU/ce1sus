@@ -18,13 +18,8 @@ function Ce1susRestException(message, type) {
 Ce1susRestException.prototype = new Ce1susException();
 Ce1susRestException.prototype.constructor = Ce1susRestException;
 
-function generateErrorMessage(response){
-  error = new Ce1susException('Message');
-  error.code = response.status;
-  error.type = "danger";
-  error.message = response.statusText;
-  
-  var message = response.data;
+function extractBodyFromHTML(text){
+  var message = text;
   var bodyStart = message.indexOf('<body') + 5;
   var bodyEnd = message.indexOf('</body>');
   message = message.substring(bodyStart,bodyEnd); 
@@ -33,9 +28,16 @@ function generateErrorMessage(response){
   //Remove powered tag
   bodyEnd = message.indexOf('<div id="');
   message = message.substring(0,bodyEnd);
-  
-  error.description = message;
+  return message;
+}
 
+function generateErrorMessage(response){
+  error = new Ce1susException('Message');
+  error.code = response.status;
+  error.type = "danger";
+  error.message = response.statusText;
+  var message = response.data;
+  error.description = extractBodyFromHTML(message);
   return error;
 }
 
@@ -47,8 +49,8 @@ function getTextOutOfErrorMessage(error){
 }
 
 function handleError(response, messages) {
-  code = response.status;
-  message = getTextOutOfErrorMessage(generateErrorMessage(response));
+  var code = response.status;
+  var message = getTextOutOfErrorMessage(generateErrorMessage(response));
   if (code === 500) {
     message = "Internal Error occured, please contact your system administrator";
   }
@@ -56,7 +58,7 @@ function handleError(response, messages) {
     message = "Server is probaly gone offline";
   }
 
-  var message = {"type":"danger","message":code+" - "+message};
+  message = {"type":"danger","message":code+" - "+message};
   messages.setMessage(message);
   return true;
 }

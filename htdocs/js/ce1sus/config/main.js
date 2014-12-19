@@ -207,15 +207,20 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/overview.html",
                             controller: 'eventOverviewController',
                             resolve: {
-                              /*
-                              $event: function(Restangular,$routeSegment) {
-                                return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": true}).then(function (data) {
+                              useradmin: function(Restangular,$routeSegment) {
+                                return Restangular.one("checks","isuseradmin").get().then(function (data) {
                                   return data;
                                 }, function(response) {
-                                    throw generateErrorMessage(response);
+                                  return false;
+                                });
+                              },
+                              groups: function(Restangular) {
+                                return Restangular.one("groups").getList(null, {"complete": false}).then(function (groups) {
+                                  return groups;
+                                }, function(response) {
+                                  return [];
                                 });
                               }
-                              */
                             },
                             dependencies: ["id"],
                             untilResolved: {

@@ -5,8 +5,10 @@
 
 Created on Oct 29, 2014
 """
+import cherrypy
 import re
 
+from ce1sus.common.checks import is_user_priviledged
 from ce1sus.controllers.base import ControllerException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
@@ -114,6 +116,8 @@ class EventHandler(RestBaseHandler):
         return self.__process_object(requested_object, details, inflated, json)
       elif requested_object['object_type'] == 'attribute':
         return self.__process_attribute(requested_object, details, inflated, json)
+      elif requested_object['object_type'] == 'changegroup':
+        return self.__change_event_group(event, json)
       else:
         raise PathParsingException(u'{0} is not definied'.format(requested_object['object_type']))
 
@@ -128,6 +132,16 @@ class EventHandler(RestBaseHandler):
         return event.to_dict(details, inflated)
       else:
         raise RestHandlerException(u'Invalid request')
+
+  def __change_event_group(self, event, json):
+    if is_user_priviledged(self.get_user()):
+      group_id = json.get('identifier', None)
+      self.event_controller.change_owner(event, group_id, self.get_user())
+
+      return 'OK'
+    else:
+      # TODO: make this cleaner
+      raise cherrypy.HTTPError(403, 'No allowed')
 
   def __process_event(self, method, event, details, inflated, json):
     if method == 'GET':

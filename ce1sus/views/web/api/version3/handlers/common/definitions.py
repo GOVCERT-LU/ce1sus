@@ -7,8 +7,7 @@ Created on Dec 19, 2014
 """
 from ce1sus.controllers.base import ControllerException
 from ce1sus.db.classes.common import Status, Analysis, Risk, TLP
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -24,7 +23,7 @@ class StatusHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
-  @require(privileged())
+  @require()
   def statuses(self, **args):
     try:
       return Status.get_cb_values()
@@ -39,7 +38,7 @@ class AnalysisHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
-  @require(privileged())
+  @require()
   def analyses(self, **args):
     try:
       return Analysis.get_cb_values()
@@ -54,7 +53,7 @@ class RiskHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
-  @require(privileged())
+  @require()
   def risks(self, **args):
     try:
       return Risk.get_cb_values()
@@ -69,7 +68,7 @@ class TLPHanlder(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
-  @require(privileged())
+  @require()
   def tlps(self, **args):
     try:
       return TLP.get_cb_values()

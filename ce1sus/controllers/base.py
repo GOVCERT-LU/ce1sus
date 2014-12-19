@@ -89,6 +89,5 @@ class BaseController:
   def set_extended_logging(self, instance, user, originating_group, insert=False):
     self.set_simple_logging(instance, user, insert)
     if insert:
-      group = user.group
-      instance.creator_group = group
+      instance.creator_group = user.group
       instance.originating_group = originating_group

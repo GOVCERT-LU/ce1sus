@@ -18,7 +18,9 @@ from ce1sus.views.web.api.version3.handlers.admin.adminviewtypehandler import At
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, \
   AnalysisHandler, RiskHandler, TLPHanlder
+from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
 from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
+from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
@@ -59,6 +61,8 @@ class RestController(BaseView):
     self.instances['analyses'] = AnalysisHandler(config)
     self.instances['risks'] = RiskHandler(config)
     self.instances['tlps'] = TLPHanlder(config)
+    self.instances['checks'] = ChecksHandler(config)
+    self.instances['groups'] = GroupHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

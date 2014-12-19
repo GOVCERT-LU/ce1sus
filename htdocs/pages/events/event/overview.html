@@ -1,10 +1,11 @@
+{{currentuser|json}}
 <legend>Details</legend>
   <div class="btn-group" style="padding-bottom: 2px;">
-    <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal" data-animation="am-fade-and-scale" >
+    <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal">
     Edit
     </button>
-    <button class="btn btn-warning"
-      data-target="#event8531TakeOwnerShipModal" data-toggle="modal">Change
+
+    <button class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal" ng-show="isAdmin">Change
       ownership</button>
     <button class="btn btn-danger"
       ng-click="removeEvent()">

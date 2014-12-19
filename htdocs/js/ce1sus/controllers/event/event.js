@@ -270,8 +270,11 @@ app.controller("editEventController", function($scope, Restangular, messages,
   };
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location) {
+    $log, $routeSegment, $location, useradmin, groups) {
+  $scope.isAdmin = useradmin;
+  $scope.groups = groups;
   $scope.removeEvent = function(){
+    
     if (confirm('Are you sure you want to delete this event?')) { 
       $scope.event.remove().then(function (data) {
         if (data) {
@@ -290,5 +293,60 @@ app.controller("eventOverviewController", function($scope, Restangular, messages
         handleError(response, messages);
       });
     }
+  };
+});
+
+app.controller("changeOwnerController", function($scope, Restangular, messages,
+    $log, $routeSegment, $http) {
+  var original_group = angular.copy($scope.event.creator_group.identifier);
+  $scope.ownergroup = $scope.event.creator_group.identifier;
+  
+  $scope.groupChanged = function (){
+    return !angular.equals($scope.ownergroup, original_group);
+  };
+  
+  $scope.resetGroup = function (){
+    $scope.ownergroup = angular.copy(original_group);
+  };
+  
+  $scope.submitGroup = function(){
+    var group = null;
+    angular.forEach($scope.groups, function(entry) {
+      if (entry.identifier === $scope.ownergroup){
+        group = entry;
+      }
+    }, $log);
+    
+    $http.put("/REST/0.3.0/event/"+$scope.event.identifier+'/changegroup', {'identifier': $scope.ownergroup}).success(function(data, status, headers, config) {
+      if (data == 'OK') {
+        $scope.event.creator_group = group;
+        messages.setMessage({'type':'success','message':'Event owner sucessfully changed'});
+      } else {
+        messages.setMessage({'type':'danger','message':'Could not change group'});
+      }
+    }).error(function(data, status, headers, config) {
+      var message = extractBodyFromHTML(data);
+      
+      if (status === 500) {
+        message = "Internal Error occured, please contact your system administrator";
+      }
+      if (status === 0) {
+        message = "Server is probaly gone offline";
+      }
+      error = new Ce1susException('Message');
+      error.code = status;
+      error.type = "danger";
+      error.message = 'Error occured';
+      error.description = message;
+      message = {"type":"danger","message":status+" - "+getTextOutOfErrorMessage(error)};
+      messages.setMessage(message);
+    });
+
+    $scope.$hide();
+
+  };
+
+  $scope.closeModal = function(){
+    $scope.$hide();
   };
 });

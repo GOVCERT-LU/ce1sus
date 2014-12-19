@@ -51,11 +51,13 @@ class LoginHandler(RestBaseHandler):
             # put in session
             self.__put_user_to_session(user)
             self.logger.info('User "{0}" logged in'.format(user.username))
+            return user.to_dict(True, False)
           else:
             self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
             raise RestHandlerException('User or password are incorrect.')
+      else:
+        raise RestHandlerException('No credentials given.')
 
-      return 'OK'
     except ControllerException as error:
       self.logger.info(error)
       raise RestHandlerException('User or password are incorrect.')
