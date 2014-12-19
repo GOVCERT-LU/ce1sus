@@ -1,0 +1,29 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="editEventController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Edit Event {{event.identifier}}</h4>
+        </div>
+        <div class="modal-body">
+          <event-form event='event' type="'edit'"' statuses='statuses' anlysises='anlysises' risks='risks' tlps='tlps'></event-form>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!eventChanged() || addEventForm.$invalid"
+              ng-click="submitEvent()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetEvent()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

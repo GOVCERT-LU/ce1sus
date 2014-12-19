@@ -1,8 +1,8 @@
-<legend>
-  Details
+<legend>Details</legend>
   <div class="btn-group" style="padding-bottom: 2px;">
-    <button class="btn btn-default" data-target="#event8531DetailModal"
-      data-toggle="modal">Edit</button>
+    <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal" data-animation="am-fade-and-scale" >
+    Edit
+    </button>
     <button class="btn btn-warning"
       data-target="#event8531TakeOwnerShipModal" data-toggle="modal">Change
       ownership</button>
@@ -10,7 +10,7 @@
       onclick="if (confirm('Are you sure you want to delete?')) { dialogCloseTabCall('/events/event/modify_event?identifier=8531&action=remove', 'eventsTab', 'eventsTab8531');}">
       Delete</button>
   </div>
-</legend>
+
 <div class="row">
   <div class="col-xs-12 col-sm-12" style="text-align: left">
     <div class="row">

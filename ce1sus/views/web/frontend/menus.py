@@ -223,7 +223,7 @@ class GuiMenus(BaseView):
     link_item['icon'] = 'fa-database'
     link_item['title'] = 'All Events'
     link_item['section'] = 'main.layout.events.allEvents'
-    link_item['reload'] = True
+    link_item['reload'] = False
     link_item['href'] = link_item['section']
     links.append(link_item)
 
@@ -231,7 +231,7 @@ class GuiMenus(BaseView):
 
     link_item['title'] = 'Unpublished Events'
     link_item['section'] = 'main.layout.events.unpublished'
-    link_item['reload'] = True
+    link_item['reload'] = False
     link_item['href'] = link_item['section']
     links.append(link_item)
 
@@ -239,7 +239,7 @@ class GuiMenus(BaseView):
 
     link_item['title'] = 'Unpublished Proposals'
     link_item['section'] = 'main.layout.events.uproposals'
-    link_item['reload'] = True
+    link_item['reload'] = False
     link_item['href'] = link_item['section']
     links.append(link_item)
 

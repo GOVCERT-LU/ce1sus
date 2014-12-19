@@ -135,6 +135,34 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                         }, function(response) {
                           throw generateErrorMessage(response);
                         });
+                      },
+                      statuses: function(Restangular) {
+                        return Restangular.one("statuses").getList(null, {"complete": true}).then(function (items) {
+                          return items;
+                        }, function(response) {
+                            throw generateErrorMessage(response);
+                        });
+                      },
+                      risks: function(Restangular) {
+                        return Restangular.one("risks").getList(null, {"complete": true}).then(function (items) {
+                          return items;
+                        }, function(response) {
+                            throw generateErrorMessage(response);
+                        });
+                      },
+                      tlps: function(Restangular) {
+                        return Restangular.one("tlps").getList(null, {"complete": true}).then(function (items) {
+                          return items;
+                        }, function(response) {
+                            throw generateErrorMessage(response);
+                        });
+                      },
+                      analyses: function(Restangular) {
+                        return Restangular.one("analyses").getList(null, {"complete": true}).then(function (items) {
+                          return items;
+                        }, function(response) {
+                            throw generateErrorMessage(response);
+                        });
                       }
                     },
                     untilResolved: {
@@ -265,34 +293,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/add.html",
                             controller : "addEventController",
                             resolve: {
-                              statuses: function(Restangular) {
-                                return Restangular.one("statuses").getList(null, {"complete": true}).then(function (items) {
-                                  return items;
-                                }, function(response) {
-                                    throw generateErrorMessage(response);
-                                });
-                              },
-                              risks: function(Restangular) {
-                                return Restangular.one("risks").getList(null, {"complete": true}).then(function (items) {
-                                  return items;
-                                }, function(response) {
-                                    throw generateErrorMessage(response);
-                                });
-                              },
-                              tlps: function(Restangular) {
-                                return Restangular.one("tlps").getList(null, {"complete": true}).then(function (items) {
-                                  return items;
-                                }, function(response) {
-                                    throw generateErrorMessage(response);
-                                });
-                              },
-                              analyses: function(Restangular) {
-                                return Restangular.one("analyses").getList(null, {"complete": true}).then(function (items) {
-                                  return items;
-                                }, function(response) {
-                                    throw generateErrorMessage(response);
-                                });
-                              }
+                              
                             },
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html'

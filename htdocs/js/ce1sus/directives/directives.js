@@ -766,7 +766,11 @@ app.directive("eventForm", function() {
       tlps: '=tlps'
     },
     controller: function($scope, $log){
-
+      if ($scope.type == 'add'){
+        $scope.addEvent = true;
+      } else {
+        $scope.addEvent = false;
+      }
     },
     templateUrl: "pages/common/directives/eventform.html"
   };

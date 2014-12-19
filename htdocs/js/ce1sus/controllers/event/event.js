@@ -1,8 +1,11 @@
 
 
 app.controller("eventController", function($scope, Restangular,$route, messages,
-    $log, $routeSegment,eventmenus, $location) {
-  
+    $log, $routeSegment,eventmenus, $location, statuses, risks, tlps, analyses) {
+  $scope.statuses=statuses;
+  $scope.risks=risks;
+  $scope.tlps=tlps;
+  $scope.anlysises=analyses;
   $scope.eventMenus = eventmenus;
   $scope.openedEvents = [];
 
@@ -58,6 +61,9 @@ app.controller("viewEventController", function($scope, Restangular, messages,
     $log, $routeSegment, $location, ngTableParams, $event) {
   $scope.event = $event;
   $scope.pushItem($scope.event);
+  $scope.reloadPage = function(){
+    $routeSegment.chain[4].reload();
+  };
 });
 
 app.controller("eventObservableController", function($scope, Restangular, messages,
@@ -188,11 +194,8 @@ app.controller("eventObservableController", function($scope, Restangular, messag
 });
 
 app.controller("addEventController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, statuses, risks, tlps, analyses) {
-  $scope.statuses=statuses;
-  $scope.risks=risks;
-  $scope.tlps=tlps;
-  $scope.anlysises=analyses;
+    $log, $routeSegment, $location) {
+  
   var original_event = {};
   $scope.event={};
   
@@ -221,3 +224,47 @@ app.controller("addEventController", function($scope, Restangular, messages,
     });
   };
 });
+
+app.controller("editEventController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location) {
+
+  var original_event = angular.copy($scope.event);
+
+  $scope.eventChanged = function ()
+  {
+    return !angular.equals($scope.event, original_event);
+  };
+  
+  $scope.resetEvent = function ()
+  {
+    $scope.event = angular.copy(original_event);
+  };
+  
+  $scope.submitEvent = function(){
+    $scope.event.put().then(function (data) {
+      if (data) {
+        $scope.event = data;
+        //update username in case
+        angular.forEach($scope.openedEvents, function(entry) {
+          if (entry.identifier === data.identifier){
+            entry.title = data.title;
+          }
+        }, $log);
+        
+      }
+      
+      messages.setMessage({'type':'success','message':'Event sucessfully edited'});
+      
+    }, function (response) {
+      $scope.event = angular.copy(original_event);
+      handleError(response, messages);
+    });
+    $scope.$hide();
+  };
+
+  $scope.closeModal = function(){
+    $scope.event = angular.copy(original_event);
+    $scope.$hide();
+  };
+});
+

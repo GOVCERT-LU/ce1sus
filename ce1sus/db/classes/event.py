@@ -153,6 +153,7 @@ class Event(ExtendedLogingInformations, Base):
     self.tlp_level_id = TLP.get_by_value(text)
 
   def validate(self):
+    # TODO validation of an event
     return True
 
   def to_dict(self, complete=True, inflated=False):
@@ -192,6 +193,22 @@ class Event(ExtendedLogingInformations, Base):
                 'first_seen': self.convert_value(None),
                 'last_seen': self.convert_value(None),
                 'observables': observables,
-                'observables_count': len(self.observables)
+                'observables_count': len(self.observables),
+                'risk': self.convert_value(self.risk),
+                'status': self.convert_value(self.status),
+                'tlp': self.convert_value(self.tlp),
+                'analysis': self.convert_value(self.analysis),
+                'creator_group': self.creator_group.to_dict(complete, inflated)
                 }
     return result
+
+  def populate(self, json):
+
+    self.title = json.get('title', None)
+    self.description = json.get('description', None)
+    self.risk = json.get('risk', 'Undefined').title()
+    self.status = json.get('status', 'Draft').title()
+    self.tlp = json.get('tlp', 'Amber').title()
+    self.analysis = json.get('analysis', 'Unknown').title()
+    # TODO: populate properties
+    # self.published = json.get('published', None)

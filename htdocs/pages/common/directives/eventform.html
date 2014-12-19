@@ -1,6 +1,5 @@
 <form name="addEventForm" class="form-horizontal" role="form" novalidate>
-<div class="row">
-  <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
+  {{addEvent}}
     <div class="row">
       <label class="col-lg-3 control-label text-right">Identifier</label>
       <div class="col-lg-9">
@@ -45,6 +44,7 @@
         <div class="col-lg-9">
             <input type="checkbox" name="published"
               value="published" ng-model="event.published"
+              ng-disabled="addEvent"
             >
         </div>
       </div>
@@ -52,14 +52,14 @@
         <label class="col-lg-3 control-label text-right">Status *</label>
         <div class="col-lg-9">
         <div
-          ng-class="{ 'has-error' : addEventForm.status_id.$invalid && !addEventForm.status_id.$pristine }">
-          <select name="status_id" class="form-control"
-            ng-options="status.identifier as status.name for status in statuses"
-            ng-model="event.status_id" required>
+          ng-class="{ 'has-error' : addEventForm.status.$invalid && !addEventForm.status.$pristine }">
+          <select name="status" class="form-control"
+            ng-options="status.name as status.name for status in statuses"
+            ng-model="event.status" required>
             <option style="display: none" value="">Select a Status</option>
           </select>
           <p
-            ng-show="addEventForm.status_id.$invalid && !addEventForm.status_id.$pristine"
+            ng-show="addEventForm.status.$invalid && !addEventForm.status.$pristine"
             class="help-block">Status is required.</p>
           </div>
         </div>
@@ -67,9 +67,9 @@
       <div class="row">
         <label class="col-lg-3 control-label text-right">Analysis *</label>
         <div class="col-lg-9">
-          <select name="anlysis_id" class="form-control"
-            ng-options="anlysis.identifier as anlysis.name for anlysis in anlysises"
-            ng-model="event.anlysis_id" required>
+          <select name="anlysis" class="form-control"
+            ng-options="anlysis.name as anlysis.name for anlysis in anlysises"
+            ng-model="event.anlysis" required>
             <option style="display: none" value="">Select an analysis</option>
           </select>
         </div>
@@ -77,9 +77,9 @@
       <div class="row">
         <label class="col-lg-3 control-label text-right">Risk *</label>
         <div class="col-lg-9">
-          <select name="risk_id" class="form-control"
-            ng-options="risk.identifier as risk.name for risk in risks"
-            ng-model="event.risk_id" required>
+          <select name="risk" class="form-control"
+            ng-options="risk.name as risk.name for risk in risks"
+            ng-model="event.risk" required>
             <option style="display: none" value="">Select a risk</option>
           </select>
         </div>
@@ -87,14 +87,13 @@
       <div class="row">
         <label class="col-lg-3 control-label text-right">TLP *</label>
         <div class="col-lg-9">
-          <select name="tlp_id" class="form-control"
-            ng-options="tlp.identifier as tlp.name for tlp in tlps"
-            ng-model="event.tlp_id" required>
+          <select name="tlp" class="form-control"
+            ng-options="tlp.name as tlp.name for tlp in tlps"
+            ng-model="event.tlp" required>
             <option style="display: none" value="">Select a TLP level</option>
           </select>
         </div>
       </div>
-  </div>
-</div>
+
     
 </form>
