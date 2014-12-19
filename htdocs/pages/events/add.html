@@ -1,3 +1,13 @@
 <h3>Add Event</h3>
 
-<event-form event='event' type='add' statuses='statuses' anlysises='anlysises' risks='risks' tlps='tlps'>
+<event-form event='event' type='add' statuses='statuses' anlysises='anlysises' risks='risks' tlps='tlps'></event-form>
+
+<div class="row" style="margin-top:20px">
+  <div class="col-xs-offset-3 col-sm-offset-3 col-xs-5 col-sm-5">
+    <div class="btn-group">
+      <button id="AddSave" class="btn btn-primary" type="submit" ng-disabled="!eventChanged() || addEventForm.$invalid" ng-click="submitEvent()">Create</button>
+      <button id="AddSave" class="btn btn-default" ng-click="resetEvent()">Cancel</button>
+    </div>
+  </div>
+</div>
+

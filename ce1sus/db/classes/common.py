@@ -84,7 +84,10 @@ class StaticBase(object):
 
   @classmethod
   def get_cb_values(cls):
-    return cls.get_all_inverted()
+    result = list()
+    for key, value in cls.get_dictionary().iteritems():
+      result.append({'identifier': key, 'name': value})
+    return result
 
 
 class ValueTable(StaticBase):
@@ -159,7 +162,6 @@ class TLP(StaticBase):
             2: u'Green',
             3: u'White'
             }
-
 
 class Properties(BitBase):
 

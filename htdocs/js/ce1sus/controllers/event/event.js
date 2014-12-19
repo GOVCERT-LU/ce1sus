@@ -186,3 +186,38 @@ app.controller("eventObservableController", function($scope, Restangular, messag
 
 
 });
+
+app.controller("addEventController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location, statuses, risks, tlps, analyses) {
+  $scope.statuses=statuses;
+  $scope.risks=risks;
+  $scope.tlps=tlps;
+  $scope.anlysises=analyses;
+  var original_event = {};
+  $scope.event={};
+  
+  $scope.eventChanged = function ()
+  {
+    return !angular.equals($scope.event, original_event);
+  };
+  
+  $scope.resetEvent = function ()
+  {
+    //Could also be done differently, but for this case the validation errors will also be resetted
+    $routeSegment.chain[3].reload();
+  };
+  
+  $scope.submitEvent = function(){
+    Restangular.all("event").post($scope.event).then(function (data) {
+      
+      if (data) {
+        $location.path("/events/event/"+ data.identifier);
+      }
+      messages.setMessage({'type':'success','message':'Event sucessfully added'});
+      
+    }, function (response) {
+      $scope.event = angular.copy(original_event);
+      handleError(response, messages);
+    });
+  };
+});
