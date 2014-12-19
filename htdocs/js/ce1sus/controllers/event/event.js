@@ -270,9 +270,10 @@ app.controller("editEventController", function($scope, Restangular, messages,
   };
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, useradmin, groups) {
+    $log, $routeSegment, $location, useradmin, groups, owner) {
   $scope.isAdmin = useradmin;
   $scope.groups = groups;
+  $scope.isOwner = owner;
   $scope.removeEvent = function(){
     
     if (confirm('Are you sure you want to delete this event?')) { 

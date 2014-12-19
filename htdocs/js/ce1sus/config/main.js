@@ -207,6 +207,13 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/overview.html",
                             controller: 'eventOverviewController',
                             resolve: {
+                              owner: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).one('owner').get().then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                  return false;
+                                });
+                              },
                               useradmin: function(Restangular,$routeSegment) {
                                 return Restangular.one("checks","isuseradmin").get().then(function (data) {
                                   return data;
