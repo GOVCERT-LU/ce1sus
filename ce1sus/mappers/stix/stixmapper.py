@@ -6,8 +6,7 @@
 Created on Nov 12, 2014
 """
 from ce1sus.controllers.base import BaseController
-from ce1sus.mappers.stix.helpers.stixce1sus import StixCelsusMapper, \
-  set_extended_logging
+from ce1sus.mappers.stix.helpers.stixce1sus import StixCelsusMapper, set_extended_logging
 import cybox.utils.idgen
 from cybox.utils.nsparser import Namespace
 import stix.utils.idgen

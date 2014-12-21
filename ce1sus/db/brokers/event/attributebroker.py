@@ -5,9 +5,6 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
-import sqlalchemy.orm.exc
-from sqlalchemy.sql.expression import or_, and_, not_, distinct
-
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.common.broker import BrokerBase
 

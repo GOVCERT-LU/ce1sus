@@ -11,16 +11,16 @@
         <div class="col-sm-1"></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary ce1sus-btn" ng-click="addAttribute()" ng-show="permissions..add"> <span
+            <button type="button" class="btn btn-primary ce1sus-btn" ng-click="addAttribute()" ng-show="permissions.add"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </button> 
-            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildObject()" ng-show="permissions..add"> <span
+            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildObject()" ng-show="permissions.add"> <span
               class="glyphicon glyphicon-download"></span>
             </button> 
             <button type="button" class="btn btn-default ce1sus-btn"ng-click="showDetails()"> <span
               class="glyphicon glyphicon-eye-open"></span>
             </button> 
-            <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeObject()" ng-show="permissions..delete"> <span
+            <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeObject()" ng-show="permissions.delete"> <span
               class="glyphicon glyphicon-remove-circle" title="delete"></span>
             </button>
             </div>
@@ -51,8 +51,8 @@
               <td><span ng-if="attribute.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
               <td>
                 <a class="hand" ng-click="showAttributeDetails(attribute)"><span class="glyphicon glyphicon-eye-open"></span></a>
-                <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="permissions..modify"></span></a>
-                <a class="hand red" ng-click="removeAttribute(attribute)" ng-show="permissions..delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
+                <a class="hand red" ng-click="removeAttribute(attribute)" ng-show="permissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
               </td>
             </tr>
           </tbody>
