@@ -374,7 +374,8 @@ app.directive("composedobservable", function($compile) {
     transclude: true,
     scope: {
       composedobservable: "=composedobservable",
-      indent: "=indent"
+      indent: "=indent",
+      permissions: "=permissions"
     },
     controller: function($scope, Pagination, $modal){
       $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
@@ -430,7 +431,8 @@ app.directive("observable", function($compile) {
     transclude: true,
     scope: {
       observable: "=observable",
-      indent: "=indent"
+      indent: "=indent",
+      permissions: "=permissions"
     },
     controller: function($scope, $modal, $log, messages){
       
@@ -519,7 +521,8 @@ app.directive("object", function($compile) {
     transclude: true,
     scope: {
       object: "=object",
-      indent: "=indent"
+      indent: "=indent",
+      permissions: "=permissions"
     },
     controller: function($scope, $modal){
       $scope.showDetails = function(){

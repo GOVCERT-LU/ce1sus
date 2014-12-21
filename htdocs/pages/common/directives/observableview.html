@@ -10,16 +10,16 @@
         <div class="col-sm-1"></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
-            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="event.userpermissions.add"> <span
+            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permissions..add"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </button>
-            <button type="button" class="btn btn-default ce1sus-btn"ng-click="editObservable()" ng-show="event.userpermissions.modify"> <span
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="editObservable()" ng-show="permissions..modify"> <span
               class="glyphicon glyphicon-pencil"></span>
             </button>
             <button type="button" class="btn btn-default ce1sus-btn"ng-click="showDetails()"> <span
               class="glyphicon glyphicon-eye-open"></span>
             </button>
-            <button type="button" class="btn btn-danger ce1sus-btn"class="red" ng-click="removeObservable()" ng-show="event.userpermissions.delete"> <span
+            <button type="button" class="btn btn-danger ce1sus-btn"class="red" ng-click="removeObservable()" ng-show="permissions..delete"> <span
               class="glyphicon glyphicon-remove-circle" title="delete"></span>
             </button>
           </div>
@@ -28,7 +28,7 @@
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
       <div class="collapse-body">
-        <object ng-if="observable.object" object="observable.object" indent="0"></object>
+        <object ng-if="observable.object" object="observable.object" indent="0" permissions="permissions"></object>
       </div>
     </div>
   </div>

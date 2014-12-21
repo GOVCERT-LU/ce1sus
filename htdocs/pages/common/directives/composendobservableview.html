@@ -10,8 +10,8 @@
         <div class="col-sm-1"></div>
         <div class="col-sm-4" >
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addObservable()" ng-show="event.userpermissions.add"> <span class="glyphicon glyphicon-plus-sign"></span></button> 
-            <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeComposedObservable()" ng-show="event.userpermissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></button>
+            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addObservable()" ng-show="permissions..add"> <span class="glyphicon glyphicon-plus-sign"></span></button> 
+            <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeComposedObservable()" ng-show="permissions..delete"><span class="glyphicon glyphicon-remove-circle"></span></button>
           </div>
         </div>
       </div>
@@ -24,8 +24,8 @@
             <td style="width: 99%">
               <!-- insert pagination here -->
               <span  ng-repeat="observable in composedobservable.observable_composition.observables | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
-                <observable ng-if="!observable.observable_composition" observable="observable" indent="0"></observable>
-                <composed_observable ng-if="observable.observable_composition" composedobservable="observable" indent="0"></composed_observable>
+                <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="permissions"></observable>
+                <composed_observable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="permissions"></composed_observable>
               </span>
               <ul class="pagination" ng-if="1 < pagination.numPages">
                 <li ng-class="{ disabled : pagination.page == 0 }">

@@ -17,8 +17,8 @@
   </div>
   <div class="col-md-9">
     <span ng-repeat="observable in observables">
-      <observable ng-if="!observable.observable_composition" observable="observable" indent="0"></observable>
-      <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0"></composedobservable>
+      <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="event.permissions"></observable>
+      <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="event.permissions"></composedobservable>
     </span>
   </div>
 </div>
