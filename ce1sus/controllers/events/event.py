@@ -9,6 +9,8 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.common.checks import is_user_priviledged, is_event_owner
+from ce1sus.db.classes.group import EventPermissions
 
 
 __author__ = 'Weber Jean-Paul'
@@ -123,3 +125,19 @@ class EventController(BaseController):
       self.event_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_event_user_permissions(self, event, user):
+    try:
+      # If is admin => give all rights the same is valid for the owenr
+      isadmin = is_user_priviledged(user)
+      isowner = is_event_owner(event, user)
+      if isadmin or isowner:
+        permissions = EventPermissions('0')
+        permissions.set_all()
+      else:
+        permissions = self.event_broker.get_event_user_permissions(event, user)
+        permissions = permissions.permissions
+      return permissions
+    except BrokerException as error:
+      raise ControllerException(error)
+

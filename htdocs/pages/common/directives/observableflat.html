@@ -14,7 +14,7 @@
   
   <a class="hand" ng-click="showAttributeDetails(attributeflat)"><span class="glyphicon glyphicon-eye-open"></span></a>
   &nbsp;
-  <a class="hand"><span class="glyphicon glyphicon-pencil"></span></a>
+  <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="event.userpermissions.modify"></span></a>
   &nbsp;
-  <a class="hand red" ng-click="removeAttribute(attributeflat)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+  <a class="hand red" ng-click="removeAttribute(attributeflat)" ng-show="event.userpermissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
   </td>

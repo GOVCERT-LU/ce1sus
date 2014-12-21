@@ -7,7 +7,7 @@
     href="#/events/event/{{event.identifier}}/indicators">Indicators</a></li>
   <li ng-class="{active: $routeSegment.contains('relations')}"><a
     href="#/events/event/{{event.identifier}}/relations">Relations</a></li>
-  <li ng-class="{active: $routeSegment.contains('groups')}"><a
+  <li ng-class="{active: $routeSegment.contains('groups')}" ng-show="event.userpermissions.set_groups"><a
     href="#/events/event/{{event.identifier}}/groups">Groups</a></li>
   <li style="float: right;">
     <a class="hand" ng-click="reloadPage()">Reload &#x21bb;</a>

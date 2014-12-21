@@ -2,7 +2,7 @@
 <div ng-if="!flat"  class="row bs-docs-container">
   <div class="col-md-3 hidden-sm hidden-xs">
     <div class="btn-group">
-      <a class="btn btn-primary" role="button">Add new Object</a>
+      <a class="btn btn-primary" role="button" ng-show="event.userpermissions.add">Add new Object</a>
       <button type="button" class="btn btn-default" data-animation="am-flip-x" bs-dropdown="dropdown">
         View Mode
       </button>

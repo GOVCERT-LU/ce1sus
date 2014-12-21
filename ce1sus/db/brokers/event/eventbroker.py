@@ -8,7 +8,8 @@ Created on Jul 9, 2013
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_, and_, not_, distinct
 
-from ce1sus.db.classes.event import Event
+from ce1sus.db.classes.event import Event, EventGroupPermission
+from ce1sus.db.classes.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, \
   BrokerException
 
@@ -32,6 +33,12 @@ class EventBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Event
+
+  def get_event_user_permissions(self, event, user):
+    try:
+      return self.session.query(EventGroupPermission).filter(and_(Event.identifier == event.identifier, Group.identifier == user.group.identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
   def get_all_limited(self, limit, offset):
     """Returns only a subset of entries"""

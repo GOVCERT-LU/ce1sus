@@ -138,6 +138,15 @@ class EventPermissions(BitBase):
     # if you can validate you can see
     self._set_value(EventPermissions.SET_GROUPS, value)
 
+  def set_all(self):
+    self.can_view = True
+    self.can_add = True
+    self.can_modify = True
+    self.can_delete = True
+    self.can_propose = True
+    self.can_validate = True
+    self.set_groups = True
+
   def to_dict(self):
     return {'view': self.can_view,
             'add': self.can_add,
@@ -151,7 +160,7 @@ class EventPermissions(BitBase):
   def populate(self, json):
     self.can_view = json.get('view', False)
     self.can_add = json.get('add', False)
-    self.can_modifiy = json.get('modify', False)
+    self.can_modify = json.get('modify', False)
     self.can_validate = json.get('validate', False)
     self.can_propose = json.get('propose', False)
     self.can_delete = json.get('delete', False)

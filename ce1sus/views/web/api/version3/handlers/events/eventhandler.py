@@ -118,8 +118,6 @@ class EventHandler(RestBaseHandler):
         return self.__process_attribute(method, requested_object, details, inflated, json)
       elif requested_object['object_type'] == 'changegroup':
         return self.__change_event_group(method, event, json)
-      elif requested_object['object_type'] == 'owner':
-        return self.__is_event_ovner(method, event)
       else:
         raise PathParsingException(u'{0} is not definied'.format(requested_object['object_type']))
 
@@ -131,7 +129,7 @@ class EventHandler(RestBaseHandler):
         event.populate(json)
         # TODO: make relations an populate the whole event by json
         self.event_controller.insert_event(self.get_user(), event, True, True)
-        return event.to_dict(details, inflated)
+        return self.__return_event(event, details, inflated)
       else:
         raise RestHandlerException(u'Invalid request')
 
@@ -156,7 +154,7 @@ class EventHandler(RestBaseHandler):
 
   def __process_event(self, method, event, details, inflated, json):
     if method == 'GET':
-      return event.to_dict(details, inflated)
+      return self.__return_event(event, details, inflated)
     elif method == 'POST':
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
@@ -164,7 +162,7 @@ class EventHandler(RestBaseHandler):
       event.populate(json)
       # TODO: make relations an populate the whole event by json
       self.event_controller.update_event(self.get_user(), event, True, True)
-      return event.to_dict(details, inflated)
+      return self.__return_event(event, details, inflated)
     elif method == 'DELETE':
       self.event_controller.remove_event(self.get_user(), event)
       return 'Deleted event'
@@ -258,6 +256,13 @@ class EventHandler(RestBaseHandler):
         raise PathParsingException(u'object cannot be called without an ID')
     except ControllerException as error:
       raise RestHandlerException(error)
+
+  def __return_event(self, event, details, inflated):
+    # Add additional permissions for the user itsel
+    event_permission = self.event_controller.get_event_user_permissions(event, self.get_user())
+    result = event.to_dict(details, inflated)
+    result['userpermissions'] = event_permission.to_dict()
+    return result
 
   """
   @rest_method()
