@@ -38,8 +38,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
         $scope.observableObject.definition=entry;
       }
     }, $log);
-    
-    $scope.$parent.$parChildObjectableObject($scope.observableObject);
+    $scope.$parent.appendObservableObject($scope.observableObject);
     $scope.$hide();
   };
 

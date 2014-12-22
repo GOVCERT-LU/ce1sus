@@ -434,7 +434,7 @@ app.directive("observable", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal, $log, messages){
+    controller: function($scope, $modal, $log, messages, Restangular, $routeSegment){
       
       
       
@@ -451,33 +451,59 @@ app.directive("observable", function($compile) {
       };
       
       $scope.setObservable = function(observable){
-        //TODO make this also work if the parent is not composed!
-        var index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
-        $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables[index] = observable;
+        var index = -1;
+        if ($scope.$parent.$parent.$parent.composedobservable) {
+          index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
+          $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables[index] = observable;
+        } else {
+          //belongs to root
+          index = 0;
+          angular.forEach($scope.$parent.$parent.$parent.$parent.observables, function(itemEntry) {
+            if (itemEntry.identifier == observable.identifier) {
+              $scope.$parent.$parent.$parent.$parent.observables[index] = observable;
+            }
+            index++;
+          }, $log);
+        }
       };
       
       $scope.removeObservable = function(){
-      //TODO make this also work if the parent is not composed!
         if (confirm('Are you sure you want to delete?')) {
-
-          //TODO: find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?
-          var index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
-          $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.splice(index,1);
-          //foo to get the paginaton right in case it changes
-          var oldnumPages = $scope.$parent.$parent.$parent.pagination.numPages;
-          $scope.$parent.$parent.$parent.pagination.numPages = Math.ceil($scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.length/$scope.$parent.$parent.$parent.pagination.perPage);
-          if (oldnumPages != $scope.$parent.$parent.$parent.pagination.numPages) {
-            $scope.$parent.$parent.$parent.pagination.setPages();
-            if (oldnumPages < $scope.$parent.$parent.$parent.pagination.numPages) {
-              $scope.$parent.$parent.$parent.pagination.nextPage();
+          var index = -1;
+          eventID = $routeSegment.$routeParams.id;
+          restangularObservable = Restangular.restangularizeElement(null, $scope.observable, 'event/'+eventID+'/observable');
+          restangularObservable.remove().then(function (data) {
+            
+            if ($scope.$parent.$parent.$parent.composedobservable) {
+              //TODO: find a way to do this more neatly see $parent.$parent.$parent, perhaps this changes!?
+              index = $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.indexOf($scope.observable);
+              $scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.splice(index,1);
+              //Serves currently only for composed observables
+              //foo to get the paginaton right in case it changes
+              var oldnumPages = $scope.$parent.$parent.$parent.pagination.numPages;
+              $scope.$parent.$parent.$parent.pagination.numPages = Math.ceil($scope.$parent.$parent.$parent.composedobservable.observable_composition.observables.length/$scope.$parent.$parent.$parent.pagination.perPage);
+              if (oldnumPages != $scope.$parent.$parent.$parent.pagination.numPages) {
+                $scope.$parent.$parent.$parent.pagination.setPages();
+                if (oldnumPages < $scope.$parent.$parent.$parent.pagination.numPages) {
+                  $scope.$parent.$parent.$parent.pagination.nextPage();
+                } else {
+                  $scope.$parent.$parent.$parent.pagination.prevPage();
+                }
+                
+              }
+              
             } else {
-              $scope.$parent.$parent.$parent.pagination.prevPage();
+              index = $scope.$parent.$parent.$parent.$parent.observables.indexOf($scope.observable);
+              $scope.$parent.$parent.$parent.$parent.observables.splice(index,1);
+              
             }
             
-          }
-          
-          
-        }
+            
+        }, function (response) {
+          $scope.observable = angular.copy(original_observable);
+          handleError(response, messages);
+        });
+       }
       };
       
       $scope.addObject = function(){

@@ -112,3 +112,8 @@ class Observable(ExtendedLogingInformations, Base):
                 }
 
     return result
+
+  def populate(self, json):
+    self.title = json.get('title', None)
+    self.description = json.get('description', None)
+    # TODO: make valid for inflated

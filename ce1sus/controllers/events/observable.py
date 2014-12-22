@@ -43,6 +43,8 @@ class ObservableController(BaseController):
     self.logger.debug(observable.identifier)
     self.logger.debug('User {0} inserts a new event'.format(user.username))
     try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(observable, user, user.group, True)
       self.observable_broker.insert(observable, False)
       # generate relations if needed!
 
@@ -87,5 +89,19 @@ class ObservableController(BaseController):
     try:
       obj = self.object_broker.get_by_id(identifier)
       return obj
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_observable(self, observable, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(observable, user, user.group, True)
+      self.observable_broker.update(observable, commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_observable(self, observable, user, commit=True):
+    try:
+      self.observable_broker.remove_by_id(observable.identifier)
     except BrokerException as error:
       raise ControllerException(error)

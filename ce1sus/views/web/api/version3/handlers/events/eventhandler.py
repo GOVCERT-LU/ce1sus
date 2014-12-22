@@ -13,6 +13,7 @@ from ce1sus.controllers.base import ControllerException, ControllerNothingFoundE
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.brokers.permissions.user import UserBroker
 from ce1sus.db.classes.event import Event, Comment
+from ce1sus.db.classes.observables import Observable
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException
 
@@ -169,7 +170,10 @@ class EventHandler(RestBaseHandler):
       return comment.to_dict(details, inflated)
     else:
       comment_id = requested_object['object_uuid']
-      comment = self.event_controller.get_comment_by_id(comment_id)
+      if comment_id:
+        comment = self.event_controller.get_comment_by_id(comment_id)
+      else:
+        raise PathParsingException(u'comment cannot be called without an ID')
       if method == 'GET':
         return comment.to_dict(details, inflated)
       elif method == 'PUT':
@@ -200,14 +204,32 @@ class EventHandler(RestBaseHandler):
       return 'Deleted event'
 
   def __process_observable(self, method, event, requested_object, details, inflated, json):
-    if method == 'GET':
-      return self.__process_observable_get(event, requested_object, details, inflated)
-    elif method == 'POST':
-      pass
-    elif method == 'PUT':
-      pass
-    elif method == 'DELETE':
-      pass
+    user = self.get_user()
+    if method == 'POST':
+      self.check_if_event_is_modifiable(event)
+      observable = Observable()
+      observable.event_id = event.identifier
+      observable.populate(json)
+      self.observable_controller.insert_observable(observable, user, True)
+      return observable.to_dict(details, inflated)
+    else:
+      if method == 'GET':
+        return self.__process_observable_get(event, requested_object, details, inflated)
+      else:
+        observable_id = requested_object['object_uuid']
+        if observable_id:
+          observable = self.observable_controller.get_observable_by_id(observable_id)
+        else:
+          raise PathParsingException(u'observale cannot be called without an ID')
+        if method == 'PUT':
+          self.check_if_event_is_modifiable(event)
+          observable.populate(json)
+          self.observable_controller.update_observable(observable, user, True)
+          return observable.to_dict(details, inflated)
+        elif method == 'DELETE':
+          self.check_if_event_is_deletable(event)
+          self.observable_controller.remove_observable(observable, user, True)
+          return 'Deleted observable'
 
   def __process_observable_get(self, event, requested_object, details, inflated):
     try:
