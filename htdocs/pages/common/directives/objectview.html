@@ -57,9 +57,9 @@
             </tr>
           </tbody>
         </table>
-        <div ng-if="object.relatedObjects" style="height:5px"></div>
-        <span ng-if="object.relatedObjects" ng-repeat="childObject in object.relatedObjects">
-          <object object="childObject" indent="1"></object>
+        <div ng-if="object.related_objects" style="height:5px"></div>
+        <span ng-if="object.related_objects" ng-repeat="childObject in object.related_objects">
+          <object object="childObject.object" indent="1" permissions="permissions"></object>
         </span>
       </div>
     </div>

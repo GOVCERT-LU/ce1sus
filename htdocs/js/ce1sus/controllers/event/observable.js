@@ -28,7 +28,7 @@ app.controller("observableAddController", function($scope, Restangular, messages
   };
   
   $scope.submitObservable = function(){
-    Restangular.one('event', $scope.event.identifier).post('observable', $scope.observable).then(function (data) {
+    Restangular.one('event', $scope.event.identifier).post('observable', $scope.observable, {'complete':true, 'infated':true}).then(function (data) {
       if ($scope.$parent.$parent.appendObservable){
         $scope.$parent.$parent.appendObservable(data);
       } else {

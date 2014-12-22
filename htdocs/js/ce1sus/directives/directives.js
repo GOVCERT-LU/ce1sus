@@ -557,14 +557,20 @@ app.directive("object", function($compile) {
       $scope.removeObject = function(){
         if (confirm('Are you sure you want to delete this object?')) {
           var remove = false;
-          if ($scope.object.relatedObjects) {
+          if ($scope.object.related_objects_count > 0) {
             remove = confirm('Are you sure you want also it\'s children?');
           } else {
             remove = true;
           }
           if (remove){
             //find a way to do this more neatly see $parent.$parent, perhaps this changes!?
-            $scope.$parent.observable.object = null;
+            if ($scope.$parent.observable) {
+              $scope.$parent.observable.object = null;
+            } else {
+              var index = $scope.$parent.object.related_objects.indexOf($scope.object);
+              $scope.$parent.object.related_objects.splice(index, 1);
+            }
+            
           }
         }
       };

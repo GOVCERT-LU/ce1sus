@@ -26,8 +26,13 @@ class RelatedObject(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child_id = Column('child_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', Unicode(40))
-  # TODO make this n:m -> less db space
-  objects = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier')
+  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
+
+  def to_dict(self, complete=True, inflated=False):
+    return {'identifier': self.convert_value(self.identifier),
+            'object': self.object.to_dict(complete, inflated),
+            'relation': self.convert_value(self.relation)
+            }
 
 
 class Object(ExtendedLogingInformations, Base):
@@ -69,6 +74,11 @@ class Object(ExtendedLogingInformations, Base):
     attributes = list()
     for attribute in self.attributes:
       attributes.append(attribute.to_dict(complete, inflated))
+    related = list()
+    if inflated:
+      for related_object in self.related_objects:
+        related.append(related_object.to_dict(complete, inflated))
+
     return {'identifier': self.convert_value(self.identifier),
             'definition': self.definition.to_dict(complete, inflated),
             'attributes': attributes,
@@ -76,4 +86,10 @@ class Object(ExtendedLogingInformations, Base):
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            'related_objects': related,
+            'related_objects_count': len(self.related_objects)
             }
+
+  def populate(self, json):
+    # TODO: if inflated
+    self.definition_id = json.get('definition_id', None)

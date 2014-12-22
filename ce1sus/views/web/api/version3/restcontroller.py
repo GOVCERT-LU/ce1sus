@@ -16,13 +16,14 @@ from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import Attrib
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminviewtypehandler import AttribueViewTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
-from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, \
-  AnalysisHandler, RiskHandler, TLPHanlder
+from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
 from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
+from ce1sus.views.web.api.version3.handlers.events.objecthandler import ObjectHandler
+from ce1sus.views.web.api.version3.handlers.events.observablehanlder import ObservableHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
@@ -56,6 +57,8 @@ class RestController(BaseView):
     self.instances['attributeviewtypes'] = AttribueViewTypeHandler(config)
     self.instances['process'] = ProcessHandler(config)
     self.instances['event'] = EventHandler(config)
+    self.instances['observable'] = ObservableHandler(config)
+    self.instances['object'] = ObjectHandler(config)
     self.instances['events'] = EventsHandler(config)
     self.instances['statuses'] = StatusHandler(config)
     self.instances['analyses'] = AnalysisHandler(config)

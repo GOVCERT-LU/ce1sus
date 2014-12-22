@@ -38,7 +38,13 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
         $scope.observableObject.definition=entry;
       }
     }, $log);
-    $scope.$parent.appendObservableObject($scope.observableObject);
+    var observableID = $scope.$parent.$parent.observable.identifier;
+    Restangular.one('observable', observableID).post('object', $scope.observableObject, {'complete':true, 'infated':true}).then(function (data) {
+      $scope.$parent.appendObservableObject(data);
+    }, function (response) {
+      $scope.observableObject = angular.copy(original_observableObject);
+      handleError(response, messages);
+    });
     $scope.$hide();
   };
 
@@ -82,8 +88,18 @@ app.controller("objectChildAddController", function($scope, Restangular, message
         $scope.childObject.definition=entry;
       }
     }, $log);
-    
-    $scope.$parent.$parent.appendChildObject($scope.childObject);
+    var eventID = $routeSegment.$routeParams.id;
+    if ($scope.$parent.$parent.object){
+      //This is a child object
+      $scope.childObject.parent_id=$scope.$parent.$parent.object.identifier;
+    }
+    var objectID = $scope.$parent.$parent.object.identifier;
+    Restangular.one('object', objectID).post('object', $scope.childObject, {'complete':true, 'infated':true}).then(function (data) {
+      $scope.$parent.appendObservableObject(data);
+    }, function (response) {
+      $scope.childObject = angular.copy(original_childObject);
+      handleError(response, messages);
+    });
     $scope.$hide();
   };
 

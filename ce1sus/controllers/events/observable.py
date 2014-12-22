@@ -5,12 +5,13 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
-from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.db.brokers.event.observablebroker import ObservableBroker
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
-from ce1sus.db.brokers.event.attributebroker import AttributeBroker
+from ce1sus.db.brokers.event.observablebroker import ObservableBroker
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, \
+  NothingFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -68,6 +69,8 @@ class ObservableController(BaseController):
     try:
       observable = self.observable_broker.get_by_id(identifier)
       return observable
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -75,6 +78,8 @@ class ObservableController(BaseController):
     try:
       composed_observable = self.composed_observable_broker.get_by_id(identifier)
       return composed_observable
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -82,6 +87,8 @@ class ObservableController(BaseController):
     try:
       obj = self.attribute_broker.get_by_id(identifier)
       return obj
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -89,6 +96,8 @@ class ObservableController(BaseController):
     try:
       obj = self.object_broker.get_by_id(identifier)
       return obj
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -103,5 +112,58 @@ class ObservableController(BaseController):
   def remove_observable(self, observable, user, commit=True):
     try:
       self.observable_broker.remove_by_id(observable.identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_event_for_observable(self, observable):
+    try:
+      # TODO: implement recursive
+      if observable.event:
+        return observable.event
+      else:
+        composed_observables = self.composed_observable_broker.get_by_parent(observable)
+        if len(composed_observables) > 0:
+          return composed_observables[0].parent
+        else:
+          raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_event_for_obj(self, obj):
+    try:
+      # TODO: implement recursive
+      observable = obj.parent
+      if observable:
+        return self.get_event_for_observable(observable)
+      else:
+        raise ControllerNothingFoundException('Parent for object {0} cannot be found'.format(obj.identifier))
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def insert_object(self, obj, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(obj, user, user.group, True)
+      self.object_broker.insert(obj)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_object(self, obj, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(obj, user, user.group, False)
+      self.object_broker.update(obj)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_object(self, obj, user, commit=True):
+    try:
+      self.object_broker.remove_by_id(obj.identifier)
     except BrokerException as error:
       raise ControllerException(error)

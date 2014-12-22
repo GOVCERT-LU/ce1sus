@@ -6,10 +6,9 @@
 Created on Feb 5, 2014
 """
 
-import cherrypy
+import re
 
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.decorators import SESSION_USER
 
 
 __author__ = 'Weber Jean-Paul'
@@ -18,6 +17,12 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 ALLOWED_HTTP_METHODS = ['GET', 'PUT', 'POST', 'DELETE']
+
+
+def valid_uuid(uuid):
+  regex = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}\Z', re.I)
+  match = regex.match(uuid)
+  return bool(match)
 
 
 def rest_method(**kwargs):
@@ -67,6 +72,10 @@ class RestHandlerException(Exception):
   pass
 
 
+class PathParsingException(RestHandlerException):
+  pass
+
+
 class RestHandlerNotFoundException(RestHandlerException):
   """
   Exception base for handler exceptions
@@ -101,3 +110,49 @@ class RestBaseHandler(BaseView):
     else:
       inflated = False
     return inflated
+
+  def parse_path(self, path, method):
+    """
+    the path can either be empty or belongs to one of the following structures
+    uuid/observable
+    uuid/composed_observable
+    uuid/object
+    uuid/attribute
+
+    uuid/observable/uuid
+    uuid/composed_observable/uuid
+    uuid/object/uuid
+    uuid/attribute/uuid
+
+    Everything else will be ignored
+    """
+    result = {'event_id': None,  # uuid of the event
+              'object_type': None,
+              'object_uuid': None,
+              'sub_object': None
+              }
+    if len(path) > 0:
+      event_id = path.pop(0)
+      if valid_uuid(event_id):
+        result['event_id'] = event_id
+      else:
+        raise PathParsingException(u'{0} is not a valid uuid'.format(event_id))
+      if len(path) > 0:
+        object_type = path.pop(0)
+        result['object_type'] = object_type
+      if len(path) > 0:
+        object_uuid = path.pop(0)
+        if valid_uuid(object_uuid):
+          result['object_uuid'] = object_uuid
+        else:
+          raise PathParsingException(u'{0} is not a valid uuid'.format(object_uuid))
+      if len(path) > 0:
+        if method == 'POST':
+          # can only be used for post to elements
+          sub_object = path.pop(0)
+          result['sub_object'] = sub_object
+        else:
+          raise PathParsingException(u'Path is too long')
+      if len(path) > 0:
+        raise PathParsingException(u'Path is too long')
+    return result

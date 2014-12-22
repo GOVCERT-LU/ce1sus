@@ -46,3 +46,12 @@ class ComposedObservableBroker(BrokerBase):
       raise BrokerException(error)
 
     return result
+
+  def get_by_parent(self, observable):
+    try:
+      result = self.session.query(ObservableComposition).filter(ObservableComposition.parent_id == observable.identifier).all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('No observables found in composed observable with ID {1}'.format(observable.identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
