@@ -147,6 +147,10 @@ class EventPermissions(BitBase):
     self.can_validate = True
     self.set_groups = True
 
+  def set_default(self):
+    self.can_view = True
+    self.can_propose = True
+
   def to_dict(self):
     return {'view': self.can_view,
             'add': self.can_add,

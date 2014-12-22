@@ -5,12 +5,14 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
+from ce1sus.common.checks import is_user_priviledged, is_event_owner
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.eventbroker import EventBroker
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
-from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from ce1sus.common.checks import is_user_priviledged, is_event_owner
+from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, \
+  NothingFoundException
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 
 __author__ = 'Weber Jean-Paul'
@@ -56,8 +58,19 @@ class EventController(BaseController):
 
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(event, user, user.group, True)
+      # set the own user group to the groups of the event and fill permissions
+      permissions = self.get_event_user_permissions(event, user)
+      group = self.group_broker.get_by_id(user.group.identifier)
+
+      event_permission = EventGroupPermission()
+      event_permission.permissions = permissions
+      event_permission.group = group
+      self.set_extended_logging(event_permission, user, user.group, True)
+
+      event.groups.append(event_permission)
 
       self.event_broker.insert(event, False)
+
       # generate relations if needed!
 
       """
@@ -129,15 +142,25 @@ class EventController(BaseController):
   def get_event_user_permissions(self, event, user):
     try:
       # If is admin => give all rights the same is valid for the owenr
-      isadmin = is_user_priviledged(user)
       isowner = is_event_owner(event, user)
-      if isadmin or isowner:
+      if isowner:
         permissions = EventPermissions('0')
         permissions.set_all()
       else:
         permissions = self.event_broker.get_event_user_permissions(event, user)
         permissions = permissions.permissions
       return permissions
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      # The group was not associated to the event
+      # if the event is still not visible the event has to have a lower or equal tlp level
+      user_tlp = user.group.tlp_lvl
+      result = event.tlp.identifier >= user_tlp
+      if result:
+        permissions = EventPermissions('0')
+        # Set to default as the user can still view
+        permissions.set_default()
+        return permissions
     except BrokerException as error:
-      raise ControllerException(error)
-
+      permissions = EventPermissions('0')
+      return permissions

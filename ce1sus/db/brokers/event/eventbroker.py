@@ -37,6 +37,8 @@ class EventBroker(BrokerBase):
   def get_event_user_permissions(self, event, user):
     try:
       return self.session.query(EventGroupPermission).filter(and_(Event.identifier == event.identifier, Group.identifier == user.group.identifier))
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Group {0} was not associated to event {1}'.format(user.group.identifier, event.identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 

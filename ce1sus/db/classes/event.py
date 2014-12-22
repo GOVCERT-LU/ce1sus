@@ -40,6 +40,12 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
         self.__bit_code = EventPermissions(self.default_dbcode, self)
     return self.__default_bit_code
 
+  @permissions.setter
+  def permissions(self, value):
+    self.__bit_code = value
+    self.dbcode = value.bit_code
+    self.__bit_code.parent = self
+
 
 class Event(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(45), index=True, unique=True, nullable=False)

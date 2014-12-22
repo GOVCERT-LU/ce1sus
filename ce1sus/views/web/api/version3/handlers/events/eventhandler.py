@@ -39,7 +39,6 @@ class EventHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.stix_mapper = StixMapper(config)
-    self.event_controller = EventController(config)
     self.observable_controller = ObservableController(config)
     self.user_broker = self.event_controller.broker_factory(UserBroker)
 
@@ -92,46 +91,50 @@ class EventHandler(RestBaseHandler):
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
   def event(self, **args):
-    method = args.get('method', None)
-    path = args.get('path')
-    details = self.get_detail_value(args)
-    inflated = self.get_inflated_value(args)
-    requested_object = self.__parse_path(path, method)
-    json = args.get('json')
-    # get the event
-    event_id = requested_object.get('event_id')
-    if event_id:
-      event = self.event_controller.get_event_by_id(event_id)
-      # check if event is viewable by the current user
-      self.check_if_event_is_viewable(event)
+    try:
+      method = args.get('method', None)
+      path = args.get('path')
+      details = self.get_detail_value(args)
+      inflated = self.get_inflated_value(args)
+      requested_object = self.__parse_path(path, method)
+      json = args.get('json')
+      # get the event
+      event_id = requested_object.get('event_id')
+      if event_id:
+        event = self.event_controller.get_event_by_id(event_id)
+        # check if event is viewable by the current user
+        self.check_if_event_is_viewable(event)
 
-      if requested_object['object_type'] is None:
-        # return the event
-        return self.__process_event(method, event, details, inflated, json)
-      elif requested_object['object_type'] == 'observable':
-        return self.__process_observable(method, event, requested_object, details, inflated, json)
-      elif requested_object['object_type'] == 'observable_composition':
-        return self.__process_composed_observable(method, requested_object, details, inflated, json)
-      elif requested_object['object_type'] == 'object':
-        return self.__process_object(method, requested_object, details, inflated, json)
-      elif requested_object['object_type'] == 'attribute':
-        return self.__process_attribute(method, requested_object, details, inflated, json)
-      elif requested_object['object_type'] == 'changegroup':
-        return self.__change_event_group(method, event, json)
-      else:
-        raise PathParsingException(u'{0} is not definied'.format(requested_object['object_type']))
+        if requested_object['object_type'] is None:
+          # return the event
+          return self.__process_event(method, event, details, inflated, json)
+        elif requested_object['object_type'] == 'observable':
+          return self.__process_observable(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'observable_composition':
+          return self.__process_composed_observable(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'object':
+          return self.__process_object(method, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'attribute':
+          return self.__process_attribute(method, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'changegroup':
+          self.check_if_admin(event)
+          return self.__change_event_group(method, event, json)
+        else:
+          raise PathParsingException(u'{0} is not definied'.format(requested_object['object_type']))
 
-    else:
-      # This can only happen when a new event is inserted
-      if method == 'POST':
-        # populate event
-        event = Event()
-        event.populate(json)
-        # TODO: make relations an populate the whole event by json
-        self.event_controller.insert_event(self.get_user(), event, True, True)
-        return self.__return_event(event, details, inflated)
       else:
-        raise RestHandlerException(u'Invalid request')
+        # This can only happen when a new event is inserted
+        if method == 'POST':
+          # populate event
+          event = Event()
+          event.populate(json)
+          # TODO: make relations an populate the whole event by json
+          self.event_controller.insert_event(self.get_user(), event, True, True)
+          return self.__return_event(event, details, inflated)
+        else:
+          raise RestHandlerException(u'Invalid request')
+    except ControllerException as error:
+      raise RestHandlerException(error)
 
   def __is_event_ovner(self, method, event):
     if method == 'GET':
@@ -159,11 +162,13 @@ class EventHandler(RestBaseHandler):
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
     elif method == 'PUT':
+      self.check_if_event_is_modifiable(event)
       event.populate(json)
       # TODO: make relations an populate the whole event by json
       self.event_controller.update_event(self.get_user(), event, True, True)
       return self.__return_event(event, details, inflated)
     elif method == 'DELETE':
+      self.check_if_event_is_deletable(event)
       self.event_controller.remove_event(self.get_user(), event)
       return 'Deleted event'
 
@@ -194,15 +199,15 @@ class EventHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_composed_observable(self, method, requested_object, details, inflated, json):
+  def __process_composed_observable(self, method, event, requested_object, details, inflated, json):
     if method == 'GET':
       return self.__process_composed_observable_get(requested_object, details, inflated)
     elif method == 'POST':
-      pass
+      raise RestHandlerException('Operation not supported')
     elif method == 'PUT':
-      pass
+      raise RestHandlerException('Operation not supported')
     elif method == 'DELETE':
-      pass
+      self.event_controller.remove_event(self.get_user(), event)
 
   def __process_composed_observable_get(self, requested_object, details, inflated):
     try:

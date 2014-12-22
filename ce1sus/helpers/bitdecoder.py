@@ -32,6 +32,20 @@ class BitBase(object):
   def bit_code(self):
     return self.__bit_value
 
+  @bit_code.setter
+  def bit_code(self, value):
+    self.__bit_value = value
+    if hasattr(self.__parent_object, self.__attr_name):
+      setattr(self.__parent_object, self.__attr_name, self.bit_code)
+
+  @property
+  def parent(self):
+    return self.__parent_object
+
+  @parent.setter
+  def parent(self, parent):
+    self.__parent_object = parent
+
   def _get_bit(self, offset):
     mask = 1 << offset
     return self.__bit_value & mask

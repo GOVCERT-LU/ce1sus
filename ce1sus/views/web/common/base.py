@@ -7,7 +7,9 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import is_viewable, get_view_message
+from ce1sus.common.checks import get_view_message, is_user_priviledged
+from ce1sus.controllers.events.event import EventController
+from ce1sus.db.classes.group import EventPermissions
 from ce1sus.helpers.common.debug import Log
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
 
@@ -45,6 +47,7 @@ class BaseView(object):
     """
     self.config = config
     self.__logger = Log(config)
+    self.event_controller = EventController(config)
 
   @property
   def logger(self):
@@ -164,20 +167,61 @@ class BaseView(object):
   def set_authorized_events_cache(self, cache):
     self._put_to_session('_cp_events_cache', cache)
 
-  def check_if_event_is_viewable(self, event, user=None):
-    if user is None:
-      user = self.get_user()
-    viewable = self.is_event_viewable(event, user)
-    if not viewable:
-      raise cherrypy.HTTPError(403, 'User {0} is not authorized to view event {1}'.format(user.username, event.identifier))
+  def check_if_admin(self, event):
+    user = self.get_user()
+    isadmin = is_user_priviledged(user)
+    if not isadmin:
+      raise cherrypy.HTTPError(403, 'User {0} cannot change owner on event "{1}" as user is not privileged'.format(user.username, event.identifier))
 
-  def is_event_viewable(self, event, user=None):
-    if user is None:
-      user = self.get_user()
+  def check_if_event_is_viewable(self, event):
+    self.check_permission(event, 'can_view')
+
+  def check_if_event_is_modifiable(self, event):
+    self.check_permission(event, 'can_modify')
+
+  def check_if_event_is_deletable(self, event):
+    self.check_permission(event, 'can_delete')
+
+  def check_permission(self, event, permission):
+    user = self.get_user()
+    result = self.is_user_allowed_to_perform(event, permission, user)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User {0} is not authorized perform action "{2}" on event {1}'.format(user.username, event.identifier, permission))
+
+  def is_user_allowed_to_perform(self, event, permission, user):
     cache = self.get_authorized_events_cache()
-    viewable = is_viewable(event, user, cache)
-    log_msg = get_view_message(viewable, event.identifier, user.username)
-    # update cache
+    result = None
+    if event:
+      # check if cache
+      if cache:
+        permissions = cache.get(event.identifier, None)
+        # if None the event is not available inside the cache
+        if permissions:
+          if isinstance(permissions, EventPermissions):
+            result = permissions.can_view
+          else:
+            result = permissions
+
+      if not result:
+        # either there was no cache or the event was not inside the cache perform checks
+        permissions = self.event_controller.get_event_user_permissions(event, user)
+        if isinstance(permissions, EventPermissions):
+          if hasattr(permissions, permission):
+            result = getattr(permissions, permission)
+        else:
+          result = False
+        # put result in the cache if there is one
+        cache[event.identifier] = result
+        # perform checks
+    else:
+      result = False
+
     self.set_authorized_events_cache(cache)
+    # if the result is still not set throw an error
+    log_msg = get_view_message(result, event.identifier, user.username, permission)
+    # update cache
     self.logger.info(log_msg)
-    return viewable
+    if result:
+      return result
+    else:
+      raise Exception(u'Unknown error occurred during event checks')
