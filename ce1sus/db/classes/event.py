@@ -25,8 +25,8 @@ __license__ = 'GPL v3+'
 
 
 class EventGroupPermission(ExtendedLogingInformations, Base):
-  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id'), nullable=False, index=True)
-  group_id = Column('group_id', Unicode(40), ForeignKey('groups.group_id'), nullable=False, index=True)
+  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+  group_id = Column('group_id', Unicode(40), ForeignKey('groups.group_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
@@ -54,6 +54,7 @@ class Event(ExtendedLogingInformations, Base):
   status_id = Column('status_id', Integer(1), default=0, nullable=False)
   risk_id = Column('risk_id', Integer(1), nullable=False, default=0)
   analysis_id = Column('analysis_id', Integer(1), nullable=False, default=0)
+  comments = relationship('Comment')
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
@@ -170,6 +171,10 @@ class Event(ExtendedLogingInformations, Base):
     else:
       observables = None
     if complete:
+      comments = list()
+      for comment in self.comments:
+        comments.append(comment.to_dict())
+
       result = {'identifier': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
                 'description': self.convert_value(self.description),
@@ -186,7 +191,8 @@ class Event(ExtendedLogingInformations, Base):
                 'first_seen': self.convert_value(None),
                 'last_seen': self.convert_value(None),
                 'observables': observables,
-                'observables_count': len(self.observables)
+                'observables_count': len(self.observables),
+                'comments': comments
                 }
     else:
       result = {'identifier': self.convert_value(self.identifier),
@@ -218,3 +224,31 @@ class Event(ExtendedLogingInformations, Base):
     self.analysis = json.get('analysis', 'Unknown').title()
     # TODO: populate properties
     # self.published = json.get('published', None)
+
+
+class Comment(ExtendedLogingInformations, Base):
+  event_id = Column(Unicode(40), ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+  event = relationship('Event')
+  comment = Column('comment', UnicodeText, nullable=False)
+
+  def to_dict(self, complete=True, inflated=False):
+    if complete:
+      result = {'identifier': self.convert_value(self.identifier),
+                'comment': self.convert_value(self.comment),
+                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'created_at': self.convert_value(self.created_at),
+                'modified_on': self.convert_value(self.modified_on),
+                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                }
+    else:
+      result = {'identifier': self.convert_value(self.identifier),
+                'comment': self.convert_value(self.comment),
+                }
+    return result
+
+  def populate(self, json):
+    self.comment = json.get('comment', None)
+
+  def validate(self):
+    # TODO: Validation of comments
+    return True

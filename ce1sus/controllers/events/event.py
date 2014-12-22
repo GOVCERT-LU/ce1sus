@@ -5,13 +5,13 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
-from ce1sus.common.checks import is_user_priviledged, is_event_owner
-from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.common.checks import is_event_owner
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.events.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, \
-  NothingFoundException
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 
@@ -40,6 +40,7 @@ class EventController(BaseController):
   def __init__(self, config):
     BaseController.__init__(self, config)
     self.event_broker = self.broker_factory(EventBroker)
+    self.comment_broker = self.broker_factory(CommentBroker)
 
   def insert_event(self, user, event, mkrelations=True, commit=True):
     """
@@ -125,6 +126,9 @@ class EventController(BaseController):
     try:
       event = self.event_broker.get_by_id(identifier)
       return event
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -164,3 +168,34 @@ class EventController(BaseController):
     except BrokerException as error:
       permissions = EventPermissions('0')
       return permissions
+
+  def get_comment_by_id(self, identifer):
+    try:
+      return self.comment_broker.get_by_id(identifer)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def insert_comment(self, user, comment):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(comment, user, user.group, True)
+      self.comment_broker.insert(comment, True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_comment(self, user, comment):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(comment, user, user.group, False)
+      self.comment_broker.update(comment, True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_comment(self, user, comment):
+    try:
+      self.comment_broker.remove_by_id(comment.identifier)
+    except BrokerException as error:
+      raise ControllerException(error)

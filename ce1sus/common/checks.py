@@ -5,7 +5,6 @@
 
 Created on Jan 30, 2014
 """
-from ce1sus.db.classes.group import EventPermissions
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

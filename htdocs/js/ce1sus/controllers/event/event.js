@@ -270,7 +270,7 @@ app.controller("editEventController", function($scope, Restangular, messages,
   };
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, useradmin, groups) {
+    $log, $routeSegment, $location, useradmin, groups, $modal) {
   $scope.isAdmin = useradmin;
   $scope.groups = groups;
   $scope.removeEvent = function(){
@@ -294,6 +294,34 @@ app.controller("eventOverviewController", function($scope, Restangular, messages
       });
     }
   };
+  
+  $scope.removeComment = function(comment){
+    if (confirm('Are you sure you want to delete this comment?')) {
+      //restangularize Element
+      restangularComment = Restangular.restangularizeElement($scope.event, comment, 'comment');
+      restangularComment.remove().then(function (data) {
+        if (data) {
+          //remove the selected user and then go to the first one in case it exists
+          var index = $scope.event.comments.indexOf(comment);
+          $scope.event.comments.splice(index, 1);
+          messages.setMessage({'type':'success','message':'Comment sucessfully removed'});
+        }
+      }, function (response) {
+        handleError(response, messages);
+      });
+    }
+  };
+  
+  $scope.showCommentDetails = function(comment){
+    $scope.commentDetails = comment;
+    $modal({scope: $scope, template: 'pages/events/event/modals/commentdetails.html', show: true});
+  };
+  
+  $scope.editCommentDetails = function(comment){
+    $scope.commentDetails = comment;
+    $modal({scope: $scope, template: 'pages/events/event/modals/editcomment.html', show: true});
+  };
+  
 });
 
 app.controller("changeOwnerController", function($scope, Restangular, messages,
@@ -347,6 +375,66 @@ app.controller("changeOwnerController", function($scope, Restangular, messages,
   };
 
   $scope.closeModal = function(){
+    $scope.$hide();
+  };
+});
+
+app.controller("addEventCommentController", function($scope, Restangular, messages,
+    $log, $routeSegment) {
+  var original_comment = {};
+  $scope.comment = {};
+  
+  $scope.commentChanged = function (){
+    return !angular.equals($scope.comment, original_comment);
+  };
+  
+  $scope.resetComment = function (){
+    $scope.comment = angular.copy(original_comment);
+  };
+  
+  $scope.submitComment = function(){
+    Restangular.one("event", $routeSegment.$routeParams.id).post('comment',$scope.comment).then(function (data) {
+      messages.setMessage({'type':'success','message':'Comment sucessfully added'});
+      $scope.event.comments.push(data);
+    }, function (response) {
+      $scope.comment = angular.copy(original_comment);
+      handleError(response, messages);
+    });
+    $scope.$hide();
+  };
+
+  $scope.closeModal = function(){
+    $scope.comment = angular.copy(original_comment);
+    $scope.$hide();
+  };
+});
+
+app.controller("editEventCommentController", function($scope, Restangular, messages,
+    $log, $routeSegment) {
+  var original_comment = angular.copy($scope.commentDetails);
+  
+  $scope.commentChanged = function (){
+    return !angular.equals($scope.commentDetails, original_comment);
+  };
+  
+  $scope.resetComment = function (){
+    $scope.commentDetails = angular.copy(original_comment);
+  };
+  
+  $scope.submitComment = function(){
+    restangularComment = Restangular.restangularizeElement($scope.event, $scope.commentDetails, 'comment');
+    restangularComment.put().then(function (data) {
+      messages.setMessage({'type':'success','message':'Comment sucessfully editied'});
+
+    }, function (response) {
+      $scope.commentDetails = angular.copy(original_comment);
+      handleError(response, messages);
+    });
+    $scope.$hide();
+  };
+
+  $scope.closeModal = function(){
+    $scope.commentDetails = angular.copy(original_comment);
     $scope.$hide();
   };
 });

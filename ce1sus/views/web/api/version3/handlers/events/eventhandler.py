@@ -9,13 +9,12 @@ import cherrypy
 import re
 
 from ce1sus.common.checks import is_user_priviledged, is_event_owner
-from ce1sus.controllers.base import ControllerException
-from ce1sus.controllers.events.event import EventController
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.brokers.permissions.user import UserBroker
-from ce1sus.db.classes.event import Event
+from ce1sus.db.classes.event import Event, Comment
 from ce1sus.mappers.stix.stixmapper import StixMapper
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -119,6 +118,8 @@ class EventHandler(RestBaseHandler):
         elif requested_object['object_type'] == 'changegroup':
           self.check_if_admin(event)
           return self.__change_event_group(method, event, json)
+        elif requested_object['object_type'] == 'comment':
+          return self.__process_commment(method, event, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not definied'.format(requested_object['object_type']))
 
@@ -133,6 +134,8 @@ class EventHandler(RestBaseHandler):
           return self.__return_event(event, details, inflated)
         else:
           raise RestHandlerException(u'Invalid request')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
 
@@ -154,6 +157,30 @@ class EventHandler(RestBaseHandler):
         raise cherrypy.HTTPError(403, 'No allowed')
     else:
       raise RestHandlerException(u'Invalid request')
+
+  def __process_commment(self, method, event, requested_object, details, inflated, json):
+    self.check_if_owner(event)
+    user = self.get_user()
+    if method == 'POST':
+      comment = Comment()
+      comment.populate(json)
+      comment.event_id = event.identifier
+      self.event_controller.insert_comment(user, comment)
+      return comment.to_dict(details, inflated)
+    else:
+      comment_id = requested_object['object_uuid']
+      comment = self.event_controller.get_comment_by_id(comment_id)
+      if method == 'GET':
+        return comment.to_dict(details, inflated)
+      elif method == 'PUT':
+        comment.populate(json)
+        self.event_controller.update_comment(user, comment)
+        return comment.to_dict(details, inflated)
+      elif method == 'DELETE':
+        self.event_controller.remove_comment(user, comment)
+        return 'Deleted comment'
+      else:
+        raise RestHandlerException(u'Invalid request')
 
   def __process_event(self, method, event, details, inflated, json):
     if method == 'GET':
@@ -264,9 +291,11 @@ class EventHandler(RestBaseHandler):
 
   def __return_event(self, event, details, inflated):
     # Add additional permissions for the user itsel
-    event_permission = self.event_controller.get_event_user_permissions(event, self.get_user())
+    user = self.get_user()
+    event_permission = self.event_controller.get_event_user_permissions(event, user)
     result = event.to_dict(details, inflated)
     result['userpermissions'] = event_permission.to_dict()
+    result['userpermissions']['owner'] = is_event_owner(event, user)
     return result
 
   """

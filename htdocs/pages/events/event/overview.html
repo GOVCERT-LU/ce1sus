@@ -162,24 +162,31 @@
   <tbody>
   </tbody>
 </table>
-<div ng-show="isOwner">
+<div ng-show="event.userpermissions.owner">
   <legend>Comments</legend>
   <table class="table table-striped table-hover table-condensed">
     <thead>
       <tr>
-        <th>#</th>
         <th>Comment</th>
         <th>Date</th>
-        <th>User</th>
         <th width="150px">Options</th>
       </tr>
     </thead>
-    <tbody>
-    </tbody>
+      <tbody>
+        <tr ng-repeat="comment in event.comments">
+          <td>{{comment.comment}}</td>
+          <td>{{comment.created_at}}</td>
+          <td>
+            <a class="hand" ng-click="showCommentDetails(comment)"><span class="glyphicon glyphicon-eye-open"></span></a>
+            <a class="hand" ng-click="editCommentDetails(comment)"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a class="hand red" ng-click="removeComment(comment)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+          </td>
+        </tr>
+      </tbody>
   </table>
   <div class="btn-group">
-    <a href="#addComment${event.identifier}Modal" role="button"
-      class="btn btn-default" data-toggle="modal" onclick="">Add new
-      Comment</a>
+    <button type="button" class="btn btn-default" data-template="pages/events/event/modals/addcomment.html" bs-modal="modal">Add new
+      Comment
+    </button>
   </div>
 </div>

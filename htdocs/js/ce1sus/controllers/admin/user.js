@@ -52,9 +52,10 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
     Restangular.all("user").post($scope.user).then(function (data) {
       
       if (data) {
-        $location.path("/events/event/"+ data.identifier);
+        $scope.users.push(data);
+        $location.path("/admin/user/"+ data.identifier);
       }
-      messages.setMessage({'type':'success','message':'Event sucessfully added'});
+      messages.setMessage({'type':'success','message':'User sucessfully added'});
       
     }, function (response) {
       $scope.$parent.user = angular.copy(original_user);

@@ -7,7 +7,8 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged
+from ce1sus.common.checks import get_view_message, is_user_priviledged, \
+  is_event_owner
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.helpers.common.debug import Log
@@ -187,6 +188,12 @@ class BaseView(object):
     result = self.is_user_allowed_to_perform(event, permission, user)
     if not result:
       raise cherrypy.HTTPError(403, 'User {0} is not authorized perform action "{2}" on event {1}'.format(user.username, event.identifier, permission))
+
+  def check_if_owner(self, event):
+    user = self.get_user()
+    owner = is_event_owner(event, user)
+    if not owner:
+      raise cherrypy.HTTPError(403, 'User {0} is not owner of event {1}'.format(user.username, event.identifier))
 
   def is_user_allowed_to_perform(self, event, permission, user):
     cache = self.get_authorized_events_cache()

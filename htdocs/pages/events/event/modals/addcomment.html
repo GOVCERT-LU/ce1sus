@@ -1,0 +1,43 @@
+<div class="modal" tabindex="-1" role="dialog" ng-controller="addEventCommentController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Add Comment for Event {{event.identifier}}</h4>
+        </div>
+        <div class="modal-body">
+          <form name="addCommentForm" class="form-horizontal" role="form" novalidate>
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Comment*</label>
+              <div class="col-lg-9">
+                <div
+                  ng-class="{ 'has-error' :addCommentForm.comment.$invalid && !addCommentForm.comment.$pristine }">
+                  <textarea name="comment" ng-model="comment.comment"
+                    cols=48 rows=20 ng-minlength=3 required></textarea>
+                  <p
+                    ng-show="addCommentForm.comment.$invalid && !addCommentForm.comment.$pristine"
+                    class="help-block">Comment is required.</p>
+                  <p ng-show="addCommentForm.comment.$error.minlength"
+                    class="help-block">Comment is too short.</p>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!commentChanged() || addCommentForm.$invalid"
+              ng-click="submitComment()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetComment()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

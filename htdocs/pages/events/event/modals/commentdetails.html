@@ -1,0 +1,27 @@
+<div class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$hide()">&times;</button>
+          <h4 class="modal-title">Comment {{commentDetails.identifier}}</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+              <label class="col-lg-3 control-label text-right">Comment*</label>
+              <div class="col-lg-9">
+                  {{commentDetails.comment}}
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default"
+              ng-click="$hide()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>
