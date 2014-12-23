@@ -70,20 +70,16 @@ app.controller("eventObservableController", function($scope, Restangular, messag
     $log, $routeSegment, $location,observables, $anchorScroll, Pagination) {
   $scope.permissions=$scope.event.userpermissions;
   $scope.getAttributes=function(){
-    function processObservavle(attributes, observable, composed){
-      if (observable.observable_composition){
-        angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
-          processObservavle(attributes, compobservable, observable.observable_composition);
-        },$log);
-      } else {
-        angular.forEach(observable.object.attributes, function(attribute, index) {
+    var attributes = [];
+    function generateItems(object, observable, composed){
+      if (object.attributes.length > 0) {
+        angular.forEach(object.attributes, function(attribute, index) {
           var item = {};
           item.value = attribute.value;
           item.definition = attribute.definition;
           item.ioc = attribute.ioc;
           item.shared = attribute.shared;
-          item.object = observable.object.definition.name;
-          //TODO: add referenced Objects
+          item.object = object.definition.name;
           item.observable = observable.title;
           if (composed) {
             item.composed = composed.title;
@@ -92,11 +88,38 @@ app.controller("eventObservableController", function($scope, Restangular, messag
           }
           attributes.push(item);
         }, $log);
+      } else {
+        var item = {};
+        item.observable = observable.title;
+        item.object = object.definition.name;
+        item.value = 'No attributes were definied';
+        attributes.push(item);
+      }
+      // continue with the related objects
+      angular.forEach(object.related_objects, function(relObject) {
+        generateItems(relObject.object, observable);
+      }, $log);
+    }
+    
+    function processObservavle(observable, composed){
+      if (observable.observable_composition){
+        angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
+          processObservavle(compobservable, observable.observable_composition);
+        },$log);
+      } else {
+        if (observable.object) {
+          generateItems(observable.object, observable, composed);
+        } else {
+          var item = {};
+          item.observable = observable.title;
+          item.object = 'No objects were definied';
+          attributes.push(item);
+        }
       }
     }
-    var attributes = [];
-    angular.forEach($scope.observables, function(observable, index) {
-      processObservavle(attributes, observable, null);
+    
+    angular.forEach($scope.observables, function(observable) {
+      processObservavle(observable, null);
     }, $log);
     return attributes;
   };

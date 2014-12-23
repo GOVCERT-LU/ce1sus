@@ -61,11 +61,11 @@
           <td><span ng-if="attributeflat.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
           <td>
           
-          <a class="hand" ng-click="showAttributeDetails(attributeflat)"><span class="glyphicon glyphicon-eye-open"></span></a>
+          <a class="hand" ng-click="showAttributeDetails(attributeflat)" ng-show="attributeflat.definition"><span class="glyphicon glyphicon-eye-open"></span></a>
           &nbsp;
-          <a class="hand"><span class="glyphicon glyphicon-pencil"></span></a>
+          <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify && attributeflat.definition"></span></a>
           &nbsp;
-          <a class="hand red" ng-click="removeAttribute(attributeflat)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+          <a class="hand red" ng-click="removeAttribute(attributeflat)" ng-show="permissions.delete && attributeflat.definition"><span class="glyphicon glyphicon-remove-circle"></span></a>
           </td>
         </tr>
       </tbody>
