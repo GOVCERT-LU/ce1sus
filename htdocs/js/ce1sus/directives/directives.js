@@ -550,27 +550,30 @@ app.directive("object", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal){
+    controller: function($scope, $modal, Restangular){
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
       };
       $scope.removeObject = function(){
         if (confirm('Are you sure you want to delete this object?')) {
           var remove = false;
-          if ($scope.object.related_objects_count > 0) {
+          if ($scope.object.related_objects.length > 0) {
             remove = confirm('Are you sure you want also it\'s children?');
           } else {
             remove = true;
           }
           if (remove){
-            //find a way to do this more neatly see $parent.$parent, perhaps this changes!?
-            if ($scope.$parent.observable) {
-              $scope.$parent.observable.object = null;
-            } else {
-              var index = $scope.$parent.object.related_objects.indexOf($scope.object);
-              $scope.$parent.object.related_objects.splice(index, 1);
-            }
-            
+            restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
+            restangularObject.remove().then(function (data) {
+              if ($scope.$parent.observable) {
+                $scope.$parent.observable.object = null;
+              } else {
+                var index = $scope.$parent.object.related_objects.indexOf($scope.object);
+                $scope.$parent.object.related_objects.splice(index, 1);
+              }
+            }, function (response) {
+              handleError(response, messages);
+            });
           }
         }
       };
@@ -585,6 +588,8 @@ app.directive("object", function($compile) {
         $scope.attributeDetails = attribute;
         $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
       };
+      
+      //TODO: edit Attribute
       
       $scope.addChildObject = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
@@ -699,11 +704,18 @@ app.directive("observableObjectForm", function() {
     restrict: "E",
     scope: {
       observableobject: "=observableobject",
-      editMode: "=edit",
+      child: "=child",
       definitions: '='
     },
     controller: function($scope, Restangular){
-
+      if ($scope.child) {
+        //get the possible relations and add None
+        Restangular.one('relations').getList().then(function(relations) {
+          $scope.relations = relations;
+        }, function(response) {
+          throw generateErrorMessage(response);
+        });
+      } 
     },
     templateUrl: "pages/common/directives/observableobjectform.html"
   };

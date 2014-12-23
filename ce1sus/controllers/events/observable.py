@@ -12,6 +12,7 @@ from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, \
   NothingFoundException
+from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,6 +30,7 @@ class ObservableController(BaseController):
     self.composed_observable_broker = self.broker_factory(ComposedObservableBroker)
     self.object_broker = self.broker_factory(ObjectBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
+    self.related_object_broker = self.broker_factory(RelatedObjectBroker)
 
   def insert_observable(self, observable, user, commit=True):
     """
@@ -135,12 +137,7 @@ class ObservableController(BaseController):
 
   def get_event_for_obj(self, obj):
     try:
-      # TODO: implement recursive
-      observable = obj.parent
-      if observable:
-        return self.get_event_for_observable(observable)
-      else:
-        raise ControllerNothingFoundException('Parent for object {0} cannot be found'.format(obj.identifier))
+      return self.get_event_for_observable(obj.observable)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:

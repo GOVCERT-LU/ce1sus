@@ -95,9 +95,8 @@ app.controller("objectChildAddController", function($scope, Restangular, message
     }
     var objectID = $scope.$parent.$parent.object.identifier;
     Restangular.one('object', objectID).post('object', $scope.childObject, {'complete':true, 'infated':true}).then(function (data) {
-      $scope.$parent.appendObservableObject(data);
+      $scope.$parent.$parent.object.related_objects.push(data);
     }, function (response) {
-      $scope.childObject = angular.copy(original_childObject);
       handleError(response, messages);
     });
     $scope.$hide();

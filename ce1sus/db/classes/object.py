@@ -45,7 +45,9 @@ class Object(ExtendedLogingInformations, Base):
   related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   dbcode = Column('code', Integer)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
-  parent = relationship('Observable', back_populates='object', uselist=False)
+  parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
+  observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
   def validate(self):
     return True

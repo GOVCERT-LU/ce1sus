@@ -60,7 +60,7 @@ class Event(ExtendedLogingInformations, Base):
   # TODO: Add administration of minimal objects -> checked before publishing
 
   groups = relationship('EventGroupPermission')
-  observables = relationship(Observable)
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
   indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer)

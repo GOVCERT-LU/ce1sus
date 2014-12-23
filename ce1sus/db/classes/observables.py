@@ -67,13 +67,15 @@ class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True, unique=True)
   description = Column('description', UnicodeText)
-  object = relationship('Object', back_populates='parent', uselist=False, lazy='joined')
+  object = relationship('Object', back_populates='parent', uselist=False, lazy='joined', primaryjoin='Object.parent_id==Observable.identifier')
   observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   keywords = relationship('ObservableKeyword', backref='observable')
-  event = relationship('Event', uselist=False)
+  event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
   event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
   dbcode = Column('code', Integer)
+  parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
+  parent_id = Column('parent_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   __bit_code = None
 
   @property

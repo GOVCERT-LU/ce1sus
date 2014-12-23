@@ -37,7 +37,7 @@ class ObservableHandler(RestBaseHandler):
       # get the event
       observable_id = requested_object.get('event_id')
       if observable_id:
-        observable = self.observable_controller.get_object_by_id(observable_id)
+        observable = self.observable_controller.get_observable_by_id(observable_id)
         event = self.observable_controller.get_event_for_observable(observable)
         # check if event is viewable by the current user
         self.check_if_event_is_viewable(event)
@@ -81,7 +81,7 @@ class ObservableHandler(RestBaseHandler):
       obj = Object()
       obj.parent = observable
       obj.populate(json)
-
+      obj.observable_id = observable.identifier
       self.observable_controller.insert_object(obj, user, True)
       return obj.to_dict(details, inflated)
     else:

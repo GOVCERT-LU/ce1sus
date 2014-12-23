@@ -9,6 +9,16 @@
       </select>
     </div>
   </div>
+  <div class="row" ng-if="child">
+    <label class="col-lg-3 control-label text-right">Relation</label>
+    <div class="col-lg-9">
+      <select name="relation" class="form-control"
+        ng-options="relation.name as relation.description for relation in relations"
+        ng-model="observableobject.relation">
+        <option style="display: none" value="">Select a definition</option>
+      </select>
+    </div>
+  </div>
   <div class="row" ng-if="observableobject.definition_id">
     <label class="col-lg-3 control-label text-right">Shared</label>
     <div class="col-lg-9">

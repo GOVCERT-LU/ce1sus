@@ -96,18 +96,20 @@ class ObjectHandler(RestBaseHandler):
     if method == 'POST':
       child_obj = Object()
       child_obj.populate(json)
+      child_obj.observable_id = obj.observable_id
       self.observable_controller.insert_object(child_obj, user, False)
 
       # update parent
-      relatedObject = RelatedObject()
-      relatedObject.parent_id = obj.identifier
-      relatedObject.child_id = child_obj.identifier
-      relatedObject.relation = json.get('relation', None)
+      related_object = RelatedObject()
+      related_object.parent_id = obj.identifier
+      related_object.child_id = child_obj.identifier
+      related_object.object = child_obj
+      related_object.relation = json.get('relation', None)
 
-      obj.related_objects.append(relatedObject)
+      obj.related_objects.append(related_object)
       self.observable_controller.update_object(child_obj, user, True)
 
-      return child_obj.to_dict(details, inflated)
+      return related_object.to_dict(details, inflated)
     else:
       object_id = requested_object['object_uuid']
       if object_id:

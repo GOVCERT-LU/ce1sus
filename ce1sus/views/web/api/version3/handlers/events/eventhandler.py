@@ -145,6 +145,7 @@ class EventHandler(RestBaseHandler):
       observable = Observable()
       observable.event_id = event.identifier
       observable.populate(json)
+      observable.parent_id = event.identifier
       self.observable_controller.insert_observable(observable, user, True)
       return observable.to_dict(details, inflated)
     else:
