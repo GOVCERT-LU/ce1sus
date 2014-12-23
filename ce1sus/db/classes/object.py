@@ -31,8 +31,13 @@ class RelatedObject(Base):
   def to_dict(self, complete=True, inflated=False):
     return {'identifier': self.convert_value(self.identifier),
             'object': self.object.to_dict(complete, inflated),
-            'relation': self.convert_value(self.relation)
+            'relation': self.convert_value(self.relation),
+            'parent_id': self.convert_value(self.parent_id)
             }
+
+  def validate(self):
+    # TODO: validate
+    return True
 
 
 class Object(ExtendedLogingInformations, Base):
@@ -43,7 +48,7 @@ class Object(ExtendedLogingInformations, Base):
   definition = relationship('ObjectDefinition', lazy='joined')
 
   related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, nullable=False, default=0)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
@@ -99,9 +104,17 @@ class Object(ExtendedLogingInformations, Base):
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
             'related_objects': related,
-            'related_objects_count': related_count
+            'related_objects_count': related_count,
+            'properties': self.properties.to_dict(),
+            'observable_id': self.convert_value(self.observable_id)
             }
 
   def populate(self, json):
     # TODO: if inflated
-    self.definition_id = json.get('definition_id', None)
+    definition_id = json.get('definition_id', None)
+    if not definition_id:
+      definition = json.get('definition', None)
+      if definition:
+        definition_id = definition.get('identifier', None)
+    self.definition_id = definition_id
+    self.properties.populate(json.get('properties', None))

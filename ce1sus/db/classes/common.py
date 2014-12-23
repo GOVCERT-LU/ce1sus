@@ -167,23 +167,16 @@ class Properties(BitBase):
 
   """
   The __bit_value is defined as follows:
-  [0] : Web insert
-  [1] : Rest insert
-  [2] : Is validated
-  [3] : Is sharable - On event lvl it has the same meaning as published
-  [4] : Is proposal
+  [0] : Is validated
+  [1] : Is sharable - On event lvl it has the same meaning as published
+  [2] : Is proposal
   """
-
-  # 1
-  WEB_INSERT = 0
-  # 2
-  REST_INSERT = 1
   # 4
-  VALIDATED = 2
+  VALIDATED = 0
   # 8
-  SHARABLE = 3
+  SHARABLE = 1
   # 16
-  PROPOSAL = 4
+  PROPOSAL = 2
 
   @property
   def is_proposal(self):
@@ -228,3 +221,18 @@ class Properties(BitBase):
   @is_shareable.setter
   def is_shareable(self, value):
     self._set_value(Properties.SHARABLE, value)
+
+  def to_dict(self):
+    return {'validated': self.is_validated,
+            'shared': self.is_shareable,
+            'proposal': self.is_proposal
+            }
+
+  def populate(self, json):
+    if json:
+      validated = json.get('validated', False)
+      self.is_validated = validated
+
+      share = json.get('shared', False)
+      self.is_shareable = share
+      # Note proposal is handled internally only by the engine

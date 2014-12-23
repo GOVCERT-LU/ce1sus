@@ -63,7 +63,7 @@ class Event(ExtendedLogingInformations, Base):
   observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
   indicators = relationship(Indicator)
   __tlp_obj = None
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
 
@@ -199,7 +199,8 @@ class Event(ExtendedLogingInformations, Base):
                 'last_seen': self.convert_value(None),
                 'observables': observables,
                 'observables_count': observables_count,
-                'comments': comments
+                'comments': comments,
+                'properties': self.properties.to_dict()
                 }
     else:
       result = {'identifier': self.convert_value(self.identifier),
@@ -217,7 +218,9 @@ class Event(ExtendedLogingInformations, Base):
                 'status': self.convert_value(self.status),
                 'tlp': self.convert_value(self.tlp),
                 'analysis': self.convert_value(self.analysis),
-                'creator_group': self.creator_group.to_dict(complete, inflated)
+                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'comments': None,
+                'properties': self.properties.to_dict()
                 }
     return result
 
@@ -229,6 +232,7 @@ class Event(ExtendedLogingInformations, Base):
     self.status = json.get('status', 'Draft').title()
     self.tlp = json.get('tlp', 'Amber').title()
     self.analysis = json.get('analysis', 'Unknown').title()
+    self.properties.populate(json.get('properties', None))
     # TODO: populate properties
     # self.published = json.get('published', None)
 

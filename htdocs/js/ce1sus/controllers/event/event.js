@@ -68,6 +68,7 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 
 app.controller("eventObservableController", function($scope, Restangular, messages,
     $log, $routeSegment, $location,observables, $anchorScroll, Pagination) {
+  $scope.permissions=$scope.event.userpermissions;
   $scope.getAttributes=function(){
     function processObservavle(attributes, observable, composed){
       if (observable.observable_composition){

@@ -63,7 +63,7 @@ class Attribute(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
 
   @property
@@ -191,4 +191,5 @@ class Attribute(ExtendedLogingInformations, Base):
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            'properties': self.properties.to_dict()
             }

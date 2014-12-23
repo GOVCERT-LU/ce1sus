@@ -1,0 +1,42 @@
+<div class="modal" role="dialog" ng-controller="observableObjectPropertiesController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()">&times;</button>
+        <h4 class="modal-title">Object - {{object.definition.name}}</h4>
+      </div>
+      <div class="modal-body">
+        <form name="editObjectPropertiesForm" class="form-horizontal" role="form" novalidate>
+          <div class="row">
+            <div class="col-md-3">
+              <b>Identifier</b>
+            </div>
+            <div class="col-md-9">
+              {{object.identifier}}
+            </div>
+          </div>
+          <div class="row" ng-if="object.parent_object_id != null">
+            <div class="col-md-3">
+              <b>Parent *</b>
+            </div>
+            <div class="col-md-9">
+              <select name="relation" class="form-control"
+                ng-options="obsObject.identifier as get_name(obsObject)  for obsObject in objects"
+                ng-model="object.parent_object_id">
+                <option style="display: none" value="">Select a parent object</option>
+              </select>
+            </div>
+          </div>
+          <object-properties-form object="object" type="'edit'" permissions="permissions" ></object-properties-form>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-group">
+          <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!objectChanged() || editObjectPropertiesForm.$invalid" ng-click="submitObject()">Save</button>
+          <button name="reset" type="button" class="btn btn-default" ng-click="resetObject()">Reset</button>
+          <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

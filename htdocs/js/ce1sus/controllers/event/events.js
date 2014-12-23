@@ -19,7 +19,7 @@ app.controller("eventsController", function($scope, Restangular, messages,
       total: 0, // length of data
       getData: function($defer, params) {
         // Make restangular call
-        Restangular.one("events").get(params.url(), {"Complete": false}).then(function(data) {
+        Restangular.one("events").get(params.url(), {"complete": false}).then(function(data) {
           if (data) {
             //Set total 
             params.total(data.total);

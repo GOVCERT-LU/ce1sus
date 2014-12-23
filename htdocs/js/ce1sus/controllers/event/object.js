@@ -4,10 +4,10 @@
 
 app.controller("observableObjectAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("objectdefinition").getList(null, null, {"Complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
-      throw generateErrorMessage(response);
+    handleError(response, messages);
   });
   
   var original_observableObject = {};
@@ -54,7 +54,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
 
 app.controller("objectChildAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("objectdefinition").getList(null, null, {"Complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
       throw generateErrorMessage(response);
@@ -102,4 +102,86 @@ app.controller("objectChildAddController", function($scope, Restangular, message
     $scope.$hide();
   };
 
+});
+
+app.controller("observableObjectPropertiesController", function($scope, Restangular, messages, $routeSegment,$log) {
+  
+  //set the id of the parent
+  if ($scope.$parent.$parent.$parent.$parent.object) {
+    $scope.object.parent_object_id = $scope.$parent.$parent.$parent.$parent.object.identifier;
+  } else {
+    $scope.object.parent_object_id = null;
+  }
+  if ($scope.object.parent_object_id) {
+    Restangular.one("observable", $scope.object.observable_id).one("object").getList(null, {"complete": false, "flat": true}).then(function (objects) {
+      $scope.objects = objects;
+      //remove the object it self
+      var index = 0;
+      angular.forEach($scope.objects, function(entry) {
+        if (entry.identifier == $scope.object.identifier){
+          $scope.objects.splice(index,1);
+        }
+
+        index++;
+      }, $log);
+      index = 0;
+      //remove the parent object
+      angular.forEach($scope.objects, function(entry) {
+        if (entry.identifier == $scope.object.parent_object_id){
+          $scope.objects.splice(index,1);
+        }
+
+        index++;
+      }, $log);
+    }, function(response) {
+        throw generateErrorMessage(response);
+    });
+  } else {
+    $scope.objects = [];
+  }
+  
+  $scope.get_name = function(object){
+    if (object.identifier) {
+      return object.definition.name + ' - '+object.identifier;
+    } else {
+      return object.definition.name;
+    }
+  };
+  
+  
+
+  
+  var original_object = angular.copy($scope.object);
+  
+  $scope.closeModal = function(){
+    $scope.object = angular.copy(original_object);
+    $scope.$hide();
+  };
+  
+  //Scope functions
+  $scope.resetObject = function ()
+  {
+    $scope.object = angular.copy(original_object);
+
+  };
+  
+
+  
+  $scope.objectChanged = function ()
+  {
+    return !angular.equals($scope.object, original_object);
+  };
+  
+  $scope.submitObject = function(){
+    //restangularize object
+    restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
+    restangularObject.put({'complete':false, 'infated':false}).then(function (data) {
+      $scope.$hide();
+      $routeSegment.chain[4].reload();
+    }, function (response) {
+      handleError(response, messages);
+      $scope.$hide();
+    });
+    
+  };
 });

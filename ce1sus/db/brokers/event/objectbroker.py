@@ -6,11 +6,9 @@ for inserting data into the database.
 Created on Jul 9, 2013
 """
 import sqlalchemy.orm.exc
-from sqlalchemy.sql.expression import or_, and_, not_, distinct
 
-from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.object import Object
-from ce1sus.db.common.broker import BrokerBase
+from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -32,3 +30,13 @@ class ObjectBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Object
+
+  def get_all_by_observable_id(self, identifier):
+    try:
+
+      result = self.session.query(Object).filter(Object.observable_id == identifier).all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

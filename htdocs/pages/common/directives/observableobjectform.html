@@ -1,6 +1,6 @@
 <form name="addObservableObjectForm" class="form-horizontal" role="form" novalidate>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">Definition *</label>
+    <label class="col-lg-3"><b>Definition *</b></label>
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
@@ -10,7 +10,7 @@
     </div>
   </div>
   <div class="row" ng-if="child">
-    <label class="col-lg-3 control-label text-right">Relation</label>
+    <label class="col-lg-3"><b>Relation</b></label>
     <div class="col-lg-9">
       <select name="relation" class="form-control"
         ng-options="relation.name as relation.description for relation in relations"
@@ -19,12 +19,5 @@
       </select>
     </div>
   </div>
-  <div class="row" ng-if="observableobject.definition_id">
-    <label class="col-lg-3 control-label text-right">Shared</label>
-    <div class="col-lg-9">
-      <input class="form-control" type="checkbox"
-        name="shared" value="shared"
-        ng-model="observableobject.shared" />
-    </div>
-  </div>
+  <object-properties-form object="object" type="type" permissions="permissions"></object-properties-form>
 </form>

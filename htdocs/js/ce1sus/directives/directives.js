@@ -550,9 +550,12 @@ app.directive("object", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal, Restangular){
+    controller: function($scope, $modal, Restangular, messages){
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
+      };
+      $scope.showProperties = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/properties.html', show: true});
       };
       $scope.removeObject = function(){
         if (confirm('Are you sure you want to delete this object?')) {
@@ -571,6 +574,7 @@ app.directive("object", function($compile) {
                 var index = $scope.$parent.object.related_objects.indexOf($scope.object);
                 $scope.$parent.object.related_objects.splice(index, 1);
               }
+              messages.setMessage({'type':'success','message':'Object sucessfully removed'});
             }, function (response) {
               handleError(response, messages);
             });
@@ -692,7 +696,8 @@ app.directive("observableForm", function() {
     restrict: "E",
     scope: {
       observable: "=observable",
-      editMode: "=edit"
+      type: "=type",
+      permissions:"=permissions"
     },
     templateUrl: "pages/common/directives/observableform.html"
   };
@@ -705,7 +710,9 @@ app.directive("observableObjectForm", function() {
     scope: {
       observableobject: "=observableobject",
       child: "=child",
-      definitions: '='
+      definitions: '=',
+      permissions: "=permissions",
+      type: "=type"
     },
     controller: function($scope, Restangular){
       if ($scope.child) {
@@ -728,7 +735,8 @@ app.directive("objectAttributeForm", function() {
     scope: {
       objectattribute: "=objectattribute",
       type: "=type",
-      definitions: '='
+      definitions: '=',
+      permissions: "=permissions"
     },
     controller: function($scope, $log){
       $scope.getDefinition = function(identifier){
@@ -820,5 +828,21 @@ app.directive("eventForm", function() {
       }
     },
     templateUrl: "pages/common/directives/eventform.html"
+  };
+});
+
+app.directive("objectPropertiesForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      item: "=object",
+      type: "=type",
+      permissions: "=permissions"
+    },
+    controller: function($scope, $log){
+
+    },
+    templateUrl: "pages/common/directives/objectproperties.html"
   };
 });

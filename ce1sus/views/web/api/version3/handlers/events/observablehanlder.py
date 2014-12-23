@@ -45,7 +45,8 @@ class ObservableHandler(RestBaseHandler):
         if requested_object['object_type'] is None:
           return self.__process_observable(method, event, observable, details, inflated, json)
         elif requested_object['object_type'] == 'object':
-          return self.__process_object(method, event, observable, requested_object, details, inflated, json)
+          flat = self.get_flat_value(args)
+          return self.__process_object(method, event, observable, requested_object, details, inflated, json, flat)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -74,7 +75,7 @@ class ObservableHandler(RestBaseHandler):
         self.observable_controller.remove_observable(observable, user, True)
         return 'Deleted observable'
 
-  def __process_object(self, method, event, observable, requested_object, details, inflated, json):
+  def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat):
     user = self.get_user()
     if method == 'POST':
       self.check_if_event_is_modifiable(event)
@@ -89,10 +90,18 @@ class ObservableHandler(RestBaseHandler):
       if uuid:
         obj = self.observable_controller.get_object_by_id(uuid)
       else:
-        raise PathParsingException(u'object cannot be called without an ID')
+        if not flat:
+          raise PathParsingException(u'object cannot be called without an ID')
       if method == 'GET':
         self.check_if_event_is_viewable(event)
-        return self.__process_object_get(requested_object, details, inflated)
+        if flat:
+          result = list()
+          flat_objects = self.observable_controller.get_flat_observable_objects(observable)
+          for flat_object in flat_objects:
+            result.append(flat_object.to_dict(details, inflated))
+          return result
+        else:
+          return self.__process_object_get(requested_object, details, inflated)
       elif method == 'PUT':
         obj.populate(json)
         self.observable_controller.update_object(obj, user, True)

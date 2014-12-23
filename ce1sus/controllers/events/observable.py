@@ -164,3 +164,23 @@ class ObservableController(BaseController):
       self.object_broker.remove_by_id(obj.identifier)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_flat_observable_objects(self, observable):
+    try:
+      return self.object_broker.get_all_by_observable_id(observable.identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_related_object_by_child(self, obj):
+    try:
+      return self.related_object_broker.get_related_object_by_child_object_id(obj.identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_related_object(self, related_object, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(related_object, user, user.group, True)
+      self.related_object_broker.update(related_object, commit)
+    except BrokerException as error:
+      raise ControllerException(error)

@@ -7,7 +7,7 @@
               <a class="hand" bs-collapse-toggle>{{getTitle(observable)}}</a>
             </h4>
         </div>
-        <div class="col-sm-1"></div>
+        <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!observable.properties.shared"></span></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
             <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permissions.add"> <span

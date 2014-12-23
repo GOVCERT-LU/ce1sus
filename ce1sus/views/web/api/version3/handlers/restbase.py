@@ -111,6 +111,15 @@ class RestBaseHandler(BaseView):
       inflated = False
     return inflated
 
+  def get_flat_value(self, args):
+    parameters = args.get('parameters')
+    flat = parameters.get('flat', 'false')
+    if flat == 'true':
+      flat = True
+    else:
+      flat = False
+    return flat
+
   def parse_path(self, path, method):
     """
     the path can either be empty or belongs to one of the following structures

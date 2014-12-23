@@ -83,6 +83,14 @@ class ObjectHandler(RestBaseHandler):
         self.check_if_event_is_viewable(event)
         return obj.to_dict(details, inflated)
       elif method == 'PUT':
+        # check if there was not a parent set
+        parent_id = json.get('parent_object_id', None)
+        if parent_id:
+          # get related object
+          related_object = self.observable_controller.get_related_object_by_child(obj)
+          related_object.parent_id = parent_id
+          self.observable_controller.update_related_object(related_object, user, False)
+
         obj.populate(json)
         self.observable_controller.update_object(obj, user, True)
         return obj.to_dict(details, inflated)
@@ -105,7 +113,8 @@ class ObjectHandler(RestBaseHandler):
       related_object.child_id = child_obj.identifier
       related_object.object = child_obj
       related_object.relation = json.get('relation', None)
-
+      if related_object.relation == 'None':
+        related_object.relation = None
       obj.related_objects.append(related_object)
       self.observable_controller.update_object(child_obj, user, True)
 

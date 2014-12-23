@@ -38,6 +38,20 @@ class ObservableComposition(Base):
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'AND')
   observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
+  dbcode = Column('code', Integer, nullable=False, default=0)
+  __bit_code = None
+
+  @property
+  def properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__bit_code is None:
+      if self.dbcode is None:
+        self.__bit_code = Properties('0', self)
+      else:
+        self.__bit_code = Properties(self.dbcode, self)
+    return self.__bit_code
 
   def validate(self):
     return True
@@ -59,13 +73,14 @@ class ObservableComposition(Base):
     return {'identifier': self.convert_value(self.identifier),
             'operator': self.convert_value(self.operator),
             'observables': observables,
-            'observables_count': observables_count
+            'observables_count': observables_count,
+            'properties': self.properties.to_dict()
             }
 
 
 class Observable(ExtendedLogingInformations, Base):
 
-  title = Column('title', Unicode(255), index=True, unique=True)
+  title = Column('title', Unicode(255), index=True)
   description = Column('description', UnicodeText)
   object = relationship('Object', back_populates='parent', uselist=False, lazy='joined', primaryjoin='Object.parent_id==Observable.identifier')
   observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
@@ -73,7 +88,7 @@ class Observable(ExtendedLogingInformations, Base):
   event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
   event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, nullable=False, default=0)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
   parent_id = Column('parent_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   __bit_code = None
@@ -114,6 +129,7 @@ class Observable(ExtendedLogingInformations, Base):
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
                 'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                'properties': self.properties.to_dict()
                 }
     else:
       result = {'identifier': self.convert_value(self.identifier),
@@ -124,6 +140,7 @@ class Observable(ExtendedLogingInformations, Base):
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
                 'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                'properties': self.properties.to_dict()
                 }
 
     return result
@@ -131,4 +148,5 @@ class Observable(ExtendedLogingInformations, Base):
   def populate(self, json):
     self.title = json.get('title', None)
     self.description = json.get('description', None)
+    self.properties.populate(json.get('properties', None))
     # TODO: make valid for inflated

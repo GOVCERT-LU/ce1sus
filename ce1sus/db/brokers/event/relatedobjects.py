@@ -40,3 +40,13 @@ class RelatedObjectBroker(BrokerBase):
       raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
+
+  def get_related_object_by_child_object_id(self, identifier):
+    try:
+      return self.session.query(RelatedObject).filter(RelatedObject.child_id == identifier).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
