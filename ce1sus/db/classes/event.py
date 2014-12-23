@@ -5,6 +5,7 @@
 
 Created on Oct 16, 2014
 """
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, Integer, UnicodeText
@@ -163,13 +164,19 @@ class Event(ExtendedLogingInformations, Base):
     # TODO validation of an event
     return True
 
+  def observables_count(self):
+      return self._sa_instance_state.session.query(Observable).filter(Observable.event_id == self.identifier).count()
+
   def to_dict(self, complete=True, inflated=False):
     if inflated:
       observables = list()
       for observable in self.observables:
         observables.append(observable.to_dict(complete, inflated))
+      observables_count = len(observables)
     else:
       observables = None
+      observables_count = self.observables_count()
+
     if complete:
       comments = list()
       for comment in self.comments:
@@ -191,7 +198,7 @@ class Event(ExtendedLogingInformations, Base):
                 'first_seen': self.convert_value(None),
                 'last_seen': self.convert_value(None),
                 'observables': observables,
-                'observables_count': len(self.observables),
+                'observables_count': observables_count,
                 'comments': comments
                 }
     else:
@@ -205,7 +212,7 @@ class Event(ExtendedLogingInformations, Base):
                 'first_seen': self.convert_value(None),
                 'last_seen': self.convert_value(None),
                 'observables': observables,
-                'observables_count': len(self.observables),
+                'observables_count': observables_count,
                 'risk': self.convert_value(self.risk),
                 'status': self.convert_value(self.status),
                 'tlp': self.convert_value(self.tlp),

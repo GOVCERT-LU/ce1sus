@@ -32,5 +32,5 @@ class EventsHandler(RestBaseHandler):
     events, total_events = self.events_controller.get_events(page, count, self.get_user())
     result = list()
     for event in events:
-      result.append(event.to_dict(details))
+      result.append(event.to_dict(details, False))
     return {'total': total_events, 'data': result}

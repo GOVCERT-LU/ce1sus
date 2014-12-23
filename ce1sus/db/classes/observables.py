@@ -11,6 +11,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.object import Object
 from ce1sus.db.common.session import Base
 
 
@@ -41,14 +42,25 @@ class ObservableComposition(Base):
   def validate(self):
     return True
 
+  def __observables_count(self):
+      # Make this with a count
+      return len(self.observables)
+
   def to_dict(self, complete=True, inflated=False):
     observables = list()
     for observable in self.observables:
       observables.append(observable.to_dict(complete, inflated))
+
+    if observables:
+      observables_count = len(observables)
+    else:
+      observables_count = self.__observables_count()
+
     return {'identifier': self.convert_value(self.identifier),
             'operator': self.convert_value(self.operator),
             'observables': observables,
-            'observables_count': len(self.observables)}
+            'observables_count': observables_count
+            }
 
 
 class Observable(ExtendedLogingInformations, Base):

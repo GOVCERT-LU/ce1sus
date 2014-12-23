@@ -6,11 +6,11 @@
 Created on Oct 16, 2014
 """
 
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, Unicode, Boolean
+from sqlalchemy.types import Integer, Unicode
 
+from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
 from ce1sus.db.common.session import Base
@@ -38,13 +38,11 @@ class RelatedObject(Base):
 class Object(ExtendedLogingInformations, Base):
   # rel_composition = relationship('ComposedObject')
   attributes = relationship('Attribute', lazy='joined')
-  operator_id = Column('operator_id', Integer(1), default=None)
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
-  type_id = Column('type_id', Integer(1))
 
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   dbcode = Column('code', Integer)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', uselist=False)
@@ -66,28 +64,40 @@ class Object(ExtendedLogingInformations, Base):
         self.__bit_code = Properties(self.dbcode, self)
     return self.__bit_code
 
-  @hybrid_property
-  def attributes_count(self):
-      return len(self.attributes)
+  def __attributes_count(self):
+      return self._sa_instance_state.session.query(Attribute).filter(Attribute.object_id == self.identifier).count()
+
+  def __rel_obj_count(self):
+      return self._sa_instance_state.session.query(RelatedObject).filter(RelatedObject.parent_id == self.identifier).count()
 
   def to_dict(self, complete=True, inflated=False):
     attributes = list()
     for attribute in self.attributes:
       attributes.append(attribute.to_dict(complete, inflated))
     related = list()
+
+    if attributes:
+      attributes_count = len(attributes)
+    else:
+      attributes_count = self.__attributes_count()
+
     if inflated:
       for related_object in self.related_objects:
         related.append(related_object.to_dict(complete, inflated))
+      related_count = len(related)
+    else:
+      related_count = self.__rel_obj_count()
 
     return {'identifier': self.convert_value(self.identifier),
             'definition': self.definition.to_dict(complete, inflated),
             'attributes': attributes,
+            'attributes_count': attributes_count,
             'creator_group': self.creator_group.to_dict(complete, inflated),
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
             'related_objects': related,
-            'related_objects_count': len(self.related_objects)
+            'related_objects_count': related_count
             }
 
   def populate(self, json):
