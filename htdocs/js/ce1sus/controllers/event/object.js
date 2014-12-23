@@ -133,6 +133,11 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
 
         index++;
       }, $log);
+      Restangular.one('relations').getList().then(function(relations) {
+        $scope.relations = relations;
+      }, function(response) {
+        throw generateErrorMessage(response);
+      });
     }, function(response) {
         throw generateErrorMessage(response);
     });

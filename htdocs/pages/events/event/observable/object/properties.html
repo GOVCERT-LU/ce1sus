@@ -23,11 +23,21 @@
               <select name="relation" class="form-control"
                 ng-options="obsObject.identifier as get_name(obsObject)  for obsObject in objects"
                 ng-model="object.parent_object_id">
-                <option style="display: none" value="">Select a parent object</option>
+                <option style="display: none" value="">Select a new parent object</option>
               </select>
             </div>
           </div>
-          <object-properties-form object="object" type="'edit'" permissions="permissions" ></object-properties-form>
+          <div class="row" ng-if="object.parent_object_id != null">
+            <label class="col-lg-3"><b>Relation</b></label>
+            <div class="col-lg-9">
+              <select name="relation" class="form-control"
+                ng-options="relation.name for relation in relations"
+                ng-model="object.relation">
+                <option style="display: none" value="">Select a relation</option>
+              </select>
+            </div>
+          </div>
+          <object-properties-form object="object" type="'edit'" permissions="permissions"></object-properties-form>
         </form>
       </div>
       <div class="modal-footer">
