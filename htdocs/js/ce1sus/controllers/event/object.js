@@ -107,9 +107,7 @@ app.controller("objectChildAddController", function($scope, Restangular, message
 app.controller("observableObjectPropertiesController", function($scope, Restangular, messages, $routeSegment,$log) {
   
   //set the id of the parent
-  if ($scope.$parent.$parent.$parent.$parent.object) {
-    $scope.object.parent_object_id = $scope.$parent.$parent.$parent.$parent.object.identifier;
-  } else {
+  if (!$scope.object.parent_object_id) {
     $scope.object.parent_object_id = null;
   }
   if ($scope.object.parent_object_id) {
@@ -125,6 +123,7 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
         index++;
       }, $log);
       index = 0;
+      /*
       //remove the parent object
       angular.forEach($scope.objects, function(entry) {
         if (entry.identifier == $scope.object.parent_object_id){
@@ -133,6 +132,7 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
 
         index++;
       }, $log);
+      */
       Restangular.one('relations').getList().then(function(relations) {
         $scope.relations = relations;
       }, function(response) {
@@ -152,10 +152,7 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
       return object.definition.name;
     }
   };
-  
-  
 
-  
   var original_object = angular.copy($scope.object);
   
   $scope.closeModal = function(){

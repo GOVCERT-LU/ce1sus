@@ -29,8 +29,12 @@ class RelatedObject(Base):
   object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
 
   def to_dict(self, complete=True, inflated=False):
+    # flatten related object
+    obj = self.object.to_dict(complete, inflated)
+    obj['relation'] = self.convert_value(self.relation)
+    obj['parent_object_id'] = self.convert_value(self.parent_id)
     return {'identifier': self.convert_value(self.identifier),
-            'object': self.object.to_dict(complete, inflated),
+            'object': obj,
             'relation': self.convert_value(self.relation),
             'parent_id': self.convert_value(self.parent_id)
             }

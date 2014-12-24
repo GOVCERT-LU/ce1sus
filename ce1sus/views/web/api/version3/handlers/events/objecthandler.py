@@ -89,6 +89,7 @@ class ObjectHandler(RestBaseHandler):
           # get related object
           related_object = self.observable_controller.get_related_object_by_child(obj)
           related_object.parent_id = parent_id
+          related_object.relation = json.get('relation', None)
           self.observable_controller.update_related_object(related_object, user, False)
 
         obj.populate(json)
