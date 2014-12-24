@@ -210,7 +210,7 @@ app.directive("objectDefinitionForm", function() {
     },
     templateUrl: "pages/common/directives/objectdefinitionform.html",
     controller: function($scope){
-      $scope.operators =  [{'name': 'OR', 'identifier':0}, {'name': 'AND', 'identifier':1}];
+      
     }
   };
 });

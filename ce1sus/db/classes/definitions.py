@@ -46,7 +46,6 @@ class ObjectDefinition(SimpleLogingInformations, Base):
   description = Column('description', UnicodeText)
   chksum = Column('chksum', Unicode(255), unique=True, nullable=False, index=True)
   default_share = Column('sharable', Boolean, default=False, nullable=False)
-  default_operator = Column('default_operator', Integer, default=0, nullable=False)
 
   # the relationship is flagged with true when it is a required attribute
   attributes = relationship('AttributeDefinition',
@@ -81,8 +80,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'chksum': self.convert_value(self.chksum),
-              'default_share': self.convert_value(self.default_share),
-              'default_operator': self.convert_value(self.default_operator)
+              'default_share': self.convert_value(self.default_share)
               }
     else:
       return {'identifier': self.identifier,
@@ -92,7 +90,6 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
     self.default_share = json.get('default_share', False)
-    self.default_operator = json.get('default_operator', 0)
 
 
 class AttributeDefinition(SimpleLogingInformations, Base):

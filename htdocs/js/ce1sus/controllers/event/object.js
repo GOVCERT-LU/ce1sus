@@ -4,14 +4,25 @@
 
 app.controller("observableObjectAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, {"complete": true}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
     handleError(response, messages);
   });
   
-  var original_observableObject = {};
-  $scope.observableObject={};
+  var original_observableObject = {'properties' : {'shared': false},
+                                   'definition_id': null};
+  $scope.observableObject=angular.copy(original_observableObject);
+  
+  $scope.$watch(function() {
+    return $scope.observableObject.definition_id;
+    }, function(newVal, oldVal) {
+      angular.forEach($scope.definitions, function(entry) {
+        if (entry.identifier === $scope.observableObject.definition_id){
+          $scope.observableObject.properties.shared = entry.default_share;
+        }
+      }, $log);
+    });
   
   $scope.closeModal = function(){
     $scope.observableObject = angular.copy(original_observableObject);
