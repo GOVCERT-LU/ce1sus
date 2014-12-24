@@ -13,6 +13,10 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
     $log, $routeSegment, $object, attributes) {
   $scope.object = $object;
   $scope.attributes = attributes;
+  var operators =  ['OR','AND'];
+  $scope.get_operator = function(operatorID){
+    return operators[operatorID];
+  };
   
   //scope functions
   $scope.removeObject = function(){

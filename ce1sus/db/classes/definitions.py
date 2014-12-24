@@ -80,7 +80,9 @@ class ObjectDefinition(SimpleLogingInformations, Base):
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
-              'chksum': self.convert_value(self.chksum)
+              'chksum': self.convert_value(self.chksum),
+              'default_share': self.convert_value(self.default_share),
+              'default_operator': self.convert_value(self.default_operator)
               }
     else:
       return {'identifier': self.identifier,
@@ -89,6 +91,8 @@ class ObjectDefinition(SimpleLogingInformations, Base):
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
+    self.default_share = json.get('default_share', False)
+    self.default_operator = json.get('default_operator', 0)
 
 
 class AttributeDefinition(SimpleLogingInformations, Base):

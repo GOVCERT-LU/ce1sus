@@ -10,8 +10,8 @@
       </select>
     </div>
   </div>
-  {{addObjectAttribtueForm.value.$error.required|json}}
   <div ng-if="attribute.definition_id">
     <attribute-handler attribute="attribute" definition="getDefinition(attribute.definition_id)" type="type" form="addObjectAttribtueForm"></attribute-handler>
+    <object-properties-form object="observable" type="type" permissions="permissions"></object-properties-form>
   </div>
 </form>

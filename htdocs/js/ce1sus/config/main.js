@@ -583,7 +583,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                              controller: "attributeDetailController",
                              resolve: {
                                $attribute: function(Restangular,$routeSegment) {
-                                 return Restangular.one("attribute",$routeSegment.$routeParams.id).get({"complete": true}).then(function (attribute) {
+                                 return Restangular.one("attributedefinition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (attribute) {
                                    return attribute;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
