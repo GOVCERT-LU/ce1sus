@@ -67,6 +67,7 @@ class ObservableHandler(RestBaseHandler):
         return observable.to_dict(details, inflated)
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
+        self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
         observable.populate(json)
         self.observable_controller.update_observable(observable, user, True)
         return observable.to_dict(details, inflated)
@@ -106,6 +107,8 @@ class ObservableHandler(RestBaseHandler):
         else:
           return self.__process_object_get(requested_object, details, inflated)
       elif method == 'PUT':
+        self.check_if_event_is_modifiable(event)
+        self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
         obj.populate(json)
         self.observable_controller.update_object(obj, user, True)
         return obj.to_dict(details, inflated)

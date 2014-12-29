@@ -596,7 +596,7 @@ app.directive("object", function($compile) {
       
       $scope.removeAttribute = function(attribute){
         if (confirm('Are you sure you want to delete this attribute?')) {
-          restangularAttribute = Restangular.restangularizeElement(null, attribute, 'attribute');
+          restangularAttribute = Restangular.restangularizeElement(null, attribute, 'object/'+$scope.object.identifier+'/attribute');
           restangularAttribute.remove().then(function (data) {
             if (data) {
               var index = $scope.object.attributes.indexOf(attribute);

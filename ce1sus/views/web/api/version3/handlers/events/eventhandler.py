@@ -65,10 +65,11 @@ class EventHandler(RestBaseHandler):
           event = Event()
           event.populate(json)
           # TODO: make relations an populate the whole event by json
-
-          # The event is directly validated as the owner can validate
-          event.properties.is_validated = True
-          self.event_controller.insert_event(self.get_user(), event, True, True)
+          user = self.get_user()
+          if self.is_event_owner(event, user):
+            # The observable is directly validated as the owner can validate
+            event.properties.is_validated = True
+          self.event_controller.insert_event(user, event, True, True)
           return self.__return_event(event, details, inflated)
         else:
           raise RestHandlerException(u'Invalid request - Event cannot be called without ID')
@@ -130,10 +131,14 @@ class EventHandler(RestBaseHandler):
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
     elif method == 'PUT':
+      user = self.get_user()
       self.check_if_event_is_modifiable(event)
+      # check if validated / shared as only the owner can do this
+      self.check_if_user_can_set_validate_or_shared(event, event, user, json)
+
       event.populate(json)
       # TODO: make relations an populate the whole event by json
-      self.event_controller.update_event(self.get_user(), event, True, True)
+      self.event_controller.update_event(user, event, True, True)
       return self.__return_event(event, details, inflated)
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
@@ -166,6 +171,7 @@ class EventHandler(RestBaseHandler):
           raise PathParsingException(u'observale cannot be called without an ID')
         if method == 'PUT':
           self.check_if_event_is_modifiable(event)
+          self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
           observable.populate(json)
           self.observable_controller.update_observable(observable, user, True)
           return observable.to_dict(details, inflated)

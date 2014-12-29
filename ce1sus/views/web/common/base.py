@@ -254,9 +254,26 @@ class BaseView(object):
 
   def is_event_owner(self, event, user):
     self.logger.debug(u'Checking if user {0} is owner of event {1}'.format(user.username, event.identifier))
-    result = is_user_priviledged(user)
+    result = is_event_owner(event, user)
     if result:
       self.logger.info(u'User {0} is owner of event {1}'.format(user.username, event.identifier))
     else:
       self.logger.info(u'User {0} is not owner of event {1}'.format(user.username, event.identifier))
     return result
+
+  def check_if_user_can_set_validate_or_shared(self, event, user, json):
+    properties = json.get('properties', None)
+    if properties:
+      permissions = self.event_controller.get_event_user_permissions(event, user)
+      validated = properties.get('validated', None)
+      if validated is not None:
+        if not permissions.can_validate:
+          self.logger.info(u'User {0} has no right to validate elements of event {1}'.format(user.username, event.identifier))
+          raise cherrypy.HTTPError(403, 'User {0} can not  validate elements of event {1}'.format(user.username, event.identifier))
+      shared = properties.get('shared', None)
+      if shared is not None:
+        if not is_event_owner(event, user):
+          self.logger.info(u'User {0} has no right to share elements of event {1}'.format(user.username, event.identifier))
+          raise cherrypy.HTTPError(403, 'User {0} does not own event {1}'.format(user.username, event.identifier))
+
+

@@ -21,7 +21,6 @@ from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHand
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
 from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
-from ce1sus.views.web.api.version3.handlers.events.attributehandler import AttributesHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.events.objecthandler import ObjectHandler
@@ -70,7 +69,6 @@ class RestController(BaseView):
     self.instances['groups'] = GroupHandler(config)
     self.instances['relations'] = RelationHandler(config)
     self.instances['condition'] = ConditionHandler(config)
-    self.instances['attribute'] = AttributesHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

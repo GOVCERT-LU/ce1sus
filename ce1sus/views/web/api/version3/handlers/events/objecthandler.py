@@ -91,6 +91,7 @@ class ObjectHandler(RestBaseHandler):
           return obj.to_dict(details, inflated)
         elif method == 'PUT':
           self.check_if_event_is_modifiable(event)
+          self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
           if parent_id:
@@ -133,22 +134,48 @@ class ObjectHandler(RestBaseHandler):
       raise RestHandlerException('Please use object/{uuid}/ instead')
 
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
-    user = self.get_user()
-    if method == 'POST':
-      self.check_if_user_can_add(event)
-      attribute = Attribute()
-      # Imporant to set the definition else the set value wont work
-      definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
-      attribute.definition = definition
-      # Important to set the parent object
-      attribute.object = obj
-      attribute.object_id = obj.identifier
-      # set the remaining stuff
-      attribute.populate(json)
-      if self.is_event_owner(event, user):
-        # The attribute is directly validated as the owner can validate
-        attribute.properties.is_validated = True
-      self.attribute_controller.insert_attribute(attribute, user, True)
-      return attribute.to_dict(details, inflated)
-    else:
-      raise RestHandlerException('Please use object/{uuid}/ instead')
+    try:
+      user = self.get_user()
+      if method == 'POST':
+        self.check_if_user_can_add(event)
+        attribute = Attribute()
+        # Imporant to set the definition else the set value wont work
+        definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
+        attribute.definition = definition
+        # Important to set the parent object
+        attribute.object = obj
+        attribute.object_id = obj.identifier
+        # set the remaining stuff
+        attribute.populate(json)
+        if self.is_event_owner(event, user):
+          # The attribute is directly validated as the owner can validate
+          attribute.properties.is_validated = True
+        self.attribute_controller.insert_attribute(attribute, user, True)
+        return attribute.to_dict(details, inflated)
+      else:
+        uuid = requested_object['object_uuid']
+        if method == 'GET':
+          if uuid:
+            attribute = self.attribute_controller.get_attribute_by_id(uuid)
+            self.check_if_event_is_viewable(event)
+            return attribute.to_dict(details, inflated)
+          else:
+            result = list()
+            for attribute in obj.attributes:
+              result.append(attribute.to_dict(details, inflated))
+            return result
+        else:
+          attribute = self.attribute_controller.get_attribute_by_id(uuid)
+          if method == 'PUT':
+            self.check_if_event_is_modifiable(event)
+            self.check_if_user_can_set_validate_or_shared(event, attribute, user, json)
+            attribute.populate(json)
+            self.attribute_controller.update_attribute(attribute, user, True)
+            return attribute.to_dict(details, inflated)
+          elif method == 'DELETE':
+            self.check_if_event_is_deletable(event)
+            self.attribute_controller.remove_attribute(attribute, user, True)
+            return 'Deleted object'
+
+    except ValueException as error:
+      raise RestHandlerException(error)
