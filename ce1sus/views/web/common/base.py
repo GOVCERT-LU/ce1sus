@@ -195,6 +195,16 @@ class BaseView(object):
     if not owner:
       raise cherrypy.HTTPError(403, 'User {0} is not owner of event {1}'.format(user.username, event.identifier))
 
+  def check_if_user_can_add(self, event):
+    user = self.get_user()
+    result = is_event_owner(event, user)
+    if not result:
+      result = self.is_user_allowed_to_perform(event, 'can_add', user)
+      if not result:
+        result = self.is_user_allowed_to_perform(event, 'can_propose', user)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User {0} can not add contents to event {1}'.format(user.username, event.identifier))
+
   def is_user_allowed_to_perform(self, event, permission, user):
     cache = self.get_authorized_events_cache()
     result = None

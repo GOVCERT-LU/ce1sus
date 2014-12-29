@@ -141,7 +141,7 @@ class EventHandler(RestBaseHandler):
   def __process_observable(self, method, event, requested_object, details, inflated, json):
     user = self.get_user()
     if method == 'POST':
-      self.check_if_event_is_modifiable(event)
+      self.check_if_user_can_add(event)
       observable = Observable()
       observable.event_id = event.identifier
       observable.populate(json)
@@ -203,27 +203,6 @@ class EventHandler(RestBaseHandler):
         return composed_observable.to_dict(details, inflated)
       else:
         raise PathParsingException(u'observable_composition cannot be called without an ID')
-    except ControllerException as error:
-      raise RestHandlerException(error)
-
-  def __process_attribute(self, method, requested_object, details, inflated, json):
-    if method == 'GET':
-      return self.__process_attribute_get(requested_object, details, inflated)
-    elif method == 'POST':
-      pass
-    elif method == 'PUT':
-      pass
-    elif method == 'DELETE':
-      pass
-
-  def __process_attribute_get(self, requested_object, details, inflated):
-    try:
-      uuid = requested_object['object_uuid']
-      if uuid:
-        obj = self.observable_controller.get_attribute_by_id(uuid)
-        return obj.to_dict(details, inflated)
-      else:
-        raise PathParsingException(u'object cannot be called without an ID')
     except ControllerException as error:
       raise RestHandlerException(error)
 

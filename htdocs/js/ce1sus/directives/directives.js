@@ -596,8 +596,17 @@ app.directive("object", function($compile) {
       
       $scope.removeAttribute = function(attribute){
         if (confirm('Are you sure you want to delete this attribute?')) {
-          var index = $scope.object.attributes.indexOf(attribute);
-          $scope.object.attributes.splice(index, 1);
+          restangularAttribute = Restangular.restangularizeElement(null, attribute, 'attribute');
+          restangularAttribute.remove().then(function (data) {
+            if (data) {
+              var index = $scope.object.attributes.indexOf(attribute);
+              $scope.object.attributes.splice(index, 1);
+              messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
+            }
+          }, function (response) {
+            handleError(response, messages);
+          });
+
         }
       };
       $scope.showAttributeDetails = function(attribute){

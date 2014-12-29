@@ -18,6 +18,10 @@ class StaticMappingException(Exception):
   pass
 
 
+class ValueException(Exception):
+  pass
+
+
 class StaticBase(object):
 
   def __init__(self, identifier):

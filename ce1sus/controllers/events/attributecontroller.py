@@ -5,9 +5,9 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
-from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -23,18 +23,30 @@ class AttributeController(BaseController):
     BaseController.__init__(self, config)
     self.attribute_broker = self.broker_factory(AttributeBroker)
 
+  def get_attribute_by_id(self, identifier):
+    try:
+      return self.attribute_broker.get_by_id(identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_attribute(self, attribute, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(attribute, user, user.group, False)
+      self.attribute_broker.update(attribute)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_attribute(self, attribute, user, commit=True):
+    try:
+      self.attribute_broker.remove_by_id(attribute.identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def insert_attribute(self, attribute, user, commit=True):
-    """
-    inserts an event
-
-    If it is invalid the event is returned
-
-    :param event:
-    :type event: Event
-
-    :returns: Event, Boolean
-    """
-    self.logger.debug('User {0} inserts a new event'.format(user.username))
+    self.logger.debug('User {0} inserts a new attribute'.format(user.username))
     try:
 
       user = self.user_broker.get_by_id(user.identifier)
@@ -49,11 +61,5 @@ class AttributeController(BaseController):
       """
       self.attribute_broker.do_commit(commit)
       return attribute, True
-    except ValidationException:
-      return attribute, False
-    except IntegrityException as error:
-      self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, attribute.identifier))
-      raise ControllerException(u'An event with uuid "{0}" already exists'.format(attribute.identifier))
     except BrokerException as error:
       raise ControllerException(error)

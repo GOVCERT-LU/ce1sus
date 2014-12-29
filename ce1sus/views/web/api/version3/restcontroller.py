@@ -15,11 +15,13 @@ from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import Admi
 from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import AttribueTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminviewtypehandler import AttribueViewTypeHandler
+from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
 from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
+from ce1sus.views.web.api.version3.handlers.events.attributehandler import AttributesHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.events.objecthandler import ObjectHandler
@@ -29,7 +31,6 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -69,6 +70,7 @@ class RestController(BaseView):
     self.instances['groups'] = GroupHandler(config)
     self.instances['relations'] = RelationHandler(config)
     self.instances['condition'] = ConditionHandler(config)
+    self.instances['attribute'] = AttributesHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

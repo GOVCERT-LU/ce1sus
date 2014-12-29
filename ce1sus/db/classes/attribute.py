@@ -10,7 +10,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, ValueException
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
@@ -144,12 +144,12 @@ class Attribute(ExtendedLogingInformations, Base):
       value_instance.value_type_id = self.definition.value_type_id
 
       if self.object:
-        if self.object.parent:
-          event_id = self.object.parent.event_id
+        if self.object.event:
+          event_id = self.object.event_id
           if event_id:
             value_instance.event_id = event_id
           else:
-            event = self.object.parent.event
+            event = self.object.event
             if event:
               value_instance.event = event
             else:
@@ -219,6 +219,9 @@ class Attribute(ExtendedLogingInformations, Base):
       definition = json.get('definition', None)
       if definition:
         definition_id = definition.get('identifier', None)
+    if self.definition_id:
+      if self.definition_id != definition_id:
+        raise ValueException(u'Attribute definitions cannot be updated')
     self.definition_id = definition_id
     condition_id = json.get('condition_id', None)
     if not definition_id:

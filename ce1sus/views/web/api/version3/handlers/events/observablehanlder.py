@@ -78,7 +78,7 @@ class ObservableHandler(RestBaseHandler):
   def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat):
     user = self.get_user()
     if method == 'POST':
-      self.check_if_event_is_modifiable(event)
+      self.check_if_user_can_add(event)
       obj = Object()
       obj.parent = observable
       obj.populate(json)

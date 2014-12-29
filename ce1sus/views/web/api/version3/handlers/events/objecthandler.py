@@ -5,14 +5,15 @@
 
 Created on Dec 22, 2014
 """
-from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
+
+from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
+from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.attribute import Attribute
+from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.controllers.events.attributecontroller import AttributeController
-from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -80,30 +81,33 @@ class ObjectHandler(RestBaseHandler):
       raise RestHandlerException(error)
 
   def __process_object(self, method, event, obj, details, inflated, json):
-    user = self.get_user()
-    if method == 'POST':
-      raise RestHandlerException('Please use observable/{uuid}/instead')
-    else:
-      if method == 'GET':
-        self.check_if_event_is_viewable(event)
-        return obj.to_dict(details, inflated)
-      elif method == 'PUT':
-        # check if there was not a parent set
-        parent_id = json.get('parent_object_id', None)
-        if parent_id:
-          # get related object
-          related_object = self.observable_controller.get_related_object_by_child(obj)
-          related_object.parent_id = parent_id
-          related_object.relation = json.get('relation', None)
-          self.observable_controller.update_related_object(related_object, user, False)
-
-        obj.populate(json)
-        self.observable_controller.update_object(obj, user, True)
-        return obj.to_dict(details, inflated)
-      elif method == 'DELETE':
-        self.check_if_event_is_deletable(event)
-        self.observable_controller.remove_object(obj, user, True)
-        return 'Deleted object'
+    try:
+      user = self.get_user()
+      if method == 'POST':
+        raise RestHandlerException('Please use observable/{uuid}/instead')
+      else:
+        if method == 'GET':
+          self.check_if_event_is_viewable(event)
+          return obj.to_dict(details, inflated)
+        elif method == 'PUT':
+          self.check_if_event_is_modifiable(event)
+          # check if there was not a parent set
+          parent_id = json.get('parent_object_id', None)
+          if parent_id:
+            # get related object
+            related_object = self.observable_controller.get_related_object_by_child(obj)
+            related_object.parent_id = parent_id
+            related_object.relation = json.get('relation', None)
+            self.observable_controller.update_related_object(related_object, user, False)
+          obj.populate(json)
+          self.observable_controller.update_object(obj, user, True)
+          return obj.to_dict(details, inflated)
+        elif method == 'DELETE':
+          self.check_if_event_is_deletable(event)
+          self.observable_controller.remove_object(obj, user, True)
+          return 'Deleted object'
+    except ValueException as error:
+      raise RestHandlerException(error)
 
   def __process_child_object(self, method, event, obj, requested_object, details, inflated, json):
     user = self.get_user()
@@ -131,6 +135,7 @@ class ObjectHandler(RestBaseHandler):
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
     user = self.get_user()
     if method == 'POST':
+      self.check_if_user_can_add(event)
       attribute = Attribute()
       # Imporant to set the definition else the set value wont work
       definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))

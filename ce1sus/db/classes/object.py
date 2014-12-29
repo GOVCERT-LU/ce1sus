@@ -12,7 +12,7 @@ from sqlalchemy.types import Integer, Unicode
 
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, ValueException
 from ce1sus.db.common.session import Base
 
 
@@ -57,6 +57,21 @@ class Object(ExtendedLogingInformations, Base):
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
+
+  @property
+  def event(self):
+    if self.observable:
+      event = self.observable.parent
+      return event
+    else:
+      raise ValueError(u'Parent of object was not set.')
+
+  @property
+  def event_id(self):
+    if self.observable:
+      return self.observable.parent_id
+    else:
+      raise ValueError(u'Parent of object was not set.')
 
   def validate(self):
     return True
@@ -121,5 +136,8 @@ class Object(ExtendedLogingInformations, Base):
       definition = json.get('definition', None)
       if definition:
         definition_id = definition.get('identifier', None)
+    if self.definition_id:
+      if self.definition_id != definition_id:
+        raise ValueException(u'Object definitions cannot be updated')
     self.definition_id = definition_id
     self.properties.populate(json.get('properties', None))
