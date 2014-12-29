@@ -52,7 +52,7 @@ class EventHandler(RestBaseHandler):
         elif requested_object['object_type'] == 'observable_composition':
           return self.__process_composed_observable(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'changegroup':
-          self.check_if_admin(event)
+          self.check_if_admin()
           return self.__change_event_group(method, event, json)
         elif requested_object['object_type'] == 'comment':
           return self.__process_commment(method, event, requested_object, details, inflated, json)

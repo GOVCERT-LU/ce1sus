@@ -3,14 +3,43 @@
  */
 app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("attributedefinition").getList(null,{"complete": true}).then(function (attributes) {
+  Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
     $scope.definitions = attributes;
   }, function(response) {
-      throw generateErrorMessage(response);
+    handleError(response, messages);
+    $scope.$hide();
+  });
+  Restangular.one("condition").getList(null, {"complete": false}).then(function (conditions) {
+    $scope.conditions = conditions;
+  }, function(response) {
+    handleError(response, messages);
+    $scope.$hide();
   });
   
-  var original_attribute = {};
-  $scope.attribute={};
+  $scope.$watch(function() {
+    return $scope.attribute.definition_id;
+    }, function(newVal, oldVal) {
+      angular.forEach($scope.definitions, function(entry) {
+        if (entry.identifier === $scope.attribute.definition_id){
+          $scope.attribute.properties.shared = entry.default_share;
+          $scope.attribute.condition_id = entry.default_condition_id;
+        }
+      }, $log);
+    });
+  
+  var original_attribute = {'properties' : {'shared': false},
+                            'definition_id': null};
+  $scope.attribute=angular.copy(original_attribute);
+  
+  $scope.$watch(function() {
+    return $scope.attribute.definition_id;
+    }, function(newVal, oldVal) {
+      angular.forEach($scope.definitions, function(entry) {
+        if (entry.identifier === $scope.attribute.definition_id){
+          $scope.attribute.properties.shared = entry.share;
+        }
+      }, $log);
+    });
   
   $scope.closeModal = function(){
     $scope.attribute = angular.copy(original_attribute);
@@ -37,8 +66,13 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
         $scope.attribute.definition=entry;
       }
     }, $log);
-    
-    //$scope.$parent.$parChildObjectableObject($scope.attribute);
+    var objectID = $scope.$parent.$parent.object.identifier;
+    Restangular.one('object', objectID).post('attribute', $scope.attribute, {'complete':true, 'infated':true}).then(function (data) {
+      $scope.$parent.appendChildObject(data);
+    }, function (response) {
+      $scope.attribute = angular.copy(original_attribute);
+      handleError(response, messages);
+    });
     $scope.$hide();
   };
 

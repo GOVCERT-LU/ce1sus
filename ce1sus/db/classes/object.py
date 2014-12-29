@@ -100,6 +100,7 @@ class Object(ExtendedLogingInformations, Base):
       related_count = self.__rel_obj_count()
 
     return {'identifier': self.convert_value(self.identifier),
+            'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, inflated),
             'attributes': attributes,
             'attributes_count': attributes_count,

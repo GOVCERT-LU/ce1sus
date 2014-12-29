@@ -60,15 +60,22 @@ class GuiMenus(BaseView):
         attributemgt = False
         if user.permissions.privileged:
           child_menu_item = dict()
-          child_menu_item['title'] = 'Object management'
+          child_menu_item['title'] = 'Objects'
           child_menu_item['section'] = 'admin/object'
           child_menus.append(child_menu_item)
           attributemgt = True
 
         if user.permissions.privileged:
           child_menu_item = dict()
-          child_menu_item['title'] = 'Attribute management'
+          child_menu_item['title'] = 'Attributes'
           child_menu_item['section'] = 'admin/attribute'
+          child_menus.append(child_menu_item)
+          attributemgt = True
+
+        if user.permissions.privileged:
+          child_menu_item = dict()
+          child_menu_item['title'] = 'Conditions'
+          child_menu_item['section'] = 'admin/condition'
           child_menus.append(child_menu_item)
           attributemgt = True
 
@@ -80,14 +87,14 @@ class GuiMenus(BaseView):
         attributeSubTypemgt = False
         if user.permissions.privileged:
           child_menu_item = dict()
-          child_menu_item['title'] = 'View types mgt'
+          child_menu_item['title'] = 'View types'
           child_menu_item['section'] = 'admin/viewtype'
           child_menus.append(child_menu_item)
           attributeSubTypemgt = True
 
         if user.permissions.privileged:
           child_menu_item = dict()
-          child_menu_item['title'] = 'Type management'
+          child_menu_item['title'] = 'Types'
           child_menu_item['section'] = 'admin/type'
           child_menus.append(child_menu_item)
           attributeSubTypemgt = True
@@ -101,14 +108,14 @@ class GuiMenus(BaseView):
         if user.permissions.privileged:
           usermgt = True
           child_menu_item = dict()
-          child_menu_item['title'] = 'User management'
+          child_menu_item['title'] = 'Users'
           child_menu_item['section'] = 'admin/user'
           child_menus.append(child_menu_item)
 
         if user.permissions.privileged:
           usermgt = True
           child_menu_item = dict()
-          child_menu_item['title'] = 'Group management'
+          child_menu_item['title'] = 'Groups'
           child_menu_item['section'] = 'admin/group'
           child_menus.append(child_menu_item)
 
@@ -119,7 +126,7 @@ class GuiMenus(BaseView):
 
         if user.permissions.privileged:
           child_menu_item = dict()
-          child_menu_item['title'] = 'Mail magagement'
+          child_menu_item['title'] = 'Mails'
           child_menu_item['section'] = 'admin/mail'
           child_menus.append(child_menu_item)
 

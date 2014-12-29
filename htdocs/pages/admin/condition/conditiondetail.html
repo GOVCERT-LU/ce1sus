@@ -1,0 +1,24 @@
+<h3>Condition Details - {{condition.name}}:</h3>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Identifier</label>
+  <div class="col-lg-9">{{condition.identifier}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Name</label>
+  <div class="col-lg-9">{{condition.name}}</div>
+</div>
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Description</label>
+  <div class="col-lg-9"><textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{condition.description}}</textarea></div>
+</div>
+
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/condition/modals/editconditionmodal.html"
+        bs-modal="modal">Edit</button>
+      <button type="button" class="btn btn-danger" ng-click="removeCondition()">Delete</button>
+    </div>
+  </div>
+</div>

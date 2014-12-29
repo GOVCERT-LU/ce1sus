@@ -8,6 +8,7 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
     $scope.definitions = objects;
   }, function(response) {
     handleError(response, messages);
+    $scope.$hide();
   });
   
   var original_observableObject = {'properties' : {'shared': false},
@@ -65,14 +66,25 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
 
 app.controller("objectChildAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("objectdefinition").getList(null, {"complete": false}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, {"complete": true}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
-      throw generateErrorMessage(response);
+    handleError(response, messages);
+    $scope.$hide();
   });
+  var original_childObject = {'properties' : {'shared': false},
+      'definition_id': null};
+  $scope.childObject=angular.copy(original_childObject);
   
-  var original_childObject = {};
-  $scope.childObject={};
+  $scope.$watch(function() {
+    return $scope.childObject.definition_id;
+    }, function(newVal, oldVal) {
+      angular.forEach($scope.definitions, function(entry) {
+        if (entry.identifier === $scope.childObject.definition_id){
+          $scope.childObject.properties.shared = entry.default_share;
+        }
+      }, $log);
+    });
   
   $scope.closeModal = function(){
     $scope.childObject = angular.copy(original_childObject);
@@ -147,10 +159,12 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
       Restangular.one('relations').getList().then(function(relations) {
         $scope.relations = relations;
       }, function(response) {
-        throw generateErrorMessage(response);
+        handleError(response, messages);
+        $scope.$hide();
       });
     }, function(response) {
-        throw generateErrorMessage(response);
+      handleError(response, messages);
+      $scope.$hide();
     });
   } else {
     $scope.objects = [];

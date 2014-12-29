@@ -1,0 +1,29 @@
+
+
+<div class="modal" tabindex="-1" role="dialog" ng-controller="conditionEditController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="closeModal()">&times;</button>
+          <h4 class="modal-title">Edit Condition {{condition.name}}</h4>
+        </div>
+        <div class="modal-body">
+          <condition-form type="'edit'" condition="condition"></condition-form>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!conditionChanged() || addConditionForm.$invalid"
+              ng-click="submitCondition()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetCondition()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="closeModal()">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

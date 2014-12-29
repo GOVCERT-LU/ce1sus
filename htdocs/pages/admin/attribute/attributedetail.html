@@ -36,7 +36,10 @@
   <label class="col-lg-3 control-label text-right">View Type</label>
   <div class="col-lg-9">{{attribute.viewType_name}}</div>
 </div>
-
+<div class="row">
+  <label class="col-lg-3 control-label text-right">Default Condition</label>
+  <div class="col-lg-9">{{attribute.condition_value}}</div>
+</div>
 
 <div class="row">
   <label class="col-lg-3 control-label text-right">Options</label>
@@ -71,5 +74,5 @@
   </div>
 </div>
 
-<add-rem-table title="Attribute" foo="attribute.objects"
-  all="objects" route="objects" owner="attribute" />
+<add-rem-table title="Attribute" associated="attribute.objects"
+  all="objects" route="object" owner="attribute" />

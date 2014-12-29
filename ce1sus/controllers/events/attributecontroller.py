@@ -7,7 +7,6 @@ Created: Aug 28, 2013
 """
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
-from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException
 
 
@@ -37,6 +36,9 @@ class AttributeController(BaseController):
     """
     self.logger.debug('User {0} inserts a new event'.format(user.username))
     try:
+
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(attribute, user, user.group, True)
       self.attribute_broker.insert(attribute, False)
       # generate relations if needed!
 

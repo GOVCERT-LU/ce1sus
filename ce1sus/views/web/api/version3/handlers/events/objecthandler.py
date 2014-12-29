@@ -8,8 +8,11 @@ Created on Dec 22, 2014
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException
+from ce1sus.controllers.events.attributecontroller import AttributeController
+from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -26,7 +29,6 @@ Created on Dec 22, 2014
 """
 
 
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
@@ -38,7 +40,8 @@ class ObjectHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.observable_controller = ObservableController(config)
-    self.object_definition_broker = ObjectDefinitionController(config)
+    self.attribute_controller = AttributeController(config)
+    self.attribute_definition_controller = AttributeDefinitionController(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -64,6 +67,8 @@ class ObjectHandler(RestBaseHandler):
 
         elif requested_object['object_type'] == 'object':
           return self.__process_child_object(method, event, obj, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'attribute':
+          return self.__process_attribute(method, event, obj, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -121,20 +126,21 @@ class ObjectHandler(RestBaseHandler):
 
       return related_object.to_dict(details, inflated)
     else:
-      object_id = requested_object['object_uuid']
-      if object_id:
-        child_obj = self.observable_controller.get_object_by_id(object_id)
-      else:
-        raise PathParsingException(u'object cannot be called without an ID')
-      if method == 'GET':
-        self.check_if_event_is_viewable(event)
-        return child_obj.to_dict(details, inflated)
-      elif method == 'PUT':
-        self.check_if_event_is_modifiable(event)
-        child_obj.populate(json)
-        self.observable_controller.update_object(child_obj, user, True)
-        return child_obj.to_dict(details, inflated)
-      elif method == 'DELETE':
-        self.check_if_event_is_deletable(event)
-        self.observable_controller.remove_object(child_obj, user, True)
-        return 'Deleted object'
+      raise RestHandlerException('Please use object/{uuid}/ instead')
+
+  def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
+    user = self.get_user()
+    if method == 'POST':
+      attribute = Attribute()
+      # Imporant to set the definition else the set value wont work
+      definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
+      attribute.definition = definition
+      # Important to set the parent object
+      attribute.object = obj
+      attribute.object_id = obj.identifier
+      # set the remaining stuff
+      attribute.populate(json)
+      self.attribute_controller.insert_attribute(attribute, user, True)
+      return attribute.to_dict(details, inflated)
+    else:
+      raise RestHandlerException('Please use object/{uuid}/ instead')

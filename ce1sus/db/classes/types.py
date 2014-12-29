@@ -28,7 +28,7 @@ class AttributeType(Base):
     # TODO: Add validation
     return True
 
-  def to_dict(self, complete=False):
+  def to_dict(self, complete=False, inflated=False):
     if self.table_id:
       name = ValueTable.get_by_id(self.table_id)
     else:
@@ -59,7 +59,7 @@ class AttributeViewType(Base):
     # TODO: Add validation
     return True
 
-  def to_dict(self, complete=False):
+  def to_dict(self, complete=False, inflated=False):
     return {'description': self.convert_value(self.description),
             'name': self.convert_value(self.name),
             'identifier': self.convert_value(self.identifier)

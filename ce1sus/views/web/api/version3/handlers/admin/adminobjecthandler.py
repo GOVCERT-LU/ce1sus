@@ -28,13 +28,14 @@ class AdminObjectHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
-  @require(privileged())
+  @require()
   def object(self, **args):
     try:
       method = args.get('method')
       path = args.get('path')
       details = self.get_detail_value(args)
       json = args.get('json')
+      inflated = self.get_inflated_value(args)
       if method == 'GET':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
@@ -43,26 +44,27 @@ class AdminObjectHandler(RestBaseHandler):
           definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
           if len(path) > 0:
             type_ = uuid = path.pop(0)
-            if type_ == 'attribute':
+            if type_ == 'attributes':
               if len(path) > 0:
-                raise RestHandlerException(u'Use the object api instead')
+                raise RestHandlerException(u'Use the attribute api instead')
               else:
                 result = list()
-                for attribute in definition.attribute:
-                  result.append(attribute.to_dict(complete=details))
+                for attribute in definition.attributes:
+                  result.append(attribute.to_dict(details, inflated))
                 return result
             else:
-              raise RestHandlerException(u'"{0}" is not supported'.format(type))
+              raise RestHandlerException(u'"{0}" is not supported'.format(type_))
           else:
-            return definition.to_dict(complete=details)
+            return definition.to_dict(details, inflated)
         else:
           # else return all
           definitions = self.object_definition_controller.get_all_object_definitions()
           result = list()
           for definition in definitions:
-            result.append(definition.to_dict(complete=details))
+            result.append(definition.to_dict(details, inflated))
           return result
       elif method == 'POST':
+        self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
           definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
@@ -92,8 +94,9 @@ class AdminObjectHandler(RestBaseHandler):
           obj_def.populate(json)
           # set the new checksum
           self.object_definition_controller.insert_object_definition(obj_def, self.get_user())
-          return obj_def.to_dict()
+          return obj_def.to_dict(details, inflated)
       elif method == 'PUT':
+        self.check_if_admin()
         # update user
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
@@ -102,11 +105,12 @@ class AdminObjectHandler(RestBaseHandler):
           obj_def.populate(json)
           # set the new checksum
           self.object_definition_controller.update_object_definition(obj_def, self.get_user())
-          return obj_def.to_dict()
+          return obj_def.to_dict(details, inflated)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
 
       elif method == 'DELETE':
+        self.check_if_admin()
         # Remove user
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user

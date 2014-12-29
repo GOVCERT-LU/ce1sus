@@ -33,6 +33,7 @@ class AdminGroupHandler(RestBaseHandler):
       path = args.get('path')
       details = self.get_detail_value(args)
       json = args.get('json')
+      inflated = self.get_inflated_value(args)
       if method == 'GET':
 
         if len(path) > 0:
@@ -49,16 +50,16 @@ class AdminGroupHandler(RestBaseHandler):
 
               result = list()
               for child in group.children:
-                result.append(child.to_dict(complete=details))
+                result.append(child.to_dict(details, inflated))
               return result
 
-          return group.to_dict(complete=details)
+          return group.to_dict(details, inflated)
         else:
           # else return all
           groups = self.group_controller.get_all_groups()
           result = list()
           for group in groups:
-              result.append(group.to_dict(complete=details))
+              result.append(group.to_dict(details, inflated))
           return result
 
       elif method == 'POST':
@@ -89,7 +90,7 @@ class AdminGroupHandler(RestBaseHandler):
           group = Group()
           group.populate(json)
           self.group_controller.insert_group(group)
-          return group.to_dict()
+          return group.to_dict(details, inflated)
       elif method == 'PUT':
         # update group
         if len(path) > 0:
@@ -98,7 +99,7 @@ class AdminGroupHandler(RestBaseHandler):
           group = self.group_controller.get_group_by_id(uuid)
           group.populate(json)
           self.group_controller.update_group(group)
-          return group.to_dict()
+          return group.to_dict(details, inflated)
         else:
           raise RestHandlerException(u'Cannot update group as no identifier was given')
 

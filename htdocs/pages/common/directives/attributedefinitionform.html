@@ -62,7 +62,7 @@
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">Data type:
+    <label class="col-lg-3 control-label text-right">Data type *:
       *</label>
     <div class="col-lg-9">
       <select name="table_id" class="form-control"
@@ -73,7 +73,7 @@
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">Base type:
+    <label class="col-lg-3 control-label text-right">Base type *:
       *</label>
     <div class="col-lg-9">
       <select name="type_id" class="form-control"
@@ -84,7 +84,7 @@
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">View Type:
+    <label class="col-lg-3 control-label text-right">View Type *:
       *</label>
     <div class="col-lg-9">
       <select name="viewType_id" class="form-control"
@@ -95,13 +95,24 @@
     </div>
   </div>
   <div class="row">
-    <label class="col-lg-3 control-label text-right">Input handler:
+    <label class="col-lg-3 control-label text-right">Input handler *:
       *</label>
     <div class="col-lg-9">
       <select name="attributehandler_id" class="form-control"
         ng-options="handler.identifier as handler.name for handler in available_handlers"
         ng-model="attribute.attributehandler_id" ng-change="handlerChange()">
         <option style="display: none" value="">Select a Handler</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Default condition *:
+      *</label>
+    <div class="col-lg-9">
+      <select name="attributehandler_id" class="form-control"
+        ng-options="condition.identifier as condition.value for condition in conditions"
+        ng-model="attribute.default_condition_id">
+        <option style="display: none" value="">Select a condition</option>
       </select>
     </div>
   </div>

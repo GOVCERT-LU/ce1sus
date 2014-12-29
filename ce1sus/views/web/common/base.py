@@ -168,11 +168,11 @@ class BaseView(object):
   def set_authorized_events_cache(self, cache):
     self._put_to_session('_cp_events_cache', cache)
 
-  def check_if_admin(self, event):
+  def check_if_admin(self):
     user = self.get_user()
     isadmin = is_user_priviledged(user)
     if not isadmin:
-      raise cherrypy.HTTPError(403, 'User {0} cannot change owner on event "{1}" as user is not privileged'.format(user.username, event.identifier))
+      raise cherrypy.HTTPError(403, 'User {0} is not privileged'.format(user.username))
 
   def check_if_event_is_viewable(self, event):
     self.check_permission(event, 'can_view')

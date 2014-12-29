@@ -75,12 +75,20 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, complete=True, inflated=False):
+
+    if inflated:
+      attribtues = list()
+      for attribute in self.attributes:
+        attribtues.append(attribute.to_dict(complete, False))
+    else:
+      attribtues = None
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'chksum': self.convert_value(self.chksum),
-              'default_share': self.convert_value(self.default_share)
+              'default_share': self.convert_value(self.default_share),
+              'attributes': attribtues
               }
     else:
       return {'identifier': self.identifier,
@@ -116,6 +124,8 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name',
                          back_populates='attributes')
+  default_condition_id = Column('default_condition_id', Unicode(40), ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
+  default_condition = relationship('Condition', uselist=False)
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
 
@@ -176,6 +186,12 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     return u'{0}'.format(class_array)
 
   def to_dict(self, complete=True, inflated=False):
+    if inflated:
+      objects = list()
+      for obj in self.objects:
+        objects.append(obj.to_dict(complete, False))
+    else:
+      objects = None
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),
@@ -187,11 +203,15 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'regex': self.convert_value(self.regex),
               'viewType_id': self.convert_value(self.view_type_id),
               'type_id': self.convert_value(self.value_type_id),
-              'viewType': self.view_type.to_dict(complete)
+              'viewType': self.view_type.to_dict(complete),
+              'default_condition_id': self.convert_value(self.default_condition_id),
+              'objects': objects
               }
     else:
       return {'identifier': self.identifier,
-              'name': self.name}
+              'name': self.name,
+              'default_condition_id': self.convert_value(self.default_condition_id),
+              }
 
   def populate(self, json):
     self.name = json.get('name', None)
@@ -200,6 +220,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.table_id = json.get('table_id', None)
     self.view_type_id = json.get('viewType_id', None)
     self.value_type_id = json.get('type_id', None)
+    self.default_condition_id = json.get('default_condition_id', None)
     relation = json.get('relation', 'false')
     if relation == 'true':
       relation = True

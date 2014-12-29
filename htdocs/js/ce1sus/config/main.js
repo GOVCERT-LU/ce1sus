@@ -47,7 +47,10 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/user/:id", "main.layout.admin.user.userDetails")
         .when("/admin/group", "main.layout.admin.group")
         .when("/admin/group/:id", "main.layout.admin.group.groupDetails")
-        .when("/admin/mailMgt", "main.layout.admin.mailMgt")
+        
+        .when("/admin/condition", "main.layout.admin.condition")
+        .when("/admin/condition/:id", "main.layout.admin.condition.conditionDetails")
+        
         .when("/admin/object", "main.layout.admin.object")
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
         .when("/admin/type", "main.layout.admin.type")
@@ -500,7 +503,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      controller: "objectDetailController",
                                      resolve: {
                                        $object: function(Restangular,$routeSegment) {
-                                         return Restangular.one("objectdefinition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
+                                         return Restangular.one("objectdefinition",$routeSegment.$routeParams.id).get({"complete": true, "inflated": true}).then(function (object) {
                                            return object;
                                          }, function(response) {
                                              throw generateErrorMessage(response);
@@ -532,6 +535,13 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  attributes: function(Restangular) {
                                    return Restangular.one("attributedefinition").getList(null, {"complete": false}).then(function (attributes) {
                                      return attributes;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 conditions: function(Restangular) {
+                                   return Restangular.one("condition").getList(null, {"complete": false}).then(function (condtitions) {
+                                     return condtitions;
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
@@ -583,14 +593,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                              controller: "attributeDetailController",
                              resolve: {
                                $attribute: function(Restangular,$routeSegment) {
-                                 return Restangular.one("attributedefinition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (attribute) {
-                                   return attribute;
-                                 }, function(response) {
-                                     throw generateErrorMessage(response);
-                                 });
-                               },
-                               $attributeObjects: function(Restangular,$routeSegment) {
-                                 return Restangular.one("attributedefinition",$routeSegment.$routeParams.id).getList('object').then(function (attribute) {
+                                 return Restangular.one("attributedefinition",$routeSegment.$routeParams.id).get({"complete": true, "inflated": true}).then(function (attribute) {
                                    return attribute;
                                  }, function(response) {
                                      throw generateErrorMessage(response);
@@ -683,6 +686,55 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           }
                           })
                         .up()
+                          .segment("condition", {
+                               templateUrl: "pages/admin/conditionmgt.html",
+                               controller : "conditionController",
+                               resolve: {
+                                 conditions: function(Restangular) {
+                                   return Restangular.one("condition").getList(null, {"complete": false}).then(function (conditions) {
+                                     return conditions;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 }
+                               },
+                               untilResolved: {
+                                 templateUrl: 'pages/common/loading.html'
+                               },
+                               resolveFailed: {
+                                 templateUrl: 'pages/common/error.html',
+                                 controller: 'errorController'
+                               }
+                              
+                        })
+                          .within()
+                             .segment("help", {
+                            "default": true,
+                            templateUrl: "pages/admin/condition/help.html"})
+                            
+                            .segment("conditionDetails", {
+                            templateUrl: "pages/admin/condition/conditiondetail.html",
+                            controller: "conditionDetailController",
+                            resolve: {
+                              $condition: function(Restangular,$routeSegment) {
+                                return Restangular.one("condition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (condition) {
+                                  return condition;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                            })
+                          .up()
+                        
                       .segment("group", {
                                templateUrl: "pages/admin/groupmgt.html",
                                controller : "groupController",
@@ -731,6 +783,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           })
                           
                         .up()
+                        
                      .up()
              .up()
         .up();

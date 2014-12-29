@@ -32,18 +32,19 @@ class MailHandler(RestBaseHandler):
       json = args.get('json')
       path = args.get('path')
       details = self.get_detail_value(args)
+      inflated = self.get_inflated_value(args)
       if method == 'GET':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single mail
           uuid = path.pop(0)
           mail = self.mail_controller.get_by_id(uuid)
-          return mail.to_dict(complete=details)
+          return mail.to_dict(details, inflated)
         else:
           # return all
           mails = self.mail_controller.get_all()
           result = list()
           for mail in mails:
-            result.append(mail.to_dict(complete=details))
+            result.append(mail.to_dict(details, inflated))
           return result
       elif method == 'PUT':
         if len(path) > 0:
@@ -51,7 +52,7 @@ class MailHandler(RestBaseHandler):
           mail = self.mail_controller.get_by_id(uuid)
           mail.populate(json)
           self.mail_controller.update_mail(mail, self.get_user())
-          return mail.to_dict()
+          return mail.to_dict(details, inflated)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')

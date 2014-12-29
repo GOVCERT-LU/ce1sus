@@ -14,12 +14,7 @@ app.controller("typesController", function($scope, Restangular, messages,
 
 app.controller('typeDetailController', function($scope, $routeSegment,$type, $log, messages) {
   
-  $scope.type = $type;
-  if ($scope.type.allowed_table.identifier){
-    $scope.enabledBtn = false;
-  } else {
-    $scope.enabledBtn  = true;
-  }
+
 
   $scope.$routeSegment = $routeSegment;
   
@@ -27,18 +22,7 @@ app.controller('typeDetailController', function($scope, $routeSegment,$type, $lo
     $scope.type = type;
   };
   
-  $scope.$watch(function() {
-    return $scope.type.allowed_table.identifier;
-    }, function(newVal, oldVal) {
-      //keep the group name shown instead the uuid, but only if there are groups
-      if ($scope.datatypes.length > 0) {
-        angular.forEach($scope.datatypes, function(entry) {
-          if (entry.identifier === $scope.type.allowed_table.identifier){
-            $scope.type.allowed_table.name = entry.name;
-          }
-        }, $log);
-      }
-    });
+
   
   //scope functions
   $scope.removeType = function(){

@@ -59,19 +59,17 @@ app.directive("addRemTable", function() {
     restrict: "E",
     scope: {
       title: "@title",
-      foo: "=foo", //group.children
       allItems: "=all", //groups
       route: "@route",
-      owner: "=owner"
+      owner: "=owner",
+      associated: "=associated"
     },
     templateUrl: "pages/common/directives/addremtables.html",
     controller: function($scope, $log, $timeout, Restangular, messages){
       //Split the associdated ones and available ones (definition of remaining)
       $scope.remaining = angular.copy($scope.allItems);
-      if ($scope.foo) {
-        $scope.associated = $scope.foo;
-      } else {
-        $scope.associated = [];
+      if (!$scope.associated){
+        $scope.associated =[];
       }
       $scope.setRemaining = function() {
         var index = 0;
@@ -226,7 +224,8 @@ app.directive("attributeDefinitionForm", function() {
       tables: "=tables",
       types: "=types",
       viewTypes: "=viewtypes",
-      reset: "=doreset"
+      reset: "=doreset",
+      conditions: "=conditions"
     },
     templateUrl: "pages/common/directives/attributedefinitionform.html",
     controller: function($scope, $log){
@@ -328,7 +327,7 @@ app.directive("attributeDefinitionForm", function() {
           $scope.available_types = angular.copy($scope.types);
           $scope.available_viewTypes = angular.copy($scope.viewTypes);
           $scope.available_handlers = angular.copy($scope.handlers);
-          
+
           delete $scope.attribute.viewType_id;
           delete $scope.attribute.table_id;
           delete $scope.attribute.type_id;
@@ -359,15 +358,25 @@ app.directive("viewtypeForm", function() {
   return {
     restrict: "E",
     scope: {
-      viewType: "=viewtype",
-      editMode: "=edit"
+      type: "=type",
+      condition: "=condition"
     },
-    templateUrl: "pages/common/directives/viewtypeform.html"
+    templateUrl: "pages/common/directives/conditionform.html"
   };
 });
 
 
-
+app.directive("conditionForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      condition: "=condition",
+      viewtype: "=type"
+    },
+    templateUrl: "pages/common/directives/conditionform.html"
+  };
+});
 
 app.directive("composedobservable", function($compile) {
   
@@ -602,11 +611,8 @@ app.directive("object", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
       };
       
-      $scope.appendChildObject = function(child){
-        if (!$scope.object.relatedObjects){
-          $scope.object.relatedObjects  = [];
-        }
-        $scope.object.relatedObjects.push(child);
+      $scope.appendChildObject = function(attribute){
+        $scope.object.attributes.push(attribute);
       };
       
       $scope.addAttribute = function(){
@@ -739,7 +745,8 @@ app.directive("objectAttributeForm", function() {
       objectattribute: "=objectattribute",
       type: "=type",
       definitions: '=',
-      permissions: "=permissions"
+      permissions: "=permissions",
+      conditions: "=conditions"
     },
     controller: function($scope, $log){
       $scope.getDefinition = function(identifier){
@@ -751,6 +758,7 @@ app.directive("objectAttributeForm", function() {
         }, $log);
         return result;
       };
+      
     },
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
@@ -842,9 +850,6 @@ app.directive("objectPropertiesForm", function() {
       item: "=object",
       type: "=type",
       permissions: "=permissions"
-    },
-    controller: function($scope, $log){
-
     },
     templateUrl: "pages/common/directives/objectproperties.html"
   };

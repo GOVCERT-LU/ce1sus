@@ -5,13 +5,24 @@
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
-        ng-model="attribute.definition_id">
+        ng-model="objectattribute.definition_id">
         <option style="display: none" value="">Select a definition</option>
       </select>
     </div>
   </div>
-  <div ng-if="attribute.definition_id">
-    <attribute-handler attribute="attribute" definition="getDefinition(attribute.definition_id)" type="type" form="addObjectAttribtueForm"></attribute-handler>
-    <object-properties-form object="observable" type="type" permissions="permissions"></object-properties-form>
+  <div ng-if="objectattribute.definition_id">
+    
+    <div class="row">
+      <label class="col-lg-3"><b>Condition *</b></label>
+      <div class="col-lg-9">
+        <select name="condition_id" class="form-control"
+          ng-options="condition.identifier as condition.value for condition in conditions"
+          ng-model="objectattribute.condition_id">
+          <option style="display: none" value="">Select a Condition</option>
+        </select>
+      </div>
+    </div>
+    <attribute-handler attribute="objectattribute" definition="getDefinition(objectattribute.definition_id)" type="type" form="addObjectAttribtueForm"></attribute-handler> 
+    <object-properties-form object="objectattribute" type="type" permissions="permissions"></object-properties-form>
   </div>
 </form>

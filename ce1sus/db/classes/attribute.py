@@ -32,6 +32,21 @@ _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', Base.metadata,
 
 class Condition(Base):
   value = Column('value', Unicode(40))
+  description = Column('description', UnicodeText)
+
+  def to_dict(self, complete=True, inflated=False):
+    return {'identifier': self.convert_value(self.identifier),
+            'value': self.convert_value(self.value),
+            'description': self.convert_value(self.description),
+            }
+
+  def populate(self, json):
+    self.value = json.get('value', None)
+    self.description = json.get('description', None)
+
+  def validate(self):
+    # TODO validate
+    return True
 
 
 class Attribute(ExtendedLogingInformations, Base):
@@ -59,11 +74,14 @@ class Attribute(ExtendedLogingInformations, Base):
                               uselist=False, lazy='joined')
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
-  condition = relationship('Condition', uselist=False, secondary='rel_attribute_conditions', lazy='joined')
+  condition_id = Column('condition_id', Unicode(40), ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), primary_key=True, index=True, default=None)
+  condition = relationship('Condition', lazy='joined')
+
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
+
   __bit_code = None
 
   @property
@@ -179,17 +197,35 @@ class Attribute(ExtendedLogingInformations, Base):
   def to_dict(self, complete=True, inflated=False):
     condition = None
     if self.condition:
-      condition = self.condition.value
+      condition = self.condition.to_dict(complete, inflated)
 
     return {'identifier': self.convert_value(self.identifier),
+            'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, inflated),
-            'shared': self.properties.is_shareable,
             'ioc': self.is_ioc,
             'value': self.convert_value(self.value),
-            'condition': self.convert_value(condition),
+            'condition_id': self.convert_value(self.condition.identifier),
+            'condition': condition,
             'creator_group': self.creator_group.to_dict(complete, inflated),
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
             'properties': self.properties.to_dict()
             }
+
+  def populate(self, json):
+    definition_id = json.get('definition_id', None)
+    if not definition_id:
+      definition = json.get('definition', None)
+      if definition:
+        definition_id = definition.get('identifier', None)
+    self.definition_id = definition_id
+    condition_id = json.get('condition_id', None)
+    if not definition_id:
+      condition = json.get('condition', None)
+      if condition:
+        condition_id = condition.get('identifier', None)
+    self.condition_id = condition_id
+    self.is_ioc = json.get('ioc', 0)
+    self.value = json.get('value', None)
+    self.properties.populate(json.get('properties', None))

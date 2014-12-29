@@ -38,6 +38,7 @@ class AdminUserHandler(RestBaseHandler):
       method = args.get('method')
       path = args.get('path')
       details = self.get_detail_value(args)
+      inflated = self.get_inflated_value(args)
       json = args.get('json')
       if method == 'GET':
 
@@ -56,9 +57,9 @@ class AdminUserHandler(RestBaseHandler):
 
             user.password = password
 
-            return user.to_dict()
+            return user.to_dict(details, inflated)
           else:
-            return user.to_dict(complete=False)
+            return user.to_dict(details, inflated)
         else:
           # else return all
           users = self.user_controller.get_all_users()
@@ -70,9 +71,9 @@ class AdminUserHandler(RestBaseHandler):
                 ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
                 password = ldap_password_identifier
               user.password = password
-              result.append(user.to_dict())
+              result.append(user.to_dict(details, inflated))
             else:
-              result.append(user.to_dict(complete=False))
+              result.append(user.to_dict(details, inflated))
           return result
       elif method == 'POST':
         # Add new user
@@ -80,7 +81,7 @@ class AdminUserHandler(RestBaseHandler):
         user.populate(json)
         user.password = hashSHA1(user.plain_password, user.username)
         self.user_controller.insert_user(user)
-        return user.to_dict()
+        return user.to_dict(details, inflated)
       elif method == 'PUT':
         # update user
         if len(path) > 0:
@@ -92,7 +93,7 @@ class AdminUserHandler(RestBaseHandler):
           if not re.match(r'^\*{8,}$', user.plain_password):
             user.password = hashSHA1(user.plain_password, user.username)
           self.user_controller.update_user(user)
-          return user.to_dict()
+          return user.to_dict(details, inflated)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
 

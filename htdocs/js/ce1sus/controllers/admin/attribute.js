@@ -3,13 +3,14 @@
  */
 
 app.controller("attributeController", function($scope, Restangular, messages,
-    $log, $routeSegment, attributes, handlers, tables, types, viewTypes) {
+    $log, $routeSegment, attributes, handlers, tables, types, viewTypes, conditions) {
   
   $scope.attributes = attributes;
   $scope.handlers = handlers;
   $scope.tables = tables;
   $scope.types = types;
   $scope.viewTypes = viewTypes;
+  $scope.conditions = conditions;
   
   $scope.$routeSegment = $routeSegment;
 
@@ -17,15 +18,26 @@ app.controller("attributeController", function($scope, Restangular, messages,
 });
 
 app.controller("attributeDetailController", function($scope, Restangular, messages,
-    $log, $routeSegment, $attribute, objects, $attributeObjects) {
+    $log, $routeSegment, $attribute, objects) {
   
   var identifier = $routeSegment.$routeParams.id;
   
   $scope.attribute = $attribute;
   $scope.objects = objects;
-  $scope.attribute.objects = $attributeObjects;
-  $scope.attrObjs = [];
 
+  $scope.$watch(function() {
+    return $scope.attribute.default_condition_id;
+    }, function(newVal, oldVal) {
+      //keep the condition name shown instead the uuid, but only if there are conditions
+      if ($scope.conditions.length > 0) {
+        angular.forEach($scope.conditions, function(entry) {
+          if (entry.identifier === $scope.attribute.default_condition_id){
+            $scope.attribute.condition_value = entry.value;
+          }
+        }, $log);
+      }
+    });
+  
   //scope functions
   $scope.removeAttribute = function(){
     //remove user from user list

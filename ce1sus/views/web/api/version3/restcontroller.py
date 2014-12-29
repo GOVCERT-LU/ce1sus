@@ -29,6 +29,7 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -67,6 +68,7 @@ class RestController(BaseView):
     self.instances['checks'] = ChecksHandler(config)
     self.instances['groups'] = GroupHandler(config)
     self.instances['relations'] = RelationHandler(config)
+    self.instances['condition'] = ConditionHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):
