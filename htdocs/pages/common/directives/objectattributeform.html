@@ -23,6 +23,14 @@
       </div>
     </div>
     <attribute-handler attribute="objectattribute" definition="getDefinition(objectattribute.definition_id)" type="type" form="addObjectAttribtueForm"></attribute-handler> 
+    <div class="row">
+      <div class="col-md-3">
+        <b>IOC</b>
+      </div>
+      <div class="col-md-9">
+        <input class="form-control" type="checkbox" name="ioc" value="ioc"  ng-model="objectattribute.ioc" />
+      </div>
+    </div>
     <object-properties-form object="objectattribute" type="type" permissions="permissions"></object-properties-form>
   </div>
 </form>

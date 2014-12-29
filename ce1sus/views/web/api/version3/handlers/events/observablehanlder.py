@@ -83,6 +83,9 @@ class ObservableHandler(RestBaseHandler):
       obj.parent = observable
       obj.populate(json)
       obj.observable_id = observable.identifier
+      if self.is_event_owner(event, user):
+        # The attribute is directly validated as the owner can validate
+        obj.properties.is_validated = True
       self.observable_controller.insert_object(obj, user, True)
       return obj.to_dict(details, inflated)
     else:

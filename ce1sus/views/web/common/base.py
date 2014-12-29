@@ -242,3 +242,21 @@ class BaseView(object):
       return result
     else:
       raise Exception(u'Unknown error occurred during event checks')
+
+  def is_user_priviledged(self, user):
+    self.logger.debug(u'Checking if user {0} is privileged'.format(user.username))
+    result = is_user_priviledged(user)
+    if result:
+      self.logger.info(u'User {0} is privileged'.format(user.username))
+    else:
+      self.logger.info(u'User {0} is not privileged'.format(user.username))
+    return result
+
+  def is_event_owner(self, event, user):
+    self.logger.debug(u'Checking if user {0} is owner of event {1}'.format(user.username, event.identifier))
+    result = is_user_priviledged(user)
+    if result:
+      self.logger.info(u'User {0} is owner of event {1}'.format(user.username, event.identifier))
+    else:
+      self.logger.info(u'User {0} is not owner of event {1}'.format(user.username, event.identifier))
+    return result

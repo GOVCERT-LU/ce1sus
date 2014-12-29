@@ -145,6 +145,9 @@ class ObjectHandler(RestBaseHandler):
       attribute.object_id = obj.identifier
       # set the remaining stuff
       attribute.populate(json)
+      if self.is_event_owner(event, user):
+        # The attribute is directly validated as the owner can validate
+        attribute.properties.is_validated = True
       self.attribute_controller.insert_attribute(attribute, user, True)
       return attribute.to_dict(details, inflated)
     else:

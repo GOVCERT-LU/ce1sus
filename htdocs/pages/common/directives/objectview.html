@@ -44,8 +44,8 @@
           </thead>
           <tbody>
             <tr ng-repeat="attribute in object.attributes">
-              <td><span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                  <span ng-if="!attribute.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              <td><span ng-if="attribute.properties.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                  <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
               </td>
               <td>{{attribute.definition.name}}</td>
               <td>

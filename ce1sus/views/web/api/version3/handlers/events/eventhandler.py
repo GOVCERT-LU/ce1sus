@@ -7,7 +7,6 @@ Created on Oct 29, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import is_user_priviledged, is_event_owner
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.event import Event, Comment
@@ -66,6 +65,9 @@ class EventHandler(RestBaseHandler):
           event = Event()
           event.populate(json)
           # TODO: make relations an populate the whole event by json
+
+          # The event is directly validated as the owner can validate
+          event.properties.is_validated = True
           self.event_controller.insert_event(self.get_user(), event, True, True)
           return self.__return_event(event, details, inflated)
         else:
@@ -77,13 +79,13 @@ class EventHandler(RestBaseHandler):
 
   def __is_event_ovner(self, method, event):
     if method == 'GET':
-      return is_event_owner(event, self.get_user())
+      return self.is_event_owner(event, self.get_user())
     else:
       raise RestHandlerException(u'Invalid request')
 
   def __change_event_group(self, method, event, json):
     if method == 'PUT':
-      if is_user_priviledged(self.get_user()):
+      if self.is_user_priviledged(self.get_user()):
         group_id = json.get('identifier', None)
         self.event_controller.change_owner(event, group_id, self.get_user())
 
@@ -146,6 +148,10 @@ class EventHandler(RestBaseHandler):
       observable.event_id = event.identifier
       observable.populate(json)
       observable.parent_id = event.identifier
+      if self.is_event_owner(event, user):
+        # The observable is directly validated as the owner can validate
+        observable.properties.is_validated = True
+
       self.observable_controller.insert_observable(observable, user, True)
       return observable.to_dict(details, inflated)
     else:
@@ -212,7 +218,7 @@ class EventHandler(RestBaseHandler):
     event_permission = self.event_controller.get_event_user_permissions(event, user)
     result = event.to_dict(details, inflated)
     result['userpermissions'] = event_permission.to_dict()
-    result['userpermissions']['owner'] = is_event_owner(event, user)
+    result['userpermissions']['owner'] = self.is_event_owner(event, user)
     return result
 
   """
