@@ -95,12 +95,17 @@ class ObjectHandler(RestBaseHandler):
           self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
+          # TODO Review the relations as they have to be removed at some point if they were existing
           if parent_id:
             # get related object
             related_object = self.observable_controller.get_related_object_by_child(obj)
-            related_object.parent_id = parent_id
-            related_object.relation = json.get('relation', None)
-            self.observable_controller.update_related_object(related_object, user, False)
+            # check if parent has changed
+            if related_object.parent_id != parent_id:
+              # unbind the earlier relation
+              related_object.parent_id = parent_id
+              related_object.relation = json.get('relation', None)
+              self.observable_controller.update_related_object(related_object, user, False)
+
           obj.populate(json)
           self.observable_controller.update_object(obj, user, True)
           return obj.to_dict(details, inflated)

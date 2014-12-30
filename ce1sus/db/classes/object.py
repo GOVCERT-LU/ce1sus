@@ -24,6 +24,7 @@ __license__ = 'GPL v3+'
 
 class RelatedObject(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
   child_id = Column('child_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', Unicode(40))
   object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
