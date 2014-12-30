@@ -57,6 +57,8 @@ class EventHandler(RestBaseHandler):
           return self.__change_event_group(method, event, json)
         elif requested_object['object_type'] == 'comment':
           return self.__process_commment(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'validate':
+          return self.__process_event_validate(method, event, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -68,6 +70,7 @@ class EventHandler(RestBaseHandler):
           event.populate(json)
           # TODO: make relations an populate the whole event by json
           user = self.get_user()
+          # TODO: determine if it was manually inserted or not
           if self.is_event_owner(event, user):
             # The observable is directly validated as the owner can validate
             event.properties.is_validated = True
@@ -230,6 +233,13 @@ class EventHandler(RestBaseHandler):
     result['userpermissions'] = event_permission.to_dict()
     result['userpermissions']['owner'] = owner
     return result
+
+  def __process_event_validate(self, method, event, requested_object, details, inflated, json):
+    if method != 'PUT':
+      raise RestHandlerException('Operation not supported')
+    self.check_if_admin_validate()
+    self.event_controller.validate_event(event, self.get_user())
+    return 'Event validated'
 
   """
   @rest_method()

@@ -173,6 +173,11 @@ class BaseView(object):
     if not isadmin:
       raise cherrypy.HTTPError(403, 'User {0} is not privileged'.format(user.username))
 
+  def check_if_admin_validate(self):
+    user = self.get_user()
+    if not user.permissions.validate:
+      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
+
   def check_if_event_is_viewable(self, event):
     self.check_permission(event, 'can_view')
 

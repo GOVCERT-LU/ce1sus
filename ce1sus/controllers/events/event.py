@@ -199,3 +199,33 @@ class EventController(BaseController):
       self.comment_broker.remove_by_id(comment.identifier)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def __validate_object(self, obj, user):
+    self.__validate_instance(obj, user)
+    for related_object in obj.related_objects:
+      self.__validate_instance(related_object.object, user)
+    for attribute in obj.attributes:
+      self.__validate_instance(attribute, user)
+
+  def __validate_observable(self, observable, user):
+    self.__validate_instance(observable, user)
+    if observable.observable_composition:
+      for child in observable.observable_composition:
+        self.__validate_observable(child, user)
+    if observable.object:
+      self.__validate_object(observable.object, user)
+
+  def __validate_instance(self, instance, user):
+    instance.properties.is_validated = True
+    self.set_extended_logging(instance, user, user.group, False)
+
+  def validate_event(self, event, user):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(event, user, user.group, False)
+      self.__validate_instance(event, user)
+      for observable in event.observables:
+        self.__validate_observable(observable, user)
+      self.event_broker.update(event, True)
+    except BrokerException as error:
+      raise ControllerException(error)

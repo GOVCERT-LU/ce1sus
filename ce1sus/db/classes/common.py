@@ -192,22 +192,6 @@ class Properties(BitBase):
     self._set_value(Properties.PROPOSAL, value)
 
   @property
-  def is_rest_instert(self):
-    return self._get_value(Properties.REST_INSERT)
-
-  @is_rest_instert.setter
-  def is_rest_instert(self, value):
-    self._set_value(Properties.REST_INSERT, value)
-
-  @property
-  def is_web_insert(self):
-    return self._get_value(Properties.WEB_INSERT)
-
-  @is_web_insert.setter
-  def is_web_insert(self, value):
-    self._set_value(Properties.WEB_INSERT, value)
-
-  @property
   def is_validated_and_shared(self):
     return self.is_validated and self.is_shareable
 

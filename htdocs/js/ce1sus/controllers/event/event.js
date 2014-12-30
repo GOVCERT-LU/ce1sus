@@ -8,6 +8,7 @@ app.controller("eventController", function($scope, Restangular,messages,
   $scope.anlysises=analyses;
   $scope.eventMenus = eventmenus;
   $scope.openedEvents = [];
+  $scope.valiation = false;
 
   $scope.pushItem = function(event, guiOpen) {
     found = false;
@@ -294,6 +295,19 @@ app.controller("eventOverviewController", function($scope, Restangular, messages
     $log, $routeSegment, $location, useradmin, groups, $modal) {
   $scope.isAdmin = useradmin;
   $scope.groups = groups;
+  $scope.validateEvent = function(){
+    //validates an event and publishes it as only users who can enter the validate section (lesser admin) can validate
+    $scope.event.one('validate').put().then(function (data) {
+      if (data) {
+        messages.setMessage({'type':'success','message':'Event sucessfully validated'});
+        $scope.removeItem($scope.event.identifier);
+      }
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
+  
+  
   $scope.removeEvent = function(){
     
     if (confirm('Are you sure you want to delete this event?')) { 
