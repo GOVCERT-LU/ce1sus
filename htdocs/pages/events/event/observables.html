@@ -43,26 +43,21 @@
       </thead>
       <tbody>
        <tr ng-repeat="attributeflat in flatAttributes | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage">
-              <td ng-if="attributeflat.properties.proposal && !attributeflat.properties.validated" style="background-color: yellow;">
-                <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="!attributeflat.properties.proposal && !attributeflat.properties.validated" style="background-color: red;">
-                <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="attributeflat.properties.proposal && attributeflat.properties.validated">
-                <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="!attributeflat.properties.proposal && attributeflat.properties.validated">
-                <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-           
-           
-           <td>
-              <span ng-if="!attributeflat.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          <td ng-if="attributeflat.properties.proposal && !attributeflat.properties.validated" style="background-color: yellow;">
+            <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </td>
+          <td ng-if="!attributeflat.properties.proposal && !attributeflat.properties.validated" style="background-color: red;">
+            <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </td>
+          <td ng-if="attributeflat.properties.proposal && attributeflat.properties.validated">
+            <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </td>
+          <td ng-if="!attributeflat.properties.proposal && attributeflat.properties.validated">
+            <span ng-if="attributeflat.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            <span ng-if="!attributeflat.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
           </td>
           <td ng-if="attributeflat.composedoperator && writeTD(attributeflat, pagination)" rowspan="{{getRowSpan(attributeflat,pagination)}}" >
             {{getFlatTitle(attributeflat)}} - {{attributeflat.composedoperator}}
