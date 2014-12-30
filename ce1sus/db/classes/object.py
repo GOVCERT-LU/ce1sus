@@ -28,7 +28,7 @@ class RelatedObject(Base):
   relation = Column('relation', Unicode(40))
   object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
 
-  def to_dict(self, complete=True, inflated=False):
+  def to_dict(self, complete=True, inflated=False, event=None, user=None):
     # flatten related object
     obj = self.object.to_dict(complete, inflated)
     obj['relation'] = self.convert_value(self.relation)
@@ -46,12 +46,12 @@ class RelatedObject(Base):
 
 class Object(ExtendedLogingInformations, Base):
   # rel_composition = relationship('ComposedObject')
-  attributes = relationship('Attribute', lazy='joined')
+  attributes = relationship('Attribute', lazy='dynamic')
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
 
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
   dbcode = Column('code', Integer, nullable=False, default=0)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
@@ -90,29 +90,67 @@ class Object(ExtendedLogingInformations, Base):
         self.__bit_code = Properties(self.dbcode, self)
     return self.__bit_code
 
-  def __attributes_count(self):
-      return self._sa_instance_state.session.query(Attribute).filter(Attribute.object_id == self.identifier).count()
+  def get_attributes_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.attributes.all()
+      else:
+        # count validated ones
+        return self.attributes.filter(Attribute.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).all()
 
-  def __rel_obj_count(self):
-      return self._sa_instance_state.session.query(RelatedObject).filter(RelatedObject.parent_id == self.identifier).count()
+  def get_related_objects_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.related_objects.all()
+      else:
+        # count validated ones
+        return self.related_objects.filter(Object.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).all()
 
-  def to_dict(self, complete=True, inflated=False):
+  def attributes_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.attributes.count()
+      else:
+        # count validated ones
+        return self.attributes.filter(Attribute.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).count()
+
+  def related_objects_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.related_objects.count()
+      else:
+        # count validated ones
+        return self.related_objects.filter(Object.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).count()
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
     attributes = list()
-    for attribute in self.attributes:
-      attributes.append(attribute.to_dict(complete, inflated))
+    for attribute in self.get_attributes_for_permissions(event_permissions):
+      attributes.append(attribute.to_dict(complete, inflated, event_permissions))
     related = list()
 
     if attributes:
       attributes_count = len(attributes)
     else:
-      attributes_count = self.__attributes_count()
+      attributes_count = self.attributes_count_for_permissions(event_permissions)
 
     if inflated:
-      for related_object in self.related_objects:
-        related.append(related_object.to_dict(complete, inflated))
+      for related_object in self.get_related_objects_for_permissions(event_permissions):
+        related.append(related_object.to_dict(complete, inflated, event_permissions))
       related_count = len(related)
     else:
-      related_count = self.__rel_obj_count()
+      related_count = self.related_objects_count_for_permissions(event_permissions)
 
     return {'identifier': self.convert_value(self.identifier),
             'definition_id': self.convert_value(self.definition_id),

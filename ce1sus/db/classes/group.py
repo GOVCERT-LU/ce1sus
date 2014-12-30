@@ -10,7 +10,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
-from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -66,14 +65,16 @@ class GroupRights(BitBase):
 
 class EventPermissions(BitBase):
 
-  VIEW = 0
-  # Add directly without validation
-  ADD = 1
-  MODIFY = 2
-  DELETE = 3
-  VALIDATE = 4
-  PROPOSE = 5
-  SET_GROUPS = 6
+  ADD = 0
+  MODIFY = 1
+  DELETE = 2
+  VALIDATE = 3
+  PROPOSE = 4
+  SET_GROUPS = 5
+
+  @property
+  def can_view(self):
+    return True
 
   @property
   def can_propose(self):
@@ -83,15 +84,6 @@ class EventPermissions(BitBase):
   def can_propose(self, value):
     # Note if you can propose, you can see
     self._set_value(EventPermissions.PROPOSE, value)
-
-  @property
-  def can_view(self):
-    return self._get_value(EventPermissions.VIEW)
-
-  @can_view.setter
-  def can_view(self, value):
-    # if you can see you can propose
-    self._set_value(EventPermissions.VIEW, value)
 
   @property
   def can_add(self):
@@ -139,7 +131,6 @@ class EventPermissions(BitBase):
     self._set_value(EventPermissions.SET_GROUPS, value)
 
   def set_all(self):
-    self.can_view = True
     self.can_add = True
     self.can_modify = True
     self.can_delete = True
@@ -148,12 +139,10 @@ class EventPermissions(BitBase):
     self.set_groups = True
 
   def set_default(self):
-    self.can_view = True
     self.can_propose = True
 
   def to_dict(self):
-    return {'view': self.can_view,
-            'add': self.can_add,
+    return {'add': self.can_add,
             'modify': self.can_modify,
             'validate': self.can_validate,
             'propose': self.can_propose,
@@ -162,7 +151,6 @@ class EventPermissions(BitBase):
             }
 
   def populate(self, json):
-    self.can_view = json.get('view', False)
     self.can_add = json.get('add', False)
     self.can_modify = json.get('modify', False)
     self.can_validate = json.get('validate', False)

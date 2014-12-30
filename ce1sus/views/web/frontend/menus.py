@@ -49,7 +49,7 @@ class GuiMenus(BaseView):
 
         if user.permissions.validate:
           child_menu_item = dict()
-          child_menu_item['title'] = 'Validate Rest Events'
+          child_menu_item['title'] = 'Validate events'
           child_menu_item['section'] = 'admin/validation'
           child_menus.append(child_menu_item)
 

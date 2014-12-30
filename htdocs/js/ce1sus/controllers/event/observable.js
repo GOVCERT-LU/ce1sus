@@ -72,7 +72,7 @@ app.controller("observableEditController", function($scope, Restangular, message
     //Lost the connection to the event
     restangularObservable = Restangular.restangularizeElement(null, $scope.working_copy, 'event/'+eventID+'/observable');
     restangularObservable.put({'complete':true, 'inflated':true}).then(function (data) {
-      $scope.$parent.$parent.setObservable(data);
+      $scope.$parent.$parent.setObservable(restangularObservable);
     }, function (response) {
       $scope.observable = angular.copy(original_observable);
       handleError(response, messages);

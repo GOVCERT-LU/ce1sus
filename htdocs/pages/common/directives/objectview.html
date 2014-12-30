@@ -1,20 +1,20 @@
 <div bs-collapse ng-transclude>
   <div class="panel panel-default"
     style="position: relative; left: {{20*indent}}px; width:calc(100% - {{20*indent}}px);" >
-    <div class="panel-heading collapse-header">
+    <div class="collapse-header" ng-class=" {'unvalidated' : !object.properties.validated && !object.properties.proposal, 'proposal': object.properties.proposal && !object.properties.validated, 'panel-heading':  object.properties.validated}">
       <div class="row">
         <div class="col-sm-7">
           <h4 class="panel-title">
-            <a bs-collapse-toggle> {{object.definition.name}} - {{object.identifier}}</a>
+            <a class="hand" bs-collapse-toggle> {{object.definition.name}} - {{object.identifier}}</a>
           </h4>
         </div>
         <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!object.properties.shared"></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary ce1sus-btn" ng-click="addAttribute()" ng-show="permissions.add"> <span
+            <button type="button" class="btn btn-primary ce1sus-btn" ng-click="addAttribute()" ng-show="permissions.add || permission.propose"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </button> 
-            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildObject()" ng-show="permissions.add"> <span
+            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildObject()" ng-show="permissions.add || permission.propose"> <span
               class="glyphicon glyphicon-download"></span>
             </button> 
             <button type="button" class="btn btn-default ce1sus-btn"ng-click="showProperties()" ng-show="permissions.modify"> <span
@@ -43,9 +43,22 @@
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="attribute in object.attributes">
-              <td><span ng-if="attribute.properties.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                  <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            <tr ng-repeat="attribute in object.attributes" >
+              <td ng-if="attribute.properties.proposal && !attribute.properties.validated" style="background-color: yellow;">
+                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="!attribute.properties.proposal && !attribute.properties.validated" style="background-color: red;">
+                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="attribute.properties.proposal && attribute.properties.validated">
+                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="!attribute.properties.proposal && attribute.properties.validated">
+                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
               </td>
               <td>{{attribute.definition.name}}</td>
               <td>

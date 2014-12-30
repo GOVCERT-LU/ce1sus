@@ -38,3 +38,13 @@ class EventsController(BaseController):
       return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)
+
+  def get_unvalidated_events(self, offset, limit, user):
+    try:
+      int_lim = int(limit) - 1
+      int_off = int(offset) - 1
+      events = self.event_broker.get_all_unvalidated(int_lim, int_off)
+      nbr_total_events = self.event_broker.get_all_unvalidated_total()
+      return (events, nbr_total_events)
+    except (BrokerException, ValueError) as error:
+      raise ControllerException(error)

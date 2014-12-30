@@ -7,11 +7,12 @@ Created on Oct 29, 2014
 """
 import cherrypy
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.event import Event, Comment
 from ce1sus.db.classes.observables import Observable
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -28,6 +29,7 @@ class EventHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
+  @require()
   def event(self, **args):
     try:
       method = args.get('method', None)
@@ -77,12 +79,6 @@ class EventHandler(RestBaseHandler):
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
-
-  def __is_event_ovner(self, method, event):
-    if method == 'GET':
-      return self.is_event_owner(event, self.get_user())
-    else:
-      raise RestHandlerException(u'Invalid request')
 
   def __change_event_group(self, method, event, json):
     if method == 'PUT':
@@ -181,18 +177,25 @@ class EventHandler(RestBaseHandler):
           return 'Deleted observable'
 
   def __process_observable_get(self, event, requested_object, details, inflated):
+    user = self.get_user()
     try:
+      event_permission = self.get_event_user_permissions(event, user)
       uuid = requested_object['object_uuid']
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_id(uuid)
-        return observable.to_dict(details, inflated)
+        if is_object_viewable(observable, event_permission):
+          return observable.to_dict(details, inflated, event_permission)
+        else:
+          raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
+
       else:
         # return all observables from the event
         result = list()
-        for observable in event.observables:
-          result.append(observable.to_dict(details, inflated))
+        for observable in event.get_observables_for_permissions(event_permission):
+          result.append(observable.to_dict(details, inflated, event_permission))
+
         return result
     except ControllerException as error:
       raise RestHandlerException(error)
@@ -219,12 +222,13 @@ class EventHandler(RestBaseHandler):
       raise RestHandlerException(error)
 
   def __return_event(self, event, details, inflated):
-    # Add additional permissions for the user itsel
+    # Add additional permissions for the user
     user = self.get_user()
-    event_permission = self.event_controller.get_event_user_permissions(event, user)
-    result = event.to_dict(details, inflated)
+    event_permission = self.get_event_user_permissions(event, user)
+    owner = self.is_event_owner(event, user)
+    result = event.to_dict(details, inflated, event_permission, owner)
     result['userpermissions'] = event_permission.to_dict()
-    result['userpermissions']['owner'] = self.is_event_owner(event, user)
+    result['userpermissions']['owner'] = owner
     return result
 
   """

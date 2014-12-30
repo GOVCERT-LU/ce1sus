@@ -7,8 +7,7 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged, \
-  is_event_owner
+from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.helpers.common.debug import Log
@@ -206,34 +205,8 @@ class BaseView(object):
       raise cherrypy.HTTPError(403, 'User {0} can not add contents to event {1}'.format(user.username, event.identifier))
 
   def is_user_allowed_to_perform(self, event, permission, user):
-    cache = self.get_authorized_events_cache()
-    result = None
-    if event:
-      # check if cache
-      if cache:
-        permissions = cache.get(event.identifier, None)
-        # if None the event is not available inside the cache
-        if permissions:
-          if isinstance(permissions, EventPermissions):
-            result = permissions.can_view
-          else:
-            result = permissions
-
-      if not result:
-        # either there was no cache or the event was not inside the cache perform checks
-        permissions = self.event_controller.get_event_user_permissions(event, user)
-        if isinstance(permissions, EventPermissions):
-          if hasattr(permissions, permission):
-            result = getattr(permissions, permission)
-        else:
-          result = False
-        # put result in the cache if there is one
-        cache[event.identifier] = result
-        # perform checks
-    else:
-      result = False
-
-    self.set_authorized_events_cache(cache)
+    permissions = self.get_event_user_permissions(event, user)
+    result = getattr(permissions, permission)
     # if the result is still not set throw an error
     log_msg = get_view_message(result, event.identifier, user.username, permission)
     # update cache
@@ -261,10 +234,11 @@ class BaseView(object):
       self.logger.info(u'User {0} is not owner of event {1}'.format(user.username, event.identifier))
     return result
 
-  def check_if_user_can_set_validate_or_shared(self, event, user, json):
+  def check_if_user_can_set_validate_or_shared(self, event, instance, user, json):
+    # TODO: Involve if user == creator
     properties = json.get('properties', None)
     if properties:
-      permissions = self.event_controller.get_event_user_permissions(event, user)
+      permissions = self.get_event_user_permissions(event, user)
       validated = properties.get('validated', None)
       if validated is not None:
         if not permissions.can_validate:
@@ -276,4 +250,24 @@ class BaseView(object):
           self.logger.info(u'User {0} has no right to share elements of event {1}'.format(user.username, event.identifier))
           raise cherrypy.HTTPError(403, 'User {0} does not own event {1}'.format(user.username, event.identifier))
 
+  def get_event_user_permissions(self, event, user):
+    cache = self.get_authorized_events_cache()
+    permissions = None
+    if event:
+      # check if cache
+      if cache:
+        permissions = cache.get(event.identifier, None)
+        # if None the event is not available inside the cache
+        if permissions:
+          return permissions
 
+      if permissions is None:
+        # either there was no cache or the event was not inside the cache perform checks
+        permissions = self.event_controller.get_event_user_permissions(event, user)
+        # put result in the cache if there is one
+        cache[event.identifier] = permissions
+        # perform checks
+    else:
+      permissions = EventPermissions('0')
+    self.set_authorized_events_cache(cache)
+    return permissions

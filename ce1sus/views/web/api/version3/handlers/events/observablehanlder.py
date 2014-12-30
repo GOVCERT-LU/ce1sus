@@ -9,7 +9,7 @@ Created on Dec 22, 2014
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.object import Object
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -26,6 +26,7 @@ class ObservableHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
+  @require()
   def observable(self, **args):
     try:
       method = args.get('method', None)

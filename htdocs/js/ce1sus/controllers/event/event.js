@@ -1,6 +1,6 @@
 
 
-app.controller("eventController", function($scope, Restangular,$route, messages,
+app.controller("eventController", function($scope, Restangular,messages,
     $log, $routeSegment,eventmenus, $location, statuses, risks, tlps, analyses) {
   $scope.statuses=statuses;
   $scope.risks=risks;
@@ -48,11 +48,8 @@ app.controller("eventController", function($scope, Restangular,$route, messages,
     }
   };
   
-  $scope.foo = function() {
-    $scope.text = [{"title":"foo"}];
-  };
   $scope.reloadPage = function() {
-    $route.reload();
+    $routeSegment.chain[3].reload();
   };
   $scope.$routeSegment = $routeSegment;
 });

@@ -563,6 +563,7 @@ app.directive("object", function($compile) {
       permissions: "=permissions"
     },
     controller: function($scope, $modal, Restangular, messages){
+
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
       };

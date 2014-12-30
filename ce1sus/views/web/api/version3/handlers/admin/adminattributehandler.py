@@ -9,7 +9,6 @@ from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionCon
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 
 

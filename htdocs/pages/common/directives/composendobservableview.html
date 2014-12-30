@@ -1,7 +1,7 @@
 
 <div class="panel-group" bs-collapse ng-transclude>
   <div class="panel panel-default">
-    <div class="panel-heading collapse-header">
+    <div class="collapse-header" ng-class=" {'unvalidated' : !composedobservable.properties.validated && !composedobservable.properties.proposal, 'proposal': composedobservable.properties.proposal && !composedobservable.properties.validated, 'panel-heading':  composedobservable.properties.validated}">
       <div class="row">
         <div class="col-sm-7">
           <h4 class="panel-title" id="Menu{{composedobservable.identifier}}">

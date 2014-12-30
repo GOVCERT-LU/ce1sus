@@ -202,7 +202,6 @@ text-transform: uppercase;
 margin-top: 9px;
 }
 
-
 .collapse-header {
 	padding: 0px;
 	
@@ -233,3 +232,11 @@ margin-top: 9px;
 .red {
   color: red;
 }
+
+.unvalidated {
+	background-color: red;
+}
+.proposal {
+  background-color: yellow;
+}
+

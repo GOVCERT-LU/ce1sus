@@ -9,9 +9,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties
-from ce1sus.db.classes.object import Object
 from ce1sus.db.common.session import Base
 
 
@@ -37,7 +37,7 @@ class ObservableComposition(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'AND')
-  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
+  observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
 
@@ -56,19 +56,37 @@ class ObservableComposition(Base):
   def validate(self):
     return True
 
-  def __observables_count(self):
-      # Make this with a count
-      return len(self.observables)
+  def get_observables_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.observables.all()
+      else:
+        # count validated ones
+        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
 
-  def to_dict(self, complete=True, inflated=False):
+  def observables_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.observables.count()
+      else:
+        # count validated ones
+        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
     observables = list()
-    for observable in self.observables:
-      observables.append(observable.to_dict(complete, inflated))
+    for observable in self.get_observables_for_permissions(event_permissions):
+      observables.append(observable.to_dict(complete, inflated, event_permissions))
 
     if observables:
       observables_count = len(observables)
     else:
-      observables_count = self.__observables_count()
+      observables_count = self.observables_count_for_permissions(event_permissions)
 
     return {'identifier': self.convert_value(self.identifier),
             'operator': self.convert_value(self.operator),
@@ -108,15 +126,26 @@ class Observable(ExtendedLogingInformations, Base):
   def validate(self):
     return True
 
-  def to_dict(self, complete=True, inflated=False):
+  def get_object_for_permissions(self, event_permissions):
     if self.object:
-      obj = self.object.to_dict(complete, inflated)
-    else:
-      obj = None
+      if is_object_viewable(self.object, event_permissions):
+        return self.object
+    return None
+
+  def get_composed_observable_for_permissions(self, event_permissions):
     if self.observable_composition:
-      composed = self.observable_composition.to_dict(complete, inflated)
-    else:
-      composed = None
+      if is_object_viewable(self.observable_composition, event_permissions):
+        return self.observable_composition
+    return None
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+    obj = self.get_object_for_permissions(event_permissions)
+    if obj:
+      obj = obj.to_dict(complete, inflated, event_permissions)
+
+    composed = self.get_composed_observable_for_permissions(event_permissions)
+    if composed:
+      composed = composed.to_dict(complete, inflated, event_permissions)
 
     if complete:
       result = {'identifier': self.convert_value(self.identifier),

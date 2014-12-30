@@ -204,7 +204,7 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
     restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
     restangularObject.put({'complete':false, 'infated':false}).then(function (data) {
       $scope.$hide();
-      $routeSegment.chain[4].reload();
+      $routeSegment.chain[$routeSegment.chain.length()].reload();
     }, function (response) {
       handleError(response, messages);
       $scope.$hide();

@@ -1,6 +1,6 @@
 <div bs-collapse ng-transclude>
   <div class="panel panel-default">
-    <div class="panel-heading collapse-header">
+    <div class="collapse-header" ng-class=" {'unvalidated' : !observable.properties.validated && !observable.properties.proposal, 'proposal': observable.properties.proposal && !observable.properties.validated, 'panel-heading':  observable.properties.validated}">
       <div class="row">
         <div class="col-sm-7">
             <h4 class="panel-title" id="Menu{{observable.identifier}}">
@@ -10,7 +10,7 @@
         <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!observable.properties.shared"></span></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
-            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permissions.add"> <span
+            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permissions.add || permission.propose"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </button>
             <button type="button" class="btn btn-default ce1sus-btn"ng-click="editObservable()" ng-show="permissions.modify"> <span

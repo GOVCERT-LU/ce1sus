@@ -142,3 +142,11 @@ function generatePagesArray(currentPage, collectionLength, rowsPerPage, paginati
   }
   return pages;
 }
+
+function getUnvalidated(object){
+  return false;
+}
+
+function getProposal(object){
+  return true;
+}

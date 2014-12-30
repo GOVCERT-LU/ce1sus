@@ -77,3 +77,18 @@ def privileged():
     else:
       return False
   return check
+
+
+def validate():
+  def check():
+    """
+      Checks if the user has the privileged right
+    """
+    # should not be done like this :P
+    session = getattr(cherrypy, 'session')
+    user = session.get(SESSION_USER, None)
+    if user:
+      return user.permissions.validate
+    else:
+      return False
+  return check

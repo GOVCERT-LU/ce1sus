@@ -42,6 +42,15 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events/event/:id/groups", "main.layout.events.event.groups")
         .when("/admin", "main.layout.admin")
         .when("/admin/validation", "main.layout.admin.validation")
+        .when("/admin/validation/all", "main.layout.admin.validation.all")
+        .when("/admin/validation/event/:id", "main.layout.admin.validation.event")
+        .when("/admin/validation/event/:id/overview", "main.layout.admin.validation.event.overview")
+        .when("/admin/validation/event/:id/observables", "main.layout.admin.validation.event.observables")
+        .when("/admin/validation/event/:id/indicators", "main.layout.admin.validation.event.indicators")
+        .when("/admin/validation/event/:id/relations", "main.layout.admin.validation.event.relations")
+        .when("/admin/validation/event/:id/groups", "main.layout.admin.validation.event.groups")
+        
+        
         .when("/admin/objAttrMgt", "main.layout.admin.objAttrMgt")
         .when("/admin/user", "main.layout.admin.user")
         .when("/admin/user/:id", "main.layout.admin.user.userDetails")
@@ -367,9 +376,166 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               
                             .up()
                         .segment("validation", {
-                               "default": true,
-                               templateUrl: "pages/admin/validation.html"
+                               templateUrl: "pages/admin/validation.html",
+                               controller: "adminValidationController",
+                               resolve: {
+                                 eventmenus: function(Restangular) {
+                                   return Restangular.oneUrl("eventmenus", "/menus/event_links").getList().then(function(eventmenus) {
+                                     return eventmenus;
+                                   }, function(response) {
+                                     throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 statuses: function(Restangular) {
+                                   return Restangular.one("statuses").getList(null, {"complete": true}).then(function (items) {
+                                     return items;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 risks: function(Restangular) {
+                                   return Restangular.one("risks").getList(null, {"complete": true}).then(function (items) {
+                                     return items;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 tlps: function(Restangular) {
+                                   return Restangular.one("tlps").getList(null, {"complete": true}).then(function (items) {
+                                     return items;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 analyses: function(Restangular) {
+                                   return Restangular.one("analyses").getList(null, {"complete": true}).then(function (items) {
+                                     return items;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 }
+                               },
+                               untilResolved: {
+                                   templateUrl: 'pages/common/loading.html'
+                               },
+                               resolveFailed: {
+                                 templateUrl: 'pages/common/error.html',
+                                 controller: 'errorController'
+                               }
                         })
+                          .within()
+                            .segment("all", {
+                              'default': true,
+                               templateUrl: "pages/events/all.html",
+                               controller: 'adminValidationsController'
+                            })
+                            .segment("event", {
+                                 templateUrl: "pages/admin/validation/event/layout.html",
+                                 controller: 'viewEventController',
+                                 resolve: {
+                                   $event: function(Restangular,$routeSegment) {
+                                     return Restangular.one("event",$routeSegment.$routeParams.id).get({"complete": true}).then(function (data) {
+                                       return data;
+                                     }, function(response) {
+                                         throw generateErrorMessage(response);
+                                     });
+                                   }
+                                 },
+                                 dependencies: ["id"],
+                                 untilResolved: {
+                                   templateUrl: 'pages/common/loading.html'
+                                 },
+                                 resolveFailed: {
+                                   templateUrl: 'pages/common/error.html',
+                                   controller: 'errorController'
+                                 }
+                        })
+                        .within()
+                          .segment("overview", {
+                            'default': true,
+                            templateUrl: "pages/events/event/overview.html",
+                            controller: 'eventOverviewController',
+                            resolve: {
+                              useradmin: function(Restangular,$routeSegment) {
+                                return Restangular.one("checks","isuseradmin").get().then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                  return false;
+                                });
+                              },
+                              groups: function(Restangular) {
+                                return Restangular.one("groups").getList(null, {"complete": false}).then(function (groups) {
+                                  return groups;
+                                }, function(response) {
+                                  return [];
+                                });
+                              }
+                            },
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("observables", {
+                            templateUrl: "pages/events/event/observables.html",
+                            controller: 'eventObservableController',
+                            resolve: {
+                              observables: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList({"complete": true, "inflated": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("indicators", {
+                            templateUrl: "pages/events/event/indicators.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("relations", {
+                            templateUrl: "pages/events/event/relations.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("groups", {
+                            templateUrl: "pages/events/event/groups.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                        .up()
+                          .up()
                         .segment("type", {
                                templateUrl: "pages/admin/typesmgt.html",
                                controller : "typesController",

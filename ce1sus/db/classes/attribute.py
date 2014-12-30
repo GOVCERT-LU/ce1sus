@@ -194,17 +194,19 @@ class Attribute(ExtendedLogingInformations, Base):
         return False
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=False):
+  def to_dict(self, complete=True, inflated=False, event=None, user=None):
     condition = None
+    condition_id = None
     if self.condition:
       condition = self.condition.to_dict(complete, inflated)
+      condition_id = self.convert_value(self.condition.identifier)
 
     return {'identifier': self.convert_value(self.identifier),
             'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, inflated),
             'ioc': self.is_ioc,
             'value': self.convert_value(self.value),
-            'condition_id': self.convert_value(self.condition.identifier),
+            'condition_id': condition_id,
             'condition': condition,
             'creator_group': self.creator_group.to_dict(complete, inflated),
             'created_at': self.convert_value(self.created_at),

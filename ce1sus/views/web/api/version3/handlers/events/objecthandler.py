@@ -13,7 +13,7 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -46,6 +46,7 @@ class ObjectHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
+  @require()
   def object(self, **args):
     try:
       method = args.get('method', None)

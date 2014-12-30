@@ -5,7 +5,6 @@
 
 Created on Oct 16, 2014
 """
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, Integer, UnicodeText
@@ -60,7 +59,7 @@ class Event(ExtendedLogingInformations, Base):
   # TODO: Add administration of minimal objects -> checked before publishing
 
   groups = relationship('EventGroupPermission')
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
   indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer, nullable=False, default=0)
@@ -164,23 +163,44 @@ class Event(ExtendedLogingInformations, Base):
     # TODO validation of an event
     return True
 
-  def observables_count(self):
-      return self._sa_instance_state.session.query(Observable).filter(Observable.event_id == self.identifier).count()
+  def get_observables_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.observables.all()
+      else:
+        # count validated ones
+        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
 
-  def to_dict(self, complete=True, inflated=False):
+  def observables_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.observables.count()
+      else:
+        # count validated ones
+        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, owner=False):
     if inflated:
       observables = list()
-      for observable in self.observables:
-        observables.append(observable.to_dict(complete, inflated))
+      for observable in self.get_observables_for_user(event_permissions):
+        observables.append(observable.to_dict(complete, inflated, event_permissions))
+
       observables_count = len(observables)
     else:
       observables = None
-      observables_count = self.observables_count()
+      observables_count = self.observables_count_for_permissions(event_permissions)
 
     if complete:
       comments = list()
-      for comment in self.comments:
-        comments.append(comment.to_dict())
+      if owner:
+        for comment in self.comments:
+          comments.append(comment.to_dict())
 
       result = {'identifier': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),

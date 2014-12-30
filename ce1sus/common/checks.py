@@ -13,8 +13,19 @@ __license__ = 'GPL v3+'
 
 
 def is_user_priviledged(user):
-
   return user.permissions.privileged
+
+
+def is_object_viewable(instance, event_permissions):
+  if instance.properties.is_validated and instance.properties.is_shareable:
+    return True
+  elif event_permissions:
+    if event_permissions.can_validate:
+      return True
+    else:
+      return False
+  else:
+    return False
 
 
 def is_event_owner(event, user):
@@ -28,13 +39,16 @@ def is_event_owner(event, user):
 
   :returns: Boolean
   """
-  if is_user_priviledged(user):
-    return True
-  else:
-    if user.group_id == event.creator_group_id:
+  if event and user:
+    if is_user_priviledged(user):
       return True
     else:
-      return False
+      if user.group_id == event.creator_group_id:
+        return True
+      else:
+        return False
+  else:
+    return False
 
 
 def get_view_message(result, event_id, username, permission):

@@ -49,7 +49,7 @@ class EventBroker(BrokerBase):
     try:
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(self.get_broker_class()).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&', 1) == 1).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -64,7 +64,7 @@ class EventBroker(BrokerBase):
       # TODO: events for user
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(self.get_broker_class()).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(self.get_broker_class()).filter(and_(Event.dbcode.op('&', 1) == 1, user.group.identifier in Event.groups)).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -91,3 +91,26 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
+
+  def get_all_unvalidated_total(self):
+    try:
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).count()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    return result
+
+  def get_all_unvalidated(self, limit=None, offset=None):
+    """
+    Returns all unvalidated events
+    """
+    try:
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    return result

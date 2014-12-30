@@ -167,6 +167,7 @@ class TLP(StaticBase):
             3: u'White'
             }
 
+
 class Properties(BitBase):
 
   """

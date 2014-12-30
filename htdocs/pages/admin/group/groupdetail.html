@@ -27,7 +27,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">Can download files</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="downloadfiles"
           value="downloadfiles"
           ng-model="group.permissions.downloadfiles" disabled>
       </div>
@@ -35,7 +35,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">TLP Propagation</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="propagate_tlp"
           value="propagate_tlp"
           ng-model="group.permissions.propagate_tlp" disabled>
       </div>
@@ -49,18 +49,9 @@
   <div class="col-lg-9">
 
     <div class="row">
-      <label class="col-lg-3 control-label text-right">View</label>
-      <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
-          value="view"
-          ng-model="group.default_event_permissions.view" disabled>
-      </div>
-    </div>
-
-    <div class="row">
       <label class="col-lg-3 control-label text-right">Add</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="add"
           value="add"
           ng-model="group.default_event_permissions.add" disabled>
       </div>
@@ -69,7 +60,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">View</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="view"
           value="view"
           ng-model="group.default_event_permissions.view" disabled>
       </div>
@@ -78,7 +69,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">Modify</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="modify"
           value="modify"
           ng-model="group.default_event_permissions.modify" disabled>
       </div>
@@ -87,7 +78,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">Validate</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="validate"
           value="validate"
           ng-model="group.default_event_permissions.validate" disabled>
       </div>
@@ -96,7 +87,7 @@
     <div class="row">
       <label class="col-lg-3 control-label text-right">Propose</label>
       <div class="col-lg-9">
-        <input type="checkbox" name="selectedPermissions[]"
+        <input type="checkbox" name="propose"
           value="propose"
           ng-model="group.default_event_permissions.propose" disabled>
       </div>
@@ -104,7 +95,7 @@
       <div class="row">
         <label class="col-lg-3 control-label text-right">Set Groups</label>
         <div class="col-lg-9">
-          <input type="checkbox" name="selectedPermissions[]"
+          <input type="checkbox" name="set_groups"
             value="set_groups"
             ng-model="group.default_event_permissions.set_groups" disabled/>
         </div>

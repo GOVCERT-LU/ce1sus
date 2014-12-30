@@ -1,10 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
 
-</body>
-</html>
+<div>
+  <div class="row">
+    <div class="col-lg-2">
+      <div id="eventsTab" class="left-nav-group">
+        <div class="left-nav-group-item" ng-class="{active: ( 'main.layout.admin.validation.all' | routeSegmentStartsWith)}" >
+          <a href="#/admin/validation/all" class="link">
+            <i class="fa fa-database" ng-if="eventMenu.icon"></i> Unvalidated events
+          </a>
+          <div class="badge" ng-click="reloadPage()">&#x21bb;</div>
+          <div style="clear: both;"></div>
+        </div>
+        <div ng-repeat="openedEvent in openedEvents" class="left-nav-group-item" ng-class="{active: ('{{openedEvent.section}}' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == openedEvent.identifier}" >
+          <a ng-href="#{{ openedEvent.section | routeSegmentUrl: {id: openedEvent.identifier} }}" class="link">
+          <i class="fa {{openedEvent.icon}}" ng-if="openedEvent.icon"></i>{{openedEvent.title}}
+          </a>
+          <div class="badge" ng-if="openedEvent.reload" ng-click="reloadPage()">&#x21bb;</div>
+          <div class="badge" ng-if="openedEvent.identifier" ng-click="removeItem(openedEvent.identifier)">x</div>
+          <div style="clear: both;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-10" app-view-segment="4"></div>
+  </div>
+</div>
