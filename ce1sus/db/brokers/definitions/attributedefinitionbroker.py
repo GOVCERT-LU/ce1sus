@@ -10,15 +10,13 @@ import sqlalchemy.orm.exc
 from ce1sus.db.brokers.definitions.definitionbase import DefinitionBrokerBase
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition
-from ce1sus.db.common.broker import NothingFoundException, BrokerException, \
-  IntegrityException
+from ce1sus.db.common.broker import NothingFoundException, BrokerException, IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
 
 
 class AttributeDefinitionBroker(DefinitionBrokerBase):

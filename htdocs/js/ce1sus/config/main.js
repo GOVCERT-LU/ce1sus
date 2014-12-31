@@ -307,7 +307,27 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  templateUrl: "pages/events/unpublishedProposals.html"
                         })
                         .segment("serach", {
-                                 templateUrl: "pages/events/serach.html"
+                          templateUrl: "pages/events/serach.html",
+                          controller : "serachController",
+                          resolve: {
+                            attributes: function(Restangular,$routeSegment) {
+                              return Restangular.one("search").all('attributes').getList({"complete": true}).then(function (data) {
+                                return data;
+                              }, function(response) {
+                                  throw generateErrorMessage(response);
+                              });
+                            }
+                              
+                              
+                              
+                          },
+                          untilResolved: {
+                            templateUrl: 'pages/common/loading.html'
+                          },
+                          resolveFailed: {
+                            templateUrl: 'pages/common/error.html',
+                            controller: 'errorController'
+                          }
                         })
                         .segment("add", {
                             templateUrl: "pages/events/add.html",

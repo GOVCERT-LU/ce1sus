@@ -7,6 +7,7 @@ Created on Oct 23, 2014
 """
 import sqlalchemy.orm.exc
 
+from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException, ValidationException, IntegrityException
@@ -71,7 +72,7 @@ class ValueBroker(BrokerBase):
     :param classname: the name of the class
     :type classname: Class
     """
-    return get_class('ce1sus.brokers.valuebroker', classname)
+    return get_class('ce1sus.db.classes.values', u'{0}Value'.format(classname))
 
   @staticmethod
   def get_class_by_attr_def(definition):
@@ -87,7 +88,7 @@ class ValueBroker(BrokerBase):
   def get_all_classes():
     """returns instances of all the table class values"""
     result = list()
-    table_names = AttributeDefinition.get_all_table_names()
+    table_names = ValueTable.get_all_table_names()
     for table_name in table_names:
       result.append(ValueBroker.get_class_by_string(table_name))
     return result

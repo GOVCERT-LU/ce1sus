@@ -75,7 +75,14 @@ class RestController(BaseView):
     self.instances['search'] = SearchHandler(config)
 
   @staticmethod
-  def find_default_method_name(instance):
+  def find_default_method_name(instance, probable_name=None):
+    # TODO: find why this is not always working?
+    if probable_name:
+      # try deducting from the first call
+      function = getattr(instance, probable_name)
+      if hasattr(function, 'default_fct'):
+        return probable_name
+
     methods = get_methods(instance)
     for method in methods:
       function = getattr(instance, method)
@@ -140,7 +147,7 @@ class RestController(BaseView):
 
       if default_method:
         # get default access point of the handler
-        method_name = RestController.find_default_method_name(handler_instance)
+        method_name = RestController.find_default_method_name(handler_instance, handler)
 
       if not method_name:
         raise cherrypy.HTTPError('Handler {0} has no default method'.format(handler_instance.name))

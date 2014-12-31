@@ -241,42 +241,7 @@ class RelationBroker(BrokerBase):
     """
     return Relation
 
-  def __look_for_value_by_class(self, clazz, value, operand, bypass_validation=False):
-    """
-    Searches the tables for a value
-    """
-    if bypass_validation:
-      code = 0
-    else:
-      code = 4
-    try:
-      if operand == '==':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value == value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '<':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value < value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '>':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value > value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '<=':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value <= value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '>=':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value >= value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == 'like':
-        return self.session.query(clazz).join(clazz.attribute).filter(clazz.value.like('%{0}%'.format(value)),
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
+
 
   def look_for_event_attributes(self, clazz, operand, attribute, needle):
     code = 4
@@ -324,56 +289,7 @@ class RelationBroker(BrokerBase):
       raise BrokerException(error)
 
   # pylint: disable=R0913
-  def __look_for_value_by_attrib_id(self,
-                                    clazz,
-                                    value,
-                                    attribute_definition_id,
-                                    operand='==',
-                                    bypass_validation=False):
-    """
-    Searches the tables for the value using an attribute definition id
-    """
-    # will return only valid ones
-    if bypass_validation:
-      code = 0
-    else:
-      code = 4
-    try:
-      if operand == '==':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value == value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '<':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value < value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '>':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value > value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '<=':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value <= value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == '>=':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value >= value,
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-      if operand == 'like':
-        return self.session.query(clazz).join(clazz.attribute).filter(Attribute.def_attribute_id == attribute_definition_id,
-                                                                      clazz.value.like('%{0}%'.format(value)),
-                                                                      Attribute.dbcode.op('&')(code) == code
-                                                                      ).all()
-    except ValueError:
-      return list()
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
+
 
   def look_for_attribute_value(self, attribute_definition, value, operand='=='):
     """

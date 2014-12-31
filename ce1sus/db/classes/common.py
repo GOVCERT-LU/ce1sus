@@ -113,6 +113,13 @@ class ValueTable(StaticBase):
   def attribute(self):
     return u'{0}_value'.format(ValueTable.get_by_id(self.identifier)).lower()
 
+  @classmethod
+  def get_all_table_names(cls):
+    result = list()
+    for value in cls.get_dictionary().itervalues():
+      result.append(value)
+    return result
+
 
 class Analysis(StaticBase):
   """Static class defining the status the analysis of an event"""

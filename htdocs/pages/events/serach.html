@@ -1,10 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
+<p><b>Note:</b>Searches only in shared and validated Attributes.</p>
+<form id="searchFormForm" class="form-inline" role="form">
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+      Search for:
+      <select class="form-control"
+        ng-options="attribute.identifier as attribute.name for attribute in attributes"
+        ng-model="search.field">
+        <option style="display: none" value="">Select an attribute</option>
+      </select>
+      <select class="form-control" ng-model="search.operator">
+                <option value="<">&lt;</option>
+                <option value="<=">&lt;=</option>
+                <option value="==">=</option>
+                <option value=">">&gt;</option>
+                <option value=">=">&gt;=</option>
+                <option value="like">like</option>
+      </select> 
+      <input class="form-control" value="" type="text" ng-model="search.value">
+      <button id="AddSave" class="btn btn-primary" type="submit" ng-disabled="!searchChanged()" ng-click="submitSearch()">Search</button>
+   </div>
+</div>
+</form>
+<div ng-show="results < 0">
+<div style="width: 500px; margin: 50px auto; text-align: center">
+    Searching...
+    <div class="progress progress-striped active">
+        <div class="bar" style="width: 100%;"></div>
+    </div>
+</div>
+</div>
 
-</body>
-</html>
+<div ng-show="results > 0">
+<h3>Found {{results}} matches</h3>
+<table ng-table="resultTable" show-filter="true" class="table table-striped table-bordered table-hover table-condensed">
+  <tbody>
+    <tr ng-repeat="item in $data">
+      <td data-title="'Event Title'" filter="{ 'eventTitle': 'text' }" sortable="'eventTitle'">
+        {{item.eventTitle}}
+      </td>
+      <td data-title="'Observable'" filter="{ 'observable': 'text' }" sortable="'observable'">
+        {{item.observable}}
+      </td>
+      <td data-title="'Object Type'" filter="{ 'objectType': 'text' }" sortable="'objectType'">
+        {{item.objectType}}
+      </td>
+      <td data-title="'Attribute Type'" filter="{ 'attributeType': 'text' }" sortable="'attributeType'">
+        {{item.attributeType}}
+      </td>
+      <td data-title="'Attribute Value'" filter="{ 'attributeValue': 'text' }" sortable="'attributeValue'">
+        {{item.attributeValue}}
+      </td>
+      <td data-title="'Options'">
+        <a href="" ng-click="pushItem(item.event, true)"><span class="glyphicon glyphicon-eye-open" title="View event" ></span></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
