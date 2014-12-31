@@ -6,11 +6,9 @@
 Created on Dec 31, 2014
 """
 
-from ce1sus.common.checks import is_user_priviledged
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
-from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.event.searchbroker import SearchBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event

@@ -6,11 +6,9 @@
 Created on Dec 31, 2014
 """
 
-from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.search import SearchController
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require, \
-  valid_uuid
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require, valid_uuid
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.object import Object

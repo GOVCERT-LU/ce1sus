@@ -1,0 +1,18 @@
+<ul class="nav nav-tabs">
+  <li ng-class="{active: $routeSegment.contains('overview')}"><a
+    href="#/admin/validation/event/{{event.identifier}}/overview">Overview</a></li>
+  <li ng-class="{active: $routeSegment.contains('observables')}"><a
+    href="#/admin/validation/event/{{event.identifier}}/observables">Observables</a></li>
+  <li ng-class="{active: $routeSegment.contains('indicators')}"><a
+    href="#/admin/validation/event/{{event.identifier}}/indicators">Indicators</a></li>
+  <li ng-class="{active: $routeSegment.contains('relations')}"><a
+    href="#/admin/validation/event/{{event.identifier}}/relations">Relations</a></li>
+  <li ng-class="{active: $routeSegment.contains('groups')}"><a
+    href="#/admin/validation/event/{{event.identifier}}/groups">Groups</a></li>
+  <li style="float: right;">
+    <a class="hand" ng-click="reloadPage()">Reload &#x21bb;</a>
+  </li>
+</ul>
+<p>
+<div app-view-segment="5">No tab selected.</div>
+</p>
