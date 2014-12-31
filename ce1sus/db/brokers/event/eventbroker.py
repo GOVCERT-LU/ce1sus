@@ -114,3 +114,35 @@ class EventBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
     return result
+
+  def get_group_by_id(self, identifier):
+    try:
+      result = self.session.query(EventGroupPermission).filter(EventGroupPermission.identifier == identifier).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    return result
+
+  def update_group_permission(self, event_group_permission, commit=True):
+    try:
+      self.update(event_group_permission, commit)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+  def insert_group_permission(self, event_group_permission, commit=True):
+    try:
+      self.insert(event_group_permission, commit)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+  def remove_group_permission_by_id(self, identifier, commit=True):
+    try:
+      self.session.query(EventGroupPermission).filter(EventGroupPermission.identifier == identifier).delete(synchronize_session='fetch')
+      self.do_commit(commit)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

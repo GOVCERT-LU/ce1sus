@@ -229,3 +229,43 @@ class EventController(BaseController):
       self.event_broker.update(event, True)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_group_by_id(self, identifier):
+    try:
+      return self.group_broker.get_by_id(identifier)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_event_group_by_id(self, identifier):
+    try:
+      return self.event_broker.get_group_by_id(identifier)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def insert_event_group_permission(self, user, event_group_permission, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(event_group_permission, user, user.group, True)
+      self.event_broker.insert_group_permission(event_group_permission, commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def update_event_group_permissions(self, user, event_group_permission, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_extended_logging(event_group_permission, user, user.group, False)
+      self.event_broker.update_group_permission(event_group_permission, commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_group_permissions(self, user, event_group_permission, commit=True):
+    try:
+      self.event_broker.remove_group_permission_by_id(event_group_permission.identifier, commit)
+    except BrokerException as error:
+      raise ControllerException(error)

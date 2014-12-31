@@ -6,7 +6,7 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Unicode, Integer, UnicodeText
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
@@ -30,21 +30,30 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
+  UniqueConstraint('event_id', 'group_id')
 
   @property
   def permissions(self):
-    if self.__default_bit_code is None:
-      if self.default_dbcode is None:
-        self.__default_bit_code = EventPermissions('0', self)
-      else:
-        self.__bit_code = EventPermissions(self.default_dbcode, self)
-    return self.__default_bit_code
+    if self.dbcode:
+      self.__bit_code = EventPermissions(self.dbcode, self)
+    else:
+      self.__bit_code = EventPermissions('0', self)
+    return self.__bit_code
 
   @permissions.setter
   def permissions(self, value):
     self.__bit_code = value
     self.dbcode = value.bit_code
     self.__bit_code.parent = self
+
+  def validate(self):
+    # TODO: validate
+    return True
+
+  def to_dict(self, complete=True, inflated=False):
+    return {'identifier': self.convert_value(self.identifier),
+            'permissions': self.permissions.to_dict(),
+            'group': self.group.to_dict(complete, inflated)}
 
 
 class Event(ExtendedLogingInformations, Base):
@@ -201,6 +210,9 @@ class Event(ExtendedLogingInformations, Base):
       if owner:
         for comment in self.comments:
           comments.append(comment.to_dict())
+      groups = list()
+      for group in self.groups:
+        groups.append(group.to_dict(complete, False))
 
       result = {'identifier': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
@@ -220,7 +232,8 @@ class Event(ExtendedLogingInformations, Base):
                 'observables': observables,
                 'observables_count': observables_count,
                 'comments': comments,
-                'properties': self.properties.to_dict()
+                'properties': self.properties.to_dict(),
+                'groups': groups
                 }
     else:
       result = {'identifier': self.convert_value(self.identifier),

@@ -202,7 +202,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      }, function(response) {
                                          throw generateErrorMessage(response);
                                      });
-                                   }
+                                   },
+                                  groups: function(Restangular) {
+                                    return Restangular.one("groups").getList(null, {"complete": true}).then(function (groups) {
+                                      return groups;
+                                    }, function(response) {
+                                      return [];
+                                    });
+                                  }
                                  },
                                  dependencies: ["id"],
                                  untilResolved: {
@@ -225,14 +232,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                 }, function(response) {
                                   return false;
                                 });
-                              },
-                              groups: function(Restangular) {
-                                return Restangular.one("groups").getList(null, {"complete": false}).then(function (groups) {
-                                  return groups;
-                                }, function(response) {
-                                  return [];
-                                });
                               }
+                              
                             },
                             dependencies: ["id"],
                             untilResolved: {
@@ -289,6 +290,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           .segment("groups", {
                             templateUrl: "pages/events/event/groups.html",
                             dependencies: ["id"],
+                            controller: 'eventGroupController',
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html'
                             },

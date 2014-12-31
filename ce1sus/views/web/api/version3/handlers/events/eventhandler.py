@@ -10,9 +10,10 @@ import cherrypy
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.event import Event, Comment
+from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
 from ce1sus.db.classes.observables import Observable
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
+from ce1sus.db.classes.group import EventPermissions
 
 
 __author__ = 'Weber Jean-Paul'
@@ -59,6 +60,8 @@ class EventHandler(RestBaseHandler):
           return self.__process_commment(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'validate':
           return self.__process_event_validate(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'group':
+          return self.__process_event_group(method, event, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -240,6 +243,66 @@ class EventHandler(RestBaseHandler):
     self.check_if_admin_validate()
     self.event_controller.validate_event(event, self.get_user())
     return 'Event validated'
+
+  def __process_event_group(self, method, event, requested_object, details, inflated, json):
+    if method == 'POST':
+      self.check_if_event_group_can_change(event)
+      # get group
+      group = json.get('group', None)
+      if group:
+        uuid = group.get('identifier')
+        if uuid:
+          # get group
+          group = self.event_controller.get_group_by_id(uuid)
+          # append
+          event_group_permission = EventGroupPermission()
+          event_group_permission.event_id = event.identifier
+          event_group_permission.group = group
+          permissions = json.get('permissions', None)
+          if permissions:
+            event_group_permission.permissions.populate(permissions)
+          else:
+            # use defaults
+            event_group_permission.dbcode = group.default_dbcode
+
+          self.event_controller.insert_event_group_permission(self.get_user(), event_group_permission, True)
+          return event_group_permission.to_dict()
+        else:
+          raise RestHandlerException(u'Cannot add group as no group was provided')
+      else:
+        raise RestHandlerException(u'Cannot add group as no group was provided')
+
+    elif method == 'PUT':
+      uuid = requested_object.get('object_uuid', None)
+      if uuid:
+        # get permissions
+
+        json_permissions = json.get('permissions', None)
+        if json_permissions:
+          event_group = self.event_controller.get_event_group_by_id(uuid)
+          event_group.permissions.populate(json_permissions)
+          self.event_controller.update_event_group_permissions(self.get_user(), event_group, True)
+          return event_group.to_dict()
+        else:
+          raise RestHandlerException(u'Cannot update group permissions for group {1} on event {0} as uuid was specified'.format(event.identifer, uuid))
+
+      else:
+        raise RestHandlerException(u'Cannot update group permissions for event {0} as uuid was specified'.format(event.identifer))
+
+    elif method == 'DELETE':
+      self.check_if_event_group_can_change(event)
+      uuid = requested_object.get('object_uuid', None)
+      if uuid:
+        # get group
+        event_group_permission = self.event_controller.get_event_group_by_id(uuid)
+
+        self.event_controller.remove_group_permissions(self.get_user(), event_group_permission, True)
+        return 'OK'
+      else:
+        raise RestHandlerException(u'Cannot remove group as no group was provided')
+
+    else:
+      raise RestHandlerException('Operation not supported')
 
   """
   @rest_method()

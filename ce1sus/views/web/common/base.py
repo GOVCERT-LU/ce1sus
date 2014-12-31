@@ -187,6 +187,9 @@ class BaseView(object):
   def check_if_event_is_deletable(self, event):
     self.check_permission(event, 'can_delete')
 
+  def check_if_event_group_can_change(self, event):
+    self.check_permission(event, 'set_groups')
+
   def check_permission(self, event, permission):
     user = self.get_user()
     result = self.is_user_allowed_to_perform(event, permission, user)
@@ -276,3 +279,4 @@ class BaseView(object):
       permissions = EventPermissions('0')
     self.set_authorized_events_cache(cache)
     return permissions
+

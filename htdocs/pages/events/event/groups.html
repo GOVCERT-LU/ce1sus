@@ -1,38 +1,98 @@
-<h4>Groupmanagment:</h4>
 
-<div id="MainGroupsErrors"></div>
-<form id="MainGroupsForm" class="form-horizontal role=" form"="">
-  <input name="identifier" value="8541" type="hidden"> <input
-    id="MainGroupsOperation" name="operation" value="" type="hidden">
-  <div class="row">
-    <div class="col-sd-5 col-md-5 ">
-      <table border="0" cellpadding="5" width="100%">
-        <tbody>
-          <tr>
-            <td><label><b>Remaining</b> groups:</label> <select
-              class="form-control" name="remaining" size="10"
-              multiple="multiple" tabindex="1">
-                <option value="1">Default_Group</option>
-                <option value="21">xxx.GOVCERT.LU</option>
-                <option value="31">ext3.GOVCERT.LU</option>
-            </select></td>
-            <td align="center">
-              <button id="MainGroupsbtnAdd" class="btn  btn-default"
-                type="submit" foo="add"
-                onclick="setBtnValue('MainGroupsbtnAdd', 'MainGroups')">&gt;</button>
-              <br>
-              <button id="MainGroupsbtnRemove" class="btn  btn-default"
-                type="submit" foo="remove"
-                onclick="setBtnValue('MainGroupsbtnRemove', 'MainGroups')">&lt;</button>
-            </td>
-            <td><label>Associated groups:</label> <select
-              class="form-control" name="existing" size="10"
-              multiple="multiple" tabindex="1">
-                <option value="11">GOVCERT.LU</option>
-            </select></td>
-          </tr>
-        </tbody>
-      </table>
+
+<div class="row">
+  <div class="col-md-6">
+    <h4>Group Management:</h4>
+    <table border="0" cellpadding="5" width="100%">
+      <tbody>
+        <tr>
+          <td><label>Accociated Groups:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="group.group.identifier as group.group.name for group in associated"
+            ng-model="selected_accociated" ng-change="setPropeties()">
+          </select></td>
+          <td align="center">
+            <button class="btn btn-default" type="button"
+              ng-click="groupRemove()">&gt;</button> <br>
+            <button class="btn btn-default" type="button"
+              ng-click="groupAdd()">&lt;</button>
+          </td>
+          <td><label><b>Remaining</b> Groups:</label> <select
+            class="form-control" size="10" multiple="multiple"
+            ng-options="rem_group.identifier as rem_group.name for rem_group in remaining"
+            ng-model="selected_remaining" ng-change="setRemPropeties()">
+          </select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h4>Group Permissions:</h4>
+
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Add</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="add" value="add"
+          ng-model="permissions.add"
+          ng-disabled="multiple">
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">View</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="view" value="view"
+          ng-model="permissions.view"
+          ng-disabled="multiple">
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Modify</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="modify" value="modify"
+          ng-model="permissions.modify"
+          ng-disabled="multiple">
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Validate</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="validate" value="validate"
+          ng-model="permissions.validate"
+          ng-disabled="multiple">
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Propose</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="propose" value="propose"
+          ng-model="permissions.propose"
+          ng-disabled="multiple">
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-lg-3 control-label text-right">Set
+        Groups</label>
+      <div class="col-lg-9">
+        <input type="checkbox" name="set_groups" value="set_groups"
+          ng-model="permissions.set_groups"
+          ng-disabled="multiple" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-offset-2 col-lg-10">
+        <div class="btn-group">
+          <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!permissionsChanged() && multiple" ng-click="submitPermissionChanges()" ng-show="showBtn">Save</button>
+          <button name="reset" type="button" class="btn btn-default" ng-click="resetPermissions()" ng-disabled="multiple" ng-show="showBtn">Reset</button>
+          <button name="setdefault" type="button" class="btn btn-default" ng-click="setDefaults()" ng-disabled="multiple">Set defaults</button>
+        </div>
+      </div>
     </div>
   </div>
-</form>
+</div>
+
+
