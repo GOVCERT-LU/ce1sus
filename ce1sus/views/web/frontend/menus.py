@@ -252,7 +252,7 @@ class GuiMenus(BaseView):
 
     link_item = dict()
     link_item['icon'] = 'fa-search'
-    link_item['title'] = 'Search'
+    link_item['title'] = 'Search Attribtues'
     link_item['section'] = 'main.layout.events.serach'
     link_item['href'] = link_item['section']
     links.append(link_item)

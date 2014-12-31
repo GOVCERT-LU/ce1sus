@@ -31,6 +31,7 @@ from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
 from ce1sus.views.web.api.version3.handlers.admin.adminvalidationhandler import ValidationHandler
+from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -71,6 +72,7 @@ class RestController(BaseView):
     self.instances['relations'] = RelationHandler(config)
     self.instances['condition'] = ConditionHandler(config)
     self.instances['validate'] = ValidationHandler(config)
+    self.instances['search'] = SearchHandler(config)
 
   @staticmethod
   def find_default_method_name(instance):

@@ -531,7 +531,7 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
         $scope.multiple = false;
         if (associatedEntry.group.identifier == $scope.selected_accociated[0]) {
           $scope.permissions = angular.copy(associatedEntry.permissions);
-          original_values = angular.copy(associatedEntry.default_event_permissions);
+          original_values = angular.copy(associatedEntry.permissions);
         }
       }, $log);
       
@@ -549,6 +549,7 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
         $scope.multiple = false;
         if (entry.identifier == $scope.selected_remaining[0]) {
           $scope.permissions = angular.copy(entry.default_event_permissions);
+          original_values = angular.copy(entry.default_event_permissions);
         }
       }, $log);
       
@@ -567,7 +568,7 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
       }
     }
     if (uuid) {
-      angular.forEach($scope.remaining, function(item) {
+      angular.forEach($scope.groups, function(item) {
         if (item.identifier == uuid) {
           $scope.permissions = angular.copy(item.default_event_permissions);
         }
@@ -656,6 +657,7 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
       }, $log);
       
     }, $log);
+    $scope.permissions = {};
     $scope.selected_accociated = [];
     $scope.selected_remaining = [];
   };
@@ -690,6 +692,7 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
     }, $log);
     $scope.remaining = angular.copy($scope.groups);
     $scope.setRemaining();
+    $scope.permissions = {};
     $scope.selected_accociated = [];
     $scope.selected_remaining = [];
   };
