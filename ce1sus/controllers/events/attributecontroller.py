@@ -35,6 +35,7 @@ class AttributeController(BaseController):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(attribute, user, user.group, False)
+      # TODO integrate handlersd
       self.attribute_broker.update(attribute)
     except BrokerException as error:
       raise ControllerException(error)
@@ -53,7 +54,8 @@ class AttributeController(BaseController):
       self.set_extended_logging(attribute, user, user.group, True)
       self.attribute_broker.insert(attribute, False)
       # generate relations if needed!
-
+      # TODO generate relations
+      # TODO integrate handlers
       """
       attributes = get_all_attributes_from_event(event)
       if (mkrelations == 'True' or mkrelations is True) and attributes:

@@ -61,7 +61,9 @@ app.controller("viewEventController", function($scope, Restangular, messages,
   $scope.pushItem($scope.event);
   $scope.groups = groups;
   $scope.reloadPage = function(){
-    $routeSegment.chain[4].reload();
+    var index = $routeSegment.chain.length;
+    
+    $routeSegment.chain[index-1].reload();
   };
 });
 
