@@ -16,7 +16,7 @@ app.controller("serachController", function($scope, Restangular,messages, $log, 
     return !angular.equals($scope.search, original_search);
   };
   var results = [];
-  $scope.results = results.length;
+  $scope.results = -2;
   
   var makeFlat = function(entry) {
     var observable = '';

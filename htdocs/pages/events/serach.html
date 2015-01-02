@@ -21,13 +21,17 @@
    </div>
 </div>
 </form>
-<div ng-show="results < 0">
+<div ng-show="results == -1">
 <div style="width: 500px; margin: 50px auto; text-align: center">
     Searching...
     <div class="progress progress-striped active">
         <div class="bar" style="width: 100%;"></div>
     </div>
 </div>
+</div>
+
+<div ng-show="results == 0">
+<h3>Found 0 matches</h3>
 </div>
 
 <div ng-show="results > 0">
