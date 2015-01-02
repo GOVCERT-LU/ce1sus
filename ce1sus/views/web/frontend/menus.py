@@ -236,19 +236,12 @@ class GuiMenus(BaseView):
 
     link_item = dict()
 
-    link_item['title'] = 'Unpublished Events'
+    link_item['title'] = 'Unpublished'
     link_item['section'] = 'main.layout.events.unpublished'
     link_item['reload'] = False
     link_item['href'] = link_item['section']
     links.append(link_item)
-
     link_item = dict()
-
-    link_item['title'] = 'Unpublished Proposals'
-    link_item['section'] = 'main.layout.events.uproposals'
-    link_item['reload'] = False
-    link_item['href'] = link_item['section']
-    links.append(link_item)
 
     link_item = dict()
     link_item['icon'] = 'fa-search'

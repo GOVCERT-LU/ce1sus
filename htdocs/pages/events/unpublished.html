@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-
-</body>
-</html>
+<ul class="nav nav-tabs">
+  <li ng-class="{active: $routeSegment.contains('events')}"><a
+    href="#/events/unpublished/events">Events</a></li>
+  <li ng-class="{active: $routeSegment.contains('observables')}"><a
+    href="#/events/unpublished/observables">Observables</a></li>
+  <li ng-class="{active: $routeSegment.contains('objects')}"><a
+    href="#/events/unpublished/objects">Objects</a></li>
+  <li ng-class="{active: $routeSegment.contains('attributes')}"><a
+    href="#/events/unpublished/attributes">Attributes</a></li>
+  <li style="float: right;">
+    <a class="hand" ng-click="reloadPage()">Reload &#x21bb;</a>
+  </li>
+</ul>
+<p>
+<div app-view-segment="4">No tab selected.</div>
+</p>

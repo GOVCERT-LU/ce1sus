@@ -11,7 +11,6 @@ from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionControlle
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require

@@ -31,7 +31,10 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events", "main.layout.events")
         .when("/events/all", "main.layout.events.allEvents")
         .when("/events/unpublished", "main.layout.events.unpublished")
-        .when("/events/unpublishedProposals", "main.layout.events.uproposals")
+        .when("/events/unpublished/events", "main.layout.events.unpublished.events")
+        .when("/events/unpublished/observables", "main.layout.events.unpublished.observables")
+        .when("/events/unpublished/objects", "main.layout.events.unpublished.objects")
+        .when("/events/unpublished/attributes", "main.layout.events.unpublished.attributes")
         .when("/events/search", "main.layout.events.serach")
         .when("/events/add", "main.layout.events.add")
         .when("/events/event/:id", "main.layout.events.event")
@@ -309,9 +312,21 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                         .segment("unpublished", {
                                  templateUrl: "pages/events/unpublished.html"
                         })
-                        .segment("uproposals", {
-                                 templateUrl: "pages/events/unpublishedProposals.html"
-                        })
+                        .within()
+                          .segment("events", {
+                              'default':true,
+                               templateUrl: "pages/events/unpublished/events.html"
+                          })
+                          .segment("observables", {
+                                   templateUrl: "pages/events/unpublished/observables.html"
+                          })
+                          .segment("objects", {
+                                   templateUrl: "pages/events/unpublished/objects.html"
+                          })
+                          .segment("attributes", {
+                                   templateUrl: "pages/events/unpublished/attributes.html"
+                          })
+                        .up()
                         .segment("serach", {
                           templateUrl: "pages/events/serach.html",
                           controller : "serachController",
