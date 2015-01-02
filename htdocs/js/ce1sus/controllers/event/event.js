@@ -82,6 +82,16 @@ app.controller("eventObservableController", function($scope, Restangular, messag
           item.shared = attribute.shared;
           item.object = object.definition.name;
           item.observable = observable.title;
+          if (attribute){
+            item.properties = attribute.properties;
+          } else {
+            if (object) {
+              item.properties = object.properties;
+            } else {
+              item.properties = observable.properties;
+            }
+          }
+          
           if (composed) {
             item.composed = composed.title;
             item.composedoperator = composed.operator;
