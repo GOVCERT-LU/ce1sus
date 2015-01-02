@@ -8,7 +8,7 @@ Created: Aug, 2013
 from ce1sus.controllers.base import BaseController, SpecialControllerException, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker, AttributeViewTypeBroker
+from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
@@ -38,7 +38,6 @@ class AttributeDefinitionController(BaseController):
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.type_broker = self.broker_factory(AttributeTypeBroker)
-    self.view_type_broker = self.broker_factory(AttributeViewTypeBroker)
 
   def get_all_attribute_definitions(self):
     """
@@ -125,23 +124,9 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def get_view_type_by_id(self, identifier):
-    try:
-      return self.view_type_broker.get_by_id(identifier)
-    except NothingFoundException as error:
-      raise ControllerNothingFoundException(error)
-    except BrokerException as error:
-      raise ControllerException(error)
-
   def insert_type(self, type_):
     try:
       return self.type_broker.insert(type_)
-    except BrokerException as error:
-      raise ControllerException(error)
-
-  def insert_view_type(self, type_):
-    try:
-      return self.view_type_broker.insert(type_)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -151,26 +136,14 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_view_type(self, type_):
-    try:
-      return self.view_type_broker.update(type_)
-    except BrokerException as error:
-      raise ControllerException(error)
-
   def remove_type_by_id(self, identifier):
     try:
       return self.type_broker.remove_by_id(identifier)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_view_type_by_id(self, identifier):
+  def get_handler_by_id(self, identifier):
     try:
-      return self.view_type_broker.remove_by_id(identifier)
-    except BrokerException as error:
-      raise ControllerException(error)
-
-  def get_all_view_types(self):
-    try:
-      return self.view_type_broker.get_all()
+      return self.handler_broker.get_by_id(identifier)
     except BrokerException as error:
       raise ControllerException(error)

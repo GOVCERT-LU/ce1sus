@@ -3,13 +3,12 @@
  */
 
 app.controller("attributeController", function($scope, Restangular, messages,
-    $log, $routeSegment, attributes, handlers, tables, types, viewTypes, conditions) {
+    $log, $routeSegment, attributes, handlers, tables, types, conditions) {
   
   $scope.attributes = attributes;
   $scope.handlers = handlers;
   $scope.tables = tables;
   $scope.types = types;
-  $scope.viewTypes = viewTypes;
   $scope.conditions = conditions;
   
   $scope.$routeSegment = $routeSegment;
@@ -105,19 +104,6 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
         angular.forEach($scope.types, function(entry) {
           if (entry.identifier === $scope.attribute.type_id){
             $scope.attribute.type_name = entry.name;
-          }
-        }, $log);
-      }
-    });
-  
-  $scope.$watch(function() {
-    return $scope.attribute.viewType_id;
-    }, function(newVal, oldVal) {
-      //keep the group name shown instead the uuid, but only if there are groups
-      if ($scope.viewTypes.length > 0) {
-        angular.forEach($scope.viewTypes, function(entry) {
-          if (entry.identifier === $scope.attribute.viewType_id){
-            $scope.attribute.viewType_name = entry.name;
           }
         }, $log);
       }

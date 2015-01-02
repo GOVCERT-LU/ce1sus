@@ -67,8 +67,6 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
         .when("/admin/type", "main.layout.admin.type")
         .when("/admin/type/:id", "main.layout.admin.type.typeDetails")
-        .when("/admin/viewtype", "main.layout.admin.viewType")
-        .when("/admin/viewtype/:id", "main.layout.admin.viewType.viewTypeDetails")
         .when("/admin/attribute", "main.layout.admin.attribute")
         .when("/admin/attribute/:id", "main.layout.admin.attribute.attributeDetails")
         .when("/admin/mail", "main.layout.admin.mail")
@@ -651,54 +649,6 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  })
                           
                          .up()
-                           .segment("viewType", {
-                               templateUrl: "pages/admin/viewtypesmgt.html",
-                               controller : "viewTypesController",
-                               resolve: {
-                                 viewTypes: function(Restangular) {
-                                   return Restangular.one("attributeviewtypes").getList(null, {"complete": false}).then(function (objects) {
-                                     return objects;
-                                   }, function(response) {
-                                       throw generateErrorMessage(response);
-                                   });
-                                 }
-                               },
-                               untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
-                               },
-                               resolveFailed: {
-                                 templateUrl: 'pages/common/error.html',
-                                 controller: 'errorController'
-                               }
-                        })
-                          .within()
-                             .segment("help", {
-                                 "default": true,
-                                 templateUrl: "pages/admin/viewtype/help.html"})
-                          
-                                 .segment("viewTypeDetails", {
-                                     templateUrl: "pages/admin/viewtype/viewtypedetail.html",
-                                     controller: "viewTypeDetailController",
-                                     resolve: {
-                                       $viewType: function(Restangular,$routeSegment) {
-                                         return Restangular.one("attributeviewtypes",$routeSegment.$routeParams.id).get({"complete": true}).then(function (object) {
-                                           return object;
-                                         }, function(response) {
-                                             throw generateErrorMessage(response);
-                                         });
-                                       },
-                                     },
-                                     dependencies: ["id"],
-                                     untilResolved: {
-                                       templateUrl: 'pages/common/loading.html'
-                                     },
-                                     resolveFailed: {
-                                       templateUrl: 'pages/common/error.html',
-                                       controller: 'errorController'
-                                     }
-                                 })
-                          
-                         .up()
                         .segment("object", {
                                templateUrl: "pages/admin/objmgt.html",
                                controller : "objectController",
@@ -788,13 +738,6 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  types: function(Restangular) {
                                    return Restangular.one("attributetypes").getList(null, {"complete": false}).then(function (tables) {
-                                     return tables;
-                                   }, function(response) {
-                                       throw generateErrorMessage(response);
-                                   });
-                                 },
-                                 viewTypes: function(Restangular) {
-                                   return Restangular.one("attributeviewtypes").getList(null, {"complete": false}).then(function (tables) {
                                      return tables;
                                    }, function(response) {
                                        throw generateErrorMessage(response);

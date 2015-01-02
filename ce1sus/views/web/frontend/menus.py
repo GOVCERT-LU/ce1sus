@@ -85,12 +85,6 @@ class GuiMenus(BaseView):
           child_menus.append(child_menu_item)
 
         attributeSubTypemgt = False
-        if user.permissions.privileged:
-          child_menu_item = dict()
-          child_menu_item['title'] = 'View types'
-          child_menu_item['section'] = 'admin/viewtype'
-          child_menus.append(child_menu_item)
-          attributeSubTypemgt = True
 
         if user.permissions.privileged:
           child_menu_item = dict()

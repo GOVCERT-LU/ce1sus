@@ -223,7 +223,6 @@ app.directive("attributeDefinitionForm", function() {
       handlers: "=handlers",
       tables: "=tables",
       types: "=types",
-      viewTypes: "=viewtypes",
       reset: "=doreset",
       conditions: "=conditions"
     },
@@ -231,7 +230,6 @@ app.directive("attributeDefinitionForm", function() {
     controller: function($scope, $log){
       $scope.available_tables = angular.copy($scope.tables);
       $scope.available_types = angular.copy($scope.types);
-      $scope.available_viewTypes = angular.copy($scope.viewTypes);
       $scope.available_handlers = angular.copy($scope.handlers);
       
       $scope.handlerChange = function (){
@@ -325,10 +323,8 @@ app.directive("attributeDefinitionForm", function() {
         if (newValue) {
           $scope.available_tables = angular.copy($scope.tables);
           $scope.available_types = angular.copy($scope.types);
-          $scope.available_viewTypes = angular.copy($scope.viewTypes);
           $scope.available_handlers = angular.copy($scope.handlers);
 
-          delete $scope.attribute.viewType_id;
           delete $scope.attribute.table_id;
           delete $scope.attribute.type_id;
           delete $scope.attribute.attributehandler_id;
@@ -353,18 +349,6 @@ app.directive("typeForm", function() {
   };
 });
 
-app.directive("viewtypeForm", function() {
-  
-  return {
-    restrict: "E",
-    scope: {
-      type: "=type",
-      condition: "=condition"
-    },
-    templateUrl: "pages/common/directives/conditionform.html"
-  };
-});
-
 
 app.directive("conditionForm", function() {
   
@@ -372,7 +356,7 @@ app.directive("conditionForm", function() {
     restrict: "E",
     scope: {
       condition: "=condition",
-      viewtype: "=type"
+      type: "=type"
     },
     templateUrl: "pages/common/directives/conditionform.html"
   };
@@ -746,13 +730,13 @@ app.directive("observableObjectForm", function() {
       permissions: "=permissions",
       type: "=type"
     },
-    controller: function($scope, Restangular){
+    controller: function($scope, Restangular, messages){
       if ($scope.child) {
         //get the possible relations and add None
         Restangular.one('relations').getList().then(function(relations) {
           $scope.relations = relations;
         }, function(response) {
-          throw generateErrorMessage(response);
+          handleError(response, messages);
         });
       } 
     },
@@ -803,7 +787,7 @@ app.directive("attributeHandler", function() {
     template : '<div ng-include="getTemplate()"></div>',
     link: function(scope, element, attrs, ctrl) {
       var contentType =  scope.type;
-      var viewType = scope.definition.viewType.name;
+      var viewType = scope.definition.attributehandler.view_type;
       scope.getTemplate = function(){
 
         var templateLoader;
@@ -815,7 +799,15 @@ app.directive("attributeHandler", function() {
         return templateUrl;
       };
     },
-    controller: function($scope, $log, $templateCache ){
+    controller: function($scope, $log, $templateCache, Restangular, messages ){
+      //Resolve additional data
+      if ($scope.type != 'view') {
+        Restangular.one('attributehandlers', $scope.definition.attributehandler_id).one('get').getList().then(function(handlerdata) {
+          $scope.handlerdata = handlerdata;
+        }, function(response) {
+          handleError(response, messages);
+        });
+      }
       $scope.removeTemplateFromCache = function(url){
         $templateCache.remove(url);
       };

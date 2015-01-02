@@ -118,8 +118,6 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   relation = Column('relationable', Boolean, default=False, nullable=False)
   value_type_id = Column('attributetype_id', Unicode(40), ForeignKey('attributetypes.attributetype_id'))
   value_type = relationship("AttributeType", uselist=False)
-  view_type_id = Column('attributeviewtype_id', Unicode(40), ForeignKey('attributeviewtypes.attributeviewtype_id'), nullable=False, index=True)
-  view_type = relationship("AttributeViewType", uselist=False)
   objects = relationship('ObjectDefinition',
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name',
@@ -197,13 +195,12 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'attributehandler_id': self.convert_value(self.attributehandler_id),
+              'attributehandler': self.handler.to_dict(),
               'table_id': self.convert_value(self.table_id),
               'relation': self.convert_value(self.relation),
               'share': self.convert_value(self.share),
               'regex': self.convert_value(self.regex),
-              'viewType_id': self.convert_value(self.view_type_id),
               'type_id': self.convert_value(self.value_type_id),
-              'viewType': self.view_type.to_dict(complete),
               'default_condition_id': self.convert_value(self.default_condition_id),
               'objects': objects
               }

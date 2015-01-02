@@ -5,7 +5,7 @@
 
 Created on Nov 6, 2014
 """
-from ce1sus.db.classes.types import AttributeType, AttributeViewType
+from ce1sus.db.classes.types import AttributeType
 from ce1sus.db.common.broker import BrokerBase, IntegrityException
 
 
@@ -39,12 +39,3 @@ class AttributeTypeBroker(BrokerBase):
       BrokerBase.update(self, instance, commit)
     else:
       raise IntegrityException('Cannot update the None element')
-
-
-class AttributeViewTypeBroker(BrokerBase):
-
-  def get_broker_class(self):
-    """
-    overrides BrokerBase.get_broker_class
-    """
-    return AttributeViewType

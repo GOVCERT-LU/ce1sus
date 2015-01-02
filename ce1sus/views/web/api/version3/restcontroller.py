@@ -14,7 +14,6 @@ from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import Admin
 from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import AdminObjectHandler
 from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import AttribueTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
-from ce1sus.views.web.api.version3.handlers.admin.adminviewtypehandler import AttribueViewTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
@@ -57,7 +56,6 @@ class RestController(BaseView):
     self.instances['attributehandlers'] = HandlerHandler(config)
     self.instances['attributetables'] = TablesHandler(config)
     self.instances['attributetypes'] = AttribueTypeHandler(config)
-    self.instances['attributeviewtypes'] = AttribueViewTypeHandler(config)
     self.instances['process'] = ProcessHandler(config)
     self.instances['event'] = EventHandler(config)
     self.instances['observable'] = ObservableHandler(config)

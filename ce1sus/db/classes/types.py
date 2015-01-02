@@ -48,23 +48,3 @@ class AttributeType(Base):
       identifier = allowed_table.get('identifier', None)
       if identifier:
         self.table_id = identifier
-
-
-class AttributeViewType(Base):
-
-  name = Column('name', Unicode(255), nullable=False, index=True, unique=True)
-  description = Column('description', UnicodeText)
-
-  def validate(self):
-    # TODO: Add validation
-    return True
-
-  def to_dict(self, complete=False, inflated=False):
-    return {'description': self.convert_value(self.description),
-            'name': self.convert_value(self.name),
-            'identifier': self.convert_value(self.identifier)
-            }
-
-  def populate(self, json):
-    self.name = json.get('name', None)
-    self.description = json.get('description', None)

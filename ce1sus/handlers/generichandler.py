@@ -7,13 +7,8 @@ Created: Aug 22, 2013
 """
 
 
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.common import Properties, ValueTable
-from ce1sus.db.classes.object import Object
-from ce1sus.handlers.base import HandlerBase, UndefinedException
-from ce1sus.helpers.common.converters import ObjectConverter
-from ce1sus.helpers.common.datumzait import DatumZait
-import uuid as uuidgen
+from ce1sus.db.classes.common import ValueTable
+from ce1sus.handlers.base import HandlerBase
 
 
 __author__ = 'Weber Jean-Paul'
@@ -50,3 +45,9 @@ class GenericHandler(HandlerBase):
     definition = self.get_main_definition()
     attribute = self.create_attribute(obj, definition, user, json)
     return attribute, None, None
+
+  def frontend_get(self, parameters):
+    return list()
+
+  def get_view_type(self):
+    return 'plain'

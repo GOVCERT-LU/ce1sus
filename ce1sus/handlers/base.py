@@ -160,3 +160,13 @@ class HandlerBase(object):
     obj.populate(json)
     obj.definition_id = definition.identifier
     return obj
+
+  def frontend_get(self, parameters):
+    raise HandlerException(('frontend_get is not defined for {0}').format(self.__class__.__name__))
+
+  def get_view_type(self):
+    raise HandlerException(('get_view_type is not defined for {0}').format(self.__class__.__name__))
+
+  def to_dict(self):
+    return {'name': self.__class__.__name__,
+            'view_type': self.get_view_type()}

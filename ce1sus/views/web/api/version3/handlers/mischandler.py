@@ -7,7 +7,9 @@ Created on Oct 29, 2014
 """
 from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require
+from ce1sus.handlers.base import HandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, \
+  RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
 
 
@@ -38,13 +40,33 @@ class HandlerHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
-  @require(privileged())
+  @require()
   def handlers(self, **args):
-    handlers = self.attribute_definition_controller.get_all_handlers()
-    result = list()
-    for handler in handlers:
-      result.append(handler.to_dict())
-    return result
+    path = args.get('path')
+    parameters = args.get('parameters')
+    if len(path) == 0:
+      self.check_if_admin()
+      handlers = self.attribute_definition_controller.get_all_handlers()
+      result = list()
+      for handler in handlers:
+        result.append(handler.to_dict())
+      return result
+    else:
+      if len(path) == 2:
+        uuid = path.pop(0)
+        if valid_uuid(uuid):
+          handler = self.attribute_definition_controller.get_handler_by_id(uuid)
+          method = path.pop(0)
+          if method == 'get':
+            handler_instance = handler.create_instance()
+            # Make the generic call for additional data
+            return handler_instance.frontend_get(parameters)
+          else:
+            raise RestHandlerException(u'Method {0} is not specified'.format(method))
+        else:
+          raise RestHandlerException(u'Specified uuid is invalid')
+      else:
+        raise RestHandlerException(u'Invalid request')
 
 
 class TablesHandler(RestBaseHandler):

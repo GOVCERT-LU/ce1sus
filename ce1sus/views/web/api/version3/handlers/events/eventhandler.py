@@ -335,7 +335,7 @@ class EventHandler(RestBaseHandler):
       uuid = requested_object.get('object_uuid', None)
       if uuid:
         # TODO delete relation
-        return 'OK'
+        raise RestHandlerException('Operation not implemented')
       else:
         raise RestHandlerException(u'Cannot remove relations as no relation id was provided')
 
