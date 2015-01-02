@@ -313,6 +313,13 @@ class EventHandler(RestBaseHandler):
       result = list()
       if details:
         # return the complete with evety event attribute etc
+        relations = self.relation_controller.get_relations_for_event(event)
+        for relation in relations:
+          if self.is_event_viewable(event):
+            rel_event = relation.rel_event
+            event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
+            result.append(relation.to_dict(details, inflated, event_permissions))
+
         return result
       else:
         # return only the unique events

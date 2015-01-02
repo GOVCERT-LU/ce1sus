@@ -42,6 +42,13 @@ class Relation(Base):
 
   UniqueConstraint('event_id', 'attribute_id', 'rel_event_id', 'rel_attribute_id')
 
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+    return {'event': self.event.to_dict(complete, inflated, event_permissions, False),
+            'rel_event': self.rel_event.to_dict(complete, inflated, event_permissions, False),
+            'attribute': self.attribute.to_dict(complete, inflated, event_permissions),
+            'rel_attribute': self.rel_attribute.to_dict(complete, inflated, event_permissions),
+            }
+
   def validate(self):
     """
     Returns true if the object is valid

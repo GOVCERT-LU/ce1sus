@@ -715,3 +715,21 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
   };
 });
 
+app.controller("eventRelationsController", function($scope, Restangular, messages,
+    $log, $routeSegment, relations, $filter, ngTableParams) {
+  var relations_data = relations;
+  $scope.tableParams = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,          // count per page
+  }, {
+      total: data.length, // length of data
+      getData: function($defer, params) {
+          // use build-in angular filter
+          var orderedData = params.filter() ? $filter('filter')(relations_data, params.filter()) : relations_data;
+          orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+          $scope.relations = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+          params.total(orderedData.length); // set total for recalc pagination
+          $defer.resolve($scope.relations);
+      }
+  }); 
+});

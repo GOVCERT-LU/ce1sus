@@ -287,6 +287,16 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           })
                           .segment("relations", {
                             templateUrl: "pages/events/event/relations.html",
+                            controller: 'eventRelationsController',
+                            resolve: {
+                              relations: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('relations').getList({"complete": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
                             dependencies: ["id"],
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html'
@@ -551,19 +561,18 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               controller: 'errorController'
                             }
                           })
-                          .segment("indicators", {
-                            templateUrl: "pages/events/event/indicators.html",
-                            dependencies: ["id"],
-                            untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
-                            },
-                            resolveFailed: {
-                              templateUrl: 'pages/common/error.html',
-                              controller: 'errorController'
-                            }
-                          })
                           .segment("relations", {
                             templateUrl: "pages/events/event/relations.html",
+                            controller: 'eventRelationsController',
+                            resolve: {
+                              relations: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('relations').getList({"complete": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
                             dependencies: ["id"],
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html'
