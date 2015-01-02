@@ -295,8 +295,13 @@ app.controller("editEventController", function($scope, Restangular, messages,
   };
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, useradmin, $modal) {
+    $log, $routeSegment, $location, useradmin, $modal, relations, Pagination) {
   $scope.isAdmin = useradmin;
+
+  $scope.relations = relations;
+  $scope.pagination = Pagination.getNew(5,'relations');
+  $scope.pagination.numPages = Math.ceil($scope.relations.length/$scope.pagination.perPage);
+  $scope.pagination.setPages();
   $scope.validateEvent = function(){
     //validates an event and publishes it as only users who can enter the validate section (lesser admin) can validate
     $scope.event.one('validate').put().then(function (data) {

@@ -7,7 +7,7 @@ Created on Dec 24, 2014
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
-from ce1sus.db.common.broker import BrokerException, NothingFoundException, ValidationException, IntegrityException, DeletionException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException, ValidationException, IntegrityException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 

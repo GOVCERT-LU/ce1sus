@@ -562,8 +562,12 @@ app.directive("object", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal, Restangular, messages, $log){
+    controller: function($scope, $modal, Restangular, messages, $log, Pagination){
 
+      $scope.pagination = Pagination.getNew(5,'object.attributes');
+      $scope.pagination.numPages = Math.ceil($scope.object.attributes.length/$scope.pagination.perPage);
+      $scope.pagination.setPages();
+      
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
       };

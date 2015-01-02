@@ -178,6 +178,10 @@ class BaseView(object):
     if not user.permissions.validate:
       raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
+  def is_event_viewable(self, event):
+    user = self.get_user()
+    return self.is_user_allowed_to_perform(event, 'can_view', user)
+
   def check_if_event_is_viewable(self, event):
     self.check_permission(event, 'can_view')
 

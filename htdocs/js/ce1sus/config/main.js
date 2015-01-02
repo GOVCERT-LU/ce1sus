@@ -232,8 +232,14 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                 }, function(response) {
                                   return false;
                                 });
-                              }
-                              
+                              },
+                              relations: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all("relations").getList({'complete':false}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                  return false;
+                                });
+                              },
                             },
                             dependencies: ["id"],
                             untilResolved: {
@@ -487,6 +493,13 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             resolve: {
                               useradmin: function(Restangular,$routeSegment) {
                                 return Restangular.one("checks","isuseradmin").get().then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                  return false;
+                                });
+                              },
+                              relations: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all("relations").getList({'complete':false}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                   return false;

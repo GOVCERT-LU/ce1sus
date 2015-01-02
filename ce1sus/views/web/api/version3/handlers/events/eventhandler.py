@@ -14,6 +14,7 @@ from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
 from ce1sus.db.classes.observables import Observable
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 from ce1sus.db.classes.group import EventPermissions
+from ce1sus.controllers.events.relations import RelationController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -27,6 +28,7 @@ class EventHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.observable_controller = ObservableController(config)
+    self.relation_controller = RelationController(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -62,6 +64,8 @@ class EventHandler(RestBaseHandler):
           return self.__process_event_validate(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'group':
           return self.__process_event_group(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'relations':
+          return self.__process_event_relations(method, event, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -304,6 +308,33 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Operation not supported')
 
+  def __process_event_relations(self, method, event, requested_object, details, inflated, json):
+    if method == 'GET':
+      result = list()
+      if details:
+        # return the complete with evety event attribute etc
+        return result
+      else:
+        # return only the unique events
+        relations = self.relation_controller.get_related_events_for_event(event)
+        for relation in relations:
+          if self.is_event_viewable(event):
+            rel_event = relation.rel_event
+            event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
+            result.append(rel_event.to_dict(details, inflated, event_permissions, False))
+
+        return result
+    elif method == 'DELETE':
+      uuid = requested_object.get('object_uuid', None)
+      if uuid:
+        # TODO delete relation
+        return 'OK'
+      else:
+        raise RestHandlerException(u'Cannot remove relations as no relation id was provided')
+
+      pass
+    else:
+      raise RestHandlerException('Operation not supported')
   """
   @rest_method()
   @methods(allowed=['GET'])

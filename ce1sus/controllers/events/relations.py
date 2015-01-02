@@ -119,3 +119,15 @@ class RelationController(BaseController):
           # do nothing if duplicate
           pass
     self.relation_broker.do_commit(commit)
+
+  def get_related_events_for_event(self, event):
+    try:
+      return self.relation_broker.get_relations_by_event(event, unique_events=True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_relations_for_event(self, event):
+    try:
+      return self.relation_broker.get_relations_by_event(event, unique_events=True)
+    except BrokerException as error:
+      raise ControllerException(error)
