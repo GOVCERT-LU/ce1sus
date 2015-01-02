@@ -54,6 +54,7 @@ class ObjectDefinitionController(BaseController):
   def insert_object_definition(self, obj, user):
     try:
       obj.chksum = gen_obj_chksum(obj)
+      user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(obj, user, insert=True)
       self.obj_def_broker.insert(obj)
       return obj
@@ -66,6 +67,7 @@ class ObjectDefinitionController(BaseController):
   def update_object_definition(self, obj, user):
     try:
       obj.chksum = gen_obj_chksum(obj)
+      user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(obj, user, insert=False)
       self.obj_def_broker.update(obj)
       return obj

@@ -78,10 +78,11 @@ class RestController(BaseView):
   def find_default_method_name(instance, probable_name=None):
     # TODO: find why this is not always working?
     if probable_name:
-      # try deducting from the first call
-      function = getattr(instance, probable_name)
-      if hasattr(function, 'default_fct'):
-        return probable_name
+      if hasattr(instance, probable_name):
+        # try deducting from the first call
+        function = getattr(instance, probable_name)
+        if hasattr(function, 'default_fct'):
+          return probable_name
 
     methods = get_methods(instance)
     for method in methods:

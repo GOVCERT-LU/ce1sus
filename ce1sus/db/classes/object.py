@@ -124,6 +124,9 @@ class Object(ExtendedLogingInformations, Base):
       # count shared and validated
       return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).count()
 
+  def attribute_count(self):
+    return self.attributes.count()
+
   def related_objects_count_for_permissions(self, event_permissions):
     if event_permissions:
       if event_permissions.can_validate:
@@ -134,6 +137,9 @@ class Object(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).count()
+
+  def related_object_count(self):
+    return self.related_objects.count()
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     attributes = list()

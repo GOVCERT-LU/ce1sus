@@ -7,14 +7,15 @@ Created Jul, 2013
 """
 from abc import abstractmethod
 from ce1sus_api.api.restclasses import Ce1susWrappedFile
+from datetime import datetime
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.pool import Pool
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Unicode
+from uuid import UUID
 import uuid
-from datetime import datetime
 
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.common import SessionManagerException, BrokerInstantiationException, ORMException
@@ -52,6 +53,8 @@ class Base(object):
         return value.get_api_wrapped_value()
       if isinstance(value, datetime):
         return value.strftime('%m/%d/%Y %H:%M:%S %Z')
+      if isinstance(value, UUID):
+        return u'{0}'.format(value)
       return value
     else:
       return ''

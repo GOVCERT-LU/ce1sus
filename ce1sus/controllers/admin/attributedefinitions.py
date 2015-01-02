@@ -63,6 +63,7 @@ class AttributeDefinitionController(BaseController):
   def insert_attribute_definition(self, attribute, user):
     try:
       attribute.chksum = gen_attr_chksum(attribute)
+      user = self.user_broker.get_by_id(user.identifier)
       # check if handler is associated
       if not attribute.attribute_handler:
         handler = self.handler_broker.get_by_id(attribute.attributehandler_id)
@@ -79,6 +80,8 @@ class AttributeDefinitionController(BaseController):
   def update_attribute_definition(self, attribute, user):
     try:
       attribute.chksum = gen_attr_chksum(attribute)
+
+      user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(attribute, user, insert=True)
       attribute = self.attr_def_broker.update(attribute)
       return attribute

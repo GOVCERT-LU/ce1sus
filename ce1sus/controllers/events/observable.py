@@ -10,8 +10,7 @@ from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, \
-  NothingFoundException
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 
 
@@ -184,3 +183,25 @@ class ObservableController(BaseController):
       self.related_object_broker.update(related_object, commit)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def __validate_object(self, obj):
+    # validate
+    if obj.validate:
+      for related_object in obj.related_objects:
+        if not related_object.validate:
+          raise ControllerException('Related object is invalid')
+    else:
+      raise ControllerException('Object is invalid')
+
+  def insert_handler_objects(self, related_objects, user, commit=True, owner=False):
+    # Validate children
+    validated = False
+    if related_objects:
+      for related_object in related_objects:
+        self.__validate_object(related_object)
+      validated = True
+
+    if validated:
+      for related_object in related_objects:
+        self.insert_object(related_object, user, False)
+      self.object_broker.do_commit(commit)

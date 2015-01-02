@@ -68,7 +68,7 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
     }, $log);
     var objectID = $scope.$parent.$parent.object.identifier;
     Restangular.one('object', objectID).post('attribute', $scope.attribute, {'complete':true, 'infated':true}).then(function (data) {
-      $scope.$parent.appendChildObject(data);
+      $scope.$parent.appendChildren(data);
     }, function (response) {
       $scope.attribute = angular.copy(original_attribute);
       handleError(response, messages);

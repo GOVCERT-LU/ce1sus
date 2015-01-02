@@ -558,7 +558,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             }
                           })
                         .up()
-
+                        .up()
                         .segment("type", {
                                templateUrl: "pages/admin/typesmgt.html",
                                controller : "typesController",

@@ -40,6 +40,7 @@ class MailController(BaseController):
 
   def update_mail(self, mail_template, user):
     try:
+      user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(mail_template, user, insert=False)
       mail_template = self.mail_broker.update(mail_template)
       return mail_template, True

@@ -7,6 +7,7 @@ Created on Dec 22, 2014
 """
 
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
+from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.controllers.events.observable import ObservableController
@@ -14,6 +15,7 @@ from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
+from ce1sus.controllers.events.relations import RelationController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -43,6 +45,8 @@ class ObjectHandler(RestBaseHandler):
     self.observable_controller = ObservableController(config)
     self.attribute_controller = AttributeController(config)
     self.attribute_definition_controller = AttributeDefinitionController(config)
+    self.object_definition_controller = ObjectDefinitionController(config)
+    self.relations_controller = RelationController(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -139,25 +143,76 @@ class ObjectHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Please use object/{uuid}/ instead')
 
+  def __make_object_attributes_flat(self, obj):
+    result = list()
+    for attribute in obj.attributes:
+      result.append(attribute)
+    for related_object in obj.related_objects:
+      result = result + self.__make_object_attributes_flat(related_object)
+    return result
+
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
     try:
       user = self.get_user()
       if method == 'POST':
         self.check_if_user_can_add(event)
-        attribute = Attribute()
-        # Imporant to set the definition else the set value wont work
+        # Get needed handler
         definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
-        attribute.definition = definition
-        # Important to set the parent object
-        attribute.object = obj
-        attribute.object_id = obj.identifier
-        # set the remaining stuff
-        attribute.populate(json)
-        if self.is_event_owner(event, user):
-          # The attribute is directly validated as the owner can validate
-          attribute.properties.is_validated = True
-        self.attribute_controller.insert_attribute(attribute, user, True)
-        return attribute.to_dict(details, inflated)
+        handler_instance = definition.handler
+        handler_instance.attribute_definitions[definition.chksum] = definition
+
+        # Check if the handler requires additional attribute definitions
+        additional_attr_defs_chksums = handler_instance.get_additional_object_chksums()
+
+        if additional_attr_defs_chksums:
+          additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
+          for additional_attr_definition in additional_attr_definitions:
+            handler_instance.attribute_definitions[additional_attr_definition.chksum] = additional_attr_definition
+
+        # Check if the handler requires additional object definitions
+        additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
+
+        if additional_obj_defs_chksums:
+          additional_obj_definitions = self.object_definition_broker.get_defintion_by_chksums(additional_obj_defs_chksums)
+          for additional_obj_definition in additional_obj_definitions:
+            handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
+
+        # Ask handler to process the json for the new attributes
+        attribute, additional_attributes, related_objects = handler_instance.process(obj, user, json)
+        # Check if not elements were attached to the object
+        # TODO: find a way to check if the object has been changed
+        if True:
+          self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
+          self.observable_controller.insert_handler_objects(related_objects, user, False, self.is_event_owner(event, user))
+        else:
+          raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
+
+        # Make attributes flat
+        flat_attriutes = list()
+
+        # Return the generated attributes as json
+        result_attriutes = list()
+        flat_attriutes.append(attribute)
+        result_attriutes.append(attribute.to_dict(details, inflated))
+        if additional_attributes:
+          for additional_attribute in additional_attributes:
+            flat_attriutes.append(flat_attriutes)
+            result_attriutes.append(additional_attribute.to_dict(details, inflated))
+
+        result_objects = list()
+        if result_objects:
+          for related_object in related_objects:
+            # make the attributes of the related object flat
+            flat_attriutes = flat_attriutes + self.__make_object_attributes_flat(related_object)
+
+            result_objects.append(related_object.to_dict(details, inflated))
+
+        # make relations
+        # TODO: add flag to skip this step
+        self.relations_controller.generate_bulk_attributes_relations(event, flat_attriutes, True)
+
+        return {'attributes': result_attriutes, 'related_objects': result_objects}
+
       else:
         uuid = requested_object['object_uuid']
         if method == 'GET':

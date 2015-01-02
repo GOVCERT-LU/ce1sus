@@ -96,14 +96,20 @@ class StaticBase(object):
 
 class ValueTable(StaticBase):
 
+  TEXT_VALUE = 0
+  STRING_VALUE = 1
+  DATE_VALUE = 2
+  NUMBER_VALUE = 3
+  TIMESTAMP_VALUE = 4
+
   @classmethod
   def get_dictionary(cls):
-    return {0: u'Text',
-            1: u'String',
-            2: u'Date',
-            3: u'Number',
-            4: u'TimeStamp',
-            5: u'Date'}
+    return {ValueTable.TEXT_VALUE: u'Text',
+            ValueTable.STRING_VALUE: u'String',
+            ValueTable.DATE_VALUE: u'Date',
+            ValueTable.NUMBER_VALUE: u'Number',
+            ValueTable.TIMESTAMP_VALUE: u'TimeStamp'
+            }
 
   @property
   def classname(self):

@@ -9,8 +9,6 @@ import sqlalchemy
 
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.object import Object
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 
 
@@ -150,6 +148,13 @@ class AttributeBroker(BrokerBase):
                                                                       ).all()
     except ValueError:
       return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+  def get_attriutes_by_class_and_values(self, clazz, search_items):
+    try:
+      return self.session.query(clazz).filter(clazz.value.in_(search_items)).all()
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

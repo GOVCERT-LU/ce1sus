@@ -82,8 +82,10 @@ class BaseController:
   def set_simple_logging(self, instance, user, insert=False):
     if insert:
       instance.creator_id = user.identifier
+      instance.creator = user
       instance.created_at = DatumZait.utcnow()
     instance.modifier_id = user.identifier
+    instance.modifier = user
     instance.modified_on = DatumZait.utcnow()
 
   def set_extended_logging(self, instance, user, originating_group, insert=False):

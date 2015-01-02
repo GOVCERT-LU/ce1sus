@@ -221,17 +221,9 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.view_type_id = json.get('viewType_id', None)
     self.value_type_id = json.get('type_id', None)
     self.default_condition_id = json.get('default_condition_id', None)
-    relation = json.get('relation', 'false')
-    if relation == 'true':
-      relation = True
-    else:
-      relation = False
+    relation = json.get('relation', False)
     self.relation = relation
-    share = json.get('share', 'false')
-    if share == 'true':
-      share = True
-    else:
-      share = False
+    share = json.get('share', False)
     self.share = share
     self.regex = json.get('regex', None)
 

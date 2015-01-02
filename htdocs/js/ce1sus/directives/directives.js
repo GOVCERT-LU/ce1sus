@@ -562,7 +562,7 @@ app.directive("object", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal, Restangular, messages){
+    controller: function($scope, $modal, Restangular, messages, $log){
 
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/details.html', show: true});
@@ -621,8 +621,17 @@ app.directive("object", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
       };
       
-      $scope.appendChildObject = function(attribute){
-        $scope.object.attributes.push(attribute);
+      $scope.appendChildren = function(data){
+        //Note several attributes can be added
+        attributes = data.attributes;
+        angular.forEach(attributes, function(element) {
+          $scope.object.attributes.push(element);
+        }, $log);
+
+        related_objects = data.related_objects;
+        angular.forEach(related_objects, function(element) {
+          $scope.object.related_objects.push(element);
+        }, $log);
       };
       
       $scope.addAttribute = function(){
