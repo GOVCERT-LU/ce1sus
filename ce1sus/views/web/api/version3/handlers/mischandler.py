@@ -52,15 +52,21 @@ class HandlerHandler(RestBaseHandler):
         result.append(handler.to_dict())
       return result
     else:
-      if len(path) == 2:
-        uuid = path.pop(0)
-        if valid_uuid(uuid):
-          handler = self.attribute_definition_controller.get_handler_by_id(uuid)
+      if len(path) > 1:
+        definition_uuid = path.pop(0)
+        if valid_uuid(definition_uuid):
+          definition = self.attribute_definition_controller.get_attribute_definitions_by_id(definition_uuid)
+          handler = definition.handler
           method = path.pop(0)
           if method == 'get':
-            handler_instance = handler.create_instance()
+            if len(path) > 0:
+              attr_uuid = path.pop(0)
+              if not valid_uuid(attr_uuid):
+                raise RestHandlerException(u'Specified second uuid is invalid')
+            else:
+              attr_uuid = None
             # Make the generic call for additional data
-            return handler_instance.frontend_get(parameters)
+            return handler.frontend_get(attr_uuid, definition, parameters)
           else:
             raise RestHandlerException(u'Method {0} is not specified'.format(method))
         else:

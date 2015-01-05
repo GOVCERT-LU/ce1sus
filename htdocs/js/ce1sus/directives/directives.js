@@ -765,7 +765,9 @@ app.directive("objectAttributeForm", function() {
         }, $log);
         return result;
       };
-      
+      $scope.changeTemplate = function(){
+
+      };
     },
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
@@ -786,31 +788,51 @@ app.directive("attributeHandler", function() {
     },
     template : '<div ng-include="getTemplate()"></div>',
     link: function(scope, element, attrs, ctrl) {
-      var contentType =  scope.type;
-      var viewType = scope.definition.attributehandler.view_type;
+      
+      
       scope.getTemplate = function(){
-
-        var templateLoader;
+        var contentType =  scope.type;
+        var viewType = scope.definition.attributehandler.view_type;
         var baseUrl = 'pages/handlers';
         
-        var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html?'+scope.counter;
+        var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();
-        scope.removeTemplateFromCache(templateUrl);
         return templateUrl;
       };
+
     },
     controller: function($scope, $log, $templateCache, Restangular, messages ){
       //Resolve additional data
-      if ($scope.type != 'view') {
-        Restangular.one('attributehandlers', $scope.definition.attributehandler_id).one('get').getList().then(function(handlerdata) {
-          $scope.handlerdata = handlerdata;
-        }, function(response) {
-          handleError(response, messages);
-        });
-      }
-      $scope.removeTemplateFromCache = function(url){
-        $templateCache.remove(url);
-      };
+      $scope.$watch('definition.regex', function() {
+        var makeRequest = false;
+        if ($scope.type == 'view') {
+          if ($scope.definition.attributehandler.view_config.req_show_data) {
+            makeRequest = true;
+          }
+        } else {
+          if ($scope.type == 'add') {
+            if ($scope.definition.attributehandler.view_config.req_insert_data) {
+              makeRequest = true;
+            }
+          } else {
+            if ($scope.type == 'edit') {
+              if ($scope.definition.attributehandler.view_config.req_edit_data) {
+                makeRequest = true;
+              }
+            }
+          }
+          
+        }
+        if (makeRequest) {
+          Restangular.one('attributehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
+            $scope.handlerdata = handlerdata;
+          }, function(response) {
+            handleError(response, messages);
+          });
+        }
+      });
+
+
       $scope.$watch('definition.regex', function() {
         $scope.patternexpression = (function() {
           if ($scope.type != 'view') {
@@ -827,7 +849,9 @@ app.directive("attributeHandler", function() {
             return /^.*$/;
           }
         })();
+        
       });
+
       $scope.patternexpression = /^.*$/;
     },
   };

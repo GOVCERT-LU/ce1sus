@@ -17,15 +17,14 @@ from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
 from apt_pkg import Group
 from ce1sus.db.classes.relation import Relation
-from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, \
-  TextValue
+from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, TextValue
 from ce1sus.db.classes.event import Event
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.objects import get_class
-from ce1sus.db.classes.types import AttributeType, AttributeViewType
+from ce1sus.db.classes.types import AttributeType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -172,10 +171,10 @@ class Maintenance(object):
     except BrokerException as error:
       raise MaintenanceException(error)
 
-  def add_handler(self, path):
-
+  def add_handler(self, path, classname):
     modulename = basename(path).replace('.py', '')
-    classname = modulename.title().replace('handler', 'Handler')
+    if not classname:
+      classname = modulename.title().replace('handler', 'Handler')
     modulename = u'{0}'.format(modulename)
     # move to correct place
     print u'Adding handler {0}'.format(modulename)
@@ -191,9 +190,8 @@ class Maintenance(object):
 
     uuid = instance.get_uuid()
     description = instance.get_description()
-    print "OK"
+
     attribute_handler = AttributeHandler()
-    print "OK"
     attribute_handler.identifier = uuid
     attribute_handler.description = description
     attribute_handler.module_classname = u'{0}.{1}'.format(modulename, classname)
@@ -201,6 +199,7 @@ class Maintenance(object):
     session = self.connector.get_direct_session().get_session()
     session.add(attribute_handler)
     session.commit()
+    print "AttributeHandler {0} added".format(classname)
 
 if __name__ == '__main__':
   parser = OptionParser()
@@ -216,6 +215,8 @@ if __name__ == '__main__':
                     help='Removes all existing relations')
   parser.add_option('--add-handler', dest='handler_file', type='string', default='',
                     help='Function to add a new handler')
+  parser.add_option('--class', dest='handler_class', type='string', default=None,
+                    help='Function to add a new handler')
 
   (options, args) = parser.parse_args()
 
@@ -225,7 +226,7 @@ if __name__ == '__main__':
   maintenance = Maintenance(config)
 
   if options.handler_file:
-    maintenance.add_handler(options.handler_file)
+    maintenance.add_handler(options.handler_file, options.handler_class)
   elif options.event_uuid and not options.rebuild_opt:
     print 'Option -e xxx has to be used with option -r.'
   else:

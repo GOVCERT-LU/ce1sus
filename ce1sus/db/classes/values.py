@@ -46,7 +46,7 @@ class ValueBase(object):
 
   @declared_attr
   def value_type(self):
-    return relationship("AttributeType", uselist=False)
+    return relationship('AttributeType', uselist=False)
 
 
 # pylint: disable=R0903,W0232

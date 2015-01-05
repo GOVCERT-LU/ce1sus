@@ -31,7 +31,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events", "main.layout.events")
         .when("/events/all", "main.layout.events.allEvents")
         .when("/events/unpublished", "main.layout.events.unpublished")
-        .when("/events/unpublished/events", "main.layout.events.unpublished.events")
+        .when("/events/unpublished/events", "main.layout.events.unpublished.uevents")
         .when("/events/unpublished/observables", "main.layout.events.unpublished.observables")
         .when("/events/unpublished/objects", "main.layout.events.unpublished.objects")
         .when("/events/unpublished/attributes", "main.layout.events.unpublished.attributes")
@@ -321,9 +321,9 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  templateUrl: "pages/events/unpublished.html"
                         })
                         .within()
-                          .segment("events", {
-                              'default':true,
-                               templateUrl: "pages/events/unpublished/events.html"
+                          .segment("uevents", {
+                              'default': true,
+                               templateUrl: "pages/events/unpublished/uevents.html"
                           })
                           .segment("observables", {
                                    templateUrl: "pages/events/unpublished/observables.html"

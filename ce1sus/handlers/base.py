@@ -6,7 +6,7 @@ module providing support for the base handler
 Created: Aug, 2013
 """
 
-from ce1sus.helpers.common.config import Configuration
+from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
 from ce1sus.helpers.common.objects import get_class
 
 
@@ -21,6 +21,14 @@ class HandlerException(Exception):
   Exception base for handler exceptions
   """
   pass
+
+
+class HandlerShowOptions(object):
+
+  def __init__(self, req_show_data=False, req_insert_data=False, req_edit_data=False):
+    self.req_show_data = req_show_data
+    self.req_insert_data = req_insert_data
+    self.req_edit_data = req_edit_data
 
 
 class UndefinedException(HandlerException):
@@ -51,10 +59,6 @@ class HandlerBase(object):
   @staticmethod
   def get_allowed_types():
     raise HandlerException('get_allowed_types not defined')
-
-  @staticmethod
-  def get_config():
-    raise HandlerException('get_config not defined')
 
   @staticmethod
   def get_description():
@@ -161,12 +165,21 @@ class HandlerBase(object):
     obj.definition_id = definition.identifier
     return obj
 
-  def frontend_get(self, parameters):
+  def frontend_get(self, attr_uuid, definition, parameters):
     raise HandlerException(('frontend_get is not defined for {0}').format(self.__class__.__name__))
 
   def get_view_type(self):
     raise HandlerException(('get_view_type is not defined for {0}').format(self.__class__.__name__))
 
+  def get_show_options(self):
+    return HandlerShowOptions()
+
   def to_dict(self):
+    options = self.get_show_options()
     return {'name': self.__class__.__name__,
-            'view_type': self.get_view_type()}
+            'view_type': self.get_view_type(),
+            'view_config': {'req_show_data': options.req_show_data,
+                            'req_insert_data': options.req_insert_data,
+                            'req_edit_data': options.req_edit_data
+                            }
+            }

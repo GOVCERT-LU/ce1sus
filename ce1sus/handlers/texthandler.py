@@ -5,10 +5,8 @@ module handing the generic handler
 
 Created: Aug 22, 2013
 """
-
-
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.base import HandlerBase
+from ce1sus.handlers.generichandler import GenericHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -17,12 +15,11 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class GenericHandler(HandlerBase):
+class TextHandler(GenericHandler):
   """The generic handler for handling known atomic values"""
-
   @staticmethod
   def get_uuid():
-    return 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+    return '1a8ec7d0-8dec-11e3-baa8-0800200c9a66'
 
   @staticmethod
   def get_description():
@@ -33,21 +30,13 @@ class GenericHandler(HandlerBase):
 
   @staticmethod
   def get_allowed_types():
-    return [ValueTable.TEXT_VALUE,
-            ValueTable.STRING_VALUE,
-            ValueTable.NUMBER_VALUE
-            ]
+    return [ValueTable.TEXT_VALUE]
 
   def get_additinal_attribute_chksums(self):
     return list()
 
-  def process(self, obj, user, json):
-    definition = self.get_main_definition()
-    attribute = self.create_attribute(obj, definition, user, json)
-    return attribute, None, None
-
-  def frontend_get(self, attribute_uuid, parameters):
+  def frontend_get(self, parameters):
     return list()
 
   def get_view_type(self):
-    return 'plain'
+    return 'text'

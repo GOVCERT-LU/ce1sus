@@ -1,0 +1,10 @@
+<div class="form-group">
+  <label class="col-xs-3"><b>Value:</b></label>
+  <div class="col-xs-9">
+        <select name="value" class="form-control"
+          ng-options="item.identifier as item.name for item in handlerdata"
+          ng-model="attribute.value">
+          <option style="display: none" value="">Select a value</option>
+        </select>
+  </div>
+</div>
