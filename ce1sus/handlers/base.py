@@ -23,14 +23,6 @@ class HandlerException(Exception):
   pass
 
 
-class HandlerShowOptions(object):
-
-  def __init__(self, req_show_data=False, req_insert_data=False, req_edit_data=False):
-    self.req_show_data = req_show_data
-    self.req_insert_data = req_insert_data
-    self.req_edit_data = req_edit_data
-
-
 class UndefinedException(HandlerException):
   pass
 
@@ -44,13 +36,17 @@ class HandlerBase(object):
 
   def __init__(self):
     # initalize the configuration for the handle and only the for the handlers
-    config = Configuration('config/handlers.conf')
+    try:
+      config = Configuration('config/handlers.conf')
+    except ConfigSectionNotFoundException as error:
+      raise HandlerException(error)
     self.__config = config
     self.attribute_definitions = dict()
     self.oject_definitions = dict()
+    self.user = None
 
   def get_config_value(self, key, default_value=None):
-    return self.__config.config.get(self.__class__.__name__, key.lower(), default_value)
+    return self.__config.get(self.__class__.__name__, key.lower(), default_value)
 
   @staticmethod
   def get_uuid():
@@ -102,7 +98,7 @@ class HandlerBase(object):
     else:
       raise HandlerException((u'Could not determine main definition for {0}').format(self.__class__.__name__))
 
-  def process(self, obj, attribute_definitions, object_definitions, user, json):
+  def insert(self, obj, user, json):
     """
     Process of the post over the RestAPI
 
@@ -117,9 +113,23 @@ class HandlerBase(object):
 
     :returns: Attribute, [List of Attribute], [related_objects]
     """
-    raise HandlerException(('process is not defined for {0} with parameters '
+    raise HandlerException(('insert is not defined for {0} with parameters '
                            + '{1},{2},{3},{4}').format(self.__class__.__name__,
                                                        obj,
+                                                       user,
+                                                       json))
+
+  def update(self, attribtue, user, json):
+    raise HandlerException(('update is not defined for {0} with parameters '
+                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                       attribtue,
+                                                       user,
+                                                       json))
+
+  def remove(self, attribtue, user, json):
+    raise HandlerException(('remove is not defined for {0} with parameters '
+                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                       attribtue,
                                                        user,
                                                        json))
 
@@ -146,6 +156,8 @@ class HandlerBase(object):
     # Note second the object has to be specified
     attribute.object = obj
     attribute.object_id = obj.identifier
+    # TODO create default value if value was not set for IOC and share
+
     # set remaining stuff
     attribute.populate(json)
     # set the definition id as in the definition as it might get overwritten
@@ -161,25 +173,19 @@ class HandlerBase(object):
     obj.identifier = None
     obj.definition = definition
     obj.event = parent.event
+    # TODO create default value if value was not set for IOC and share
+
     obj.populate(json)
     obj.definition_id = definition.identifier
     return obj
 
-  def frontend_get(self, attr_uuid, definition, parameters):
+  def get_data(self, attribute, definition, parameters):
     raise HandlerException(('frontend_get is not defined for {0}').format(self.__class__.__name__))
 
   def get_view_type(self):
     raise HandlerException(('get_view_type is not defined for {0}').format(self.__class__.__name__))
 
-  def get_show_options(self):
-    return HandlerShowOptions()
-
   def to_dict(self):
-    options = self.get_show_options()
     return {'name': self.__class__.__name__,
-            'view_type': self.get_view_type(),
-            'view_config': {'req_show_data': options.req_show_data,
-                            'req_insert_data': options.req_insert_data,
-                            'req_edit_data': options.req_edit_data
-                            }
+            'view_type': self.get_view_type()
             }

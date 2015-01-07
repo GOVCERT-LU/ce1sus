@@ -23,6 +23,10 @@ class DateHandler(GenericHandler):
     return '11406d00-8dec-11e3-baa8-0800200c9a66'
 
   @staticmethod
+  def get_description():
+    return u'Handler for Dates'
+
+  @staticmethod
   def get_allowed_types():
     return [ValueTable.DATE_VALUE]
 

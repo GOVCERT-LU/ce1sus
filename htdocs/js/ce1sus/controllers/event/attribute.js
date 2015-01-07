@@ -1,8 +1,9 @@
 /**
  * 
  */
-app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log) {
+app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log, $upload) {
   $scope.definitions =[];
+
   Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
     $scope.definitions = attributes;
   }, function(response) {
@@ -58,6 +59,14 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   $scope.attributeChanged = function ()
   {
     return !angular.equals($scope.attribute, original_attribute);
+  };
+  
+  $scope.uploadPic = function(files) {
+    $scope.formUpload = true;
+    if (files !== null) {
+      var file = files[0];
+      
+    }
   };
   
   $scope.submitAttribute = function(){

@@ -66,3 +66,22 @@ def get_view_message(result, event_id, username, permission):
     return 'User "{1}" can perform action "{2}" on event "{0}"'.format(event_id, username, permission)
   else:
     return 'User "{1}" is not allowed perform action "{2}" on event "{0}"'.format(event_id, username, permission)
+
+
+def can_user_download(event, user, cache=None):
+  """
+  Returns true if the user can download from the event
+
+  :param event:
+  :type event: Event
+  :param user:
+  :type user: User
+
+  :returns: Boolean
+  """
+  # TODO: rethink this
+  result = is_object_viewable(event, user, cache)
+  if not result:
+    # check if the default group can download
+    result = user.default_group.can_download
+  return result

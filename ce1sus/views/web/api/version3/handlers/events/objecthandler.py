@@ -150,6 +150,29 @@ class ObjectHandler(RestBaseHandler):
       result = result + self.__make_object_attributes_flat(related_object)
     return result
 
+  def __get_handler(self, definition):
+    handler_instance = definition.handler
+    handler_instance.attribute_definitions[definition.chksum] = definition
+
+    # Check if the handler requires additional attribute definitions
+    additional_attr_defs_chksums = handler_instance.get_additional_object_chksums()
+
+    if additional_attr_defs_chksums:
+      additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
+      for additional_attr_definition in additional_attr_definitions:
+        handler_instance.attribute_definitions[additional_attr_definition.chksum] = additional_attr_definition
+
+    # Check if the handler requires additional object definitions
+    additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
+
+    if additional_obj_defs_chksums:
+      additional_obj_definitions = self.object_definition_broker.get_defintion_by_chksums(additional_obj_defs_chksums)
+      for additional_obj_definition in additional_obj_definitions:
+        handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
+
+    handler_instance.user = self.get_user()
+    return handler_instance
+
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
     try:
       user = self.get_user()
@@ -157,27 +180,10 @@ class ObjectHandler(RestBaseHandler):
         self.check_if_user_can_add(event)
         # Get needed handler
         definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
-        handler_instance = definition.handler
-        handler_instance.attribute_definitions[definition.chksum] = definition
-
-        # Check if the handler requires additional attribute definitions
-        additional_attr_defs_chksums = handler_instance.get_additional_object_chksums()
-
-        if additional_attr_defs_chksums:
-          additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
-          for additional_attr_definition in additional_attr_definitions:
-            handler_instance.attribute_definitions[additional_attr_definition.chksum] = additional_attr_definition
-
-        # Check if the handler requires additional object definitions
-        additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
-
-        if additional_obj_defs_chksums:
-          additional_obj_definitions = self.object_definition_broker.get_defintion_by_chksums(additional_obj_defs_chksums)
-          for additional_obj_definition in additional_obj_definitions:
-            handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
+        handler_instance = self.__get_handler(definition)
 
         # Ask handler to process the json for the new attributes
-        attribute, additional_attributes, related_objects = handler_instance.process(obj, user, json)
+        attribute, additional_attributes, related_objects = handler_instance.insert(obj, user, json)
         # Check if not elements were attached to the object
         # TODO: find a way to check if the object has been changed
         if True:

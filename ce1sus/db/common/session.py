@@ -7,7 +7,7 @@ Created Jul, 2013
 """
 from abc import abstractmethod
 from ce1sus_api.api.restclasses import Ce1susWrappedFile
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
@@ -53,6 +53,8 @@ class Base(object):
         return value.get_api_wrapped_value()
       if isinstance(value, datetime):
         return value.strftime('%m/%d/%Y %H:%M:%S %Z')
+      if isinstance(value, date):
+        return value.strftime('%m/%d/%Y')
       if isinstance(value, UUID):
         return u'{0}'.format(value)
       return value

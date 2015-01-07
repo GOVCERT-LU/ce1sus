@@ -23,7 +23,7 @@ class TextHandler(GenericHandler):
 
   @staticmethod
   def get_description():
-    return u'Generic Handler, usable for a single line entry'
+    return u'Text Handler, usable for a textlines'
 
   def get_additional_object_chksums(self):
     return list()

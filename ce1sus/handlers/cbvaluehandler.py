@@ -6,7 +6,7 @@ module handing the generic handler
 Created: Aug 22, 2013
 """
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.base import HandlerException, HandlerShowOptions
+from ce1sus.handlers.base import HandlerException
 from ce1sus.handlers.generichandler import GenericHandler
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
 
@@ -27,6 +27,10 @@ class CBValueHandler(GenericHandler):
   @staticmethod
   def get_allowed_types():
     return [ValueTable.STRING_VALUE]
+
+  @staticmethod
+  def get_description():
+    return u'CB Handler used for creating comboboxes. Note The REGEX defines the valies, therefore it must be under the format of: "^(?:\^.+\$\|)+(?:\^.+\$)$"'
 
   @staticmethod
   def __check_vailidity_regex(regex):
@@ -57,7 +61,7 @@ class CBValueHandler(GenericHandler):
       result.append(temp)
     return result
 
-  def frontend_get(self, attr_uuid, definition, parameters):
+  def get_data(self, attribute, definition, parameters):
     regex = definition.regex
     if regex:
       cb_values = CBValueHandler.__get_cb_values(regex)
@@ -70,6 +74,3 @@ class CBValueHandler(GenericHandler):
 
   def get_view_type(self):
     return 'combobox'
-
-  def get_show_options(self):
-    return HandlerShowOptions(req_show_data=False, req_insert_data=True, req_edit_data=True)

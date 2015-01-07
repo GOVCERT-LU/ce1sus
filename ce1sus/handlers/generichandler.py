@@ -41,12 +41,12 @@ class GenericHandler(HandlerBase):
   def get_additinal_attribute_chksums(self):
     return list()
 
-  def process(self, obj, user, json):
+  def insert(self, obj, user, json):
     definition = self.get_main_definition()
     attribute = self.create_attribute(obj, definition, user, json)
     return attribute, None, None
 
-  def frontend_get(self, attribute_uuid, parameters):
+  def get_data(self, attribute, parameters):
     return list()
 
   def get_view_type(self):

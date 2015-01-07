@@ -1,4 +1,4 @@
-<div ng-init="attribute.value=handlerdata[0].identifier">
+<div ng-init="getData()"></div>
 
 <div class="form-group">
   <label class="col-xs-3"><b>Value:</b></label>
@@ -10,5 +10,12 @@
         </select>
   </div>
 </div>
-
-
+<div class="row">
+  <div class="col-md-3">
+    <b>IOC</b>
+  </div>
+  <div class="col-md-9">
+    <input class="form-control" type="checkbox" name="ioc" value="ioc"  ng-model="objectattribute.ioc" />
+  </div>
+</div>
+<object-properties-form object="objectattribute" type="type" permissions="permissions"></object-properties-form>

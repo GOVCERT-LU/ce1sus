@@ -11,6 +11,7 @@ from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, \
   RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.controllers.events.attributecontroller import AttributeController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -37,6 +38,7 @@ class HandlerHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.attribute_definition_controller = AttributeDefinitionController(config)
+    self.attribute_controller = AttributeController(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
@@ -57,16 +59,19 @@ class HandlerHandler(RestBaseHandler):
         if valid_uuid(definition_uuid):
           definition = self.attribute_definition_controller.get_attribute_definitions_by_id(definition_uuid)
           handler = definition.handler
+          handler.user = self.get_user()
           method = path.pop(0)
           if method == 'get':
             if len(path) > 0:
               attr_uuid = path.pop(0)
-              if not valid_uuid(attr_uuid):
+              if valid_uuid(attr_uuid):
+                attribute = self.attribute_controller.get_attribute_by_id(attr_uuid)
+              else:
                 raise RestHandlerException(u'Specified second uuid is invalid')
             else:
-              attr_uuid = None
+              attribute = None
             # Make the generic call for additional data
-            return handler.frontend_get(attr_uuid, definition, parameters)
+            return handler.get_data(attribute, definition, parameters)
           else:
             raise RestHandlerException(u'Method {0} is not specified'.format(method))
         else:

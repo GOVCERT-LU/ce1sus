@@ -10,7 +10,8 @@ var app = angular.module('app', ['ngRoute',
                                  'ngSanitize', 
                                  "mgcrea.ngStrap",
                                  'ngTable',
-                                 'simplePagination'
+                                 'simplePagination',
+                                 'angularFileUpload'
                                  ]);
 
 
