@@ -1,0 +1,12 @@
+[FileHandler]
+files=
+
+[CVEHandler]
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
+
+[RTHandler]
+rt_user=
+rt_password=
+rt_url=
+
+

@@ -120,6 +120,11 @@ class HandlerBase(object):
                                                        json))
 
   def update(self, attribtue, user, json):
+    """
+    Process of the post over the RestAPI
+
+    :returns: Attribute
+    """
     raise HandlerException(('update is not defined for {0} with parameters '
                            + '{1},{2},{3},{4}').format(self.__class__.__name__,
                                                        attribtue,

@@ -25,7 +25,7 @@ class MailTemplate(SimpleLogingInformations, Base):
   body = Column('body', UnicodeText, nullable=False)
   subject = Column('subject', Unicode(255), nullable=False)
 
-  def to_dict(self, complete=True):
+  def to_dict(self, complete=True, inflated=False):
     if complete:
       return {'identifier': self.convert_value(self.identifier),
               'name': self.convert_value(self.name),

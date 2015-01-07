@@ -135,13 +135,19 @@ class Attribute(ExtendedLogingInformations, Base):
       value_table = self.definition.value_table
       classname = '{0}Value'.format(value_table)
       attribute = '{0}_value'.format(value_table.lower())
-
-      value_instance = get_class('ce1sus.db.classes.values', classname)
-      value_instance = value_instance()
-      value_instance.attribute_id = self.identifier
-      value_instance.attribute = self
-      value_instance.value = new_value
-      value_instance.value_type_id = self.definition.value_type_id
+      
+      #check if not a value has been assigned
+      value_instance = self.__get_value_instance()
+      if value_instance:
+        # update only
+        value_instance.value = new_value
+      else:
+        value_instance = get_class('ce1sus.db.classes.values', classname)
+        value_instance = value_instance()
+        value_instance.attribute_id = self.identifier
+        value_instance.attribute = self
+        value_instance.value = new_value
+        value_instance.value_type_id = self.definition.value_type_id
 
       if self.object:
         if self.object.event:
@@ -224,13 +230,15 @@ class Attribute(ExtendedLogingInformations, Base):
     if self.definition_id:
       if self.definition_id != definition_id:
         raise ValueException(u'Attribute definitions cannot be updated')
-    self.definition_id = definition_id
+    if definition_id:
+      self.definition_id = definition_id
     condition_id = json.get('condition_id', None)
-    if not definition_id:
+    if not condition_id:
       condition = json.get('condition', None)
       if condition:
         condition_id = condition.get('identifier', None)
-    self.condition_id = condition_id
+    if condition_id:
+      self.condition_id = condition_id
     self.is_ioc = json.get('ioc', 0)
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))

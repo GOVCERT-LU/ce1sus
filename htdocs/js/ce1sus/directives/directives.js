@@ -627,11 +627,26 @@ app.directive("object", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/add.html', show: true});
       };
       
+      $scope.editAttribute = function(attribute){
+        $scope.attributeDetails = attribute;
+        $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/edit.html', show: true});
+      };
+      
       $scope.appendAttribute = function(attribute){
         if (!$scope.object.attributes){
           $scope.object.attributes  = [];
         }
         $scope.object.attributes.push(attribute);
+      };
+      
+      $scope.updateAttribute = function(attribute){
+        var counter = 0;
+        angular.forEach($scope.object.attributes, function(item) {
+          if (item.identifier == attribute.identifier){
+            $scope.object.attributes[counter] = attribute;
+          }
+          counter++;
+        }, $log);
       };
       
     },

@@ -11,7 +11,8 @@ var app = angular.module('app', ['ngRoute',
                                  "mgcrea.ngStrap",
                                  'ngTable',
                                  'simplePagination',
-                                 'angularFileUpload'
+                                 'angularFileUpload',
+                                 'angular-loading-bar'
                                  ]);
 
 

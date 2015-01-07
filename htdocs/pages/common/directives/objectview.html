@@ -67,7 +67,7 @@
               <td><span ng-if="attribute.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
               <td>
                 <a class="hand" ng-click="showAttributeDetails(attribute)"><span class="glyphicon glyphicon-eye-open"></span></a>
-                <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
+                <a class="hand" ng-click="editAttribute(attribute)"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
                 <a class="hand red" ng-click="removeAttribute(attribute)" ng-show="permissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
               </td>
             </tr>

@@ -54,12 +54,6 @@ under the BSD License
 The license is included in the docs/licenses folder.
 URL: http://caligatio.github.com/jsSHA
 
-jsSHA
-Copyright Brian Turek 2008-2014
-under the BSD License
-The license is included in the docs/licenses folder.
-URL: http://caligatio.github.com/jsSHA
-
 ngTable 
 Copyright Vitalii Savchuk(esvit666@gmail.com)
 under the BSD License
@@ -67,15 +61,19 @@ The license is included in the docs/licenses folder.
 URL: https://github.com/esvit/ng-table
 
 angular-route-segment
-Artem Chivchalov
+Copyright (c) 2013 Artem Chivchalov
 under the The MIT License
 The license is included in the docs/licenses folder.
-URL: https://angular-route-segment.com
+URL: https://github.com/artch/angular-route-segment
 
-angular-route-segment
+angular-loading-bar
 Copyright (c) 2014 Wes Cruver
 under the The MIT License
 The license is included in the docs/licenses folder.
-URL: ttps://chieffancypants.github.io/angular-loading-bar
+URL: https://github.com/chieffancypants/angular-loading-bar
 
-
+angular-file-upload
+Copyright (c) 2013 danialfarid
+under the The MIT License
+The license is included in the docs/licenses folder.
+URL: https://github.com/danialfarid/angular-file-upload

@@ -4,8 +4,10 @@
 
 var queue = [];
 
-app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider, $scrollspyProvider) {
-    
+app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider, $scrollspyProvider, cfpLoadingBarProvider) {
+  
+  cfpLoadingBarProvider.includeSpinner = false;
+  
   angular.extend($scrollspyProvider.defaults, {
     animation: 'am-fade-and-slide-top',
     placement: 'top'
@@ -98,7 +100,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                   }
                 },
                 untilResolved: {
-                    templateUrl: 'pages/common/loading.html'
+                    templateUrl: 'pages/common/loading.html',
+                    controller: 'loadingController'
                 },
                 resolveFailed: {
                   templateUrl: 'pages/common/error.html',
@@ -120,7 +123,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                        }
                      },
                      untilResolved: {
-                       templateUrl: 'pages/common/loading.html'
+                       templateUrl: 'pages/common/loading.html',
+                       controller: 'loadingController'
                      },
                      resolveFailed: {
                        templateUrl: 'pages/common/error.html',
@@ -179,7 +183,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                       }
                     },
                     untilResolved: {
-                        templateUrl: 'pages/common/loading.html'
+                      templateUrl: 'pages/common/loading.html',
+                      controller: 'loadingController'
                     },
                     resolveFailed: {
                       templateUrl: 'pages/common/error.html',
@@ -214,7 +219,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  dependencies: ["id"],
                                  untilResolved: {
-                                   templateUrl: 'pages/common/loading.html'
+                                   templateUrl: 'pages/common/loading.html',
+                                   controller: 'loadingController'
                                  },
                                  resolveFailed: {
                                    templateUrl: 'pages/common/error.html',
@@ -244,7 +250,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -265,7 +272,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -276,7 +284,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/indicators.html",
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -297,7 +306,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -309,7 +319,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             dependencies: ["id"],
                             controller: 'eventGroupController',
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -351,7 +362,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               
                           },
                           untilResolved: {
-                            templateUrl: 'pages/common/loading.html'
+                            templateUrl: 'pages/common/loading.html',
+                            controller: 'loadingController'
                           },
                           resolveFailed: {
                             templateUrl: 'pages/common/error.html',
@@ -365,7 +377,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               
                             },
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -391,7 +404,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      }
                                    },
                                    untilResolved: {
-                                     templateUrl: 'pages/common/loading.html'
+                                     templateUrl: 'pages/common/loading.html',
+                                     controller: 'loadingController'
                                    },
                                    resolveFailed: {
                                      templateUrl: 'pages/common/error.html',
@@ -417,7 +431,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               },
                               dependencies: ["id"],
                               untilResolved: {
-                                templateUrl: 'pages/common/loading.html'
+                                templateUrl: 'pages/common/loading.html',
+                                controller: 'loadingController'
                               },
                               resolveFailed: {
                                 templateUrl: 'pages/common/error.html',
@@ -467,7 +482,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  }
                                },
                                untilResolved: {
-                                   templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -501,7 +517,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                  dependencies: ["id"],
                                  untilResolved: {
-                                   templateUrl: 'pages/common/loading.html'
+                                   templateUrl: 'pages/common/loading.html',
+                                   controller: 'loadingController'
                                  },
                                  resolveFailed: {
                                    templateUrl: 'pages/common/error.html',
@@ -531,7 +548,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -552,7 +570,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -573,7 +592,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -585,7 +605,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             dependencies: ["id"],
                             controller: 'eventGroupController',
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -614,7 +635,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                 }
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -640,7 +662,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      },
                                      dependencies: ["id"],
                                      untilResolved: {
-                                       templateUrl: 'pages/common/loading.html'
+                                       templateUrl: 'pages/common/loading.html',
+                                       controller: 'loadingController'
                                      },
                                      resolveFailed: {
                                        templateUrl: 'pages/common/error.html',
@@ -662,7 +685,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  }
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -695,7 +719,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                      },
                                      dependencies: ["id"],
                                      untilResolved: {
-                                       templateUrl: 'pages/common/loading.html'
+                                       templateUrl: 'pages/common/loading.html',
+                                       controller: 'loadingController'
                                      },
                                      resolveFailed: {
                                        templateUrl: 'pages/common/error.html',
@@ -745,7 +770,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  },
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -778,7 +804,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                              },
                              dependencies: ["id"],
                              untilResolved: {
-                               templateUrl: 'pages/common/loading.html'
+                               templateUrl: 'pages/common/loading.html',
+                               controller: 'loadingController'
                              },
                              resolveFailed: {
                                templateUrl: 'pages/common/error.html',
@@ -820,7 +847,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -847,7 +875,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           },
                           dependencies: ["id"],
                           untilResolved: {
-                            templateUrl: 'pages/common/loading.html'
+                            templateUrl: 'pages/common/loading.html',
+                            controller: 'loadingController'
                           },
                           resolveFailed: {
                             templateUrl: 'pages/common/error.html',
@@ -868,7 +897,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  }
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -895,7 +925,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             },
                             dependencies: ["id"],
                             untilResolved: {
-                              templateUrl: 'pages/common/loading.html'
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
                             },
                             resolveFailed: {
                               templateUrl: 'pages/common/error.html',
@@ -917,7 +948,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                  }
                                },
                                untilResolved: {
-                                 templateUrl: 'pages/common/loading.html'
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
                                },
                                resolveFailed: {
                                  templateUrl: 'pages/common/error.html',
@@ -943,7 +975,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           },
                           dependencies: ["id"],
                           untilResolved: {
-                            templateUrl: 'pages/common/loading.html'
+                            templateUrl: 'pages/common/loading.html',
+                            controller: 'loadingController'
                           },
                           resolveFailed: {
                             templateUrl: 'pages/common/error.html',

@@ -186,6 +186,7 @@ class ObjectHandler(RestBaseHandler):
         attribute, additional_attributes, related_objects = handler_instance.insert(obj, user, json)
         # Check if not elements were attached to the object
         # TODO: find a way to check if the object has been changed
+        # TODO also check if there are no children attached
         if True:
           self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
           self.observable_controller.insert_handler_objects(related_objects, user, False, self.is_event_owner(event, user))
@@ -234,9 +235,16 @@ class ObjectHandler(RestBaseHandler):
           attribute = self.attribute_controller.get_attribute_by_id(uuid)
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
+
+            definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
+            handler_instance = self.__get_handler(definition)
+
             self.check_if_user_can_set_validate_or_shared(event, attribute, user, json)
-            attribute.populate(json)
+            # Ask handler to process the json for the new attributes
+            attribute = handler_instance.update(attribute, user, json)
+            # TODO: check if there are no children attached
             self.attribute_controller.update_attribute(attribute, user, True)
+
             return attribute.to_dict(details, inflated)
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)

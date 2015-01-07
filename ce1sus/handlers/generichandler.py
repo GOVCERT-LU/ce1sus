@@ -51,3 +51,7 @@ class GenericHandler(HandlerBase):
 
   def get_view_type(self):
     return 'plain'
+
+  def update(self, attribute, user, json):
+    attribute.populate(json)
+    return attribute

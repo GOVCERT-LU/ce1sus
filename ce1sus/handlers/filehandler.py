@@ -158,6 +158,9 @@ class FileHandler(GenericHandler):
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
 
+  def update(self, attribute, user, json):
+    raise HandlerException('FileHandler does not support updates')
+
   def get_data(self, attribute, parameters):
     if attribute:
       rel_path = attribute.value
