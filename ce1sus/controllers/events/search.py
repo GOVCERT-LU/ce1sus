@@ -26,8 +26,8 @@ __license__ = 'GPL v3+'
 
 class SearchController(BaseController):
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.attribute_definition_broker = self.broker_factory(AttributeDefinitionBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.search_broker = self.broker_factory(SearchBroker)

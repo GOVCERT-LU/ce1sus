@@ -20,8 +20,8 @@ __license__ = 'GPL v3+'
 class ConditionController(BaseController):
   """Controller handling all the requests for objects"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
 
   def get_condition_by_id(self, identifier):

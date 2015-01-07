@@ -19,8 +19,8 @@ __license__ = 'GPL v3+'
 class AttributeController(BaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
 
   def get_attribute_by_id(self, identifier):

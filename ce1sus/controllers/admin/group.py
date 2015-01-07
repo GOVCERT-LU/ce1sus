@@ -20,8 +20,8 @@ __license__ = 'GPL v3+'
 class GroupController(BaseController):
   """Controller handling all the requests for groups"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
 
   def get_all_groups(self):
     try:

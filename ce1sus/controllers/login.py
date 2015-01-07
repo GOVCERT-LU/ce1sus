@@ -24,8 +24,8 @@ class ActivationTimedOut(Exception):
 
 class LoginController(BaseController):
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
 
   def get_user_by_usr_pwd(self, username, password):
     """

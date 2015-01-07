@@ -8,7 +8,10 @@ Created on Dec 19, 2013
 
 from sqlalchemy import or_
 import sqlalchemy.orm.exc
+from sqlalchemy.sql.expression import not_
 
+from ce1sus.db.classes.attribute import Attribute
+from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.relation import Relation
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 
@@ -95,3 +98,16 @@ class RelationBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Relation
+
+  def get_all_rel_with_not_def_list(self, def_ids):
+    try:
+      relations = self.session.query(Relation).join(Attribute, Relation.attribute_id == Attribute.identifier).join(AttributeDefinition, Attribute.def_attribute_id == AttributeDefinition.identifier).filter(not_(AttributeDefinition.identifier.in_(def_ids))).all()
+      if relations:
+        return relations
+      else:
+        return list()
+    except sqlalchemy.orm.exc.NoResultFound:
+      return list()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

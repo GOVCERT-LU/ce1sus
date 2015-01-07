@@ -20,8 +20,8 @@ __license__ = 'GPL v3+'
 class EventsController(BaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.event_broker = self.broker_factory(EventBroker)
 
   def get_events(self, offset, limit, user):

@@ -23,8 +23,8 @@ __license__ = 'GPL v3+'
 class ObservableController(BaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.observable_broker = self.broker_factory(ObservableBroker)
     self.composed_observable_broker = self.broker_factory(ComposedObservableBroker)
     self.object_broker = self.broker_factory(ObjectBroker)

@@ -26,8 +26,8 @@ def gen_obj_chksum(obj):
 class ObjectDefinitionController(BaseController):
   """Controller handling all the requests for objects"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
 
   def get_all_object_definitions(self):
     try:

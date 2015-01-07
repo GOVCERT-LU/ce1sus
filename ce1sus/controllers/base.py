@@ -51,10 +51,16 @@ class NotImplementedException(ControllerException):
 class BaseController:
   """This is the base class for controlles all controllers should extend this
   class"""
-  def __init__(self, config):
+  def __init__(self, config, session=None):
     self.config = config
     self.__logger = Log(self.config)
-    self.session_manager = SessionManager(config)
+    if session:
+      self.session = session
+      self.session_manager = None
+    else:
+      self.session = None
+      self.session_manager = SessionManager(config)
+
     self.user_broker = self.broker_factory(UserBroker)
     self.group_broker = self.broker_factory(GroupBroker)
     self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
@@ -73,7 +79,10 @@ class BaseController:
     :returns: Instance of a broker
     """
     self.logger.debug('Create broker for {0}'.format(clazz))
-    return self.session_manager.broker_factory(clazz)
+    if self.session:
+      return self.session
+    else:
+      return self.session_manager.broker_factory(clazz)
 
   @property
   def logger(self):

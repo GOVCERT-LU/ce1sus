@@ -23,8 +23,8 @@ __license__ = 'GPL v3+'
 class RelationController(BaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 
@@ -129,5 +129,52 @@ class RelationController(BaseController):
   def get_relations_for_event(self, event):
     try:
       return self.relation_broker.get_relations_by_event(event, unique_events=True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def make_object_attributes_flat(self, obj):
+    result = list()
+    if obj:
+      for attribute in obj.attributes:
+        result.append(attribute)
+      for related_object in obj.related_objects:
+        result = result + self.__make_object_attributes_flat(related_object)
+    return result
+
+  def __process_observable(self, observable):
+    result = list()
+    if observable.observable_composition:
+      for child_observable in observable.observable_composition.observables:
+        result + self.__process_observable(child_observable)
+    else:
+      result = result + self.make_object_attributes_flat(child_observable.object)
+
+  def get_flat_attributes_for_event(self, event):
+    # Make attributes flat
+    flat_attriutes = list()
+
+    if event.observables:
+      for observable in event.observables:
+        if observable.observable_composition:
+          flat_attriutes = flat_attriutes + self.__process_observable(observable)
+
+    return flat_attriutes
+
+  def remove_all_relations_by_definition_ids(self, id_list, commit=True):
+    try:
+      relations = self.relation_broker.get_all_rel_with_not_def_list(id_list)
+      if relations:
+        for relation in relations:
+          self.relation_broker.remove_by_id(relation.identifier, False)
+        self.relation_broker.do_commit(commit)
+        return len(relations)
+      else:
+        return 0
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def clear_relations_table(self):
+    try:
+      self.relation_broker.clear_relations_table()
     except BrokerException as error:
       raise ControllerException(error)

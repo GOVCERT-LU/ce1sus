@@ -194,3 +194,6 @@ class HandlerBase(object):
     return {'name': self.__class__.__name__,
             'view_type': self.get_view_type()
             }
+
+  def require_js(self):
+    raise HandlerException(u'require_js is not defined for {0}'.format(self.__class__.__name__))

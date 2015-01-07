@@ -143,14 +143,6 @@ class ObjectHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Please use object/{uuid}/ instead')
 
-  def __make_object_attributes_flat(self, obj):
-    result = list()
-    for attribute in obj.attributes:
-      result.append(attribute)
-    for related_object in obj.related_objects:
-      result = result + self.__make_object_attributes_flat(related_object)
-    return result
-
   def __get_handler(self, definition):
     handler_instance = definition.handler
     handler_instance.attribute_definitions[definition.chksum] = definition
@@ -210,7 +202,7 @@ class ObjectHandler(RestBaseHandler):
         if result_objects:
           for related_object in related_objects:
             # make the attributes of the related object flat
-            flat_attriutes = flat_attriutes + self.__make_object_attributes_flat(related_object)
+            flat_attriutes = flat_attriutes + self.relations_controller.make_object_attributes_flat(related_object)
 
             result_objects.append(related_object.to_dict(details, inflated))
 

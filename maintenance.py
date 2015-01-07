@@ -6,25 +6,30 @@
 Created on Jul 11, 2014
 """
 from optparse import OptionParser
-import os
-from os.path import basename
+from os import remove
+from os.path import basename, dirname, abspath, isfile
+from shutil import copy, move
+
+from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController, gen_attr_chksum
+from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController, gen_obj_chksum
+from ce1sus.controllers.base import ControllerException
+from ce1sus.controllers.events.event import EventController
+from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition, AttributeHandler
+from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.mailtemplate import MailTemplate
 from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.user import User
-from ce1sus.db.common.session import SessionManager, Base
-from ce1sus.helpers.common.config import Configuration
-from apt_pkg import Group
 from ce1sus.db.classes.relation import Relation
+from ce1sus.db.classes.types import AttributeType
+from ce1sus.db.classes.user import User
 from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, TextValue
-from ce1sus.db.classes.event import Event
-from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
 from ce1sus.helpers.common.config import Configuration
+from ce1sus.helpers.common.hash import fileHashMD5
 from ce1sus.helpers.common.objects import get_class
-from ce1sus.db.classes.types import AttributeType
+from ce1sus.controllers.admin.user import UserController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -46,17 +51,23 @@ class Maintenance(object):
     self.config = config
     self.connector = SessionManager(config).connector
     directconnection = self.connector.get_direct_session()
-    # self.def_attr_broker = AttributeDefinitionBroker(directconnection)
-    # self.def_obj_broker = ObjectDefinitionBroker(directconnection)
-    # self.relation_broker = RelationBroker(directconnection)
-    # self.ce1sus_broker = Ce1susBroker(directconnection)
-    # self.event_broker = EventBroker(directconnection)
+    self.relation_controller = RelationController(config, directconnection)
+    self.attribute_definition_controller = AttributeDefinitionController(config, directconnection)
+    self.object_definition_controller = ObjectDefinitionController(config, directconnection)
+    self.event_controller = EventController(config, directconnection)
+    self.user_controller = UserController(config, directconnection)
+
+    # set maintenance user
+    user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
+    if None:
+      raise MaintenanceException('maintenaceuseruuid was not defined in config')
+    self.user = self.user_controller.get_user_by_id(user_uuid)
 
   def rebuild_relations(self, verbose=False):
     definitions = self.get_relationable_definitions(verbose)
     self.removing_obsolete_relations(definitions, verbose, False)
     self.regenerate_relations(definitions, verbose, False)
-    self.relation_broker.do_commit(True)
+    self.relation_controller.relation_broker.do_commit(True)
     print 'Done.'
 
   def removing_obsolete_relations(self, definitions, verbose=False, commit=False):
@@ -67,50 +78,41 @@ class Maintenance(object):
       for definition in definitions:
         def_ids.append(definition.identifier)
       # get all relations not in the definitions
-      relations = self.relation_broker.get_all_rel_with_not_def_list(def_ids)
-      if verbose:
-        print 'Found {0} obsolete relations'.format(len(relations))
-      # remove all definitions
-      if relations:
-        if verbose:
-          print 'Removing obsolete relations'
-        for relation in relations:
-          self.relation_broker.remove_by_id(relation.identifier, False)
-        self.relation_broker.do_commit(commit)
+      removed = self.relation_controller.remove_all_relations_by_definition_ids(def_ids, commit)
+      if removed:
+        print 'Found and deleted {0} obsolete relations'.format(removed)
       else:
-        if verbose:
-          print 'No obsolete relation found'
-    except BrokerException as error:
+        print 'No obsolete relation found'
+    except ControllerException as error:
       raise MaintenanceException(error)
 
   def get_relationable_definitions(self, verbose=False):
     try:
       if verbose:
         print 'Getting relationable definitions'
-      definitions = self.def_attr_broker.get_all_relationable_definitions()
+      definitions = self.attribute_definition_controller.get_rel.get_all_relationable_definitions()
       if verbose:
         print 'Found {0} relationable definitions'.format(len(definitions))
       return definitions
-    except BrokerException as error:
+    except ControllerException as error:
       raise MaintenanceException(error)
 
   def regenerate_relations(self, definitions, verbose=False, commit=False):
     try:
       if verbose:
         print 'Regenerating definitions'
-      events = self.event_broker.get_all()
+      events = self.event_controller.get_all()
       if verbose:
         print 'Found {0} events'.format(len(events))
       if events:
         for event in events:
-          attributes = None
-          # attributes = get_all_attribtues_from_event(event)
-          self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
-        self.relation_broker.do_commit(commit)
+          flat_attributes = self.relation_controller.get_flat_attributes_for_event(event)
+          self.relation_controller.generate_bulk_attributes_relations(event, flat_attributes, False)
+        self.relation_controller.relation_broker.do_commit(commit)
       else:
         if verbose:
           print 'No event found.'
-    except BrokerException as error:
+    except ControllerException as error:
       raise MaintenanceException(error)
 
   def recheck_definition_chksums(self, verbose=False):
@@ -118,7 +120,7 @@ class Maintenance(object):
       if verbose:
         print 'Checking definitions'
       # find all object definitions
-      objects = self.def_obj_broker.get_all()
+      objects = self.object_definition_controller.get_all_object_definitions()
       not_matching_objs = list()
       for obj in objects:
         if obj.chksum != gen_obj_chksum(obj):
@@ -128,10 +130,10 @@ class Maintenance(object):
       # fix checksums
       for not_matching_obj in not_matching_objs:
         not_matching_obj.chksum = gen_obj_chksum(not_matching_obj)
-        self.def_obj_broker.update(not_matching_obj, False, True)
-      self.def_obj_broker.do_commit(True)
+        self.object_definition_controller.update_object_definition(not_matching_obj, self.user)
+      self.object_definition_controller.def_obj_broker.do_commit(True)
       # find attribute chksums not matching the one stored
-      attributes = self.def_attr_broker.get_all()
+      attributes = self.attribute_definition_controller.get_all_attribute_definitions()
       not_matching_attrs = list()
       for attribute in attributes:
         if attribute.chksum != gen_attr_chksum(attribute):
@@ -141,10 +143,10 @@ class Maintenance(object):
       # fix checksums
       for not_matching_attr in not_matching_attrs:
         not_matching_attr.chksum = gen_attr_chksum(not_matching_attr)
-        self.def_attr_broker.update(not_matching_attr, False, True)
-      self.def_attr_broker.do_commit(True)
+        self.attribute_definition_controller.update_attribute_definition(not_matching_attr, self.user)
+      self.attribute_definition_controller.def_attr_broker.do_commit(True)
 
-    except BrokerException as error:
+    except ControllerException as error:
       raise MaintenanceException(error)
 
   def rebuild_event_relations(self, event_uuid, verbose):
@@ -152,13 +154,10 @@ class Maintenance(object):
       if verbose:
         print u'Rebuilding relations for event {0}'.format(event_uuid)
       # find event by uuid
-      event = self.event_broker.get_by_uuid(event_uuid)
-      attributes = None  # get_all_attribtues_from_event(event)
-      self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
-      self.relation_broker.do_commit(True)
-    except NothingFoundException as error:
-      print error
-    except BrokerException as error:
+      event = self.event_controller.get_event_by_id(event_uuid)
+      flat_attributes = self.relation_controller.get_flat_attributes_for_event(event)
+      self.relation_controller.generate_bulk_attributes_relations(event, flat_attributes, True)
+    except ControllerException as error:
       raise MaintenanceException(error)
 
   def drop_relations(self, verbose):
@@ -166,10 +165,47 @@ class Maintenance(object):
       if verbose:
         print u'Truncate relations table'
       # get Table
-      self.relation_broker.clear_relations_table()
-      self.relation_broker.do_commit(True)
-    except BrokerException as error:
+      self.relation_controller.clear_relations_table()
+      self.relation_controller.relation_broker.do_commit(True)
+    except ControllerException as error:
       raise MaintenanceException(error)
+
+  def __check_templates(self, handler_base_path, classname, handler, base_templates, destination_path, type_):
+    file_to_move = handler_base_path + '/' + type_ + '/' + handler.get_view_type() + '.html'
+    add_file = base_templates + type_ + '/' + handler.get_view_type() + '.html'
+    # check if file is supplied by the new handler
+    if isfile(file_to_move):
+      if isfile(add_file):
+        # file exists
+        if fileHashMD5(file_to_move) != fileHashMD5(add_file):
+          remove(destination_path)
+          raise Exception((u'{0} does supply a template (file {2}/{1}.html) wich is different from an existing one.').format(classname, handler.get_view_type(), type_))
+    else:
+      remove(destination_path)
+      raise Exception((u'{0} does not supply a template (file {2}/{1}.html not found)').format(classname, handler.get_view_type(), type_))
+
+  def __append_js_to_index(self, classname, base_path):
+    try:
+      index_file = base_path + '/htdocs/index.html'
+      orig_index = base_path + '/htdocs/old_index.html'
+      move(index_file, orig_index)
+      old_file = open(orig_index, 'r')
+      new_file = open(index_file, 'w')
+      lines = old_file.readlines()
+      for line in lines:
+        if line == '</body>':
+          # append js here
+          new_file.write('<script type="text/javascript" src="/js/ce1sus/controllers/handlers/{0}controller.js"></script>'.format(classname.lower()))
+          new_file.write(line)
+        else:
+          new_file.write(line)
+      old_file.close()
+      new_file.close()
+      return True
+    except:
+      # move file back
+      move(orig_index, index_file)
+      return False
 
   def add_handler(self, path, classname):
     modulename = basename(path).replace('.py', '')
@@ -177,16 +213,82 @@ class Maintenance(object):
       classname = modulename.title().replace('handler', 'Handler')
     modulename = u'{0}'.format(modulename)
     # move to correct place
-    print u'Adding handler {0}'.format(modulename)
+    handler_base_path = dirname(abspath(path))
+    ce1sus_base_path = dirname(abspath(__file__))
+    destination_path = ce1sus_base_path + '/ce1sus/handlers/' + basename(path)
+
+    # copy python file if nessessary
+    if destination_path != path:
+      if isfile(destination_path):
+        raise Exception(u'Handler already exists at the given place')
+      else:
+        copy(path, destination_path)
+        print u'Copied file {0} to {1}'.format(path, destination_path)
 
     clazz = get_class(u'ce1sus.handlers.{0}'.format(modulename), classname)
     # check if class implements handler base
     instance = clazz()
 
+    print u'Adding handler {0}'.format(modulename)
+
     if not isinstance(instance, HandlerBase):
       # remove file
-
+      remove(destination_path)
       raise Exception((u'{0} does not implement HandlerBase').format(classname))
+
+    # check if input, edit and view files required exists
+    base_templates = ce1sus_base_path + '/htdocs/pages/handlers/'
+
+    # check if template files are matching
+    self.__check_templates(handler_base_path, classname, instance, base_templates, destination_path, 'add')
+    self.__check_templates(handler_base_path, classname, instance, base_templates, destination_path, 'edit')
+    self.__check_templates(handler_base_path, classname, instance, base_templates, destination_path, 'view')
+
+    # copy templates files
+    file_to_move = handler_base_path + '/add/' + instance.get_view_type() + '.html'
+    add_file = base_templates + 'add/' + instance.get_view_type() + '.html'
+    copy(add_file, file_to_move)
+    file_to_move = handler_base_path + '/edit/' + instance.get_view_type() + '.html'
+    edit_file = base_templates + 'edit/' + instance.get_view_type() + '.html'
+    copy(edit_file, file_to_move)
+    file_to_move = handler_base_path + '/edit/' + instance.get_view_type() + '.html'
+    view_file = base_templates + 'edit/' + instance.get_view_type() + '.html'
+    copy(view_file, file_to_move)
+
+    js_file = None
+    if instance.require_js():
+      # do the same checks as for the above
+      file_to_move = handler_base_path + '/' + classname.lower() + 'controller.js'
+      base_js = ce1sus_base_path + '/htdocs/js/ce1sus/controllers/handlers/'
+      js_file = base_js + classname.lower() + 'handler.js'
+
+      # check if file is supplied by the new handler
+      if isfile(file_to_move):
+        if isfile(js_file):
+          if fileHashMD5(file_to_move) != fileHashMD5(js_file):
+            remove(destination_path)
+            remove(add_file)
+            remove(edit_file)
+            remove(view_file)
+            raise Exception((u'{0} does supply a js (file /htdocs/js/ce1sus/controllers/handlers/{0}handler.js) which is different from an existing one.').format(classname))
+          else:
+            copy(file_to_move, js_file)
+      else:
+        remove(destination_path)
+        remove(add_file)
+        remove(edit_file)
+        remove(view_file)
+        raise Exception((u'{0} does not supply a js but states it is required (file {0}handler.js not found)').format(classname))
+
+      # appending file to index
+      worked = self.__append_js_to_index(classname, ce1sus_base_path)
+      if not worked:
+        remove(destination_path)
+        remove(add_file)
+        remove(edit_file)
+        remove(view_file)
+        if js_file:
+          remove(js_file)
 
     uuid = instance.get_uuid()
     description = instance.get_description()
@@ -198,8 +300,19 @@ class Maintenance(object):
     # TODO: Use controller instead
     session = self.connector.get_direct_session().get_session()
     session.add(attribute_handler)
-    session.commit()
+    try:
+      session.commit()
+    except:
+      remove(destination_path)
+      remove(add_file)
+      remove(edit_file)
+      remove(view_file)
+      if js_file:
+        remove(js_file)
     print "AttributeHandler {0} added".format(classname)
+
+  # TODO write a method just to register handlers
+  # TODO wirte a method to remove handlers
 
 if __name__ == '__main__':
   parser = OptionParser()
@@ -220,7 +333,7 @@ if __name__ == '__main__':
 
   (options, args) = parser.parse_args()
 
-  basePath = os.path.dirname(os.path.abspath(__file__))
+  basePath = dirname(abspath(__file__))
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   config = Configuration(ce1susConfigFile)
   maintenance = Maintenance(config)

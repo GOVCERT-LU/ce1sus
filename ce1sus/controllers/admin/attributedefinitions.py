@@ -33,8 +33,8 @@ def gen_attr_chksum(attribute):
 class AttributeDefinitionController(BaseController):
   """Controller handling all the requests for attributes"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.type_broker = self.broker_factory(AttributeTypeBroker)
@@ -145,5 +145,14 @@ class AttributeDefinitionController(BaseController):
   def get_handler_by_id(self, identifier):
     try:
       return self.handler_broker.get_by_id(identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_all_relationable_definitions(self):
+    """
+    Returns the attribute definition by the given id
+    """
+    try:
+      return self.attr_def_broker.get_all_relationable_definitions()
     except BrokerException as error:
       raise ControllerException(error)

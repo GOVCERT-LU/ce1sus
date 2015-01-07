@@ -7,7 +7,7 @@ Created: Aug 28, 2013
 """
 from ce1sus.common.checks import is_event_owner
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
-from ce1sus.controllers.events.comments import CommentBroker
+from ce1sus.db.brokers.event.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
@@ -37,8 +37,8 @@ def __get_all_attributes_from_obj(attributes, obj):
 class EventController(BaseController):
   """event controller handling all actions in the event section"""
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.event_broker = self.broker_factory(EventBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
 
@@ -129,6 +129,13 @@ class EventController(BaseController):
     except NothingFoundException as error:
       self.logger.debug(error)
       raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_all(self):
+    try:
+      events = self.event_broker.get_all()
+      return events
     except BrokerException as error:
       raise ControllerException(error)
 
