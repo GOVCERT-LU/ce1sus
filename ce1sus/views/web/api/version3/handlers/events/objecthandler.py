@@ -15,6 +15,7 @@ from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.handlers.base import HandlerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -235,9 +236,13 @@ class ObjectHandler(RestBaseHandler):
           attribute = self.attribute_controller.get_attribute_by_id(uuid)
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
+            definition_id = json.get('definition_id', None)
+            if definition_id:
+              # check if it still is the same
+              if not attribute.definition_id == definition_id:
+                raise HandlerException('It is not possible to change the definition of attribtues')
 
-            definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
-            handler_instance = self.__get_handler(definition)
+            handler_instance = self.__get_handler(attribute.definition)
 
             self.check_if_user_can_set_validate_or_shared(event, attribute, user, json)
             # Ask handler to process the json for the new attributes
