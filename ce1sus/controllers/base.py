@@ -5,14 +5,15 @@ for controllers.
 
 Created: Jul, 2013
 """
+from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.brokers.permissions.user import UserBroker
 from ce1sus.db.classes.user import User
+from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.debug import Log
-from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -80,7 +81,11 @@ class BaseController:
     """
     self.logger.debug('Create broker for {0}'.format(clazz))
     if self.session:
-      return self.session
+      # instanciate class
+      if not issubclass(clazz, BrokerBase):
+        raise ControllerException('Class does not implement BrokerBase')
+      return clazz(self.session)
+
     else:
       return self.session_manager.broker_factory(clazz)
 

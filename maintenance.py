@@ -49,8 +49,8 @@ class Maintenance(object):
 
   def __init__(self, config):
     self.config = config
-    self.connector = SessionManager(config).connector
-    directconnection = self.connector.get_direct_session()
+    self.session_manager = SessionManager(config)
+    directconnection = self.session_manager.connector.get_direct_session()
     self.relation_controller = RelationController(config, directconnection)
     self.attribute_definition_controller = AttributeDefinitionController(config, directconnection)
     self.object_definition_controller = ObjectDefinitionController(config, directconnection)
@@ -321,6 +321,7 @@ class Maintenance(object):
     uuid = instance.get_uuid()
     description = instance.get_description()
     self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+    # TODO check if the required files are available
 
   def remove_handler(self, modulename, classname=None):
     if not classname:
