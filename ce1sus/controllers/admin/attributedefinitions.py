@@ -10,7 +10,7 @@ from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDef
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.db.classes.definitions import AttributeDefinition
+from ce1sus.db.classes.definitions import AttributeDefinition, AttributeHandler
 from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -154,5 +154,21 @@ class AttributeDefinitionController(BaseController):
     """
     try:
       return self.attr_def_broker.get_all_relationable_definitions()
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def register_handler(self, uuid, module, description):
+    try:
+      attribute_handler = AttributeHandler()
+      attribute_handler.identifier = uuid
+      attribute_handler.description = description
+      attribute_handler.module_classname = module
+      self.handler_broker.insert(attribute_handler, True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_handler_by_id(self, identifier):
+    try:
+      self.handler_broker.remove_by_id(identifier)
     except BrokerException as error:
       raise ControllerException(error)

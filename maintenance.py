@@ -292,17 +292,9 @@ class Maintenance(object):
 
     uuid = instance.get_uuid()
     description = instance.get_description()
-
-    attribute_handler = AttributeHandler()
-    attribute_handler.identifier = uuid
-    attribute_handler.description = description
-    attribute_handler.module_classname = u'{0}.{1}'.format(modulename, classname)
-    # TODO: Use controller instead
-    session = self.connector.get_direct_session().get_session()
-    session.add(attribute_handler)
     try:
-      session.commit()
-    except:
+      self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+    except ControllerException:
       remove(destination_path)
       remove(add_file)
       remove(edit_file)
@@ -311,8 +303,60 @@ class Maintenance(object):
         remove(js_file)
     print "AttributeHandler {0} added".format(classname)
 
-  # TODO write a method just to register handlers
-  # TODO wirte a method to remove handlers
+  def register_handler(self, modulename, classname=None):
+    if not classname:
+      classname = modulename.title().replace('handler', 'Handler')
+    modulename = u'{0}'.format(modulename)
+
+    clazz = get_class(u'ce1sus.handlers.{0}'.format(modulename), classname)
+    # check if class implements handler base
+    instance = clazz()
+
+    print u'Adding handler {0}'.format(modulename)
+
+    if not isinstance(instance, HandlerBase):
+      # remove file
+      raise Exception((u'{0} does not implement HandlerBase').format(classname))
+
+    uuid = instance.get_uuid()
+    description = instance.get_description()
+    self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+
+  def remove_handler(self, modulename, classname=None):
+    if not classname:
+      classname = modulename.title().replace('handler', 'Handler')
+    modulename = u'{0}'.format(modulename)
+
+    clazz = get_class(u'ce1sus.handlers.{0}'.format(modulename), classname)
+    # check if class implements handler base
+    instance = clazz()
+
+    # deregister
+    self.attribute_definition_controller.remove_handler_by_id(instance.get_uuid())
+
+    ce1sus_base_path = dirname(abspath(__file__))
+    handler_path = ce1sus_base_path + '/ce1sus/handlers/' + modulename + '.py'
+
+    remove(handler_path)
+    base_templates = ce1sus_base_path + '/htdocs/pages/handlers/'
+
+    add_file = base_templates + 'add/' + instance.get_view_type() + '.html'
+    remove(add_file)
+
+    edit_file = base_templates + 'edit/' + instance.get_view_type() + '.html'
+    remove(edit_file)
+
+    view_file = base_templates + 'edit/' + instance.get_view_type() + '.html'
+    remove(view_file)
+
+    js_file = None
+    if instance.require_js():
+      # do the same checks as for the above
+      base_js = ce1sus_base_path + '/htdocs/js/ce1sus/controllers/handlers/'
+      js_file = base_js + classname.lower() + 'handler.js'
+      remove(js_file)
+
+  # TODO clean this up
 
 if __name__ == '__main__':
   parser = OptionParser()
@@ -330,6 +374,10 @@ if __name__ == '__main__':
                     help='Function to add a new handler')
   parser.add_option('--class', dest='handler_class', type='string', default=None,
                     help='Function to add a new handler')
+  parser.add_option('--reg-handler', dest='handler_reg_module', type='string', default='',
+                    help='Function to registers an installed handler')
+  parser.add_option('--remove-handler', dest='handler_rem_module', type='string', default='',
+                    help='Function to removes an handler')
 
   (options, args) = parser.parse_args()
 
@@ -340,6 +388,10 @@ if __name__ == '__main__':
 
   if options.handler_file:
     maintenance.add_handler(options.handler_file, options.handler_class)
+  elif options.handler_reg_module:
+    maintenance.register_handler(options.handler_reg_module, options.handler_class)
+  elif options.handler_rem_module:
+    maintenance.register_handler(options.handler_rem_module, options.handler_class)
   elif options.event_uuid and not options.rebuild_opt:
     print 'Option -e xxx has to be used with option -r.'
   else:
