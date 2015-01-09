@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
-from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
+from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger, Boolean
 
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
@@ -71,10 +71,22 @@ class EventPermissions(BitBase):
   VALIDATE = 3
   PROPOSE = 4
   SET_GROUPS = 5
+  VIEW_SHARE = 6
 
   @property
   def can_view(self):
     return True
+
+  @property
+  def can_view_non_shared(self):
+    # TODO: implement non shared to see
+    # Note this is for non shared elements
+    return self._get_value(EventPermissions.VIEW_SHARE)
+
+  @can_view_non_shared.setter
+  def can_view_non_shared(self, value):
+    # Note this is for non shared elements
+    self._set_value(EventPermissions.VIEW_SHARE, value)
 
   @property
   def can_propose(self):
@@ -169,6 +181,7 @@ class Group(Base):
   default_dbcode = Column('default_code', Integer, default=0, nullable=False)
   email = Column('email', Unicode(255), unique=True)
   gpg_key = Column('gpg_key', UnicodeText)
+  send_usermails = Column('usermails', Boolean, default=False, nullable=False)
   children = relationship('Group',
                           secondary=_REL_MAINGROUP_GROUPS,
                           primaryjoin='Group.identifier == group_has_groups.c.group_id',

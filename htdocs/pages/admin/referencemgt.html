@@ -1,0 +1,27 @@
+
+<div class="row">
+  <div class="col-lg-3">
+    <div class="btn-group">
+    <button type="button" class="btn btn-default" data-template="pages/admin/references/modals/addreferencemodal.html" bs-modal="modal" >
+    Add new Reference
+    </button>
+    </div>
+    <p/>
+    <div class="well">
+      
+      <ul class="nav nav-list">
+        <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
+        <li ng-class="{active: ('main.layout.admin.reference.help' | routeSegmentStartsWith)}">
+          <a href="#{{ 'main.layout.admin.reference' | routeSegmentUrl }}">Help</a>
+        </li>
+        <li class="nav-header"><i class="fa fa-envelope"></i> References</li>
+        <li ng-repeat="reference_entry in references" ng-class="{active: ('main.layout.admin.reference.referenceDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == reference_entry.identifier}">
+        <a ng-href="#{{ 'main.layout.admin.reference.referenceDetails' | routeSegmentUrl: {id: reference_entry.identifier} }}">{{reference_entry.name}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-9 anim" app-view-segment="4">
+  </div>
+</div>
+

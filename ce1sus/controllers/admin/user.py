@@ -41,7 +41,7 @@ class UserController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_user(self, user, validate=True):
+  def insert_user(self, user, validate=True, commit=True):
     try:
       # Add unset elements
       user.activation_str = hashSHA1('{0}{1}'.format(user.plain_password, random.random()))
@@ -51,7 +51,7 @@ class UserController(BaseController):
 
       # TODO: add api key and mail sending
 
-      self.user_broker.insert(user, validate=validate)
+      self.user_broker.insert(user, validate=validate, commit=commit)
 
       # if user.gpg_key:
       #  self.mail_handler.import_gpg_key(user.gpg_key)

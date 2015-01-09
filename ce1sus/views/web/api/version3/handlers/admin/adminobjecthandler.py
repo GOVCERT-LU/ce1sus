@@ -10,7 +10,6 @@ from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionControlle
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
 
 
 __author__ = 'Weber Jean-Paul'

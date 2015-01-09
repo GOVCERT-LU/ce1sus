@@ -37,9 +37,9 @@ class GroupController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_group(self, group, validate=True):
+  def insert_group(self, group, validate=True, commit=True):
     try:
-      self.group_broker.insert(group, validate=validate)
+      self.group_broker.insert(group, commit, validate)
 
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(group)

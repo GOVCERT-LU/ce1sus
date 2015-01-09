@@ -12,8 +12,10 @@ from ce1sus.helpers.common.objects import get_methods
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
 from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import AdminObjectHandler
+from ce1sus.views.web.api.version3.handlers.admin.adminreferencehandler import AdminReferenceDefinitionHandler
 from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import AttribueTypeHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminUserHandler
+from ce1sus.views.web.api.version3.handlers.admin.adminvalidationhandler import ValidationHandler
 from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
@@ -24,13 +26,12 @@ from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHand
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.events.objecthandler import ObjectHandler
 from ce1sus.views.web.api.version3.handlers.events.observablehanlder import ObservableHandler
+from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from ce1sus.views.web.api.version3.handlers.admin.adminvalidationhandler import ValidationHandler
-from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -71,6 +72,9 @@ class RestController(BaseView):
     self.instances['condition'] = ConditionHandler(config)
     self.instances['validate'] = ValidationHandler(config)
     self.instances['search'] = SearchHandler(config)
+    self.instances['referencehandlers'] = ReferenceHandlerHandler(config)
+    self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
+
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):

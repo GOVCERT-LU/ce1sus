@@ -156,8 +156,12 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
     $scope.$hide();
   };
 
+  $scope.closeModal = function(){
+    var attribute = angular.copy(original_attribute);
+    $scope.$parent.setAttribute(attribute);
+    $scope.$hide();
 
-  
+  };
 });
 
 app.controller("attributeEditController", function($scope, Restangular, messages, $routeSegment,$location, $log) {

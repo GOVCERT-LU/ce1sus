@@ -47,8 +47,10 @@
       <div
         ng-class="{ 'has-error' : addUserForm.username.$invalid && !addUserForm.username.$pristine }">
         <input class="form-control" name="username"
+          ng-model="user.username" type="text" disabled ng-if="type=='edit'">
+        <input class="form-control" name="username"
           ng-model="user.username" type="text" required ng-minlength=3
-          ng-maxlength=255 ng-pattern="/^[\d\w]+$/">
+          ng-maxlength=255 ng-pattern="/^[\d\w]+$/" ng-if="type=='add'">
         <p
           ng-show="addUserForm.username.$invalid && !addUserForm.username.$pristine"
           class="help-block">Username is required.</p>

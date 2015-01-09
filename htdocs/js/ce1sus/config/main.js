@@ -73,7 +73,9 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/attribute/:id", "main.layout.admin.attribute.attributeDetails")
         .when("/admin/mail", "main.layout.admin.mail")
         .when("/admin/mail/:id", "main.layout.admin.mail.mailDetails")
-    
+        .when("/admin/reference", "main.layout.admin.reference")
+        .when("/admin/reference/:id", "main.layout.admin.reference.referenceDetails")
+        
         .segment('main', {
             //Main consits only of a main template
             templateUrl: 'pages/main.html',
@@ -424,6 +426,63 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                 $mail: function(Restangular,$routeSegment) {
                                   return Restangular.one("mail",$routeSegment.$routeParams.id).get({"complete": true}).then(function (mails) {
                                     return mails;
+                                  }, function(response) {
+                                      throw generateErrorMessage(response);
+                                  });
+                                }
+                              },
+                              dependencies: ["id"],
+                              untilResolved: {
+                                templateUrl: 'pages/common/loading.html',
+                                controller: 'loadingController'
+                              },
+                              resolveFailed: {
+                                templateUrl: 'pages/common/error.html',
+                                controller: 'errorController'
+                              }
+                              })
+                              
+                            .up()
+                              .segment("reference", {
+                                   templateUrl: "pages/admin/referencemgt.html",
+                                   controller : "referenceController",
+                                   resolve: {
+                                     references: function(Restangular) {
+                                       return Restangular.one("referencedefinition").getList(null, {"complete": false}).then(function (mails) {
+                                         return mails;
+                                       }, function(response) {
+                                           throw generateErrorMessage(response);
+                                       });
+                                     },
+                                     handlers: function(Restangular) {
+                                       return Restangular.one("referencehandlers").getList(null, {"complete": false}).then(function (handlers) {
+                                         return handlers;
+                                       }, function(response) {
+                                           throw generateErrorMessage(response);
+                                       });
+                                     },
+                                   },
+                                   untilResolved: {
+                                     templateUrl: 'pages/common/loading.html',
+                                     controller: 'loadingController'
+                                   },
+                                   resolveFailed: {
+                                     templateUrl: 'pages/common/error.html',
+                                     controller: 'errorController'
+                                   }
+                          })
+                            .within()
+                               .segment("help", {
+                              "default": true,
+                              templateUrl: "pages/admin/references/help.html"})
+                              
+                              .segment("referenceDetails", {
+                              templateUrl: "pages/admin/references/referencedetail.html",
+                              controller: 'referenceDetailController',
+                              resolve: {
+                                $reference: function(Restangular,$routeSegment) {
+                                  return Restangular.one("referencedefinition",$routeSegment.$routeParams.id).get({"complete": true}).then(function (references) {
+                                    return references;
                                   }, function(response) {
                                       throw generateErrorMessage(response);
                                   });

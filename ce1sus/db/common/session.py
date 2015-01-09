@@ -29,7 +29,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class Base(object):
+class BaseClass(object):
   __abstract__ = True
 
   @declared_attr
@@ -61,7 +61,7 @@ class Base(object):
     else:
       return ''
 
-Base = declarative_base(cls=Base)
+Base = declarative_base(cls=BaseClass)
 
 
 @event.listens_for(Pool, "checkout")

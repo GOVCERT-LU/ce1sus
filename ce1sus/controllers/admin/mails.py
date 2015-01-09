@@ -43,7 +43,7 @@ class MailController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(mail_template, user, insert=False)
       mail_template = self.mail_broker.update(mail_template)
-      return mail_template, True
+      return mail_template
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(mail_template)
       raise ControllerException(u'Could not update mail due to: {0}'.format(message))

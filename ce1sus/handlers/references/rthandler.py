@@ -5,8 +5,7 @@ module providing support for tickets handling
 
 Created: Aug, 2013
 """
-from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.generichandler import GenericHandler
+from ce1sus.handlers.references.generichandler import GenericHandler
 from ce1sus.helpers.common.rt import RTTickets
 from ce1sus.handlers.base import HandlerException
 
@@ -31,10 +30,6 @@ class RTHandler(GenericHandler):
   @staticmethod
   def get_uuid():
     return 'f1509d30-8deb-11e3-baa8-0800200c9a66'
-
-  @staticmethod
-  def get_allowed_types():
-    return [ValueTable.NUMBER_VALUE]
 
   @staticmethod
   def get_description():

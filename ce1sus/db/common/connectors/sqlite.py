@@ -53,6 +53,10 @@ class SqliteSession(SessionObject):
     else:
       return cherrypy.request.db
 
+  def close(self):
+    if self.__session:
+      self.__session.close()
+
 
 class SqliteConnector(Connector):
   """

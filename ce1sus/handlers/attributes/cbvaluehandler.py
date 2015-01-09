@@ -7,7 +7,7 @@ Created: Aug 22, 2013
 """
 from ce1sus.db.classes.common import ValueTable
 from ce1sus.handlers.base import HandlerException
-from ce1sus.handlers.generichandler import GenericHandler
+from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
 
 

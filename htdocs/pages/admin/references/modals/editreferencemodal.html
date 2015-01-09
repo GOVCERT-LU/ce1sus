@@ -1,0 +1,25 @@
+<div class="modal" tabindex="-1" role="dialog" ng-controller="referenceEditController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" ng-click="$hide();">&times;</button>
+          <h4 class="modal-title">Edit Reference Definition - {{reference.identifier}}</h4>
+        </div>
+        <div class="modal-body">
+          <reference-definition-form reference="reference" type="'edit'" handlers="handlers"/>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary"
+              ng-disabled="!referenceChanged() || addReferenceDefinitionForm.$invalid"
+              ng-click="submitReference()">Save</button>
+            <button name="reset" type="button" class="btn btn-default"
+              ng-click="resetReference()">Reset</button>
+            <button type="button" class="btn btn-default"
+              ng-click="$hide();">Close</button>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+</div>

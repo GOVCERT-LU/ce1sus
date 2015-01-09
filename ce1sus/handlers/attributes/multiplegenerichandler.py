@@ -7,7 +7,7 @@ Created: Sep 19, 2013
 """
 import types
 
-from ce1sus.handlers.generichandler import GenericHandler
+from ce1sus.handlers.attributes.generichandler import GenericHandler
 
 
 __author__ = 'Weber Jean-Paul'

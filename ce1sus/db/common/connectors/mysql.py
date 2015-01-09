@@ -39,6 +39,10 @@ class MySqlSession(SessionObject):
     else:
       return cherrypy.request.db
 
+  def close(self):
+    if self.__session:
+      self.__session.close()
+
 
 class MySqlConnector(Connector):
   """

@@ -5,13 +5,11 @@
 
 Created on Oct 28, 2014
 """
-from _mysql import result
 import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer
 
-from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
@@ -144,6 +142,7 @@ class User(Base):
 
     :returns: Boolean
     """
+    # TODO: Edit cannot change username!
     # TODO: Verify validation of User Object
     if not (self.password or self.username):
       return False

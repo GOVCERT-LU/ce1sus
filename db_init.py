@@ -24,6 +24,7 @@ from ce1sus.db.classes.types import AttributeType
 import ce1sus.db.classes.types
 import ce1sus.db.classes.user
 import ce1sus.db.classes.values
+import ce1sus.db.classes.report
 from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
 from db_data import get_mail_templates, get_users, get_object_definitions

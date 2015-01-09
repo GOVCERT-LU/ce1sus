@@ -5,7 +5,7 @@
 
 Created on Oct 16, 2014
 """
-import json
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Table, Column, ForeignKey
 from sqlalchemy.types import Integer, Unicode, BigInteger, UnicodeText, Boolean
@@ -88,7 +88,8 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'description': self.convert_value(self.description),
               'chksum': self.convert_value(self.chksum),
               'default_share': self.convert_value(self.default_share),
-              'attributes': attribtues
+              'attributes': attribtues,
+              'chksum': self.convert_value(self.chksum),
               }
     else:
       return {'identifier': self.identifier,
@@ -111,8 +112,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   attribute_handler = relationship('AttributeHandler',
                                    primaryjoin='AttributeHandler.identifier==AttributeDefinition.attributehandler_id',
                                    lazy='joined',
-                                   cascade='all',
-                                   order_by='AttributeDefinition.name')
+                                   cascade='all')
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
@@ -202,7 +202,8 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'regex': self.convert_value(self.regex),
               'type_id': self.convert_value(self.value_type_id),
               'default_condition_id': self.convert_value(self.default_condition_id),
-              'objects': objects
+              'objects': objects,
+              'chksum': self.convert_value(self.chksum),
               }
     else:
       return {'identifier': self.identifier,
@@ -215,7 +216,6 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.description = json.get('description', None)
     self.attributehandler_id = json.get('attributehandler_id', None)
     self.table_id = json.get('table_id', None)
-    self.view_type_id = json.get('viewType_id', None)
     self.value_type_id = json.get('type_id', None)
     self.default_condition_id = json.get('default_condition_id', None)
     relation = json.get('relation', False)
@@ -246,7 +246,7 @@ class AttributeHandler(Base):
 
   @property
   def clazz(self):
-    clazz = get_class('ce1sus.handlers.{0}'.format(self.module), self.classname)
+    clazz = get_class('ce1sus.handlers.attributes.{0}'.format(self.module), self.classname)
     return clazz
 
   def create_instance(self):

@@ -30,7 +30,7 @@ app.directive("userForm", function() {
     restrict: "E",
     scope: {
       user: "=user",
-      editMode: "=edit",
+      type: "=type",
       groups: "=groups"
     },
     templateUrl: "pages/common/directives/userform.html",
@@ -332,6 +332,22 @@ app.directive("attributeDefinitionForm", function() {
           $scope.reset=false;
         }
       });
+      
+    }
+  };
+});
+
+app.directive("referenceDefinitionForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      reference: "=reference",
+      type: "=type",
+      handlers: "=handlers"
+    },
+    templateUrl: "pages/common/directives/referencedefinitionform.html",
+    controller: function($scope, $log){
       
     }
   };
@@ -786,6 +802,8 @@ app.directive("objectAttributeForm", function() {
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
 });
+
+
 
 app.directive("attributeHandler", function() {
   

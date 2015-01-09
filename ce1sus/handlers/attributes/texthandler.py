@@ -6,7 +6,7 @@ module handing the generic handler
 Created: Aug 22, 2013
 """
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.generichandler import GenericHandler
+from ce1sus.handlers.attributes.generichandler import GenericHandler
 
 
 __author__ = 'Weber Jean-Paul'
