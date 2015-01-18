@@ -683,6 +683,148 @@ app.directive("object", function($compile) {
   };
 });
 
+app.directive("report", function($compile) {
+  
+  return {
+    restrict: "E",
+    replace: true,
+    transclude: true,
+    scope: {
+      report: "=report",
+      indent: "=indent",
+      permissions: "=permissions"
+    },
+    controller: function($scope, $modal, Restangular, messages, $log, Pagination){
+
+      $scope.pagination = Pagination.getNew(5,'report.references');
+      $scope.pagination.numPages = Math.ceil($scope.report.references.length/$scope.pagination.perPage);
+      $scope.pagination.setPages();
+      
+      $scope.showDetails = function(){
+        $modal({scope: $scope, template: 'pages/events/event/report/details.html', show: true});
+      };
+      $scope.showProperties = function(){
+        $modal({scope: $scope, template: 'pages/events/event/report/edit.html', show: true});
+      };
+      $scope.removeReport = function(){
+        if (confirm('Are you sure you want to delete this report?')) {
+          var remove = false;
+          if ($scope.report.related_reports.length > 0) {
+            remove = confirm('Are you sure you want also it\'s children?');
+          } else {
+            remove = true;
+          }
+          if (remove){
+            restangularReport = Restangular.restangularizeElement(null, $scope.report, 'report');
+            restangularReport.remove().then(function (data) {
+              var index = -1;
+              if ($scope.$parent.report.related_reports.length > 0){
+                index = $scope.$parent.report.related_reports.indexOf($scope.report);
+                $scope.$parent.report.related_reports.splice(index, 1);
+              } else {
+                index = $scope.$parent.$parent.reports.indexOf($scope.report);
+                $scope.$parent.$parent.reports.splice(index, 1);
+              }
+              messages.setMessage({'type':'success','message':'Report sucessfully removed'});
+            }, function (response) {
+              handleError(response, messages);
+            });
+          }
+        }
+      };
+      
+      $scope.removeReference = function(reference){
+        if (confirm('Are you sure you want to delete this reference?')) {
+          restangularReference = Restangular.restangularizeElement(null, reference, 'report/'+$scope.report.identifier+'/reference');
+          restangularReference.remove().then(function (data) {
+            if (data) {
+              var index = $scope.report.references.indexOf(reference);
+              $scope.report.references.splice(index, 1);
+              messages.setMessage({'type':'success','message':'Reference sucessfully removed'});
+            }
+          }, function (response) {
+            handleError(response, messages);
+          });
+
+        }
+      };
+      $scope.showReferenceDetails = function(reference){
+        $scope.referenceDetails = reference;
+        $modal({scope: $scope, template: 'pages/events/event/report/reference/details.html', show: true});
+      };
+      
+      //TODO: edit Reference
+      
+      $scope.addChildReport = function(){
+        $modal({scope: $scope, template: 'pages/events/event/report/addChild.html', show: true});
+      };
+      
+      $scope.appendChildren = function(data){
+        //Note several references can be added
+        references = data.references;
+        angular.forEach(references, function(element) {
+          $scope.report.references.push(element);
+        }, $log);
+
+        related_reports = data.related_reports;
+        angular.forEach(related_reports, function(element) {
+          $scope.report.related_reports.push(element);
+        }, $log);
+      };
+      
+      $scope.addReference = function(){
+        $modal({scope: $scope, template: 'pages/events/event/report/reference/add.html', show: true});
+      };
+      
+      $scope.editReference = function(reference){
+        $scope.referenceDetails = reference;
+        $modal({scope: $scope, template: 'pages/events/event/report/reference/edit.html', show: true});
+      };
+      
+      $scope.appendReference = function(reference){
+        if (!$scope.report.references){
+          $scope.report.references  = [];
+        }
+        $scope.report.references.push(reference);
+      };
+      
+      $scope.updateReference = function(reference){
+        var counter = 0;
+        angular.forEach($scope.report.references, function(item) {
+          if (item.identifier == reference.identifier){
+            $scope.report.references[counter] = reference;
+          }
+          counter++;
+        }, $log);
+      };
+      
+      $scope.getReportTitle = function(report){
+        if (report.title){
+          return report.title + ' - ' + report.identifier; 
+        } else {
+          return 'Report - ' + report.identifier; 
+        }
+      };
+    },
+    templateUrl: "pages/common/directives/reportview.html",
+    compile: function(tElement, tAttr, transclude) {
+      var contents = tElement.contents().remove();
+      var compiledContents;
+      return function(scope, iElement, iAttr) {
+
+          if(!compiledContents) {
+              compiledContents = $compile(contents, transclude);
+          }
+          compiledContents(scope, function(clone, scope) {
+                   iElement.append(clone); 
+          });
+      };
+    }
+  };
+});
+
+
+
 app.directive("menu", function($compile, $timeout) {
   
   return {
@@ -705,7 +847,15 @@ app.directive("menu", function($compile, $timeout) {
               if (observable.object) {
                 return "Observable - "+ observable.object.definition.name;
               } else {
-                return "Observable";
+                if (observable.hasOwnProperty('short_description')) {
+                  if (!observable.title) {
+                    return "Report";
+                  }
+                } else {
+                  return "Observable";
+                }
+                
+                
               }
               
             }
@@ -776,6 +926,23 @@ app.directive("observableObjectForm", function() {
   };
 });
 
+app.directive("eventReportForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      report: "=report",
+      child: "=child",
+      permissions: "=permissions",
+      type: "=type"
+    },
+    controller: function($scope, Restangular, messages){
+
+    },
+    templateUrl: "pages/common/directives/eventreportform.html"
+  };
+});
+
 app.directive("objectAttributeForm", function() {
   
   return {
@@ -803,6 +970,32 @@ app.directive("objectAttributeForm", function() {
   };
 });
 
+app.directive("reportReferenceForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      reportreference: "=reportreference",
+      type: "=type",
+      definitions: '=',
+      permissions: "=permissions",
+      conditions: "=conditions"
+    },
+    controller: function($scope, $log){
+      $scope.getDefinition = function(identifier){
+        var result = {}; 
+        angular.forEach($scope.definitions, function(definition) {
+          if (definition.identifier == identifier){
+            result = definition;
+          }
+        }, $log);
+        return result;
+      };
+      
+    },
+    templateUrl: "pages/common/directives/reportreferenceform.html"
+  };
+});
 
 
 app.directive("attributeHandler", function() {
@@ -827,7 +1020,7 @@ app.directive("attributeHandler", function() {
         var viewType = scope.definition.attributehandler.view_type;
         var baseUrl = 'pages/handlers';
         
-        var templateUrl = baseUrl + '/'+ contentType + '/'+viewType+'.html';
+        var templateUrl = baseUrl + '/attributes/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();
         return templateUrl;
       };
@@ -838,6 +1031,71 @@ app.directive("attributeHandler", function() {
 
       $scope.getData = function() {
           Restangular.one('attributehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
+            $scope.handlerdata = handlerdata;
+          }, function(response) {
+            handleError(response, messages);
+          });
+      };
+
+
+
+      $scope.$watch('definition.regex', function() {
+        $scope.patternexpression = (function() {
+          if ($scope.type != 'view') {
+            var regexp =  new RegExp($scope.definition.regex);
+            return {
+                test: function(value) {
+                    if( $scope.requireVal === false ) {
+                        return true;
+                    }
+                    return regexp.test(value);
+                }
+            };
+          } else {
+            return /^.*$/;
+          }
+        })();
+        
+      });
+
+      $scope.patternexpression = /^.*$/;
+    },
+  };
+});
+
+app.directive("referenceHandler", function() {
+  
+
+  
+  
+  return {
+    restrict: "E",
+    scope: {
+      resource: "=reference",
+      definition: "=definition",
+      type: "=type",
+      form: "=form"
+    },
+    template : '<div ng-include="getTemplate()"></div>',
+    link: function(scope, element, attrs, ctrl) {
+      
+      
+      scope.getTemplate = function(){
+        var contentType =  scope.type;
+        var viewType = scope.definition.reference_handler.view_type;
+        var baseUrl = 'pages/handlers';
+        
+        var templateUrl = baseUrl + '/references/'+ contentType + '/'+viewType+'.html';
+        templateUrl = templateUrl.toLowerCase();
+        return templateUrl;
+      };
+
+    },
+    controller: function($scope, $log, $templateCache, Restangular, messages ){
+      //Resolve additional data
+
+      $scope.getData = function() {
+          Restangular.one('referencehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
             $scope.handlerdata = handlerdata;
           }, function(response) {
             handleError(response, messages);

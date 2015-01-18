@@ -1,0 +1,18 @@
+<div class="modal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$hide()">&times;</button>
+        <h4 class="modal-title">Report Details - {{report.identifier}}</h4>
+      </div>
+      <div class="modal-body">
+        <event-report-form type="'add'" report="report" permissions="permissions" child="false"></event-report-form>
+      </div>
+      <div class="modal-footer">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

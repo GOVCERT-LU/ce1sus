@@ -204,4 +204,4 @@ class ObservableController(BaseController):
     if validated:
       for related_object in related_objects:
         self.insert_object(related_object, user, False)
-      self.object_broker.do_commit(commit)
+    self.object_broker.do_commit(commit)

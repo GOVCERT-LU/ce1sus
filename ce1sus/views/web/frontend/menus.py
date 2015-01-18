@@ -190,44 +190,6 @@ class GuiMenus(BaseView):
   @cherrypy.tools.allow(methods=['GET'])
   @cherrypy.tools.json_out()
   @require()
-  def event_tabs(self):
-    # tabs shown on a single event
-    tabs = list()
-    tab_item = dict()
-    tab_item['icon'] = 'fa-newspaper-o'
-    tab_item['title'] = 'Overview'
-    tab_item['section'] = 'home'
-    tabs.append(tab_item)
-
-    tab_item = dict()
-    tab_item['icon'] = 'fa-newspaper-o'
-    tab_item['title'] = 'Structured Objects'
-    tab_item['section'] = 'home'
-    tabs.append(tab_item)
-
-    tab_item = dict()
-    tab_item['icon'] = 'fa-newspaper-o'
-    tab_item['title'] = 'Flat Objects'
-    tab_item['section'] = 'home'
-    tabs.append(tab_item)
-
-    tab_item = dict()
-    tab_item['icon'] = 'fa-arrows-alt'
-    tab_item['title'] = 'Relations'
-    tab_item['section'] = 'home'
-    tabs.append(tab_item)
-
-    tab_item = dict()
-    tab_item['icon'] = 'fa-group'
-    tab_item['title'] = 'Groups'
-    tab_item['section'] = 'home'
-    tabs.append(tab_item)
-    return tabs
-
-  @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET'])
-  @cherrypy.tools.json_out()
-  @require()
   def event_links(self):
     # links on the left side of the events menu
     links = list()

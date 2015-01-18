@@ -10,11 +10,13 @@ import cherrypy
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
-from ce1sus.db.classes.observables import Observable
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
-from ce1sus.db.classes.group import EventPermissions
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.controllers.events.reports import ReportController
+from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
+from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.classes.observables import Observable
+from ce1sus.db.classes.report import Report
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,6 +31,7 @@ class EventHandler(RestBaseHandler):
     RestBaseHandler.__init__(self, config)
     self.observable_controller = ObservableController(config)
     self.relation_controller = RelationController(config)
+    self.report_controller = ReportController(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -66,6 +69,8 @@ class EventHandler(RestBaseHandler):
           return self.__process_event_group(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'relations':
           return self.__process_event_relations(method, event, requested_object, details, inflated, json)
+        elif requested_object['object_type'] == 'report':
+          return self.__process_event_report(method, event, requested_object, details, inflated, json)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -121,10 +126,12 @@ class EventHandler(RestBaseHandler):
       if method == 'GET':
         return comment.to_dict(details, inflated)
       elif method == 'PUT':
+        self.check_if_event_is_modifiable(event)
         comment.populate(json)
         self.event_controller.update_comment(user, comment)
         return comment.to_dict(details, inflated)
       elif method == 'DELETE':
+        self.check_if_event_is_deletable(event)
         self.event_controller.remove_comment(user, comment)
         return 'Deleted comment'
       else:
@@ -173,6 +180,7 @@ class EventHandler(RestBaseHandler):
         observable_id = requested_object['object_uuid']
         if observable_id:
           observable = self.observable_controller.get_observable_by_id(observable_id)
+          self.check_item_is_viewable(event, observable)
         else:
           raise PathParsingException(u'observale cannot be called without an ID')
         if method == 'PUT':
@@ -195,6 +203,7 @@ class EventHandler(RestBaseHandler):
         # return the given observable
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_id(uuid)
+        self.check_item_is_viewable(event, observable)
         if is_object_viewable(observable, event_permission):
           return observable.to_dict(details, inflated, event_permission)
         else:
@@ -204,7 +213,8 @@ class EventHandler(RestBaseHandler):
         # return all observables from the event
         result = list()
         for observable in event.get_observables_for_permissions(event_permission):
-          result.append(observable.to_dict(details, inflated, event_permission))
+          if self.is_item_viewable(event, observable):
+            result.append(observable.to_dict(details, inflated, event_permission))
 
         return result
     except ControllerException as error:
@@ -218,6 +228,7 @@ class EventHandler(RestBaseHandler):
     elif method == 'PUT':
       raise RestHandlerException('Operation not supported')
     elif method == 'DELETE':
+      self.check_if_event_is_deletable(event)
       self.event_controller.remove_event(self.get_user(), event)
 
   def __process_composed_observable_get(self, requested_object, details, inflated):
@@ -277,6 +288,7 @@ class EventHandler(RestBaseHandler):
         raise RestHandlerException(u'Cannot add group as no group was provided')
 
     elif method == 'PUT':
+      self.check_if_event_is_modifiable(event)
       uuid = requested_object.get('object_uuid', None)
       if uuid:
         # get permissions
@@ -342,6 +354,40 @@ class EventHandler(RestBaseHandler):
       pass
     else:
       raise RestHandlerException('Operation not supported')
+
+  def __process_event_report(self, method, event, requested_object, details, inflated, json):
+
+    user = self.get_user()
+    if method == 'GET':
+      event_permission = self.get_event_user_permissions(event, user)
+      uuid = requested_object['object_uuid']
+      if uuid:
+        # return the given observable
+        # TODO: Check if observable belongs to event
+        report = self.report_controller.get_report_by_id(uuid)
+        self.check_item_is_viewable(event, report)
+        if is_object_viewable(report, event_permission):
+          return report.to_dict(details, inflated, event_permission)
+        else:
+          raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
+
+      else:
+        # return all observables from the event
+        result = list()
+        for report in event.get_reports_for_permissions(event_permission):
+          result.append(report.to_dict(details, inflated, event_permission))
+        return result
+    if method == 'POST':
+      self.check_if_user_can_add(event)
+      report = Report()
+      report.populate(json)
+      report.event_id = event.identifier
+      self.report_controller.insert_report(report, user)
+      return report.to_dict(details, inflated)
+    else:
+      raise RestHandlerException('Operation not supported')
+    return list()
+
   """
   @rest_method()
   @methods(allowed=['GET'])

@@ -1,0 +1,20 @@
+<div class="modal" role="dialog" ng-controller="reportReferenceAddController">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="closeModal()">&times;</button>
+        <h4 class="modal-title">Add Report Reference</h4>
+      </div>
+      <div class="modal-body">
+        <report-reference-form reportreference="reference" type="'add'" definitions="definitions" permissions="permissions"></report-reference-form>
+      </div>
+      <div class="modal-footer">
+          <div class="btn-group">
+            <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!referenceChanged() || addReportReferenceForm.$invalid" ng-click="submitReference()">Save</button>
+            <button name="reset" type="button" class="btn btn-default" ng-click="resetReference()">Reset</button>
+            <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,7 +7,8 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner
+from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, \
+  is_object_viewable, get_item_view_message
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.helpers.common.debug import Log
@@ -185,6 +186,29 @@ class BaseView(object):
   def check_if_event_is_viewable(self, event):
     self.check_permission(event, 'can_view')
 
+  def is_item_viewable(self, event, item):
+    user = self.get_user()
+    if self.is_event_owner(event, user):
+      return True
+    else:
+      permissions = self.get_event_user_permissions(event, user)
+      if is_object_viewable(item, permissions):
+        return True
+      else:
+        return False
+
+  def check_item_is_viewable(self, event, item):
+    user = self.get_user()
+    result = self.is_item_viewable(event, item)
+    # if the result is still not set throw an error
+    log_msg = get_item_view_message(result, event.identifier, item.identifier, user.username, 'can_view')
+    # update cache
+    self.logger.info(log_msg)
+    if result:
+      return result
+    else:
+      raise Exception(u'Unknown error occurred during event checks')
+
   def check_if_event_is_modifiable(self, event):
     self.check_permission(event, 'can_modify')
 
@@ -274,9 +298,13 @@ class BaseView(object):
           return permissions
 
       if permissions is None:
-        # either there was no cache or the event was not inside the cache perform checks
-        permissions = self.event_controller.get_event_user_permissions(event, user)
-        # put result in the cache if there is one
+        if self.is_event_owner(event, user):
+          permissions = EventPermissions('0')
+          permissions.set_all()
+        else:
+          # either there was no cache or the event was not inside the cache perform checks
+          permissions = self.event_controller.get_event_user_permissions(event, user)
+          # put result in the cache if there is one
         cache[event.identifier] = permissions
         # perform checks
     else:

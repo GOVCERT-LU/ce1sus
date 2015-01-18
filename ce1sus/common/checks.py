@@ -68,6 +68,13 @@ def get_view_message(result, event_id, username, permission):
     return 'User "{1}" is not allowed perform action "{2}" on event "{0}"'.format(event_id, username, permission)
 
 
+def get_item_view_message(result, event_id, item_id, username, permission):
+  if result:
+    return 'User "{1}" can perform action "{2}" on event "{0}" for item {3}'.format(event_id, username, permission, item_id)
+  else:
+    return 'User "{1}" is not allowed perform action "{2}" on event "{0}" for item {3}'.format(event_id, username, permission, item_id)
+
+
 def can_user_download(event, user, cache=None):
   """
   Returns true if the user can download from the event

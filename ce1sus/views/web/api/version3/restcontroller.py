@@ -32,6 +32,7 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -74,7 +75,7 @@ class RestController(BaseView):
     self.instances['search'] = SearchHandler(config)
     self.instances['referencehandlers'] = ReferenceHandlerHandler(config)
     self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
-
+    self.instances['report'] = ReportHandler(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):
@@ -153,7 +154,7 @@ class RestController(BaseView):
         method_name = RestController.find_default_method_name(handler_instance, handler)
 
       if not method_name:
-        raise cherrypy.HTTPError('Handler {0} has no default method'.format(handler_instance.name))
+        raise RestHandlerException('Handler {0} has no default method'.format(handler_instance.name))
 
       http_method = cherrypy.request.method
 

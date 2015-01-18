@@ -62,7 +62,8 @@ class HandlerHandler(RestBaseHandler):
           handler = definition.handler
           handler.user = self.get_user()
           method = path.pop(0)
-          if method == 'GET':
+          # has nothing to do with the http method which is in capital
+          if method == 'get':
             if len(path) > 0:
               attr_uuid = path.pop(0)
               if valid_uuid(attr_uuid):
@@ -108,7 +109,8 @@ class ReferenceHandlerHandler(RestBaseHandler):
           handler = definition.handler
           handler.user = self.get_user()
           method = path.pop(0)
-          if method == 'GET':
+          # has nothing to do with the http method which is in capital
+          if method == 'get':
             if len(path) > 0:
               attr_uuid = path.pop(0)
               if valid_uuid(attr_uuid):

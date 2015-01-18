@@ -45,6 +45,10 @@ class HandlerBase(object):
     self.oject_definitions = dict()
     self.user = None
 
+  @property
+  def reference_definitions(self):
+    return self.attribute_definitions
+
   def get_config_value(self, key, default_value=None):
     return self.__config.get(self.__class__.__name__, key.lower(), default_value)
 
@@ -69,6 +73,9 @@ class HandlerBase(object):
   def get_additional_object_chksums(self):
     raise HandlerException(('get_additional_object_chksums not defined for {0}').format(self.__class__.__name__))
 
+  def get_additinal_reference_chksums(self):
+    raise HandlerException(('get_additinal_reference_chksums not defined for {0}').format(self.__class__.__name__))
+
   def get_attriute_definition(self, chksum):
     definition = self.attribute_definitions.get(chksum, None)
     if definition:
@@ -87,7 +94,7 @@ class HandlerBase(object):
     """
     Returns the definition using this handler
     """
-    chksums = self.get_additinal_attribute_chksums() + self.get_additional_object_chksums()
+    chksums = self.get_additinal_attribute_chksums()
     diff = list(set(self.attribute_definitions.keys()) - set(chksums))
     if len(diff) == 1:
       main_definition = self.attribute_definitions.get(diff[0], None)
@@ -169,6 +176,23 @@ class HandlerBase(object):
     attribute.definition_id = definition.identifier
 
     return attribute
+
+  def create_reference(self, report, definition, user, json):
+    reference = get_class('ce1sus.db.classes.report', 'Reference')()
+    # Note first the definition has to be specified else the value cannot be assigned
+    reference.definition = definition
+
+    # Note second the object has to be specified
+    reference.report = report
+    reference.report_id = report.identifier
+    # TODO create default value if value was not set for IOC and share
+
+    # set remaining stuff
+    reference.populate(json)
+    # set the definition id as in the definition as it might get overwritten
+    reference.definition_id = definition.identifier
+
+    return reference
 
   @staticmethod
   def create_object(parent, definition, user, json):

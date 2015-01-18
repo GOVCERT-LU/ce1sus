@@ -6,8 +6,8 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Unicode, Integer, UnicodeText
+from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
+from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
@@ -16,6 +16,7 @@ from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.report import Report
 
 
 __author__ = 'Weber Jean-Paul'
@@ -74,6 +75,7 @@ class Event(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
+  reports = relationship('Report', lazy='dynamic')
 
   @property
   def properties(self):
@@ -183,6 +185,17 @@ class Event(ExtendedLogingInformations, Base):
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
 
+  def get_reports_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.reports.all()
+      else:
+        # count validated ones
+        return self.reports.filter(Report.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.reports.filter(Report.dbcode.op('&')(3) == 3).all()
+
   def observables_count_for_permissions(self, event_permissions):
     if event_permissions:
       if event_permissions.can_validate:
@@ -194,6 +207,17 @@ class Event(ExtendedLogingInformations, Base):
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
 
+  def reports_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.reports.count()
+      else:
+        # count validated ones
+        return self.reports.filter(Report.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.reports.filter(Report.dbcode.op('&')(3) == 3).count()
+
   def to_dict(self, complete=True, inflated=False, event_permissions=None, owner=False):
     if inflated:
       observables = list()
@@ -201,9 +225,18 @@ class Event(ExtendedLogingInformations, Base):
         observables.append(observable.to_dict(complete, inflated, event_permissions))
 
       observables_count = len(observables)
+
+      reports = list()
+      for report in self.get_reports_for_user(event_permissions):
+        reports.append(report.to_dict(complete, inflated, event_permissions))
+
+      reports_count = len(reports)
+
     else:
       observables = None
       observables_count = self.observables_count_for_permissions(event_permissions)
+      reports = None
+      reports_count = self.reports_count_for_permissions(event_permissions)
 
     if complete:
       comments = list()
@@ -247,6 +280,8 @@ class Event(ExtendedLogingInformations, Base):
                 'last_seen': self.convert_value(None),
                 'observables': observables,
                 'observables_count': observables_count,
+                'reports': reports,
+                'reports_count': reports_count,
                 'risk': self.convert_value(self.risk),
                 'status': self.convert_value(self.status),
                 'tlp': self.convert_value(self.tlp),

@@ -8,9 +8,10 @@ Created on Feb 21, 2014
 
 
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound
 
 from ce1sus.db.classes.report import ReferenceDefinition, ReferenceHandler
-from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
+from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -42,3 +43,27 @@ class ReferenceDefintionsBroker(BrokerBase):
 
   def get_broker_class(self):
     return ReferenceDefinition
+
+  def get_defintion_by_chksums(self, chksums):
+    """
+    Returns the attribute definition object with the given name
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :param identifier: the id of the requested user object
+    :type identifier: integer
+
+    :returns: Object
+    """
+    try:
+      definitions = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(), 'chksum').in_(chksums)).all()
+      if definitions:
+        return definitions
+      else:
+        return list()
+    except NoResultFound:
+      raise NothingFoundException(u'No {0} not found for CHKSUMS {1}'.format(self.get_broker_class().__class__.__name__,
+                                                                             chksums))
+    except SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

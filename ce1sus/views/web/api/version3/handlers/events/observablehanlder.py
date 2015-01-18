@@ -63,8 +63,9 @@ class ObservableHandler(RestBaseHandler):
     if method == 'POST':
       raise RestHandlerException('Recurive observables are currently not supported')
     else:
+      self.check_item_is_viewable(event, observable)
       if method == 'GET':
-        self.check_if_event_is_viewable(event)
+
         return observable.to_dict(details, inflated)
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
@@ -94,11 +95,11 @@ class ObservableHandler(RestBaseHandler):
       uuid = requested_object['object_uuid']
       if uuid:
         obj = self.observable_controller.get_object_by_id(uuid)
+        self.check_item_is_viewable(event, obj)
       else:
         if not flat:
           raise PathParsingException(u'object cannot be called without an ID')
       if method == 'GET':
-        self.check_if_event_is_viewable(event)
         if flat:
           result = list()
           flat_objects = self.observable_controller.get_flat_observable_objects(observable)

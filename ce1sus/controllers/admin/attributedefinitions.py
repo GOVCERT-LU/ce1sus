@@ -172,3 +172,9 @@ class AttributeDefinitionController(BaseController):
       self.handler_broker.remove_by_id(identifier)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_defintion_by_chksums(self, chksums):
+    try:
+      return self.attr_def_broker.get_defintion_by_chksums(chksums)
+    except BrokerException as error:
+      raise ControllerException(error)

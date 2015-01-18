@@ -1,0 +1,48 @@
+<form name="addEventReportForm" class="form-horizontal" role="form" novalidate>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Identifier</label>
+    <div class="col-lg-9">
+      <input class="form-control" name="identifier"
+        ng-model="report.identifier" type="text" disabled>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Title</label>
+    <div class="col-lg-9"">
+      <div
+        ng-class="{ 'has-error' : addEventReportForm.title.$invalid && !addEventReportForm.title.$pristine }">
+        <input class="form-control" name="title" ng-model="report.title"
+          type="text" ng-minlength=3 ng-maxlength=255>
+        <p ng-show="addEventReportForm.title.$error.minlength"
+          class="help-block">Title is too short.</p>
+        <p ng-show="addEventReportForm.title.$error.maxlength"
+          class="help-block">Title is too long.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Short Description</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addEventReportForm.short_description.$invalid && !addEventReportForm.short_description.$pristine }">
+        <textarea name="short_description" ng-model="report.short_description"
+          cols=48 rows=10 ng-minlength=3></textarea>
+        <p ng-show="addEventReportForm.short_description.$error.minlength"
+          class="help-block">Short Description is too short.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Description</label>
+    <div class="col-lg-9">
+      <div
+        ng-class="{ 'has-error' : addEventReportForm.description.$invalid && !addEventReportForm.description.$pristine }">
+        <textarea name="description" ng-model="report.description"
+          cols=48 rows=20 ng-minlength=3></textarea>
+        <p ng-show="addEventReportForm.description.$error.minlength"
+          class="help-block">Description is too short.</p>
+      </div>
+    </div>
+  </div>
+  <object-properties-form object="report" type="type" permissions="permissions"></object-properties-form>
+</form>

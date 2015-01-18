@@ -27,20 +27,26 @@ class GenericHandler(HandlerBase):
   def get_description():
     return u'Generic Handler, usable for a single line entry'
 
-  def insert(self, obj, user, json):
+  def insert(self, report, user, json):
     definition = self.get_main_definition()
-    attribute = self.create_attribute(obj, definition, user, json)
-    return attribute, None, None
+    reference = self.create_reference(report, definition, user, json)
+    return reference, None, None
 
-  def get_data(self, attribute, parameters):
+  def get_data(self, reference, parameters):
     return list()
 
   def get_view_type(self):
     return 'plain'
 
-  def update(self, attribute, user, json):
-    attribute.populate(json)
-    return attribute
+  def update(self, reference, user, json):
+    reference.populate(json)
+    return reference
 
   def require_js(self):
     return False
+
+  def get_additinal_reference_chksums(self):
+    return list()
+
+  def get_additinal_attribute_chksums(self):
+    return self.get_additinal_reference_chksums()

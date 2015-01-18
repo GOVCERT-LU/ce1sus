@@ -1,0 +1,16 @@
+
+<form name="addAddReportReferenceForm" class="form-horizontal" role="form" novalidate>
+  <div class="row">
+    <label class="col-lg-3"><b>Definition *</b></label>
+    <div class="col-lg-9">
+      <select name="definition_id" class="form-control"
+        ng-options="definition.identifier as definition.name for definition in definitions"
+        ng-model="reportreference.definition_id" ng-change="changeTemplate()" ng-disabled="type!='add'">
+        <option style="display: none" value="">Select a definition</option>
+      </select>
+    </div>
+  </div>
+  <div ng-if="reportreference.definition_id">
+    <reference-handler reference="reportreference" definition="getDefinition(reportreference.definition_id)" type="type" form="addAddReportReferenceForm"></reference-handler> 
+  </div>
+</form>

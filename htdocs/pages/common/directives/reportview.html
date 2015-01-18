@@ -1,0 +1,99 @@
+<div bs-collapse ng-transclude>
+  <div class="panel panel-default"
+    style="position: relative; left: {{20*indent}}px; width:calc(100% - {{20*indent}}px);" >
+    <div class="collapse-header" ng-class=" {'unvalidated' : !report.properties.validated && !report.properties.proposal, 'proposal': report.properties.proposal && !report.properties.validated, 'panel-heading':  report.properties.validated}">
+      <div class="row">
+        <div class="col-sm-7">
+          <h4 class="panel-title">
+            <a class="hand" bs-collapse-toggle> {{getReportTitle(report)}}</a>
+          </h4>
+        </div>
+        <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!report.properties.shared"></div>
+        <div class="col-sm-4">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary ce1sus-btn" ng-click="addReference()" ng-show="permissions.add || permission.propose"> <span
+              class="glyphicon glyphicon-plus-sign"></span>
+            </button> 
+            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildReport()" ng-show="permissions.add || permission.propose"> <span
+              class="glyphicon glyphicon-download"></span>
+            </button> 
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="showProperties()" ng-show="permissions.modify"> <span
+              class="glyphicon glyphicon-pencil"></span>
+            </button> 
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="showDetails()"> <span
+              class="glyphicon glyphicon-eye-open"></span>
+            </button> 
+            <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeReport()" ng-show="permissions.delete"> <span
+              class="glyphicon glyphicon-remove-circle" title="delete"></span>
+            </button>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-collapse collapse" bs-collapse-target>
+      <div class="collapse-body" style="padding-right:0;padding-left:0;padding-bottom:0">
+        <table ng-if="report.references.length > 0" class="table-striped table-bordered table-hover table-condensed">
+          <thead>
+            <tr>
+              <th width="2%">S</th>
+              <th width="16%">Type</th>
+              <th width="72%">Value</th>
+              <th width="10%">Options</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="reference in report.references | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage" >
+              <td ng-if="reference.properties.proposal && !reference.properties.validated" style="background-color: yellow;">
+                <span ng-if="reference.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!reference.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="!reference.properties.proposal && !reference.properties.validated" style="background-color: red;">
+                <span ng-if="reference.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!reference.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="reference.properties.proposal && reference.properties.validated">
+                <span ng-if="reference.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!reference.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td ng-if="!reference.properties.proposal && reference.properties.validated">
+                <span ng-if="reference.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="!reference.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </td>
+              <td>{{reference.definition.name}}</td>
+              <td>
+                <reference-handler reference="reference" definition="reference.definition" type="'view'"></reference-handler>
+              </td>
+              <td>
+                <a class="hand" ng-click="showReferenceDetails(reference)"><span class="glyphicon glyphicon-eye-open"></span></a>
+                <a class="hand" ng-click="editReference(reference)"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify"></span></a>
+                <a class="hand red" ng-click="removeReference(reference)" ng-show="permissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ul class="pagination" ng-if="1 < pagination.numPages">
+          <li ng-class="{ disabled : pagination.page == 0 }">
+            <a href="" ng-click="pagination.toPageId(0)">&laquo;</a>
+          </li>
+          <li ng-class="{ disabled : pagination.page == 0 }">
+            <a href="" ng-click="pagination.prevPage()">&lsaquo;</a>
+          </li>
+          <li ng-repeat="pageNumber in pagination.pages track by $index" ng-class="{ active : pageNumber-1 == pagination.page, disabled : pageNumber == '...' }">
+            <a href="" ng-click="pagination.toPageId(pageNumber-1)">{{ pageNumber }}</a>
+          </li>
+          <li ng-class="{ disabled : pagination.page == pagination.numPages-1}">
+            <a href="" ng-click="pagination.nextPage()">&rsaquo;</a>
+          </li>
+          <li ng-class="{ disabled : pagination.page == pagination.numPages-1 }">
+            <a href="" ng-click="pagination.toPageId(pagination.numPages-1)">&raquo;</a>
+          </li>
+        </ul>
+        <div ng-if="report.related_reports" style="height:5px"></div>
+        <span ng-if="report.related_reports" ng-repeat="childReport in report.related_reports">
+          <report report="childReport" indent="1" permissions="permissions"></report>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+

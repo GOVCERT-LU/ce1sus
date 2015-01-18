@@ -1,0 +1,19 @@
+<div class="row bs-docs-container">
+  <div class="col-md-3 hidden-sm hidden-xs">
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary" data-template="pages/events/event/report/add.html" bs-modal="modal" ng-show="event.userpermissions.add || event.userpermissions.propose">Add new Report</button>
+    </div>
+    <div style="height: 15px"></div>
+    <legend>Reports</legend>
+      <div>
+        <div class="bs-sidebar hidden-print" role="complementary"  data-offset-top="-5" bs-affix>
+          <menu items="reports" first="'bs-sidenav'" limit="1000"></menu>
+        </div>
+      </div>
+  </div>
+  <div class="col-md-9">
+    <span ng-repeat="report in reports">
+      <report report="report" indent="0" permissions="permissions"></report>
+    </span>
+  </div>
+</div>

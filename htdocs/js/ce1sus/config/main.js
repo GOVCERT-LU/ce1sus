@@ -44,6 +44,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/events/event/:id/observables", "main.layout.events.event.observables")
         .when("/events/event/:id/indicators", "main.layout.events.event.indicators")
         .when("/events/event/:id/relations", "main.layout.events.event.relations")
+        .when("/events/event/:id/reports", "main.layout.events.event.reports")
         .when("/events/event/:id/groups", "main.layout.events.event.groups")
         .when("/admin", "main.layout.admin")
         .when("/admin/validation", "main.layout.admin.validation")
@@ -284,6 +285,28 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           })
                           .segment("indicators", {
                             templateUrl: "pages/events/event/indicators.html",
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("reports", {
+                            templateUrl: "pages/events/event/reports.html",
+                            controller: 'eventReportController',
+                            resolve: {
+                              reports: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('report').getList({"complete": true, 'inflated':true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
                             dependencies: ["id"],
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html',
@@ -621,6 +644,28 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             resolve: {
                               observables: function(Restangular,$routeSegment) {
                                 return Restangular.one("event",$routeSegment.$routeParams.id).all('observable').getList({"complete": true, "inflated": true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            dependencies: ["id"],
+                            untilResolved: {
+                              templateUrl: 'pages/common/loading.html',
+                              controller: 'loadingController'
+                            },
+                            resolveFailed: {
+                              templateUrl: 'pages/common/error.html',
+                              controller: 'errorController'
+                            }
+                          })
+                          .segment("reports", {
+                            templateUrl: "pages/events/event/reports.html",
+                            controller: 'eventReportController',
+                            resolve: {
+                              reports: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all('report').getList({"complete": true}).then(function (data) {
                                   return data;
                                 }, function(response) {
                                     throw generateErrorMessage(response);

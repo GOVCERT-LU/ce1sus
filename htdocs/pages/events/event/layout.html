@@ -5,6 +5,8 @@
     href="#/events/event/{{event.identifier}}/observables">Observables</a></li>
   <li ng-class="{active: $routeSegment.contains('relations')}"><a
     href="#/events/event/{{event.identifier}}/relations">Relations</a></li>
+  <li ng-class="{active: $routeSegment.contains('reports')}"><a
+    href="#/events/event/{{event.identifier}}/reports">Reports</a></li>
   <li ng-class="{active: $routeSegment.contains('groups')}" ng-show="event.userpermissions.set_groups"><a
     href="#/events/event/{{event.identifier}}/groups">Groups</a></li>
   <li style="float: right;">

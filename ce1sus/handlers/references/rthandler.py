@@ -35,10 +35,10 @@ class RTHandler(GenericHandler):
   def get_description():
     return u'Handler for RT Tickets'
 
-  def insert(self, obj, user, json):
+  def insert(self, report, user, json):
     definition = self.get_main_definition()
-    attribute = self.create_attribute(obj, definition, user, json)
-    return attribute, None, None
+    reference = self.create_reference(report, definition, user, json)
+    return reference, None, None
 
   def __convert_ticket_to_dict(self, ticket):
     return {'identifier': ticket.identifier,
@@ -46,7 +46,7 @@ class RTHandler(GenericHandler):
             'url': ticket.url
             }
 
-  def get_data(self, attr_uuid, definition, parameters):
+  def get_data(self, reference_uuid, definition, parameters):
     type_ = parameters.get('type', 'view')
     if type_ == 'view':
       return self.rt_system.get_base_ticket_url()

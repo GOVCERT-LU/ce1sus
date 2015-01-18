@@ -57,7 +57,7 @@ class Sighting(ExtendedLogingInformations, Base):
   timestamp_precision = Column('timestamp_precision', Unicode(40))
   description = Column('description', UnicodeText)
   confidence = Column('confidence', Unicode(5), default=u'HIGH', nullable=False)
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
   @property
@@ -81,7 +81,7 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
   start_time = Column('start_time', DateTime, nullable=False)
   end_time = Column('end_time', DateTime, nullable=False)
   indicator_id = Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
   @property
@@ -116,7 +116,7 @@ class Indicator(ExtendedLogingInformations, Base):
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*
   # TODO add related indicators and TTP
-  dbcode = Column('code', Integer)
+  dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
   @property

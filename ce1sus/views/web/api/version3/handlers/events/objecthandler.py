@@ -61,14 +61,15 @@ class ObjectHandler(RestBaseHandler):
       json = args.get('json')
       # get the event
       object_id = requested_object.get('event_id')
-      obj = self.observable_controller.get_object_by_id(object_id)
-      event = self.observable_controller.get_event_for_obj(obj)
       if object_id:
+        obj = self.observable_controller.get_object_by_id(object_id)
+        event = self.observable_controller.get_event_for_obj(obj)
+        self.check_if_event_is_viewable(event)
         if requested_object['object_type'] is None:
           # return the event
 
           # check if event is viewable by the current user
-          self.check_if_event_is_viewable(event)
+
           return self.__process_object(method, event, obj, details, inflated, json)
 
         elif requested_object['object_type'] == 'object':
@@ -91,11 +92,13 @@ class ObjectHandler(RestBaseHandler):
       if method == 'POST':
         raise RestHandlerException('Please use observable/{uuid}/instead')
       else:
+        event_permissions = self.get_event_user_permissions(event, self.get_user())
         if method == 'GET':
-          self.check_if_event_is_viewable(event)
-          return obj.to_dict(details, inflated)
+          self.check_item_is_viewable(event, obj)
+          return obj.to_dict(details, inflated, event_permissions)
         elif method == 'PUT':
           self.check_if_event_is_modifiable(event)
+          self.check_item_is_viewable(event, obj)
           self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
@@ -112,9 +115,10 @@ class ObjectHandler(RestBaseHandler):
 
           obj.populate(json)
           self.observable_controller.update_object(obj, user, True)
-          return obj.to_dict(details, inflated)
+          return obj.to_dict(details, inflated, event_permissions)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
+          self.check_item_is_viewable(event, obj)
           self.observable_controller.remove_object(obj, user, True)
           return 'Deleted object'
     except ValueException as error:
@@ -123,6 +127,7 @@ class ObjectHandler(RestBaseHandler):
   def __process_child_object(self, method, event, obj, requested_object, details, inflated, json):
     user = self.get_user()
     if method == 'POST':
+      self.check_if_user_can_add(event)
       child_obj = Object()
       child_obj.populate(json)
       child_obj.observable_id = obj.observable_id
@@ -148,7 +153,7 @@ class ObjectHandler(RestBaseHandler):
     handler_instance.attribute_definitions[definition.chksum] = definition
 
     # Check if the handler requires additional attribute definitions
-    additional_attr_defs_chksums = handler_instance.get_additional_object_chksums()
+    additional_attr_defs_chksums = handler_instance.get_additinal_attribute_chksums()
 
     if additional_attr_defs_chksums:
       additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
@@ -182,7 +187,7 @@ class ObjectHandler(RestBaseHandler):
         # TODO also check if there are no children attached
         if True:
           self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
-          self.observable_controller.insert_handler_objects(related_objects, user, False, self.is_event_owner(event, user))
+          self.observable_controller.insert_handler_objects(related_objects, user, True, self.is_event_owner(event, user))
         else:
           raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
 
@@ -199,7 +204,7 @@ class ObjectHandler(RestBaseHandler):
             result_attriutes.append(additional_attribute.to_dict(details, inflated))
 
         result_objects = list()
-        if result_objects:
+        if related_objects:
           for related_object in related_objects:
             # make the attributes of the related object flat
             flat_attriutes = flat_attriutes + self.relations_controller.make_object_attributes_flat(related_object)
@@ -217,17 +222,19 @@ class ObjectHandler(RestBaseHandler):
         if method == 'GET':
           if uuid:
             attribute = self.attribute_controller.get_attribute_by_id(uuid)
-            self.check_if_event_is_viewable(event)
+            self.check_item_is_viewable(event, attribute)
             return attribute.to_dict(details, inflated)
           else:
             result = list()
             for attribute in obj.attributes:
-              result.append(attribute.to_dict(details, inflated))
+              if self.is_item_viewable(event, attribute):
+                result.append(attribute.to_dict(details, inflated))
             return result
         else:
           attribute = self.attribute_controller.get_attribute_by_id(uuid)
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
+            self.check_item_is_viewable(event, attribute)
             definition_id = json.get('definition_id', None)
             if definition_id:
               # check if it still is the same
@@ -245,6 +252,7 @@ class ObjectHandler(RestBaseHandler):
             return attribute.to_dict(details, inflated)
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)
+            self.check_item_is_viewable(event, attribute)
             self.attribute_controller.remove_attribute(attribute, user, True)
             return 'Deleted object'
 
