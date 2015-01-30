@@ -141,8 +141,9 @@ class BrokerBase(object):
     try:
       result = self.session.query(self.get_broker_class())
       if order is None:
-        colname = u'{0}.{1}'.format(self.get_broker_class().identifier.expression.table.fullname, self.get_broker_class().identifier.expression.key)
-        result = result.order_by(colname)
+        # colname = u'{0}.{1}'.format(self.get_broker_class().identifier.expression.table.fullname, self.get_broker_class().identifier.expression.key)
+        # result = result.order_by(colname)
+        pass
       else:
         result = result.order_by(order)
       return result.all()
