@@ -189,12 +189,16 @@ class Properties(BitBase):
   [1] : Is sharable - On event lvl it has the same meaning as published
   [2] : Is proposal
   """
+  # 1
+  WEB_INSERT = 0
+  # 2
+  REST_INSERT = 1
   # 4
-  VALIDATED = 0
+  VALIDATED = 2
   # 8
-  SHARABLE = 1
+  SHARABLE = 3
   # 16
-  PROPOSAL = 2
+  PROPOSAL = 4
 
   @property
   def is_proposal(self):

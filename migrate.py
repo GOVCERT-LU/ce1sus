@@ -66,6 +66,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 notmapped = None
+seen_attribute_ids = list()
 
 
 def map_group(line, groups, owner):
@@ -174,7 +175,12 @@ def map_attribute(line, attr_defs, users, obj, owner, conditions):
       return None
 
   attribute = Attribute()
-  attribute.identifier = line['uuid']
+  id_ = line['uuid']
+  if id_ in seen_attribute_ids:
+    id_ = uuid4()
+
+  seen_attribute_ids.append(id_)
+  attribute.identifier = id_
   attribute.dbcode = line['dbcode']
   attribute_id_uuid[line['identifier']] = attribute
   attribute.creator_group = groups[line['creator_group_id']]
@@ -228,7 +234,7 @@ def map_attribute(line, attr_defs, users, obj, owner, conditions):
     atribute = map_attribute(line, attr_defs, users, obj, owner, conditions)
     obj.attributes.append(atribute)
 
-  logger.info('Created attribute {0}'.format(attribute))
+  logger.debug('Created attribute {0}'.format(attribute))
   return attribute
 
 
@@ -238,7 +244,7 @@ def create_related_obj(parent, child):
   related_obj.parent_id = related_obj.parent.identifier
   related_obj.object = child
   related_obj.child_id = related_obj.object.identifier
-  logger.info('Created related object {0}'.format(related_obj))
+  logger.debug('Created related object {0}'.format(related_obj))
   return related_obj
 
 
@@ -257,7 +263,7 @@ def create_related_observable(parent, child):
   related_observable.originating_group = related_observable.creator_group
   related_observable.originating_group_id = related_observable.creator_group.identifier
 
-  logger.info('Created related observable {0}'.format(related_observable))
+  logger.debug('Created related observable {0}'.format(related_observable))
   return related_observable
 
 seen_objects = list()
@@ -321,7 +327,7 @@ def map_cybox(line, users, groups, owner, attr_defs, obj_defs, observable, event
     attribtue = map_attribute(attribute_line, attr_defs, users, raw_artifact, owner, conditions)
     raw_artifact.attributes.append(attribtue)
     # set the type
-    attribute_line['uuid'] = uuid4()
+    attribute_line['uuid'] = u'{0}'.format(uuid4())
     attribute_line['definition']['name'] = 'artifact_type'
     attribute_line['value'] = 'Network Traffic'
     attribtue = map_attribute(attribute_line, attr_defs, users, raw_artifact, owner, conditions)
@@ -454,17 +460,20 @@ def map_cybox(line, users, groups, owner, attr_defs, obj_defs, observable, event
           related_object = create_related_obj(obj, mapped)
           obj.related_objects.append(related_object)
         pass
-  logger.info('Created object {0}'.format(obj))
+  logger.debug('Created object {0}'.format(obj))
   return obj
 
 
 def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event, conditions):
   observable = make_observable(line, groups, users, event)
   observable.title = 'Malicious website'
+  observable.identifier = line['uuid']
 
   composed_attribute = ObservableComposition()
   composed_attribute.identifier = uuid4()
   composed_attribute.dbcode = line['dbcode']
+  composed_attribute.parent_id = observable.identifier
+  composed_attribute.parent = observable
 
   attributes = line['attributes']
   for attribtue in attributes:
@@ -684,8 +693,11 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
   result_observable.identifier = uuid4()
 
   composed_attribute = ObservableComposition()
-  composed_attribute.identifier = line['uuid']
+  composed_attribute.identifier = uuid4()
   composed_attribute.dbcode = line['dbcode']
+  composed_attribute.parent_id = result_observable.identifier
+  composed_attribute.parent = result_observable
+
   report = None
   for attribute in mal_email:
     name = attribute['definition']['name']
@@ -811,6 +823,7 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
     else:
       raise Exception('Mapping for {0} is not defined'.format(name))
 
+  result_observable.observable_composition = composed_attribute
   return result_observable
 
 
@@ -940,6 +953,8 @@ def map_object(parent, line, users, groups, owner, event, attr_defs, obj_defs, c
     composed_attribute = ObservableComposition()
     composed_attribute.uuid = line['uuid']
     composed_attribute.dbcode = line['dbcode']
+    composed_attribute.parent_id = result_observable.identifier
+    composed_attribute.parent = result_observable
 
     attributes = line['attributes']
     # create for each a single entry
@@ -959,7 +974,8 @@ def map_object(parent, line, users, groups, owner, event, attr_defs, obj_defs, c
 
     result = map_ioc_records(line, users, groups, owner, attr_defs, obj_defs, None, event, conditions)
     if result:
-      return result
+      for obs in result:
+        event.observables.append(obs)
 
     # -> composed observable
   elif definition['name'] == 'malicious_website':
@@ -991,6 +1007,7 @@ def make_reference(attribute, users, groups, report, resources):
   reference.creator_group_id = reference.creator_group.identifier
   reference.creator = users[attribute['creator_id']]
   reference.creator_id = reference.creator.identifier
+  reference.dbcode = attribute['dbcode']
   modifier_id = attribute.get('modifier_id')
   if modifier_id:
     reference.modifier = users[modifier_id]
@@ -1024,6 +1041,8 @@ def make_report(line, users, groups, owner, event):
   report.creator_group_id = report.creator_group.identifier
   report.creator = users[line['creator_id']]
   report.creator_id = report.creator.identifier
+  report.dbcode = line['dbcode']
+
   modifier_id = line['modifier_id']
   if modifier_id:
     report.modifier = users[modifier_id]
@@ -1087,6 +1106,7 @@ def map_event(line, users, groups, attr_defs, obj_defs, conditions, ressources):
   event.title = line['title']
   event.modifier = users[line['modifier_id']]
   event.modifier_id = event.modifier.identifier
+  event.tlp_level_id = line['tlp_level_id']
 
   event.originating_group = event.creator_group
   event.originating_group_id = event.creator_group.identifier
@@ -1120,7 +1140,7 @@ def map_event(line, users, groups, attr_defs, obj_defs, conditions, ressources):
 
   event.created_at = convert_date(line['created'])
   event.modified_on = convert_date(line['modified'])
-  logger.info('Created event {0}'.format(event))
+  logger.debug('Created event {0}'.format(event))
   return event
 
 
@@ -1276,5 +1296,5 @@ if __name__ == '__main__':
   data_file.close()
 
   notmapped.close()
-  # event_controller.event_broker.do_commit(True)
+  event_controller.event_broker.do_commit(True)
   directconnection.close()

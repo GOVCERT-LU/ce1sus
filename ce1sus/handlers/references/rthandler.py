@@ -49,7 +49,7 @@ class RTHandler(GenericHandler):
   def get_data(self, reference_uuid, definition, parameters):
     type_ = parameters.get('type', 'view')
     if type_ == 'view':
-      return self.rt_system.get_base_ticket_url()
+      return [self.rt_system.get_base_ticket_url()]
     else:
       tickets = self.rt_system.get_all_tickets()
       # convert the tickets into dictionaries

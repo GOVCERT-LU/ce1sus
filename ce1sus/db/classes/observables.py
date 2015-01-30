@@ -36,7 +36,7 @@ _REL_OBSERVABLE_COMPOSITION = Table('rel_observable_composition', Base.metadata,
 class ObservableComposition(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Observable')
-  operator = Column('operator', Unicode(3), default=u'AND')
+  operator = Column('operator', Unicode(3), default=u'OR')
   observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None

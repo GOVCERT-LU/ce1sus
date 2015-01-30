@@ -30,7 +30,7 @@
   <table ng-table="tableParams" class="table table-striped table-bordered table-hover table-condensed" show-filter="true">
       <tr ng-repeat="ticket in $data">
           <td data-title="''">
-            <input type="radio" name="ticketid" value="{{ticket.identifier}}" ng-model="attribute.value">
+            <input type="radio" name="ticketid" value="{{ticket.identifier}}" ng-model="resource.value">
           </td>
           <td data-title="'Identifier'" sortable="'identifier'" filter="{ 'identifier': 'text' }">
             <a href="{{ticket.url}}">{{ticket.identifier}}</a>
