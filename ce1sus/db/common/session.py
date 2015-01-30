@@ -9,8 +9,7 @@ from abc import abstractmethod
 from datetime import datetime, date
 from decimal import Decimal
 from sqlalchemy import exc, event
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import declared_attr
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.pool import Pool
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Unicode
