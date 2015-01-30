@@ -98,10 +98,12 @@ def map_obj_def(line, definitions):
     name = 'file'
   elif name == 'victim_targeting':
     return None
+  elif name == 'user_account':
+    name = 'UserAccount'
   chksum = line['chksum']
   found_def = None
   for definition in definitions:
-    if name == definition.name or chksum == definition.chksum:
+    if name == definition.name:
       found_def = definition
       break
   if found_def:
@@ -123,7 +125,7 @@ def map_reference_definition(line, definitions):
   chksum = line['chksum']
   found_def = None
   for definition in definitions:
-    if name == definition.name or chksum == definition.chksum:
+    if name == definition.name:
       found_def = definition
       break
   if found_def:
@@ -158,7 +160,7 @@ def map_attr_def(line, definitions):
     name = 'HTTP_Method'
   chksum = line['chksum']
   for definition in definitions:
-    if name == definition.name or chksum == definition.chksum:
+    if name == definition.name:
       return definition
   raise Exception(u'Attribtue Definition {0} with chksum {1} not found in new setup'.format(name, chksum))
 
@@ -471,7 +473,7 @@ def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event
       if not observable.description:
         observable.description = ''
       observable.description = observable.description + ' ' + attribtue['value']
-    elif name == 'url':
+    elif name == 'url' or name == 'reference_url':
       attribute = make_attr_obs(attribtue, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions)
       composed_attribute.observables.append(attribute)
     elif name == 'url_path':
@@ -484,6 +486,9 @@ def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event
       composed_attribute.observables.append(attribute)
     elif name == 'hostname':
       attribute = make_attr_obs(attribtue, users, groups, 'Hostname', 'Hostname_Value', owner, obj_defs, attr_defs, conditions)
+      composed_attribute.observables.append(attribute)
+    elif name == 'ipv4_addr':
+      attribute = make_attr_obs(attribtue, users, groups, 'Address', name, owner, obj_defs, attr_defs, conditions)
       composed_attribute.observables.append(attribute)
     else:
       raise Exception(name)
@@ -649,7 +654,8 @@ def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_
   if not changed:
     line['definition']['name'] = attr_def
   attribute = map_attribute(line, attr_defs, users, obj, owner, conditions)
-  obj.attributes.append(attribute)
+  if attribute:
+    obj.attributes.append(attribute)
   # make additional attribtues
   if attr_def == 'hostname':
     line['definition']['name'] = 'Naming_System'
@@ -657,14 +663,16 @@ def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_
     line['uuid'] = u'{0}'.format(uuid4())
     line['value'] = 'DNS'
     attribute = map_attribute(line, attr_defs, users, obj, owner, conditions)
-    obj.attributes.append(attribute)
+    if attribute:
+      obj.attributes.append(attribute)
   elif attr_def == 'url':
     line['definition']['name'] = 'URIType'
     line['definition']['chksum'] = None
     line['uuid'] = u'{0}'.format(uuid4())
     line['value'] = 'URL'
     attribute = map_attribute(line, attr_defs, users, obj, owner, conditions)
-    obj.attributes.append(attribute)
+    if attribute:
+      obj.attributes.append(attribute)
 
   observable.object = obj
 
@@ -772,8 +780,8 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
 
       composed_attribute.observables.append(observable)
     elif name == 'vulnerability_cve':
-      notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
-      notmapped.write('{0}\n'.format(json.dumps(attribute)))
+      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions)
+      composed_attribute.observables.append(obs)
     elif 'targeted' in name:
       notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
       notmapped.write('{0}\n'.format(json.dumps(attribute)))
@@ -1262,9 +1270,8 @@ if __name__ == '__main__':
   lines = data_file.readlines()
   for line in lines:
     json_dict = json.loads(line)
-    if json_dict['identifier'] not in [41, 211]:
-      event = map_event(json_dict, users, groups, attr_defs, obj_defs, conditions, ressources)
-      event_controller.event_broker.insert(event, False)
+    event = map_event(json_dict, users, groups, attr_defs, obj_defs, conditions, ressources)
+    event_controller.event_broker.insert(event, False)
 
   data_file.close()
 
