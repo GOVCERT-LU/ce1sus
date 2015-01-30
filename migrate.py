@@ -529,7 +529,8 @@ def clone_object(obj):
   new_obj.modifier_id = new_obj.modifier.identifier
   new_obj.originating_group = obj.originating_group
   new_obj.originating_group_id = new_obj.originating_group.identifier
-
+  new_obj.creator_group = obj.creator.group
+  new_obj.creator_group_id = obj.creator.group_id
   new_obj.definition = obj.definition
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
@@ -1291,7 +1292,7 @@ if __name__ == '__main__':
   for line in lines:
     json_dict = json.loads(line)
     event = map_event(json_dict, users, groups, attr_defs, obj_defs, conditions, ressources)
-    event_controller.event_broker.insert(event, False)
+    event_controller.event_broker.insert(event, True)
 
   data_file.close()
 
