@@ -6,7 +6,8 @@
 Created on Jan 8, 2015
 """
 import json
-from os.path import dirname, abspath
+from os import makedirs
+from os.path import dirname, abspath, exists
 
 from ce1sus.db.common.session import SessionManager
 from ce1sus.depricated.brokers.oldbrokers import OldEventBroker, OldAttributeDefinitionsBroker, OldObjectDefinitionsBroker, OldUserBroker, OldGroupBroker, OldConfigBroker, OldHandlerBroker
@@ -42,22 +43,25 @@ if __name__ == '__main__':
   connector = SessionManager(config).connector
   directconnection = connector.get_direct_session()
 
+  if not exists('dumps/'):
+    makedirs('dumps/')
+
   # create a dump for the events
-  dump_file('events.txt', OldEventBroker, directconnection)
+  dump_file('dumps/events.txt', OldEventBroker, directconnection)
 
   # create a dump for the defintions
-  # dump_file('attributedefinitions.txt', OldAttributeDefinitionsBroker, directconnection)
-  # dump_file('objectdefinitions.txt', OldObjectDefinitionsBroker, directconnection)
+  dump_file('dumps/attributedefinitions.txt', OldAttributeDefinitionsBroker, directconnection)
+  dump_file('dumps/objectdefinitions.txt', OldObjectDefinitionsBroker, directconnection)
 
   # create a dump for the users
-  # dump_file('users.txt', OldUserBroker, directconnection)
+  dump_file('dumps/users.txt', OldUserBroker, directconnection)
 
   # create a dump for the groups
-  # dump_file('groups.txt', OldGroupBroker, directconnection)
+  dump_file('dumps/groups.txt', OldGroupBroker, directconnection)
 
-  # dump_file('ce1susconf.txt', OldConfigBroker, directconnection)
+  dump_file('dumps/ce1susconf.txt', OldConfigBroker, directconnection)
 
-  # dump_file('handlers.txt', OldHandlerBroker, directconnection)
+  dump_file('dumps/handlers.txt', OldHandlerBroker, directconnection)
 
   # dumps are done beginning of Migration
 

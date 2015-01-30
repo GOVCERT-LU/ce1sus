@@ -1134,7 +1134,7 @@ if __name__ == '__main__':
   directconnection = connector.get_direct_session()
   session = directconnection
   # Insert groups and keep reference of the group_id and the new uuid
-  data_file = open('handlers.txt', 'r')
+  data_file = open('dumps/handlers.txt', 'r')
   lines = data_file.readlines()
   handlers = dict()
   for line in lines:
@@ -1144,7 +1144,7 @@ if __name__ == '__main__':
     handlers[id_] = uuid
   data_file.close()
 
-  notmapped = open('notmapped.txt', 'w')
+  notmapped = open('dumps/notmapped.txt', 'w')
 
   # check if the handlers are exitsting
   handler_controller = AttributeDefinitionController(config, directconnection)
@@ -1161,7 +1161,7 @@ if __name__ == '__main__':
   # insert groups
   group_controller = GroupController(config, directconnection)
 
-  data_file = open('groups.txt', 'r')
+  data_file = open('dumps/groups.txt', 'r')
   lines = data_file.readlines()
   groups = dict()
   for line in lines:
@@ -1195,7 +1195,7 @@ if __name__ == '__main__':
   # insert users
   user_controller = UserController(config, directconnection)
 
-  data_file = open('users.txt', 'r')
+  data_file = open('dumps/users.txt', 'r')
   lines = data_file.readlines()
   users = dict()
   for line in lines:
@@ -1258,7 +1258,7 @@ if __name__ == '__main__':
   def_con = IndicatorController(config, directconnection)
   types = def_con.get_all()
 
-  data_file = open('events.txt', 'r')
+  data_file = open('dumps/events.txt', 'r')
   lines = data_file.readlines()
   for line in lines:
     json_dict = json.loads(line)
@@ -1271,6 +1271,3 @@ if __name__ == '__main__':
   notmapped.close()
   # event_controller.event_broker.do_commit(True)
   directconnection.close()
-
-
-

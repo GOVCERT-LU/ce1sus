@@ -9,4 +9,8 @@ rt_user=
 rt_password=
 rt_url=
 
+[FileReferenceHandler]
+files=
 
+[FileWithHashesHandler]
+files=
