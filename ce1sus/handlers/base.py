@@ -6,6 +6,8 @@ module providing support for the base handler
 Created: Aug, 2013
 """
 
+from os.path import dirname, abspath
+
 from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
 from ce1sus.helpers.common.objects import get_class
 
@@ -37,7 +39,8 @@ class HandlerBase(object):
   def __init__(self):
     # initalize the configuration for the handle and only the for the handlers
     try:
-      config = Configuration('config/handlers.conf')
+      basePath = dirname(abspath(__file__))
+      config = Configuration(basePath + '/../../config/handlers.conf')
     except ConfigSectionNotFoundException as error:
       raise HandlerException(error)
     self.__config = config

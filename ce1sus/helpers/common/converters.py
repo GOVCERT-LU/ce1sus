@@ -26,7 +26,7 @@ def convert_string_to_value(string):
   if uppser_string:
     if uppser_string == 'TRUE' or uppser_string == 'YES':
       return_value = True
-    elif uppser_string == 'False'or uppser_string == 'NO':
+    elif uppser_string == 'FALSE'or uppser_string == 'NO':
       return_value = False
     elif string.isdigit():
       return_value = ValueConverter.set_integer(string)

@@ -7,8 +7,7 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, \
-  is_object_viewable, get_item_view_message
+from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.helpers.common.debug import Log
