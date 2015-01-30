@@ -90,10 +90,24 @@ function getTlpColor(tlptext) {
       if (tlptext=='Red'){
         return '#ff0000';
       } else {
-        return '#000000';
+        return '#FFFFFF';
       }
     }
   }
+}
+
+function limitStr(string, timLength){
+  var length = 30;
+  if (timLength){
+    length = timLength;
+  }
+  if (string.length > length) {
+    var trimmedString = string.substring(0, length);
+    return trimmedString + '...';
+  } else {
+    return string;
+  }
+  
 }
 
 function calculatePageNumber(i, currentPage, paginationRange, totalPages) {

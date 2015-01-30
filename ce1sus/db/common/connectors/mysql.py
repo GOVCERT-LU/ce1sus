@@ -10,6 +10,7 @@ import os
 import socket
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import QueuePool, NullPool
 
 from ce1sus.db.common.common import SessionObject, SessionManagerException, Connector
 from ce1sus.db.common.recepie.satool import SAEnginePlugin, SATool
@@ -92,10 +93,7 @@ class MySqlConnector(Connector):
     if self.engine:
       return self.engine
     else:
-      return create_engine(self.connection_string + '?charset=utf8',
-                           echo=self.debug,
-                           echo_pool=self.debug,
-                           encoding='utf-8')
+      return self.create_engine()
 
   def get_direct_session(self):
     """
@@ -149,8 +147,9 @@ class MySqlConnector(Connector):
     Returns the engine
     """
     return create_engine(self.connection_string + '?charset=utf8',
+                         poolclass=QueuePool,
                          echo=self.debug,
-                         echo_pool=self.debug,
                          encoding='utf-8',
                          pool_recycle=3600,
-                         pool_size=10)
+                         pool_size=10,
+                         max_overflow=10)

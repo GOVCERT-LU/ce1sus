@@ -101,7 +101,7 @@ class Indicator(ExtendedLogingInformations, Base):
 
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
   observables = relationship('Observable')
-  title = Column('title', Unicode(255), index=True, nullable=False)
+  title = Column('title', Unicode(255), index=True, nullable=True)
   description = Column('description', UnicodeText)
   short_description = Column('short_description', Unicode(255))
   confidence = Column('confidence', Unicode(5), default=u'HIGH', nullable=False)

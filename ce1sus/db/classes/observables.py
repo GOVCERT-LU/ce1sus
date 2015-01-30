@@ -96,6 +96,32 @@ class ObservableComposition(Base):
             }
 
 
+class RelatedObservable(ExtendedLogingInformations, Base):
+  parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  parent = relationship('Observable', primaryjoin='RelatedObservable.parent_id==Observable.identifier', uselist=False)
+  child_id = Column('child_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  relation = Column('relation', Unicode(40))
+  confidence = Column('confidence', Integer)
+  observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+    # flatten related object
+    observable = self.observable.to_dict(complete, inflated, event_permissions)
+    observable['relation'] = self.convert_value(self.relation)
+    observable['confidence'] = self.convert_value(self.confidence)
+    observable['parent_observable_id'] = self.convert_value(self.parent_id)
+    return {'identifier': self.convert_value(self.identifier),
+            'observable': observable,
+            'relation': self.convert_value(self.relation),
+            'confidence': self.convert_value(self.confidence),
+            'parent_id': self.convert_value(self.parent_id)
+            }
+
+  def validate(self):
+    # TODO: validate
+    return True
+
+
 class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True)
@@ -109,7 +135,33 @@ class Observable(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, nullable=False, default=0)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
   parent_id = Column('parent_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
   __bit_code = None
+
+  def related_observables_count_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.related_observables.count()
+      else:
+        # count validated ones
+        return self.related_observables.filter(Observable.dbcode.op('&')(1) == 1).count()
+    else:
+      # count shared and validated
+      return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).count()
+
+  def related_observables_count(self):
+    return self.related_objects.count()
+
+  def get_related_observables_for_permissions(self, event_permissions):
+    if event_permissions:
+      if event_permissions.can_validate:
+        return self.related_observables.all()
+      else:
+        # count validated ones
+        return self.related_observables.filter(Observable.dbcode.op('&')(1) == 1).all()
+    else:
+      # count shared and validated
+      return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).all()
 
   @property
   def properties(self):
@@ -146,6 +198,13 @@ class Observable(ExtendedLogingInformations, Base):
     composed = self.get_composed_observable_for_permissions(event_permissions)
     if composed:
       composed = composed.to_dict(complete, inflated, event_permissions)
+    related = list()
+    if inflated:
+      for related_observable in self.get_related_observables_for_permissions(event_permissions):
+        related.append(related_observable.to_dict(complete, inflated, event_permissions))
+      related_count = len(related)
+    else:
+      related_count = self.related_observables_count_for_permissions(event_permissions)
 
     if complete:
       result = {'identifier': self.convert_value(self.identifier),
@@ -154,6 +213,8 @@ class Observable(ExtendedLogingInformations, Base):
                 'object': obj,
                 'version': self.convert_value(self.version),
                 'observable_composition': composed,
+                'related_observables': related,
+                'related_observables_count': related_count,
                 'creator_group': self.creator_group.to_dict(complete, inflated),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),

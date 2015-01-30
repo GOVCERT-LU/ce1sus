@@ -5,11 +5,11 @@
   <div class="col-xs-9">
       <div
         ng-class="{ 'has-error' :form.value.$invalid && !form.value.$pristine }">
-        <textarea class="form-control" name="value" ng-model="attribute.value"
+        <input class="form-control" name="value" ng-model="attribute.value"
           type="text" ng-minlength=2 ng-maxlength=255 required  
-          ng-pattern="patternexpression"></textarea>
+          ng-pattern="patternexpression">
         <p
-         ng-show="form.value.$invalid && !form.value.$pristine"
+          ng-show="form.value.$invalid && !form.value.$pristine"
           class="help-block">Value is required.</p>
         <p ng-show="form.value.$error.minlength"
           class="help-block">Value is too short.</p>
@@ -28,4 +28,4 @@
     <input class="form-control" type="checkbox" name="ioc" value="ioc"  ng-model="objectattribute.ioc" />
   </div>
 </div>
-<object-properties-form object="objectattribute" type="type" permissions="permissions"></object-properties-form>
+<object-properties-form object="attribute" type="type" permissions="permissions"></object-properties-form>

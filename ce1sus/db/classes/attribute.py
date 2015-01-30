@@ -80,6 +80,7 @@ class Attribute(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
+  parent = relationship('Attribute', uselist=False)
   dbcode = Column('code', Integer, nullable=False, default=0)
 
   __bit_code = None
@@ -132,11 +133,14 @@ class Attribute(ExtendedLogingInformations, Base):
 
   def __set_value(self, new_value):
     if self.definition:
-      value_table = self.definition.value_table
+      try:
+        value_table = self.definition.value_table
+      except AttributeError as error:
+        raise error
       classname = '{0}Value'.format(value_table)
       attribute = '{0}_value'.format(value_table.lower())
-      
-      #check if not a value has been assigned
+
+      # check if not a value has been assigned
       value_instance = self.__get_value_instance()
       if value_instance:
         # update only

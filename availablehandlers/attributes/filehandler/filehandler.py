@@ -302,4 +302,4 @@ class FileWithHashesHandler(FileHandler):
     return main_attribute, attributes, sub_objects
 
   def require_js(self):
-    return True
+    return False

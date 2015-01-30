@@ -10,6 +10,18 @@ from datetime import datetime
 from ce1sus.db.classes.definitions import ObjectDefinition, AttributeDefinition
 from ce1sus.db.classes.mailtemplate import MailTemplate
 from ce1sus.db.classes.user import User
+from ce1sus.db.classes.types import AttributeType
+from ce1sus.controllers.admin.attributedefinitions import gen_attr_chksum
+from ce1sus.db.classes.common import ValueTable
+from ce1sus.handlers.attributes.texthandler import TextHandler
+from ce1sus.handlers.attributes.multiplegenerichandler import MultipleGenericHandler
+from ce1sus.handlers.attributes.emailhandler import EmailHandler
+from ce1sus.handlers.attributes.generichandler import GenericHandler
+from ce1sus.db.classes.attribute import Condition
+from ce1sus.handlers.attributes.datehandler import DateHandler
+from ce1sus.handlers.attributes.cbvaluehandler import CBValueHandler
+from ce1sus.handlers.attributes.filehandler import FileHandler
+from ce1sus.controllers.admin.objectdefinitions import gen_obj_chksum
 
 
 __author__ = 'Weber Jean-Paul'
@@ -84,191 +96,1391 @@ def get_mail_templates(user):
   return result
 
 
-def get_object_definitions(user):
-  result = list()
+def get_attribute_type_definitions():
+  attribute_type = AttributeType()
+  attribute_type.name = 'None'
+  attribute_type.description = 'This type is used when no type has been specified'
+  attribute_type.table_id = None
 
-  object_def = ObjectDefinition()
-  object_def.identifier = '0f19ec49-7014-466b-908f-0647e403f054'
-  object_def.chksum = 'a88b7dcd1a9e3e17770bbaa6d7515b31a2d7e85d'
-  object_def.name = 'email'
-  object_def.description = 'email'
-  object_def.creator = user
-  object_def.modifier = user
+  return {'None': attribute_type}
+
+
+def get_conditions():
+  result = dict()
+  condition = Condition()
+  condition.value = 'Equals'
+  condition.description = 'The value matches 1:1'
+  result[condition.value] = condition
+
+  condition = Condition()
+  condition.value = 'Like'
+  condition.description = 'The value matches the pattern'
+  result[condition.value] = condition
+  return result
+
+
+def get_attribute_definitions(user, type_definitions, conditions):
+  result = dict()
 
   attribute = AttributeDefinition()
-  attribute.identifier = 'caba989d-b213-48a2-8363-2fbf005cd8a1'
-  attribute.name = 'email'
-  attribute.chksum = 'd0f5ee98489d940fbc41a178f2b3d0ded011d360'
-  attribute.description = 'email'
-  attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.cybox_std = False
+  attribute.name = 'analysis_free_text'
+  attribute.description = 'A free text analysis for the object.'
+  attribute.table_id = ValueTable.TEXT_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = TextHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
-  result.append(object_def)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
 
-  object_def = ObjectDefinition()
-  object_def.identifier = 'cebb031f-f7a4-4cc6-95c9-b0cf39fede98'
-  object_def.chksum = '971c419dd609331343dee105fffd0f4608dc0bf2'
-  object_def.name = 'file'
-  object_def.description = 'file'
-  object_def.creator = user
-  object_def.modifier = user
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = 'a0a6c5ec-8d97-44dd-84e0-cd86d8f533cc'
-  attribute.name = 'hash_md5'
-  attribute.chksum = '6426c35c25e2853e161c29b40bb9359d6368f5ac'
-  attribute.description = 'hash_md5'
-  attribute.cybox_std = True
-  attribute.table_id = 'caba989d-b213-48a2-8363-2fbf005cd8a1'
+  attribute.cybox_std = False
+  attribute.name = 'antivirus_record'
+  attribute.description = 'The results of one or many antivirus scans for an object. This is a multiline csv value (datetime, engine, result, threat name). '
+  attribute.table_id = ValueTable.STRING_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = '105de9a1-64d8-4f2f-a2f4-3cd5c0118ece'
-  attribute.name = 'hash_sha1'
-  attribute.chksum = '750e67e8b7813b868e8f59d2b909b1773465493a'
-  attribute.description = 'hash_md5'
-  attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.cybox_std = False
+  attribute.name = 'asn'
+  attribute.description = 'The asn value specifies an identifier for an autonomous system number.'
+  attribute.table_id = ValueTable.STRING_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
+  attribute.value_type_id = type_definitions.get('None').identifier
   attribute.relation = True
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = '1a5b25fe-e427-4647-bf87-d406c97ed57a'
-  attribute.name = 'hash_sha256'
-  attribute.chksum = '507e3aaf4fda10e106dc3746e68e1a7e1ae05f51'
-  attribute.description = 'hash_md5'
-  attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.cybox_std = False
+  attribute.name = 'ce1sus eml file handler'
+  attribute.description = 'EML File handler. This attribute lets you upload an eml file and all the attributes which can be extracted from this file are beeing generated. Note also child objects will be created ofr the attachments.'
+  attribute.table_id = ValueTable.STRING_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
-  attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = EmailHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = '1a5b25fe-e427-4647-bf87-d406c97ed57ab'
-  attribute.name = 'file_name'
-  attribute.chksum = '507e3aaf4fda10e106dc3746e68e1a7e1ae05f22'
-  attribute.description = 'file_name'
   attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.name = 'code_language'
+  attribute.description = 'The code_language field refers to the code language used in the code characterized in this field.'
+  attribute.table_id = ValueTable.STRING_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = GenericHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
-  result.append(object_def)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
 
-  object_def = ObjectDefinition()
-  object_def.identifier = '43fe36b5-55f4-416e-850c-df39709515d2'
-  object_def.chksum = '709381e970d2d669ee1d1b4844a6dde9d9b63c77'
-  object_def.name = 'hostname'
-  object_def.description = 'hostname'
-  object_def.creator = user
-  object_def.modifier = user
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = 'caba989d-b213-48a2-8363-2fbf005cd8a2'
-  attribute.name = 'hostname'
-  attribute.chksum = 'd0f5ee98489d940fbc41a178f2b3d0ded011d315'
-  attribute.description = 'hostname'
+  attribute.cybox_std = False
+  attribute.name = 'comment'
+  attribute.description = 'Holds free text for comments about objects and event. '
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'description'
+  attribute.description = 'Contains free text description for an object.'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
   attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.name = 'digital_signature'
+  attribute.description = 'The Digital_Signatures field is optional and captures one or more digital signatures for the file.'
+  attribute.table_id = ValueTable.TEXT_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = TextHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
 
-
-
-  result.append(object_def)
-
-  object_def = ObjectDefinition()
-  object_def.identifier = '69cdc198-5d29-4f3d-bf1a-b1a94b4bafa9'
-  object_def.chksum = '9120580e94f134cb7c9f27cd1e43dbc82980e152'
-  object_def.name = 'domain'
-  object_def.description = 'domain'
-  object_def.creator = user
-  object_def.modifier = user
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = '924335f6-f396-44c4-844c-e5c22f39ff0f'
+  attribute.cybox_std = True
   attribute.name = 'domain'
-  attribute.chksum = 'c3808d106fbe167f7f7403f59f827d21cdf8df71'
-  attribute.description = 'domain'
-  attribute.cybox_std = True
-  attribute.table_id = 1
-  attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
+  attribute.description = 'Contains a fully qualified domain name'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^(\.|\*\.)?(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
   attribute.relation = True
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
-  result.append(object_def)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
 
-  object_def = ObjectDefinition()
-  object_def.identifier = 'c818d722-d217-4ce5-8da2-c2c5ce08f75a'
-  object_def.chksum = '2c6d680f5c570ba21d22697cd028f230e9f4cd56'
-  object_def.name = 'uri'
-  object_def.description = 'uri'
-  object_def.creator = user
-  object_def.modifier = user
+  result[attribute.name] = attribute
 
   attribute = AttributeDefinition()
-  attribute.identifier = '99801f4a-15e1-4a87-9030-fe37879758d9'
-  attribute.name = 'url'
-  attribute.chksum = '7b9299c7f86cf8d5046b7fda2afc15fd848ddc8d'
-  attribute.description = 'email'
   attribute.cybox_std = True
-  attribute.table_id = 1
+  attribute.name = 'email_attachment_file_name'
+  attribute.description = 'The Attachments field specifies any files that were attached to the email message. It imports and uses the CybOX FileObjectType from the File_Object to do so.'
+  attribute.table_id = ValueTable.STRING_VALUE
   attribute.regex = '^.+$'
-  attribute.value_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.view_type_id = '2fcdfa20-6b19-11e4-9803-0800200c9a66'
-  attribute.relation = True
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
   attribute.share = True
-  attribute.attributehandler_id = 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
   attribute.creator = user
   attribute.modifier = user
-  object_def.attributes.append(attribute)
-  result.append(object_def)
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_bcc'
+  attribute.description = 'The BCC field specifies the email addresses of any recipients that were included in the blind carbon copy header of the email message.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_cc'
+  attribute.description = 'The CC field specifies the email addresses of any recipients that were included in the carbon copy header of the email message.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_content_type'
+  attribute.description = 'The Content-Type field specifies the internet media, or MIME, type of the email message content.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_errors_to'
+  attribute.description = 'The Errors_To field specifies the entry in the (deprecated) errors_to header of the email message.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_from'
+  attribute.description = 'The From field specifies the email address of the sender of the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_in_reply_to'
+  attribute.description = 'The In_Reply_To field specifies the message ID of the message that this email is a reply to.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_message_id'
+  attribute.description = 'The Message_ID field specifies the automatically generated ID of the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_mime_version'
+  attribute.description = 'The MIME-Version field specifies the version of the MIME formatting used in the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_raw_body'
+  attribute.description = 'The Raw_Body field specifies the complete (raw) body of the email message.'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$ '
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_raw_header'
+  attribute.description = 'The Raw_Header field specifies the complete (raw) headers of the email message.'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$ '
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'email_relay_ip'
+  attribute.description = 'This attribute hold the IP address of an MTA used to deliver the mail.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_reply_to'
+  attribute.description = 'The Reply_To field specifies the email address that should be used when replying to the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'email_sender'
+  attribute.description = 'The Sender field specifies the email address of the sender who is acting on behalf of the author listed in the From: field '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_subject'
+  attribute.description = 'The Subject field specifies the subject (a brief summary of the message topic) of the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_to'
+  attribute.description = 'The To field specifies the email addresses of the recipients of the email message. '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_x_mailer'
+  attribute.description = 'The X-Mailer field specifies the software used to send the email message. This field is non-standard.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'email_x_originating_ip'
+  attribute.description = 'The X-Originating-IP field specifies the originating IP Address of the email sender, in terms of their connection to the mail server used to send the email message. This field is non-standard.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'encryption_key'
+  attribute.description = 'Clear text stings used along with an encryption algorithm in order to cypher data'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'encryption_mechanism'
+  attribute.description = 'The encryption_mechanism field is optional and specifies the protection/encryption algorithm utilized to protect the Raw_Artifact content.'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'encryption_mechanism'
+  attribute.description = 'The encryption_mechanism field is optional and specifies the protection/encryption algorithm utilized to protect the Raw_Artifact content.'
+  attribute.table_id = ValueTable.TEXT_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = TextHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_accessed_datetime'
+  attribute.description = 'The Accessed_Time field specifies the date/time the file was last accessed. '
+  attribute.table_id = ValueTable.DATE_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = DateHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_created_datetime'
+  attribute.description = 'The Created_Time field specifies the date/time the file was created.'
+  attribute.table_id = ValueTable.DATE_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = DateHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_modified_datetime'
+  attribute.description = 'The Created_Time field specifies the date/time the file was created.'
+  attribute.table_id = ValueTable.DATE_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = DateHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_extension'
+  attribute.description = 'The File_Extension field specifies the file extension of the file.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_format'
+  attribute.description = 'The File_Format field specifies the particular file format of the file, most typically specified by a tool such as the UNIX file command.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_full_path'
+  attribute.description = 'The File path including the file name.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'file_id'
+  attribute.description = 'File description as returned by unix "file" command'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_modified_time'
+  attribute.description = 'The Modified_Time field specifies the date/time the file was last modified.'
+  attribute.table_id = ValueTable.DATE_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = DateHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'file_name'
+  attribute.description = 'The file_name field specifies the name of the file.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_md5'
+  attribute.description = 'md5 hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[0-9a-fA-F]{32}'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_sha1'
+  attribute.description = 'sha1 hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[0-9a-fA-F]{40}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_sha256'
+  attribute.description = 'sha256 hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[0-9a-fA-F]{64}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_sha384'
+  attribute.description = 'sha384 hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[0-9a-fA-F]{96}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_sha512'
+  attribute.description = 'sha512 hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^[0-9a-fA-F]{128}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hash_ssdeep'
+  attribute.description = 'ssdeep hash of a file'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^\d+:[a-zA-Z0-9+]+:[a-zA-Z0-9+]+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'hostname'
+  attribute.description = 'Fully qualified domain name'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^(\.|\*\.)?(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,6}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'http_method'
+  attribute.description = 'The Hypertext Transfer Protocol (HTTP) identifies the client software originating the request, using a "User-Agent" header, even when the client is not operated by a user.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^GET$|^HEAD$|^POST$|^PUT$|^DELETE$|^TRACE$|^OPTIONS$|^CONNECT$|^PATCH$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = CBValueHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'http_user_agent'
+  attribute.description = 'HTTP defines methods (sometimes referred to as verbs) to indicate the desired action to be performed on the identified resource. What this resource represents, whether pre-existing data or data that is generated dynamically, depends on the implementation of the server. Often, the resource corresponds to a file or the output of an executable residing on the server.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'http_version'
+  attribute.description = 'HTTP uses a "<major>.<minor>" numbering scheme to indicate versions of the protocol.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^\d+\.\d+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ip_port'
+  attribute.description = 'Port'
+  attribute.table_id = ValueTable.NUMBER_VALUE
+  attribute.regex = '^[\d]{1,}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ip_protocol'
+  attribute.description = 'IP protocol'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^tcp$|^udp$|^icmp$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = CBValueHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ipv4_addr'
+  attribute.description = 'The IPv4-addr value specifies an IPV4 address.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ipv4_net'
+  attribute.description = 'The IPv4-addr value specifies an IPV4 address.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ipv6_addr'
+  attribute.description = 'The IPv6-addr value specifies an IPv6 address.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'ipv6_net'
+  attribute.description = 'IPv6 sub-network'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = True
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'magic_number'
+  attribute.description = 'The magic_number specifies the particular magic number (typically a hexadecimal constant used to identify a file format) corresponding to the file, if applicable.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'mime_type'
+  attribute.description = 'mime_type'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'mutex'
+  attribute.description = 'The Mutex object is intended to characterize generic mutual exclusion (mutex) objects.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'named_pipe'
+  attribute.description = 'Specifies a named pipe handle.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = True
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'Raw_Artifact'
+  attribute.description = 'The raw file data '
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = FileHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = False
+  attribute.name = 'raw_document'
+  attribute.description = 'The raw document (non malicious file)'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = FileHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'size_in_bytes'
+  attribute.description = 'The size_in_bytes field specifies the size of the file, in bytes. '
+  attribute.table_id = ValueTable.NUMBER_VALUE
+  attribute.regex = '^\d+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'uri'
+  attribute.description = 'Holds a complete URL'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'uri_path'
+  attribute.description = 'Holds only the path part of an URL. (e.g. /en/index.html)'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = MultipleGenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'targeted_platforms'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'processor_family'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'discovery_method'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'start_address'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'username'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'password'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'full_name'
+  attribute.description = ''
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+
+  attribute = AttributeDefinition()
+  attribute.cybox_std = True
+  attribute.name = 'win_registry_key'
+  attribute.description = 'The WindowsRegistryObjectType type is intended to characterize Windows registry objects, including Keys and Key/Value pairs.'
+  attribute.table_id = ValueTable.STRING_VALUE
+  attribute.regex = '^.+$'
+  attribute.value_type_id = type_definitions.get('None').identifier
+  attribute.relation = False
+  attribute.share = False
+  attribute.attributehandler_id = GenericHandler.get_uuid()
+  attribute.creator = user
+  attribute.modifier = user
+  attribute.chksum = gen_attr_chksum(attribute)
+  attribute.default_condition_id = conditions.get('Equals').identifier
+
+  result[attribute.name] = attribute
+  return result
+
+
+def get_object_definitions(user, attribute_definitions):
+  result = dict()
+
+  object_def = ObjectDefinition()
+  object_def.name = 'email'
+  object_def.description = 'The email object is intended to characterize an individual email message.'
+  object_def.default_share = True
+  object_def.creator = user
+  object_def.modifier = user
+  object_def.chksum = gen_obj_chksum(object_def)
+
+  object_def.attributes.append(attribute_definitions['analysis_free_text'])
+  object_def.attributes.append(attribute_definitions['comment'])
+  object_def.attributes.append(attribute_definitions['email_attachment_file_name'])
+  object_def.attributes.append(attribute_definitions['email_bcc'])
+  object_def.attributes.append(attribute_definitions['email_cc'])
+  object_def.attributes.append(attribute_definitions['email_content_type'])
+  object_def.attributes.append(attribute_definitions['email_errors_to'])
+  object_def.attributes.append(attribute_definitions['email_from'])
+  object_def.attributes.append(attribute_definitions['email_in_reply_to'])
+  object_def.attributes.append(attribute_definitions['email_message_id'])
+  object_def.attributes.append(attribute_definitions['email_mime_version'])
+  object_def.attributes.append(attribute_definitions['email_raw_body'])
+  object_def.attributes.append(attribute_definitions['email_raw_header'])
+  object_def.attributes.append(attribute_definitions['email_relay_ip'])
+  object_def.attributes.append(attribute_definitions['email_sender'])
+  object_def.attributes.append(attribute_definitions['email_subject'])
+  object_def.attributes.append(attribute_definitions['email_to'])
+  object_def.attributes.append(attribute_definitions['email_x_mailer'])
+  object_def.attributes.append(attribute_definitions['email_x_originating_ip'])
+  object_def.attributes.append(attribute_definitions['hash_md5'])
+  object_def.attributes.append(attribute_definitions['hash_sha1'])
+  object_def.attributes.append(attribute_definitions['hash_sha256'])
+  object_def.attributes.append(attribute_definitions['hash_sha384'])
+  object_def.attributes.append(attribute_definitions['hash_sha512'])
+
+  result[object_def.name] = object_def
+
+  object_def = ObjectDefinition()
+  object_def.name = 'file'
+  object_def.description = 'The File object is intended to characterize generic files.'
+  object_def.default_share = True
+  object_def.creator = user
+  object_def.modifier = user
+  object_def.chksum = gen_obj_chksum(object_def)
+
+  object_def.attributes.append(attribute_definitions['analysis_free_text'])
+  object_def.attributes.append(attribute_definitions['description'])
+  object_def.attributes.append(attribute_definitions['comment'])
+  object_def.attributes.append(attribute_definitions['hash_md5'])
+  object_def.attributes.append(attribute_definitions['hash_sha1'])
+  object_def.attributes.append(attribute_definitions['hash_sha256'])
+  object_def.attributes.append(attribute_definitions['hash_sha384'])
+  object_def.attributes.append(attribute_definitions['hash_sha512'])
+  object_def.attributes.append(attribute_definitions['file_accessed_datetime'])
+  object_def.attributes.append(attribute_definitions['file_created_datetime'])
+  object_def.attributes.append(attribute_definitions['file_extension'])
+  object_def.attributes.append(attribute_definitions['file_format'])
+  object_def.attributes.append(attribute_definitions['file_full_path'])
+  object_def.attributes.append(attribute_definitions['file_extension'])
+  object_def.attributes.append(attribute_definitions['file_id'])
+  object_def.attributes.append(attribute_definitions['file_modified_datetime'])
+  object_def.attributes.append(attribute_definitions['file_name'])
+  object_def.attributes.append(attribute_definitions['magic_number'])
+  object_def.attributes.append(attribute_definitions['mime_type'])
+  object_def.attributes.append(attribute_definitions['Raw_Artifact'])
+  object_def.attributes.append(attribute_definitions['raw_document'])
+  object_def.attributes.append(attribute_definitions['size_in_bytes'])
+
+  result[object_def.name] = object_def
+
+  object_def = ObjectDefinition()
+  object_def.name = 'file'
+  object_def.description = 'The File object is intended to characterize generic files.'
+  object_def.default_share = True
+  object_def.creator = user
+  object_def.modifier = user
+  object_def.chksum = gen_obj_chksum(object_def)
+
+  object_def.attributes.append(attribute_definitions['analysis_free_text'])
+  object_def.attributes.append(attribute_definitions['description'])
+  object_def.attributes.append(attribute_definitions['comment'])
+  object_def.attributes.append(attribute_definitions['hash_md5'])
+  object_def.attributes.append(attribute_definitions['hash_sha1'])
+  object_def.attributes.append(attribute_definitions['hash_sha256'])
+  object_def.attributes.append(attribute_definitions['hash_sha384'])
+  object_def.attributes.append(attribute_definitions['hash_sha512'])
+  object_def.attributes.append(attribute_definitions['file_accessed_datetime'])
+  object_def.attributes.append(attribute_definitions['file_created_datetime'])
+  object_def.attributes.append(attribute_definitions['file_extension'])
+  object_def.attributes.append(attribute_definitions['file_format'])
+  object_def.attributes.append(attribute_definitions['file_full_path'])
+  object_def.attributes.append(attribute_definitions['file_extension'])
+  object_def.attributes.append(attribute_definitions['file_id'])
+  object_def.attributes.append(attribute_definitions['file_modified_datetime'])
+  object_def.attributes.append(attribute_definitions['file_name'])
+  object_def.attributes.append(attribute_definitions['magic_number'])
+  object_def.attributes.append(attribute_definitions['mime_type'])
+  object_def.attributes.append(attribute_definitions['Raw_Artifact'])
+  object_def.attributes.append(attribute_definitions['raw_document'])
+  object_def.attributes.append(attribute_definitions['size_in_bytes'])
+
+  result[object_def.name] = object_def
+
+  object_def = ObjectDefinition()
+  object_def.name = 'Code'
+  object_def.description = 'The Code is intended to characterize a body of computer code.'
+  object_def.default_share = True
+  object_def.creator = user
+  object_def.modifier = user
+  object_def.chksum = gen_obj_chksum(object_def)
+  object_def.attributes.append(attribute_definitions['code_language'])
+  object_def.attributes.append(attribute_definitions['description'])
+  object_def.attributes.append(attribute_definitions['targeted_platforms'])
+  object_def.attributes.append(attribute_definitions['processor_family'])
+  object_def.attributes.append(attribute_definitions['discovery_method'])
+  object_def.attributes.append(attribute_definitions['start_address'])
+
+  result[object_def.name] = object_def
+
+  object_def = ObjectDefinition()
+  object_def.name = 'UserAccount'
+  object_def.description = 'The Code is intended to characterize a body of computer code.'
+  object_def.default_share = True
+  object_def.creator = user
+  object_def.modifier = user
+  object_def.chksum = gen_obj_chksum(object_def)
+  object_def.attributes.append(attribute_definitions['description'])
+  object_def.attributes.append(attribute_definitions['domain'])
+  object_def.attributes.append(attribute_definitions['username'])
+  object_def.attributes.append(attribute_definitions['password'])
+  object_def.attributes.append(attribute_definitions['full_name'])
+
+  result[object_def.name] = object_def
 
   return result

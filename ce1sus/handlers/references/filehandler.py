@@ -11,7 +11,7 @@ from cherrypy.lib.static import serve_file
 from datetime import datetime
 from os import makedirs
 from os import remove
-from os.path import isfile, getsize, basename, exists, dirname
+from os.path import isfile, basename, exists, dirname
 from shutil import move, rmtree
 import types
 import zipfile
@@ -24,7 +24,6 @@ from ce1sus.helpers.common.config import ConfigException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
-import magic
 
 
 __author__ = 'Weber Jean-Paul'
@@ -45,7 +44,7 @@ CHK_SUM_FILE_ID = '745af7b7cf3bf4c5a0b2b04ad9cd2c9b8da39fc1'
 CHK_SUM_HASH_MD5 = '8a3975c871c6df7ab9a890b8f0fd1fb6e4e6556e'
 
 
-class FileHandler(GenericHandler):
+class FileReferenceHandler(GenericHandler):
   """Handler for handling files"""
 
   URLSTR = '/events/event/attribute/call_handler_get/{0}/{1}/{2}'
@@ -105,7 +104,7 @@ class FileHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
-  def insert(self, obj, user, json):
+  def insert(self, report, user, json):
     value = json.get('value', None)
     filename = value.get('name', None)
     data = value.get('data', None)
@@ -140,17 +139,17 @@ class FileHandler(GenericHandler):
       main_definition = self.get_main_definition()
 
       internal_json['value'] = rel_folder + '/' + sha1
-      main_attribute = self.create_attribute(obj, main_definition, user, internal_json)
+      main_attribute = self.create_reference(report, main_definition, user, internal_json)
       # secondary
       attributes = list()
       filename_definition = self.get_attriute_definition(CHK_SUM_FILE_NAME)
       internal_json['value'] = filename
-      attribute = self.create_attribute(obj, filename_definition, user, internal_json)
+      attribute = self.create_reference(report, filename_definition, user, internal_json)
       attributes.append(attribute)
 
       sha1_definition = self.get_attriute_definition(CHK_SUM_HASH_SHA1)
       internal_json['value'] = sha1
-      attribute = self.create_attribute(obj, sha1_definition, user, internal_json)
+      attribute = self.create_reference(report, sha1_definition, user, internal_json)
       attributes.append(attribute)
 
       return main_attribute, attributes, None
@@ -237,69 +236,6 @@ class FileHandler(GenericHandler):
       return basename(attribtue.value)
     else:
       return None
-
-
-class FileWithHashesHandler(FileHandler):
-  """
-  Extends the filehandler with additional hashes
-  """
-  @staticmethod
-  def get_uuid():
-    return 'e8b47b60-8deb-11e3-baa8-0800200c9a66'
-
-  def get_additinal_attribute_chksums(self):
-    return [CHK_SUM_FILE_NAME,
-            CHK_SUM_HASH_SHA1,
-            CHK_SUM_HASH_SHA256,
-            CHK_SUM_HASH_SHA384,
-            CHK_SUM_HASH_SHA512,
-            CHK_SUM_SIZE_IN_BYTES,
-            CHK_SUM_MAGIC_NUMBER,
-            CHK_SUM_MIME_TYPE,
-            CHK_SUM_FILE_ID,
-            CHK_SUM_HASH_MD5]
-
-  def insert(self, obj, user, json):
-    main_attribute, attributes, sub_objects = FileHandler(self, obj, user, json)
-
-    internal_json = json
-
-    filepath = self.get_base_path() + '/' + main_attribute.value
-
-    # create the remaining attributes
-    internal_json['value'] = hasher.fileHashMD5(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_MD5), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = hasher.fileHashSHA256(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA256), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = hasher.fileHashSHA384(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA384), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = hasher.fileHashSHA512(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA512), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = getsize(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_SIZE_IN_BYTES), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = magic.from_file(filepath, mime=True)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_MIME_TYPE), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = magic.from_file(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
-    attributes.append(attribute)
-
-    internal_json['value'] = magic.from_file(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
-    attributes.append(attribute)
-
-    return main_attribute, attributes, sub_objects
 
   def require_js(self):
     return False

@@ -135,7 +135,9 @@ class Reference(ExtendedLogingInformations, Base):
                             primaryjoin='ReferenceDefinition.identifier==Reference.definition_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
   value = Column('value', Unicode(255), nullable=False, index=True)
-
+  parent_id = Column('parent_id', Unicode(40), ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
+  children = relationship('Reference',
+                          primaryjoin='Reference.identifier==Reference.parent_id')
   __bit_code = None
 
   def populate(self, json):

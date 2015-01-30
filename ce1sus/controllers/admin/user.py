@@ -6,8 +6,10 @@ module handing the attributes pages
 Created: Aug 26, 2013
 """
 import random
+from sqlalchemy.exc import IntegrityError
 
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, \
+  ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashSHA1
@@ -35,7 +37,7 @@ class UserController(BaseController):
 
   def get_user_by_id(self, user_id):
     try:
-      return self.user_broker.get_by_id(user_id)
+      return self.user_broker.getUserByUserName('admin')
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -72,6 +74,8 @@ class UserController(BaseController):
         self.user_broker.update(user)
         self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
         raise ControllerException(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+    except IntegrityException as error:
+      raise ControllerIntegrityException(error)
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(user)
       raise ControllerException(u'Could not add user due to: {0}'.format(message))
@@ -99,6 +103,14 @@ class UserController(BaseController):
       raise ControllerException('Cannot delete user. The user is referenced by elements. Disable this user instead.')
     except DeletionException:
       raise ControllerException('This user cannot be deleted')
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_user_by_username(self, username):
+    try:
+      return self.user_broker.getUserByUserName(username)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 

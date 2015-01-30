@@ -220,7 +220,8 @@ class Maintenance(object):
     # copy python file if nessessary
     if destination_path != path:
       if isfile(destination_path):
-        raise Exception(u'Handler already exists at the given place')
+        # raise Exception(u'Handler already exists at the given place')
+        pass
       else:
         copy(path, destination_path)
         print u'Copied file {0} to {1}'.format(path, destination_path)
@@ -237,7 +238,7 @@ class Maintenance(object):
       raise Exception((u'{0} does not implement HandlerBase').format(classname))
 
     # check if input, edit and view files required exists
-    base_templates = ce1sus_base_path + '/htdocs/pages/handlers/'
+    base_templates = ce1sus_base_path + '/htdocs/pages/handlers/attribtues/'
 
     # check if template files are matching
     self.__check_templates(handler_base_path, classname, instance, base_templates, destination_path, 'add')
@@ -266,41 +267,44 @@ class Maintenance(object):
       if isfile(file_to_move):
         if isfile(js_file):
           if fileHashMD5(file_to_move) != fileHashMD5(js_file):
-            remove(destination_path)
-            remove(add_file)
-            remove(edit_file)
-            remove(view_file)
+            #remove(destination_path)
+            #remove(add_file)
+            #remove(edit_file)
+            #remove(view_file)
             raise Exception((u'{0} does supply a js (file /htdocs/js/ce1sus/controllers/handlers/{0}handler.js) which is different from an existing one.').format(classname))
           else:
             copy(file_to_move, js_file)
       else:
-        remove(destination_path)
-        remove(add_file)
-        remove(edit_file)
-        remove(view_file)
-        raise Exception((u'{0} does not supply a js but states it is required (file {0}handler.js not found)').format(classname))
+        #remove(destination_path)
+        #remove(add_file)
+        #remove(edit_file)
+        #remove(view_file)
+        # raise Exception((u'{0} does not supply a js but states it is required (file {0}handler.js not found)').format(classname))
+        pass
 
       # appending file to index
       worked = self.__append_js_to_index(classname, ce1sus_base_path)
       if not worked:
-        remove(destination_path)
-        remove(add_file)
-        remove(edit_file)
-        remove(view_file)
+        #remove(destination_path)
+        #remove(add_file)
+        #remove(edit_file)
+        #remove(view_file)
         if js_file:
-          remove(js_file)
+          #remove(js_file)
+          pass
 
     uuid = instance.get_uuid()
     description = instance.get_description()
     try:
       self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
     except ControllerException:
-      remove(destination_path)
-      remove(add_file)
-      remove(edit_file)
-      remove(view_file)
+      #remove(destination_path)
+      #remove(add_file)
+      #remove(edit_file)
+      #remove(view_file)
       if js_file:
-        remove(js_file)
+        #remove(js_file)
+        pass
     print "AttributeHandler {0} added".format(classname)
 
   def register_handler(self, modulename, classname=None):

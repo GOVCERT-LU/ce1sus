@@ -8,6 +8,8 @@ Created Jul, 2013
 from abc import abstractmethod
 from ce1sus_api.api.restclasses import Ce1susWrappedFile
 from datetime import datetime, date
+from decimal import Decimal
+import json
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
@@ -27,6 +29,14 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+
+
+class fakefloat(float):
+    def __init__(self, value):
+        self._value = value
+
+    def __repr__(self):
+        return str(self._value)
 
 
 class BaseClass(object):
@@ -57,6 +67,8 @@ class BaseClass(object):
         return value.strftime('%m/%d/%Y')
       if isinstance(value, UUID):
         return u'{0}'.format(value)
+      if isinstance(value, Decimal):
+        return fakefloat(value)
       return value
     else:
       return ''

@@ -58,7 +58,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
 
 
 class Event(ExtendedLogingInformations, Base):
-  title = Column('title', Unicode(45), index=True, unique=True, nullable=False)
+  title = Column('title', Unicode(45), index=True, nullable=False)
   description = Column('description', UnicodeText)
   tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
   status_id = Column('status_id', Integer(1), default=0, nullable=False)

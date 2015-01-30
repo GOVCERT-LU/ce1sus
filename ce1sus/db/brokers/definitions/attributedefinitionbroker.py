@@ -154,7 +154,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
     """
     try:
       self.session.query(AttributeDefinition).filter(AttributeDefinition.identifier == identifier,
-                                                     AttributeDefinition.deletable == 1
+                                                     AttributeDefinition.cybox_std is False
                                                      ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.OperationalError as error:
       self.session.rollback()

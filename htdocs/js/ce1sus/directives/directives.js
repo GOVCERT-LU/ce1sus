@@ -1020,7 +1020,7 @@ app.directive("attributeHandler", function() {
         var viewType = scope.definition.attributehandler.view_type;
         var baseUrl = 'pages/handlers';
         
-        var templateUrl = baseUrl + '/attributes/'+ contentType + '/'+viewType+'.html';
+        var templateUrl = baseUrl + '/attribtues/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();
         return templateUrl;
       };

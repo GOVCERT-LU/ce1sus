@@ -9,7 +9,7 @@
           type="text" ng-minlength=2 ng-maxlength=255 required  
           ng-pattern="patternexpression"></textarea>
         <p
-          ng-show="form.value.$invalid && !form.value.$pristine"
+         ng-show="form.value.$invalid && !form.value.$pristine"
           class="help-block">Value is required.</p>
         <p ng-show="form.value.$error.minlength"
           class="help-block">Value is too short.</p>

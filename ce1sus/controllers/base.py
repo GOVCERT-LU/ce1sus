@@ -29,6 +29,10 @@ class ControllerException(Exception):
   pass
 
 
+class ControllerIntegrityException(ControllerException):
+  pass
+
+
 class ControllerNothingFoundException(ControllerException):
   pass
 
