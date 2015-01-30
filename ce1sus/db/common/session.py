@@ -6,10 +6,8 @@ module for session handling and brokers
 Created Jul, 2013
 """
 from abc import abstractmethod
-from ce1sus_api.api.restclasses import Ce1susWrappedFile
 from datetime import datetime, date
 from decimal import Decimal
-import json
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import declared_attr
@@ -59,8 +57,6 @@ class BaseClass(object):
     # TODO: rethink the wrapped file foo
     """converts the value None to '' else it will be send as None-Text"""
     if value or value == 0:
-      if isinstance(value, Ce1susWrappedFile):
-        return value.get_api_wrapped_value()
       if isinstance(value, datetime):
         return value.strftime('%m/%d/%Y %H:%M:%S %Z')
       if isinstance(value, date):
