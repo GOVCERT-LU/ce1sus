@@ -20,7 +20,6 @@ from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import Condit
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
-from ce1sus.views.web.api.version3.handlers.common.progresshandler import ProcessHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
@@ -58,7 +57,6 @@ class RestController(BaseView):
     self.instances['attributehandlers'] = HandlerHandler(config)
     self.instances['attributetables'] = TablesHandler(config)
     self.instances['attributetypes'] = AttribueTypeHandler(config)
-    self.instances['process'] = ProcessHandler(config)
     self.instances['event'] = EventHandler(config)
     self.instances['observable'] = ObservableHandler(config)
     self.instances['object'] = ObjectHandler(config)
