@@ -5,7 +5,7 @@
 
 Created on Oct 17, 2014
 """
-from sqlalchemy.ext.declarative.api import declared_attr
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date
