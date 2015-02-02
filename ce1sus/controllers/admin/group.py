@@ -5,7 +5,8 @@ module handing the attributes pages
 
 Created: Aug 26, 2013
 """
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException,\
+  ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
@@ -44,6 +45,8 @@ class GroupController(BaseController):
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(group)
       raise ControllerException(u'Could not add group due to: {0}'.format(message))
+    except IntegrityException as error:
+      raise ControllerIntegrityException(error)
     except (BrokerException) as error:
       raise ControllerException(error)
 

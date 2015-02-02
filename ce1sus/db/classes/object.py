@@ -92,6 +92,7 @@ class Object(ExtendedLogingInformations, Base):
     return self.__bit_code
 
   def get_attributes_for_permissions(self, event_permissions):
+    return self.attributes.all()
     if event_permissions:
       if event_permissions.can_validate:
         return self.attributes.all()
