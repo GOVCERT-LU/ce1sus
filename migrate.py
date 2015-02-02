@@ -69,7 +69,7 @@ def get_db_code(old_code):
   permissions.is_rest_instert = bit_value.is_rest_instert
   permissions.is_validated = bit_value.is_validated
   permissions.is_web_insert = bit_value.is_web_insert
-  return permissions.bit_code()
+  return permissions.bit_code
 
 
 def convert_date(string_date):
@@ -307,6 +307,7 @@ class Migrator(object):
     lines = data_file.readlines()
     for line in lines:
       json_dict = json.loads(line)
+      print u'Migrating Event # {0} - {1}'.format(json_dict['identifier'], json_dict['uuid'])
       if json_dict['uuid'] == '84ca657d-eee2-4202-99be-f78256eb876a' or not debug:
         event = self.map_event(json_dict)
         self.event_controller.event_broker.insert(event, True)
