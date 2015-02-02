@@ -16,7 +16,7 @@ def is_user_priviledged(user):
   return user.permissions.privileged
 
 
-def is_object_viewable(instance, event_permissions):
+def is_object_viewable(instance, event_permissions, cache=None):
   if instance.properties.is_validated and instance.properties.is_shareable:
     return True
   elif event_permissions:

@@ -14,6 +14,7 @@ from os.path import dirname, abspath
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.dynamic import AppenderQuery
 from sqlalchemy.orm.session import make_transient
+import time
 from types import ListType
 from uuid import uuid4
 
@@ -37,8 +38,7 @@ import ce1sus.db.classes.indicator
 import ce1sus.db.classes.mailtemplate
 from ce1sus.db.classes.object import Object, RelatedObject
 import ce1sus.db.classes.object
-from ce1sus.db.classes.observables import Observable, ObservableComposition, \
-  RelatedObservable
+from ce1sus.db.classes.observables import Observable, ObservableComposition, RelatedObservable
 import ce1sus.db.classes.observables
 import ce1sus.db.classes.relation
 from ce1sus.db.classes.report import Report, Reference
@@ -75,6 +75,8 @@ def map_group(line, groups, owner):
   grouppermission.group = group
   grouppermission.group_id = group.identifier
   grouppermission.dbcode = group.default_dbcode
+  if owner.group.identifier == group.identifier:
+    grouppermission.permissions.set_all()
   # Set the informations to the owner of the event
   grouppermission.creator_group = owner.group
   grouppermission.creator_group_id = grouppermission.creator_group.identifier
@@ -182,11 +184,17 @@ def map_attribute(line, attr_defs, users, obj, owner, conditions):
   seen_attribute_ids.append(id_)
   attribute.identifier = id_
   attribute.dbcode = line['dbcode']
+  if not attribute.properties.is_validated:
+    # when migrating everything gets validated
+    attribute.properties.is_validated = True
   attribute_id_uuid[line['identifier']] = attribute
   attribute.creator_group = groups[line['creator_group_id']]
   attribute.creator_group_id = attribute.creator_group.identifier
   attribute.creator = users[line['creator_id']]
   attribute.creator_id = attribute.creator.identifier
+  attribute.created_at = convert_date(line['created'])
+  attribute.modified_on = convert_date(line['modified'])
+
   modifier_id = line.get('modifier_id')
   if modifier_id:
     modifier = users[modifier_id]
@@ -278,8 +286,13 @@ def make_object(line, observable, groups, users):
   obj.creator_group_id = obj.creator_group.identifier
   obj.creator = users[line['creator_id']]
   obj.creator_id = obj.creator.identifier
+  obj.created_at = convert_date(line['created'])
+  obj.modified_on = convert_date(line['modified'])
   modifier_id = line['modifier_id']
   obj.dbcode = line['dbcode']
+  if not obj.properties.is_validated:
+    # when migrating everything gets validated
+    obj.properties.is_validated = True
   if modifier_id:
     modifier = users[modifier_id]
   else:
@@ -472,6 +485,9 @@ def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event
   composed_attribute = ObservableComposition()
   composed_attribute.identifier = uuid4()
   composed_attribute.dbcode = line['dbcode']
+  if not composed_attribute.properties.is_validated:
+    # when migrating everything gets validated
+    composed_attribute.properties.is_validated = True
   composed_attribute.parent_id = observable.identifier
   composed_attribute.parent = observable
 
@@ -483,7 +499,7 @@ def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event
         observable.description = ''
       observable.description = observable.description + ' ' + attribtue['value']
     elif name == 'url' or name == 'reference_url':
-      attribute = make_attr_obs(attribtue, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions)
+      attribute = make_attr_obs(attribtue, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(attribute)
     elif name == 'url_path':
       # make pattern out of it
@@ -491,13 +507,13 @@ def map_malicious_website(line, users, groups, owner, attr_defs, obj_defs, event
       attribute['uuid'] = u'{0}'.format(uuid4())
       attribute['definition']['name'] = 'url_pattern'
       attribute['definition']['chksum'] = None
-      attribute = make_attr_obs(attribtue, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions)
+      attribute = make_attr_obs(attribtue, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(attribute)
     elif name == 'hostname':
-      attribute = make_attr_obs(attribtue, users, groups, 'Hostname', 'Hostname_Value', owner, obj_defs, attr_defs, conditions)
+      attribute = make_attr_obs(attribtue, users, groups, 'Hostname', 'Hostname_Value', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(attribute)
     elif name == 'ipv4_addr':
-      attribute = make_attr_obs(attribtue, users, groups, 'Address', name, owner, obj_defs, attr_defs, conditions)
+      attribute = make_attr_obs(attribtue, users, groups, 'Address', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(attribute)
     else:
       raise Exception(name)
@@ -534,7 +550,9 @@ def clone_object(obj):
   new_obj.definition = obj.definition
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
-
+  if not new_obj.properties.is_validated:
+    # when migrating everything gets validated
+    new_obj.properties.is_validated = True
   new_obj.observable = obj.observable
   new_obj.observable_id = new_obj.observable.identifier
   new_obj.parent = new_obj.parent
@@ -550,6 +568,9 @@ def clone_object(obj):
 def clone_composed_observable(composed_observable):
   new_composed_observable = ObservableComposition()
   new_composed_observable.dbcode = composed_observable.dbcode
+  if not new_composed_observable.properties.is_validated:
+    # when migrating everything gets validated
+    new_composed_observable.properties.is_validated = True
   new_composed_observable.operator = composed_observable.operator
   new_composed_observable.parent = composed_observable.parent
   new_composed_observable.parent_id = composed_observable.parent_id
@@ -576,6 +597,9 @@ def clone_observable(observable):
   new_observable.title = observable.title
   new_observable.dbcode = observable.dbcode
   # do not set event as this will then be directly liked to the event!
+  if not new_observable.properties.is_validated:
+    # when migrating everything gets validated
+    new_observable.properties.is_validated = True
   new_observable.parent = observable.parent
   new_observable.parent_id = observable.parent_id
 
@@ -629,13 +653,17 @@ def map_indicator(observable, line, users, groups, indicator_type):
   return indicator
 
 
-def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_defs, conditions):
+def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_defs, conditions, event):
   observable = make_observable(line, groups, users, event)
   observable.identifier = uuid4()
+  # important to delink them from the event
+  observable.event_id = None
+  observable.event = None
 
   obj = make_object(line, observable, groups, users)
   obj.identifier = uuid4()
-  changed = False
+
+  line['definition']['name'] = attr_def
   if attr_def == 'ip_port':
     obj.definition = map_obj_def({'name': 'SocketAddress', 'chksum': None}, obj_defs)
   elif attr_def == 'ip_protocol':
@@ -647,7 +675,6 @@ def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_
       obj.definition = map_obj_def({'name': 'IDSRule', 'chksum': None}, obj_defs)
       line['definition']['name'] = 'snort_rule'
       line['definition']['chksum'] = None
-      changed = True
     else:
       raise Exception('Uknown ids system {0}'.format(value))
 
@@ -656,13 +683,12 @@ def make_attr_obs(line, users, groups, obj_def, attr_def, owner, obj_defs, attr_
 
   else:
     obj.definition = map_obj_def({'name': obj_def, 'chksum': None}, obj_defs)
+
   if not obj.definition:
     notmapped.write('{0} could not be mapped\n'.format(obj_def))
     notmapped.write('{0}\n'.format(json.dumps(line)))
     return None
 
-  if not changed:
-    line['definition']['name'] = attr_def
   attribute = map_attribute(line, attr_defs, users, obj, owner, conditions)
   if attribute:
     obj.attributes.append(attribute)
@@ -696,6 +722,9 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
   composed_attribute = ObservableComposition()
   composed_attribute.identifier = uuid4()
   composed_attribute.dbcode = line['dbcode']
+  if not composed_attribute.properties.is_validated:
+    # when migrating everything gets validated
+    composed_attribute.properties.is_validated = True
   composed_attribute.parent_id = result_observable.identifier
   composed_attribute.parent = result_observable
 
@@ -703,31 +732,31 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
   for attribute in mal_email:
     name = attribute['definition']['name']
     if 'domain' in name:
-      obs = make_attr_obs(attribute, users, groups, 'DomainName', 'domain', owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'DomainName', 'domain', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'hostname'in name:
-      obs = make_attr_obs(attribute, users, groups, 'Hostname', 'Hostname_Value', owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'Hostname', 'Hostname_Value', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'ip' in name:
-      obs = make_attr_obs(attribute, users, groups, 'Address', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'Address', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'file' in name:
-      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'email' in name:
-      obs = make_attr_obs(attribute, users, groups, 'email', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'email', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'comment' in name:
-      pass
-      # TODO
+      notmapped.write('IOC Record comment could not be created the new event {0} and composed attribute {1}\n'.format(event.identifier, composed_attribute.identifier))
+      notmapped.write('{0}\n'.format(json.dumps(attribute)))
     elif 'hash' in name:
-      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'encryption_key':
       notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
       notmapped.write('{0}\n'.format(json.dumps(attribute)))
     elif name == 'ids_rules':
-      obs = make_attr_obs(attribute, users, groups, 'IDSRule', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'IDSRule', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'analysis_free_text':
       if not report:
@@ -736,7 +765,7 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
       report.description = report.description + '\n' + attribute['value']
       event.reports.append(report)
     elif name == 'yara_rule':
-      obs = make_attr_obs(attribute, users, groups, 'IDSRule', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'IDSRule', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'reference_free_text':
       if not report:
@@ -745,16 +774,16 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
       report.description = report.description + '\n' + attribute['value']
       event.reports.append(report)
     elif 'http' in name:
-      obs = make_attr_obs(attribute, users, groups, 'HTTPSession', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'HTTPSession', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'traffic_content' in name:
-      obs = make_attr_obs(attribute, users, groups, 'forensic_records', 'traffic_content', owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'forensic_records', 'traffic_content', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'memory_pattern':
-      obs = make_attr_obs(attribute, users, groups, 'Memory', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'Memory', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'mutex':
-      obs = make_attr_obs(attribute, users, groups, 'Mutex', 'Mutex_name', owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'Mutex', 'Mutex_name', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'win_registry_key':
       value = attribute['value']
@@ -793,7 +822,7 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
 
       composed_attribute.observables.append(observable)
     elif name == 'vulnerability_cve':
-      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'file', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif 'targeted' in name:
       notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
@@ -805,10 +834,10 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
       notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
       notmapped.write('{0}\n'.format(json.dumps(attribute)))
     elif 'traffic_content' in name:
-      obs = make_attr_obs(attribute, users, groups, 'forensic_records', 'traffic_content', owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'forensic_records', 'traffic_content', owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'url':
-      obs = make_attr_obs(attribute, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'url_path':
       # make pattern out of it
@@ -816,16 +845,24 @@ def map_observable_composition(mal_email, line, users, groups, owner, event):
       attribute['uuid'] = u'{0}'.format(uuid4())
       attribute['definition']['name'] = 'url_pattern'
       attribute['definition']['chksum'] = None
-      obs = make_attr_obs(attribute, users, groups, 'URI', attribute['definition']['name'], owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'URI', attribute['definition']['name'], owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     elif name == 'url_pattern':
-      obs = make_attr_obs(attribute, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions)
+      obs = make_attr_obs(attribute, users, groups, 'URI', name, owner, obj_defs, attr_defs, conditions, event)
       composed_attribute.observables.append(obs)
     else:
       raise Exception('Mapping for {0} is not defined'.format(name))
 
-  result_observable.observable_composition = composed_attribute
-  return result_observable
+  if composed_attribute.observables.count() == 1:
+    composed_attribute.observables[0].event = event
+    composed_attribute.observables[0].event_id = event.identifier
+    return composed_attribute.observables[0]
+
+  elif composed_attribute.observables.count() > 1:
+    result_observable.observable_composition = composed_attribute
+    return result_observable
+  else:
+    return None
 
 
 def map_ioc_records(line, users, groups, owner, attr_defs, obj_defs, parent_observable, event, conditions):
@@ -862,59 +899,68 @@ def map_ioc_records(line, users, groups, owner, attr_defs, obj_defs, parent_obse
 
   if mal_email:
     observable = map_observable_composition(mal_email, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'Malicious E-mail')
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'Malicious E-mail')
 
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+      result_observables.append(observable)
+      del mal_email[:]
+      event.indicators.append(indicator)
 
   if artifacts:
     observable = map_observable_composition(artifacts, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'Malware Artifacts')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'Malware Artifacts')
+      del artifacts[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if ips:
     observable = map_observable_composition(ips, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'IP Watchlist')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'IP Watchlist')
+      del ips[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if file_hashes:
     observable = map_observable_composition(file_hashes, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'File Hash Watchlist')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'File Hash Watchlist')
+      del file_hashes[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if domains:
     observable = map_observable_composition(domains, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'Domain Watchlist')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'Domain Watchlist')
+      del domains[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if c2s:
     observable = map_observable_composition(c2s, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'C2')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'C2')
+      del c2s[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if urls:
     observable = map_observable_composition(urls, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, 'URL Watchlist')
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, 'URL Watchlist')
+      del urls[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   if others:
     observable = map_observable_composition(others, line, users, groups, owner, event)
-    indicator = map_indicator(observable, line, users, groups, None)
-
-    result_observables.append(observable)
-    event.indicators.append(indicator)
+    if observable:
+      indicator = map_indicator(observable, line, users, groups, None)
+      del others[:]
+      result_observables.append(observable)
+      event.indicators.append(indicator)
 
   return result_observables
 
@@ -927,6 +973,8 @@ def make_observable(line, groups, users, event):
   result_observable.creator_group_id = result_observable.creator_group.identifier
   result_observable.creator = users[line['creator_id']]
   result_observable.creator_id = result_observable.creator.identifier
+  result_observable.created_at = convert_date(line['created'])
+  result_observable.modified_on = convert_date(line['modified'])
   modifier_id = line['modifier_id']
   if modifier_id:
     modifier = users[modifier_id]
@@ -940,8 +988,13 @@ def make_observable(line, groups, users, event):
   result_observable.parent = event
   result_observable.event_id = event.identifier
   result_observable.event = event
+  result_observable.created_at = convert_date(line['created'])
+  result_observable.modified_on = convert_date(line['modified'])
   # db code is the same as for the object
   result_observable.dbcode = line['dbcode']
+  if not result_observable.properties.is_validated:
+    # when migrating everything gets validated
+    result_observable.properties.is_validated = True
   return result_observable
 
 
@@ -975,8 +1028,7 @@ def map_object(parent, line, users, groups, owner, event, attr_defs, obj_defs, c
 
     result = map_ioc_records(line, users, groups, owner, attr_defs, obj_defs, None, event, conditions)
     if result:
-      for obs in result:
-        event.observables.append(obs)
+      return result
 
     # -> composed observable
   elif definition['name'] == 'malicious_website':
@@ -1009,7 +1061,12 @@ def make_reference(attribute, users, groups, report, resources):
   reference.creator = users[attribute['creator_id']]
   reference.creator_id = reference.creator.identifier
   reference.dbcode = attribute['dbcode']
+  if not reference.properties.is_validated:
+    # when migrating everything gets validated
+    reference.properties.is_validated = True
   modifier_id = attribute.get('modifier_id')
+  reference.created_at = convert_date(attribute['created'])
+  reference.modified_on = convert_date(attribute['modified'])
   if modifier_id:
     reference.modifier = users[modifier_id]
   else:
@@ -1043,7 +1100,11 @@ def make_report(line, users, groups, owner, event):
   report.creator = users[line['creator_id']]
   report.creator_id = report.creator.identifier
   report.dbcode = line['dbcode']
-
+  if not report.properties.is_validated:
+    # when migrating everything gets validated
+    report.properties.is_validated = True
+  report.created_at = convert_date(line['created'])
+  report.modified_on = convert_date(line['modified'])
   modifier_id = line['modifier_id']
   if modifier_id:
     report.modifier = users[modifier_id]
@@ -1289,10 +1350,18 @@ if __name__ == '__main__':
 
   data_file = open('dumps/events.txt', 'r')
   lines = data_file.readlines()
+  counter = -1
+  start = 14
+  end = start + 5
   for line in lines:
-    json_dict = json.loads(line)
-    event = map_event(json_dict, users, groups, attr_defs, obj_defs, conditions, ressources)
-    event_controller.event_broker.insert(event, True)
+    counter = counter + 1
+    if counter >= start and counter <= end:
+      json_dict = json.loads(line)
+      event = map_event(json_dict, users, groups, attr_defs, obj_defs, conditions, ressources)
+      event_controller.event_broker.insert(event, True)
+      event = None
+    if counter > end:
+      break
 
   data_file.close()
 

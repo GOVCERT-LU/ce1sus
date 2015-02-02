@@ -161,7 +161,7 @@ class FileHandler(GenericHandler):
   def update(self, attribute, user, json):
     raise HandlerException('FileHandler does not support updates')
 
-  def get_data(self, attribute, parameters):
+  def get_data(self, attribute, definition, parameters):
     if attribute:
       rel_path = attribute.value
       event = attribute.object.event
