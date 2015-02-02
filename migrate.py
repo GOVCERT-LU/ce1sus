@@ -86,9 +86,7 @@ def clone_attr(attribute, obj):
   attr.object = obj
   attr.object_id = attr.object.identifier
 
-  if not attr.properties.is_validated:
-    # when migrating everything gets validated
-    attr.properties.is_validated = True
+  attr.properties.is_validated = True
   attr.value = attribute.value
   return attr
 
@@ -110,9 +108,7 @@ def clone_object(obj, observable, parent=None):
   new_obj.definition = obj.definition
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
-  if not new_obj.properties.is_validated:
-    # when migrating everything gets validated
-    new_obj.properties.is_validated = True
+  new_obj.properties.is_validated = True
 
   new_obj.observable = observable
   new_obj.observable_id = new_obj.observable.identifier
@@ -140,9 +136,7 @@ def clone_composed_observable(composed_observable):
   new_composed_observable = ObservableComposition()
   new_composed_observable.identifier = uuid4()
   new_composed_observable.dbcode = composed_observable.dbcode
-  if not new_composed_observable.properties.is_validated:
-    # when migrating everything gets validated
-    new_composed_observable.properties.is_validated = True
+  new_composed_observable.properties.is_validated = True
   new_composed_observable.operator = composed_observable.operator
   new_composed_observable.parent = composed_observable.parent
   new_composed_observable.parent_id = composed_observable.parent_id
@@ -207,9 +201,8 @@ def clone_observable(observable):
   new_observable.title = observable.title
   new_observable.dbcode = observable.dbcode
   # do not set event as this will then be directly liked to the event!
-  if not new_observable.properties.is_validated:
-    # when migrating everything gets validated
-    new_observable.properties.is_validated = True
+
+  new_observable.properties.is_validated = True
   new_observable.parent = observable.parent
   new_observable.parent_id = observable.parent_id
 
@@ -342,9 +335,7 @@ class Migrator(object):
     report.creator = self.get_users()[line['creator_id']]
     report.creator_id = report.creator.identifier
     report.dbcode = line['dbcode']
-    if not report.properties.is_validated:
-      # when migrating everything gets validated
-      report.properties.is_validated = True
+    report.properties.is_validated = True
     report.created_at = convert_date(line['created'])
     report.modified_on = convert_date(line['modified'])
     modifier_id = line['modifier_id']
@@ -490,9 +481,8 @@ class Migrator(object):
     obj.modified_on = convert_date(line['modified'])
     modifier_id = line['modifier_id']
     obj.dbcode = line['dbcode']
-    if not obj.properties.is_validated:
-      # when migrating everything gets validated
-      obj.properties.is_validated = True
+
+    obj.properties.is_validated = True
     if modifier_id:
       modifier = self.get_users()[modifier_id]
     else:
@@ -530,9 +520,8 @@ class Migrator(object):
     result_observable.modified_on = convert_date(line['modified'])
     # db code is the same as for the object
     result_observable.dbcode = line['dbcode']
-    if not result_observable.properties.is_validated:
-      # when migrating everything gets validated
-      result_observable.properties.is_validated = True
+
+    result_observable.properties.is_validated = True
     return result_observable
 
   def map_reference_definition(self, line):
@@ -564,9 +553,8 @@ class Migrator(object):
     reference.creator = self.get_users()[attribute['creator_id']]
     reference.creator_id = reference.creator.identifier
     reference.dbcode = attribute['dbcode']
-    if not reference.properties.is_validated:
-      # when migrating everything gets validated
-      reference.properties.is_validated = True
+
+    reference.properties.is_validated = True
     modifier_id = attribute.get('modifier_id')
     reference.created_at = convert_date(attribute['created'])
     reference.modified_on = convert_date(attribute['modified'])
@@ -646,9 +634,8 @@ class Migrator(object):
     self.seen_attribtues_uuids.append(id_)
     attribute.identifier = id_
     attribute.dbcode = line['dbcode']
-    if not attribute.properties.is_validated:
-      # when migrating everything gets validated
-      attribute.properties.is_validated = True
+
+    attribute.properties.is_validated = True
 
     self.seen_attributes[line['identifier']] = attribute
 
@@ -807,9 +794,8 @@ class Migrator(object):
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
     composed_attribute.dbcode = line['dbcode']
-    if not composed_attribute.properties.is_validated:
-      # when migrating everything gets validated
-      composed_attribute.properties.is_validated = True
+
+    composed_attribute.properties.is_validated = True
     composed_attribute.parent_id = result_observable.identifier
     composed_attribute.parent = result_observable
 
@@ -1097,9 +1083,8 @@ class Migrator(object):
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
     composed_attribute.dbcode = line['dbcode']
-    if not composed_attribute.properties.is_validated:
-      # when migrating everything gets validated
-      composed_attribute.properties.is_validated = True
+
+    composed_attribute.properties.is_validated = True
     composed_attribute.parent_id = observable.identifier
     composed_attribute.parent = observable
 
@@ -1311,9 +1296,8 @@ class Migrator(object):
       composed_attribute = ObservableComposition()
       composed_attribute.uuid = line['uuid']
       composed_attribute.dbcode = line['dbcode']
-      if not composed_attribute.properties.is_validated:
-        # when migrating everything gets validated
-        composed_attribute.properties.is_validated = True
+
+      composed_attribute.properties.is_validated = True
       composed_attribute.parent_id = result_observable.identifier
       composed_attribute.parent = result_observable
 
@@ -1370,9 +1354,8 @@ class Migrator(object):
     event.creator = self.get_users()[line['creator_id']]
     event.creator_id = event.creator.identifier
     event.dbcode = line['dbcode']
-    if not event.properties.is_validated:
-      # when migrating everything gets validated
-      event.properties.is_validated = True
+
+    event.properties.is_validated = True
     event.properties.is_shareable = line['published'] == 1
     event.risk_id = line['risk_id']
     event.title = line['title']
