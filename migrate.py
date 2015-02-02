@@ -28,6 +28,7 @@ from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.db.classes.attribute import Attribute
 import ce1sus.db.classes.attribute
+from ce1sus.db.classes.common import Properties
 import ce1sus.db.classes.definitions
 from ce1sus.db.classes.event import Event, EventGroupPermission
 import ce1sus.db.classes.event
@@ -47,7 +48,7 @@ from ce1sus.db.classes.user import User
 import ce1sus.db.classes.user
 import ce1sus.db.classes.values
 from ce1sus.db.common.session import SessionManager, Base
-from ce1sus.depricated.helpers.bitdecoder import BitRight
+from ce1sus.depricated.helpers.bitdecoder import BitRight, BitValue
 from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.helpers.common import strings
 from ce1sus.helpers.common.config import Configuration
@@ -59,6 +60,16 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+
+
+def get_db_code(old_code):
+  bit_value = BitValue(old_code)
+  permissions = Properties('0')
+  permissions.is_proposal = bit_value.is_proposal
+  permissions.is_rest_instert = bit_value.is_rest_instert
+  permissions.is_validated = bit_value.is_validated
+  permissions.is_web_insert = bit_value.is_web_insert
+  return permissions.bit_code()
 
 
 def convert_date(string_date):
@@ -86,7 +97,6 @@ def clone_attr(attribute, obj):
   attr.object = obj
   attr.object_id = attr.object.identifier
 
-
   attr.value = attribute.value
   return attr
 
@@ -108,7 +118,6 @@ def clone_object(obj, observable, parent=None):
   new_obj.definition = obj.definition
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
-
 
   new_obj.observable = observable
   new_obj.observable_id = new_obj.observable.identifier
@@ -201,7 +210,6 @@ def clone_observable(observable):
   new_observable.title = observable.title
   new_observable.dbcode = observable.dbcode
   # do not set event as this will then be directly liked to the event!
-
 
   new_observable.parent = observable.parent
   new_observable.parent_id = observable.parent_id
@@ -334,7 +342,7 @@ class Migrator(object):
     report.creator_group_id = report.creator_group.identifier
     report.creator = self.get_users()[line['creator_id']]
     report.creator_id = report.creator.identifier
-    report.dbcode = line['dbcode']
+    report.dbcode = get_db_code(line['dbcode'])
 
     report.created_at = convert_date(line['created'])
     report.modified_on = convert_date(line['modified'])
@@ -480,7 +488,7 @@ class Migrator(object):
     obj.created_at = convert_date(line['created'])
     obj.modified_on = convert_date(line['modified'])
     modifier_id = line['modifier_id']
-    obj.dbcode = line['dbcode']
+    obj.dbcode = get_db_code(line['dbcode'])
 
     if modifier_id:
       modifier = self.get_users()[modifier_id]
@@ -518,8 +526,7 @@ class Migrator(object):
     result_observable.created_at = convert_date(line['created'])
     result_observable.modified_on = convert_date(line['modified'])
     # db code is the same as for the object
-    result_observable.dbcode = line['dbcode']
-
+    result_observable.dbcode = get_db_code(line['dbcode'])
 
     return result_observable
 
@@ -551,8 +558,7 @@ class Migrator(object):
     reference.creator_group_id = reference.creator_group.identifier
     reference.creator = self.get_users()[attribute['creator_id']]
     reference.creator_id = reference.creator.identifier
-    reference.dbcode = attribute['dbcode']
-
+    reference.dbcode = get_db_code(attribute['dbcode'])
 
     modifier_id = attribute.get('modifier_id')
     reference.created_at = convert_date(attribute['created'])
@@ -632,9 +638,7 @@ class Migrator(object):
 
     self.seen_attribtues_uuids.append(id_)
     attribute.identifier = id_
-    attribute.dbcode = line['dbcode']
-
-
+    attribute.dbcode = get_db_code(line['dbcode'])
 
     self.seen_attributes[line['identifier']] = attribute
 
@@ -792,8 +796,7 @@ class Migrator(object):
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
-    composed_attribute.dbcode = line['dbcode']
-
+    composed_attribute.dbcode = get_db_code(line['dbcode'])
 
     composed_attribute.parent_id = result_observable.identifier
     composed_attribute.parent = result_observable
@@ -1081,8 +1084,7 @@ class Migrator(object):
 
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
-    composed_attribute.dbcode = line['dbcode']
-
+    composed_attribute.dbcode = get_db_code(line['dbcode'])
 
     composed_attribute.parent_id = observable.identifier
     composed_attribute.parent = observable
@@ -1294,8 +1296,7 @@ class Migrator(object):
 
       composed_attribute = ObservableComposition()
       composed_attribute.uuid = line['uuid']
-      composed_attribute.dbcode = line['dbcode']
-
+      composed_attribute.dbcode = get_db_code(line['dbcode'])
 
       composed_attribute.parent_id = result_observable.identifier
       composed_attribute.parent = result_observable
@@ -1352,8 +1353,7 @@ class Migrator(object):
     event.creator_group_id = event.creator_group.identifier
     event.creator = self.get_users()[line['creator_id']]
     event.creator_id = event.creator.identifier
-    event.dbcode = line['dbcode']
-
+    event.dbcode = get_db_code(line['dbcode'])
 
     event.properties.is_shareable = line['published'] == 1
     event.risk_id = line['risk_id']
