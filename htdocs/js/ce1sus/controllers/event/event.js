@@ -17,8 +17,8 @@ app.controller("eventController", function($scope, Restangular,messages,
         found = true;
       }
     }, $log);
+    var url = '/events/event/'+event.identifier;
     if (!found) {
-      var url = '/events/event/'+event.identifier;
       $scope.openedEvents.push({
         icon: '',
         title: event.title,
@@ -31,6 +31,8 @@ app.controller("eventController", function($scope, Restangular,messages,
       if (guiOpen){
         $location.path(url);
       }
+    } else {
+      $location.path(url);
     }
   };
 
