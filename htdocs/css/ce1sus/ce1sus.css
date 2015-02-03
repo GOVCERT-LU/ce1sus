@@ -240,3 +240,10 @@ margin-top: 9px;
   background-color: yellow;
 }
 
+.scrollbarbox {
+	width: 100%;
+	height: 80vh;
+	padding-bottom: 5px;
+	overflow: auto;
+}
+

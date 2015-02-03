@@ -8,17 +8,18 @@
     </div>
     <p/>
     <div class="well">
-      
-      <ul class="nav nav-list">
-        <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
-        <li ng-class="{active: ('main.layout.admin.group.help' | routeSegmentStartsWith)}">
-          <a href="#{{ 'main.layout.admin.group' | routeSegmentUrl }}">Help</a>
-        </li>
-        <li class="nav-header"><i class="fa fa-users"></i> Groups</li>
-        <li ng-repeat="group_entry in groups" ng-class="{active: ('main.layout.admin.group.groupDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == group_entry.identifier}">
-        <a ng-href="#{{ 'main.layout.admin.group.groupDetails' | routeSegmentUrl: {id: group_entry.identifier} }}">{{group_entry.name}}</a>
-        </li>
-      </ul>
+      <div class="scrollbarbox">
+        <ul class="nav nav-list">
+          <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
+          <li ng-class="{active: ('main.layout.admin.group.help' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.group' | routeSegmentUrl }}">Help</a>
+          </li>
+          <li class="nav-header"><i class="fa fa-users"></i> Groups</li>
+          <li ng-repeat="group_entry in groups" ng-class="{active: ('main.layout.admin.group.groupDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == group_entry.identifier}">
+          <a ng-href="#{{ 'main.layout.admin.group.groupDetails' | routeSegmentUrl: {id: group_entry.identifier} }}">{{group_entry.name}}</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
   <div class="col-lg-9 anim" app-view-segment="4">

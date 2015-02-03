@@ -8,17 +8,18 @@
     </div>
     <p/>
     <div class="well">
-      
-      <ul class="nav nav-list">
-        <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
-        <li ng-class="{active: ('main.layout.admin.condition.help' | routeSegmentStartsWith)}">
-          <a href="#{{ 'main.layout.admin.condition' | routeSegmentUrl }}">Help</a>
-        </li>
-        <li class="nav-header"><i class="fa fa-envelope"></i> Conditions</li>
-        <li ng-repeat="condition_entry in conditions" ng-class="{active: ('main.layout.admin.condition.conditionDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == condition_entry.identifier}">
-        <a ng-href="#{{ 'main.layout.admin.condition.conditionDetails' | routeSegmentUrl: {id: condition_entry.identifier} }}">{{condition_entry.value}}</a>
-        </li>
-      </ul>
+      <div class="scrollbarbox">
+        <ul class="nav nav-list">
+          <li class="nav-header"><span class="glyphicon glyphicon-asterisk"></span> Misc</li>
+          <li ng-class="{active: ('main.layout.admin.condition.help' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.condition' | routeSegmentUrl }}">Help</a>
+          </li>
+          <li class="nav-header"><i class="fa fa-envelope"></i> Conditions</li>
+          <li ng-repeat="condition_entry in conditions" ng-class="{active: ('main.layout.admin.condition.conditionDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == condition_entry.identifier}">
+          <a ng-href="#{{ 'main.layout.admin.condition.conditionDetails' | routeSegmentUrl: {id: condition_entry.identifier} }}">{{condition_entry.value}}</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
   <div class="col-lg-9 anim" app-view-segment="4">
