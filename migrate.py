@@ -134,7 +134,8 @@ def clone_object(obj, observable, parent=None):
       att = clone_attr(attribute, new_obj)
       if att:
         new_obj.attributes.append(att)
-  if new_obj.attributes.count() > 0:
+  # if new_obj.attributes.count() > 0:
+  if len(new_obj.attributes) > 0:
     return new_obj
   else:
     return None
@@ -154,7 +155,8 @@ def clone_composed_observable(composed_observable):
     if obs_i:
       new_composed_observable.observables.append(obs_i)
 
-  if new_composed_observable.observables.count() > 0:
+  # if new_composed_observable.observables.count() > 0:
+  if len(new_composed_observable.observables) > 0:
     return new_composed_observable
   else:
     return None
@@ -782,7 +784,8 @@ class Migrator(object):
         obj.attributes.append(attribute)
       else:
         raise Exception('No attributes were mapped')
-    if obj.attributes.count() > 0:
+    # if obj.attributes.count() > 0:
+    if len(obj.attributes) > 0:
       observable.object = obj
 
       return observable
@@ -926,12 +929,14 @@ class Migrator(object):
       else:
         raise Exception('Mapping for {0} is not defined'.format(name))
 
-    if composed_attribute.observables.count() == 1:
+    # if composed_attribute.observables.count() == 1:
+    if len(composed_attribute.observables) == 1:
       composed_attribute.observables[0].event = event
       composed_attribute.observables[0].event_id = event.identifier
       return composed_attribute.observables[0]
 
-    elif composed_attribute.observables.count() > 1:
+    # elif composed_attribute.observables.count() > 1:
+    elif len(composed_attribute.observables) > 1:
       result_observable.observable_composition = composed_attribute
       return result_observable
     else:
