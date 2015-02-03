@@ -70,13 +70,13 @@ class Event(ExtendedLogingInformations, Base):
 
   groups = relationship('EventGroupPermission', lazy='joined')
   # observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='joined')
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
   indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
-  reports = relationship('Report', lazy='joined')
+  reports = relationship('Report')
 
   @property
   def properties(self):
