@@ -147,7 +147,8 @@ class RelationController(BaseController):
       for child_observable in observable.observable_composition.observables:
         result + self.__process_observable(child_observable)
     else:
-      result = result + self.make_object_attributes_flat(child_observable.object)
+      result = result + self.make_object_attributes_flat(observable.object)
+    return result
 
   def get_flat_attributes_for_event(self, event):
     # Make attributes flat

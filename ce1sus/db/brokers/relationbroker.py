@@ -101,7 +101,7 @@ class RelationBroker(BrokerBase):
 
   def get_all_rel_with_not_def_list(self, def_ids):
     try:
-      relations = self.session.query(Relation).join(Attribute, Relation.attribute_id == Attribute.identifier).join(AttributeDefinition, Attribute.def_attribute_id == AttributeDefinition.identifier).filter(not_(AttributeDefinition.identifier.in_(def_ids))).all()
+      relations = self.session.query(Relation).join(Attribute, Relation.attribute_id == Attribute.identifier).join(AttributeDefinition, Attribute.definition_id == AttributeDefinition.identifier).filter(not_(AttributeDefinition.identifier.in_(def_ids))).all()
       if relations:
         return relations
       else:

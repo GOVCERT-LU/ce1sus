@@ -24,6 +24,7 @@ from ce1sus.db.classes.relation import Relation
 from ce1sus.db.classes.types import AttributeType
 from ce1sus.db.classes.user import User
 from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, TextValue
+from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition, ReferenceHandler
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
 from ce1sus.helpers.common.config import Configuration
@@ -90,7 +91,7 @@ class Maintenance(object):
     try:
       if verbose:
         print 'Getting relationable definitions'
-      definitions = self.attribute_definition_controller.get_rel.get_all_relationable_definitions()
+      definitions = self.attribute_definition_controller.get_all_relationable_definitions()
       if verbose:
         print 'Found {0} relationable definitions'.format(len(definitions))
       return definitions
