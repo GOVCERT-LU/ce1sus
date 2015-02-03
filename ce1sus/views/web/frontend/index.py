@@ -13,8 +13,6 @@ from ce1sus.controllers.login import LoginController
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.controllers.base import ControllerException
 
-from cherrypy.lib import httpauth
-
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -31,12 +29,7 @@ class IndexView(BaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def index(self):
-    try:
-      ah = httpauth.parseAuthorization(cherrypy.request.headers['authorization'])
-    except KeyError:
-      cherrypy.response.headers['www-authenticate'] = httpauth.basicAuth('iuser')
-      raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
-  
+
     # check if basic auth is enabled an if the user is set
     if not self.user_authenticated():
       # check if there is a basic auth enabled
@@ -44,7 +37,7 @@ class IndexView(BaseView):
       use_basic_auth = True
       if use_basic_auth:
         try:
-          ah = httpauth.parseAuthorization(cherrypy.request.headers['authorization'])
+          ah = cherrypy.lib.httpauth.parseAuthorization(cherrypy.request.headers['authorization'])
           username = ah['username']
           if username:
             user = self.login_controller.get_user_by_username(username)
@@ -52,12 +45,11 @@ class IndexView(BaseView):
               self.login_controller.update_last_login(user)
               self.put_user_to_session(user)
             else:
-              cherrypy.response.headers['www-authenticate'] = httpauth.basicAuth('iuser')
-              raise cherrypy.HTTPError(401, "You are not authorized to access this resource")              
+              cherrypy.response.headers['www-authenticate'] = cherrypy.lib.httpauth.basicAuth('iuser')
+              raise cherrypy.HTTPError(401, "You are not authorized to access this resource")
         except (KeyError, ControllerException):
-          cherrypy.response.headers['www-authenticate'] = httpauth.basicAuth('iuser')
+          cherrypy.response.headers['www-authenticate'] = cherrypy.lib.httpauth.basicAuth('iuser')
           raise cherrypy.HTTPError(401, "You are not authorized to access this resource")
-
 
     # only for fetching the first page
     return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index.html'))

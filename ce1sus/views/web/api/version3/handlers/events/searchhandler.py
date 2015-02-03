@@ -83,14 +83,14 @@ class SearchHandler(RestBaseHandler):
                        'attribute': found_value.to_dict(False, False),
                        })
       elif isinstance(found_value, Observable):
-        event = found_value.event
+        event = found_value.parent
         result.append({'event': event.to_dict(False, False),
                        'object': None,
                        'observable': found_value.to_dict(False, False),
                        'attribute': None,
                        })
       elif isinstance(found_value, ObservableComposition):
-        event = found_value.parent.event
+        event = found_value.parent.parent
         result.append({'event': event.to_dict(False, False),
                        'object': None,
                        'observable': found_value.to_dict(False, False),

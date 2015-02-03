@@ -43,7 +43,7 @@ class GuiMenus(BaseView):
       if user.permissions.access_admin_area:
         menu_item = dict()
         menu_item['icon'] = 'fa-cog'
-        menu_item['title'] = 'Admninistration'
+        menu_item['title'] = 'Administration'
 
         child_menus = list()
 

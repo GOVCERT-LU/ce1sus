@@ -6,8 +6,8 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
-from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
+from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
+from sqlalchemy.types import Unicode, Integer, UnicodeText
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
@@ -16,7 +16,6 @@ from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
-from ce1sus.db.classes.report import Report
 
 
 __author__ = 'Weber Jean-Paul'
