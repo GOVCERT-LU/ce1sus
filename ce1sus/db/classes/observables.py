@@ -37,7 +37,8 @@ class ObservableComposition(Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'OR')
-  observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
+  # observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
+  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
 
@@ -57,6 +58,19 @@ class ObservableComposition(Base):
     return True
 
   def get_observables_for_permissions(self, event_permissions):
+    rel_objs = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for rel_obj in self.observables:
+          if rel_obj.properties.is_shareable:
+            rel_objs.append(rel_obj)
+      # TODO take into account owner
+    else:
+      for rel_obj in self.observables:
+        if rel_obj.properties.is_validated_and_shared:
+          rel_objs.append(rel_obj)
+    return rel_objs
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.observables.all()
@@ -66,8 +80,11 @@ class ObservableComposition(Base):
     else:
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
+    """
 
   def observables_count_for_permissions(self, event_permissions):
+    return len(self.get_observables_for_permissions(event_permissions))
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.observables.count()
@@ -77,7 +94,7 @@ class ObservableComposition(Base):
     else:
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
-
+    """
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     observables = list()
     for observable in self.get_observables_for_permissions(event_permissions):
@@ -102,7 +119,7 @@ class RelatedObservable(ExtendedLogingInformations, Base):
   child_id = Column('child_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', Unicode(40))
   confidence = Column('confidence', Integer)
-  observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
+  observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False, lazy='joined')
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     # flatten related object
@@ -135,10 +152,13 @@ class Observable(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, nullable=False, default=0)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
   parent_id = Column('parent_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
-  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
+  # related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
+  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='joined')
   __bit_code = None
 
   def related_observables_count_for_permissions(self, event_permissions):
+    return len(self.get_related_observables_for_permissions(event_permissions))
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.related_observables.count()
@@ -148,11 +168,26 @@ class Observable(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).count()
+    """
 
   def related_observables_count(self):
-    return self.related_objects.count()
+    return len(self.related_observables)
+    # return self.related_objects.count()
 
   def get_related_observables_for_permissions(self, event_permissions):
+    rel_objs = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for rel_obj in self.related_observables:
+          if rel_obj.observable.properties.is_shareable:
+            rel_objs.append(rel_obj)
+      # TODO take into account owner
+    else:
+      for rel_obj in self.related_observables:
+        if rel_obj.observable.properties.is_validated_and_shared:
+          rel_objs.append(rel_obj)
+    return rel_objs
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.related_observables.all()
@@ -162,6 +197,7 @@ class Observable(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).all()
+    """
 
   @property
   def properties(self):

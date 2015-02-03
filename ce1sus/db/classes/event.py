@@ -69,7 +69,8 @@ class Event(ExtendedLogingInformations, Base):
   # TODO: Add administration of minimal objects -> checked before publishing
 
   groups = relationship('EventGroupPermission')
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
+  # observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
   indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer, nullable=False, default=0)
@@ -175,6 +176,19 @@ class Event(ExtendedLogingInformations, Base):
     return True
 
   def get_observables_for_permissions(self, event_permissions):
+    rel_objs = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for rel_obj in self.observables:
+          if rel_obj.properties.is_shareable:
+            rel_objs.append(rel_obj)
+      # TODO take into account owner
+    else:
+      for rel_obj in self.observables:
+        if rel_obj.properties.is_validated_and_shared:
+          rel_objs.append(rel_obj)
+    return rel_objs
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.observables.all()
@@ -184,8 +198,22 @@ class Event(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
+    """
 
   def get_reports_for_permissions(self, event_permissions):
+    rel_objs = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for rel_obj in self.reports:
+          if rel_obj.properties.is_shareable:
+            rel_objs.append(rel_obj)
+      # TODO take into account owner
+    else:
+      for rel_obj in self.reports:
+        if rel_obj.properties.is_validated_and_shared:
+          rel_objs.append(rel_obj)
+    return rel_objs
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.reports.all()
@@ -195,8 +223,11 @@ class Event(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.reports.filter(Report.dbcode.op('&')(3) == 3).all()
+    """
 
   def observables_count_for_permissions(self, event_permissions):
+    return len(self.get_observables_for_permissions(event_permissions))
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.observables.count()
@@ -206,8 +237,11 @@ class Event(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
+    """
 
   def reports_count_for_permissions(self, event_permissions):
+    return len(self.get_reports_for_permissions(event_permissions))
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.reports.count()
@@ -217,6 +251,7 @@ class Event(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.reports.filter(Report.dbcode.op('&')(3) == 3).count()
+    """
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, owner=False):
     if inflated:

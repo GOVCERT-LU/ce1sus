@@ -46,13 +46,14 @@ class RelatedObject(Base):
 
 
 class Object(ExtendedLogingInformations, Base):
-  # rel_composition = relationship('ComposedObject')
-  attributes = relationship('Attribute', lazy='dynamic')
+  # attributes = relationship('Attribute', lazy='dynamic')
+  attributes = relationship('Attribute', lazy='joined')
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
 
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
+  # related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   dbcode = Column('code', Integer, nullable=False, default=0)
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
@@ -92,6 +93,21 @@ class Object(ExtendedLogingInformations, Base):
     return self.__bit_code
 
   def get_attributes_for_permissions(self, event_permissions):
+    return self.attributes
+    attributes = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for attribute in self.attributes:
+          if attribute.properties.is_shareable:
+            attributes.append(attribute)
+      # TODO take into account owner
+    else:
+      for attribute in self.attributes:
+        if attribute.properties.is_validated_and_shared:
+          attributes.append(attribute)
+    return attributes
+
+    """
     return self.attributes.all()
     if event_permissions:
       if event_permissions.can_validate:
@@ -102,8 +118,23 @@ class Object(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).all()
+    """
 
   def get_related_objects_for_permissions(self, event_permissions):
+
+    rel_objs = list()
+    if event_permissions:
+      if event_permissions.can_validate:
+        for rel_obj in self.related_objects:
+          if rel_obj.object.properties.is_shareable:
+            rel_objs.append(rel_obj)
+      # TODO take into account owner
+    else:
+      for rel_obj in self.related_objects:
+        if rel_obj.object.properties.is_validated_and_shared:
+          rel_objs.append(rel_obj)
+    return rel_objs
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.related_objects.all()
@@ -113,8 +144,11 @@ class Object(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).all()
+    """
 
   def attributes_count_for_permissions(self, event_permissions):
+
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.attributes.count()
@@ -124,11 +158,16 @@ class Object(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).count()
+    """
+    return len(self.get_attributes_for_permissions(event_permissions))
 
   def attribute_count(self):
-    return self.attributes.count()
+    return len(self.attributes)
+    # return self.attributes.count()
 
   def related_objects_count_for_permissions(self, event_permissions):
+    return len(self.get_related_objects_for_permissions(event_permissions))
+    """
     if event_permissions:
       if event_permissions.can_validate:
         return self.related_objects.count()
@@ -138,9 +177,11 @@ class Object(ExtendedLogingInformations, Base):
     else:
       # count shared and validated
       return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).count()
+    """
 
   def related_object_count(self):
-    return self.related_objects.count()
+    return len(self.related_objects)
+    # return self.related_objects.count()
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     attributes = list()

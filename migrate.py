@@ -62,14 +62,13 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-def get_db_code(old_code):
+def set_db_code(obj, old_code):
   bit_value = BitValue(old_code)
-  permissions = Properties('0')
-  permissions.is_proposal = bit_value.is_proposal
-  permissions.is_rest_instert = bit_value.is_rest_instert
-  permissions.is_validated = bit_value.is_validated
-  permissions.is_web_insert = bit_value.is_web_insert
-  return permissions.bit_code
+  obj.properties.is_proposal = bit_value.is_proposal
+  obj.properties.is_shareable = bit_value.is_shareable
+  obj.properties.is_rest_instert = bit_value.is_rest_instert
+  obj.properties.is_validated = True
+  obj.properties.is_web_insert = bit_value.is_web_insert
 
 
 def convert_date(string_date):
@@ -343,7 +342,7 @@ class Migrator(object):
     report.creator_group_id = report.creator_group.identifier
     report.creator = self.get_users()[line['creator_id']]
     report.creator_id = report.creator.identifier
-    report.dbcode = get_db_code(line['dbcode'])
+    set_db_code(report, line['dbcode'])
 
     report.created_at = convert_date(line['created'])
     report.modified_on = convert_date(line['modified'])
@@ -489,7 +488,7 @@ class Migrator(object):
     obj.created_at = convert_date(line['created'])
     obj.modified_on = convert_date(line['modified'])
     modifier_id = line['modifier_id']
-    obj.dbcode = get_db_code(line['dbcode'])
+    set_db_code(obj, line['dbcode'])
 
     if modifier_id:
       modifier = self.get_users()[modifier_id]
@@ -527,7 +526,7 @@ class Migrator(object):
     result_observable.created_at = convert_date(line['created'])
     result_observable.modified_on = convert_date(line['modified'])
     # db code is the same as for the object
-    result_observable.dbcode = get_db_code(line['dbcode'])
+    set_db_code(result_observable, line['dbcode'])
 
     return result_observable
 
@@ -559,7 +558,7 @@ class Migrator(object):
     reference.creator_group_id = reference.creator_group.identifier
     reference.creator = self.get_users()[attribute['creator_id']]
     reference.creator_id = reference.creator.identifier
-    reference.dbcode = get_db_code(attribute['dbcode'])
+    set_db_code(reference, attribute['dbcode'])
 
     modifier_id = attribute.get('modifier_id')
     reference.created_at = convert_date(attribute['created'])
@@ -639,7 +638,7 @@ class Migrator(object):
 
     self.seen_attribtues_uuids.append(id_)
     attribute.identifier = id_
-    attribute.dbcode = get_db_code(line['dbcode'])
+    set_db_code(attribute, line['dbcode'])
 
     self.seen_attributes[line['identifier']] = attribute
 
@@ -797,7 +796,7 @@ class Migrator(object):
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
-    composed_attribute.dbcode = get_db_code(line['dbcode'])
+    set_db_code(composed_attribute, line['dbcode'])
 
     composed_attribute.parent_id = result_observable.identifier
     composed_attribute.parent = result_observable
@@ -1085,7 +1084,7 @@ class Migrator(object):
 
     composed_attribute = ObservableComposition()
     composed_attribute.identifier = uuid4()
-    composed_attribute.dbcode = get_db_code(line['dbcode'])
+    set_db_code(composed_attribute, line['dbcode'])
 
     composed_attribute.parent_id = observable.identifier
     composed_attribute.parent = observable
@@ -1297,7 +1296,7 @@ class Migrator(object):
 
       composed_attribute = ObservableComposition()
       composed_attribute.uuid = line['uuid']
-      composed_attribute.dbcode = get_db_code(line['dbcode'])
+      set_db_code(composed_attribute, line['dbcode'])
 
       composed_attribute.parent_id = result_observable.identifier
       composed_attribute.parent = result_observable
@@ -1354,9 +1353,9 @@ class Migrator(object):
     event.creator_group_id = event.creator_group.identifier
     event.creator = self.get_users()[line['creator_id']]
     event.creator_id = event.creator.identifier
-    event.dbcode = get_db_code(line['dbcode'])
+    set_db_code(event, line['dbcode'])
 
-    event.properties.is_shareable = line['published'] == 1
+    event.properties.is_shareable = line['published'] == 1 or line['published'] == '1'
     event.risk_id = line['risk_id']
     event.title = line['title']
     event.modifier = self.get_users()[line['modifier_id']]
