@@ -123,7 +123,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                          order_by='ObjectDefinition.name',
                          back_populates='attributes')
   default_condition_id = Column('default_condition_id', Unicode(40), ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
-  default_condition = relationship('Condition', uselist=False)
+  default_condition = relationship('Condition', uselist=False, lazy='joined')
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
 

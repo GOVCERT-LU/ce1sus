@@ -3,6 +3,7 @@ Changelog
 
 Release 0.11.0
 --------------
+* Basic Authenication support
 * Code refactoring
 * New DB Objects, more adapted to STIX
 * Removed unused files

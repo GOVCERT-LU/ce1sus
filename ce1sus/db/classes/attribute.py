@@ -55,7 +55,8 @@ class Attribute(ExtendedLogingInformations, Base):
   definition_id = Column('definition_id', Unicode(40),
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
-                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id')
+                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id',
+                            lazy='joined')
   object_id = Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')

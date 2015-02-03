@@ -10,7 +10,9 @@ import cherrypy
 from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.classes.user import UserRights
 from ce1sus.helpers.common.debug import Log
+from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
 
 
@@ -311,3 +313,22 @@ class BaseView(object):
     self.set_authorized_events_cache(cache)
     return permissions
 
+  def put_user_to_session(self, user):
+    cherrypy.request.login = user.username
+    self._put_to_session('_cp_username', user.username)
+    offline_user = self.__make_user_object(user)
+    self._put_to_session(SESSION_USER, offline_user)
+
+  def __make_user_object(self, user):
+    # TODO: make user offline
+    obj = GenObject()
+    obj.name = user.name
+    obj.username = user.username
+    obj.identifier = user.identifier
+    obj.email = user.email
+    obj.group_id = user.group_id
+    obj.activated = user.activated
+    obj.sirname = user.sirname
+    obj.permissions = UserRights(user.dbcode)
+
+    return obj

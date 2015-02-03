@@ -236,8 +236,11 @@ class Observable(ExtendedLogingInformations, Base):
       composed = composed.to_dict(complete, inflated, event_permissions)
     related = list()
     if inflated:
+      """
       for related_observable in self.get_related_observables_for_permissions(event_permissions):
         related.append(related_observable.to_dict(complete, inflated, event_permissions))
+      """
+      # TODO: find a way to omptimize this
       related_count = len(related)
     else:
       related_count = self.related_observables_count_for_permissions(event_permissions)

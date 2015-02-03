@@ -49,7 +49,7 @@ class LoginHandler(RestBaseHandler):
           if user:
             self.login_controller.update_last_login(user)
             # put in session
-            self.__put_user_to_session(user)
+            self.put_user_to_session(user)
             self.logger.info('User "{0}" logged in'.format(user.username))
             return user.to_dict(True, False)
           else:
@@ -61,26 +61,6 @@ class LoginHandler(RestBaseHandler):
     except ControllerException as error:
       self.logger.info(error)
       raise RestHandlerException('User or password are incorrect.')
-
-  def __put_user_to_session(self, user):
-    cherrypy.request.login = user.username
-    self._put_to_session('_cp_username', user.username)
-    offline_user = self.__make_user_object(user)
-    self._put_to_session(SESSION_USER, offline_user)
-
-  def __make_user_object(self, user):
-    # TODO: make user offline
-    obj = GenObject()
-    obj.name = user.name
-    obj.username = user.username
-    obj.identifier = user.identifier
-    obj.email = user.email
-    obj.group_id = user.group_id
-    obj.activated = user.activated
-    obj.sirname = user.sirname
-    obj.permissions = UserRights(user.dbcode)
-
-    return obj
 
 
 class LogoutHandler(RestBaseHandler):

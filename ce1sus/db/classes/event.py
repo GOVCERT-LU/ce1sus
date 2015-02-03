@@ -68,15 +68,15 @@ class Event(ExtendedLogingInformations, Base):
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
-  groups = relationship('EventGroupPermission')
+  groups = relationship('EventGroupPermission', lazy='joined')
   # observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='joined')
   indicators = relationship(Indicator)
   __tlp_obj = None
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
-  reports = relationship('Report', lazy='dynamic')
+  reports = relationship('Report', lazy='joined')
 
   @property
   def properties(self):

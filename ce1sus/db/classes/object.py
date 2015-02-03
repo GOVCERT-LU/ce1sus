@@ -27,7 +27,7 @@ class RelatedObject(Base):
   parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
   child_id = Column('child_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', Unicode(40))
-  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
+  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined')
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     # flatten related object
@@ -58,7 +58,7 @@ class Object(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
+  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False, lazy='joined')
 
   @property
   def event(self):

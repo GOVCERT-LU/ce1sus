@@ -89,3 +89,9 @@ class LoginController(BaseController):
       self.user_broker.update(user)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_user_by_username(self, username):
+    try:
+      return self.user_broker.getUserByUserName(username)
+    except BrokerException as error:
+      raise ControllerException(error)
