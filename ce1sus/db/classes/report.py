@@ -154,15 +154,15 @@ class Reference(ExtendedLogingInformations, Base):
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
     return {'identifier': self.convert_value(self.identifier),
             'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, inflated),
             'value': self.convert_value(self.value),
-            'creator_group': self.creator_group.to_dict(complete, inflated),
+            'creator_group': self.creator_group.to_dict(complete, False),
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            'modifier_group': self.modifier.group.to_dict(complete, False),
             'properties': self.properties.to_dict()
             }
 
@@ -265,6 +265,8 @@ class Report(ExtendedLogingInformations, Base):
               'title': self.convert_value(self.title),
               'description': self.convert_value(self.description),
               'short_description': self.convert_value(self.short_description),
+              'creator_group': self.creator_group.to_dict(complete, False),
+              'modifier_group': self.modifier.group.to_dict(complete, False),
               # TODO references
               'references': references,
               'references_count': references_count,

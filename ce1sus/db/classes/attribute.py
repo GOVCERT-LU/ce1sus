@@ -55,8 +55,7 @@ class Attribute(ExtendedLogingInformations, Base):
   definition_id = Column('definition_id', Unicode(40),
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
-                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id',
-                            lazy='joined')
+                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id', lazy='joined')
   object_id = Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
@@ -205,7 +204,7 @@ class Attribute(ExtendedLogingInformations, Base):
         return False
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None):
     condition = None
     condition_id = None
     if self.condition:
@@ -214,15 +213,15 @@ class Attribute(ExtendedLogingInformations, Base):
 
     return {'identifier': self.convert_value(self.identifier),
             'definition_id': self.convert_value(self.definition_id),
-            'definition': self.definition.to_dict(complete, inflated),
+            'definition': self.definition.to_dict(complete, False),
             'ioc': self.is_ioc,
             'value': self.convert_value(self.value),
             'condition_id': condition_id,
             'condition': condition,
-            'creator_group': self.creator_group.to_dict(complete, inflated),
+            'creator_group': self.creator_group.to_dict(complete, False),
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            'modifier_group': self.modifier.group.to_dict(complete, False),
             'properties': self.properties.to_dict()
             }
 

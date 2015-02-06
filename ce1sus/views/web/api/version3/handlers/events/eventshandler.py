@@ -33,7 +33,7 @@ class EventsHandler(RestBaseHandler):
     offset = count * (page - 1)
     if offset == 0:
       offset = 1
-    events, total_events = self.events_controller.get_events(offset, count, self.get_user())
+    events, total_events = self.events_controller.get_events(offset, count, self.get_user(), parameters)
     result = list()
     for event in events:
       result.append(event.to_dict(details, False))

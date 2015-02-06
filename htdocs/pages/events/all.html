@@ -3,7 +3,7 @@
   <tbody>
     <tr ng-repeat="item in $data">
       <td data-title="'Title'" filter="{ 'title': 'text' }"
-        sortable="'title'">{{item.title}}</td>
+        sortable="'title'"><a href="#/events/event/{{item.identifier}}">{{item.title}}</a></td>
       <td data-title="'Analysis'" filter="{ 'analysis': 'text' }"
         sortable="'analysis'">{{item.analysis}}</td>
       <td data-title="'Status'" filter="{ 'status': 'text' }"

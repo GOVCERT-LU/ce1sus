@@ -77,10 +77,6 @@ class EventPermissions(BitBase):
   def can_view(self):
     return True
 
-  def can_delete(self):
-    # TODO intorduce
-    return self.can_modify
-
   @property
   def can_view_non_shared(self):
     # TODO: implement non shared to see

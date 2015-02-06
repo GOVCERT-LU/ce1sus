@@ -44,12 +44,86 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
-  def get_all_limited(self, limit, offset):
+  def get_all_limited(self, limit, offset, parameters=None):
     """Returns only a subset of entries"""
     try:
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(1) == 1).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(8) == 8)
+      # add additinal filters
+      if parameters:
+        anal = parameters.get('filter[analysis]', None)
+        if anal:
+          matching_ids = 1
+          result = result.filter(Event.analysis_id.in_(matching_ids))
+        anal = parameters.get('filter[creator_group_name]', None)
+        if anal:
+          result = result.join(Event.creator_group).filter(Group.name.like('%{0}%'.format(anal)))
+        anal = parameters.get('filter[created_at]', None)
+        if anal:
+          result = result.filter(Event.created_at.like('%{0}%'.format(anal)))
+        anal = parameters.get('filter[title]', None)
+        if anal:
+          result = result.filter(Event.title.like('%{0}%'.format(anal)))
+        anal = parameters.get('filter[status]', None)
+        if anal:
+          matching_ids = 1
+          result = result.filter(Event.analysis_id.in_(matching_ids))
+        anal = parameters.get('filter[tlp]', None)
+        if anal:
+          matching_ids = 1
+          result = result.filter(Event.analysis_id.in_(matching_ids))
+
+        sorting_set = False
+        # do a similar stuff for sorting
+        anal = parameters.get('sorting[analysis]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.analysis_id.desc())
+          else:
+            result = result.order_by(Event.analysis_id.asc())
+          sorting_set = True
+        anal = parameters.get('sorting[creator_group_name]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.join(Event.creator_group).order_by(Group.name.desc())
+          else:
+            result = result.join(Event.creator_group).order_by(Group.name.asc())
+          sorting_set = True
+        anal = parameters.get('sorting[created_at]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.created_at.desc())
+          else:
+            result = result.order_by(Event.created_at.asc())
+          sorting_set = True
+        anal = parameters.get('sorting[title]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.title.desc())
+          else:
+            result = result.order_by(Event.title.asc())
+          sorting_set = True
+        anal = parameters.get('sorting[status]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.status_id.desc())
+          else:
+            result = result.order_by(Event.status_id.asc())
+          sorting_set = True
+        anal = parameters.get('sorting[tlp]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.tlp_level_id.desc())
+          else:
+            result = result.order_by(Event.tlp_level_id.asc())
+          sorting_set = True
+
+      if sorting_set:
+        result = result.limit(limit).offset(offset).all()
+      else:
+        # it can be only one sorting
+        result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:

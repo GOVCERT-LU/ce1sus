@@ -103,7 +103,8 @@ class ObservableComposition(Base):
     if observables:
       observables_count = len(observables)
     else:
-      observables_count = self.observables_count_for_permissions(event_permissions)
+      # observables_count = self.observables_count_for_permissions(event_permissions)
+      observables_count = -1
 
     return {'identifier': self.convert_value(self.identifier),
             'operator': self.convert_value(self.operator),
@@ -131,7 +132,7 @@ class RelatedObservable(ExtendedLogingInformations, Base):
             'observable': observable,
             'relation': self.convert_value(self.relation),
             'confidence': self.convert_value(self.confidence),
-            'parent_id': self.convert_value(self.parent_id)
+            'parent_id': self.convert_value(self.parent_id),
             }
 
   def validate(self):
@@ -243,7 +244,8 @@ class Observable(ExtendedLogingInformations, Base):
       # TODO: find a way to omptimize this
       related_count = len(related)
     else:
-      related_count = self.related_observables_count_for_permissions(event_permissions)
+      # related_count = self.related_observables_count_for_permissions(event_permissions)
+      related_count = -1
 
     if complete:
       result = {'identifier': self.convert_value(self.identifier),
@@ -254,10 +256,10 @@ class Observable(ExtendedLogingInformations, Base):
                 'observable_composition': composed,
                 'related_observables': related,
                 'related_observables_count': related_count,
-                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'creator_group': self.creator_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
-                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
                 'properties': self.properties.to_dict()
                 }
     else:
@@ -265,10 +267,10 @@ class Observable(ExtendedLogingInformations, Base):
                 'title': self.convert_value(self.title),
                 'object': obj,
                 'observable_composition': composed,
-                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'creator_group': self.creator_group.to_dict(complete, False),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
-                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
                 'properties': self.properties.to_dict()
                 }
 

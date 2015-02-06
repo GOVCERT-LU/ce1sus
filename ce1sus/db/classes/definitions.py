@@ -50,8 +50,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
   # the relationship is flagged with true when it is a required attribute
   attributes = relationship('AttributeDefinition',
                             secondary='objectdefinition_has_attributedefinitions',
-                            order_by='AttributeDefinition.name',
-                            back_populates='objects')
+                            order_by='AttributeDefinition.name')
   cybox_std = Column('cybox_std', Boolean, default=False)
 
   def validate(self):
@@ -120,8 +119,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   value_type = relationship("AttributeType", uselist=False)
   objects = relationship('ObjectDefinition',
                          secondary='objectdefinition_has_attributedefinitions',
-                         order_by='ObjectDefinition.name',
-                         back_populates='attributes')
+                         order_by='ObjectDefinition.name')
   default_condition_id = Column('default_condition_id', Unicode(40), ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   default_condition = relationship('Condition', uselist=False, lazy='joined')
   __handler = None

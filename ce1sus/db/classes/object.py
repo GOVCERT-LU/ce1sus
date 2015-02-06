@@ -58,7 +58,7 @@ class Object(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False, lazy='joined')
+  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
   @property
   def event(self):
@@ -203,13 +203,13 @@ class Object(ExtendedLogingInformations, Base):
 
     return {'identifier': self.convert_value(self.identifier),
             'definition_id': self.convert_value(self.definition_id),
-            'definition': self.definition.to_dict(complete, inflated),
+            'definition': self.definition.to_dict(complete, False),
             'attributes': attributes,
             'attributes_count': attributes_count,
             'creator_group': self.creator_group.to_dict(complete, inflated),
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+            'modifier_group': self.modifier.group.to_dict(complete, False),
             'related_objects': related,
             'related_objects_count': related_count,
             'properties': self.properties.to_dict(),

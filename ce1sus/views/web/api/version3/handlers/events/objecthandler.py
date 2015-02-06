@@ -63,7 +63,7 @@ class ObjectHandler(RestBaseHandler):
       object_id = requested_object.get('event_id')
       if object_id:
         obj = self.observable_controller.get_object_by_id(object_id)
-        event = self.observable_controller.get_event_for_obj(obj)
+        event = obj.event
         self.check_if_event_is_viewable(event)
         if requested_object['object_type'] is None:
           # return the event

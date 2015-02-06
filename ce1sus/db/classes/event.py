@@ -255,23 +255,24 @@ class Event(ExtendedLogingInformations, Base):
   def to_dict(self, complete=True, inflated=False, event_permissions=None, owner=False):
     if inflated:
       observables = list()
-      for observable in self.get_observables_for_user(event_permissions):
+      for observable in self.get_observables_for_permissions(event_permissions):
         observables.append(observable.to_dict(complete, inflated, event_permissions))
 
       observables_count = len(observables)
 
       reports = list()
-      for report in self.get_reports_for_user(event_permissions):
+      for report in self.get_reports_for_permissions(event_permissions):
         reports.append(report.to_dict(complete, inflated, event_permissions))
 
       reports_count = len(reports)
 
     else:
       observables = None
-      observables_count = self.observables_count_for_permissions(event_permissions)
+      # observables_count = self.observables_count_for_permissions(event_permissions)
+      observables_count = -1
       reports = None
-      reports_count = self.reports_count_for_permissions(event_permissions)
-
+      # reports_count = self.reports_count_for_permissions(event_permissions)
+      reports_count = -1
     if complete:
       comments = list()
       if owner:
@@ -289,7 +290,8 @@ class Event(ExtendedLogingInformations, Base):
                 'status': self.convert_value(self.status),
                 'tlp': self.convert_value(self.tlp),
                 'analysis': self.convert_value(self.analysis),
-                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'creator_group': self.creator_group.to_dict(complete, False),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'published': self.convert_value(self.properties.is_shareable),
                 'modified_on': self.convert_value(self.modified_on),
@@ -320,7 +322,8 @@ class Event(ExtendedLogingInformations, Base):
                 'status': self.convert_value(self.status),
                 'tlp': self.convert_value(self.tlp),
                 'analysis': self.convert_value(self.analysis),
-                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'creator_group': self.creator_group.to_dict(complete, False),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
                 'comments': None,
                 'properties': self.properties.to_dict()
                 }
@@ -348,10 +351,10 @@ class Comment(ExtendedLogingInformations, Base):
     if complete:
       result = {'identifier': self.convert_value(self.identifier),
                 'comment': self.convert_value(self.comment),
-                'creator_group': self.creator_group.to_dict(complete, inflated),
+                'creator_group': self.creator_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
-                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, inflated)),
+                'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, False)),
                 }
     else:
       result = {'identifier': self.convert_value(self.identifier),

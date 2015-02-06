@@ -24,16 +24,16 @@ class EventsController(BaseController):
     BaseController.__init__(self, config, session)
     self.event_broker = self.broker_factory(EventBroker)
 
-  def get_events(self, offset, limit, user):
+  def get_events(self, offset, limit, user, parameters=None):
     try:
       int_lim = int(limit) - 1
       int_off = int(offset) - 1
       isadmin = is_user_priviledged(user)
       if isadmin:
-        events = self.event_broker.get_all_limited(int_lim, int_off)
+        events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
         nbr_total_events = self.event_broker.get_total_events()
       else:
-        events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user)
+        events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
         nbr_total_events = self.event_broker.get_total_events_for_user()
       return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
