@@ -90,8 +90,9 @@ class AdminUserHandler(RestBaseHandler):
           user = self.user_controller.get_user_by_id(uuid)
           user.populate(json)
           # Do not update the password if it matches the masking
-          if not re.match(r'^\*{8,}$', user.plain_password):
-            user.password = hashSHA1(user.plain_password, user.username)
+          if user.plain_password:
+            if not re.match(r'^\*{8,}$', user.plain_password):
+              user.password = hashSHA1(user.plain_password, user.username)
           self.user_controller.update_user(user)
           return user.to_dict(details, inflated)
         else:

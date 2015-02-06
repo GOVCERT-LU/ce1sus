@@ -33,7 +33,8 @@ class LoginHandler(RestBaseHandler):
   @methods(allowed=['POST'])
   def login(self, **args):
     try:
-      credentials = args.get('json')
+      credentials = args.get('json', None)
+      user = None
       if credentials:
         usr = credentials.get('usr', None)
         pwd = credentials.get('pwd', None)
@@ -45,22 +46,31 @@ class LoginHandler(RestBaseHandler):
              and
              not ValueValidator.validateRegex(pwd, regex, 'errorMsg')):
             raise ControllerException(u'Illegal input')
+          self.logger.debug('A login attempt via username and password')
           user = self.login_controller.get_user_by_usr_pwd(usr, pwd)
-          if user:
-            self.login_controller.update_last_login(user)
-            # put in session
-            self.put_user_to_session(user)
-            self.logger.info('User "{0}" logged in'.format(user.username))
-            return user.to_dict(True, False)
-          else:
-            self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
-            raise RestHandlerException('User or password are incorrect.')
       else:
-        raise RestHandlerException('No credentials given.')
-
+        headers = args.get('headers', None)
+        if headers:
+          key = headers.get('Key', None)
+          if key:
+            self.logger.debug('A login attempt via api key')
+            user = self.login_controller.get_user_by_apikey(key)
+          else:
+            raise RestHandlerException('No credentials given.')
+        else:
+          raise RestHandlerException('No credentials given.')
+      if user:
+        self.login_controller.update_last_login(user)
+        # put in session
+        self.put_user_to_session(user)
+        self.logger.info('User "{0}" logged in'.format(user.username))
+        return user.to_dict(True, False)
+      else:
+        self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
+        raise RestHandlerException('User or password are incorrect.')
     except ControllerException as error:
       self.logger.info(error)
-      raise RestHandlerException('User or password are incorrect.')
+      raise RestHandlerException('Credentials are incorrect.')
 
 
 class LogoutHandler(RestBaseHandler):

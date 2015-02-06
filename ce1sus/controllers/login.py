@@ -95,3 +95,9 @@ class LoginController(BaseController):
       return self.user_broker.getUserByUserName(username)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_user_by_apikey(self, apikey):
+    try:
+      return self.user_broker.get_user_by_api_key(apikey)
+    except BrokerException as error:
+      raise ControllerException(error)
