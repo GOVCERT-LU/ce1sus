@@ -56,6 +56,7 @@ class ObjectHandler(RestBaseHandler):
       method = args.get('method', None)
       path = args.get('path')
       details = self.get_detail_value(args)
+      headers = args.get('headers')
       inflated = self.get_inflated_value(args)
       requested_object = self.parse_path(path, method)
       json = args.get('json')
@@ -73,9 +74,9 @@ class ObjectHandler(RestBaseHandler):
           return self.__process_object(method, event, obj, details, inflated, json)
 
         elif requested_object['object_type'] == 'object':
-          return self.__process_child_object(method, event, obj, requested_object, details, inflated, json)
+          return self.__process_child_object(method, event, obj, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'attribute':
-          return self.__process_attribute(method, event, obj, requested_object, details, inflated, json)
+          return self.__process_attribute(method, event, obj, requested_object, details, inflated, json, headers)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -86,7 +87,7 @@ class ObjectHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_object(self, method, event, obj, details, inflated, json):
+  def __process_object(self, method, event, obj, details, inflated, json, headers):
     try:
       user = self.get_user()
       if method == 'POST':
@@ -113,7 +114,7 @@ class ObjectHandler(RestBaseHandler):
               related_object.relation = json.get('relation', None)
               self.observable_controller.update_related_object(related_object, user, False)
 
-          obj.populate(json)
+          obj.populate(json, self.is_rest_insert(headers))
           self.observable_controller.update_object(obj, user, True)
           return obj.to_dict(details, inflated, event_permissions)
         elif method == 'DELETE':
@@ -124,12 +125,12 @@ class ObjectHandler(RestBaseHandler):
     except ValueException as error:
       raise RestHandlerException(error)
 
-  def __process_child_object(self, method, event, obj, requested_object, details, inflated, json):
+  def __process_child_object(self, method, event, obj, requested_object, details, inflated, json, headers):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
       child_obj = Object()
-      child_obj.populate(json)
+      child_obj.populate(json, self.is_rest_insert(headers))
       child_obj.observable_id = obj.observable_id
       self.observable_controller.insert_object(child_obj, user, False)
 
@@ -171,7 +172,12 @@ class ObjectHandler(RestBaseHandler):
     handler_instance.user = self.get_user()
     return handler_instance
 
-  def __process_attribute(self, method, event, obj, requested_object, details, inflated, json):
+  def __set_provenance(self, instance, headers):
+    rest_insert = self.is_rest_insert(headers)
+    instance.properties.is_rest_instert = rest_insert
+    instance.properties.is_web_insert = not rest_insert
+
+  def __process_attribute(self, method, event, obj, requested_object, details, inflated, json, headers):
     try:
       user = self.get_user()
       if method == 'POST':
@@ -186,7 +192,12 @@ class ObjectHandler(RestBaseHandler):
         # TODO: find a way to check if the object has been changed
         # TODO also check if there are no children attached
         if True:
+          self.__set_provenance(attribute, headers)
           self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
+          # set provenance
+          if related_objects:
+            for related_object in related_objects:
+              self.__set_provenance(related_object, headers)
           self.observable_controller.insert_handler_objects(related_objects, user, True, self.is_event_owner(event, user))
         else:
           raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
@@ -200,6 +211,7 @@ class ObjectHandler(RestBaseHandler):
         result_attriutes.append(attribute.to_dict(details, inflated))
         if additional_attributes:
           for additional_attribute in additional_attributes:
+            self.__set_provenance(additional_attribute, headers)
             flat_attriutes.append(flat_attriutes)
             result_attriutes.append(additional_attribute.to_dict(details, inflated))
 

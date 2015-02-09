@@ -5,16 +5,13 @@
 
 Created on Oct 29, 2014
 """
-import cherrypy
+
 import string
 
 from ce1sus.controllers.base import ControllerException
 from ce1sus.controllers.login import LoginController
-from ce1sus.db.classes.user import UserRights
-from ce1sus.helpers.common.objects import GenObject
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
-from ce1sus.views.web.common.decorators import SESSION_USER
 
 
 __author__ = 'Weber Jean-Paul'

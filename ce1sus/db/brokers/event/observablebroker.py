@@ -6,12 +6,10 @@ for inserting data into the database.
 Created on Jul 9, 2013
 """
 import sqlalchemy.orm.exc
-from sqlalchemy.sql.expression import or_, and_, not_, distinct
+from sqlalchemy.sql.expression import and_
 
-from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.observables import Observable
-from ce1sus.db.common.broker import BrokerBase, NothingFoundException, \
-  TooManyResultsFoundException, BrokerException
+from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
 __author__ = 'Weber Jean-Paul'

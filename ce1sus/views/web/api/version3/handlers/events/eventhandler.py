@@ -13,7 +13,6 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
-from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.classes.report import Report
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
@@ -44,6 +43,7 @@ class EventHandler(RestBaseHandler):
       inflated = self.get_inflated_value(args)
       requested_object = self.parse_path(path, method)
       json = args.get('json')
+      headers = args.get('headers')
       # get the event
       event_id = requested_object.get('event_id')
       if event_id:
@@ -79,10 +79,9 @@ class EventHandler(RestBaseHandler):
         if method == 'POST':
           # populate event
           event = Event()
-          event.populate(json)
+          event.populate(json, self.is_rest_insert(headers))
           # TODO: make relations an populate the whole event by json
           user = self.get_user()
-          # TODO: determine if it was manually inserted or not
           if self.is_event_owner(event, user):
             # The observable is directly validated as the owner can validate
             event.properties.is_validated = True

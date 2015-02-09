@@ -329,7 +329,7 @@ class Event(ExtendedLogingInformations, Base):
                 }
     return result
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
 
     self.title = json.get('title', None)
     self.description = json.get('description', None)
@@ -338,6 +338,8 @@ class Event(ExtendedLogingInformations, Base):
     self.tlp = json.get('tlp', 'Amber').title()
     self.analysis = json.get('analysis', 'Unknown').title()
     self.properties.populate(json.get('properties', None))
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert
     # TODO: populate properties
     # self.published = json.get('published', None)
 
@@ -362,7 +364,7 @@ class Comment(ExtendedLogingInformations, Base):
                 }
     return result
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     self.comment = json.get('comment', None)
 
   def validate(self):

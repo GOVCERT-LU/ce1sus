@@ -6,7 +6,7 @@ for inserting data into the database.
 Created on Jul 9, 2013
 """
 import sqlalchemy.orm.exc
-from sqlalchemy.sql.expression import or_, and_, not_, distinct
+from sqlalchemy.sql.expression import and_
 
 from ce1sus.db.classes.event import Event, EventGroupPermission
 from ce1sus.db.classes.group import Group

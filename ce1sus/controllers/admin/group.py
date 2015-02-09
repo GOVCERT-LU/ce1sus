@@ -5,8 +5,7 @@ module handing the attributes pages
 
 Created: Aug 26, 2013
 """
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException,\
-  ControllerIntegrityException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 

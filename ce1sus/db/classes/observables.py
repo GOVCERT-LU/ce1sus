@@ -276,8 +276,10 @@ class Observable(ExtendedLogingInformations, Base):
 
     return result
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     self.title = json.get('title', None)
     self.description = json.get('description', None)
     self.properties.populate(json.get('properties', None))
     # TODO: make valid for inflated
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert

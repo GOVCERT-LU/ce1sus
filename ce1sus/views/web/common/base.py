@@ -271,6 +271,13 @@ class BaseView(object):
       self.logger.info(u'User {0} is not owner of event {1}'.format(user.username, event.identifier))
     return result
 
+  def is_rest_insert(self, headers):
+    webinsert = headers.get('frontend', None)
+    if webinsert:
+      return False
+    else:
+      return True
+
   def check_if_user_can_set_validate_or_shared(self, event, instance, user, json):
     # TODO: Involve if user == creator
     properties = json.get('properties', None)

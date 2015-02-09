@@ -6,6 +6,8 @@ var queue = [];
 
 app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, messageQueueProvider, $scrollspyProvider, cfpLoadingBarProvider) {
   
+  RestangularProvider.setDefaultHeaders({frontend: true});
+  
   cfpLoadingBarProvider.includeSpinner = false;
   
   angular.extend($scrollspyProvider.defaults, {

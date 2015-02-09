@@ -225,7 +225,7 @@ class Attribute(ExtendedLogingInformations, Base):
             'properties': self.properties.to_dict()
             }
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     definition_id = json.get('definition_id', None)
     if not definition_id:
       definition = json.get('definition', None)
@@ -246,3 +246,5 @@ class Attribute(ExtendedLogingInformations, Base):
     self.is_ioc = json.get('ioc', 0)
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert

@@ -9,7 +9,6 @@ from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDef
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.brokers.permissions.user import UserBroker
-from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.datumzait import DatumZait

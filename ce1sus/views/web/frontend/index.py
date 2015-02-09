@@ -29,10 +29,10 @@ class IndexView(BaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def index(self):
-    #check if user sso set
+    # check if user sso set
     basic_auth = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
     if basic_auth:
-      username = cherrypy.request.wsgi_environ.get('REMOTE_USER', None) 
+      username = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
       if username:
         try:
           user = self.login_controller.get_user_by_username(username)
@@ -42,9 +42,8 @@ class IndexView(BaseView):
         except ControllerException:
           pass
 
-    
     # check if basic auth is enabled an if the user is set
-    #only for fetching the first page
+    # only for fetching the first page
     return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index.html'))
 
     """

@@ -9,9 +9,7 @@ from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.events.attributecontroller import AttributeController
-from ce1sus.handlers.base import HandlerException
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, \
-  RestHandlerException, valid_uuid
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
 
 

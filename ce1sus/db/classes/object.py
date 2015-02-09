@@ -216,7 +216,7 @@ class Object(ExtendedLogingInformations, Base):
             'observable_id': self.convert_value(self.observable_id)
             }
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     # TODO: if inflated
     definition_id = json.get('definition_id', None)
     if not definition_id:
@@ -228,3 +228,5 @@ class Object(ExtendedLogingInformations, Base):
         raise ValueException(u'Object definitions cannot be updated')
     self.definition_id = definition_id
     self.properties.populate(json.get('properties', None))
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert

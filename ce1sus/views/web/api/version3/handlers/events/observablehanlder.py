@@ -33,6 +33,7 @@ class ObservableHandler(RestBaseHandler):
       path = args.get('path')
       details = self.get_detail_value(args)
       inflated = self.get_inflated_value(args)
+      headers = args.get('headers')
       requested_object = self.parse_path(path, method)
       json = args.get('json')
       # get the event
@@ -44,10 +45,10 @@ class ObservableHandler(RestBaseHandler):
         self.check_if_event_is_viewable(event)
 
         if requested_object['object_type'] is None:
-          return self.__process_observable(method, event, observable, details, inflated, json)
+          return self.__process_observable(method, event, observable, details, inflated, json, headers)
         elif requested_object['object_type'] == 'object':
           flat = self.get_flat_value(args)
-          return self.__process_object(method, event, observable, requested_object, details, inflated, json, flat)
+          return self.__process_object(method, event, observable, requested_object, details, inflated, json, flat, headers)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -58,7 +59,7 @@ class ObservableHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_observable(self, method, event, observable, details, inflated, json):
+  def __process_observable(self, method, event, observable, details, inflated, json, headers):
     user = self.get_user()
     if method == 'POST':
       raise RestHandlerException('Recurive observables are currently not supported')
@@ -70,7 +71,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
-        observable.populate(json)
+        observable.populate(json, self.is_rest_insert(headers))
         self.observable_controller.update_observable(observable, user, True)
         return observable.to_dict(details, inflated)
       elif method == 'DELETE':
@@ -78,13 +79,13 @@ class ObservableHandler(RestBaseHandler):
         self.observable_controller.remove_observable(observable, user, True)
         return 'Deleted observable'
 
-  def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat):
+  def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat, headers):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
       obj = Object()
       obj.parent = observable
-      obj.populate(json)
+      obj.populate(json, self.is_rest_insert(headers))
       obj.observable_id = observable.identifier
       if self.is_event_owner(event, user):
         # The attribute is directly validated as the owner can validate
@@ -111,7 +112,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
-        obj.populate(json)
+        obj.populate(json, self.is_rest_insert(headers))
         self.observable_controller.update_object(obj, user, True)
         return obj.to_dict(details, inflated)
       elif method == 'DELETE':
