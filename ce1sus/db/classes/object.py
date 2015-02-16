@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, Unicode
+from sqlalchemy.types import Integer, Unicode, BigInteger
 
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
@@ -23,10 +23,10 @@ __license__ = 'GPL v3+'
 
 
 class RelatedObject(Base):
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
-  child_id = Column('child_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  relation = Column('relation', Unicode(40))
+  child_id = Column('child_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  relation = Column('relation', BigInteger)
   object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined')
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
@@ -34,7 +34,7 @@ class RelatedObject(Base):
     obj = self.object.to_dict(complete, inflated, event_permissions)
     obj['relation'] = self.convert_value(self.relation)
     obj['parent_object_id'] = self.convert_value(self.parent_id)
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'object': obj,
             'relation': self.convert_value(self.relation),
             'parent_id': self.convert_value(self.parent_id)
@@ -49,15 +49,15 @@ class Object(ExtendedLogingInformations, Base):
   # attributes = relationship('Attribute', lazy='dynamic')
   attributes = relationship('Attribute', lazy='joined')
   # if the composition is one the return the object (property)
-  definition_id = Column('definition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+  definition_id = Column('definition_id', BigInteger, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
 
   # related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
   related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   dbcode = Column('code', Integer, nullable=False, default=0)
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
-  observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
   @property
@@ -201,7 +201,7 @@ class Object(ExtendedLogingInformations, Base):
     else:
       related_count = self.related_objects_count_for_permissions(event_permissions)
 
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, False),
             'attributes': attributes,

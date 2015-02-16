@@ -23,6 +23,14 @@ class GroupController(BaseController):
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
 
+  def get_group_by_uuid(self, uuid):
+    try:
+      return self.group_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all_groups(self):
     try:
       return self.group_broker.get_all()

@@ -29,6 +29,14 @@ class ObjectDefinitionController(BaseController):
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
 
+  def get_defintion_by_name(self, name):
+    try:
+      return self.obj_def_broker.get_defintion_by_name(name)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all_object_definitions(self):
     try:
       return self.obj_def_broker.get_all(ObjectDefinition.name.asc())

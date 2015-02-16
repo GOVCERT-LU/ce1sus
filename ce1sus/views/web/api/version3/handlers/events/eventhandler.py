@@ -53,16 +53,16 @@ class EventHandler(RestBaseHandler):
 
         if requested_object['object_type'] is None:
           # return the event
-          return self.__process_event(method, event, details, inflated, json)
+          return self.__process_event(method, event, details, inflated, json, headers)
         elif requested_object['object_type'] == 'observable':
-          return self.__process_observable(method, event, requested_object, details, inflated, json)
+          return self.__process_observable(method, event, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'observable_composition':
           return self.__process_composed_observable(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'changegroup':
           self.check_if_admin()
           return self.__change_event_group(method, event, json)
         elif requested_object['object_type'] == 'comment':
-          return self.__process_commment(method, event, requested_object, details, inflated, json)
+          return self.__process_commment(method, event, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'validate':
           return self.__process_event_validate(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'group':
@@ -70,7 +70,7 @@ class EventHandler(RestBaseHandler):
         elif requested_object['object_type'] == 'relations':
           return self.__process_event_relations(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'report':
-          return self.__process_event_report(method, event, requested_object, details, inflated, json)
+          return self.__process_event_report(method, event, requested_object, details, inflated, json, headers)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -107,12 +107,12 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException(u'Invalid request')
 
-  def __process_commment(self, method, event, requested_object, details, inflated, json):
+  def __process_commment(self, method, event, requested_object, details, inflated, json, headers):
     self.check_if_owner(event)
     user = self.get_user()
     if method == 'POST':
       comment = Comment()
-      comment.populate(json)
+      comment.populate(json, self.is_rest_insert(headers))
       comment.event_id = event.identifier
       self.event_controller.insert_comment(user, comment)
       return comment.to_dict(details, inflated)
@@ -126,7 +126,7 @@ class EventHandler(RestBaseHandler):
         return comment.to_dict(details, inflated)
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
-        comment.populate(json)
+        comment.populate(json, self.is_rest_insert(headers))
         self.event_controller.update_comment(user, comment)
         return comment.to_dict(details, inflated)
       elif method == 'DELETE':
@@ -136,7 +136,7 @@ class EventHandler(RestBaseHandler):
       else:
         raise RestHandlerException(u'Invalid request')
 
-  def __process_event(self, method, event, details, inflated, json):
+  def __process_event(self, method, event, details, inflated, json, headers):
     if method == 'GET':
       return self.__return_event(event, details, inflated)
     elif method == 'POST':
@@ -148,7 +148,7 @@ class EventHandler(RestBaseHandler):
       # check if validated / shared as only the owner can do this
       self.check_if_user_can_set_validate_or_shared(event, event, user, json)
 
-      event.populate(json)
+      event.populate(json, self.is_rest_insert(headers))
       # TODO: make relations an populate the whole event by json
       self.event_controller.update_event(user, event, True, True)
       return self.__return_event(event, details, inflated)
@@ -157,13 +157,13 @@ class EventHandler(RestBaseHandler):
       self.event_controller.remove_event(self.get_user(), event)
       return 'Deleted event'
 
-  def __process_observable(self, method, event, requested_object, details, inflated, json):
+  def __process_observable(self, method, event, requested_object, details, inflated, json, headers):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
       observable = Observable()
       observable.event_id = event.identifier
-      observable.populate(json)
+      observable.populate(json, self.is_rest_insert(headers))
       observable.parent_id = event.identifier
       if self.is_event_owner(event, user):
         # The observable is directly validated as the owner can validate
@@ -185,7 +185,7 @@ class EventHandler(RestBaseHandler):
         if method == 'PUT':
           self.check_if_event_is_modifiable(event)
           self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
-          observable.populate(json)
+          observable.populate(json, self.is_rest_insert(headers))
           self.observable_controller.update_observable(observable, user, True)
           return observable.to_dict(details, inflated)
         elif method == 'DELETE':
@@ -354,7 +354,7 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Operation not supported')
 
-  def __process_event_report(self, method, event, requested_object, details, inflated, json):
+  def __process_event_report(self, method, event, requested_object, details, inflated, json, headers):
 
     user = self.get_user()
     if method == 'GET':
@@ -379,8 +379,9 @@ class EventHandler(RestBaseHandler):
     if method == 'POST':
       self.check_if_user_can_add(event)
       report = Report()
-      report.populate(json)
+      report.populate(json, self.is_rest_insert(headers))
       report.event_id = event.identifier
+      report.event = event
       self.report_controller.insert_report(report, user)
       return report.to_dict(details, inflated)
     else:

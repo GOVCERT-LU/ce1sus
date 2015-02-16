@@ -39,6 +39,14 @@ class AttributeDefinitionController(BaseController):
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.type_broker = self.broker_factory(AttributeTypeBroker)
 
+  def get_defintion_by_name(self, name):
+    try:
+      return self.attr_def_broker.get_defintion_by_name(name)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all_attribute_definitions(self):
     """
     Returns all attribute definitions

@@ -22,19 +22,19 @@ __license__ = 'GPL v3+'
 
 
 class ObservableKeyword(Base):
-  observable_id = Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False)
+  observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False)
   keyword = Column('keyword', Unicode(255), nullable=False, index=True)
 
 
 _REL_OBSERVABLE_COMPOSITION = Table('rel_observable_composition', Base.metadata,
                                     Column('roc_id', BigInteger, primary_key=True, nullable=False, index=True),
-                                    Column('observablecomposition_id', Unicode(40), ForeignKey('observablecompositions.observablecomposition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                                    Column('child_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+                                    Column('observablecomposition_id', BigInteger, ForeignKey('observablecompositions.observablecomposition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                    Column('child_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
                                     )
 
 
 class ObservableComposition(Base):
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'OR')
   # observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
@@ -106,7 +106,7 @@ class ObservableComposition(Base):
       # observables_count = self.observables_count_for_permissions(event_permissions)
       observables_count = -1
 
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'operator': self.convert_value(self.operator),
             'observables': observables,
             'observables_count': observables_count,
@@ -115,10 +115,10 @@ class ObservableComposition(Base):
 
 
 class RelatedObservable(ExtendedLogingInformations, Base):
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   parent = relationship('Observable', primaryjoin='RelatedObservable.parent_id==Observable.identifier', uselist=False)
-  child_id = Column('child_id', Unicode(40), ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  relation = Column('relation', Unicode(40))
+  child_id = Column('child_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  relation = Column('relation', BigInteger)
   confidence = Column('confidence', Integer)
   observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False, lazy='joined')
 
@@ -128,7 +128,7 @@ class RelatedObservable(ExtendedLogingInformations, Base):
     observable['relation'] = self.convert_value(self.relation)
     observable['confidence'] = self.convert_value(self.confidence)
     observable['parent_observable_id'] = self.convert_value(self.parent_id)
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'observable': observable,
             'relation': self.convert_value(self.relation),
             'confidence': self.convert_value(self.confidence),
@@ -148,11 +148,11 @@ class Observable(ExtendedLogingInformations, Base):
   observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   keywords = relationship('ObservableKeyword', backref='observable')
   event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
-  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
   dbcode = Column('code', Integer, nullable=False, default=0)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   # related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
   related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='joined')
   __bit_code = None
@@ -248,7 +248,7 @@ class Observable(ExtendedLogingInformations, Base):
       related_count = -1
 
     if complete:
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'title': self.convert_value(self.title),
                 'description': self.convert_value(self.description),
                 'object': obj,
@@ -263,7 +263,7 @@ class Observable(ExtendedLogingInformations, Base):
                 'properties': self.properties.to_dict()
                 }
     else:
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'title': self.convert_value(self.title),
                 'object': obj,
                 'observable_composition': composed,

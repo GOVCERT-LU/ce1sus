@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import ForeignKey, Column
-from sqlalchemy.types import Unicode
+from sqlalchemy.types import Unicode, BigInteger
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.helpers.common.datumzait import DatumZait
@@ -28,7 +28,7 @@ class SimpleLogingInformations(object):
 
   @declared_attr
   def creator_id(cls):
-    return Column('creator_id', Unicode(45), ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+    return Column('creator_id', BigInteger, ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
 
   @declared_attr
   def creator(cls):
@@ -36,7 +36,7 @@ class SimpleLogingInformations(object):
 
   @declared_attr
   def modifier_id(cls):
-    return Column('modifier_id', Unicode(45), ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+    return Column('modifier_id', BigInteger, ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
 
   @declared_attr
   def modifier(cls):
@@ -47,7 +47,7 @@ class ExtendedLogingInformations(SimpleLogingInformations):
 
   @declared_attr
   def creator_group_id(cls):
-    return Column('creator_group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+    return Column('creator_group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
 
   @declared_attr
   def creator_group(cls):
@@ -55,7 +55,7 @@ class ExtendedLogingInformations(SimpleLogingInformations):
 
   @declared_attr
   def originating_group_id(cls):
-    return Column('originating_group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+    return Column('originating_group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
 
   @declared_attr
   def originating_group(cls):

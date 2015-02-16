@@ -23,8 +23,8 @@ __license__ = 'GPL v3+'
 
 _REL_MAINGROUP_GROUPS = Table('group_has_groups', Base.metadata,
                               Column('ghg_id', BigInteger, primary_key=True, nullable=False, index=True),
-                              Column('group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True),
-                              Column('rel_group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True))
+                              Column('group_id', BigInteger, ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True),
+                              Column('rel_group_id', BigInteger, ForeignKey('groups.group_id', onupdate='cascade', ondelete='cascade'), index=True))
 
 
 class GroupRights(BitBase):
@@ -231,7 +231,7 @@ class Group(Base):
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'permissions': self.permissions.to_dict(),

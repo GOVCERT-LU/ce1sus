@@ -8,7 +8,7 @@ Created on Oct 28, 2014
 import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer
+from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.session import Base
@@ -108,7 +108,7 @@ class User(Base):
   activation_str = Column('activation_str', Unicode(255))
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
-  group_id = Column('group_id', Unicode(45), ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
+  group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
   group = relationship(Group, backref='users')
   plain_password = None
 
@@ -174,7 +174,7 @@ class User(Base):
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'activated': self.convert_value(self.activated),
               'activation_send': self.convert_value(self.activation_sent),

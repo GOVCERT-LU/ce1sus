@@ -36,7 +36,7 @@ class AttributeType(Base):
     allowed_table = {'identifier': self.table_id, 'name': name}
     return {'description': self.convert_value(self.description),
             'name': self.convert_value(self.name),
-            'identifier': self.convert_value(self.identifier),
+            'identifier': self.convert_value(self.uuid),
             'allowed_table': allowed_table
             }
 

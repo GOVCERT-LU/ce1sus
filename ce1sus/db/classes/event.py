@@ -7,7 +7,7 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Unicode, Integer, UnicodeText
+from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
@@ -25,8 +25,8 @@ __license__ = 'GPL v3+'
 
 
 class EventGroupPermission(ExtendedLogingInformations, Base):
-  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-  group_id = Column('group_id', Unicode(40), ForeignKey('groups.group_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+  group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
@@ -51,7 +51,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
     return True
 
   def to_dict(self, complete=True, inflated=False):
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'permissions': self.permissions.to_dict(),
             'group': self.group.to_dict(complete, inflated)}
 
@@ -201,16 +201,9 @@ class Event(ExtendedLogingInformations, Base):
 
   def get_reports_for_permissions(self, event_permissions):
     rel_objs = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for rel_obj in self.reports:
-          if rel_obj.properties.is_shareable:
-            rel_objs.append(rel_obj)
-      # TODO take into account owner
-    else:
-      for rel_obj in self.reports:
-        if rel_obj.properties.is_validated_and_shared:
-          rel_objs.append(rel_obj)
+    # TODO take into account owner
+    for rel_obj in self.reports:
+      rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:
@@ -282,7 +275,7 @@ class Event(ExtendedLogingInformations, Base):
       for group in self.groups:
         groups.append(group.to_dict(complete, False))
 
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'title': self.convert_value(self.title),
                 'description': self.convert_value(self.description),
                 'last_publish_date': self.convert_value(self.last_publish_date),
@@ -305,7 +298,7 @@ class Event(ExtendedLogingInformations, Base):
                 'groups': groups
                 }
     else:
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'title': self.convert_value(self.title),
                 'creator_group': self.creator_group.to_dict(False),
                 'created_at': self.convert_value(self.created_at),
@@ -345,13 +338,13 @@ class Event(ExtendedLogingInformations, Base):
 
 
 class Comment(ExtendedLogingInformations, Base):
-  event_id = Column(Unicode(40), ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+  event_id = Column(BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   event = relationship('Event')
   comment = Column('comment', UnicodeText, nullable=False)
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'comment': self.convert_value(self.comment),
                 'creator_group': self.creator_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
@@ -359,7 +352,7 @@ class Comment(ExtendedLogingInformations, Base):
                 'modifier_group': self.convert_value(self.modifier.group.to_dict(complete, False)),
                 }
     else:
-      result = {'identifier': self.convert_value(self.identifier),
+      result = {'identifier': self.convert_value(self.uuid),
                 'comment': self.convert_value(self.comment),
                 }
     return result

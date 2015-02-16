@@ -8,7 +8,7 @@ Created on Oct 17, 2014
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date
+from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date, BigInteger
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
@@ -26,7 +26,7 @@ class ValueBase(object):
 
   @declared_attr
   def attribute_id(self):
-    return Column('attribute_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    return Column('attribute_id', BigInteger, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @declared_attr
   def attribute(self):
@@ -34,7 +34,7 @@ class ValueBase(object):
 
   @declared_attr
   def event_id(self):
-    return Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    return Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @declared_attr
   def event(self):
@@ -42,7 +42,7 @@ class ValueBase(object):
 
   @declared_attr
   def value_type_id(self):
-    return Column('attributetype_id', Unicode(40), ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
+    return Column('attributetype_id', BigInteger, ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
 
   @declared_attr
   def value_type(self):

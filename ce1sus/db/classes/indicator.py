@@ -23,27 +23,27 @@ __license__ = 'GPL v3+'
 
 _REL_INDICATOR_SIGHTINGS = Table('rel_indicator_sightings', Base.metadata,
                                  Column('ris_id', BigInteger, primary_key=True, nullable=False, index=True),
-                                 Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                                 Column('sighting_id', Unicode(40), ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                 Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                 Column('sighting_id', BigInteger, ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                  )
 
 _REL_INDICATOR_TYPE = Table('rel_indicator_types', Base.metadata,
                             Column('rit_id', BigInteger, primary_key=True, nullable=False, index=True),
-                            Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                            Column('indicatortype_id', Unicode(40), ForeignKey('indicatortypes.indicatortype_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                            Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                            Column('indicatortype_id', BigInteger, ForeignKey('indicatortypes.indicatortype_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                             )
 
 
 _REL_INDICATOR_KILLCHAINPHASE = Table('rel_indicator_killchainphase', Base.metadata,
                                       Column('rik_id', BigInteger, primary_key=True, nullable=False, index=True),
-                                      Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                                      Column('killchainphase_id', Unicode(40), ForeignKey('killchainphases.killchainphase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                      Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                      Column('killchainphase_id', BigInteger, ForeignKey('killchainphases.killchainphase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                       )
 
 _REL_INDICATOR_OBSERVABLE = Table('rel_indicator_observable', Base.metadata,
                                   Column('rio_id', BigInteger, primary_key=True, nullable=False, index=True),
-                                  Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                                  Column('observable_id', Unicode(40), ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                  Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                  Column('observable_id', BigInteger, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                   )
 
 
@@ -54,7 +54,7 @@ class KillChainPhase(Base):
 
 
 class Sighting(ExtendedLogingInformations, Base):
-  timestamp_precision = Column('timestamp_precision', Unicode(40))
+  timestamp_precision = Column('timestamp_precision', BigInteger)
   description = Column('description', UnicodeText)
   confidence = Column('confidence', Unicode(5), default=u'HIGH', nullable=False)
   dbcode = Column('code', Integer, default=0, nullable=False)
@@ -75,12 +75,13 @@ class Sighting(ExtendedLogingInformations, Base):
 
 class IndicatorType(Base):
   name = Column('name', Unicode(255), nullable=False, unique=True)
+  description = Column('description', UnicodeText)
 
 
 class ValidTimePosition(ExtendedLogingInformations, Base):
   start_time = Column('start_time', DateTime, nullable=False)
   end_time = Column('end_time', DateTime, nullable=False)
-  indicator_id = Column('indicator_id', Unicode(40), ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  indicator_id = Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
@@ -99,7 +100,7 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
 
 class Indicator(ExtendedLogingInformations, Base):
 
-  version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
+  version = Column('version', BigInteger, default=u'1.0.0', nullable=False)
   observables = relationship('Observable')
   title = Column('title', Unicode(255), index=True, nullable=True)
   description = Column('description', UnicodeText)
@@ -108,7 +109,7 @@ class Indicator(ExtendedLogingInformations, Base):
   # TODO relation tables
   # TODO Markings
   event = relationship('Event', uselist=False)
-  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   sightings = relationship('Sighting', secondary='rel_indicator_sightings')
   killchain = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   type_ = relationship('IndicatorType', secondary='rel_indicator_types')

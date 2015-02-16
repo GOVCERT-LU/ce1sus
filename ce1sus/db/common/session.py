@@ -12,7 +12,7 @@ from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.pool import Pool
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode
+from sqlalchemy.types import Unicode, BigInteger
 from uuid import UUID
 import uuid
 
@@ -45,7 +45,22 @@ class BaseClass(object):
 
   @declared_attr
   def identifier(cls):
-    return Column(u'{0}_id'.format(cls.__name__.lower()), Unicode(45), primary_key=True, default=uuid.uuid4, nullable=False, index=True, unique=True)
+    return Column(u'{0}_id'.format(cls.__name__.lower()),
+                  BigInteger,
+                  primary_key=True,
+                  autoincrement=True,
+                  nullable=False,
+                  index=True,
+                  unique=True)
+
+  @declared_attr
+  def uuid(cls):
+    return Column('uuid',
+                  Unicode(45),
+                  default=uuid.uuid4,
+                  nullable=False,
+                  index=True,
+                  unique=True)
 
   @abstractmethod
   def validate(self):

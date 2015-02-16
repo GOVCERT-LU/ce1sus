@@ -27,12 +27,12 @@ class MailTemplate(SimpleLogingInformations, Base):
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'body': self.convert_value(self.body),
               'subject': self.convert_value(self.subject)}
     else:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name)}
 
   def populate(self, json):

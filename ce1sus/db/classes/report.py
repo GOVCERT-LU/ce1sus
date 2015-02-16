@@ -7,7 +7,7 @@ Created on Jan 8, 2015
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer
+from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
@@ -67,7 +67,7 @@ class ReferenceHandler(Base):
   def to_dict(self, complete=False, inflated=False):
     return {'description': self.convert_value(self.description),
             'name': self.convert_value(self.classname),
-            'identifier': self.convert_value(self.identifier)
+            'identifier': self.convert_value(self.uuid)
             }
 
 
@@ -78,7 +78,7 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
   chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
   regex = Column('regex', Unicode(255), nullable=False, default=u'^.+$')
 
-  referencehandler_id = Column('referencehandler_id', Unicode(40), ForeignKey('referencehandlers.referencehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
+  referencehandler_id = Column('referencehandler_id', BigInteger, ForeignKey('referencehandlers.referencehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   reference_handler = relationship('ReferenceHandler',
                                    primaryjoin='ReferenceHandler.identifier==ReferenceDefinition.referencehandler_id',
                                    lazy='joined',
@@ -102,7 +102,7 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'referencehandler_id': self.convert_value(self.referencehandler_id),
@@ -128,19 +128,19 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
 class Reference(ExtendedLogingInformations, Base):
   # Similar approach as for attributes
   report = relationship('Report', uselist=False, primaryjoin='Reference.report_id==Report.identifier')
-  report_id = Column('event_id', Unicode(40), ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  definition_id = Column('definition_id', Unicode(40),
+  report_id = Column('event_id', BigInteger, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  definition_id = Column('definition_id', BigInteger,
                          ForeignKey('referencedefinitions.referencedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(ReferenceDefinition,
                             primaryjoin='ReferenceDefinition.identifier==Reference.definition_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
   value = Column('value', Unicode(255), nullable=False, index=True)
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')
   __bit_code = None
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     definition_id = json.get('definition_id', None)
     if not definition_id:
       definition = json.get('definition', None)
@@ -153,9 +153,11 @@ class Reference(ExtendedLogingInformations, Base):
       self.definition_id = definition_id
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, inflated),
             'value': self.convert_value(self.value),
@@ -188,10 +190,10 @@ class Report(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(255), index=True)
   description = Column('description', UnicodeText)
   short_description = Column('short_description', Unicode(255))
-  parent_report_id = Column('parent_report_id', Unicode(40), ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
+  parent_report_id = Column('parent_report_id', BigInteger, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent_report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event = relationship('Event', uselist=False, primaryjoin='Report.event_id==Event.identifier')
-  event_id = Column('event_id', Unicode(40), ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
   references = relationship('Reference', lazy='dynamic')
   dbcode = Column('code', Integer, nullable=False, default=0)
@@ -261,7 +263,7 @@ class Report(ExtendedLogingInformations, Base):
     else:
       related_count = self.related_reports_count_for_permissions(event_permissions)
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'title': self.convert_value(self.title),
               'description': self.convert_value(self.description),
               'short_description': self.convert_value(self.short_description),
@@ -280,12 +282,14 @@ class Report(ExtendedLogingInformations, Base):
               'title': self.title
               }
 
-  def populate(self, json):
+  def populate(self, json, rest_insert=True):
     self.title = json.get('title', None)
     self.description = json.get('description', None)
     self.properties.populate(json.get('properties', None))
     # TODO inflated
     self.short_description = json.get('short_description', None)
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert
 
   @property
   def properties(self):

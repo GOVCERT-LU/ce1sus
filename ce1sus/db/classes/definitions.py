@@ -27,8 +27,8 @@ __license__ = 'GPL v3+'
 _REL_OBJECT_ATTRIBUTE_DEFINITION = Table(
     'objectdefinition_has_attributedefinitions', getattr(Base, 'metadata'),
     Column('oha_id', BigInteger, primary_key=True, nullable=False, index=True),
-    Column('attributedefinition_id', Unicode(40), ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
-    Column('objectdefinition_id', Unicode(40), ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    Column('attributedefinition_id', BigInteger, ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True),
+    Column('objectdefinition_id', BigInteger, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 )
 
 
@@ -82,7 +82,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     else:
       attribtues = None
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'chksum': self.convert_value(self.chksum),
@@ -107,7 +107,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
   regex = Column('regex', Unicode(255), nullable=False, default=u'^.+$')
   table_id = Column('table_id', Integer, nullable=False, default=0)
-  attributehandler_id = Column('attributehandler_id', Unicode(40), ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
+  attributehandler_id = Column('attributehandler_id', BigInteger, ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   attribute_handler = relationship('AttributeHandler',
                                    primaryjoin='AttributeHandler.identifier==AttributeDefinition.attributehandler_id',
                                    lazy='joined',
@@ -115,12 +115,12 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
-  value_type_id = Column('attributetype_id', Unicode(40), ForeignKey('attributetypes.attributetype_id'))
+  value_type_id = Column('attributetype_id', BigInteger, ForeignKey('attributetypes.attributetype_id'))
   value_type = relationship("AttributeType", uselist=False)
   objects = relationship('ObjectDefinition',
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name')
-  default_condition_id = Column('default_condition_id', Unicode(40), ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
+  default_condition_id = Column('default_condition_id', BigInteger, ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   default_condition = relationship('Condition', uselist=False, lazy='joined')
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
@@ -189,7 +189,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     else:
       objects = None
     if complete:
-      return {'identifier': self.convert_value(self.identifier),
+      return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
               'attributehandler_id': self.convert_value(self.attributehandler_id),
@@ -273,6 +273,6 @@ class AttributeHandler(Base):
 
     return {'description': self.convert_value(self.description),
             'name': self.convert_value(self.classname),
-            'identifier': self.convert_value(self.identifier),
+            'identifier': self.convert_value(self.uuid),
             'allowed_tables': result
             }

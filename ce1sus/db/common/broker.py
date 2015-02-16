@@ -89,6 +89,21 @@ class BrokerBase(object):
     self.clazz = None
     self.identifier = None
 
+  def get_by_uuid(self, uuid):
+    try:
+
+      result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                          'uuid') == uuid).one()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(uuid, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(uuid))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
+
+    return result
+
   @property
   def session(self):
     """
@@ -119,7 +134,7 @@ class BrokerBase(object):
     try:
 
       result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                          'identifier') == identifier).one()
+                                                                          'uuid') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
@@ -163,7 +178,7 @@ class BrokerBase(object):
     """
     try:
       self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                 'identifier') == identifier
+                                                                 'uuid') == identifier
                                                          ).delete(synchronize_session='fetch')
     except sqlalchemy.exc.IntegrityError as error:
       self.session.rollback()

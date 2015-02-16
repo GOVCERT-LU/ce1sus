@@ -7,7 +7,7 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
-from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode
+from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
@@ -25,8 +25,8 @@ __license__ = 'GPL v3+'
 
 
 _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', Base.metadata,
-                                  Column('condition_id', Unicode(40), ForeignKey('conditions.condition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                                  Column('attribute_id', Unicode(40), ForeignKey('attributes.attribute_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                  Column('condition_id', BigInteger, ForeignKey('conditions.condition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                  Column('attribute_id', BigInteger, ForeignKey('attributes.attribute_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                   )
 
 
@@ -35,7 +35,7 @@ class Condition(Base):
   description = Column('description', UnicodeText)
 
   def to_dict(self, complete=True, inflated=False):
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'value': self.convert_value(self.value),
             'description': self.convert_value(self.description),
             }
@@ -52,11 +52,11 @@ class Condition(Base):
 class Attribute(ExtendedLogingInformations, Base):
   description = Column('description', UnicodeText)
 
-  definition_id = Column('definition_id', Unicode(40),
+  definition_id = Column('definition_id', BigInteger,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
                             primaryjoin='AttributeDefinition.identifier==Attribute.definition_id', lazy='joined')
-  object_id = Column('object_id', Unicode(40), ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  object_id = Column('object_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
   # valuerelations
@@ -74,10 +74,10 @@ class Attribute(ExtendedLogingInformations, Base):
                               uselist=False, lazy='joined')
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
-  condition_id = Column('condition_id', Unicode(40), ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), primary_key=True, index=True, default=None)
+  condition_id = Column('condition_id', BigInteger, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
   condition = relationship('Condition', lazy='joined')
 
-  parent_id = Column('parent_id', Unicode(40), ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
+  parent_id = Column('parent_id', BigInteger, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
   parent = relationship('Attribute', uselist=False)
@@ -211,7 +211,7 @@ class Attribute(ExtendedLogingInformations, Base):
       condition = self.condition.to_dict(complete, inflated)
       condition_id = self.convert_value(self.condition.identifier)
 
-    return {'identifier': self.convert_value(self.identifier),
+    return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition_id),
             'definition': self.definition.to_dict(complete, False),
             'ioc': self.is_ioc,

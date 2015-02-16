@@ -77,7 +77,7 @@ def convert_date(string_date):
 
 def clone_attr(attribute, obj):
   attr = Attribute()
-  attr.identifier = uuid4()
+  attr.uuid = uuid4()
   attr.modified_on = attribute.modified_on
   attr.created_at = attribute.created_at
   attr.creator = attribute.creator
@@ -103,7 +103,7 @@ def clone_attr(attribute, obj):
 def clone_object(obj, observable, parent=None):
   new_obj = Object()
   # typical foo
-  new_obj.identifier = uuid4()
+  new_obj.uuid = uuid4()
   new_obj.modified_on = obj.modified_on
   new_obj.created_at = obj.created_at
   new_obj.creator = obj.creator
@@ -143,7 +143,7 @@ def clone_object(obj, observable, parent=None):
 
 def clone_composed_observable(composed_observable):
   new_composed_observable = ObservableComposition()
-  new_composed_observable.identifier = uuid4()
+  new_composed_observable.uuid = uuid4()
   new_composed_observable.dbcode = composed_observable.dbcode
 
   new_composed_observable.operator = composed_observable.operator
@@ -164,7 +164,7 @@ def clone_composed_observable(composed_observable):
 
 def create_related_obj(parent, child):
   related_obj = RelatedObject()
-  related_obj.identifier = uuid4()
+  related_obj.uuid = uuid4()
   related_obj.parent = parent
   related_obj.parent_id = related_obj.parent.identifier
   related_obj.object = child
@@ -191,7 +191,7 @@ def create_related_observable(parent, child):
 
 def clone_rel_observable(rel_observable, parent_obs):
   new_rel_observable = RelatedObservable()
-  new_rel_observable.identifier = uuid4()
+  new_rel_observable.uuid = uuid4()
   new_rel_observable.observable = clone_observable(rel_observable.observable)
   if new_rel_observable.observable:
     new_rel_observable.child_id = new_rel_observable.observable.identifier
@@ -207,7 +207,7 @@ def clone_rel_observable(rel_observable, parent_obs):
 
 def clone_observable(observable):
   new_observable = Observable()
-  new_observable.identifier = uuid4()
+  new_observable.uuid = uuid4()
   new_observable.title = observable.title
   new_observable.dbcode = observable.dbcode
   # do not set event as this will then be directly liked to the event!
@@ -269,10 +269,10 @@ class Migrator(object):
 
     self.event_controller = EventController(config, directconnection)
 
-    def_con = AttributeDefinitionController(config, directconnection)
-    self.attr_defs = def_con.get_all_attribute_definitions()
-    def_con = ObjectDefinitionController(config, directconnection)
-    self.obj_defs = def_con.get_all_object_definitions()
+    self.attr_def_controller = AttributeDefinitionController(config, directconnection)
+
+    self.obj_def_controller = ObjectDefinitionController(config, directconnection)
+
     def_con = ConditionController(config, directconnection)
     self.conditions = def_con.get_all_conditions()
     def_con = ReferencesController(config, directconnection)
@@ -400,7 +400,7 @@ class Migrator(object):
       group_dict = json.loads(line)
       group = Group()
       id_ = group_dict['identifier']
-      group.identifier = group_dict['uuid']
+      group.uuid = group_dict['uuid']
       group.email = group_dict['email']
       group.gpg_key = group_dict['gpg_key']
       group.tlp_lvl = group_dict['tlp_lvl']
@@ -420,7 +420,7 @@ class Migrator(object):
       try:
         self.group_controller.insert_group(group, commit=False)
       except ControllerIntegrityException:
-        group = self.group_controller.get_group_by_id(group.identifier)
+        group = self.group_controller.get_group_by_uuid(group.uuid)
 
       groups[id_] = group
 
@@ -482,7 +482,7 @@ class Migrator(object):
     obj = Object()
     obj.observable_id = observable.identifier
     obj.observable = observable
-    obj.identifier = line['uuid']
+    obj.uuid = line['uuid']
     obj.creator_group = self.get_groups()[line['creator_group_id']]
     obj.creator_group_id = obj.creator_group.identifier
     obj.creator = self.get_users()[line['creator_id']]
@@ -504,7 +504,7 @@ class Migrator(object):
 
   def make_observable(self, line, event):
     result_observable = Observable()
-    result_observable.identifier = line['uuid']
+    result_observable.uuid = line['uuid']
     # The creator of the result_observable is the creator of the object
     result_observable.creator_group = self.get_groups()[line['creator_group_id']]
     result_observable.creator_group_id = result_observable.creator_group.identifier
@@ -555,7 +555,7 @@ class Migrator(object):
 
   def make_reference(self, attribute, report):
     reference = Reference()
-    reference.identifier = attribute['uuid']
+    reference.uuid = attribute['uuid']
     reference.creator_group = self.get_groups()[attribute['creator_group_id']]
     reference.creator_group_id = reference.creator_group.identifier
     reference.creator = self.get_users()[attribute['creator_id']]
@@ -620,10 +620,10 @@ class Migrator(object):
     elif name == 'http_method':
       name = 'HTTP_Method'
     chksum = line['chksum']
-    for definition in self.attr_defs:
-      if name == definition.name:
-        return definition
-    raise Exception(u'Attribtue Definition {0} with chksum {1} not found in new setup'.format(name, chksum))
+    try:
+      return self.attr_def_controller.get_defintion_by_name(name)
+    except ControllerException:
+      raise Exception(u'Attribtue Definition "{0}" with chksum {1} not found in new setup'.format(name, chksum))
 
   def map_attribute(self, line, obj, owner):
     if obj.definition.name == 'email':
@@ -639,7 +639,7 @@ class Migrator(object):
       id_ = uuid4()
 
     self.seen_attribtues_uuids.append(id_)
-    attribute.identifier = id_
+    attribute.uuid = id_
     set_db_code(attribute, line['dbcode'])
 
     self.seen_attributes[line['identifier']] = attribute
@@ -711,25 +711,20 @@ class Migrator(object):
     elif name == 'user_account':
       name = 'UserAccount'
     chksum = line['chksum']
-    found_def = None
-    for definition in self.obj_defs:
-      if name == definition.name:
-        found_def = definition
-        break
-    if found_def:
-      return found_def
-    else:
+    try:
+      return self.obj_def_controller.get_defintion_by_name(name)
+    except ControllerException:
       raise Exception(u'Object Definition {0} with chksum {1} not found in new setup'.format(name, chksum))
 
   def make_attr_obs(self, line, obj_def, attr_def, owner, event):
     observable = self.make_observable(line, event)
-    observable.identifier = uuid4()
+    observable.uuid = uuid4()
     # important to delink them from the event
     observable.event_id = None
     observable.event = None
 
     obj = self.make_object(line, observable)
-    obj.identifier = uuid4()
+    obj.uuid = uuid4()
 
     line['definition']['name'] = attr_def
     if attr_def == 'ip_port':
@@ -794,11 +789,11 @@ class Migrator(object):
 
   def map_observable_composition(self, array_items, line, owner, event, title=None):
     result_observable = self.make_observable(line, event)
-    result_observable.identifier = uuid4()
+    result_observable.uuid = uuid4()
     if title:
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
-    composed_attribute.identifier = uuid4()
+    composed_attribute.uuid = uuid4()
     set_db_code(composed_attribute, line['dbcode'])
 
     composed_attribute.parent_id = result_observable.identifier
@@ -950,7 +945,7 @@ class Migrator(object):
 
   def map_indicator(self, observable, line, indicator_type, event):
     indicator = Indicator()
-    indicator.identifier = uuid4()
+    indicator.uuid = uuid4()
     indicator.creator_group = observable.creator_group
     indicator.creator_group_id = indicator.creator_group.identifier
     indicator.creator = observable.creator
@@ -1085,10 +1080,10 @@ class Migrator(object):
   def map_malicious_website(self, line, owner, event):
     observable = self.make_observable(line, event)
     observable.title = 'Malicious website'
-    observable.identifier = line['uuid']
+    observable.uuid = line['uuid']
 
     composed_attribute = ObservableComposition()
-    composed_attribute.identifier = uuid4()
+    composed_attribute.uuid = uuid4()
     set_db_code(composed_attribute, line['dbcode'])
 
     composed_attribute.parent_id = observable.identifier
@@ -1144,7 +1139,7 @@ class Migrator(object):
 
       # then attach the raw artifact
       raw_artifact = self.make_object(line, observable)
-      raw_artifact.identifier = uuid4()
+      raw_artifact.uuid = uuid4()
       raw_artifact.definition = self.map_obj_def({'name': 'Artifact', 'chksum': None})
       # set attributes for type and data
       attribute_line = None
@@ -1188,7 +1183,7 @@ class Migrator(object):
         # do the artifact
         # then attach the raw artifact
         raw_artifact = self.make_object(line, observable)
-        raw_artifact.identifier = uuid4()
+        raw_artifact.uuid = uuid4()
         raw_artifact.definition = self.map_obj_def({'name': 'Artifact', 'chksum': None})
 
         attribute_line['definition']['name'] = 'raw_artifact'
@@ -1220,7 +1215,7 @@ class Migrator(object):
           attribute_hash = element
 
       file_obj = self.make_object(line, observable)
-      file_obj.identifier = uuid4()
+      file_obj.uuid = uuid4()
       file_obj.definition = self.map_obj_def({'name': 'file', 'chksum': None})
       if attribute_hash:
         line['attributes'].remove(attribute_hash)
@@ -1238,7 +1233,7 @@ class Migrator(object):
         # do the artifact
         # then attach the raw artifact
         raw_artifact = self.make_object(line, observable)
-        raw_artifact.identifier = uuid4()
+        raw_artifact.uuid = uuid4()
         raw_artifact.definition = self.map_obj_def({'name': 'Artifact', 'chksum': None})
 
         attribute_file['definition']['name'] = 'raw_artifact'
@@ -1285,8 +1280,8 @@ class Migrator(object):
         else:
           mapped = self.map_cybox(child, owner, observable, event)
           if mapped:
-            if mapped.identifier == obj.identifier:
-              mapped.identifier = uuid4()
+            if mapped.uuid == obj.uuid:
+              mapped.uuid = uuid4()
             related_object = create_related_obj(obj, mapped)
             obj.related_objects.append(related_object)
           pass
@@ -1297,7 +1292,7 @@ class Migrator(object):
     definition = line['definition']
     if ['name'] == 'user_account':
       result_observable = self.make_observable(line, event)
-      result_observable.identifier = uuid4()
+      result_observable.uuid = uuid4()
 
       composed_attribute = ObservableComposition()
       composed_attribute.uuid = line['uuid']
@@ -1310,7 +1305,7 @@ class Migrator(object):
       # create for each a single entry
       for attribute in attributes:
         observable = self.make_observable(attribute, event)
-        observable.identifier = uuid4()
+        observable.uuid = uuid4()
 
         obj = self.make_object(line, observable)
         definition = self.map_obj_def({'name': 'UserAccount', 'chksum': None})
@@ -1335,7 +1330,7 @@ class Migrator(object):
     else:
 
       observable = self.make_observable(line, event)
-      observable.identifier = uuid4()
+      observable.uuid = uuid4()
 
       obj = self.map_cybox(line, owner, observable, event)
       if obj:
@@ -1349,7 +1344,7 @@ class Migrator(object):
 
   def map_event(self, line):
     event = Event()
-    event.identifier = line['uuid']
+    event.uuid = line['uuid']
     event.status_id = line['status_id']
     event.description = line['description']
     event.analysis_id = line['analysis_status_id']
