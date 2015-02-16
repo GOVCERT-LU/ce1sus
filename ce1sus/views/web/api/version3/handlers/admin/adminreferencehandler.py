@@ -38,7 +38,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single mail
           uuid = path.pop(0)
-          reference = self.reference_controller.get_reference_definitions_by_id(uuid)
+          reference = self.reference_controller.get_reference_definitions_by_uuid(uuid)
           return reference.to_dict(details, inflated)
         else:
           # return all
@@ -51,7 +51,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
         self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
-          reference = self.reference_controller.get_reference_definitions_by_id(uuid)
+          reference = self.reference_controller.get_reference_definitions_by_uuid(uuid)
           reference.populate(json)
           self.reference_controller.update_reference_definition(reference, self.get_user())
           return reference.to_dict(details, inflated)
@@ -71,7 +71,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
         self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
-          self.reference_controller.remove_reference_definition_by_id(uuid)
+          self.reference_controller.remove_reference_definition_by_uuid(uuid)
         else:
           raise RestHandlerException(u'Cannot remove reference as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')

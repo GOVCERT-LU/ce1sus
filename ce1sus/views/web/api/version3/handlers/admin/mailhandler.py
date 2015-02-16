@@ -37,7 +37,7 @@ class MailHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single mail
           uuid = path.pop(0)
-          mail = self.mail_controller.get_by_id(uuid)
+          mail = self.mail_controller.get_by_uuid(uuid)
           return mail.to_dict(details, inflated)
         else:
           # return all
@@ -49,7 +49,7 @@ class MailHandler(RestBaseHandler):
       elif method == 'PUT':
         if len(path) > 0:
           uuid = path.pop(0)
-          mail = self.mail_controller.get_by_id(uuid)
+          mail = self.mail_controller.get_by_uuid(uuid)
           mail.populate(json)
           self.mail_controller.update_mail(mail, self.get_user())
           return mail.to_dict(details, inflated)

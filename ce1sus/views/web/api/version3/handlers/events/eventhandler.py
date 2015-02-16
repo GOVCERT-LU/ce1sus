@@ -47,7 +47,7 @@ class EventHandler(RestBaseHandler):
       # get the event
       event_id = requested_object.get('event_id')
       if event_id:
-        event = self.event_controller.get_event_by_id(event_id)
+        event = self.event_controller.get_event_by_uuid(event_id)
         # check if event is viewable by the current user
         self.check_if_event_is_viewable(event)
 
@@ -119,7 +119,7 @@ class EventHandler(RestBaseHandler):
     else:
       comment_id = requested_object['object_uuid']
       if comment_id:
-        comment = self.event_controller.get_comment_by_id(comment_id)
+        comment = self.event_controller.get_comment_by_uuid(comment_id)
       else:
         raise PathParsingException(u'comment cannot be called without an ID')
       if method == 'GET':
@@ -178,7 +178,7 @@ class EventHandler(RestBaseHandler):
       else:
         observable_id = requested_object['object_uuid']
         if observable_id:
-          observable = self.observable_controller.get_observable_by_id(observable_id)
+          observable = self.observable_controller.get_observable_by_uuid(observable_id)
           self.check_item_is_viewable(event, observable)
         else:
           raise PathParsingException(u'observale cannot be called without an ID')
@@ -201,7 +201,7 @@ class EventHandler(RestBaseHandler):
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
-        observable = self.observable_controller.get_observable_by_id(uuid)
+        observable = self.observable_controller.get_observable_by_uuid(uuid)
         self.check_item_is_viewable(event, observable)
         if is_object_viewable(observable, event_permission):
           return observable.to_dict(details, inflated, event_permission)
@@ -234,7 +234,7 @@ class EventHandler(RestBaseHandler):
     try:
       uuid = requested_object['object_uuid']
       if uuid:
-        composed_observable = self.observable_controller.get_composed_observable_by_id(uuid)
+        composed_observable = self.observable_controller.get_composed_observable_by_uuid(uuid)
         return composed_observable.to_dict(details, inflated)
       else:
         raise PathParsingException(u'observable_composition cannot be called without an ID')
@@ -267,7 +267,7 @@ class EventHandler(RestBaseHandler):
         uuid = group.get('identifier')
         if uuid:
           # get group
-          group = self.event_controller.get_group_by_id(uuid)
+          group = self.event_controller.get_group_by_uuid(uuid)
           # append
           event_group_permission = EventGroupPermission()
           event_group_permission.event_id = event.identifier
@@ -294,7 +294,7 @@ class EventHandler(RestBaseHandler):
 
         json_permissions = json.get('permissions', None)
         if json_permissions:
-          event_group = self.event_controller.get_event_group_by_id(uuid)
+          event_group = self.event_controller.get_event_group_by_uuid(uuid)
           event_group.permissions.populate(json_permissions)
           self.event_controller.update_event_group_permissions(self.get_user(), event_group, True)
           return event_group.to_dict()
@@ -309,7 +309,7 @@ class EventHandler(RestBaseHandler):
       uuid = requested_object.get('object_uuid', None)
       if uuid:
         # get group
-        event_group_permission = self.event_controller.get_event_group_by_id(uuid)
+        event_group_permission = self.event_controller.get_event_group_by_uuid(uuid)
 
         self.event_controller.remove_group_permissions(self.get_user(), event_group_permission, True)
         return 'OK'
@@ -363,7 +363,7 @@ class EventHandler(RestBaseHandler):
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
-        report = self.report_controller.get_report_by_id(uuid)
+        report = self.report_controller.get_report_by_uuid(uuid)
         self.check_item_is_viewable(event, report)
         if is_object_viewable(report, event_permission):
           return report.to_dict(details, inflated, event_permission)

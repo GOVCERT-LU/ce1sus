@@ -32,6 +32,12 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_report_by_uuid(self, uuid):
+    try:
+      return self.report_broker.get_by_uuid(uuid)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def insert_report(self, report, user, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
@@ -62,9 +68,25 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_reference_definitions_by_uuid(self, uuid):
+    try:
+        return self.reference_definition_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_reference_by_id(self, identifier):
     try:
         return self.reference_broker.get_by_id(identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_reference_by_uuid(self, uuid):
+    try:
+        return self.reference_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:

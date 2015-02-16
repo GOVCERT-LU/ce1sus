@@ -37,7 +37,7 @@ class AttribueTypeHandler(RestBaseHandler):
       if method == 'GET':
         if len(path) > 0:
           uuid = path.pop(0)
-          type_ = self.attribute_definition_controller.get_type_by_id(uuid)
+          type_ = self.attribute_definition_controller.get_type_by_uuid(uuid)
           return type_.to_dict(details, inflated)
         else:
           types = self.attribute_definition_controller.get_all_types()
@@ -59,7 +59,7 @@ class AttribueTypeHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          type_ = self.attribute_definition_controller.get_type_by_id(uuid)
+          type_ = self.attribute_definition_controller.get_type_by_uuid(uuid)
           type_.populate(json)
           self.attribute_definition_controller.update_type(type_)
           return type_.to_dict(details, inflated)
@@ -69,7 +69,7 @@ class AttribueTypeHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          self.attribute_definition_controller.remove_type_by_id(uuid)
+          self.attribute_definition_controller.remove_type_by_uuid(uuid)
           return 'OK'
         else:
           raise RestHandlerException(u'Cannot delete type as no identifier was given')

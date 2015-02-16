@@ -31,6 +31,14 @@ class AttributeController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_attribute_by_uuid(self, uuid):
+    try:
+      return self.attribute_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def update_attribute(self, attribute, user, commit=True):
     # TODO: include handler
     try:

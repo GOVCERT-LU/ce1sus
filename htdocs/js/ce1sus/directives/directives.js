@@ -956,13 +956,19 @@ app.directive("objectAttributeForm", function() {
     },
     controller: function($scope, $log){
       $scope.getDefinition = function(identifier){
-        var result = {}; 
-        angular.forEach($scope.definitions, function(definition) {
-          if (definition.identifier == identifier){
-            result = definition;
-          }
-        }, $log);
-        return result;
+        var result = {};
+        if ($scope.type == 'edit'){
+          return $scope.objectattribute.definition;
+        } else {
+          angular.forEach($scope.definitions, function(definition) {
+            if (definition.identifier == identifier){
+              result = definition;
+            }
+          }, $log);
+          return result;
+        }
+
+        
       };
       
     },
@@ -999,10 +1005,7 @@ app.directive("reportReferenceForm", function() {
 
 
 app.directive("attributeHandler", function() {
-  
 
-  
-  
   return {
     restrict: "E",
     scope: {
@@ -1017,7 +1020,13 @@ app.directive("attributeHandler", function() {
       
       scope.getTemplate = function(){
         var contentType =  scope.type;
-        var viewType = scope.definition.attributehandler.view_type;
+        var viewType = null;
+        if (scope.type == 'edit') {
+          viewType = scope.attribute.definition.attributehandler.view_type;
+        } else {
+          viewType = scope.definition.attributehandler.view_type;
+        }
+        
         var baseUrl = 'pages/handlers';
         
         var templateUrl = baseUrl + '/attribtues/'+ contentType + '/'+viewType+'.html';
@@ -1030,11 +1039,19 @@ app.directive("attributeHandler", function() {
       //Resolve additional data
 
       $scope.getData = function() {
+        if (scope.type == 'edit') {
+          Restangular.one('attributehandlers', $scope.attribute.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
+            $scope.handlerdata = handlerdata;
+          }, function(response) {
+            handleError(response, messages);
+          });
+        } else {
           Restangular.one('attributehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
             $scope.handlerdata = handlerdata;
           }, function(response) {
             handleError(response, messages);
           });
+        }
       };
 
 
@@ -1042,7 +1059,13 @@ app.directive("attributeHandler", function() {
       $scope.$watch('definition.regex', function() {
         $scope.patternexpression = (function() {
           if ($scope.type != 'view') {
-            var regexp =  new RegExp($scope.definition.regex);
+            var regexp = /^.*$/;
+            if ($scope.type == 'edit') {
+              regexp =  new RegExp($scope.attribute.definition.regex);
+            } else {
+              regexp =  new RegExp($scope.definition.regex);
+            }
+            
             return {
                 test: function(value) {
                     if( $scope.requireVal === false ) {

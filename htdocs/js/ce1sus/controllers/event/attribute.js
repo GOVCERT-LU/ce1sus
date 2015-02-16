@@ -32,16 +32,6 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
                             'definition_id': null};
   $scope.attribute=angular.copy(original_attribute);
   
-  $scope.$watch(function() {
-    return $scope.attribute.definition_id;
-    }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = entry.share;
-        }
-      }, $log);
-    });
-  
   $scope.closeModal = function(){
     $scope.attribute = angular.copy(original_attribute);
     $scope.$hide();
@@ -82,6 +72,9 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
 
 app.controller("objectAttributeEditController", function($scope, Restangular, messages, $routeSegment,$log, $upload) {
   $scope.definitions =[];
+  
+  var original_attribute = angular.copy($scope.attributeDetails);
+  $scope.attribute=angular.copy(original_attribute);
 
   Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
     $scope.definitions = attributes;
@@ -95,31 +88,6 @@ app.controller("objectAttributeEditController", function($scope, Restangular, me
     handleError(response, messages);
     $scope.$hide();
   });
-  
-  $scope.$watch(function() {
-    return $scope.attribute.definition_id;
-    }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = entry.default_share;
-          $scope.attribute.condition_id = entry.default_condition_id;
-        }
-      }, $log);
-    });
-  
-  var original_attribute = angular.copy($scope.attributeDetails);
-  $scope.attribute=angular.copy(original_attribute);
-  
-  $scope.$watch(function() {
-    return $scope.attribute.definition_id;
-    }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = entry.share;
-        }
-      }, $log);
-    });
-  
   $scope.closeModal = function(){
     $scope.attribute = angular.copy(original_attribute);
     $scope.$hide();
@@ -131,13 +99,16 @@ app.controller("objectAttributeEditController", function($scope, Restangular, me
     $scope.attribute = angular.copy(original_attribute);
 
   };
-  
 
-  
   $scope.attributeChanged = function ()
   {
     return !angular.equals($scope.attribute, original_attribute);
   };
+  
+
+  
+  
+
   
   $scope.submitAttribute = function(){
     angular.forEach($scope.definitions, function(entry) {
@@ -155,6 +126,6 @@ app.controller("objectAttributeEditController", function($scope, Restangular, me
     });
     $scope.$hide();
   };
-  
+
   
 });

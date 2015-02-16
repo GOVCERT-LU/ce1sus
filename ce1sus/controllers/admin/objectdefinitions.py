@@ -43,6 +43,14 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_object_definitions_by_uuid(self, uuid):
+    try:
+      return self.obj_def_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_object_definitions_by_id(self, object_id):
     try:
       return self.obj_def_broker.get_by_id(object_id)
@@ -85,9 +93,17 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_definition_by_id(self, uuid):
+  def remove_definition_by_id(self, identifier):
     try:
-      self.obj_def_broker.remove_by_id(uuid)
+      self.obj_def_broker.remove_by_id(identifier)
+    except IntegrityException as error:
+      raise SpecialControllerException('Cannot delete this object. The object is still referenced.')
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_definition_by_uuid(self, uuid):
+    try:
+      self.obj_def_broker.remove_by_uuid(uuid)
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this object. The object is still referenced.')
     except BrokerException as error:

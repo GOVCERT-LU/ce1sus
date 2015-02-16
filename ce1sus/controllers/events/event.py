@@ -132,6 +132,16 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_event_by_uuid(self, uuid):
+    try:
+      event = self.event_broker.get_by_uuid(uuid)
+      return event
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all(self):
     try:
       events = self.event_broker.get_all()
@@ -179,6 +189,15 @@ class EventController(BaseController):
   def get_comment_by_id(self, identifer):
     try:
       return self.comment_broker.get_by_id(identifer)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_comment_by_uuid(self, uuid):
+    try:
+      return self.comment_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       self.logger.debug(error)
       raise ControllerNothingFoundException(error)
@@ -246,9 +265,27 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_group_by_uuid(self, uuid):
+    try:
+      return self.group_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_event_group_by_id(self, identifier):
     try:
       return self.event_broker.get_group_by_id(identifier)
+    except NothingFoundException as error:
+      self.logger.debug(error)
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_event_group_by_uuid(self, uuid):
+    try:
+      return self.event_broker.get_group_by_uuid(uuid)
     except NothingFoundException as error:
       self.logger.debug(error)
       raise ControllerNothingFoundException(error)

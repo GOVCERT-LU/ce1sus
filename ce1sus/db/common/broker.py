@@ -134,7 +134,7 @@ class BrokerBase(object):
     try:
 
       result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                          'uuid') == identifier).one()
+                                                                          'identifier') == identifier).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
@@ -170,6 +170,26 @@ class BrokerBase(object):
     return result
 
   def remove_by_id(self, identifier, commit=True):
+    """
+    Removes the <<get_broker_class()>> with the given identifier
+
+    :param identifier:  the id of the requested user object
+    :type identifier: integer
+    """
+    try:
+      self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                 'identifier') == identifier
+                                                         ).delete(synchronize_session='fetch')
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
+    self.do_commit(commit)
+
+  def remove_by_uuid(self, identifier, commit=True):
     """
     Removes the <<get_broker_class()>> with the given identifier
 

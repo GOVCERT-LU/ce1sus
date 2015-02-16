@@ -39,7 +39,7 @@ class ObservableHandler(RestBaseHandler):
       # get the event
       observable_id = requested_object.get('event_id')
       if observable_id:
-        observable = self.observable_controller.get_observable_by_id(observable_id)
+        observable = self.observable_controller.get_observable_by_uuid(observable_id)
         event = self.observable_controller.get_event_for_observable(observable)
         # check if event is viewable by the current user
         self.check_if_event_is_viewable(event)
@@ -95,7 +95,7 @@ class ObservableHandler(RestBaseHandler):
     else:
       uuid = requested_object['object_uuid']
       if uuid:
-        obj = self.observable_controller.get_object_by_id(uuid)
+        obj = self.observable_controller.get_object_by_uuid(uuid)
         self.check_item_is_viewable(event, obj)
       else:
         if not flat:

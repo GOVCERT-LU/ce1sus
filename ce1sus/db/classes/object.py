@@ -14,6 +14,7 @@ from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.definitions import ObjectDefinition
 
 
 __author__ = 'Weber Jean-Paul'
@@ -202,7 +203,7 @@ class Object(ExtendedLogingInformations, Base):
       related_count = self.related_objects_count_for_permissions(event_permissions)
 
     return {'identifier': self.convert_value(self.uuid),
-            'definition_id': self.convert_value(self.definition_id),
+            'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(complete, False),
             'attributes': attributes,
             'attributes_count': attributes_count,
@@ -218,14 +219,16 @@ class Object(ExtendedLogingInformations, Base):
 
   def populate(self, json, rest_insert=True):
     # TODO: if inflated
-    definition_id = json.get('definition_id', None)
-    if not definition_id:
+    session = self._sa_instance_state.session
+    definition_uuid = json.get('definition_id', None)
+    if not definition_uuid:
       definition = json.get('definition', None)
       if definition:
-        definition_id = definition.get('identifier', None)
-    if self.definition_id:
-      if self.definition_id != definition_id:
+        definition_uuid = definition.get('identifier', None)
+    if self.definition:
+      if self.definition.uuid != definition_uuid:
         raise ValueException(u'Object definitions cannot be updated')
+    definition_id = session.query(ObjectDefinition.identifier).filter(ObjectDefinition.uuid == definition_uuid).one()[0]
     self.definition_id = definition_id
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert

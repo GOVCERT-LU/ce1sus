@@ -37,7 +37,15 @@ class UserController(BaseController):
 
   def get_user_by_id(self, user_id):
     try:
-      return self.user_broker.getUserByUserName('admin')
+      return self.user_broker.get_by_id(user_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_user_by_uuid(self, uuid):
+    try:
+      return self.user_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -99,6 +107,16 @@ class UserController(BaseController):
   def remove_user_by_id(self, identifier):
     try:
       self.user_broker.remove_by_id(identifier)
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete user. The user is referenced by elements. Disable this user instead.')
+    except DeletionException:
+      raise ControllerException('This user cannot be deleted')
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_user_by_uuid(self, uuid):
+    try:
+      self.user_broker.remove_by_uuid(uuid)
     except IntegrityException as error:
       raise ControllerException('Cannot delete user. The user is referenced by elements. Disable this user instead.')
     except DeletionException:

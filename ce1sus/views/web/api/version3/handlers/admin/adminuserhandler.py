@@ -46,7 +46,7 @@ class AdminUserHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           # TODO: add inflate
-          user = self.user_controller.get_user_by_id(uuid)
+          user = self.user_controller.get_user_by_uuid(uuid)
           if details:
             password = '*******************'
             if is_plugin_available('ldap', self.config):
@@ -87,7 +87,7 @@ class AdminUserHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          user = self.user_controller.get_user_by_id(uuid)
+          user = self.user_controller.get_user_by_uuid(uuid)
           user.populate(json)
           # Do not update the password if it matches the masking
           if user.plain_password:
@@ -103,7 +103,7 @@ class AdminUserHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          self.user_controller.remove_user_by_id(uuid)
+          self.user_controller.remove_user_by_uuid(uuid)
           return 'Deleted user'
         else:
           raise RestHandlerException(u'Cannot delete user as no identifier was given')

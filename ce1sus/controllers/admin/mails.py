@@ -38,6 +38,14 @@ class MailController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_by_uuid(self, uuid):
+    try:
+      return self.mail_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def update_mail(self, mail_template, user):
     try:
       user = self.user_broker.get_by_id(user.identifier)

@@ -11,7 +11,7 @@ from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
-from ce1sus.db.classes.definitions import AttributeDefinition
+from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.common.objects import get_class
@@ -209,10 +209,10 @@ class Attribute(ExtendedLogingInformations, Base):
     condition_id = None
     if self.condition:
       condition = self.condition.to_dict(complete, inflated)
-      condition_id = self.convert_value(self.condition.identifier)
+      condition_id = self.convert_value(self.condition.uuid)
 
     return {'identifier': self.convert_value(self.uuid),
-            'definition_id': self.convert_value(self.definition_id),
+            'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(complete, False),
             'ioc': self.is_ioc,
             'value': self.convert_value(self.value),
@@ -226,22 +226,30 @@ class Attribute(ExtendedLogingInformations, Base):
             }
 
   def populate(self, json, rest_insert=True):
-    definition_id = json.get('definition_id', None)
-    if not definition_id:
+    definition_uuid = json.get('definition_id', None)
+    if not definition_uuid:
       definition = json.get('definition', None)
       if definition:
-        definition_id = definition.get('identifier', None)
-    if self.definition_id:
-      if self.definition_id != definition_id:
+        definition_uuid = definition.get('identifier', None)
+    session = self._sa_instance_state.session
+    if self.definition:
+      if self.definition.uuid != definition_uuid:
         raise ValueException(u'Attribute definitions cannot be updated')
-    if definition_id:
+    if definition_uuid:
+      # get id for the uuid
+      definition_id = session.query(AttributeDefinition.identifier).filter(AttributeDefinition.uuid == definition_uuid).one()[0]
+
       self.definition_id = definition_id
-    condition_id = json.get('condition_id', None)
-    if not condition_id:
+
+    condition_uuid = json.get('condition_id', None)
+    if not condition_uuid:
       condition = json.get('condition', None)
       if condition:
-        condition_id = condition.get('identifier', None)
-    if condition_id:
+        condition_uuid = condition.get('identifier', None)
+    if condition_uuid:
+
+      condition_id = session.query(Condition.identifier).filter(Condition.uuid == condition_uuid).one()[0]
+
       self.condition_id = condition_id
     self.is_ioc = json.get('ioc', 0)
     self.value = json.get('value', None)

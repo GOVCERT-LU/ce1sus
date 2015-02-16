@@ -63,7 +63,7 @@ class ObjectHandler(RestBaseHandler):
       # get the event
       object_id = requested_object.get('event_id')
       if object_id:
-        obj = self.observable_controller.get_object_by_id(object_id)
+        obj = self.observable_controller.get_object_by_uuid(object_id)
         event = obj.event
         self.check_if_event_is_viewable(event)
         if requested_object['object_type'] is None:
@@ -71,7 +71,7 @@ class ObjectHandler(RestBaseHandler):
 
           # check if event is viewable by the current user
 
-          return self.__process_object(method, event, obj, details, inflated, json)
+          return self.__process_object(method, event, obj, details, inflated, json, headers)
 
         elif requested_object['object_type'] == 'object':
           return self.__process_child_object(method, event, obj, requested_object, details, inflated, json, headers)
@@ -183,7 +183,7 @@ class ObjectHandler(RestBaseHandler):
       if method == 'POST':
         self.check_if_user_can_add(event)
         # Get needed handler
-        definition = self.attribute_definition_controller.get_attribute_definitions_by_id(json.get('definition_id', None))
+        definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(json.get('definition_id', None))
         handler_instance = self.__get_handler(definition)
 
         # Ask handler to process the json for the new attributes
@@ -233,7 +233,7 @@ class ObjectHandler(RestBaseHandler):
         uuid = requested_object['object_uuid']
         if method == 'GET':
           if uuid:
-            attribute = self.attribute_controller.get_attribute_by_id(uuid)
+            attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
             self.check_item_is_viewable(event, attribute)
             return attribute.to_dict(details, inflated)
           else:
@@ -243,14 +243,15 @@ class ObjectHandler(RestBaseHandler):
                 result.append(attribute.to_dict(details, inflated))
             return result
         else:
-          attribute = self.attribute_controller.get_attribute_by_id(uuid)
+          attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
             self.check_item_is_viewable(event, attribute)
-            definition_id = json.get('definition_id', None)
-            if definition_id:
+            definition_uuid = json.get('definition_id', None)
+
+            if definition_uuid:
               # check if it still is the same
-              if not attribute.definition_id == definition_id:
+              if attribute.definition.uuid != definition_uuid:
                 raise HandlerException('It is not possible to change the definition of attribtues')
 
             handler_instance = self.__get_handler(attribute.definition)

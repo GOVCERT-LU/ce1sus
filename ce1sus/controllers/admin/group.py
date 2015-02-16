@@ -76,3 +76,13 @@ class GroupController(BaseController):
       raise ControllerException('This group cannot be deleted')
     except BrokerException as error:
       raise ControllerException(error)
+
+  def remove_group_by_uuid(self, uuid):
+    try:
+      self.group_broker.remove_by_uuid(uuid)
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete group. The group is referenced by elements. Disable this group instead.')
+    except DeletionException:
+      raise ControllerException('This group cannot be deleted')
+    except BrokerException as error:
+      raise ControllerException(error)

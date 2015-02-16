@@ -47,6 +47,14 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_reference_by_uuid(self, uuid):
+    try:
+      return self.reference_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def update_reference(self, reference, user):
     try:
       user = self.user_broker.get_by_id(user.identifier)
@@ -68,6 +76,14 @@ class ReferencesController(BaseController):
   def get_reference_definitions_by_id(self, identifier):
     try:
       return self.reference_definition_broker.get_by_id(identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_reference_definitions_by_uuid(self, uuid):
+    try:
+      return self.reference_definition_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -101,6 +117,14 @@ class ReferencesController(BaseController):
   def remove_reference_definition_by_id(self, identifier):
     try:
       return self.reference_definition_broker.remove_by_id(identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_reference_definition_by_uuid(self, uuid):
+    try:
+      return self.reference_definition_broker.remove_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:

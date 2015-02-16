@@ -40,7 +40,7 @@ class AdminObjectHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           # TODO: add inflate
-          definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
+          definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
           if len(path) > 0:
             type_ = uuid = path.pop(0)
             if type_ == 'attributes':
@@ -66,7 +66,7 @@ class AdminObjectHandler(RestBaseHandler):
         self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
-          definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
+          definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
           if len(path) > 0:
             type_ = path.pop(0)
             if type_ == 'attribute':
@@ -77,7 +77,7 @@ class AdminObjectHandler(RestBaseHandler):
 
               uuid = json.get('identifier', None)
               if uuid:
-                attr = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+                attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
                 definition.attributes.append(attr)
                 self.object_definition_controller.update_object_definition(definition, self.get_user())
                 return 'OK'
@@ -100,7 +100,7 @@ class AdminObjectHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          obj_def = self.object_definition_controller.get_object_definitions_by_id(uuid)
+          obj_def = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
           obj_def.populate(json)
           # set the new checksum
           self.object_definition_controller.update_object_definition(obj_def, self.get_user())
@@ -117,15 +117,15 @@ class AdminObjectHandler(RestBaseHandler):
           if len(path) > 0:
             type_ = path.pop(0)
             if len(path) > 0:
-              definition = self.object_definition_controller.get_object_definitions_by_id(uuid)
+              definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
               uuid = path.pop(0)
-              attr = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+              attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
               definition.attributes.remove(attr)
               self.object_definition_controller.update_object_definition(definition, self.get_user())
             else:
               raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
           else:
-            self.object_definition_controller.remove_definition_by_id(uuid)
+            self.object_definition_controller.remove_definition_by_uuid(uuid)
 
           return 'OK'
         else:

@@ -75,9 +75,27 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_observable_by_uuid(self, uuid):
+    try:
+      observable = self.observable_broker.get_by_uuid(uuid)
+      return observable
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_composed_observable_by_id(self, identifier):
     try:
       composed_observable = self.composed_observable_broker.get_by_id(identifier)
+      return composed_observable
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_composed_observable_by_uuid(self, uuid):
+    try:
+      composed_observable = self.composed_observable_broker.get_by_uuid(uuid)
       return composed_observable
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
@@ -93,9 +111,27 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_attribute_by_uuid(self, uuid):
+    try:
+      obj = self.attribute_broker.get_by_uuid(uuid)
+      return obj
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_object_by_id(self, identifier):
     try:
       obj = self.object_broker.get_by_id(identifier)
+      return obj
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_object_by_uuid(self, uuid):
+    try:
+      obj = self.object_broker.get_by_uuid(uuid)
       return obj
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)

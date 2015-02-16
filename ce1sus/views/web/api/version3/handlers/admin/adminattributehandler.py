@@ -40,7 +40,7 @@ class AdminAttributeHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           # TODO: add inflate
-          definition = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+          definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
           if len(path) > 0:
             type_ = uuid = path.pop(0)
             if type_ == 'object':
@@ -67,7 +67,7 @@ class AdminAttributeHandler(RestBaseHandler):
         self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
-          definition = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+          definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
           if len(path) > 0:
             type_ = path.pop(0)
             if type_ == 'object':
@@ -77,7 +77,7 @@ class AdminAttributeHandler(RestBaseHandler):
                 raise RestHandlerException(u'POST of attribute objects does not support lists')
               uuid = json.get('identifier', None)
               if uuid:
-                obj = self.object_definition_controller.get_object_definitions_by_id(uuid)
+                obj = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
                 definition.objects.append(obj)
                 self.attribute_definition_controller.update_attribute_definition(definition, self.get_user())
                 return 'OK'
@@ -100,7 +100,7 @@ class AdminAttributeHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          attr_def = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+          attr_def = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
           attr_def.populate(json)
           # set the new checksum
           self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())
@@ -117,16 +117,16 @@ class AdminAttributeHandler(RestBaseHandler):
           if len(path) > 0:
             type_ = path.pop(0)
             if len(path) > 0:
-              definition = self.attribute_definition_controller.get_attribute_definitions_by_id(uuid)
+              definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
               uuid = path.pop(0)
-              obj = self.object_definition_controller.get_object_definitions_by_id(uuid)
+              obj = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
               definition.objects.remove(obj)
               self.attribute_definition_controller.update_attribute_definition(definition, self.get_user())
 
             else:
               raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
           else:
-            self.attribute_definition_controller.remove_definition_by_id(uuid)
+            self.attribute_definition_controller.remove_definition_by_uuid(uuid)
 
           return 'OK'
         else:

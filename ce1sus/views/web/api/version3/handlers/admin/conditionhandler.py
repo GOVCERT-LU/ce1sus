@@ -37,7 +37,7 @@ class ConditionHandler(RestBaseHandler):
       if method == 'GET':
         if len(path) > 0:
           uuid = path.pop(0)
-          condition = self.condition_controller.get_condition_by_id(uuid)
+          condition = self.condition_controller.get_condition_by_uuid(uuid)
           return condition.to_dict(details, inflated)
         else:
           conditions = self.condition_controller.get_all_conditions()
@@ -59,7 +59,7 @@ class ConditionHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          condition = self.condition_controller.get_condition_by_id(uuid)
+          condition = self.condition_controller.get_condition_by_uuid(uuid)
           condition.populate(json)
           self.condition_controller.update_condition(condition)
           return condition.to_dict(details, inflated)
@@ -69,7 +69,7 @@ class ConditionHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          self.condition_controller.remove_condition_by_id(uuid)
+          self.condition_controller.remove_condition_by_uuid(uuid)
           return 'OK'
         else:
           raise RestHandlerException(u'Cannot delete condition as no identifier was given')

@@ -32,6 +32,14 @@ class ConditionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_condition_by_uuid(self, uuid):
+    try:
+      return self.condition_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_all_conditions(self):
     try:
       return self.condition_broker.get_all()
@@ -59,6 +67,14 @@ class ConditionController(BaseController):
   def remove_condition_by_id(self, identifier):
     try:
       self.group_broker.remove_by_id(identifier)
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete condition. The condition is referenced by elements.')
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_condition_by_uuid(self, uuid):
+    try:
+      self.group_broker.remove_by_uuid(uuid)
     except IntegrityException as error:
       raise ControllerException('Cannot delete condition. The condition is referenced by elements.')
     except BrokerException as error:

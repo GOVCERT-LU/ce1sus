@@ -41,7 +41,7 @@ class ReportHandler(RestBaseHandler):
       # get the event
       report_id = requested_object.get('event_id')
       if report_id:
-        report = self.report_controller.get_report_by_id(report_id)
+        report = self.report_controller.get_report_by_uuid(report_id)
         event = report.event
         self.check_if_event_is_viewable(event)
         if requested_object['object_type'] is None:
@@ -132,7 +132,7 @@ class ReportHandler(RestBaseHandler):
       if method == 'POST':
         self.check_if_user_can_add(event)
         # Get needed handler
-        definition = self.report_controller.get_reference_definitions_by_id(json.get('definition_id', None))
+        definition = self.report_controller.get_reference_definitions_by_uuid(json.get('definition_id', None))
         handler_instance = self.__get_handler(definition)
 
         # Ask handler to process the json for the new attributes
@@ -164,7 +164,7 @@ class ReportHandler(RestBaseHandler):
         uuid = requested_object['object_uuid']
         if method == 'GET':
           if uuid:
-            reference = self.report_controller.get_reference_by_id(uuid)
+            reference = self.report_controller.get_reference_by_uuid(uuid)
             self.check_item_is_viewable(event, reference)
             return reference.to_dict(details, inflated)
           else:
@@ -174,7 +174,7 @@ class ReportHandler(RestBaseHandler):
                 result.append(related_report.to_dict(details, inflated))
             return result
         else:
-          reference = self.report_controller.get_reference_by_id(uuid)
+          reference = self.report_controller.get_reference_by_uuid(uuid)
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
             self.check_item_is_viewable(event, reference)

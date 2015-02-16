@@ -40,7 +40,7 @@ class AdminGroupHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single group
           uuid = path.pop(0)
           # TODO: add inflate
-          group = self.group_controller.get_group_by_id(uuid)
+          group = self.group_controller.get_group_by_uuid(uuid)
 
           if len(path) > 0:
             # check if the next path
@@ -65,7 +65,7 @@ class AdminGroupHandler(RestBaseHandler):
       elif method == 'POST':
         if len(path) > 0:
           uuid = path.pop(0)
-          group = self.group_controller.get_group_by_id(uuid)
+          group = self.group_controller.get_group_by_uuid(uuid)
           if len(path) > 0:
             type_ = path.pop(0)
             if type_ == 'children':
@@ -75,7 +75,7 @@ class AdminGroupHandler(RestBaseHandler):
                 raise RestHandlerException(u'POST of group children does not support lists')
               uuid = json.get('identifier', None)
               if uuid:
-                child = self.group_controller.get_group_by_id(uuid)
+                child = self.group_controller.get_group_by_uuid(uuid)
                 group.children.append(child)
                 self.group_controller.update_group(group)
                 return 'OK'
@@ -96,7 +96,7 @@ class AdminGroupHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single group
           uuid = path.pop(0)
-          group = self.group_controller.get_group_by_id(uuid)
+          group = self.group_controller.get_group_by_uuid(uuid)
           group.populate(json)
           self.group_controller.update_group(group)
           return group.to_dict(details, inflated)
@@ -111,15 +111,15 @@ class AdminGroupHandler(RestBaseHandler):
           if len(path) > 0:
             type_ = path.pop(0)
             if len(path) > 0:
-              group = self.group_controller.get_group_by_id(uuid)
+              group = self.group_controller.get_group_by_uuid(uuid)
               uuid = path.pop(0)
-              child = self.group_controller.get_group_by_id(uuid)
+              child = self.group_controller.get_group_by_uuid(uuid)
               group.children.remove(child)
               self.group_controller.update_group(group)
             else:
               raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
           else:
-            self.group_controller.remove_group_by_id(uuid)
+            self.group_controller.remove_group_by_uuid(uuid)
           return 'OK'
         else:
           raise RestHandlerException(u'Cannot delete group as no identifier was given')

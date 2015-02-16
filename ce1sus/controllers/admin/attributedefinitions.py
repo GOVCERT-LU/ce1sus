@@ -41,7 +41,7 @@ class AttributeDefinitionController(BaseController):
 
   def get_defintion_by_name(self, name):
     try:
-      return self.attr_def_broker.get_defintion_by_name(name)
+      return self.attr_def_broker.get_by_name(name)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -62,6 +62,17 @@ class AttributeDefinitionController(BaseController):
     """
     try:
       return self.attr_def_broker.get_by_id(object_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_attribute_definitions_by_uuid(self, uuid):
+    """
+    Returns the attribute definition by the given id
+    """
+    try:
+      return self.attr_def_broker.get_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -98,9 +109,17 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_definition_by_id(self, uuid):
+  def remove_definition_by_id(self, identifier):
     try:
-      self.attr_def_broker.remove_by_id(uuid)
+      self.attr_def_broker.remove_by_id(identifier)
+    except IntegrityException as error:
+      raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_definition_by_uuid(self, uuid):
+    try:
+      self.attr_def_broker.remove_by_uuid(uuid)
     except IntegrityException as error:
       raise SpecialControllerException('Cannot delete this attribute. The attribute is still referenced.')
     except BrokerException as error:
@@ -132,6 +151,14 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_type_by_uuid(self, uuid):
+    try:
+      return self.type_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def insert_type(self, type_):
     try:
       return self.type_broker.insert(type_)
@@ -150,9 +177,21 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def remove_type_by_uuid(self, uuid):
+    try:
+      return self.type_broker.remove_by_uuid(uuid)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_handler_by_id(self, identifier):
     try:
       return self.handler_broker.get_by_id(identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_handler_by_uuid(self, uuid):
+    try:
+      return self.handler_broker.get_by_uuid(uuid)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -178,6 +217,12 @@ class AttributeDefinitionController(BaseController):
   def remove_handler_by_id(self, identifier):
     try:
       self.handler_broker.remove_by_id(identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_handler_by_uuid(self, uuid):
+    try:
+      self.handler_broker.remove_by_uuid(uuid)
     except BrokerException as error:
       raise ControllerException(error)
 
