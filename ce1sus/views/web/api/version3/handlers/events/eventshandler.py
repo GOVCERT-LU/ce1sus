@@ -30,9 +30,11 @@ class EventsHandler(RestBaseHandler):
     count = int(parameters.get('count', 10))
     page = int(parameters.get('page', 1))
     details = self.get_detail_value(args)
-    offset = count * (page - 1)
-    if offset == 0:
+    if page > 1:
+      offset = count * (page - 1)
+    else:
       offset = 1
+
     events, total_events = self.events_controller.get_events(offset, count, self.get_user(), parameters)
     result = list()
     for event in events:

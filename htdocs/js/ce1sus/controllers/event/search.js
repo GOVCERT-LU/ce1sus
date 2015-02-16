@@ -4,19 +4,20 @@
 
 app.controller("serachController", function($scope, Restangular,messages, $log, $routeSegment, attributes, ngTableParams, $filter) {
   $scope.attributes = attributes;
-  //default search values
-  
+  //default searc
+});
+
+app.controller("doSerachController", function($scope, Restangular,messages, $log, $routeSegment, ngTableParams, $filter) {
   var original_search =  {'operator': '==','field':null};
   $scope.search = angular.copy(original_search);
   
-  $scope.eventResults = 0;
-  $scope.attributeResults = 0;
+  $scope.results = -2;
+  $scope.resultItems = [];
   
   $scope.searchChanged = function (){
     return !angular.equals($scope.search, original_search);
   };
-  var results = [];
-  $scope.results = -2;
+   
   
   var makeFlat = function(entry) {
     var observable = '';
@@ -55,32 +56,35 @@ app.controller("serachController", function($scope, Restangular,messages, $log, 
          
         }, $log);
         $scope.results = results.length;
+        $scope.resultItems = results;
         $scope.resultTable.reload();
       } else {
         messages.setMessage({'type':'info','message':'The given search did not yield any results'});
         results = [];
         $scope.results = results.length;
+        $scope.resultItems = results;
         $scope.resultTable.reload();
       }
     }, function (response) {
       results = [];
       $scope.results = results.length;
+      $scope.resultItems = results;
       $scope.resultTable.reload();
       handleError(response, messages);
     });
-    $scope.search = angular.copy(original_search);
+    //$scope.search = angular.copy(original_search);
   };
 
   $scope.resultTable = new ngTableParams({
     page: 1,            // show first page
     count: 10           // count per page
   }, {
-    total: results.length, // length of data
+    total: $scope.resultItems.length, // length of data
     getData: function($defer, params) {
         // use build-in angular filter
       
       var orderedData = params.sorting() ?
-              $filter('orderBy')(results, params.orderBy()) :
+              $filter('orderBy')($scope.resultItems, params.orderBy()) :
               data;
       orderedData = params.filter() ?
               $filter('filter')(orderedData, params.filter()) :

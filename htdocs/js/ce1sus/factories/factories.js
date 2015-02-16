@@ -44,7 +44,8 @@ app.factory("messages", function($rootScope, $alert, messageQueue) {
       
   };
 });
-/*
+
+
 app.factory('$exceptionHandler', function( $injector, messageQueue) {
   return function(exception, cause) {
     
@@ -66,4 +67,3 @@ app.factory('$exceptionHandler', function( $injector, messageQueue) {
     //window.location.reload();
   };
 });
-*/

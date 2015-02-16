@@ -82,7 +82,7 @@ class ValueBroker(BrokerBase):
     :param attribute: the attribute in context
     :type attribute: Attribute
     """
-    return ValueBroker.get_class_by_string(definition.classname)
+    return ValueBroker.get_class_by_string(definition.value_table)
 
   @staticmethod
   def get_all_classes():

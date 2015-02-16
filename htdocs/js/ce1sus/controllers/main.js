@@ -8,7 +8,7 @@
  */
 
 app.controller('layoutController', function($scope, $routeSegment, version, menus, $log) {
-  
+
   $scope.$routeSegment = $routeSegment;
   $scope.versionInformation = version;
   $scope.menus = menus;

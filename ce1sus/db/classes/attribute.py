@@ -58,7 +58,7 @@ class Attribute(ExtendedLogingInformations, Base):
                             primaryjoin='AttributeDefinition.identifier==Attribute.definition_id', lazy='joined')
   object_id = Column('object_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
-                        primaryjoin='Object.identifier==Attribute.object_id')
+                        primaryjoin='Object.identifier==Attribute.object_id', lazy='joined')
   # valuerelations
   string_value = relationship(StringValue,
                               primaryjoin='Attribute.identifier==StringValue.attribute_id',

@@ -91,7 +91,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'chksum': self.convert_value(self.chksum),
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.uuid,
               'name': self.name}
 
   def populate(self, json):
@@ -204,7 +204,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'chksum': self.convert_value(self.chksum),
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.uuid,
               'name': self.name,
               'default_condition_id': self.convert_value(self.default_condition_id),
               }

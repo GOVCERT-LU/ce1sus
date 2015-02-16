@@ -58,7 +58,7 @@ class Object(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
+  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False, lazy='joined')
 
   @property
   def event(self):
