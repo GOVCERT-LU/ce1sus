@@ -22,9 +22,9 @@ __license__ = 'GPL v3+'
 # A: Major Release
 # B: Release feature changes
 # C: Bug fixes/Small features
-APP_REL = '0.11.0'
-DB_REL = '0.9.4'
-REST_REL = '0.2.0'
+APP_REL = '0.11.1'
+DB_REL = '0.9.5'
+REST_REL = '0.3.0'
 
 
 # pylint: disable=W0613

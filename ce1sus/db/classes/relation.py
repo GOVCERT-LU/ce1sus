@@ -7,7 +7,7 @@ Created on Oct 23, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Unicode, BigInteger
+from sqlalchemy.types import BigInteger
 
 from ce1sus.db.common.session import Base
 

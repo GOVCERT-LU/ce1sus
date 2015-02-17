@@ -8,9 +8,8 @@ Created on Oct 16, 2014
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, Unicode, BigInteger
+from sqlalchemy.types import Integer, BigInteger
 
-from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
 from ce1sus.db.common.session import Base
