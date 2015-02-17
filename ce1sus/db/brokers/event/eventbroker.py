@@ -199,6 +199,16 @@ class EventBroker(BrokerBase):
       raise BrokerException(error)
     return result
 
+  def get_group_by_uuid(self, uuid):
+    try:
+      result = self.session.query(EventGroupPermission).filter(EventGroupPermission.uuid == uuid).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    return result
+
   def update_group_permission(self, event_group_permission, commit=True):
     try:
       self.update(event_group_permission, commit)
