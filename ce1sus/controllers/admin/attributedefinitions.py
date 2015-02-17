@@ -96,6 +96,8 @@ class AttributeDefinitionController(BaseController):
       raise ControllerException(error)
 
   def update_attribute_definition(self, attribute, user):
+    if attribute.cybox_std:
+      raise ControllerException(u'Could not update attribute definition as the attribute is part of the cybox standard')
     try:
       attribute.chksum = gen_attr_chksum(attribute)
 
@@ -105,7 +107,7 @@ class AttributeDefinitionController(BaseController):
       return attribute
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(attribute)
-      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not update attribute definition due to: {0}'.format(message))
     except BrokerException as error:
       raise ControllerException(error)
 

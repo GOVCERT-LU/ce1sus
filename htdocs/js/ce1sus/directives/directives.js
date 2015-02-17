@@ -149,6 +149,10 @@ app.directive("addRemTable", function() {
         }, $log);
       };
       
+      $scope.disableBtn = function() {
+        return disableButton($scope.owner);
+      };
+      
       $scope.addRemTableAdd = function() {
         var original_associated = angular.copy($scope.associated);
         angular.forEach($scope.selected_remaining, function(addedItemID) {

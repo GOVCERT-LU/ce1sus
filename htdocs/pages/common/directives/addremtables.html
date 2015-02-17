@@ -11,9 +11,9 @@
           </select></td>
           <td align="center">
             <button class="btn btn-default" type="button"
-              ng-click="addRemTableRemove()">&gt;</button> <br>
+              ng-click="addRemTableRemove()" ng-disabled="disableBtn()">&gt;</button> <br>
             <button class="btn btn-default" type="button"
-              ng-click="addRemTableAdd()">&lt;</button>
+              ng-click="addRemTableAdd()" ng-disabled="disableBtn()">&lt;</button>
           </td>
           <td><label><b>Remaining</b> {{title}}s:</label> <select
             class="form-control" size="10" multiple="multiple"

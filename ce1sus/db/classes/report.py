@@ -105,21 +105,26 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
       return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
-              'referencehandler_id': self.convert_value(self.referencehandler_id),
+              'referencehandler_id': self.convert_value(self.reference_handler.uuid),
               'reference_handler': self.handler.to_dict(),
               'share': self.convert_value(self.share),
               'regex': self.convert_value(self.regex),
               'chksum': self.convert_value(self.chksum),
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.uuid,
               'name': self.name
               }
 
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
-    self.referencehandler_id = json.get('referencehandler_id', None)
+    referencehandler_uuid = json.get('referencehandler_id', None)
+    referencehandler_id = None
+    if referencehandler_uuid:
+      session = self._sa_instance_state.session
+      referencehandler_id = session.query(ReferenceHandler.identifier).filter(ReferenceHandler.uuid == referencehandler_uuid).one()[0]
+    self.referencehandler_id = referencehandler_id
     share = json.get('share', False)
     self.share = share
     self.regex = json.get('regex', None)

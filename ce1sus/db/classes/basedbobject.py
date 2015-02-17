@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import ForeignKey, Column
-from sqlalchemy.types import Unicode, BigInteger
+from sqlalchemy.types import BigInteger
 
 from ce1sus.db.common.broker import DateTime
 from ce1sus.helpers.common.datumzait import DatumZait

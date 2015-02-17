@@ -14,6 +14,10 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
   $scope.object = $object;
   $scope.attributes = attributes;
   
+  $scope.showBtn = function() {
+    return !disableButton($scope.object);
+  };
+  
   //scope functions
   $scope.removeObject = function(){
     //remove user from user list

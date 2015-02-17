@@ -164,3 +164,11 @@ function getUnvalidated(object){
 function getProposal(object){
   return true;
 }
+
+function disableButton(item) {
+  if (item.cybox_std){
+    return item.cybox_std;
+  } else {
+    return false;
+  }
+}

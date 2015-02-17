@@ -8,6 +8,8 @@ app.controller("typesController", function($scope, Restangular, messages,
   
   $scope.$routeSegment = $routeSegment;
   $scope.datatypes = datatypes;
+  //Add any any
+  $scope.datatypes.push({"identifier": null, "name": "Any"});
 
 
 });
@@ -17,12 +19,10 @@ app.controller('typeDetailController', function($scope, $routeSegment,$type, $lo
 
 
   $scope.$routeSegment = $routeSegment;
-  
+  $scope.type = $type;
   $scope.setType = function(type){
     $scope.type = type;
   };
-  
-
   
   //scope functions
   $scope.removeType = function(){

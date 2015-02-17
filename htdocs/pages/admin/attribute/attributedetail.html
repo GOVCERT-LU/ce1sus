@@ -69,11 +69,10 @@
     <div class="btn-group">
       <button type="button" class="btn btn-default"
         data-template="pages/admin/attribute/modals/editattributemodal.html"
-        bs-modal="modal">Edit</button>
-      <button type="button" class="btn btn-danger" ng-click="removeAttribute()">Delete</button>
+        bs-modal="modal" ng-show="showBtn()">Edit</button>
+      <button type="button" class="btn btn-danger" ng-click="removeAttribute()" ng-show="showBtn()">Delete</button>
     </div>
   </div>
 </div>
 
-<add-rem-table title="Attribute" associated="attribute.objects"
-  all="objects" route="object" owner="attribute" />
+<add-rem-table title="Attribute" associated="attribute.objects" all="objects" route="object" owner="attribute" />

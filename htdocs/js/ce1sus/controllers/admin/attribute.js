@@ -24,6 +24,10 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
   $scope.attribute = $attribute;
   $scope.objects = objects;
 
+  $scope.showBtn = function() {
+    return !disableButton($scope.attribute);
+  };
+  
   $scope.$watch(function() {
     return $scope.attribute.default_condition_id;
     }, function(newVal, oldVal) {

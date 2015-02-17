@@ -241,7 +241,7 @@ class Group(Base):
               'children': dict(),
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.uuid,
               'name': self.name
               }
 

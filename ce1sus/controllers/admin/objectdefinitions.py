@@ -81,6 +81,8 @@ class ObjectDefinitionController(BaseController):
       raise ControllerException(error)
 
   def update_object_definition(self, obj, user):
+    if obj.cybox_std:
+      raise ControllerException(u'Could not update object definition as the object is part of the cybox standard')
     try:
       obj.chksum = gen_obj_chksum(obj)
       user = self.user_broker.get_by_id(user.identifier)

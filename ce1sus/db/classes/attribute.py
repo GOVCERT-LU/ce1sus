@@ -11,7 +11,7 @@ from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
-from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition
+from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.common.objects import get_class

@@ -13,6 +13,7 @@ from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer, BigInteger
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
+from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 
@@ -193,7 +194,7 @@ class User(Base):
               'username': self.convert_value(self.username)
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.uuid,
               'username': self.username
               }
 
@@ -204,8 +205,12 @@ class User(Base):
     self.api_key = json.get('api_key', None)
     self.sirname = json.get('sirname', None)
     self.username = json.get('username', None)
-    group_id = json.get('group_id', None)
+    group_uuid = json.get('group_id', None)
+    group_id = None
     if group_id:
+      session = self._sa_instance_state.session
+      clazz = get_class('ce1sus.db.classes.attribute', 'Condition')
+      group_id = session.query(clazz.identifier).filter(clazz.uuid == group_uuid).one()[0]
       self.group_id = group_id
     else:
       self.group_id = None

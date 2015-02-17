@@ -5,9 +5,10 @@
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
-        ng-model="objectattribute.definition_id" ng-change="changeTemplate()" ng-disabled="type!='add'">
+        ng-model="objectattribute.definition_id" ng-change="changeTemplate()" ng-show="type=='add'">
         <option style="display: none" value="">Select a definition</option>
       </select>
+      <div ng-show="type!='add'">{{objectattribute.definition.name}}</div>
     </div>
   </div>
   <div ng-if="objectattribute.definition_id">

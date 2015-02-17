@@ -12,6 +12,7 @@ from sqlalchemy.types import Integer, Unicode, BigInteger, UnicodeText, Boolean
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.common import ValueTable
+from ce1sus.db.classes.types import AttributeType
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.objects import get_class
@@ -89,6 +90,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'default_share': self.convert_value(self.default_share),
               'attributes': attribtues,
               'chksum': self.convert_value(self.chksum),
+              'cybox_std': self.convert_value(self.cybox_std)
               }
     else:
       return {'identifier': self.uuid,
@@ -192,30 +194,45 @@ class AttributeDefinition(SimpleLogingInformations, Base):
       return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
               'description': self.convert_value(self.description),
-              'attributehandler_id': self.convert_value(self.attributehandler_id),
+              'attributehandler_id': self.convert_value(self.attribute_handler.uuid),
               'attributehandler': self.handler.to_dict(),
               'table_id': self.convert_value(self.table_id),
               'relation': self.convert_value(self.relation),
               'share': self.convert_value(self.share),
               'regex': self.convert_value(self.regex),
-              'type_id': self.convert_value(self.value_type_id),
-              'default_condition_id': self.convert_value(self.default_condition_id),
+              'type_id': self.convert_value(self.value_type.uuid),
+              'default_condition_id': self.convert_value(self.default_condition.uuid),
               'objects': objects,
               'chksum': self.convert_value(self.chksum),
+              'cybox_std': self.convert_value(self.cybox_std)
               }
     else:
       return {'identifier': self.uuid,
               'name': self.name,
-              'default_condition_id': self.convert_value(self.default_condition_id),
+              'default_condition_id': self.convert_value(self.default_condition.uuid),
               }
 
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
-    self.attributehandler_id = json.get('attributehandler_id', None)
+    attributehandler_uuid = json.get('attributehandler_id', None)
+    session = self._sa_instance_state.session
+    attributehandler_id = None
+    if attributehandler_uuid:
+      attributehandler_id = session.query(AttributeHandler.identifier).filter(AttributeHandler.uuid == attributehandler_uuid).one()[0]
+    self.attributehandler_id = attributehandler_id
     self.table_id = json.get('table_id', None)
-    self.value_type_id = json.get('type_id', None)
-    self.default_condition_id = json.get('default_condition_id', None)
+    value_type_uuid = json.get('type_id', None)
+    value_type_id = None
+    if value_type_uuid:
+      value_type_id = session.query(AttributeType.identifier).filter(AttributeType.uuid == value_type_uuid).one()[0]
+    self.value_type_id = value_type_id
+    value_type_uuid = json.get('type_id', None)
+    default_condition_uuid = json.get('default_condition_id', None)
+    if default_condition_uuid:
+      clazz = get_class('ce1sus.db.classes.attribute', 'Condition')
+      default_condition_id = session.query(clazz.identifier).filter(clazz.uuid == default_condition_uuid).one()[0]
+    self.default_condition_id = default_condition_id
     relation = json.get('relation', False)
     self.relation = relation
     share = json.get('share', False)
