@@ -41,7 +41,7 @@ class AttributeDefinitionController(BaseController):
 
   def get_defintion_by_name(self, name):
     try:
-      return self.attr_def_broker.get_by_name(name)
+      return self.attr_def_broker.get_defintion_by_name(name)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
