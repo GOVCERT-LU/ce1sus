@@ -32,7 +32,6 @@ from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
 from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
-from ce1sus.views.web.api.version3.adapters.misp import MISPAdapter
 
 
 __author__ = 'Weber Jean-Paul'
@@ -75,7 +74,6 @@ class RestController(BaseView):
     self.instances['referencehandlers'] = ReferenceHandlerHandler(config)
     self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
     self.instances['report'] = ReportHandler(config)
-    self.instances['MISP'] = MISPAdapter(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):
