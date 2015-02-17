@@ -8,11 +8,13 @@ Created on Dec 31, 2014
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.search import SearchController
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require, valid_uuid
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.db.classes.report import Report, Reference
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require, valid_uuid
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -38,9 +40,6 @@ class SearchHandler(RestBaseHandler):
           operator = json.get('operator', None)
           if operator in ['<', '<=', '==', '>=', '>', 'like']:
             definition_id = json.get('field', None)
-            if definition_id is not None:
-              if not (valid_uuid(definition_id) or definition_id == 'uuid'):
-                raise RestHandlerException(u'Definition uuid "{0}" is valid'.format(definition_id))
 
             return self.__prossess_search(needle, operator, definition_id)
 
@@ -96,6 +95,18 @@ class SearchHandler(RestBaseHandler):
                        'observable': found_value.to_dict(False, False),
                        'attribute': None,
                        })
+      elif isinstance(found_value, Report):
+        event = found_value.event
+        result.append({'event': event.to_dict(False, False),
+                       'report': found_value.to_dict(False, False),
+                       'reference': None,
+                       })
+      elif isinstance(found_value, Reference):
+        event = found_value.report.event
+        result.append({'event': event.to_dict(False, False),
+                       'report': found_value.report.to_dict(False, False),
+                       'reference': found_value.to_dict(False, False),
+                       })
       else:
         attribute = found_value.attribute
         obj = attribute.object
@@ -115,10 +126,23 @@ class SearchHandler(RestBaseHandler):
       result = list()
       # Add any
       result.append({'identifier': None, 'name': 'Any'})
+      # Generic container fields
       result.append({'identifier': 'uuid', 'name': 'uuid'})
+      result.append({'identifier': 'title', 'name': 'title'})
+      result.append({'identifier': 'description', 'name': 'description'})
+
       attributes = self.search_controller.get_all_attributes()
       for attribtue in attributes:
-        result.append(attribtue.to_dict(False, False))
+        attr_dict = attribtue.to_dict(False, False)
+        attr_dict['identifier'] = 'attribute:{0}'.format(attr_dict['identifier'])
+        result.append(attr_dict)
+
+      references = self.search_controller.get_all_references()
+      for reference in references:
+        ref_dict = reference.to_dict(False, False)
+        ref_dict['identifier'] = 'reference:{0}'.format(ref_dict['identifier'])
+        result.append(ref_dict)
+      # Report fields
       return result
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)

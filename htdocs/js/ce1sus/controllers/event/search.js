@@ -27,16 +27,34 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
       } else {
         observable = 'Observable';
       }
+    } else {
+      if (entry.report){
+        observable = 'Report';
+      }
     }
     var objType = '';
     if (entry.object){
       objType = entry.object.definition.name;
+    } else {
+      if (entry.report){
+        if (entry.report.title) {
+          objType = entry.report.title;
+        } else {
+          objType = entry.identifier;
+        }
+        
+      }
     }
     var attrType = '';
     var value = '';
     if (entry.attribute){
       attrType = entry.attribute.definition.name;
       value = entry.attribute.value;
+    } else {
+      if (entry.reference){
+        attrType = entry.reference.definition.name;
+        value = entry.reference.value;
+      }
     }
     
     

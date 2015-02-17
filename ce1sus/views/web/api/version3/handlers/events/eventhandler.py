@@ -382,6 +382,10 @@ class EventHandler(RestBaseHandler):
       report.populate(json, self.is_rest_insert(headers))
       report.event_id = event.identifier
       report.event = event
+      if self.is_event_owner(event, user):
+        # The observable is directly validated as the owner can validate
+        report.properties.is_validated = True
+
       self.report_controller.insert_report(report, user)
       return report.to_dict(details, inflated)
     else:
