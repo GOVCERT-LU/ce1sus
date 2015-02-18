@@ -228,9 +228,12 @@ class Observable(ExtendedLogingInformations, Base):
     return None
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
-    obj = self.get_object_for_permissions(event_permissions)
-    if obj:
-      obj = obj.to_dict(complete, inflated, event_permissions)
+    if inflated:
+      obj = self.get_object_for_permissions(event_permissions)
+      if obj:
+        obj = obj.to_dict(complete, inflated, event_permissions)
+    else:
+      obj = None
 
     composed = self.get_composed_observable_for_permissions(event_permissions)
     if composed:

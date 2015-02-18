@@ -195,6 +195,10 @@ class RestController(BaseView):
         message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
         self.logger.error(message)
         raise cherrypy.HTTPError(status=418, message=message)
+    except cherrypy.HTTPError as error:
+      message = u'{0}'.format(error)
+      self.logger.warning(message)
+      raise error
     except Exception as error:
       message = u'{0}'.format(error)
       self.logger.error(message)

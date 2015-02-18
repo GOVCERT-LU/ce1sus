@@ -200,21 +200,35 @@ class Object(ExtendedLogingInformations, Base):
       related_count = len(related)
     else:
       related_count = self.related_objects_count_for_permissions(event_permissions)
-
-    return {'identifier': self.convert_value(self.uuid),
-            'definition_id': self.convert_value(self.definition.uuid),
-            'definition': self.definition.to_dict(complete, False),
-            'attributes': attributes,
-            'attributes_count': attributes_count,
-            'creator_group': self.creator_group.to_dict(complete, inflated),
-            'created_at': self.convert_value(self.created_at),
-            'modified_on': self.convert_value(self.modified_on),
-            'modifier_group': self.modifier.group.to_dict(complete, False),
-            'related_objects': related,
-            'related_objects_count': related_count,
-            'properties': self.properties.to_dict(),
-            'observable_id': self.convert_value(self.observable_id)
-            }
+    if complete:
+      return {'identifier': self.convert_value(self.uuid),
+              'definition_id': self.convert_value(self.definition.uuid),
+              'definition': self.definition.to_dict(complete, False),
+              'attributes': attributes,
+              'attributes_count': attributes_count,
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.modifier.group.to_dict(complete, False),
+              'related_objects': related,
+              'related_objects_count': related_count,
+              'properties': self.properties.to_dict(),
+              'observable_id': self.convert_value(self.observable_id)
+              }
+    else:
+      return {'identifier': self.convert_value(self.uuid),
+              'definition_id': self.convert_value(self.definition.uuid),
+              'definition': self.definition.to_dict(complete, False),
+              'attributes_count': attributes_count,
+              'creator_group': self.creator_group.to_dict(complete, inflated),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'modifier_group': self.modifier.group.to_dict(complete, False),
+              'related_objects': related,
+              'related_objects_count': related_count,
+              'properties': self.properties.to_dict(),
+              'observable_id': self.convert_value(self.observable_id)
+              }
 
   def populate(self, json, rest_insert=True):
     # TODO: if inflated
