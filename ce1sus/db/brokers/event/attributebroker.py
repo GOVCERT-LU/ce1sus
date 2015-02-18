@@ -71,7 +71,7 @@ class AttributeBroker(BrokerBase):
     if bypass_validation:
       code = 0
     else:
-      code = 1
+      code = 4
     try:
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(clazz.value == value,
@@ -114,7 +114,7 @@ class AttributeBroker(BrokerBase):
     if bypass_validation:
       code = 0
     else:
-      code = 12
+      code = 4
     try:
       if operand == '==':
         return self.session.query(clazz).join(clazz.attribute).filter(Attribute.definition_id == attribute_definition_id,

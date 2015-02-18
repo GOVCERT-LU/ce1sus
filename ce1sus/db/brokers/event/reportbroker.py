@@ -59,7 +59,7 @@ class ReferenceBroker(BrokerBase):
     if bypass_validation:
       code = 0
     else:
-      code = 12
+      code = 4
     try:
       if operand == '==':
         return self.session.query(Reference).filter(Reference.value == needle,

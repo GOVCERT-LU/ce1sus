@@ -53,7 +53,7 @@ class SearchBroker(BrokerBase):
     if bypass_validation:
       code = 0
     else:
-      code = 12
+      code = 4
     try:
       if operand == '==':
         return self.session.query(clazz).filter(getattr(clazz, attribute_name) == needle,

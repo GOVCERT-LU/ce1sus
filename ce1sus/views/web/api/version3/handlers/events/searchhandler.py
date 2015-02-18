@@ -13,7 +13,7 @@ from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Report, Reference
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require, valid_uuid
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -54,68 +54,83 @@ class SearchHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
+  def __check_permissions(self, event, item):
+    if item:
+      return self.is_item_viewable(event, item)
+    else:
+      return self.is_event_viewable(event)
+
   def __prossess_search(self, needle, operator, definition_id):
+    """ Note returns only the events which can be viewed """
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
     for found_value in results:
       # TODO find a unified way to do this
       # TODO: include user!!!!! IMPORTANT
       if isinstance(found_value, Event):
-        result.append({'event': found_value.to_dict(False, False),
-                       'object': None,
-                       'observable': None,
-                       'attribute': None,
-                       })
+        if self.__check_permissions(found_value, None):
+          result.append({'event': found_value.to_dict(False, False),
+                         'object': None,
+                         'observable': None,
+                         'attribute': None,
+                         })
       elif isinstance(found_value, Object):
         event = found_value.event
-        result.append({'event': event.to_dict(False, False),
-                       'object': found_value.to_dict(False, False),
-                       'observable': found_value.observable.to_dict(False, False),
-                       'attribute': None,
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'object': found_value.to_dict(False, False),
+                         'observable': found_value.observable.to_dict(False, False),
+                         'attribute': None,
+                         })
       elif isinstance(found_value, Attribute):
         obj = found_value.object
         event = obj.event
-        result.append({'event': event.to_dict(False, False),
-                       'object': obj.to_dict(False, False),
-                       'observable': obj.observable.to_dict(False, False),
-                       'attribute': found_value.to_dict(False, False),
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'object': obj.to_dict(False, False),
+                         'observable': obj.observable.to_dict(False, False),
+                         'attribute': found_value.to_dict(False, False),
+                         })
       elif isinstance(found_value, Observable):
         event = found_value.parent
-        result.append({'event': event.to_dict(False, False),
-                       'object': None,
-                       'observable': found_value.to_dict(False, False),
-                       'attribute': None,
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'object': None,
+                         'observable': found_value.to_dict(False, False),
+                         'attribute': None,
+                         })
       elif isinstance(found_value, ObservableComposition):
         event = found_value.parent.parent
-        result.append({'event': event.to_dict(False, False),
-                       'object': None,
-                       'observable': found_value.to_dict(False, False),
-                       'attribute': None,
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'object': None,
+                         'observable': found_value.to_dict(False, False),
+                         'attribute': None,
+                         })
       elif isinstance(found_value, Report):
         event = found_value.event
-        result.append({'event': event.to_dict(False, False),
-                       'report': found_value.to_dict(False, False),
-                       'reference': None,
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'report': found_value.to_dict(False, False),
+                         'reference': None,
+                         })
       elif isinstance(found_value, Reference):
         event = found_value.report.event
-        result.append({'event': event.to_dict(False, False),
-                       'report': found_value.report.to_dict(False, False),
-                       'reference': found_value.to_dict(False, False),
-                       })
+        if self.__check_permissions(event, found_value):
+          result.append({'event': event.to_dict(False, False),
+                         'report': found_value.report.to_dict(False, False),
+                         'reference': found_value.to_dict(False, False),
+                         })
       else:
         attribute = found_value.attribute
         obj = attribute.object
         event = obj.event
-        result.append({'event': event.to_dict(False, False),
-                       'observable': obj.observable.to_dict(False, False),
-                       'object': obj.to_dict(False, False),
-                       'attribute': attribute.to_dict(False, False),
-                       })
+        if self.__check_permissions(event, attribute):
+          result.append({'event': event.to_dict(False, False),
+                         'observable': obj.observable.to_dict(False, False),
+                         'object': obj.to_dict(False, False),
+                         'attribute': attribute.to_dict(False, False),
+                         })
     return result
 
   @rest_method(default=False)
