@@ -86,6 +86,6 @@ class AttributeController(BaseController):
 
       self.attribute_broker.do_commit(commit)
       return attribute, additional_attributes
-
+    # TODO integrity exception
     except BrokerException as error:
       raise ControllerException(error)

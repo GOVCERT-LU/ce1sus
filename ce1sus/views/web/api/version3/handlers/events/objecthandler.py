@@ -113,8 +113,7 @@ class ObjectHandler(RestBaseHandler):
               related_object.parent_id = parent_id
               related_object.relation = json.get('relation', None)
               self.observable_controller.update_related_object(related_object, user, False)
-
-          obj.populate(json, self.is_rest_insert(headers))
+          obj = self.assembler.update_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.observable_controller.update_object(obj, user, True)
           return obj.to_dict(details, inflated, event_permissions)
         elif method == 'DELETE':
@@ -129,21 +128,8 @@ class ObjectHandler(RestBaseHandler):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
-      child_obj = Object()
-      child_obj.populate(json, self.is_rest_insert(headers))
-      child_obj.observable_id = obj.observable_id
-      self.observable_controller.insert_object(child_obj, user, False)
-
-      # update parent
-      related_object = RelatedObject()
-      related_object.parent_id = obj.identifier
-      related_object.child_id = child_obj.identifier
-      related_object.object = child_obj
-      related_object.relation = json.get('relation', None)
-      if related_object.relation == 'None':
-        related_object.relation = None
-      obj.related_objects.append(related_object)
-      self.observable_controller.update_object(child_obj, user, True)
+      related_object = self.assembler.assemble_related_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
+      self.observable_controller.update_object(related_object.object, user, True)
 
       return related_object.to_dict(details, inflated)
     else:
@@ -193,6 +179,10 @@ class ObjectHandler(RestBaseHandler):
         # TODO also check if there are no children attached
         if True:
           self.__set_provenance(attribute, headers)
+          if additional_attributes:
+            for additional_attribute in additional_attributes:
+              self.__set_provenance(additional_attribute, headers)
+
           self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
           # set provenance
           if related_objects:

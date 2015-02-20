@@ -276,6 +276,7 @@ class Event(ExtendedLogingInformations, Base):
         groups.append(group.to_dict(complete, False))
 
       result = {'identifier': self.convert_value(self.uuid),
+                'int_id': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
                 'description': self.convert_value(self.description),
                 'last_publish_date': self.convert_value(self.last_publish_date),
@@ -285,6 +286,7 @@ class Event(ExtendedLogingInformations, Base):
                 'analysis': self.convert_value(self.analysis),
                 'creator_group': self.creator_group.to_dict(complete, False),
                 'modifier_group': self.modifier.group.to_dict(complete, False),
+                'originating_group': self.originating_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'published': self.convert_value(self.properties.is_shareable),
                 'modified_on': self.convert_value(self.modified_on),
@@ -299,6 +301,7 @@ class Event(ExtendedLogingInformations, Base):
                 }
     else:
       result = {'identifier': self.convert_value(self.uuid),
+                'int_id': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
                 'creator_group': self.creator_group.to_dict(False),
                 'created_at': self.convert_value(self.created_at),
@@ -317,6 +320,7 @@ class Event(ExtendedLogingInformations, Base):
                 'analysis': self.convert_value(self.analysis),
                 'creator_group': self.creator_group.to_dict(complete, False),
                 'modifier_group': self.modifier.group.to_dict(complete, False),
+                'originating_group': self.originating_group.to_dict(complete, False),
                 'comments': None,
                 'properties': self.properties.to_dict()
                 }

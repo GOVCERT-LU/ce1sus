@@ -61,8 +61,8 @@ class ObservableController(BaseController):
       return observable, False
     except IntegrityException as error:
       self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, observable.identifier))
-      raise ControllerException(u'An event with uuid "{0}" already exists'.format(observable.identifier))
+      self.logger.info(u'User {0} tried to insert an observable with uuid "{1}" but the uuid already exists'.format(user.username, observable.uuid))
+      raise ControllerException(u'An observable with uuid "{0}" already exists'.format(observable.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -183,6 +183,7 @@ class ObservableController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(obj, user, user.group, True)
       self.object_broker.insert(obj)
+      # TODO integrity exception
     except BrokerException as error:
       raise ControllerException(error)
 

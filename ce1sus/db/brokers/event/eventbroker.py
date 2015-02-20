@@ -118,7 +118,13 @@ class EventBroker(BrokerBase):
           else:
             result = result.order_by(Event.tlp_level_id.asc())
           sorting_set = True
-
+        anal = parameters.get('sorting[id]', None)
+        if anal:
+          if anal == 'desc':
+            result = result.order_by(Event.identifier.desc())
+          else:
+            result = result.order_by(Event.identifier.asc())
+          sorting_set = True
       if sorting_set:
         result = result.limit(limit).offset(offset).all()
       else:

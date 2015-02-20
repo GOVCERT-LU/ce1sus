@@ -71,7 +71,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
-        observable.populate(json, self.is_rest_insert(headers))
+        observable = self.assembler.update_observable(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
         self.observable_controller.update_observable(observable, user, True)
         return observable.to_dict(details, inflated)
       elif method == 'DELETE':
@@ -83,13 +83,7 @@ class ObservableHandler(RestBaseHandler):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
-      obj = Object()
-      obj.parent = observable
-      obj.populate(json, self.is_rest_insert(headers))
-      obj.observable_id = observable.identifier
-      if self.is_event_owner(event, user):
-        # The attribute is directly validated as the owner can validate
-        obj.properties.is_validated = True
+      obj = self.assembler.assemble_object(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
       self.observable_controller.insert_object(obj, user, True)
       return obj.to_dict(details, inflated)
     else:
@@ -112,7 +106,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
-        obj.populate(json, self.is_rest_insert(headers))
+        obj = self.assembler.update_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
         self.observable_controller.update_object(obj, user, True)
         return obj.to_dict(details, inflated)
       elif method == 'DELETE':

@@ -202,4 +202,6 @@ class RestController(BaseView):
     except Exception as error:
       message = u'{0}'.format(error)
       self.logger.error(message)
-      raise cherrypy.HTTPError(status=400, message=message)
+
+      # raise cherrypy.HTTPError(status=400, message=message)
+      raise

@@ -232,7 +232,6 @@ class Object(ExtendedLogingInformations, Base):
 
   def populate(self, json, rest_insert=True):
     # TODO: if inflated
-    session = self._sa_instance_state.session
     definition_uuid = json.get('definition_id', None)
     if not definition_uuid:
       definition = json.get('definition', None)
@@ -241,8 +240,6 @@ class Object(ExtendedLogingInformations, Base):
     if self.definition:
       if self.definition.uuid != definition_uuid:
         raise ValueException(u'Object definitions cannot be updated')
-    definition_id = session.query(ObjectDefinition.identifier).filter(ObjectDefinition.uuid == definition_uuid).one()[0]
-    self.definition_id = definition_id
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert

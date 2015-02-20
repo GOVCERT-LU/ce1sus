@@ -43,6 +43,7 @@ class ReportController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(report, user, user.group, True)
       self.report_broker.insert(report)
+    # TODO integrity exception
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -133,7 +134,7 @@ class ReportController(BaseController):
 
       self.reference_broker.do_commit(commit)
       return reference, additional_references
-
+    # TODO integrity exception
     except BrokerException as error:
       raise ControllerException(error)
 

@@ -8,6 +8,7 @@ Created on Feb 5, 2014
 
 import re
 
+from ce1sus.views.web.api.version3.handlers.common.assembler import Assembler
 from ce1sus.views.web.common.base import BaseView
 
 
@@ -88,6 +89,7 @@ class RestBaseHandler(BaseView):
 
   def __init__(self, config):
     BaseView.__init__(self, config)
+    self.assembler = Assembler(config)
 
   @property
   def name(self):

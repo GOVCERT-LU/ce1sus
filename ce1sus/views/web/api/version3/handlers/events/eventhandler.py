@@ -78,13 +78,8 @@ class EventHandler(RestBaseHandler):
         # This can only happen when a new event is inserted
         if method == 'POST':
           # populate event
-          event = Event()
-          event.populate(json, self.is_rest_insert(headers))
-          # TODO: make relations an populate the whole event by json
           user = self.get_user()
-          if self.is_event_owner(event, user):
-            # The observable is directly validated as the owner can validate
-            event.properties.is_validated = True
+          event = self.assembler.assemble_event(json, user, True, self.is_rest_insert(headers))
           self.event_controller.insert_event(user, event, True, True)
           return self.__return_event(event, details, inflated)
         else:
@@ -111,9 +106,7 @@ class EventHandler(RestBaseHandler):
     self.check_if_owner(event)
     user = self.get_user()
     if method == 'POST':
-      comment = Comment()
-      comment.populate(json, self.is_rest_insert(headers))
-      comment.event_id = event.identifier
+      comment = self.assembler.assemble_comment(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
       self.event_controller.insert_comment(user, comment)
       return comment.to_dict(details, inflated)
     else:
@@ -126,7 +119,7 @@ class EventHandler(RestBaseHandler):
         return comment.to_dict(details, inflated)
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
-        comment.populate(json, self.is_rest_insert(headers))
+        comment = self.assembler.update_comment(comment, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
         self.event_controller.update_comment(user, comment)
         return comment.to_dict(details, inflated)
       elif method == 'DELETE':
@@ -147,8 +140,7 @@ class EventHandler(RestBaseHandler):
       self.check_if_event_is_modifiable(event)
       # check if validated / shared as only the owner can do this
       self.check_if_user_can_set_validate_or_shared(event, event, user, json)
-
-      event.populate(json, self.is_rest_insert(headers))
+      event = self.assembler.update_event(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
       # TODO: make relations an populate the whole event by json
       self.event_controller.update_event(user, event, True, True)
       return self.__return_event(event, details, inflated)
@@ -161,14 +153,7 @@ class EventHandler(RestBaseHandler):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
-      observable = Observable()
-      observable.event_id = event.identifier
-      observable.populate(json, self.is_rest_insert(headers))
-      observable.parent_id = event.identifier
-      if self.is_event_owner(event, user):
-        # The observable is directly validated as the owner can validate
-        observable.properties.is_validated = True
-
+      observable = self.assembler.assemble_observable(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
       self.observable_controller.insert_observable(observable, user, True)
       return observable.to_dict(details, inflated)
     else:
@@ -185,7 +170,7 @@ class EventHandler(RestBaseHandler):
         if method == 'PUT':
           self.check_if_event_is_modifiable(event)
           self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
-          observable.populate(json, self.is_rest_insert(headers))
+          observable = self.assembler.update_observable(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.observable_controller.update_observable(observable, user, True)
           return observable.to_dict(details, inflated)
         elif method == 'DELETE':
@@ -378,13 +363,7 @@ class EventHandler(RestBaseHandler):
         return result
     if method == 'POST':
       self.check_if_user_can_add(event)
-      report = Report()
-      report.populate(json, self.is_rest_insert(headers))
-      report.event_id = event.identifier
-      report.event = event
-      if self.is_event_owner(event, user):
-        # The observable is directly validated as the owner can validate
-        report.properties.is_validated = True
+      report = self.assembler.assemble_report(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
       self.report_controller.insert_report(report, user)
       return report.to_dict(details, inflated)

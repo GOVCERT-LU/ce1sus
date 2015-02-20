@@ -86,8 +86,8 @@ class EventController(BaseController):
       raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
     except IntegrityException as error:
       self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.identifier))
-      raise ControllerException(u'An event with uuid "{0}" already exists'.format(event.identifier))
+      self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.uuid))
+      raise ControllerException(u'An event with uuid "{0}" already exists'.format(event.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 

@@ -37,6 +37,7 @@ class ReportHandler(RestBaseHandler):
       inflated = self.get_inflated_value(args)
       requested_object = self.parse_path(path, method)
       json = args.get('json')
+      headers = args.get('headers')
       # get the event
       report_id = requested_object.get('event_id')
       if report_id:
@@ -45,11 +46,11 @@ class ReportHandler(RestBaseHandler):
         self.check_if_event_is_viewable(event)
         if requested_object['object_type'] is None:
           # return the report
-          return self.__process_report(method, event, report, details, inflated, json)
+          return self.__process_report(method, event, report, details, inflated, json, headers)
         elif requested_object['object_type'] == 'report':
-          return self.__process_child_report(method, event, report, requested_object, details, inflated, json)
+          return self.__process_child_report(method, event, report, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'reference':
-          return self.__process_reference(method, event, report, requested_object, details, inflated, json)
+          return self.__process_reference(method, event, report, requested_object, details, inflated, json, headers)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -60,7 +61,7 @@ class ReportHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_report(self, method, event, report, details, inflated, json):
+  def __process_report(self, method, event, report, details, inflated, json, headers):
     try:
       user = self.get_user()
       if method == 'POST':
@@ -84,8 +85,7 @@ class ReportHandler(RestBaseHandler):
               # unbind the earlier relation
               related_report.parent_report_id = parent_id
               self.report_controller.update_related_report(related_report, user, False)
-
-          report.populate(json)
+          report = self.assembler.update_report(report, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.report_controller.update_report(report, user, True)
           return report.to_dict(details, inflated, event_permissions)
         elif method == 'DELETE':
@@ -95,14 +95,11 @@ class ReportHandler(RestBaseHandler):
     except ValueException as error:
       raise RestHandlerException(error)
 
-  def __process_child_report(self, method, event, report, requested_object, details, inflated, json):
+  def __process_child_report(self, method, event, report, requested_object, details, inflated, json, headers):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
-      child_obj = Report()
-      child_obj.populate(json)
-      child_obj.event_id = event.identifier
-      child_obj.parent_report_id = report.identifier
+      child_obj = self.assembler.assemble_child_report(report, event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
       self.report_controller.insert_report(child_obj, user, False)
 
@@ -125,7 +122,7 @@ class ReportHandler(RestBaseHandler):
     handler_instance.user = self.get_user()
     return handler_instance
 
-  def __process_reference(self, method, event, report, requested_object, details, inflated, json):
+  def __process_reference(self, method, event, report, requested_object, details, inflated, json, headers):
     try:
       user = self.get_user()
       if method == 'POST':
@@ -140,7 +137,14 @@ class ReportHandler(RestBaseHandler):
         # TODO: find a way to check if the object has been changed
         # TODO also check if there are no children attached
         if True:
+          self.__set_provenance(reference, headers)
+          if additional_references:
+            for additional_reference in additional_references:
+              self.__set_provenance(additional_reference, headers)
           self.report_controller.insert_reference(reference, additional_references, user, False, self.is_event_owner(event, user))
+          if related_reports:
+            for related_report in related_reports:
+              self.__set_provenance(related_report, headers)
           self.report_controller.insert_handler_reports(related_reports, user, True, self.is_event_owner(event, user))
         else:
           raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))

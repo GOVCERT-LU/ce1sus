@@ -2,6 +2,8 @@
 <table ng-table="eventTable" show-filter="true" class="table table-striped table-bordered table-hover table-condensed">
   <tbody>
     <tr ng-repeat="item in $data">
+      <td data-title="'#'" filter="{ 'id': 'number' }"
+        sortable="'id'"><a href="#/events/event/{{item.identifier}}">{{item.int_id}}</a></td>
       <td data-title="'Title'" filter="{ 'title': 'text' }"
         sortable="'title'"><a href="#/events/event/{{item.identifier}}">{{item.title}}</a></td>
       <td data-title="'Analysis'" filter="{ 'analysis': 'text' }"
