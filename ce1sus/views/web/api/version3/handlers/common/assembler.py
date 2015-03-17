@@ -101,6 +101,7 @@ class Assembler(BaseController):
       instance.originating_group = self.get_set_group(json.get('originating_group', None), user)
 
   def assemble_event(self, json, user, owner=False, rest_insert=True):
+
     event = Event()
     event.populate(json, rest_insert)
     event.uuid = json.get('identifier', None)
@@ -158,6 +159,7 @@ class Assembler(BaseController):
     if observables:
       for observable in observables:
         obs = self.assemble_observable(event, observable, user, owner, rest_insert)
+        obs.event_id = None
         composed.observables.append(obs)
     composed.properties.populate(json.get('properties'))
     if owner:
@@ -166,6 +168,7 @@ class Assembler(BaseController):
     return composed
 
   def assemble_observable(self, event, json, user, owner=False, rest_insert=True):
+
     observable = Observable()
     observable.uuid = json.get('identifier', None)
     observable.event_id = event.identifier
@@ -175,8 +178,9 @@ class Assembler(BaseController):
 
     self.observable_controller.insert_observable(observable, user, False)
     # check if it is a composed one or not
-    if json.get('observable_composition', None):
-      composed = self.assemble_composed_observable(event, observable, user, owner, rest_insert)
+    composed_obs = json.get('observable_composition', None)
+    if composed_obs:
+      composed = self.assemble_composed_observable(event, composed_obs, user, owner, rest_insert)
       observable.observable_composition = composed
     else:
       obj = json.get('object')
@@ -231,6 +235,7 @@ class Assembler(BaseController):
     raise ControllerException('Could not find a definition in the attribute')
 
   def assemble_object(self, observable, json, user, owner=False, rest_insert=True):
+
     obj = Object()
     obj.uuid = json.get('identifier', None)
     obj.parent = observable
@@ -300,6 +305,7 @@ class Assembler(BaseController):
     return obj
 
   def assemble_related_object(self, obj, json, user, owner=False, rest_insert=True):
+
     child_obj_json = json.get('object')
     child_obj = self.assemble_object(obj.observable, child_obj_json, user, owner, rest_insert)
 
@@ -315,6 +321,7 @@ class Assembler(BaseController):
     return related_object
 
   def assemble_report(self, event, json, user, owner=False, rest_insert=True):
+
     report = Report()
     report.uuid = json.get('identifier', None)
     report.populate(json, rest_insert)

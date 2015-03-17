@@ -28,3 +28,9 @@ class IndicatorController(BaseController):
       return self.indicator_type_broker.get_all()
     except BrokerException as error:
       raise ControllerException(error)
+
+  def get_all_types(self):
+    try:
+      return self.indicator_type_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)

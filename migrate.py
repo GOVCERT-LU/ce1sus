@@ -959,7 +959,7 @@ class Migrator(object):
     indicator.event_id = event.identifier
 
     if indicator_type:
-      indicator.type_ .append(self.get_indicator_type(indicator_type))
+      indicator.type_.append(self.get_indicator_type(indicator_type))
 
     new_observable = clone_observable(observable)
     if new_observable:

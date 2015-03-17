@@ -337,8 +337,6 @@ class Event(ExtendedLogingInformations, Base):
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
-    # TODO: populate properties
-    # self.published = json.get('published', None)
 
 
 class Comment(ExtendedLogingInformations, Base):

@@ -89,12 +89,13 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'chksum': self.convert_value(self.chksum),
               'default_share': self.convert_value(self.default_share),
               'attributes': attribtues,
-              'chksum': self.convert_value(self.chksum),
               'cybox_std': self.convert_value(self.cybox_std)
               }
     else:
       return {'identifier': self.uuid,
-              'name': self.name}
+              'name': self.name,
+              'chksum': self.convert_value(self.chksum)
+              }
 
   def populate(self, json):
     self.name = json.get('name', None)
@@ -210,6 +211,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
       return {'identifier': self.uuid,
               'name': self.name,
               'default_condition_id': self.convert_value(self.default_condition.uuid),
+              'chksum': self.convert_value(self.chksum),
               }
 
   def populate(self, json):

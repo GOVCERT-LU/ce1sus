@@ -11,6 +11,7 @@ from uuid import UUID
 from ce1sus.helpers.common.objects import get_methods
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
 from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
+from ce1sus.views.web.api.version3.handlers.admin.adminindicatorhandler import AdminIndicatorTypesHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminobjecthandler import AdminObjectHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminreferencehandler import AdminReferenceDefinitionHandler
 from ce1sus.views.web.api.version3.handlers.admin.admintypehandler import AttribueTypeHandler
@@ -25,13 +26,13 @@ from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHand
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
 from ce1sus.views.web.api.version3.handlers.events.objecthandler import ObjectHandler
 from ce1sus.views.web.api.version3.handlers.events.observablehanlder import ObservableHandler
+from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -74,6 +75,7 @@ class RestController(BaseView):
     self.instances['referencehandlers'] = ReferenceHandlerHandler(config)
     self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
     self.instances['report'] = ReportHandler(config)
+    self.instances['indicatortypes'] = AdminIndicatorTypesHandler(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):

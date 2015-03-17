@@ -56,7 +56,7 @@ class HandlerHandler(RestBaseHandler):
       if len(path) > 1:
         definition_uuid = path.pop(0)
         if valid_uuid(definition_uuid):
-          definition = self.attribute_definition_controller.get_attribute_definitions_by_id(definition_uuid)
+          definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(definition_uuid)
           handler = definition.handler
           handler.user = self.get_user()
           method = path.pop(0)
@@ -65,7 +65,7 @@ class HandlerHandler(RestBaseHandler):
             if len(path) > 0:
               attr_uuid = path.pop(0)
               if valid_uuid(attr_uuid):
-                attribute = self.attribute_controller.get_attribute_by_id(attr_uuid)
+                attribute = self.attribute_controller.get_attribute_by_uuid(attr_uuid)
               else:
                 raise RestHandlerException(u'Specified second uuid is invalid')
             else:
@@ -103,7 +103,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
       if len(path) > 1:
         definition_uuid = path.pop(0)
         if valid_uuid(definition_uuid):
-          definition = self.reference_controller.get_reference_definitions_by_id(definition_uuid)
+          definition = self.reference_controller.get_reference_definitions_by_uuid(definition_uuid)
           handler = definition.handler
           handler.user = self.get_user()
           method = path.pop(0)
@@ -112,7 +112,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
             if len(path) > 0:
               attr_uuid = path.pop(0)
               if valid_uuid(attr_uuid):
-                reference = self.reference_controller.get_reference_by_id(attr_uuid)
+                reference = self.reference_controller.get_reference_by_uuid(attr_uuid)
               else:
                 raise RestHandlerException(u'Specified second uuid is invalid')
             else:

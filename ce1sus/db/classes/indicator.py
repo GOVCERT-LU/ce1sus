@@ -77,6 +77,15 @@ class IndicatorType(Base):
   name = Column('name', Unicode(255), nullable=False, unique=True)
   description = Column('description', UnicodeText)
 
+  def to_dict(self, complete=True, inflated=False):
+    if complete:
+      return {'identifier': self.convert_value(self.uuid),
+              'name': self.convert_value(self.name),
+              'description': self.convert_value(self.description)}
+    else:
+      return {'identifier': self.convert_value(self.uuid),
+              'name': self.convert_value(self.name)}
+
 
 class ValidTimePosition(ExtendedLogingInformations, Base):
   start_time = Column('start_time', DateTime, nullable=False)
@@ -101,7 +110,6 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
 class Indicator(ExtendedLogingInformations, Base):
 
   version = Column('version', BigInteger, default=u'1.0.0', nullable=False)
-  observables = relationship('Observable')
   title = Column('title', Unicode(255), index=True, nullable=True)
   description = Column('description', UnicodeText)
   short_description = Column('short_description', Unicode(255))
