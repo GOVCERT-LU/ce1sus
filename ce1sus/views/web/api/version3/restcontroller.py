@@ -204,4 +204,8 @@ class RestController(BaseView):
     except Exception as error:
       message = u'{0}'.format(error)
       self.logger.error(message)
-      raise cherrypy.HTTPError(status=500, message=message)
+      env = self.config.get('ce1sus', 'environment')
+      if env == 'LOCAL_DEV':
+        raise
+      else:
+        raise cherrypy.HTTPError(status=500, message=message)

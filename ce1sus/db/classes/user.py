@@ -184,7 +184,7 @@ class User(Base):
               'dbcode': self.convert_value(self.dbcode),
               'email': self.convert_value(self.email),
               'gpg_key': self.convert_value(self.gpg_key),
-              'group_id': self.convert_value(self.group_id),
+              'group_id': self.convert_value(self.group.uuid),
               'permissions': self.permissions.to_dict(),
               # TODO: add group to dict fct
               'group': None,
