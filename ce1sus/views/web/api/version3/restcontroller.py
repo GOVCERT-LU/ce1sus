@@ -116,92 +116,84 @@ class RestController(BaseView):
   @cherrypy.tools.json_out()
   @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
   def default(self, *vpath, **params):
-    try:
-      path = list()
-      handler = None
-      # the first element in vpath is the name of the handler to use
-      # the remaining elements are the parameters for the handler
-      first_element = True
-      for node in vpath:
-        if first_element:
-          handler = node
-          first_element = False
-        else:
-          path.append(node)
-
-      if not handler:
-        raise cherrypy.HTTPError(status=451, message='Root requests are not allowed')
-
-      # get the requested handler
-      handler_instance = self.instances.get(handler, None)
-
-      if not handler_instance:
-        raise cherrypy.HTTPError(status=404, message='Handler "{0}" is not defined'.format(handler))
-
-      default_method = True
-      if len(path) > 0:
-        uuid_string = path[0]
-        # check if it is a uuid
-        try:
-          UUID(uuid_string, version=4)
-        except ValueError:
-          # it is not a uuid therefore it must be a method name
-          method_name = path.pop(0)
-          default_method = False
-
-      if default_method:
-        # get default access point of the handler
-        method_name = RestController.find_default_method_name(handler_instance, handler)
-
-      if not method_name:
-        raise RestHandlerException('Handler {0} has no default method'.format(handler_instance.name))
-
-      http_method = cherrypy.request.method
-
-      json = {}
-      if hasattr(cherrypy.request, 'json'):
-        json = cherrypy.request.json
-
-      method = getattr(handler_instance, method_name, None)
-
-      if hasattr(method, 'rest_method'):
-        # check if the is has requriements
-        if hasattr(method, 'require_auth_flag'):
-          conditions = method.require_auth
-          self.__check_requirements(conditions)
-
-        # check if http_method is allowed on function
-        if hasattr(method, 'allowed_http_methods'):
-          if http_method in method.allowed_http_methods:
-            try:
-              headers = cherrypy.request.headers
-              result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
-              # execute method
-              return result
-            except RestHandlerException as error:
-              message = u'{0}'.format(error)
-              self.logger.error(message)
-              if isinstance(error, RestHandlerNotFoundException):
-                raise cherrypy.HTTPError(status=404, message=message)
-              raise cherrypy.HTTPError(status=400, message=message)
-          else:
-            message = u'Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)
-            self.logger.error(message)
-            raise cherrypy.HTTPError(status=501, message=message)
-        else:
-          message = u'Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)
-          self.logger.error(message)
-          raise cherrypy.HTTPError(status=405, message=message)
-
+    path = list()
+    handler = None
+    # the first element in vpath is the name of the handler to use
+    # the remaining elements are the parameters for the handler
+    first_element = True
+    for node in vpath:
+      if first_element:
+        handler = node
+        first_element = False
       else:
-        message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
+        path.append(node)
+
+    if not handler:
+      raise cherrypy.HTTPError(status=451, message='Root requests are not allowed')
+
+    # get the requested handler
+    handler_instance = self.instances.get(handler, None)
+
+    if not handler_instance:
+      raise cherrypy.HTTPError(status=404, message='Handler "{0}" is not defined'.format(handler))
+
+    default_method = True
+    if len(path) > 0:
+      uuid_string = path[0]
+      # check if it is a uuid
+      try:
+        UUID(uuid_string, version=4)
+      except ValueError:
+        # it is not a uuid therefore it must be a method name
+        method_name = path.pop(0)
+        default_method = False
+
+    if default_method:
+      # get default access point of the handler
+      method_name = RestController.find_default_method_name(handler_instance, handler)
+
+    if not method_name:
+      raise RestHandlerException('Handler {0} has no default method'.format(handler_instance.name))
+
+    http_method = cherrypy.request.method
+
+    json = {}
+    if hasattr(cherrypy.request, 'json'):
+      json = cherrypy.request.json
+
+    method = getattr(handler_instance, method_name, None)
+
+    if hasattr(method, 'rest_method'):
+      # check if the is has requriements
+      if hasattr(method, 'require_auth_flag'):
+        conditions = method.require_auth
+        self.__check_requirements(conditions)
+
+      # check if http_method is allowed on function
+      if hasattr(method, 'allowed_http_methods'):
+        if http_method in method.allowed_http_methods:
+          try:
+            headers = cherrypy.request.headers
+            result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
+            # execute method
+            return result
+          except RestHandlerException as error:
+            message = u'{0}'.format(error)
+            self.logger.error(message)
+            if isinstance(error, RestHandlerNotFoundException):
+              raise cherrypy.HTTPError(status=404, message=message)
+            raise cherrypy.HTTPError(status=400, message=message)
+        else:
+          message = u'Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)
+          self.logger.error(message)
+          raise cherrypy.HTTPError(status=501, message=message)
+      else:
+        message = u'Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)
         self.logger.error(message)
-        raise cherrypy.HTTPError(status=418, message=message)
-    except cherrypy.HTTPError as error:
-      message = u'{0}'.format(error)
-      self.logger.warning(message)
-      raise cherrypy.HTTPError(status=error.args[0], message=error.args[1])
-    except Exception as error:
-      message = u'{0}'.format(error)
+        raise cherrypy.HTTPError(status=405, message=message)
+
+    else:
+      message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
       self.logger.error(message)
-      raise cherrypy.HTTPError(status=500, message=message)
+      raise cherrypy.HTTPError(status=418, message=message)
+
