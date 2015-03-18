@@ -130,7 +130,7 @@ class RestController(BaseView):
           path.append(node)
 
       if not handler:
-        raise cherrypy.HTTPError(status=451, message='Root requests are not allowed')
+        raise cherrypy.HTTPError(status=405, message='Root requests are not allowed')
 
       # get the requested handler
       handler_instance = self.instances.get(handler, None)
@@ -187,11 +187,11 @@ class RestController(BaseView):
           else:
             message = u'Handler {0} \'s fucntion {1} does not support the {2} method'.format(handler_instance.name, method_name, http_method)
             self.logger.error(message)
-            raise cherrypy.HTTPError(status=501, message=message)
+            raise cherrypy.HTTPError(status=405, message=message)
         else:
           message = u'Handler {0} \'s fucntion {1} has no http methods specified'.format(handler_instance.name, method_name)
           self.logger.error(message)
-          raise cherrypy.HTTPError(status=405, message=message)
+          raise cherrypy.HTTPError(status=418, message=message)
 
       else:
         message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
