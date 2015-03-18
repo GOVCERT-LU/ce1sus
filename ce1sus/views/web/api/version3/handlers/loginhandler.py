@@ -12,6 +12,7 @@ from ce1sus.controllers.base import ControllerException
 from ce1sus.controllers.login import LoginController
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
+import cherrypy
 
 
 __author__ = 'Weber Jean-Paul'
@@ -53,9 +54,9 @@ class LoginHandler(RestBaseHandler):
             self.logger.debug('A login attempt via api key')
             user = self.login_controller.get_user_by_apikey(key)
           else:
-            raise RestHandlerException('No credentials given.')
+            raise cherrypy.HTTPError(status=401, message='No credentials given.')
         else:
-          raise RestHandlerException('No credentials given.')
+          raise cherrypy.HTTPError(status=401, message='No credentials given.')
       if user:
         self.login_controller.update_last_login(user)
         # put in session
@@ -64,10 +65,10 @@ class LoginHandler(RestBaseHandler):
         return user.to_dict(False, False)
       else:
         self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
-        raise RestHandlerException('User or password are incorrect.')
+        raise cherrypy.HTTPError(status=401, message='User or password are incorrect.')
     except ControllerException as error:
       self.logger.info(error)
-      raise RestHandlerException('Credentials are incorrect.')
+      raise cherrypy.HTTPError(status=401, message='Credentials are incorrect.')
 
 
 class LogoutHandler(RestBaseHandler):
