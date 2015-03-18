@@ -183,7 +183,10 @@ class ObservableController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(obj, user, user.group, True)
       self.object_broker.insert(obj)
-      # TODO integrity exception
+    except IntegrityException as error:
+      self.logger.debug(error)
+      self.logger.info(u'User {0} tried to insert an object with uuid "{1}" but the uuid already exists'.format(user.username, obj.uuid))
+      raise ControllerException(u'An object with uuid "{0}" already exists'.format(obj.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 

@@ -669,6 +669,16 @@ app.directive("object", function($compile) {
         }, $log);
       };
       
+      $scope.getStyle = function(properties) {
+        if (properties.proposal && !properties.validated) {
+          return 'background-color: yellow;';
+        }
+        if (!properties.validated) {
+          return 'background-color: red;';
+        }
+        return '';
+      };
+      
     },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {
@@ -1015,6 +1025,7 @@ app.directive("attributeHandler", function() {
     scope: {
       attribute: "=attribute",
       definition: "=definition",
+      permissions: "=permissions",
       type: "=type",
       form: "=form"
     },

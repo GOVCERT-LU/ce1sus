@@ -8,7 +8,8 @@ Created on Jan 9, 2015
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.brokers.event.reportbroker import ReportBroker, ReferenceBroker
-from ce1sus.db.common.broker import BrokerException, NothingFoundException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException, \
+  IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -43,7 +44,10 @@ class ReportController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(report, user, user.group, True)
       self.report_broker.insert(report)
-    # TODO integrity exception
+    except IntegrityException as error:
+      self.logger.debug(error)
+      self.logger.info(u'User {0} tried to insert a report with uuid "{1}" but the uuid already exists'.format(user.username, report.uuid))
+      raise ControllerException(u'An report with uuid "{0}" already exists'.format(report.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -134,7 +138,10 @@ class ReportController(BaseController):
 
       self.reference_broker.do_commit(commit)
       return reference, additional_references
-    # TODO integrity exception
+    except IntegrityException as error:
+      self.logger.debug(error)
+      self.logger.info(u'User {0} tried to insert a reference with uuid "{1}" but the uuid already exists'.format(user.username, reference.uuid))
+      raise ControllerException(u'An reference with uuid "{0}" already exists'.format(reference.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 

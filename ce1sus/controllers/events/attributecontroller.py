@@ -7,7 +7,8 @@ Created: Aug 28, 2013
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
-from ce1sus.db.common.broker import BrokerException, NothingFoundException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException, \
+  IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -86,6 +87,9 @@ class AttributeController(BaseController):
 
       self.attribute_broker.do_commit(commit)
       return attribute, additional_attributes
-    # TODO integrity exception
+    except IntegrityException as error:
+      self.logger.debug(error)
+      self.logger.info(u'User {0} tried to insert an attribute with uuid "{1}" but the uuid already exists'.format(user.username, attribute.uuid))
+      raise ControllerException(u'An attribute with uuid "{0}" already exists'.format(attribute.uuid))
     except BrokerException as error:
       raise ControllerException(error)

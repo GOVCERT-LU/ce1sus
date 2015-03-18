@@ -1,7 +1,7 @@
 <div bs-collapse ng-transclude>
   <div class="panel panel-default"
     style="position: relative; left: {{20*indent}}px; width:calc(100% - {{20*indent}}px);" >
-    <div class="collapse-header" ng-class=" {'unvalidated' : !object.properties.validated && !object.properties.proposal, 'proposal': object.properties.proposal && !object.properties.validated, 'panel-heading':  object.properties.validated}">
+    <div class="collapse-header panel-heading" style="{{getStyle(object.properties)}}">
       <div class="row">
         <div class="col-sm-7">
           <h4 class="panel-title">
