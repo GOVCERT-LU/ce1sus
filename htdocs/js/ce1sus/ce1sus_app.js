@@ -13,7 +13,8 @@ var app = angular.module('app', ['ngRoute',
                                  'simplePagination',
                                  'angularFileUpload',
                                  'angular-loading-bar',
-                                 'angular-growl'
+                                 'angular-growl',
+                                 'ui.select'
                                  ]);
 
 

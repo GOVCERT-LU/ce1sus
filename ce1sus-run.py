@@ -19,6 +19,7 @@ from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
+from ce1sus.views.web.api.version2.depricated import DepricatedView
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,6 +48,7 @@ def bootstrap():
 
   cherrypy.tree.mount(IndexView(config), '/')
   cherrypy.tree.mount(RestController(config), '/REST/0.3.0/')
+  cherrypy.tree.mount(DepricatedView(config), '/REST/0.2.0/')
   cherrypy.tree.mount(GuiMenus(config), '/menus')
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
