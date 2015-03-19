@@ -31,10 +31,14 @@ class EventsController(BaseController):
       isadmin = is_user_priviledged(user)
       if isadmin:
         events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
-        nbr_total_events = self.event_broker.get_total_events()
+        # nbr_total_events = self.event_broker.get_total_events()
+
+        nbr_total_events = len(events)
       else:
         events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
-        nbr_total_events = self.event_broker.get_total_events_for_user()
+        # nbr_total_events = self.event_broker.get_total_events_for_user()
+        nbr_total_events = len(events)
+
       return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)

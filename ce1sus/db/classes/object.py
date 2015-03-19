@@ -27,7 +27,7 @@ class RelatedObject(Base):
   parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
   child_id = Column('child_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', BigInteger)
-  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined')
+  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     # flatten related object
@@ -47,18 +47,18 @@ class RelatedObject(Base):
 
 class Object(ExtendedLogingInformations, Base):
   # attributes = relationship('Attribute', lazy='dynamic')
-  attributes = relationship('Attribute', lazy='joined')
+  attributes = relationship('Attribute')
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigInteger, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship('ObjectDefinition', lazy='joined')
+  definition = relationship('ObjectDefinition')
 
   # related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
-  dbcode = Column('code', Integer, nullable=False, default=0)
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
+  dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)
   observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False, lazy='joined')
+  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
   @property
   def event(self):

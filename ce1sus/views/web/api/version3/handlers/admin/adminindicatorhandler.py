@@ -19,7 +19,7 @@ class AdminIndicatorTypesHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.indicator_controller = IndicatorController(config)
+    self.indicator_controller = self.controller_factory(IndicatorController)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])

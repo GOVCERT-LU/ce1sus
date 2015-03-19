@@ -38,8 +38,8 @@ class ObservableComposition(Base):
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'OR')
   # observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
-  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
-  dbcode = Column('code', Integer, nullable=False, default=0)
+  observables = relationship('Observable', secondary='rel_observable_composition')
+  dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   __bit_code = None
 
   @property
@@ -120,7 +120,7 @@ class RelatedObservable(ExtendedLogingInformations, Base):
   child_id = Column('child_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', BigInteger)
   confidence = Column('confidence', Integer)
-  observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False, lazy='joined')
+  observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     # flatten related object
@@ -144,17 +144,17 @@ class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True)
   description = Column('description', UnicodeText)
-  object = relationship('Object', back_populates='parent', uselist=False, lazy='joined', primaryjoin='Object.parent_id==Observable.identifier')
-  observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
+  object = relationship('Object', back_populates='parent', uselist=False, primaryjoin='Object.parent_id==Observable.identifier')
+  observable_composition = relationship('ObservableComposition', uselist=False)
   keywords = relationship('ObservableKeyword', backref='observable')
   event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
-  dbcode = Column('code', Integer, nullable=False, default=0)
+  dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
   parent_id = Column('parent_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
   # related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
-  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='joined')
+  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id')
   __bit_code = None
 
   def related_observables_count_for_permissions(self, event_permissions):

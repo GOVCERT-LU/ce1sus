@@ -126,7 +126,6 @@ class Assembler(BaseController):
       for comment in comments:
         com = self.assemble_comment(event, comment, user, owner, rest_insert)
         event.comments.append(com)
-    # TODO implement attributes
     # TODO check if definitions do exist
     return event
 

@@ -19,7 +19,7 @@ class EventsHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.events_controller = EventsController(config)
+    self.events_controller = self.controller_factory(EventsController)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])

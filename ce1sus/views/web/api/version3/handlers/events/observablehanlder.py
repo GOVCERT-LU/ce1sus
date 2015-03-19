@@ -22,7 +22,7 @@ class ObservableHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.observable_controller = ObservableController(config)
+    self.observable_controller = self.controller_factory(ObservableController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

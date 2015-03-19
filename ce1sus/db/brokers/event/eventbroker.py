@@ -156,7 +156,8 @@ class EventBroker(BrokerBase):
   def get_total_events(self):
     try:
       # TODO add validation and published checks
-      result = self.session.query(self.get_broker_class()).count()
+      result = len(self.get_all())
+      # result = self.session.query(self.get_broker_class()).count()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()

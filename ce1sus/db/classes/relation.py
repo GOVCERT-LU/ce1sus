@@ -28,8 +28,7 @@ class Relation(Base):
   rel_event_id = Column('rel_event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   rel_event = relationship("Event",
                            uselist=False,
-                           primaryjoin='Event.identifier==Relation.rel_event_id',
-                           lazy='joined')
+                           primaryjoin='Event.identifier==Relation.rel_event_id')
   attribute_id = Column('attribute_id', BigInteger, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   attribute = relationship("Attribute",
                            uselist=False,
@@ -37,8 +36,7 @@ class Relation(Base):
   rel_attribute_id = Column('rel_attribute_id', BigInteger, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   rel_attribute = relationship('Attribute',
                                uselist=False,
-                               primaryjoin='Attribute.identifier==Relation.rel_attribute_id',
-                               lazy='joined')
+                               primaryjoin='Attribute.identifier==Relation.rel_attribute_id')
 
   UniqueConstraint('event_id', 'attribute_id', 'rel_event_id', 'rel_attribute_id')
 

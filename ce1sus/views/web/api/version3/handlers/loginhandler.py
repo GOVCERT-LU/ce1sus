@@ -25,7 +25,7 @@ class LoginHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.login_controller = LoginController(config)
+    self.login_controller = self.controller_factory(LoginController)
 
   @rest_method(default=True)
   @methods(allowed=['POST'])

@@ -81,7 +81,7 @@ class Attribute(ExtendedLogingInformations, Base):
   children = relationship('Attribute',
                           primaryjoin='Attribute.identifier==Attribute.parent_id')
   parent = relationship('Attribute', uselist=False)
-  dbcode = Column('code', Integer, nullable=False, default=0)
+  dbcode = Column('code', Integer, nullable=False, default=0, index=True)
 
   __bit_code = None
 

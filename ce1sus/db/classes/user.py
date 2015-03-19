@@ -102,7 +102,7 @@ class User(Base):
   password = Column('password', Unicode(255), nullable=False)
   last_login = Column('last_login', DateTime)
   email = Column('email', Unicode(255), unique=True)
-  api_key = Column('apikey', Unicode(255))
+  api_key = Column('apikey', Unicode(255), index=True)
   gpg_key = Column('gpg_key', UnicodeText)
   activated = Column('activated', DateTime)
   activation_sent = Column('activation_sent', DateTime)

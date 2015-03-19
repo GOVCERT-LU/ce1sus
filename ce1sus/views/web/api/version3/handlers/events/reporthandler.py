@@ -24,7 +24,7 @@ class ReportHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.report_controller = ReportController(config)
+    self.report_controller = self.controller_factory(ReportController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

@@ -28,7 +28,7 @@ class AdminUserHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.user_controller = UserController(config)
+    self.user_controller = self.controller_factory(UserController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])

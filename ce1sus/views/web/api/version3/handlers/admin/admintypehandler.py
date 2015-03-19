@@ -22,7 +22,7 @@ class AttribueTypeHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
+    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

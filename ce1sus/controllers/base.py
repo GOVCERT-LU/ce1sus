@@ -55,6 +55,9 @@ class NotImplementedException(ControllerException):
 class BaseController:
   """This is the base class for controlles all controllers should extend this
   class"""
+
+  brokers = dict()
+
   def __init__(self, config, session=None):
     self.config = config
     self.__logger = Log(self.config)
@@ -82,15 +85,22 @@ class BaseController:
 
     :returns: Instance of a broker
     """
-    self.logger.debug('Create broker for {0}'.format(clazz))
-    if self.session:
-      # instanciate class
-      if not issubclass(clazz, BrokerBase):
-        raise ControllerException('Class does not implement BrokerBase')
-      return clazz(self.session)
+    if issubclass(clazz, BrokerBase):
+      classname = clazz.__name__
+      if classname in BaseController.brokers:
+        return BaseController.brokers[classname]
+      # need to create the broker
+      self.logger.debug('Create broker for {0}'.format(clazz))
+      if self.session:
+        instance = clazz(self.session)
+      else:
+        instance = self.session_manager.broker_factory(clazz)
+
+      BaseController.brokers[classname] = instance
+      return instance
 
     else:
-      return self.session_manager.broker_factory(clazz)
+      raise ControllerException('Class does not implement BrokerBase')
 
   def get_session(self):
     if self.session:

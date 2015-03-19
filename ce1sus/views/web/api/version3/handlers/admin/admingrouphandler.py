@@ -22,7 +22,7 @@ class AdminGroupHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.group_controller = GroupController(config)
+    self.group_controller = self.controller_factory(GroupController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])

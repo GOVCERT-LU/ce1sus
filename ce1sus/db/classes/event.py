@@ -27,7 +27,7 @@ __license__ = 'GPL v3+'
 class EventGroupPermission(ExtendedLogingInformations, Base):
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
   group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-  dbcode = Column('code', Integer, default=0, nullable=False)
+  dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
   UniqueConstraint('event_id', 'group_id')
@@ -67,7 +67,7 @@ class Event(ExtendedLogingInformations, Base):
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
-  groups = relationship('EventGroupPermission', lazy='joined')
+  groups = relationship('EventGroupPermission')
   # observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
   observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
   indicators = relationship(Indicator)

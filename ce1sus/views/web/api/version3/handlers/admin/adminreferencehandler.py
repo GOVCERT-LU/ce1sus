@@ -22,7 +22,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.reference_controller = ReferencesController(config)
+    self.reference_controller = self.controller_factory(ReferencesController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

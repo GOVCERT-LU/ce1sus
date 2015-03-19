@@ -42,11 +42,11 @@ class ObjectHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.observable_controller = ObservableController(config)
-    self.attribute_controller = AttributeController(config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
-    self.object_definition_controller = ObjectDefinitionController(config)
-    self.relations_controller = RelationController(config)
+    self.observable_controller = self.controller_factory(ObservableController)
+    self.attribute_controller = self.controller_factory(AttributeController)
+    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
+    self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
+    self.relations_controller = self.controller_factory(RelationController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

@@ -22,8 +22,8 @@ class AdminObjectHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.object_definition_controller = ObjectDefinitionController(config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
+    self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
+    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

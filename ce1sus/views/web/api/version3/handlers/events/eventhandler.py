@@ -12,9 +12,7 @@ from ce1sus.controllers.base import ControllerException, ControllerNothingFoundE
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.reports import ReportController
-from ce1sus.db.classes.event import Event, Comment, EventGroupPermission
-from ce1sus.db.classes.observables import Observable
-from ce1sus.db.classes.report import Report
+from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
 
@@ -28,9 +26,9 @@ class EventHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.observable_controller = ObservableController(config)
-    self.relation_controller = RelationController(config)
-    self.report_controller = ReportController(config)
+    self.observable_controller = self.controller_factory(ObservableController)
+    self.relation_controller = self.controller_factory(RelationController)
+    self.report_controller = self.controller_factory(ReportController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

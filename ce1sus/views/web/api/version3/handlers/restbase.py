@@ -10,6 +10,8 @@ import re
 
 from ce1sus.views.web.api.version3.handlers.common.assembler import Assembler
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.handlers.base import HandlerException
+from ce1sus.controllers.base import BaseController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -87,9 +89,24 @@ class RestHandlerNotFoundException(RestHandlerException):
 class RestBaseHandler(BaseView):
   """Base class for handlers"""
 
+  controllers = dict()
+
   def __init__(self, config):
     BaseView.__init__(self, config)
     self.assembler = Assembler(config)
+
+  def controller_factory(self, clazz):
+    if issubclass(clazz, BaseController):
+      classname = clazz.__name__
+      if classname in RestBaseHandler.controllers:
+        return RestBaseHandler.controllers[classname]
+      # need to create the broker
+      self.logger.debug('Create controller for {0}'.format(clazz))
+      instance = clazz(self.config)
+      RestBaseHandler.controllers[classname] = instance
+      return instance
+    else:
+      raise HandlerException('Class does not implement BaseController')
 
   @property
   def name(self):

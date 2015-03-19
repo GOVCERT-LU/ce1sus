@@ -36,8 +36,8 @@ class HandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
-    self.attribute_controller = AttributeController(config)
+    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
+    self.attribute_controller = self.controller_factory(AttributeController)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
@@ -84,7 +84,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.reference_controller = ReferencesController(config)
+    self.reference_controller = self.controller_factory(ReferencesController)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
@@ -131,7 +131,7 @@ class TablesHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.attribute_definition_controller = AttributeDefinitionController(config)
+    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])

@@ -22,7 +22,7 @@ class ConditionHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.condition_controller = ConditionController(config)
+    self.condition_controller = self.controller_factory(ConditionController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])

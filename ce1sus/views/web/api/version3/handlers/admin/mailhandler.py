@@ -21,7 +21,7 @@ class MailHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.mail_controller = MailController(config)
+    self.mail_controller = self.controller_factory(MailController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT'])

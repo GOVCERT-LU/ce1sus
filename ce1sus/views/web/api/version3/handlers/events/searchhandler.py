@@ -26,7 +26,7 @@ class SearchHandler(RestBaseHandler):
 
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
-    self.search_controller = SearchController(config)
+    self.search_controller = self.controller_factory(SearchController)
 
   @rest_method(default=True)
   @methods(allowed=['POST'])

@@ -125,7 +125,7 @@ class Indicator(ExtendedLogingInformations, Base):
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*
   # TODO add related indicators and TTP
-  dbcode = Column('code', Integer, default=0, nullable=False)
+  dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
 
   @property
