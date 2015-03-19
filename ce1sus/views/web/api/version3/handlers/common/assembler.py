@@ -51,9 +51,10 @@ class Assembler(BaseController):
       raise ControllerException(error)
 
   def populate_simple_logging(self, instance, json, user, insert=False):
+    db_user = self.get_db_user(user)
     if insert:
-      # Note the creato
-      db_user = self.get_db_user(user)
+      # Note the creator
+
       instance.creator_id = db_user.identifier
       instance.creator = db_user
 
