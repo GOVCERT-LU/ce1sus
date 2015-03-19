@@ -8,7 +8,6 @@ Created on Oct 23, 2014
 import sqlalchemy.orm.exc
 
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException, ValidationException, IntegrityException
 from ce1sus.helpers.common.objects import get_class

@@ -5,7 +5,6 @@
 
 Created on Feb 21, 2014
 """
-import sqlalchemy.orm.exc
 
 
 from ce1sus.db.classes.mailtemplate import MailTemplate

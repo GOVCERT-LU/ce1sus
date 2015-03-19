@@ -10,11 +10,12 @@ app.controller('errorController', function($scope, error) {
   $scope.error = error;
 });
 
-app.controller('loadingController', function($scope, cfpLoadingBar) {
+app.controller('loadingController', function($scope, cfpLoadingBar, $rootScope) {
   $scope.$watch(function() {
     return cfpLoadingBar.status();
   }, function(newValue, oldValue) {
-    $scope.status = Math.floor(newValue * 100);
+    if (newValue > oldValue){
+      $scope.status = Math.floor(newValue * 100);
+    }
   });
-  
 });

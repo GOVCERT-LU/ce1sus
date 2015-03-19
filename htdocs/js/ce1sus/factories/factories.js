@@ -2,7 +2,7 @@
  * 
  */
 
-app.factory("messages", function($rootScope, $alert, messageQueue) {
+app.factory("messages", function($rootScope, $alert, messageQueue, growl) {
   var currentMessage = "";
   $rootScope.$watch("messageSet", function(newValue, oldValue) { 
     if (newValue) {
@@ -20,7 +20,23 @@ app.factory("messages", function($rootScope, $alert, messageQueue) {
         if (title == "Danger"){
           title = "Error";
         }
-        
+        switch(type) {
+          case "success":
+            growl.success(message,{title: title});
+            break;
+          case "info":
+            growl.info(message,{title: title});
+            break;
+          case "warning":
+            growl.warning(message,{title: title});
+            break;
+          case "danger":
+            growl.error(message,{title: title});
+            break;
+          default:
+            growl.error(message,{title: title});
+        }
+        /*
         var myAlert = $alert({title: title+":", 
                               content: message, 
                               type: type, 
@@ -28,6 +44,7 @@ app.factory("messages", function($rootScope, $alert, messageQueue) {
                               animation: "am-fade-and-slide-top",
                               duration: 10,
                               show: true});
+        */
       }
       $rootScope.messageSet = false;
     }

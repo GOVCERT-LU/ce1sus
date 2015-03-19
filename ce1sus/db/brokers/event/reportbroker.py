@@ -7,7 +7,6 @@ Created on Jan 9, 2015
 """
 import sqlalchemy.exc
 
-from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.report import Report, Reference
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 

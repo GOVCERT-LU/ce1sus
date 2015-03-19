@@ -6,10 +6,8 @@ module handing the attributes pages
 Created: Aug 26, 2013
 """
 import random
-from sqlalchemy.exc import IntegrityError
 
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, \
-  ControllerIntegrityException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashSHA1

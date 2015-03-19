@@ -12,7 +12,8 @@ var app = angular.module('app', ['ngRoute',
                                  'ngTable',
                                  'simplePagination',
                                  'angularFileUpload',
-                                 'angular-loading-bar'
+                                 'angular-loading-bar',
+                                 'angular-growl'
                                  ]);
 
 

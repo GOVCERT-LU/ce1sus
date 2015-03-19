@@ -15,6 +15,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
     placement: 'top'
   });
   
+
+  
     messageQueueProvider.setQueue(queue);
     // Configuring provider options
     RestangularProvider.setBaseUrl("/REST/0.3.0");
@@ -1097,3 +1099,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .up();
     $routeProvider.otherwise({redirectTo: '/'}); 
 });
+
+app.config(['growlProvider', function(growlProvider) {
+  growlProvider.globalReversedOrder(true);
+  growlProvider.globalTimeToLive({success: 2000, error: 5000, warning: 4000, info: 3000});
+}]);
