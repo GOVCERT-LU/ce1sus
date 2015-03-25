@@ -10,7 +10,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties, ValueException
+from ce1sus.db.classes.common import Properties
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
@@ -231,26 +231,14 @@ class Attribute(ExtendedLogingInformations, Base):
       definition = json.get('definition', None)
       if definition:
         definition_uuid = definition.get('identifier', None)
-    session = self._sa_instance_state.session
-    if self.definition:
-      if self.definition.uuid != definition_uuid:
-        raise ValueException(u'Attribute definitions cannot be updated')
-    if definition_uuid:
-      # get id for the uuid
-      definition_id = session.query(AttributeDefinition.identifier).filter(AttributeDefinition.uuid == definition_uuid).one()[0]
-
-      self.definition_id = definition_id
+    setattr(self, 'def_uuid', definition_uuid)
 
     condition_uuid = json.get('condition_id', None)
     if not condition_uuid:
       condition = json.get('condition', None)
       if condition:
         condition_uuid = condition.get('identifier', None)
-    if condition_uuid:
-
-      condition_id = session.query(Condition.identifier).filter(Condition.uuid == condition_uuid).one()[0]
-
-      self.condition_id = condition_id
+    setattr(self, 'cond_uuid', condition_uuid)
     self.is_ioc = json.get('ioc', 0)
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))

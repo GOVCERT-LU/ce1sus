@@ -184,3 +184,15 @@ class RestBaseHandler(BaseView):
       if len(path) > 0:
         raise PathParsingException(u'Path is too long')
     return result
+
+  def is_rest_insert(self, headers):
+    webinsert = headers.get('frontend', None)
+    if webinsert:
+      return False
+    else:
+      return True
+
+  def set_provenance(self, instance, headers):
+    rest_insert = self.is_rest_insert(self.headers)
+    instance.properties.is_rest_instert = rest_insert
+    instance.properties.is_web_insert = not rest_insert

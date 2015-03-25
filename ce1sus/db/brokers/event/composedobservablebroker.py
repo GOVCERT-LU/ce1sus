@@ -53,3 +53,18 @@ class ComposedObservableBroker(BrokerBase):
       raise NothingFoundException('No observables found in composed observable with ID {1}'.format(observable.identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
+
+  def get_by_observable_id(self, identifier):
+    try:
+      # TODO find a solution with one
+      result = self.session.query(ObservableComposition).join(ObservableComposition.observables).filter(Observable.identifier == identifier).all()
+      if result:
+        return result[0]
+      else:
+        raise sqlalchemy.orm.exc.NoResultFound()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('No composition found in observable with ID {0}'.format(identifier))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for observable with ID {0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

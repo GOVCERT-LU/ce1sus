@@ -6,16 +6,22 @@
 Created on Dec 22, 2014
 """
 
+from types import ListType
+from uuid import uuid4
+
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
+from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.controllers.events.relations import RelationController
+from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.object import Object, RelatedObject
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
-from ce1sus.controllers.events.relations import RelationController
+from ce1sus.db.classes.observables import ObservableComposition, Observable
 from ce1sus.handlers.base import HandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,6 +53,7 @@ class ObjectHandler(RestBaseHandler):
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
     self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
     self.relations_controller = self.controller_factory(RelationController)
+    self.conditions_controller = self.controller_factory(ConditionController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -156,12 +163,55 @@ class ObjectHandler(RestBaseHandler):
         handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
 
     handler_instance.user = self.get_user()
+
+    # set conditions
+    conditions = self.conditions_controller.get_all_conditions()
+    handler_instance.conditions = conditions
+
     return handler_instance
 
-  def __set_provenance(self, instance, headers):
-    rest_insert = self.is_rest_insert(headers)
-    instance.properties.is_rest_instert = rest_insert
-    instance.properties.is_web_insert = not rest_insert
+  def __make_attribute_insert_return(self, param_1, related_objects, observable, is_observable, details, inflated):
+    if is_observable:
+      return {'observable': param_1.to_dict(), 'relpaced_observable': observable.to_dict(False, False)}
+    else:
+      result_attriutes = list()
+      result_objects = list()
+      for attr in param_1:
+        result_attriutes.append(attr.to_dict(details, inflated))
+      if related_objects:
+        for related_object in related_objects:
+          result_objects.append(related_object.to_dict(details, inflated))
+      return {'attributes': result_attriutes, 'related_objects': result_objects}
+
+  def __get_attribtues_for_object(self, obj):
+    result = obj.attributes
+    if obj.related_objects:
+      for rel_obj in obj.related_objects:
+        result = result + self.__get_attribtues_for_object(rel_obj.object)
+    return result
+
+  def __get_attribtues_for_observable(self, obs):
+    result = list()
+    if obs.object:
+      result = result + self.__get_attribtues_for_object(obs.object)
+    if obs.related_observables:
+      for rel_obs in obs.related_observables:
+        result = result + self.__get_attribtues_for_observable(rel_obs.observable)
+
+    return result
+
+  def __get_all_attribtues(self, param_1, related_objects, is_observable):
+    result = list()
+    if is_observable:
+      # then param 1 is an wrapped composed observable
+      for obs in param_1.observable_composition.observables:
+        result = result + self.__get_attribtues_for_observable(obs)
+    else:
+      result = result + param_1
+      if related_objects:
+        for rel_obj in related_objects:
+          result = result + self.__get_attribtues_for_object(rel_obj)
+    return result
 
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json, headers):
     try:
@@ -171,53 +221,123 @@ class ObjectHandler(RestBaseHandler):
         # Get needed handler
         definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(json.get('definition_id', None))
         handler_instance = self.__get_handler(definition)
+        # set provenace to handler
+        handler_instance.is_rest_insert = self.is_rest_insert(headers)
+        handler_instance.is_owner = self.is_event_owner(event, user)
+        # Ask handler to process the json for the new attributes/observables
+        # param 1 can be either a list of attributes or a list of observables
+        param_1, related_objects = handler_instance.insert(obj, user, json)
 
-        # Ask handler to process the json for the new attributes
-        attribute, additional_attributes, related_objects = handler_instance.insert(obj, user, json)
-        # Check if not elements were attached to the object
-        # TODO: find a way to check if the object has been changed
-        # TODO also check if there are no children attached
-        if True:
-          self.__set_provenance(attribute, headers)
-          if additional_attributes:
-            for additional_attribute in additional_attributes:
-              self.__set_provenance(additional_attribute, headers)
-
-          self.attribute_controller.insert_attribute(attribute, additional_attributes, user, False, self.is_event_owner(event, user))
-          # set provenance
-          if related_objects:
-            for related_object in related_objects:
-              self.__set_provenance(related_object, headers)
-          self.observable_controller.insert_handler_objects(related_objects, user, True, self.is_event_owner(event, user))
+        is_observable = True
+        # checks for param 1:
+        if isinstance(param_1, ListType):
+          if len(param_1) > 0:
+            first_element = param_1[0]
+            if isinstance(first_element, Attribute):
+              is_observable = False
+            else:
+              if related_objects:
+                raise RestHandlerException('Handler  {0} returns observables but also related objects this cannot be'.format(definition.attribute_handler.classname))
+          else:
+            raise RestHandlerException('Fist parameter is an empty list for handler {0}'.format(definition.attribute_handler.classname))
         else:
-          raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
+          raise RestHandlerException('Fist parameter is not a list for handler {0}'.format(definition.attribute_handler.classname))
 
-        # Make attributes flat
-        flat_attriutes = list()
+        if is_observable:
+          # make a composed observable for the observables gotten an the observable of the originating object
+          observable = obj.observable
 
-        # Return the generated attributes as json
-        result_attriutes = list()
-        flat_attriutes.append(attribute)
-        result_attriutes.append(attribute.to_dict(details, inflated))
-        if additional_attributes:
-          for additional_attribute in additional_attributes:
-            self.__set_provenance(additional_attribute, headers)
-            flat_attriutes.append(flat_attriutes)
-            result_attriutes.append(additional_attribute.to_dict(details, inflated))
+          # check if there is already a composed observable on top
+          try:
+            test_composition = self.observable_controller.get_composition_by_observable(observable)
+          except ControllerNothingFoundException:
+            test_composition = None
 
-        result_objects = list()
-        if related_objects:
-          for related_object in related_objects:
-            # make the attributes of the related object flat
-            flat_attriutes = flat_attriutes + self.relations_controller.make_object_attributes_flat(related_object)
+          if test_composition:
+            composed_observable = test_composition
+          else:
+            # if there exists none create composed observable
+            composed_observable = ObservableComposition()
+            composed_observable.uuid = uuid4()
 
-            result_objects.append(related_object.to_dict(details, inflated))
+            composed_observable.dbcode = observable.dbcode
+
+          # only add if there are attributes
+          if obj.attributes:
+            composed_observable.observables.append(observable)
+
+          # TODO: check if the obseravbles are valid
+          for obs in param_1:
+            # enforce that no parent is set
+            obs.event = None
+            obs.event_id = None
+            obs.parent = observable.parent
+            obs.parent_id = observable.parent_id
+            # set extended logging
+            db_user = user = self.attribute_controller.user_broker.get_by_id(user.identifier)
+            self.attribute_controller.set_extended_logging(obs, db_user, db_user.group, True)
+
+            composed_observable.observables.append(obs)
+
+          # wrapper for composed observable
+          if test_composition:
+            wrapped_observable = composed_observable.parent
+            replaced_observable = test_composition.parent
+          else:
+            wrapped_observable = Observable()
+            wrapped_observable.uuid = uuid4()
+            wrapped_observable.observable_composition = composed_observable
+
+            wrapped_observable.event = observable.event
+            wrapped_observable.event_id = observable.event_id
+            wrapped_observable.parent = observable.parent
+            wrapped_observable.parent_id = observable.parent_id
+            wrapped_observable.dbcode = observable.dbcode
+
+            composed_observable.parent = wrapped_observable
+            composed_observable.parent_id = wrapped_observable.identifier
+
+            observable.event_id = None
+            observable.event = None
+
+            replaced_observable = observable
+
+          # insert composed observable
+          self.observable_controller.insert_composed_observable(wrapped_observable, user, False, self.is_event_owner(event, user))
+
+          param_1 = wrapped_observable
+        else:
+          replaced_observable = None
+          # process the attributes and related objects
+
+          # get the main attribtue
+
+          # Check if not elements were attached to the object
+          # TODO: find a way to check if the object has been changed
+          # TODO also check if there are no children attached
+          if True:
+            self.attribute_controller.insert_attributes(param_1, user, False, self.is_event_owner(event, user))
+            self.observable_controller.insert_handler_objects(related_objects, user, False, self.is_event_owner(event, user))
+
+          else:
+            raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
+
+          # return the attributes and related objects
+
+        # extract all the attributes to make relations
+        flat_attriutes = self.__get_all_attribtues(param_1, related_objects, is_observable)
 
         # make relations
         # TODO: add flag to skip this step
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attriutes, True)
 
-        return {'attributes': result_attriutes, 'related_objects': result_objects}
+        result = self.__make_attribute_insert_return(param_1, related_objects, replaced_observable, is_observable, details, inflated)
+        # clean up
+        if not obj.attributes:
+          # remove the empty attribute
+          self.observable_controller.remove_observable(obj.observable, user)
+
+        return result
 
       else:
         uuid = requested_object['object_uuid']

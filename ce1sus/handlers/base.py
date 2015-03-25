@@ -7,8 +7,11 @@ Created: Aug, 2013
 """
 
 from os.path import dirname, abspath
+from uuid import uuid4
 
+from ce1sus.db.classes.observables import Observable
 from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
+from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.objects import get_class
 
 
@@ -47,6 +50,10 @@ class HandlerBase(object):
     self.attribute_definitions = dict()
     self.oject_definitions = dict()
     self.user = None
+    self.conditions = dict()
+    self.is_multi_line = False
+    self.is_rest_insert = True
+    self.is_owner = False
 
   @property
   def reference_definitions(self):
@@ -84,14 +91,32 @@ class HandlerBase(object):
     if definition:
       return definition
     else:
-      raise HandlerException(u'Attribute definition with chksum {0} cannot be found')
+      raise HandlerException(u'Attribute definition with chksum {0} cannot be found'.format(chksum))
+
+  def get_condition_by_uuid(self, uuid):
+    for condition in self.conditions:
+      if condition.uuid == uuid:
+        return condition
+    raise HandlerException(u'Condition with uuid {0} cannot be found'.format(uuid))
+
+  def get_attriute_definition_by_uuid(self, uuid):
+    for value in self.attribute_definitions.itervalues():
+      if value.uuid == uuid:
+        return value
+    raise HandlerException(u'Attribute definition with uuid {0} cannot be found'.format(uuid))
+
+  def get_object_definition_by_uuid(self, uuid):
+    for value in self.oject_definitions.itervalues():
+      if value.uuid == uuid:
+        return value
+    raise HandlerException(u'Object definition with uuid {0} cannot be found'.format(uuid))
 
   def get_object_definition(self, chksum):
-    definition = self.attribute_definitions.get(chksum, None)
+    definition = self.oject_definitions.get(chksum, None)
     if definition:
       return definition
     else:
-      raise HandlerException(u'Attribute definition with chksum {0} cannot be found')
+      raise HandlerException(u'Object definition with chksum {0} cannot be found'.format(chksum))
 
   def get_main_definition(self):
     """
@@ -175,9 +200,17 @@ class HandlerBase(object):
 
     # set remaining stuff
     attribute.populate(json)
-    # set the definition id as in the definition as it might get overwritten
+    # set definition id
+    definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
+    attribute.definition = definition
     attribute.definition_id = definition.identifier
 
+    # set condition id
+    condition = self.get_condition_by_uuid(attribute.cond_uuid)
+    attribute.condition = condition
+    attribute.condition_id = condition.identifier
+
+    self.set_provenance(attribute)
     return attribute
 
   def create_reference(self, report, definition, user, json):
@@ -194,21 +227,27 @@ class HandlerBase(object):
     reference.populate(json)
     # set the definition id as in the definition as it might get overwritten
     reference.definition_id = definition.identifier
-
+    self.set_provenance(reference)
     return reference
 
-  @staticmethod
-  def create_object(parent, definition, user, json):
+  def create_object(self, obsevable, definition, user, json, has_parent_observable=True):
     # TODO recreate object to new setup
     obj = get_class('ce1sus.db.classes.object', 'Object')()
 
     obj.identifier = None
     obj.definition = definition
-    obj.event = parent.event
+    obj.definition_id = definition.identifier
+
+    obj.observable = obsevable
+    obj.observable_id = obsevable.identifier
+    if has_parent_observable:
+      obj.parent = obsevable
+      obj.parent_id = obsevable.identifier
     # TODO create default value if value was not set for IOC and share
 
     obj.populate(json)
-    obj.definition_id = definition.identifier
+
+    self.set_provenance(obj)
     return obj
 
   def get_data(self, attribute, definition, parameters):
@@ -219,8 +258,48 @@ class HandlerBase(object):
 
   def to_dict(self):
     return {'name': self.__class__.__name__,
-            'view_type': self.get_view_type()
+            'view_type': self.get_view_type(),
+            'is_multi_line': self.is_multi_line
             }
 
   def require_js(self):
     raise HandlerException(u'require_js is not defined for {0}'.format(self.__class__.__name__))
+
+  def set_provenance(self, instance):
+    if self.is_owner:
+      instance.properties.is_validated = True
+    instance.properties.is_rest_instert = self.is_rest_insert
+    instance.properties.is_web_insert = not self.is_rest_insert
+
+  def get_classname(self):
+    return self.__class__.__name__
+
+  def create_observable(self, attribute):
+      observable = Observable()
+
+      # set new uuid for the parent
+
+      observable.created_at = attribute.created_at
+      observable.modified_on = attribute.modified_on
+      observable.creator = attribute.creator
+      observable.modifier = attribute.modifier
+      observable.creator_id = attribute.creator_id
+      observable.modifier_id = attribute.modifier_id
+      observable.originating_group = attribute.originating_group
+      observable.originating_group_id = attribute.originating_group_id
+
+      event = attribute.object.event
+      observable.parent_id = event.identifier
+      observable.parent = event
+
+      observable.created_at = DatumZait.utcnow()
+      observable.modified_on = DatumZait.utcnow()
+      observable.description = 'Auto generated'
+      observable.uuid = uuid4()
+
+      self.set_provenance(observable)
+
+      if attribute.properties.is_shareable:
+        observable.properties.is_shareable = True
+
+      return observable

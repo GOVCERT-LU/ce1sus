@@ -5,13 +5,16 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
+from uuid import uuid4
+
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
+from ce1sus.db.classes.observables import Observable
+from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -42,11 +45,54 @@ class ObservableController(BaseController):
 
     :returns: Event, Boolean
     """
-    self.logger.debug(observable.identifier)
-    self.logger.debug('User {0} inserts a new event'.format(user.username))
+    self.logger.debug('User {0} inserts a new observable'.format(user.username))
     try:
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(observable, user, user.group, True)
+      self.observable_broker.insert(observable, False)
+      # generate relations if needed!
+
+      """
+      attributes = get_all_attributes_from_event(event)
+      if (mkrelations == 'True' or mkrelations is True) and attributes:
+        self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
+      """
+      self.observable_broker.do_commit(commit)
+      return observable, True
+    except ValidationException:
+      return observable, False
+    except IntegrityException as error:
+      self.logger.debug(error)
+      self.logger.info(u'User {0} tried to insert an observable with uuid "{1}" but the uuid already exists'.format(user.username, observable.uuid))
+      raise ControllerException(u'An observable with uuid "{0}" already exists'.format(observable.uuid))
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def __set_extended_logging_object(self, obj, user, insert=True):
+    self.set_extended_logging(obj, user, user.group, insert)
+    for attribute in obj.attributes:
+      self.set_extended_logging(attribute, user, user.group, insert)
+    if obj.related_objects:
+      for rel_obj in obj.related_objects:
+        self.__set_extended_logging_object(rel_obj.object, user, insert)
+        # TODO: check if relobject parent is set correctly
+        rel_obj.parent = obj
+
+  def __set_extended_logging_observble(self, obs, user, insert=True):
+    if obs.object:
+      self.__set_extended_logging_object(obs.object, user, insert)
+    if obs.observable_composition:
+      self.__set_extended_logging_observble(obs, user, insert)
+    self.set_extended_logging(obs, user, user.group, insert)
+
+  def insert_composed_observable(self, observable, user, commit=True, owner=True):
+    self.logger.debug('User {0} inserts a new composed observable'.format(user.username))
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      for obs in observable.observable_composition.observables:
+        self.__set_extended_logging_observble(obs, user, True)
+      self.set_extended_logging(observable, user, user.group, True)
+
       self.observable_broker.insert(observable, False)
       # generate relations if needed!
 
@@ -245,3 +291,12 @@ class ObservableController(BaseController):
       for related_object in related_objects:
         self.insert_object(related_object, user, False)
     self.object_broker.do_commit(commit)
+
+  def get_composition_by_observable(self, observable):
+    try:
+      composition = self.composed_observable_broker.get_by_observable_id(observable.identifier)
+      return composition
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)

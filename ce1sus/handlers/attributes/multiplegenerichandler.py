@@ -8,6 +8,7 @@ Created: Sep 19, 2013
 import types
 
 from ce1sus.handlers.attributes.generichandler import GenericHandler
+from ce1sus.handlers.base import HandlerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -17,6 +18,10 @@ __license__ = 'GPL v3+'
 
 
 class MultipleGenericHandler(GenericHandler):
+
+  def __init__(self):
+    GenericHandler.__init__(self)
+    self.is_multi_line = True
 
   @staticmethod
   def get_uuid():
@@ -34,14 +39,28 @@ class MultipleGenericHandler(GenericHandler):
         values = self.__get_string_attribtues(value)
       else:
         values = value
-      attributes = list()
-      for value in values:
-        value = value.strip('\n\r')
+      observables = list()
+      if len(values) == 1:
+        value = values[0].strip('\n\r')
         json['value'] = value
         attribute = self.create_attribute(obj, definition, user, json)
-        attributes.append(attribute)
-      attribute = attributes.pop(0)
-      return attribute, attributes, None
+        return [attribute], None
+      else:
+        for value in values:
+          value = value.strip('\n\r')
+          json['value'] = value
+          attribute = self.create_attribute(obj, definition, user, json)
+
+          observable = self.create_observable(attribute)
+          sub_obj = self.create_object(observable, obj.definition, user, obj.to_dict())
+          attribute.object = sub_obj
+          attribute.object_id = sub_obj.identifier
+          observable.obejct = sub_obj
+          sub_obj.attributes.append(attribute)
+          observables.append(observable)
+        return observables, None
+    else:
+      raise HandlerException('No value found for handler {0}'.format(self.__class__.__name__))
 
   def __get_string_attribtues(self, value):
     return value.split('\n')

@@ -130,7 +130,9 @@ class EmailHandler(FileWithHashesHandler):
         value_dict = {'name': filename, 'data': raw_base64}
         internal_json['value'] = value_dict
 
-        file_main_attribute, file_attributes, sub_objects = FileWithHashesHandler.insert(self, obj, self.user, internal_json)
+        file_attributes, sub_objects = FileWithHashesHandler.insert(self, obj, self.user, internal_json)
+
+        file_main_attribute = self.get_main_attribute(file_attributes)
 
         file_main_attribute.children = file_attributes
 
@@ -139,7 +141,7 @@ class EmailHandler(FileWithHashesHandler):
 
         child_objects.append(child_object)
 
-      return attributes.pop(0), attributes, child_objects
+      return attributes, child_objects
 
   def get_additional_object_chksums(self):
     return [CHK_SUM_GENERIC_FILE]

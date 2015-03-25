@@ -8,7 +8,7 @@ Created: Aug 22, 2013
 
 
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.base import HandlerBase
+from ce1sus.handlers.base import HandlerBase, HandlerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -44,7 +44,7 @@ class GenericHandler(HandlerBase):
   def insert(self, obj, user, json):
     definition = self.get_main_definition()
     attribute = self.create_attribute(obj, definition, user, json)
-    return attribute, None, None
+    return [attribute], None
 
   def get_data(self, attribute, parameters):
     return list()
@@ -58,3 +58,10 @@ class GenericHandler(HandlerBase):
 
   def require_js(self):
     return False
+
+  def get_main_attribute(self, attributes):
+    main_def = self.get_main_definition()
+    for attr in attributes:
+      if attr.definition.uuid == main_def.uuid:
+        return attr
+    raise HandlerException('Main attribute cannot be found')

@@ -17,12 +17,10 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
     $scope.$hide();
   });
   
-  $scope.$watch(function() {
-    return $scope.attribute.definition_id;
-    }, function(newVal, oldVal) {
+  $scope.$watch('attribute.definition_id', function() {
       angular.forEach($scope.definitions, function(entry) {
         if (entry.identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = entry.default_share;
+          $scope.attribute.properties.shared = entry.share;
           $scope.attribute.condition_id = entry.default_condition_id;
         }
       }, $log);
@@ -59,7 +57,7 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
     }, $log);
     var objectID = $scope.$parent.$parent.object.identifier;
     Restangular.one('object', objectID).post('attribute', $scope.attribute, {'complete':true, 'infated':true}).then(function (data) {
-      $scope.$parent.appendChildren(data);
+      $scope.$parent.appendData(data);
     }, function (response) {
       $scope.attribute = angular.copy(original_attribute);
       handleError(response, messages);

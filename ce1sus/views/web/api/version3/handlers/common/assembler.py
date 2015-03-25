@@ -8,16 +8,17 @@ Created on Feb 18, 2015
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
+from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Comment, Event
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.db.classes.report import Report
+from ce1sus.db.classes.report import Report, Reference
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common import strings
 from ce1sus.helpers.common.datumzait import DatumZait
-from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -33,6 +34,7 @@ class Assembler(BaseController):
     self.observable_controller = ObservableController(config, session)
     self.event_controller = EventController(config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
+    self.reference_definiton_broker = self.broker_factory(ReferenceDefintionsBroker)
 
   def get_user(self, json):
     uuid = json.get('identifier', None)
@@ -121,7 +123,8 @@ class Assembler(BaseController):
     if reports:
       for report in reports:
         rep = self.assemble_report(event, report, user, owner, rest_insert)
-        event.reports.append(rep)
+        if rep:
+          event.reports.append(rep)
     comments = json.get('comments', None)
     if comments:
       for comment in comments:
@@ -238,7 +241,6 @@ class Assembler(BaseController):
 
     obj = Object()
     obj.uuid = json.get('identifier', None)
-    obj.parent = observable
     self.populate_extended_logging(obj, json, user, True)
 
     obj.populate(json, rest_insert)
@@ -249,6 +251,7 @@ class Assembler(BaseController):
     obj.definition_id = definition.identifier
 
     obj.observable_id = observable.identifier
+    obj.observable = observable
 
     if owner:
       # The attribute is directly validated as the owner can validate
@@ -320,8 +323,39 @@ class Assembler(BaseController):
     obj.related_objects.append(related_object)
     return related_object
 
-  def assemble_report(self, event, json, user, owner=False, rest_insert=True):
+  def get_reference_definition(self, json):
+    uuid = json.get('definition_id', None)
+    if not uuid:
+      definition_json = json.get('definition', None)
+      if definition_json:
+        uuid = definition_json.get('identifier', None)
+    if uuid:
+      try:
+        definition = self.reference_definiton_broker.get_by_uuid(uuid)
+      except NothingFoundException as error:
+        raise ControllerNothingFoundException(error)
+      except BrokerException as error:
+        raise ControllerException(error)
+      return definition
+    raise ControllerException('Could not find "{0}" definition in the reference'.format(definition_json))
 
+  def assemble_reference(self, reference, user, owner, rest_insert=True):
+    value = reference.get('value', None)
+    if value:
+      definition = self.get_reference_definition(reference)
+      if definition:
+        ref = Reference()
+        ref.definition = definition
+        ref.uuid = reference.get('identifier', None)
+        ref.populate(reference, rest_insert)
+        self.populate_extended_logging(ref, reference, user, True)
+        return ref
+      else:
+        return None
+    else:
+      return None
+
+  def assemble_report(self, event, json, user, owner=False, rest_insert=True):
     report = Report()
     report.uuid = json.get('identifier', None)
     report.populate(json, rest_insert)
@@ -331,8 +365,14 @@ class Assembler(BaseController):
     if owner:
       # The observable is directly validated as the owner can validate
       report.properties.is_validated = True
-    # TODO: Add references
-    return report
+    references = json.get('references', list())
+    for reference in references:
+      ref = self.assemble_reference(reference, user, owner, rest_insert)
+      report.references.append(ref)
+    if report.references:
+      return report
+    else:
+      return None
 
   def update_report(self, report, json, user, owner=False, rest_insert=True):
     report.populate(json)

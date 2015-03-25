@@ -394,7 +394,7 @@ app.directive("composedobservable", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, Pagination, $modal){
+    controller: function($scope, Pagination, $modal, $routeSegment, Restangular){
       $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
       $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
@@ -408,9 +408,19 @@ app.directive("composedobservable", function($compile) {
           }
         }
         if (remove) {
-          //find a way to make this more neat see $parent
-          var index = $scope.$parent.observables.indexOf($scope.composedobservable);
-          $scope.$parent.observables.splice(index,1);
+          var eventID = $routeSegment.$routeParams.id;
+          
+
+          restangularObservable = Restangular.restangularizeElement(null, $scope.composedobservable, 'event/'+eventID+'/observable');
+          restangularObservable.remove().then(function (data) {
+            //find a way to make this more neat see $parent
+            var index = $scope.$parent.observables.indexOf($scope.composedobservable);
+            $scope.$parent.observables.splice(index,1);
+            messages.setMessage({'type':'success','message':'Observable sucessfully removed'});
+          }, function (response) {
+            handleError(response, messages);
+          });
+          
         }
       };
       
@@ -567,7 +577,7 @@ app.directive("object", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, $modal, Restangular, messages, $log, Pagination){
+    controller: function($scope, $modal, Restangular, messages, $log, Pagination, $routeSegment){
 
       $scope.pagination = Pagination.getNew(5,'object.attributes');
       $scope.pagination.numPages = Math.ceil($scope.object.attributes.length/$scope.pagination.perPage);
@@ -630,17 +640,42 @@ app.directive("object", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
       };
       
-      $scope.appendChildren = function(data){
-        //Note several attributes can be added
-        attributes = data.attributes;
-        angular.forEach(attributes, function(element) {
-          $scope.object.attributes.push(element);
-        }, $log);
+      $scope.appendData = function(data){
+        //check what kind of data it is
+        if (typeof(data.attributes) !== 'undefined'){
+          // simple attribute w/o related objects
+          attributes = data.attributes;
+          angular.forEach(attributes, function(element) {
+            $scope.object.attributes.push(element);
+          }, $log);
 
-        related_objects = data.related_objects;
-        angular.forEach(related_objects, function(element) {
-          $scope.object.related_objects.push(element);
-        }, $log);
+          related_objects = data.related_objects;
+          angular.forEach(related_objects, function(element) {
+            $scope.object.related_objects.push(element);
+          }, $log);
+          
+        } else {
+          // observables
+          observable = data.observable;
+          relpacedObservable = data.relpaced_observable;
+          
+          allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.observables;
+          counter = -1;
+          index = -1;
+          angular.forEach(allObservables, function(element) {
+            counter++;
+            if (element.identifier == relpacedObservable.identifier) {
+              index = counter;
+            }
+          }, $log);
+          //remove old element
+          //TODO: find a better way
+          var index = $routeSegment.chain.length;
+          $routeSegment.chain[index-1].reload();
+        }
+        
+        
+
       };
       
       $scope.addAttribute = function(){
@@ -1069,24 +1104,43 @@ app.directive("attributeHandler", function() {
         }
       };
 
-
-
       $scope.$watch('definition.regex', function() {
         $scope.patternexpression = (function() {
-          if ($scope.type != 'view') {
+          if (($scope.type != 'view') ){
             var regexp = /^.*$/;
+            var muliline = false;
             if ($scope.type == 'edit') {
-              regexp =  new RegExp($scope.attribute.definition.regex);
+              regexp = $scope.attribute.definition.regex ;
+              muliline = $scope.attribute.definition.attributehandler.is_multi_line;
             } else {
-              regexp =  new RegExp($scope.definition.regex);
+              regexp = $scope.definition.regex;
+              muliline = $scope.definition.attributehandler.is_multi_line;
             }
+            regexp = new RegExp(regexp);
             
             return {
                 test: function(value) {
                     if( $scope.requireVal === false ) {
                         return true;
                     }
-                    return regexp.test(value);
+                    if (muliline) {
+                      //silly but works
+                      var splitted = value.split("\n");
+                      for (var i in splitted) {
+                        var cleaned = splitted[i].replace(/(\r\n|\n|\r)/gm,"");
+                        if (!regexp.test(cleaned)){
+                          return false;
+                        }
+                      }
+                      return true;
+                      
+                      
+                      
+                    } else {
+                      return regexp.test(value);
+                    }
+
+                    
                 }
             };
           } else {

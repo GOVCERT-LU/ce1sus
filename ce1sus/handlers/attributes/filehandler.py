@@ -140,9 +140,13 @@ class FileHandler(GenericHandler):
       main_definition = self.get_main_definition()
 
       internal_json['value'] = rel_folder + '/' + sha1
-      main_attribute = self.create_attribute(obj, main_definition, user, internal_json)
-      # secondary
+
       attributes = list()
+
+      main_attribute = self.create_attribute(obj, main_definition, user, internal_json)
+
+      # secondary
+
       filename_definition = self.get_attriute_definition(CHK_SUM_FILE_NAME)
       internal_json['value'] = filename
       attribute = self.create_attribute(obj, filename_definition, user, internal_json)
@@ -153,7 +157,12 @@ class FileHandler(GenericHandler):
       attribute = self.create_attribute(obj, sha1_definition, user, internal_json)
       attributes.append(attribute)
 
-      return main_attribute, attributes, None
+      # set parent
+      for attribtue in attributes:
+        attribtue.parent = main_attribute
+
+      attributes.append(main_attribute)
+      return attributes, None
 
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
@@ -260,9 +269,10 @@ class FileWithHashesHandler(FileHandler):
             CHK_SUM_HASH_MD5]
 
   def insert(self, obj, user, json):
-    main_attribute, attributes, sub_objects = FileHandler(self, obj, user, json)
+    attributes, sub_objects = FileHandler(self, obj, user, json)
 
     internal_json = json
+    main_attribute = self.get_main_attribute(attributes)
 
     filepath = self.get_base_path() + '/' + main_attribute.value
 
@@ -299,7 +309,11 @@ class FileWithHashesHandler(FileHandler):
     attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
     attributes.append(attribute)
 
-    return main_attribute, attributes, sub_objects
+    # set parent
+    for attribtue in attributes:
+      attribtue.parent = main_attribute
+
+    return attributes, sub_objects
 
   def require_js(self):
     return False

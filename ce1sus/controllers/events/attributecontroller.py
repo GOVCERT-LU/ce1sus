@@ -56,7 +56,7 @@ class AttributeController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_attribute(self, attribute, additional_attributes, user, commit=True, owner=True):
+  def insert_attributes(self, attributes, user, commit=True, owner=True):
     self.logger.debug('User {0} inserts a new attribute'.format(user.username))
 
     # handle handler attributes
@@ -64,28 +64,15 @@ class AttributeController(BaseController):
     try:
 
       user = self.user_broker.get_by_id(user.identifier)
-      if owner:
-        attribute.properties.is_validated = True
-      # check if no children are attached
-      if attribute.children:
-        raise ControllerException(u'Attribute contains children, this cannot be.')
-
-      self.set_extended_logging(attribute, user, user.group, True)
-      self.attribute_broker.insert(attribute, False)
-
-      if additional_attributes:
-        for additional_attribute in additional_attributes:
-          if owner:
-            additional_attribute.properties.is_validated = True
-          if additional_attribute.children:
-            raise ControllerException(u'Attribute contains children, this cannot be.')
-
-          additional_attribute.attr_parent_id = attribute.identifier
-          self.set_extended_logging(additional_attribute, user, user.group, True)
-          self.attribute_broker.insert(additional_attribute, commit=False)
+      # set owner
+      for attribute in attributes:
+        if owner:
+          attribute.properties.is_validated = True
+          self.set_extended_logging(attribute, user, user.group, True)
+          self.attribute_broker.insert(attribute, commit=False)
 
       self.attribute_broker.do_commit(commit)
-      return attribute, additional_attributes
+      return attributes
     except IntegrityException as error:
       self.logger.debug(error)
       self.logger.info(u'User {0} tried to insert an attribute with uuid "{1}" but the uuid already exists'.format(user.username, attribute.uuid))
