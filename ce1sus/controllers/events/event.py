@@ -59,16 +59,18 @@ class EventController(BaseController):
 
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(event, user, user.group, True)
-      # set the own user group to the groups of the event and fill permissions
-      permissions = self.get_event_user_permissions(event, user)
-      group = self.group_broker.get_by_id(user.group.identifier)
+      if commit:
+        # do this only if there is a commit
+        # set the own user group to the groups of the event and fill permissions
+        permissions = self.get_event_user_permissions(event, user)
+        group = self.group_broker.get_by_id(user.group.identifier)
 
-      event_permission = EventGroupPermission()
-      event_permission.permissions = permissions
-      event_permission.group = group
-      self.set_extended_logging(event_permission, user, user.group, True)
+        event_permission = EventGroupPermission()
+        event_permission.permissions = permissions
+        event_permission.group = group
+        self.set_extended_logging(event_permission, user, user.group, True)
 
-      event.groups.append(event_permission)
+        event.groups.append(event_permission)
 
       self.event_broker.insert(event, False)
 
