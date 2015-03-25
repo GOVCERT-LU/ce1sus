@@ -205,15 +205,6 @@ class User(Base):
     self.api_key = json.get('api_key', None)
     self.sirname = json.get('sirname', None)
     self.username = json.get('username', None)
-    group_uuid = json.get('group_id', None)
-    group_id = None
-    if group_uuid:
-      session = self._sa_instance_state.session
-      clazz = get_class('ce1sus.db.classes.group', 'Group')
-      group_id = session.query(clazz.identifier).filter(clazz.uuid == group_uuid).one()[0]
-      self.group_id = group_id
-    else:
-      self.group_id = None
     self.plain_password = json.get('password', None)
     # permissions setting
     self.permissions.populate(json.get('permissions', {}))

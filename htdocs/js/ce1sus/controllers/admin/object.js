@@ -114,7 +114,7 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
   };
   
   $scope.submitObject = function(){
-    $scope.object.put().then(function (data) {
+    $scope.object.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
         //update username in case
         angular.forEach($scope.objects, function(entry) {

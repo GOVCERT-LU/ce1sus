@@ -8,7 +8,7 @@ Created on Feb 5, 2014
 
 import re
 
-from ce1sus.views.web.api.version3.handlers.common.assembler import Assembler
+from ce1sus.controllers.common.assembler import Assembler
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.handlers.base import HandlerException
 from ce1sus.controllers.base import BaseController

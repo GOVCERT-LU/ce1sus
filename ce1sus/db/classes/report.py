@@ -119,12 +119,6 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
-    referencehandler_uuid = json.get('referencehandler_id', None)
-    referencehandler_id = None
-    if referencehandler_uuid:
-      session = self._sa_instance_state.session
-      referencehandler_id = session.query(ReferenceHandler.identifier).filter(ReferenceHandler.uuid == referencehandler_uuid).one()[0]
-    self.referencehandler_id = referencehandler_id
     share = json.get('share', False)
     self.share = share
     self.regex = json.get('regex', None)

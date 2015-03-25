@@ -9,13 +9,17 @@ from ce1sus.controllers.base import BaseController, ControllerException, Control
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
+from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
+from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.attribute import Attribute
+from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.event import Comment, Event
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.db.classes.report import Report, Reference
+from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition
+from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common import strings
 from ce1sus.helpers.common.datumzait import DatumZait
@@ -27,6 +31,10 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+class AssemblerException(Exception):
+  pass
+
+
 class Assembler(BaseController):
 
   def __init__(self, config, session=None):
@@ -35,6 +43,9 @@ class Assembler(BaseController):
     self.event_controller = EventController(config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.reference_definiton_broker = self.broker_factory(ReferenceDefintionsBroker)
+    self.handler_broker = self.broker_factory(AttributeHandlerBroker)
+    self.value_type_broker = self.broker_factory(AttributeTypeBroker)
+    self.condition_broker = self.broker_factory(ConditionBroker)
 
   def get_user(self, json):
     uuid = json.get('identifier', None)
@@ -301,6 +312,72 @@ class Assembler(BaseController):
     self.populate_extended_logging(attribute, json, user, True)
 
     return attribute
+
+  def assemble_attribute_definition(self, json):
+    attr_def = AttributeDefinition()
+    return self.update_attribute_definition(attr_def, json)
+
+  def assemble_reference_definition(self, json):
+    ref_def = ReferenceDefinition()
+    return self.update_reference_definition(ref_def, json)
+
+  def update_reference_definition(self, ref_def, json):
+    ref_def.populate(json)
+    referencehandler_uuid = json.get('referencehandler_id', None)
+    if referencehandler_uuid:
+      referencehandler = self.reference_definiton_broker.get_by_uuid(referencehandler_uuid)
+      ref_def.referencehandler_id = referencehandler.identifier
+      ref_def.referencehandler = referencehandler
+    else:
+      raise AssemblerException('Reference definition does not have a handler specified')
+    return ref_def
+
+  def update_attribute_definition(self, attr_def, json):
+    attr_def.populate(json)
+
+    attributehandler_uuid = json.get('attributehandler_id', None)
+    if attributehandler_uuid:
+      attribute_handler = self.handler_broker.get_by_uuid(attributehandler_uuid)
+      attr_def.attributehandler_id = attribute_handler.identifier
+      attr_def.attribute_handler = attribute_handler
+    else:
+      raise AssemblerException('Attribute definition does not have a handler specified')
+
+    value_type_uuid = json.get('type_id', None)
+
+    if value_type_uuid:
+      value_type = self.value_type_broker.get_by_uuid(value_type_uuid)
+      attr_def.value_type_id = value_type.identifier
+      attr_def.value_type = value_type
+    else:
+      raise AssemblerException('Attribute definition does not have a value type specified')
+
+    default_condition_uuid = json.get('default_condition_id', None)
+    if default_condition_uuid:
+      default_condition = self.condition_broker.get_by_uuid(default_condition_uuid)
+      attr_def.default_condition_id = default_condition
+      attr_def.default_condition = default_condition
+    else:
+      raise AssemblerException('Attribute definition does not have a condition specified')
+
+    return attr_def
+
+  def assemble_user(self, json):
+    user = User()
+    return self.update_user(user, json)
+
+  def update_user(self, user, json):
+    user.populate(json)
+    group_uuid = json.get('group_id', None)
+    if group_uuid:
+      group = self.group_broker.get_by_uuid(group_uuid)
+      user.group_id = group
+    else:
+      user.group_id = None
+    return user
+
+  def assemble_report(self, json):
+    pass
 
   def update_object(self, obj, json, user, owner=False, rest_instert=True):
     obj.populate(json, rest_instert)

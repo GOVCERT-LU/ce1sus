@@ -7,7 +7,6 @@ Created on Nov 3, 2014
 """
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
-from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 
@@ -89,8 +88,7 @@ class AdminAttributeHandler(RestBaseHandler):
             raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
         else:
           # Add new user
-          attr_def = AttributeDefinition()
-          attr_def.populate(json)
+          attr_def = self.assembler.assemble_attribute_definition(json)
           # set the new checksum
           self.attribute_definition_controller.insert_attribute_definition(attr_def, self.get_user())
           return attr_def.to_dict(details, inflated)
@@ -101,6 +99,7 @@ class AdminAttributeHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           attr_def = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
+
           attr_def.populate(json)
           # set the new checksum
           self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())

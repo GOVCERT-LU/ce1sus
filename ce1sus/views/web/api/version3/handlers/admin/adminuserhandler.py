@@ -9,7 +9,6 @@ import re
 
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
-from ce1sus.db.classes.user import User
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
@@ -77,8 +76,7 @@ class AdminUserHandler(RestBaseHandler):
           return result
       elif method == 'POST':
         # Add new user
-        user = User()
-        user.populate(json)
+        user = self.assembler.assemble_user(json)
         user.password = hashSHA1(user.plain_password, user.username)
         self.user_controller.insert_user(user)
         return user.to_dict(details, inflated)
@@ -88,7 +86,7 @@ class AdminUserHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           user = self.user_controller.get_user_by_uuid(uuid)
-          user.populate(json)
+          user = self.assembler.update_user(user, json)
           # Do not update the password if it matches the masking
           if user.plain_password:
             if not re.match(r'^\*{8,}$', user.plain_password):

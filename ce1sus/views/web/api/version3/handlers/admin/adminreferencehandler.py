@@ -9,7 +9,6 @@ from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.db.classes.report import ReferenceDefinition
 
 
 __author__ = 'Weber Jean-Paul'
@@ -52,7 +51,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
         if len(path) > 0:
           uuid = path.pop(0)
           reference = self.reference_controller.get_reference_definitions_by_uuid(uuid)
-          reference.populate(json)
+          reference = self.assembler.update_reference_definition(reference, json)
           self.reference_controller.update_reference_definition(reference, self.get_user())
           return reference.to_dict(details, inflated)
         else:
@@ -62,8 +61,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
         if len(path) > 0:
           raise RestHandlerException(u'Cannot insert reference as an identifier was given')
         else:
-          reference = ReferenceDefinition()
-          reference.populate(json)
+          reference = self.assembler.assemble_reference_definition(json)
           self.reference_controller.insert_reference_definition(reference, self.get_user())
           return reference.to_dict(details, inflated)
 

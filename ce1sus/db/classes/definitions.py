@@ -217,29 +217,12 @@ class AttributeDefinition(SimpleLogingInformations, Base):
   def populate(self, json):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
-    attributehandler_uuid = json.get('attributehandler_id', None)
-    session = self._sa_instance_state.session
-    attributehandler_id = None
-    if attributehandler_uuid:
-      attributehandler_id = session.query(AttributeHandler.identifier).filter(AttributeHandler.uuid == attributehandler_uuid).one()[0]
-    self.attributehandler_id = attributehandler_id
-    self.table_id = json.get('table_id', None)
-    value_type_uuid = json.get('type_id', None)
-    value_type_id = None
-    if value_type_uuid:
-      value_type_id = session.query(AttributeType.identifier).filter(AttributeType.uuid == value_type_uuid).one()[0]
-    self.value_type_id = value_type_id
-    value_type_uuid = json.get('type_id', None)
-    default_condition_uuid = json.get('default_condition_id', None)
-    if default_condition_uuid:
-      clazz = get_class('ce1sus.db.classes.attribute', 'Condition')
-      default_condition_id = session.query(clazz.identifier).filter(clazz.uuid == default_condition_uuid).one()[0]
-    self.default_condition_id = default_condition_id
     relation = json.get('relation', False)
     self.relation = relation
     share = json.get('share', False)
     self.share = share
     self.regex = json.get('regex', None)
+    self.table_id = json.get('table_id', None)
 
 
 class AttributeHandler(Base):
