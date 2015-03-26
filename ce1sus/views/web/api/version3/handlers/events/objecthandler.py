@@ -365,6 +365,8 @@ class ObjectHandler(RestBaseHandler):
                 raise HandlerException('It is not possible to change the definition of attribtues')
 
             handler_instance = self.__get_handler(attribute.definition)
+            handler_instance.is_rest_insert = self.is_rest_insert(headers)
+            handler_instance.is_owner = self.is_event_owner(event, user)
 
             self.check_if_user_can_set_validate_or_shared(event, attribute, user, json)
             # Ask handler to process the json for the new attributes

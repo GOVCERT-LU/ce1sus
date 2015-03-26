@@ -1033,20 +1033,23 @@ app.directive("reportReferenceForm", function() {
       reportreference: "=reportreference",
       type: "=type",
       definitions: '=',
-      permissions: "=permissions",
-      conditions: "=conditions"
+      permissions: "=permissions"
     },
     controller: function($scope, $log){
+
       $scope.getDefinition = function(identifier){
-        var result = {}; 
-        angular.forEach($scope.definitions, function(definition) {
-          if (definition.identifier == identifier){
-            result = definition;
-          }
-        }, $log);
-        return result;
+        var result = {};
+        if ($scope.type == 'edit'){
+          return $scope.reportreference.definition;
+        } else {
+          angular.forEach($scope.definitions, function(definition) {
+            if (definition.identifier == identifier){
+              result = definition;
+            }
+          }, $log);
+          return result;
+        }
       };
-      
     },
     templateUrl: "pages/common/directives/reportreferenceform.html"
   };
@@ -1174,7 +1177,12 @@ app.directive("referenceHandler", function() {
       
       scope.getTemplate = function(){
         var contentType =  scope.type;
-        var viewType = scope.definition.reference_handler.view_type;
+        var viewType = null;
+        if (scope.type == 'edit') {
+          viewType = scope.resource.definition.reference_handler.view_type;
+        } else {
+          viewType = scope.definition.reference_handler.view_type;
+        }
         var baseUrl = 'pages/handlers';
         
         var templateUrl = baseUrl + '/references/'+ contentType + '/'+viewType+'.html';
@@ -1187,25 +1195,58 @@ app.directive("referenceHandler", function() {
       //Resolve additional data
 
       $scope.getData = function() {
+        if (scope.type == 'edit') {
+          Restangular.one('referencehandlers', $scope.resource.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
+            $scope.handlerdata = handlerdata;
+          }, function(response) {
+            handleError(response, messages);
+          });
+        } else {
           Restangular.one('referencehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
             $scope.handlerdata = handlerdata;
           }, function(response) {
             handleError(response, messages);
           });
+        }
       };
-
-
-
+      
       $scope.$watch('definition.regex', function() {
         $scope.patternexpression = (function() {
-          if ($scope.type != 'view') {
-            var regexp =  new RegExp($scope.definition.regex);
+          if (($scope.type != 'view') ){
+            var regexp = /^.*$/;
+            var muliline = false;
+            if ($scope.type == 'edit') {
+              regexp = $scope.resource.definition.regex ;
+              muliline = $scope.resource.definition.reference_handler.is_multi_line;
+            } else {
+              regexp = $scope.definition.regex;
+              muliline = $scope.definition.attributehandler.is_multi_line;
+            }
+            regexp = new RegExp(regexp);
+            
             return {
                 test: function(value) {
                     if( $scope.requireVal === false ) {
                         return true;
                     }
-                    return regexp.test(value);
+                    if (muliline) {
+                      //silly but works
+                      var splitted = value.split("\n");
+                      for (var i in splitted) {
+                        var cleaned = splitted[i].replace(/(\r\n|\n|\r)/gm,"");
+                        if (!regexp.test(cleaned)){
+                          return false;
+                        }
+                      }
+                      return true;
+                      
+                      
+                      
+                    } else {
+                      return regexp.test(value);
+                    }
+
+                    
                 }
             };
           } else {
@@ -1214,6 +1255,7 @@ app.directive("referenceHandler", function() {
         })();
         
       });
+      
 
       $scope.patternexpression = /^.*$/;
     },

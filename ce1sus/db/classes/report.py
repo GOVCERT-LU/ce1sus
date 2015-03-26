@@ -7,7 +7,8 @@ Created on Jan 8, 2015
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
+from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger, \
+  Text
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
@@ -133,7 +134,7 @@ class Reference(ExtendedLogingInformations, Base):
   definition = relationship(ReferenceDefinition,
                             primaryjoin='ReferenceDefinition.identifier==Reference.definition_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
-  value = Column('value', Unicode(255), nullable=False, index=True)
+  value = Column('value', Text, nullable=False, index=True)
   parent_id = Column('parent_id', BigInteger, ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')
@@ -157,7 +158,7 @@ class Reference(ExtendedLogingInformations, Base):
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None):
     return {'identifier': self.convert_value(self.uuid),
-            'definition_id': self.convert_value(self.definition_id),
+            'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(complete, inflated),
             'value': self.convert_value(self.value),
             'creator_group': self.creator_group.to_dict(complete, False),

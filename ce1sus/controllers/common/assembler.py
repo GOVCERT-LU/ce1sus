@@ -10,7 +10,7 @@ from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
+from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker, ReferencesBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
@@ -46,6 +46,7 @@ class Assembler(BaseController):
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.value_type_broker = self.broker_factory(AttributeTypeBroker)
     self.condition_broker = self.broker_factory(ConditionBroker)
+    self.references_broker = self.broker_factory(ReferencesBroker)
 
   def get_user(self, json):
     uuid = json.get('identifier', None)
@@ -263,6 +264,8 @@ class Assembler(BaseController):
 
     obj.observable_id = observable.identifier
     obj.observable = observable
+    obj.parent = observable
+    obj.parent_id = observable.identifier
 
     if owner:
       # The attribute is directly validated as the owner can validate
@@ -325,7 +328,7 @@ class Assembler(BaseController):
     ref_def.populate(json)
     referencehandler_uuid = json.get('referencehandler_id', None)
     if referencehandler_uuid:
-      referencehandler = self.reference_definiton_broker.get_by_uuid(referencehandler_uuid)
+      referencehandler = self.references_broker.get_handler_by_uuid(referencehandler_uuid)
       ref_def.referencehandler_id = referencehandler.identifier
       ref_def.referencehandler = referencehandler
     else:
@@ -376,9 +379,6 @@ class Assembler(BaseController):
       user.group_id = None
     return user
 
-  def assemble_report(self, json):
-    pass
-
   def update_object(self, obj, json, user, owner=False, rest_instert=True):
     obj.populate(json, rest_instert)
     self.populate_extended_logging(obj, json, user, False)
@@ -388,7 +388,9 @@ class Assembler(BaseController):
 
     child_obj_json = json.get('object')
     child_obj = self.assemble_object(obj.observable, child_obj_json, user, owner, rest_insert)
-
+    # dereference object from observable
+    child_obj.parent = None
+    child_obj.parent_id = None
     # update parent
     related_object = RelatedObject()
     related_object.parent_id = obj.identifier

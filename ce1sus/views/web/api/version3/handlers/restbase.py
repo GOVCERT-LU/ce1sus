@@ -192,7 +192,3 @@ class RestBaseHandler(BaseView):
     else:
       return True
 
-  def set_provenance(self, instance, headers):
-    rest_insert = self.is_rest_insert(self.headers)
-    instance.properties.is_rest_instert = rest_insert
-    instance.properties.is_web_insert = not rest_insert

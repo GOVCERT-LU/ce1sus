@@ -6,7 +6,7 @@
 Created on Jan 9, 2015
 """
 
-from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
+from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.common import ValueException
 from ce1sus.db.classes.report import Report
@@ -130,21 +130,17 @@ class ReportHandler(RestBaseHandler):
         # Get needed handler
         definition = self.report_controller.get_reference_definitions_by_uuid(json.get('definition_id', None))
         handler_instance = self.__get_handler(definition)
-
+        handler_instance.is_rest_insert = self.is_rest_insert(headers)
+        handler_instance.is_owner = self.is_event_owner(event, user)
         # Ask handler to process the json for the new attributes
         reference, additional_references, related_reports = handler_instance.insert(report, user, json)
         # Check if not elements were attached to the object
         # TODO: find a way to check if the object has been changed
         # TODO also check if there are no children attached
         if True:
-          self.__set_provenance(reference, headers)
-          if additional_references:
-            for additional_reference in additional_references:
-              self.__set_provenance(additional_reference, headers)
           self.report_controller.insert_reference(reference, additional_references, user, False, self.is_event_owner(event, user))
           if related_reports:
-            for related_report in related_reports:
-              self.__set_provenance(related_report, headers)
+            raise NotImplementedException('Related reports returned for handler {0} but the processing is not'.format(definition.attribute_handler.classname))
           self.report_controller.insert_handler_reports(related_reports, user, True, self.is_event_owner(event, user))
         else:
           raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
@@ -188,6 +184,8 @@ class ReportHandler(RestBaseHandler):
                 raise HandlerException('It is not possible to change the definition of references')
 
             handler_instance = self.__get_handler(reference.definition)
+            handler_instance.is_rest_insert = self.is_rest_insert(headers)
+            handler_instance.is_owner = self.is_event_owner(event, user)
 
             self.check_if_user_can_set_validate_or_shared(event, reference, user, json)
             # Ask handler to process the json for the new attributes
