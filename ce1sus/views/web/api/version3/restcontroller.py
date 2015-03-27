@@ -6,6 +6,7 @@
 Created on Oct 23, 2014
 """
 import cherrypy
+from json import dumps
 from uuid import UUID
 
 from ce1sus.helpers.common.objects import get_methods
@@ -180,7 +181,7 @@ class RestController(BaseView):
               result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
               # execute method
 
-              return result
+              return dumps(result)
             except RestHandlerException as error:
               message = u'{0}'.format(error)
               self.logger.error(message)
