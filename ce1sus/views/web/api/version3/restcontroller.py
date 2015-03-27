@@ -113,8 +113,6 @@ class RestController(BaseView):
         raise cherrypy.HTTPError(403, 'Not authenticated')
 
   @cherrypy.expose
-  @cherrypy.tools.json_in()
-  @cherrypy.tools.json_out()
   @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
   def default(self, *vpath, **params):
     try:
@@ -160,16 +158,14 @@ class RestController(BaseView):
       http_method = cherrypy.request.method
 
       json = {}
-      if hasattr(cherrypy.request, 'json'):
-        json = cherrypy.request.json
-      else:
-        cl = cherrypy.request.headers.get('Content-Length', None)
-        if cl:
-          try:
-            rawbody = cherrypy.request.body.read(int(cl))
-            json = loads(rawbody)
-          except TypeError:
-            pass
+      cl = cherrypy.request.headers.get('Content-Length', None)
+      if cl:
+        try:
+          rawbody = cherrypy.request.body.read(int(cl))
+          json = loads(rawbody)
+        except TypeError:
+          # wonder what's wrong restangular?!?
+          rawbody = cherrypy.request.body.readline(1)
 
       method = getattr(handler_instance, method_name, None)
 
