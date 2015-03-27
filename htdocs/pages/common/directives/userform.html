@@ -70,7 +70,7 @@
         ng-class="{ 'has-error' : addUserForm.password.$invalid && !addUserForm.password.$pristine }">
         <input class="form-control" name="password"
           ng-model="user.password" type="text" ng-minlength=8
-          ng-maxlength=255">
+          ng-maxlength=255>
         <p ng-show="addUserForm.password.$error.minlength"
           class="help-block">Password is too short.</p>
         <p ng-show="addUserForm.password.$error.maxlength"
