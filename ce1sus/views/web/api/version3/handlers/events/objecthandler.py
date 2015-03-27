@@ -18,7 +18,6 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.common import ValueException
-from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import ObservableComposition, Observable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require

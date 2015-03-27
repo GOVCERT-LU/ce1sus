@@ -374,9 +374,11 @@ class Assembler(BaseController):
     group_uuid = json.get('group_id', None)
     if group_uuid:
       group = self.group_broker.get_by_uuid(group_uuid)
-      user.group_id = group
+      user.group_id = group.identifier
+      user.group = group
     else:
       user.group_id = None
+      user.group = None
     return user
 
   def update_object(self, obj, json, user, owner=False, rest_instert=True):

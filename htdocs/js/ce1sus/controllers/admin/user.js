@@ -67,7 +67,7 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
 
 });
 
-app.controller("userDetailController", function($scope, $routeSegment,$user, $log) {
+app.controller("userDetailController", function($scope, $routeSegment,$user, $log, messages) {
 
   $scope.user = $user;
   

@@ -9,7 +9,6 @@ Created on Jan 9, 2015
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.common import ValueException
-from ce1sus.db.classes.report import Report
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
