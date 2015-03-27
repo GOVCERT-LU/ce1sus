@@ -111,4 +111,4 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
         self.observable_controller.remove_object(obj, user, True)
-        return 'Deleted observable'
+        return ''
