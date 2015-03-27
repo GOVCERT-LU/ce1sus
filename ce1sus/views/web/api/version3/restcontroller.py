@@ -6,7 +6,7 @@
 Created on Oct 23, 2014
 """
 import cherrypy
-from json import dumps
+from json import dumps, loads
 from uuid import UUID
 
 from ce1sus.helpers.common.objects import get_methods
@@ -162,6 +162,14 @@ class RestController(BaseView):
       json = {}
       if hasattr(cherrypy.request, 'json'):
         json = cherrypy.request.json
+      else:
+        cl = cherrypy.request.headers.get('Content-Length', None)
+        if cl:
+          try:
+            rawbody = cherrypy.request.body.read(int(cl))
+            json = loads(rawbody)
+          except TypeError:
+            pass
 
       method = getattr(handler_instance, method_name, None)
 
