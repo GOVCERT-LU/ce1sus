@@ -70,7 +70,8 @@ class LdapPlugin(BasePlugin):
       if params:
         pass
       else:
-        return self.__get_all()
+        users = self.__get_all()
+        return users
     elif http_method == 'POST':
       return self.__insert_user(params.get('uid', None))
     elif http_method == 'PUT':

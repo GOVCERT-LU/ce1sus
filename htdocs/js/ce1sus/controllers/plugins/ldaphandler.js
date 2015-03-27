@@ -13,6 +13,7 @@ app.controller('ldapController', function($scope, ngTableParams,Restangular, mes
     if (!ldapusers){
       $scope.$hide();
     }
+    data = ldapusers;
   });
   
   

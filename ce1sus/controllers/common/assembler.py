@@ -143,6 +143,8 @@ class Assembler(BaseController):
         com = self.assemble_comment(event, comment, user, owner, rest_insert)
         event.comments.append(com)
     # TODO check if definitions do exist
+    event.properties.is_rest_instert = rest_insert
+    event.properties.is_web_insert = not rest_insert
     return event
 
   def update_event(self, event, json, user, owner=False, rest_insert=True):
@@ -158,6 +160,8 @@ class Assembler(BaseController):
     comment.event_id = event.identifier
     if owner:
       comment.properties.is_validated = True
+    comment.properties.is_rest_instert = rest_insert
+    comment.properties.is_web_insert = not rest_insert
     return comment
 
   def update_comment(self, comment, json, user, owner=False, rest_insert=True):
@@ -209,7 +213,8 @@ class Assembler(BaseController):
     if owner:
       # The observable is directly validated as the owner can validate
       observable.properties.is_validated = True
-
+    observable.properties.is_rest_instert = rest_insert
+    observable.properties.is_web_insert = not rest_insert
     return observable
 
   def update_observable(self, observable, json, user, owner=False, rest_insert=True):
@@ -284,6 +289,8 @@ class Assembler(BaseController):
       for attribute in attributes:
         attr = self.assemble_attribute(obj, attribute, user, owner, rest_insert)
         obj.attributes.append(attr)
+    obj.properties.is_rest_instert = rest_insert
+    obj.properties.is_web_insert = not rest_insert
     return obj
 
   def assemble_attribute(self, obj, json, user, owner=False, rest_insert=True):
@@ -430,6 +437,8 @@ class Assembler(BaseController):
         ref.uuid = reference.get('identifier', None)
         ref.populate(reference, rest_insert)
         self.populate_extended_logging(ref, reference, user, True)
+        ref.properties.is_rest_instert = rest_insert
+        ref.properties.is_web_insert = not rest_insert
         return ref
       else:
         return None
@@ -451,6 +460,8 @@ class Assembler(BaseController):
       ref = self.assemble_reference(reference, user, owner, rest_insert)
       report.references.append(ref)
     if report.references:
+      report.properties.is_rest_instert = rest_insert
+      report.properties.is_web_insert = not rest_insert
       return report
     else:
       return None
