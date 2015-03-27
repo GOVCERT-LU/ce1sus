@@ -132,13 +132,19 @@ class RelationController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def remove_relations_for_event(self, event):
+    try:
+      return self.relation_broker.remove_relations_for_event(event)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def make_object_attributes_flat(self, obj):
     result = list()
     if obj:
       for attribute in obj.attributes:
         result.append(attribute)
       for related_object in obj.related_objects:
-        result = result + self.__make_object_attributes_flat(related_object)
+        result = result + self.make_object_attributes_flat(related_object.object)
     return result
 
   def __process_observable(self, observable):
@@ -157,6 +163,9 @@ class RelationController(BaseController):
     if event.observables:
       for observable in event.observables:
         if observable.observable_composition:
+          for obs in observable.observable_composition.observables:
+            flat_attriutes = flat_attriutes + self.__process_observable(obs)
+        else:
           flat_attriutes = flat_attriutes + self.__process_observable(observable)
 
     return flat_attriutes

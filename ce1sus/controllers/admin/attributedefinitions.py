@@ -95,15 +95,15 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_attribute_definition(self, attribute, user):
+  def update_attribute_definition(self, attribute, user, commit=True):
     if attribute.cybox_std:
       raise ControllerException(u'Could not update attribute definition as the attribute is part of the cybox standard')
     try:
       attribute.chksum = gen_attr_chksum(attribute)
 
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(attribute, user, insert=True)
-      attribute = self.attr_def_broker.update(attribute)
+      self.set_simple_logging(attribute, user, insert=False)
+      attribute = self.attr_def_broker.update(attribute, commit)
       return attribute
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(attribute)

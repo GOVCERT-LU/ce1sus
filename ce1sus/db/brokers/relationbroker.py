@@ -13,7 +13,8 @@ from sqlalchemy.sql.expression import not_
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.relation import Relation
-from ce1sus.db.common.broker import BrokerBase, BrokerException
+from ce1sus.db.common.broker import BrokerBase, BrokerException, \
+  IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -91,7 +92,15 @@ class RelationBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
-    # convert
+  def remove_relations_for_event(self, event):
+    try:
+      self.session.query(Relation).filter(or_(Relation.event_id == event.identifier, Relation.rel_event_id == event.identifier)).delete(synchronize_session='fetch')
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
   def get_broker_class(self):
     """

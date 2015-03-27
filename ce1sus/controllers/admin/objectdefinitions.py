@@ -80,14 +80,14 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_object_definition(self, obj, user):
+  def update_object_definition(self, obj, user, commit=True):
     if obj.cybox_std:
       raise ControllerException(u'Could not update object definition as the object is part of the cybox standard')
     try:
       obj.chksum = gen_obj_chksum(obj)
       user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(obj, user, insert=False)
-      self.obj_def_broker.update(obj)
+      self.obj_def_broker.update(obj, commit)
       return obj
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(obj)

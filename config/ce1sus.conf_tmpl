@@ -12,30 +12,14 @@ usecherrypy=yes
 #General configurations for ce1sus
 [ce1sus]
 #If set to yes emails will be send to the users/groups who can access/see the event
-sendmails=no
-useldap=no
+sendmail=yes
+useldap=yes
 #The following variable be displayed in the title section
 environment=LOCAL_DEV
-enableRestAPI=yes
 #Not this has to be the external address for ce1sus
 baseurl=http://localhost:8080
-
-#Handler configurations
-[Handlers]
-cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=
-#Destination for uploaded files
-files=
-#Configuration to access the RT rest api
-rt_user=
-rt_password=
-rt_url=
-
-[ErrorHandler]
-debug=no
-#If set then do not forget to set the reciever email
-useMailer=No
-subject=ErrorOccureredForCelsus
-receiver=
+maintenaceuseruuid=9947840d-0591-42dd-9d1a-8db105683ec2
+usebasicauth=no
 
 [Logger]
 log=Yes
@@ -44,14 +28,6 @@ logConsole = Yes
 level=DEBUG
 size=10000000
 backups=1000
-
-[Mako]
-#Note the absolute path have to be sepcified for templateRoot and projectRoot
-templateRoot=/path/to/ce1sus/ce1sus/templates
-projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus
-collectionsize=200
-outputencoding=utf-8
-tmpfolder=/path/to/desired/tmp/folder
 
 #Configuration for the LDAP server
 [LDAP]

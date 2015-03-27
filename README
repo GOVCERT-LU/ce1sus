@@ -37,7 +37,7 @@ Features
 * Search
 * STIX Compatible (Currently supports Observables, Indicators, TTPs)
 * Completely interfaceable (REST API)
-* Can be used without the graphical web interaface
+* Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
 
 Requirements

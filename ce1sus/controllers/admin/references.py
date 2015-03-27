@@ -10,6 +10,7 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker, Ref
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.db.classes.report import ReferenceHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -127,5 +128,15 @@ class ReferencesController(BaseController):
       return self.reference_definition_broker.remove_by_uuid(uuid)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def register_handler(self, uuid, module, description):
+    try:
+      reference_handler = ReferenceHandler()
+      reference_handler.identifier = uuid
+      reference_handler.description = description
+      reference_handler.module_classname = module
+      self.handler_broker.insert(reference_handler, True)
     except BrokerException as error:
       raise ControllerException(error)
