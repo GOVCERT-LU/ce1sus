@@ -77,7 +77,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
         self.observable_controller.remove_observable(observable, user, True)
-        return 'Deleted observable'
+        return {'result': 'Deleted observable'}
 
   def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat, headers):
     user = self.get_user()
