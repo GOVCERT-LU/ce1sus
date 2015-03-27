@@ -8,7 +8,6 @@ Created on Dec 22, 2014
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.object import Object
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
 
@@ -77,7 +76,7 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
         self.observable_controller.remove_observable(observable, user, True)
-        return {'result': 'Deleted observable'}
+        return 'Deleted observable'
 
   def __process_object(self, method, event, observable, requested_object, details, inflated, json, flat, headers):
     user = self.get_user()
