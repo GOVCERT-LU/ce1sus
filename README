@@ -1,3 +1,5 @@
+0.11.X is still Under Development
+
 ce1sus
 =======
 
@@ -35,7 +37,7 @@ Features
 * Easy installation
 * Completely open source
 * Search
-* STIX Compatible (Currently supports Observables, Indicators, TTPs)
+* STIX Compatible (Currently supports Observables, Indicators)
 * Completely interfaceable (REST API)
 * Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
@@ -64,17 +66,28 @@ Requirements
 RoadMap
 =======
 
-* Share definitions 
+v0.11.0
+-------
+* Genuine Misp v2.x integration of push/pull requests
+* Update documentation
+* Cybox naming convention
+
+v0.11.1
+-------
 * Password protection for compressed files
+* Web-interface sync-server management (Misp and ce1sus)
+
+Up the road 0.11.x
+-----------
+* Mail support
+* Share custom definitions
 * Profile management
 * More handlers
 * Improved search
 * Export of events (i.e. csv, xml)
-* STIX/TAXII currently only available in the ce1sus_api project
-* Web-interface sync-server management
-* Enhanced attributes modifications
-* Custom attributes properties
-* External request
+* STIX support currently only available in the ce1sus_api project
+* Enhance STIX/Cybox support
+* TAXII server integration
 
 
 Installation
