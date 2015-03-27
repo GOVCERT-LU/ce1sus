@@ -5,7 +5,6 @@
 
 Created on Oct 23, 2014
 """
-from json import dumps, loads
 import cherrypy
 from uuid import UUID
 
@@ -113,6 +112,8 @@ class RestController(BaseView):
         raise cherrypy.HTTPError(403, 'Not authenticated')
 
   @cherrypy.expose
+  @cherrypy.tools.json_in()
+  @cherrypy.tools.json_out()
   @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
   def default(self, *vpath, **params):
     try:
@@ -178,8 +179,8 @@ class RestController(BaseView):
                 print 'Delete'
               result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
               # execute method
-              
-              return dumps(result)
+
+              return result
             except RestHandlerException as error:
               message = u'{0}'.format(error)
               self.logger.error(message)
