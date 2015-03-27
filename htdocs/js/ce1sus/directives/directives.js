@@ -394,7 +394,7 @@ app.directive("composedobservable", function($compile) {
       indent: "=indent",
       permissions: "=permissions"
     },
-    controller: function($scope, Pagination, $modal, $routeSegment, Restangular){
+    controller: function($scope, Pagination, $modal, $routeSegment, Restangular, messages){
       $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
       $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
