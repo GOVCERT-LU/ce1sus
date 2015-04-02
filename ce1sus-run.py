@@ -20,7 +20,7 @@ from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
 from ce1sus.views.web.divers.index import MISPView
-from ce1sus.views.web.api.version3.adapters.misp.misp import MISPAdapter
+from ce1sus.views.web.adapters.misp.misp import MISPAdapter
 
 
 __author__ = 'Weber Jean-Paul'
