@@ -27,6 +27,7 @@ import ce1sus.db.classes.types
 from ce1sus.db.classes.user import User
 import ce1sus.db.classes.user
 import ce1sus.db.classes.values
+import ce1sus.db.classes.servers
 from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
 from db_data import get_mail_templates, get_users, get_object_definitions, get_attribute_type_definitions, get_attribute_definitions, get_conditions
@@ -80,16 +81,16 @@ if __name__ == '__main__':
 
     pass
 
-  maintenance.add_handler('availablehandlers/attributes/cbhandler/cbvaluehandler.py', 'CBValueHandler')
+  # maintenance.add_handler('availablehandlers/attributes/cbhandler/cbvaluehandler.py', 'CBValueHandler')
 
-  maintenance.add_handler('availablehandlers/attributes/datehandler/datehandler.py', None)
+  # maintenance.add_handler('availablehandlers/attributes/datehandler/datehandler.py', None)
 
-  maintenance.add_handler('availablehandlers/attributes/filehandler/filehandler.py', 'FileHandler')
+  # maintenance.add_handler('availablehandlers/attributes/filehandler/filehandler.py', 'FileHandler')
 
-  maintenance.add_handler('availablehandlers/attributes/filehandler/filehandler.py', 'FileWithHashesHandler')
+  # maintenance.add_handler('availablehandlers/attributes/filehandler/filehandler.py', 'FileWithHashesHandler')
 
-  maintenance.add_handler('availablehandlers/attributes/texthandler/texthandler.py', None)
-  maintenance.add_handler('availablehandlers/attributes/multiplehandler/multiplegenerichandler.py', 'MultipleGenericHandler')
+  # maintenance.add_handler('availablehandlers/attributes/texthandler/texthandler.py', None)
+  # maintenance.add_handler('availablehandlers/attributes/multiplehandler/multiplegenerichandler.py', 'MultipleGenericHandler')
 
 
   session.commit()
@@ -121,7 +122,7 @@ if __name__ == '__main__':
 
 
   session.commit()
-
+  """
   all_conditions = get_conditions()
   conditions = dict()
   for key, value in all_conditions.iteritems():
@@ -159,6 +160,6 @@ if __name__ == '__main__':
       session.flush()
     except sqlalchemy.exc.IntegrityError:
       session.rollback()
-
+  """
   session.commit()
   session.close()

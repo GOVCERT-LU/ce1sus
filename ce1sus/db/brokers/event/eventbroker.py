@@ -44,6 +44,12 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
+  def get_all_by_ids(self, ids):
+    try:
+      return self.session.query(EventGroupPermission).filter(Event.identifier.in_(ids))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
+
   def get_all_limited(self, limit, offset, parameters=None):
     """Returns only a subset of entries"""
     try:
@@ -201,6 +207,15 @@ class EventBroker(BrokerBase):
       result = self.session.query(EventGroupPermission).filter(EventGroupPermission.identifier == identifier).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    return result
+
+  def get_by_ids(self, ids):
+    try:
+      result = self.session.query(Event).filter(Event.uuid.in_(ids)).all()
+      return result
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

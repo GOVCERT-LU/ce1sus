@@ -1,0 +1,24 @@
+<div class="row">
+  <div class="col-lg-3">
+    <div class="btn-group">
+    <button type="button" class="btn btn-default" data-template="pages/admin/syncservers/modals/addserver.html" bs-modal="modal" >
+    Add new Server
+    </button>
+    </div>
+    <p/>
+    <div class="well">
+      <div class="scrollbarbox">
+        <ul class="nav nav-list">
+          <li ng-class="{active: ('main.layout.admin.syncservers.help' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.syncservers.help' | routeSegmentUrl }}">Help</a>
+          </li>
+          <li ng-class="{active: ('main.layout.admin.syncservers.servers' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.syncservers.servers' | routeSegmentUrl }}">Servers</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-9 anim" app-view-segment="4">
+  </div>
+</div>

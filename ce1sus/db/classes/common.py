@@ -160,6 +160,14 @@ class Risk(StaticBase):
             4: u'Undefined'}
 
 
+class ServerType(StaticBase):
+  """Static class defining the risk of an event"""
+  @classmethod
+  def get_dictionary(cls):
+    return {0: u'MISP',
+            1: u'Ce1sus'}
+
+
 class Status(StaticBase):
   """Static class defining the status of an event"""
   @classmethod

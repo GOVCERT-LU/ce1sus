@@ -70,6 +70,10 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/condition", "main.layout.admin.condition")
         .when("/admin/condition/:id", "main.layout.admin.condition.conditionDetails")
         
+        .when("/admin/syncservers", "main.layout.admin.syncservers")
+        .when("/admin/syncservers/help", "main.layout.admin.syncservers.help")
+        .when("/admin/syncservers/servers", "main.layout.admin.syncservers.servers")
+        
         .when("/admin/object", "main.layout.admin.object")
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
         .when("/admin/type", "main.layout.admin.type")
@@ -1042,7 +1046,57 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             }
                             })
                           .up()
+                          .segment("syncservers", {
+                               templateUrl: "pages/admin/syncservers.html",
+                               controller: "SyncMainServersController",
+                               resolve: {
+                                 servertypes: function(Restangular) {
+                                   return Restangular.one("servertypes").getList(null, {"complete": true}).then(function (servertypes) {
+                                     return servertypes;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 }
+                               },
+                               untilResolved: {
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
+                               },
+                               resolveFailed: {
+                                 templateUrl: 'pages/common/error.html',
+                                 controller: 'errorController'
+                               }
+                        })
+                        .within()
+                           .segment("help", {
+                          "default": true,
+                          templateUrl: "pages/admin/syncservers/help.html"})
+                          
+                          .segment("servers", {
+                          templateUrl: "pages/admin/syncservers/servers.html",
+                          controller: "SyncServersController",
+                          resolve: {
+                            syncservers: function(Restangular) {
+                              return Restangular.one("syncservers").getList(null, {"complete": true}).then(function (syncservers) {
+                                return syncservers;
+                              }, function(response) {
+                                  throw generateErrorMessage(response);
+                              });
+                            }
+                          },
+                          untilResolved: {
+                            templateUrl: 'pages/common/loading.html',
+                            controller: 'loadingController'
+                          },
+                          resolveFailed: {
+                            templateUrl: 'pages/common/error.html',
+                            controller: 'errorController'
+                          }
+                          })
+                          
+                        .up()
                         
+                        .up()
                       .segment("group", {
                                templateUrl: "pages/admin/groupmgt.html",
                                controller : "groupController",

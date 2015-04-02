@@ -9,17 +9,18 @@ import cherrypy
 import os
 import sys
 
+from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.attribute import Attribute
-
 from ce1sus.helpers.common.config import Configuration
+from ce1sus.views.web.api.version2.depricated import DepricatedView
 from ce1sus.views.web.api.version3.restcontroller import RestController
 from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
-from ce1sus.views.web.api.version2.depricated import DepricatedView
+from ce1sus.views.web.divers.index import MISPView
+from ce1sus.views.web.api.version3.adapters.misp.misp import MISPAdapter
 
 
 __author__ = 'Weber Jean-Paul'
@@ -51,6 +52,9 @@ def bootstrap():
   cherrypy.tree.mount(DepricatedView(config), '/REST/0.2.0/')
   cherrypy.tree.mount(GuiMenus(config), '/menus')
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
+
+  cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
+  cherrypy.tree.mount(MISPView(config), '/events')
 
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)

@@ -975,6 +975,22 @@ app.directive("observableObjectForm", function() {
   };
 });
 
+app.directive("serverForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      server: "=server",
+      types: '=types',
+      type: "=type"
+    },
+    controller: function($scope, Restangular, messages){
+     
+    },
+    templateUrl: "pages/common/directives/serverform.html"
+  };
+});
+
 app.directive("eventReportForm", function() {
   
   return {

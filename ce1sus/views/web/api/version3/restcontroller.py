@@ -20,6 +20,7 @@ from ce1sus.views.web.api.version3.handlers.admin.adminuserhandler import AdminU
 from ce1sus.views.web.api.version3.handlers.admin.adminvalidationhandler import ValidationHandler
 from ce1sus.views.web.api.version3.handlers.admin.conditionhandler import ConditionHandler
 from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
+from ce1sus.views.web.api.version3.handlers.admin.syncservershandler import SyncServerHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
@@ -30,7 +31,8 @@ from ce1sus.views.web.api.version3.handlers.events.observablehanlder import Obse
 from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, \
+  SyncServerTypesHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
@@ -77,6 +79,8 @@ class RestController(BaseView):
     self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
     self.instances['report'] = ReportHandler(config)
     self.instances['indicatortypes'] = AdminIndicatorTypesHandler(config)
+    self.instances['syncservers'] = SyncServerHandler(config)
+    self.instances['servertypes'] = SyncServerTypesHandler(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):

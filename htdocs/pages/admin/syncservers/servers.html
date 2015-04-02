@@ -1,0 +1,40 @@
+<table ng-table="serversTable" show-filter="true" class="table table-striped table-bordered table-hover table-condensed">
+  <tbody>
+    <tr ng-repeat="item in $data">
+      <td data-title="'#'" 
+        sortable="'id'">{{item.int_id}}</td>
+      <td data-title="'Type'" filter="{ 'type': 'text' }"
+        sortable="'type'">{{item.title}}</td>
+      <td data-title="'Name'" filter="{ 'name': 'text' }"
+        sortable="'name'">{{item.name}}</td>
+        
+      <td data-title="'Description'" filter="{ 'description': 'text' }"
+        sortable="'description'">{{item.description}}</td>
+      <td data-title="'Base Url'" filter="{ 'baseurl': 'text' }"
+        sortable="'baseurl'">{{item.baseurl}}</td>
+      <td data-title="'API Key'" filter="{ 'api_key': 'text' }"
+        sortable="'api_key'">{{item.api_key}}</td>
+      <td data-title="'Verify ssl'">
+        <span ng-show="item.verify_ssl" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+        <span ng-show="!item.verify_ssl" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+      </td>
+      <td data-title="'Mode'">
+        <i ng-show="item.mode.is_push" class="fa fa-upload"></i>
+        <i ng-show="item.mode.is_pull" class="fa fa-download"></i>
+      </td>
+      <td data-title="'Options'">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary ce1sus-btn" ng-click="showDetails(item)">
+          <span class="glyphicon glyphicon-eye-open" title="View Server Details" ></span>
+        </button>
+        <button type="button" class="btn btn-primary ce1sus-btn" ng-click="editServer(item)">
+          <span class="glyphicon glyphicon-pencil" title="Edit Server" ></span>
+        </button>
+        <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeServer(item)">
+          <span class="glyphicon glyphicon-remove" title="Remove Server" ></span>
+        </button>
+       </div>
+      </td>
+    </tr>
+  </tbody>
+</table>

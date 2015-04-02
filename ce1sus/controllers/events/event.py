@@ -13,6 +13,7 @@ from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -41,6 +42,23 @@ class EventController(BaseController):
     BaseController.__init__(self, config, session)
     self.event_broker = self.broker_factory(EventBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
+    self.reference_broker = self.broker_factory(ReferenceBroker)
+
+  def get_all_misp_events(self):
+    try:
+      references_with_misp = self.reference_broker.get_all_misp_references()
+      events_ids = dict()
+      for reference in references_with_misp:
+        splitted = reference.value.split()
+        event_id = splitted[-1]
+        report = reference.report
+        events_ids[report.event_id] = event_id
+
+      events = self.event_broker.get_all_by_ids(events_ids.keys())
+
+      return (events, events_ids)
+    except BrokerException as error:
+      raise ControllerException(error)
 
   def insert_event(self, user, event, mkrelations=True, commit=True):
     """
@@ -131,6 +149,13 @@ class EventController(BaseController):
     except NothingFoundException as error:
       self.logger.debug(error)
       raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_event_by_ids(self, id_list):
+    try:
+      event = self.event_broker.get_by_ids(id_list)
+      return event
     except BrokerException as error:
       raise ControllerException(error)
 

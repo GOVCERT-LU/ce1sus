@@ -11,6 +11,7 @@ from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.controllers.admin.syncserver import SyncServerController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -138,6 +139,23 @@ class TablesHandler(RestBaseHandler):
   @require(privileged())
   def tables(self, **args):
     values = self.attribute_definition_controller.get_all_tables()
+    result = list()
+    for key, value in values.iteritems():
+      result.append({'identifier': key, 'name': value})
+    return result
+
+
+class SyncServerTypesHandler(RestBaseHandler):
+
+  def __init__(self, config):
+    RestBaseHandler.__init__(self, config)
+    self.sync_server_controller = self.controller_factory(SyncServerController)
+
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def types(self, **args):
+    values = self.sync_server_controller.get_all_types()
     result = list()
     for key, value in values.iteritems():
       result.append({'identifier': key, 'name': value})

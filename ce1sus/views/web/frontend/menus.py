@@ -110,6 +110,18 @@ class GuiMenus(BaseView):
           child_menu_item['divider'] = True
           child_menus.append(child_menu_item)
 
+        if user.permissions.privileged:
+          child_menu_item = dict()
+          child_menu_item['title'] = 'Sync Servers'
+          child_menu_item['section'] = 'admin/syncservers'
+          child_menus.append(child_menu_item)
+          syncserver = True
+
+        if syncserver:
+          child_menu_item = dict()
+          child_menu_item['divider'] = True
+          child_menus.append(child_menu_item)
+
         usermgt = False
         if user.permissions.privileged:
           usermgt = True

@@ -34,6 +34,19 @@ class ReferenceBroker(BrokerBase):
   def get_broker_class(self):
     return Reference
 
+  def get_all_misp_references(self, bypass_validation=False):
+    if bypass_validation:
+      code = 0
+    else:
+      code = 4
+    try:
+      return self.session.query(Reference).filter(Reference.value.like('%{0}%'.format('Event ID')),
+                                                  Reference.dbcode.op('&')(code) == code
+                                                  ).all()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
   def look_for_reference_value(self, reference_definition, value, operand='==', bypass_validation=False):
     """
     returns a list of matching values
