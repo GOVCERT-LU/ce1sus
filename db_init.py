@@ -26,6 +26,7 @@ from ce1sus.db.classes.types import AttributeType
 import ce1sus.db.classes.types
 from ce1sus.db.classes.user import User
 import ce1sus.db.classes.user
+import ce1sus.db.classes.log
 import ce1sus.db.classes.values
 import ce1sus.db.classes.servers
 from ce1sus.db.common.session import SessionManager, Base

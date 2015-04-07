@@ -134,9 +134,7 @@ class MISPAdapter(BaseView):
 
     # create array of uuids
     for key in incomming_events.iterkeys():
-      if key in remove:
-        continue
-      else:
+      if key not in remove:
         result.append(key)
     cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return json.dumps(result)
