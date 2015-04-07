@@ -19,7 +19,6 @@ from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
-from ce1sus.views.web.divers.index import MISPView
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter
 
 
@@ -54,7 +53,6 @@ def bootstrap():
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
   cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
-  cherrypy.tree.mount(MISPView(config), '/events')
 
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)

@@ -61,7 +61,6 @@ class Ce1susMISP(BaseController):
     root = etree.Element('Event')
     self.__append_child(root, 'id', event.identifier)
     self.__append_child(root, 'org', event.creator_group.name)
-    self.__append_child(root, 'org', event.creator_group.name)
 
     self.__append_child(root, 'info', event.description)
     if event.properties.is_shareable:

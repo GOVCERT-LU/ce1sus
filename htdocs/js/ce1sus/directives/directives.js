@@ -982,7 +982,8 @@ app.directive("serverForm", function() {
     scope: {
       server: "=server",
       types: '=types',
-      type: "=type"
+      type: "=type",
+      users: "=users"
     },
     controller: function($scope, Restangular, messages){
      

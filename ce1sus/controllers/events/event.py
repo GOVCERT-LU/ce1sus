@@ -152,9 +152,9 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def get_event_by_ids(self, id_list):
+  def get_event_by_uuids(self, id_list):
     try:
-      event = self.event_broker.get_by_ids(id_list)
+      event = self.event_broker.get_by_uuids(id_list)
       return event
     except BrokerException as error:
       raise ControllerException(error)

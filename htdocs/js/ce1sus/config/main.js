@@ -1046,6 +1046,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             }
                             })
                           .up()
+         
                           .segment("syncservers", {
                                templateUrl: "pages/admin/syncservers.html",
                                controller: "SyncMainServersController",
@@ -1056,7 +1057,23 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
+                                 },
+                                 syncservers: function(Restangular) {
+                                   return Restangular.one("syncservers").getList(null, {"complete": true}).then(function (syncservers) {
+                                     return syncservers;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 },
+                                 users: function(Restangular,$routeSegment) {
+                                   return Restangular.one("user").getList(null, {"complete": false}).then(function (users) {
+                                     return users;
+                                   
+                                   }, function(response) {
+                                     throw generateErrorMessage(response);
+                                   });
                                  }
+                          
                                },
                                untilResolved: {
                                  templateUrl: 'pages/common/loading.html',
@@ -1076,13 +1093,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           templateUrl: "pages/admin/syncservers/servers.html",
                           controller: "SyncServersController",
                           resolve: {
-                            syncservers: function(Restangular) {
-                              return Restangular.one("syncservers").getList(null, {"complete": true}).then(function (syncservers) {
-                                return syncservers;
-                              }, function(response) {
-                                  throw generateErrorMessage(response);
-                              });
-                            }
+                            
                           },
                           untilResolved: {
                             templateUrl: 'pages/common/loading.html',
@@ -1096,7 +1107,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           
                         .up()
                         
-                        .up()
+                
                       .segment("group", {
                                templateUrl: "pages/admin/groupmgt.html",
                                controller : "groupController",

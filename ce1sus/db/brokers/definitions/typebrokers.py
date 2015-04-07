@@ -5,9 +5,13 @@
 
 Created on Nov 6, 2014
 """
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+
 from ce1sus.db.classes.indicator import IndicatorType
 from ce1sus.db.classes.types import AttributeType
-from ce1sus.db.common.broker import BrokerBase, IntegrityException
+from ce1sus.db.common.broker import BrokerBase, IntegrityException, NothingFoundException, \
+  TooManyResultsFoundException, BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -23,6 +27,16 @@ class IndicatorTypeBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return IndicatorType
+
+  def get_type_by_name(self, name):
+    try:
+      return self.session.query(IndicatorType).filter(IndicatorType.name == name).one()
+    except NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(name, self.__class__.__name__))
+    except MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(name))
+    except SQLAlchemyError as error:
+      raise BrokerException(error)
 
 
 class AttributeTypeBroker(BrokerBase):

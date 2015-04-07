@@ -9,8 +9,11 @@ import cherrypy
 import json
 
 from ce1sus.controllers.events.event import EventController
+from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
+from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
+from ce1sus.views.web.api.version3.handlers.restbase import rest_method, methods
 from ce1sus.views.web.common.base import BaseView
 
 
@@ -23,13 +26,19 @@ __license__ = 'GPL v3+'
 class MISPAdapter(BaseView):
 
   def __init__(self, config):
+    BaseView.__init__(self, config)
     self.event_controller = EventController(config)
+    self.server_broker = self.event_controller.broker_factory(SyncServerBroker)
     self.ce1sus_to_misp = Ce1susMISP(config)
+    self.login_handler = LoginHandler(config)
+    self.logout_handler = LogoutHandler(config)
+    self.misp_converter = MispConverter(config, None, None, None)
 
-  # @rest_method(default=True)
-  # @methods(allowed=['GET'])
-  # def shadow_attributes(self, **args):
-  #  pass
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  def shadow_attributes(self, **args):
+    # called during pull request to get proposals and such stuff
+    pass
 
   @cherrypy.expose
   def test(self):
@@ -40,7 +49,13 @@ class MISPAdapter(BaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
   def events(self, *vpath, **params):
+
     headers = cherrypy.request.headers
+    authkey = headers.get('Authorization')
+    # reset key
+    headers['key'] = authkey
+    self.login_handler.login(headers=headers)
+
     rawbody = ''
     path = vpath
     method = cherrypy.request.method
@@ -55,8 +70,6 @@ class MISPAdapter(BaseView):
       body = rawbody
     else:
       raise
-
-    authkey = headers.get('Authorization')
     # check aut else a 405 exception
 
     # TODO: check if user has the right
@@ -64,22 +77,41 @@ class MISPAdapter(BaseView):
     if len(path) > 0:
       if path[0] == 'filterEventIdsForPush':
         if method == 'POST':
-          return self.perform_push(body)
+          return_message = self.perform_push(body)
       if path[0] == 'index':
         if method == 'GET':
-          return '<?xml version="1.0" encoding="UTF-8"?><response><xml_version>2.3.0</xml_version></response><!--Please note that this XML page is a representation of the /events/index page.Because the /events/index page is paginated you will have a limited number of results.You can for example ask: /events/index/limit:999.xml to get the 999 first records.You can also sort the table by using the sort and direction parameters. For example:/events/index/sort:date/direction:desc.xmlTo export all the events at once, with their attributes, use the export functionality. -->'
+          return_message = '<?xml version="1.0" encoding="UTF-8"?><response><xml_version>2.3.0</xml_version></response><!--Please note that this XML page is a representation of the /events/index page.Because the /events/index page is paginated you will have a limited number of results.You can for example ask: /events/index/limit:999.xml to get the 999 first records.You can also sort the table by using the sort and direction parameters. For example:/events/index/sort:date/direction:desc.xmlTo export all the events at once, with their attributes, use the export functionality. -->'
     else:
       # it is an insert of an event
       if method == 'POST':
-        return self.pushed_event(body)
+        return_message = self.pushed_event(body)
+
+    self.logout_handler.logout()
+    return return_message
 
   def pushed_event(self, xml_string):
+    # instantiate misp converter
+    user = self.get_user()
+    server_details = self.server_broker.get_server_by_user_id(user.identifier)
+    # check if it is a misp server else raise
+    if server_details.type == 'MISP':
+      self.misp_converter.api_key = server_details.user.api_key
+      self.misp_converter.api_url = server_details.baseurl
+      self.misp_converter.tag = server_details.name
+      self.misp_converter.user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
+
+      self.misp_converter.insert_event_from_xml(xml_string)
+      pass
+    else:
+      raise
+    
     # make db object
-    event = self.misp_to_ce1sus.get_event_from_xml(xml_string)
+    # event = self.misp_to_ce1sus.get_event_from_xml(xml_string)
     # insert into db
 
     # return misp xml of the event
-    return self.ce1sus_to_misp.make_misp_xml(event)
+    # return self.ce1sus_to_misp.make_misp_xml(event)$
+    return ''
 
   def perform_push(self, send_events):
     incomming_events = dict()
@@ -90,21 +122,21 @@ class MISPAdapter(BaseView):
       incomming_events[uuid] = send_event['Event']['timestamp']
     remove = list()
     # find all events matching the uuids
-    local_events = self.event_controller.get_event_by_ids(incomming_events.keys())
+    local_events = self.event_controller.get_event_by_uuids(incomming_events.keys())
     for local_event in local_events:
       # check if the local events were not modified
-      if not (local_event.last_publish_date < incomming_events[local_event.uuid]):
-        remove.append(local_event.uuid)
+      # if not (local_event.last_publish_date < incomming_events[local_event.uuid]):
+      remove.append(local_event.uuid)
 
-        # check if the local event is not locked -> does not exist in ours
+      # check if the local event is not locked -> does not exist in ours
 
     result = list()
-    # remove the ones not needed
-    for item in remove:
-      del incomming_events[item]
 
     # create array of uuids
     for key in incomming_events.iterkeys():
-      result.append(key)
+      if key in remove:
+        continue
+      else:
+        result.append(key)
     cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return json.dumps(result)

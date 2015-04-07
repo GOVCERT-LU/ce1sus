@@ -16,6 +16,12 @@ import urllib2
 from uuid import uuid4
 from zipfile import ZipFile
 
+from ce1sus.controllers.base import BaseController
+from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
+from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
+from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
+from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
+from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.group import Group
@@ -23,8 +29,10 @@ from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Reference, Report
+from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.syslogger import Syslogger
 import xml.etree.ElementTree as et
+from ce1sus.db.brokers.event.eventbroker import EventBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -82,7 +90,7 @@ class MispMappingException(MispConverterException):
   pass
 
 
-class MispConverter(object):
+class MispConverter(BaseController):
 
   ce1sus_risk_level = ['High', 'Medium', 'Low', 'None', 'Undefined']
   ce1sus_analysis_level = ['None', 'Opened', 'Stalled', 'Completed', 'Unknown']
@@ -116,21 +124,25 @@ class MispConverter(object):
     return {'Accept': 'application/xml',
             'Authorization': self.api_key}
 
-  def __init__(self, api_url, api_key, ce1sus_attribute_definitions, ce1sus_object_definitions, reference_definitions, indicator_types, conditions, misp_tag='Generic MISP'):
+  def __init__(self, config, api_url, api_key, misp_tag='Generic MISP'):
+    BaseController.__init__(self, config)
     self.api_url = api_url
     self.api_key = api_key
     self.api_headers = self.get_api_header_parameters()
     self.tag = misp_tag
-    self.object_definitions = ce1sus_attribute_definitions
-    self.attribute_definitions = ce1sus_object_definitions
-    self.reference_definitions = reference_definitions
-    self.indicator_types = indicator_types
-    self.conditions = conditions
+    self.object_definitions_broker = self.broker_factory(ObjectDefinitionBroker)
+    self.attribute_definitions_broker = self.broker_factory(AttributeDefinitionBroker)
+    self.reference_definitions_broker = self.broker_factory(ReferenceDefintionsBroker)
+    self.indicator_types_broker = self.broker_factory(IndicatorTypeBroker)
+    self.condition_broker = self.broker_factory(ConditionBroker)
+    self.event_broker = self.broker_factory(EventBroker)
+
     self.dump = False
     self.file_location = None
     self.syslogger = Syslogger()
     self.dump = False
     self.file_location = '/tmp'
+    self.user = None
 
   def set_event_header(self, event, rest_event, title_prefix=''):
     event_header = {}
@@ -157,14 +169,15 @@ class MispConverter(object):
 
     # Populate the event
     event_id = event_header.get('id', '')
-    rest_event.identifier = event_header.get('uuid', None)
-    if not rest_event.identifier:
+    rest_event.uuid = event_header.get('uuid', None)
+    if not rest_event.uuid:
       message = 'Cannot find uuid for event {0} generating one'.format(event_id)
       self.syslogger.warning(message)
       # raise MispMappingException(message)
-      rest_event.identifier = u'{0}'.format(uuid4())
-    rest_event.title = u'{0}Event {1}'.format(title_prefix, event_id)
+      rest_event.uuid = u'{0}'.format(uuid4())
+
     rest_event.description = unicode(event_header.get('info', ''))
+    rest_event.title = u'{0}Event {1} - {2}'.format(title_prefix, event_id, rest_event.description)
     date = event_header.get('date', None)
     if date:
       rest_event.first_seen = parser.parse(date)
@@ -182,7 +195,6 @@ class MispConverter(object):
     if rest_event.analysis not in MispConverter.ce1sus_analysis_level:
       rest_event.analysis = 'None'
 
-    rest_event.objects = []
     rest_event.comments = []
 
     published = event_header.get('published', '1')
@@ -191,12 +203,32 @@ class MispConverter(object):
     else:
       rest_event.properties.is_shareable = False
     rest_event.status = u'Confirmed'
-    rest_event.originating_group = Group()
-    rest_event.originating_group.name = event_header.get('corg', None)
-    rest_event.creator_group = Group()
-    rest_event.creator_group.name = event_header.get('org', None)
-    rest_event.modifier = rest_event.creator_group
+    group_name = event_header.get('orgc', None)
+    group = self.get_group_by_name(group_name)
+    rest_event.originating_group_id = group.identifier
+    group_name = event_header.get('org', None)
+    group = self.get_group_by_name(group_name)
+    rest_event.creator_group_id = group.identifier
+    rest_event.modifier_id = self.user.identifier
+    rest_event.creator_id = self.user.identifier
     return event_id
+
+  def get_group_by_name(self, name):
+    group = None
+    try:
+      group = self.group_broker.get_by_name(name)
+    except NothingFoundException:
+      # create it
+      group = Group()
+      group.name = name
+      self.group_broker.insert(group, False, False)
+    except BrokerException as error:
+      self.logger.error(error)
+      raise MispConverterException(error)
+    if group:
+      return group
+    else:
+      raise MispConverterException('Error determining group')
 
   def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid):
     if '|' in type_:
@@ -272,7 +304,7 @@ class MispConverter(object):
         print message
         # build raw_artifact
         raw_artifact = Object()
-        raw_artifact.identifier = uuid4()
+        raw_artifact.uuid = uuid4()
         self.set_properties(raw_artifact, share)
         self.set_extended_logging(raw_artifact, event)
         raw_artifact.definition = self.get_object_definition('Artifact', None, None)
@@ -285,7 +317,7 @@ class MispConverter(object):
 
         # add raw artifact
         attr = Attribute()
-        attr.identifier = uuid4()
+        attr.uuid = uuid4()
         attr.definition = self.get_attibute_definition('', 'raw_artifact', None, raw_artifact, observable, attr)
         if attr.definition:
           attr.definition_id = attr.definition.identifier
@@ -302,13 +334,19 @@ class MispConverter(object):
 
     else:
       attribute = Attribute()
-      attribute.identifier = uuid
+      attribute.uuid = uuid
       self.set_properties(attribute, share)
       self.set_extended_logging(attribute, event)
       attribute.definition = self.get_attibute_definition(category, type_, value, obj, observable, attribute)
       if attribute.definition:
         attribute.definition_id = attribute.definition.identifier
+        attribute.object = obj
+        attribute.object_id = attribute.object.identifier
         attribute.value = value
+        # foo workaround
+        def_name = attribute.definition.name
+        attribute.definition = None
+        setattr(attribute, 'def_name', def_name)
         if ioc == 1:
           attribute.is_ioc = True
         else:
@@ -394,15 +432,17 @@ class MispConverter(object):
       return None
     if name or chksum:
       # search for it
-      for object_definition in self.object_definitions:
-        if object_definition.chksum == chksum or object_definition.name == name:
-          return object_definition
+      try:
+        definition = self.object_definitions_broker.get_defintion_by_name(name)
+        return definition
+      except BrokerException as error:
+        self.logger.error(error)
 
-    # if here no def was found raise exception
-    message = u'No object definition for {0}/{1} and value "{2}" can be found'.format(category, type_, value)
-    print message
-    self.syslogger.error(message)
-    raise MispMappingException(message)
+        # if here no def was found raise exception
+        message = u'No object definition for {0}/{1} and value "{2}" can be found'.format(category, type_, value)
+        print message
+        self.syslogger.error(message)
+        raise MispMappingException(message)
 
   def get_reference_definition(self, category, type_, value):
     # compose the correct chksum/name
@@ -410,28 +450,31 @@ class MispConverter(object):
     name = None
     if type_ == 'url':
       name = 'link'
-    elif type_ == 'text':
+    elif type_ in ['text', 'other']:
       name = 'comment'
     else:
       name = type_
 
     if name or chksum:
       # search for it
-      for reference_definition in self.reference_definitions:
-        if reference_definition.name == name:
-          return reference_definition
-
-    # if here no def was found raise exception
-    message = u'No reference definition for {0}/{1} and value "{2}" can be found'.format(category, type_, value)
-    print message
-    self.syslogger.error(message)
-    raise MispMappingException(message)
+      try:
+        reference_definition = self.reference_definitions_broker.get_definition_by_name(name)
+        return reference_definition
+      except BrokerException as error:
+        self.logger.error(error)
+        # if here no def was found raise exception
+        message = u'No reference definition for {0}/{1} and value "{2}" can be found'.format(category, type_, value)
+        print message
+        self.syslogger.error(message)
+        raise MispMappingException(message)
 
   def get_condition(self, condition):
-    for cond in self.conditions:
-      if cond.value == condition:
-        return cond
-    raise MispMappingException(u'Condition {0} is not defined'.format(condition))
+    try:
+      condition = self.condition_broker.get_condition_by_value(condition)
+      return condition
+    except BrokerException as error:
+      self.logger.error(error)
+      raise MispMappingException(u'Condition {0} is not defined'.format(condition))
 
   def get_attibute_definition(self, category, type_, value, obj, observable, attribute):
     # compose the correct chksum/name
@@ -442,10 +485,11 @@ class MispConverter(object):
       name = type_
 
     if 'pattern' in type_:
-      attribute.condition = self.get_condition('Like')
+      condition = self.get_condition('Like')
     else:
-      attribute.condition = self.get_condition('Equals')
+      condition = self.get_condition('Equals')
 
+    attribute.condition_id = condition.identifier
     if category == 'antivirus detection' and type_ == 'text':
       name = 'comment'
 
@@ -524,18 +568,22 @@ class MispConverter(object):
   def __find_attr_def(self, name, chksum):
     if name or chksum:
       # search for it
-      for attribute_definition in self.attribute_definitions:
-        if attribute_definition.chksum == chksum or attribute_definition.name == name:
-          return attribute_definition
-    return None
+      try:
+        definition = self.attribute_definitions_broker.get_defintion_by_name(name)
+        return definition
+      except BrokerException as error:
+        self.logger.error(error)
+        return None
 
   def create_reference(self, uuid, category, type_, value, data, comment, ioc, share, event):
     reference = Reference()
     # TODO map reference
-    reference.identifier = uuid
+    # reference.identifier = uuid
+    reference.uuid = uuid
     reference.definition = self.get_reference_definition(category, type_, value)
     reference.definition_id = reference.definition.identifier
     reference.value = value
+
     self.set_extended_logging(reference, event)
     return reference
 
@@ -546,7 +594,9 @@ class MispConverter(object):
       reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event)
       if len(event.reports) == 0:
         report = Report()
-        report.identifier = uuid4()
+        report.event = event
+        report.event_id = event.identifier
+        report.uuid = uuid4()
         self.set_extended_logging(report, event)
         if comment:
           if report.description:
@@ -554,13 +604,15 @@ class MispConverter(object):
           else:
             report.description = comment
         event.reports.append(report)
+      reference.report = event.reports[0]
+      reference.report_id = event.reports[0].identifier
       event.reports[0].references.append(reference)
     elif category == 'attribution':
       reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event)
       reference.value = u'Attribution: '.format(reference.value)
       if len(event.reports) == 0:
         report = Report()
-        report.identifier = uuid4()
+        report.uuid = uuid4()
         self.set_extended_logging(report, event)
         if comment:
           if report.description:
@@ -568,19 +620,23 @@ class MispConverter(object):
           else:
             report.description = comment
         event.reports.append(report)
+      reference.report = event.reports[0]
+      reference.report_id = event.reports[0].identifier
+      event.reports[0].references.append(reference)
 
     else:
       observable = self.make_observable(event, comment, share)
       # create object
       obj = Object()
-      obj.identifier = uuid4()
+      obj.uuid = uuid4()
       self.set_properties(obj, share)
       self.set_extended_logging(obj, event)
       observable.object = obj
-      obj.definition = self.get_object_definition(category, type_, value)
-      if obj.definition:
-        obj.definition_id = obj.definition.identifier
-
+      definition = self.get_object_definition(category, type_, value)
+      if definition:
+        obj.definition_id = definition.identifier
+        obj.observable = observable
+        obj.observable_id = obj.observable.identifier
         # create attribute(s) for object
         self.append_attributes(obj, observable, id_, category, type_, value, ioc, share, event, uuid)
         if not observable.description:
@@ -597,11 +653,15 @@ class MispConverter(object):
 
   def make_observable(self, event, comment, shared):
     result_observable = Observable()
-    result_observable.identifier = uuid4()
+    result_observable.uuid = uuid4()
     # The creator of the result_observable is the creator of the object
     self.set_extended_logging(result_observable, event)
 
     result_observable.event_id = event.identifier
+    result_observable.event = event
+
+    result_observable.parent_id = event.identifier
+    result_observable.parent = event
 
     if comment is None:
       result_observable.description = ''
@@ -620,11 +680,14 @@ class MispConverter(object):
     if title:
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
-    composed_attribute.identifier = uuid4()
+    composed_attribute.uuid = uuid4()
     self.set_properties(composed_attribute, shared)
     result_observable.observable_composition = composed_attribute
 
     for observable in array:
+      # remove relation to event as it is in the relation of an composition
+      observable.event = None
+      observable.event_id = None
       composed_attribute.observables.append(observable)
 
     return result_observable
@@ -680,11 +743,11 @@ class MispConverter(object):
           attr_def_name = None
           if obj:
             if len(obj.attributes) == 1:
-              attr_def_name = obj.attributes[0].definition.name
+              attr_def_name = obj.attributes[0].def_name
             elif len(obj.attributes) == 2:
               for attr in obj.attributes:
-                if 'hash' in attr.definition.name:
-                  attr_def_name = attr.definition.name
+                if 'hash' in attr.def_name:
+                  attr_def_name = attr.def_name
                   break
             else:
               message = u'Misp Attribute {0} defined as {1}/{2} with value {3} resulted too many attribtues'.format(id_, category, type_, value)
@@ -797,53 +860,59 @@ class MispConverter(object):
       self.syslogger.warning('Event {0} does not contain attributes. None detected'.format(event.identifier))
       return result_observables
 
+  def __make_single_event_xml(self, xml_event):
+    rest_event = Event()
+
+    event_id = self.set_event_header(xml_event, rest_event)
+
+    observables = self.parse_attributes(rest_event, xml_event)
+    rest_event.observables = observables
+    # Append reference
+
+    result = list()
+
+    report = Report()
+    report.uuid = uuid4()
+    self.set_extended_logging(report, rest_event)
+    value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
+    reference = self.create_reference(uuid4(), None, 'reference_external_identifier', value, None, None, False, False, rest_event)
+    report.references.append(reference)
+    value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
+    reference = self.create_reference(uuid4(), None, 'link', value, None, None, False, False, rest_event)
+    report.references.append(reference)
+
+    result.append(report)
+
+    # check if there aren't any empty reports
+
+    for event_report in rest_event.reports:
+      if event_report.references:
+        result.append(event_report)
+
+    rest_event.reports = result
+    setattr(rest_event, 'misp_id', event_id)
+
+    return rest_event
+
   def parse_events(self, xml):
     events = xml.iterfind('./Event')
     rest_events = []
 
     for event in events:
-      rest_event = Event()
+      rest_event = self.__make_single_event_xml(event)
 
-      event_id = self.set_event_header(event, rest_event)
-
-      observables = self.parse_attributes(rest_event, event)
-      rest_event.observables = observables
-      # Append reference
-
-      result = list()
-
-      report = Report()
-      report.identifier = uuid4()
-      self.set_extended_logging(report, rest_event)
-      value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
-      reference = self.create_reference(uuid4(), None, 'reference_external_identifier', value, None, None, False, False, rest_event)
-      report.references.append(reference)
-      value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
-      reference = self.create_reference(uuid4(), None, 'link', value, None, None, False, False, rest_event)
-      report.references.append(reference)
-
-      result.append(report)
-
-      # check if there aren't any empty reports
-
-      for event_report in rest_event.reports:
-        if event_report.references:
-          continue
-        else:
-          result.append(event_report)
-
-      rest_event.reports = result
-      setattr(rest_event, 'misp_id', event_id)
       rest_events.append(rest_event)
 
     return rest_events
 
   def set_extended_logging(self, instance, event):
-    instance.creator_group = event.creator_group
+
+    instance.creator_group_id = event.creator_group_id
     instance.created_at = DatumZait.utcnow()
     instance.modified_on = DatumZait.utcnow()
-    instance.modifier = event.creator_group
-    instance.originating_group = instance.creator_group
+    instance.modifier_id = self.user.identifier
+    instance.creator_id = self.user.identifier
+    instance.originating_group_id = event.creator_group_id
 
   def get_xml_event(self, event_id):
     url = '{0}/events/{1}'.format(self.api_url, event_id)
@@ -852,10 +921,12 @@ class MispConverter(object):
     xml_string = urllib2.urlopen(req).read()
     return xml_string
 
-  def get_event_from_xml(self, xml_string):
+  def insert_event_from_xml(self, xml_string):
     xml = et.fromstring(xml_string)
-    rest_events = self.parse_events(xml)
-    return rest_events[0]
+    rest_event = self.__make_single_event_xml(xml)
+
+    self.event_broker.insert(rest_event, True)
+    return rest_event
 
   def __get_dump_path(self, base, dirname):
     sub_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
@@ -892,7 +963,7 @@ class MispConverter(object):
 
   def map_indicator(self, observable, indicator_type, event):
     indicator = Indicator()
-    indicator.identifier = uuid4()
+    indicator.uuid = uuid4()
     self.set_extended_logging(indicator, event)
 
     indicator.event = event
@@ -985,9 +1056,12 @@ class MispConverter(object):
       return None
 
   def get_indicator_type(self, indicator_type):
-    for type_ in self.indicator_types:
-      if type_.name == indicator_type:
-        return type_
-    message = u'Indicator type {0} is not defined'.format(indicator_type)
-    self.syslogger.error(message)
-    raise MispMappingException(message)
+
+    try:
+      type_ = self.indicator_types_broker.get_type_by_name(indicator_type)
+      return type_
+    except BrokerException as error:
+      self.logger.error(error)
+      message = u'Indicator type {0} is not defined'.format(indicator_type)
+      self.syslogger.error(message)
+      raise MispMappingException(message)

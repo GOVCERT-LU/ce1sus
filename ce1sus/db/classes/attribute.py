@@ -31,7 +31,7 @@ _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', Base.metadata,
 
 
 class Condition(Base):
-  value = Column('value', Unicode(40))
+  value = Column('value', Unicode(40), unique=True)
   description = Column('description', UnicodeText)
 
   def to_dict(self, complete=True, inflated=False):

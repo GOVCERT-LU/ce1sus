@@ -29,7 +29,7 @@ class GroupBroker(BrokerBase):
   def get_by_name(self, name):
     try:
 
-      result = self.session.query(self.get_broker_class()).filter(Group.name == name).one()
+      result = self.session.query(Group).filter(Group.name == name).one()
       return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found with name :{0}'.format(name))

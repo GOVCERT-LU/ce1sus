@@ -53,18 +53,21 @@ class SyncServerHandler(RestBaseHandler):
           uuid = path.pop(0)
           server = self.sync_server_controller.get_server_by_uuid(uuid)
           if method == 'PUT':
-            server.populate(json)
-            self.sync_server_controller.update_server(server)
+            # assemble
+            self.assembler.update_syncserver(server, json)
+
+            self.sync_server_controller.update_server(server, self.get_user())
             return server.to_dict(details, inflated)
           else:
-            self.sync_server_controller.remove_server(server)
+            self.sync_server_controller.remove_server(server, self.get_user())
             return 'OK'
         else:
           raise RestHandlerException(u'No id was specified in the json post')
       elif method == 'POST':
-        server = SyncServer()
-        server.populate(json)
-        self.sync_server_controller.insert_server(server)
+        # assemble
+        server = self.assembler.assemble_serversync(json)
+
+        self.sync_server_controller.insert_server(server, self.get_user())
         return server.to_dict(details, inflated)
       else:
         raise RestHandlerException(u'Unrecoverable error')

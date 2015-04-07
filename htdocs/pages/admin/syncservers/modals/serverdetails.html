@@ -10,15 +10,97 @@
           <h4 class="modal-title">Details of Sync Server {{server.identifier}}</h4>
         </div>
         <div class="modal-body">
-          Details
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Identifier</label>
+    <div class="col-lg-9">
+      {{server.identifier}}
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 text-right"><b>Type *</b></label>
+    <div class="col-lg-9">
+     {{server.type}}
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Name *</label>
+    <div class="col-lg-9"">
+        {{server.name}}
+      </div>
+    </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Description
+      *</label>
+    <div class="col-lg-9">
+      
+        {{server.description}}
+      </div>
+    </div>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Associated User</label>
+    <div class="col-lg-9">
+
+         {{server.user.username}}
+      </div>
+    </div>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">base Url *</label>
+    <div class="col-lg-9"">
+      {{server.baseurl}}
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Mode</label>
+    <div class="col-lg-9">
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Push</label>
+        <div class="col-lg-9">
+          <input class="form-control" type="checkbox"
+            name="is_push" value="is_push"
+            ng-model="server.mode.is_push" disabled/>
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Pull</label>
+        <div class="col-lg-9">
+          <input class="form-control" type="checkbox"
+            name="is_pull" value="is_pull"
+            ng-model="server.mode.is_pull" disabled/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Certificate</label>
+    <div class="col-lg-9">
+      {{erver.certificate}}
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Ca
+      Certificate</label>
+    <div class="col-lg-9">
+      {{server.ca_certificate}}
+    </div>
+  </div>
+  <div class="row">
+    <label class="col-lg-3 control-label text-right">Verify SSL</label>
+    <div class="col-lg-9">
+          <input class="form-control" type="checkbox"
+            name="is_pull" value="is_pull"
+            ng-model="server.validate_ssl" disabled/>
+    </div>
+  </div>
+
+
         </div>
         <div class="modal-footer">
           <div class="btn-group">
-            <button name="submit" type="submit" class="btn btn-primary"
-              ng-disabled="!objectChanged() || addServerForm.$invalid"
-              ng-click="submitObject()">Save</button>
-            <button name="reset" type="button" class="btn btn-default"
-              ng-click="resetObject()">Reset</button>
             <button type="button" class="btn btn-default"
               ng-click="$hide()">Close</button>
           </div>

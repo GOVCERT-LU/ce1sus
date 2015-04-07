@@ -134,7 +134,7 @@ class Reference(ExtendedLogingInformations, Base):
   definition = relationship(ReferenceDefinition,
                             primaryjoin='ReferenceDefinition.identifier==Reference.definition_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
-  value = Column('value', Text, nullable=False, index=True)
+  value = Column('value', UnicodeText, nullable=False)
   parent_id = Column('parent_id', BigInteger, ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')

@@ -5,8 +5,9 @@
 
 Created on Apr 2, 2015
 """
-from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode, UnicodeText, Integer, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.types import Unicode, UnicodeText, Integer, Boolean, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import ServerType
@@ -49,32 +50,43 @@ class ServerMode(BitBase):
   def is_pull(self, value):
     self._set_value(ServerMode.PUSH, value)
 
+  def to_dict(self):
+    return {'is_pull': self.is_pull,
+            'is_push': self.is_push
+            }
+
+  def populate(self, json):
+    self.is_pull = json.get('is_pull', False)
+    self.is_push = json.get('is_push', False)
+
 
 class SyncServer(ExtendedLogingInformations, Base):
 
   name = Column('name', Unicode(255))
-  api_key = Column('apikey', Unicode(255), index=True)
+  user_id = Column('user_id', BigInteger, ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), index=True, unique=True)
+  user = relationship('User', primaryjoin='SyncServer.user_id==User.identifier')
   baseurl = Column('baseurl', Unicode(255), index=True)
-  mode_code = Column('mode_id', Integer, index=True)
+  mode_code = Column('mode_id', Integer, index=True, default=0)
   type_id = Column('type_id', Integer, index=True)
   description = Column('description', UnicodeText)
-  certificat = Column('certificat', UnicodeText)
-  ca_certificat = Column('ca_certificat', UnicodeText)
+  certificate = Column('certificat', UnicodeText)
+  ca_certificate = Column('ca_certificat', UnicodeText)
   verify_ssl = Column('verify_ssl', Boolean)
+  __mode_code = None
 
   @property
   def mode(self):
-    if self.dbcode:
-      self.__bit_code = ServerMode(self.dbcode, self)
+    if self.mode_code:
+      self.__mode_code = ServerMode(self.mode_code, self, 'mode_code')
     else:
-      self.__bit_code = ServerMode('0', self)
-    return self.__bit_code
+      self.__mode_code = ServerMode('0', self, 'mode_code')
+    return self.__mode_code
 
   @mode.setter
   def mode(self, value):
-    self.__bit_code = value
-    self.dbcode = value.bit_code
-    self.__bit_code.parent = self
+    self.__mode_code = value
+    self.mode_code = value.bit_code
+    self.__mode_code.parent = self
 
   @property
   def type(self):
@@ -93,3 +105,48 @@ class SyncServer(ExtendedLogingInformations, Base):
     :returns: String
     """
     self.type_id = ServerType.get_by_value(type_text)
+
+  def to_dict(self, complete=True, inflated=False):
+    if self.user_id:
+      user = self.user.to_dict(complete, False)
+      user_id = self.user.uuid
+    else:
+      user = None
+      user_id = None
+
+    if complete:
+      return {'identifier': self.convert_value(self.uuid),
+              'name': self.convert_value(self.name),
+              'description': self.convert_value(self.description),
+              'mode': self.mode.to_dict(),
+              'type_id': self.convert_value(self.description),
+              'type': self.convert_value(self.type),
+              'baseurl': self.convert_value(self.baseurl),
+              'certificate': self.convert_value(self.certificate),
+              'ca_certificate': self.convert_value(self.ca_certificate),
+              'verify_ssl': self.convert_value(self.verify_ssl),
+              'user': user,
+              'user_id': user_id,
+              }
+    else:
+      return {'identifier': self.uuid,
+              'name': self.name
+              }
+
+  def populate(self, json):
+    self.name = json.get('name', None)
+    self.description = json.get('description', None)
+    self.type_id = json.get('type_id', None)
+    self.baseurl = json.get('baseurl', None)
+    self.baseurl = json.get('baseurl', None)
+    self.api_key = json.get('api_key', None)
+    self.certificate = json.get('certificate', None)
+    self.ca_certificate = json.get('ca_certificate', None)
+    self.verify_ssl = json.get('verify_ssl', False)
+    # permissions setting
+    self.mode.populate(json.get('mode', {}))
+    # TODO add group
+
+  def validate(self):
+    # TODO implement validate
+    return True

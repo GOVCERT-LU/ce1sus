@@ -19,6 +19,7 @@ from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition
+from ce1sus.db.classes.servers import SyncServer
 from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common import strings
@@ -63,6 +64,17 @@ class Assembler(BaseController):
       return self.user_broker.get_by_id(user.identifier)
     except BrokerException as error:
       raise ControllerException(error)
+
+  def update_syncserver(self, server, json):
+    server.populate(json)
+    user_uuid = json.get('user_id', None)
+    if not user_uuid:
+      user = json.get('user', None)
+      user_uuid = user.get('identifier', None)
+    if user_uuid:
+      user = self.user_broker.get_by_uuid(user_uuid)
+      server.user = user
+      server.user_id = user.identifier
 
   def populate_simple_logging(self, instance, json, user, insert=False):
     db_user = self.get_db_user(user)
@@ -292,6 +304,19 @@ class Assembler(BaseController):
     obj.properties.is_rest_instert = rest_insert
     obj.properties.is_web_insert = not rest_insert
     return obj
+
+  def assemble_serversync(self, json):
+    server = SyncServer()
+    server.populate(json)
+    user_uuid = json.get('user_id', None)
+    if not user_uuid:
+      user = json.get('user', None)
+      user_uuid = user.get('identifier', None)
+    if user_uuid:
+      user = self.user_broker.get_by_uuid(user_uuid)
+      server.user = user
+      server.user_id = user.identifier
+    return server
 
   def assemble_attribute(self, obj, json, user, owner=False, rest_insert=True):
     attribute = Attribute()

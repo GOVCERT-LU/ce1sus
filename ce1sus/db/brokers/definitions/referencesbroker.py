@@ -79,3 +79,13 @@ class ReferenceDefintionsBroker(BrokerBase):
     except SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
+
+  def get_definition_by_name(self, name):
+    try:
+      return self.session.query(ReferenceDefinition).filter(ReferenceDefinition.name == name).one()
+    except NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(name, self.__class__.__name__))
+    except MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(name))
+    except SQLAlchemyError as error:
+      raise BrokerException(error)

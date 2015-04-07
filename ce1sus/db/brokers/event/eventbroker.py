@@ -212,7 +212,7 @@ class EventBroker(BrokerBase):
       raise BrokerException(error)
     return result
 
-  def get_by_ids(self, ids):
+  def get_by_uuids(self, ids):
     try:
       result = self.session.query(Event).filter(Event.uuid.in_(ids)).all()
       return result
