@@ -34,7 +34,6 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
-from ce1sus.helpers.common.syslogger import Syslogger
 import xml.etree.ElementTree as et
 
 
@@ -148,7 +147,6 @@ class MispConverter(BaseController):
 
     self.dump = False
     self.file_location = None
-    self.syslogger = Syslogger()
     self.dump = False
     self.file_location = '/tmp'
     self.user = None
@@ -181,7 +179,7 @@ class MispConverter(BaseController):
     rest_event.uuid = event_header.get('uuid', None)
     if not rest_event.uuid:
       message = 'Cannot find uuid for event {0} generating one'.format(event_id)
-      self.syslogger.warning(message)
+      self.logger.warning(message)
       # raise MispMappingException(message)
 
     rest_event.description = unicode(event_header.get('info', ''))
@@ -375,7 +373,7 @@ class MispConverter(BaseController):
           obj.related_objects.append(raw_artifact)
         else:
           message = 'Could not find attribute definition raw_artifact'
-          self.syslogger.error(message)
+          self.logger.error(message)
           self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
           return None
           # raise MispMappingException(message)
@@ -383,7 +381,7 @@ class MispConverter(BaseController):
       else:
         message = u'Failed to download file "{0}" id:{1}, add manually'.format(filename, id_)
         self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
-        self.syslogger.warning(message)
+        self.logger.warning(message)
 
     else:
       attribute = Attribute()
@@ -451,7 +449,7 @@ class MispConverter(BaseController):
 
         message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
         print message
-        self.syslogger.warning(message)
+        self.logger.warning(message)
         return None
       elif 'snort' in type_:
         name = 'IDSRule'
@@ -467,7 +465,7 @@ class MispConverter(BaseController):
       elif type_ == 'text':
         message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
         print message
-        self.syslogger.warning(message)
+        self.logger.warning(message)
         return None
       else:
         name = 'Artifact'
@@ -841,7 +839,7 @@ class MispConverter(BaseController):
           else:
             others.append(observable)
       else:
-        self.syslogger.warning('Dropped empty attribute')
+        self.logger.warning('Dropped empty attribute')
     result_observables = list()
 
     if mal_email:
@@ -919,7 +917,7 @@ class MispConverter(BaseController):
     if result_observables:
       return result_observables
     else:
-      self.syslogger.warning('Event {0} does not contain attributes. None detected'.format(event.uuid))
+      self.logger.warning('Event {0} does not contain attributes. None detected'.format(event.uuid))
       return result_observables
 
   def __make_single_event_xml(self, xml_event, ignore_uuid=False):
@@ -1004,7 +1002,7 @@ class MispConverter(BaseController):
       return path
     else:
       message = 'Dumping of files was activated but no file location was specified'
-      self.syslogger.error(message)
+      self.logger.error(message)
       raise MispConverterException(message)
 
   def __dump_files(self, dirname, filename, data):
@@ -1059,7 +1057,7 @@ class MispConverter(BaseController):
           event_list[event_id] = {}
         else:
           message = 'Event collision, API returned the same event twice, should not happen!'
-          self.syslogger.error(message)
+          self.logger.error(message)
           raise ValueError(message)
 
         for event_id_element in event:
@@ -1128,5 +1126,5 @@ class MispConverter(BaseController):
     except BrokerException as error:
       self.logger.error(error)
       message = u'Indicator type {0} is not defined'.format(indicator_type)
-      self.syslogger.error(message)
+      self.logger.error(message)
       raise MispMappingException(message)

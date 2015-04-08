@@ -245,7 +245,7 @@ class Merger(BaseController):
 
     return merges
 
-  def merge_events(self, local_event, remote_event, user):
+  def merge_event(self, local_event, remote_event, user):
     # check which one is newer (utc is ignored as everything is in utc)
     merges = False
     if remote_event.modified_on > local_event.modified_on:

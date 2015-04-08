@@ -115,7 +115,7 @@ class MISPAdapter(BaseView):
         # merge event with existing event
         local_event = self.event_controller.get_event_by_uuid(event.uuid)
         # TODO check if user can actually merge this event
-        merged_event = self.merger.merge_events(local_event, event, user)
+        merged_event = self.merger.merge_event(local_event, event, user)
         if merged_event:
           self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
           self.event_controller.update_event(self.get_user(), merged_event, True, True)
