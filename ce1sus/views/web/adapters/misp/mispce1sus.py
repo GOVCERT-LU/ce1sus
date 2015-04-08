@@ -6,7 +6,6 @@
 Created on Feb 20, 2015
 """
 from StringIO import StringIO
-from ce1sus_api.helpers.datumzait import DatumZait
 from copy import deepcopy
 from dateutil import parser
 from os import makedirs, remove
@@ -34,6 +33,7 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
+from ce1sus.helpers.common.datumzait import DatumZait
 import xml.etree.ElementTree as et
 
 

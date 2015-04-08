@@ -6,13 +6,13 @@
 Created on Feb 17, 2015
 """
 import cherrypy
-from datetime import datetime
 import json
 
 from ce1sus.controllers.common.merger import Merger
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.db.common.broker import IntegrityException
+from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
@@ -144,7 +144,7 @@ class MISPAdapter(BaseView):
     for local_event in local_events:
       # check if the local events were not modified
       date = incomming_events[local_event.uuid]
-      datetime_from_string = datetime.utcfromtimestamp(int(date))
+      datetime_from_string = DatumZait.utcfromtimestamp(int(date))
 
       if local_event.modified_on >= datetime_from_string:
         # remove the ones which are either new or

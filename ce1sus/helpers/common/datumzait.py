@@ -32,3 +32,7 @@ class DatumZait(datetime):
   def strptime(date_string, date_format):
     """same as in datetime"""
     return datetime.strptime(date_string, date_format)
+
+  @staticmethod
+  def utcfromtimestamp(value):
+    return datetime.utcfromtimestamp(value).replace(tzinfo=dateutil.tz.tzutc())
