@@ -23,6 +23,18 @@ class MergingException(Exception):
 
 class Merger(BaseController):
 
+  def set_dbcode(self, local, remote):
+    self.logger.info('{0} {1} dbcode will be replaced "{2}" by "{3}"'.format(local.__class__.__name__, local.uuid, local.dbcode, local.dbcode))
+    # set only share and proposal
+    local.properties.is_shareable = remote.properties.is_shareable
+    local.properties.is_proposal = remote.properties.is_proposal
+    # unvalidate only if the value has changed
+    if hasattr(local, 'value'):
+      if local.value == remote.value:
+        local.properties.is_validated = True
+      else:
+        local.properties.is_validated = False
+
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
 
@@ -79,8 +91,7 @@ class Merger(BaseController):
   def merge_attribute(self, local_attribute, rem_attribute, user):
     if local_attribute.modified_on < rem_attribute.modified_on:
       self.logger.info('Attribute {0} will be updated'.format(local_attribute.uuid))
-      self.logger.info('Attribute {0} dbcode will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.dbcode, rem_attribute.dbcode))
-      local_attribute.dbcode = rem_attribute.dbcode
+      self.set_dbcode(local_attribute, rem_attribute)
       self.logger.info('Attribute {0} is_ioc will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.is_ioc, rem_attribute.is_ioc))
       local_attribute.is_ioc = rem_attribute.is_ioc
       self.logger.info('Attribute {0} condition_id will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.condition_id, rem_attribute.condition_id))
@@ -96,8 +107,7 @@ class Merger(BaseController):
     merges = False
     if local_object.modified_on < remote_object.modified_on:
       self.logger.info('Object {0} will be updated'.format(local_object.uuid))
-      self.logger.info('Object {0} dbcode will be replaced "{1}" by "{2}"'.format(local_object.uuid, local_object.dbcode, remote_object.dbcode))
-      local_object.dbcode = remote_object.dbcode
+      self.set_dbcode(local_object, remote_object)
       local_object.modified_on = remote_object.modified_on
       local_object.modifier_id = user.identifier
       merges = True
@@ -156,8 +166,7 @@ class Merger(BaseController):
       local_observable.description = remote_observable.description
       self.logger.info('Observable {0} version will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.version, remote_observable.version))
       local_observable.version = remote_observable.version
-      self.logger.info('Observable {0} dbcode will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.dbcode, remote_observable.dbcode))
-      local_observable.dbcode = remote_observable.dbcode
+      self.set_dbcode(local_observable, remote_observable)
       local_observable.modified_on = remote_observable.modified_on
       local_observable.modifier_id = user.identifier
 
@@ -180,8 +189,7 @@ class Merger(BaseController):
     merges = False
 
     self.logger.info('Observable Composition {0} will be updated'.format(local_observable_composition.uuid))
-    self.logger.info('Observable Composition {0} dbcode will be replaced "{1}" by "{2}"'.format(local_observable_composition.uuid, local_observable_composition.dbcode, remote_observable_composition.dbcode))
-    local_observable_composition.dbcode = remote_observable_composition.dbcode
+    self.set_dbcode(local_observable_composition, remote_observable_composition)
     if remote_observable_composition.operator:
       self.logger.info('Observable Composition {0} operator will be replaced "{1}" by "{2}"'.format(local_observable_composition.uuid, local_observable_composition.operator, remote_observable_composition.operator))
       local_observable_composition.operator = remote_observable_composition.operator
@@ -255,8 +263,9 @@ class Merger(BaseController):
       local_event.risk_id = remote_event.risk_id
       self.logger.info('Event {0} analysis_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.analysis_id, remote_event.analysis_id))
       local_event.analysis_id = remote_event.analysis_id
-      self.logger.info('Event {0} dbcode will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.dbcode, remote_event.dbcode))
-      local_event.dbcode = remote_event.dbcode
+      self.set_dbcode(local_event, local_event)
+      # event will get unpublished
+      local_event.properties.is_shareable = False
       self.logger.info('Event {0} title will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.last_publish_date, remote_event.last_publish_date))
       local_event.last_publish_date = remote_event.last_publish_date
 
@@ -291,8 +300,7 @@ class Merger(BaseController):
       local_report.description = remote_report.description
       self.logger.info('Report {0} short_description will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.short_description, remote_report.short_description))
       local_report.short_description = remote_report.short_description
-      self.logger.info('Report {0} dbcode will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.dbcode, remote_report.dbcode))
-      local_report.dbcode = remote_report.dbcode
+      self.set_dbcode(local_report, remote_report)
       self.logger.info('Report {0} title will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.title, remote_report.title))
       local_report.title = remote_report.title
       local_report.modified_on = remote_report.modified_on
@@ -317,8 +325,7 @@ class Merger(BaseController):
   def merge_reference(self, local_reference, rem_reference, user):
     if local_reference.modified_on < rem_reference.modified_on:
       self.logger.info('Reference {0} will be updated'.format(local_reference.uuid))
-      self.logger.info('Reference {0} dbcode will be replaced "{1}" by "{2}"'.format(local_reference.uuid, local_reference.dbcode, rem_reference.dbcode))
-      local_reference.dbcode = rem_reference.dbcode
+      self.set_dbcode(local_reference, rem_reference)
       self.logger.info('Reference {0} value will be replaced "{1}" by "{2}"'.format(local_reference.uuid, local_reference.value, rem_reference.value))
       local_reference.value = rem_reference.value
       local_reference.modified_on = rem_reference.modified_on
