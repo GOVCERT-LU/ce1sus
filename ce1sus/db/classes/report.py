@@ -141,16 +141,14 @@ class Reference(ExtendedLogingInformations, Base):
   __bit_code = None
 
   def populate(self, json, rest_insert=True):
-    definition_id = json.get('definition_id', None)
-    if not definition_id:
+    definition_uuid = json.get('definition_id', None)
+    if not definition_uuid:
       definition = json.get('definition', None)
       if definition:
-        definition_id = definition.get('identifier', None)
-    if self.definition_id:
-      if self.definition_id != definition_id:
+        definition_uuid = definition.get('identifier', None)
+    if self.definition:
+      if self.definition.uuid != definition_uuid:
         raise ValueException(u'Reference definitions cannot be updated')
-    if definition_id:
-      self.definition_id = definition_id
     self.value = json.get('value', None)
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert

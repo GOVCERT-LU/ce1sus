@@ -461,6 +461,7 @@ class Assembler(BaseController):
         ref.definition = definition
         ref.uuid = reference.get('identifier', None)
         ref.populate(reference, rest_insert)
+        # set definition
         self.populate_extended_logging(ref, reference, user, True)
         ref.properties.is_rest_instert = rest_insert
         ref.properties.is_web_insert = not rest_insert

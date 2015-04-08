@@ -176,10 +176,10 @@ class ReportHandler(RestBaseHandler):
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
             self.check_item_is_viewable(event, reference)
-            definition_id = json.get('definition_id', None)
-            if definition_id:
+            definition_uuid = json.get('definition_id', None)
+            if definition_uuid:
               # check if it still is the same
-              if not reference.definition_id == definition_id:
+              if not reference.definition.uuid == definition_uuid:
                 raise HandlerException('It is not possible to change the definition of references')
 
             handler_instance = self.__get_handler(reference.definition)

@@ -154,7 +154,7 @@ class Attribute(ExtendedLogingInformations, Base):
         value_instance.value_type_id = self.definition.value_type_id
 
       if self.object:
-        if self.object.event:
+        if self.object.event or self.object.event_id:
           event_id = self.object.event_id
           if event_id:
             value_instance.event_id = event_id

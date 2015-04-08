@@ -57,6 +57,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/validation/event/:id/overview", "main.layout.admin.validation.event.overview")
         .when("/admin/validation/event/:id/observables", "main.layout.admin.validation.event.observables")
         .when("/admin/validation/event/:id/indicators", "main.layout.admin.validation.event.indicators")
+        .when("/admin/validation/event/:id/reports", "main.layout.admin.validation.event.reports")
         .when("/admin/validation/event/:id/relations", "main.layout.admin.validation.event.relations")
         .when("/admin/validation/event/:id/groups", "main.layout.admin.validation.event.groups")
         

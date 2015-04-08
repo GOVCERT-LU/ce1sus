@@ -263,7 +263,8 @@ class EventController(BaseController):
   def __validate_observable(self, observable, user):
     self.__validate_instance(observable, user)
     if observable.observable_composition:
-      for child in observable.observable_composition:
+      observable.observable_composition.properties.is_validated = True
+      for child in observable.observable_composition.observables:
         self.__validate_observable(child, user)
     if observable.object:
       self.__validate_object(observable.object, user)
@@ -279,6 +280,16 @@ class EventController(BaseController):
       self.__validate_instance(event, user)
       for observable in event.observables:
         self.__validate_observable(observable, user)
+      # Validate reports
+      for report in event.reports:
+        self.__validate_instance(report, user)
+        for reference in report.references:
+          self.__validate_instance(reference, user)
+      # validate indicators
+      for indicator in event.indicators:
+        self.__validate_instance(indicator, user)
+        for observable in indicator.observables:
+          self.__validate_observable(observable, user)
       self.event_broker.update(event, True)
     except BrokerException as error:
       raise ControllerException(error)

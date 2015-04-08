@@ -1185,6 +1185,7 @@ app.directive("referenceHandler", function() {
     scope: {
       resource: "=reference",
       definition: "=definition",
+      permissions: "=permissions",
       type: "=type",
       form: "=form"
     },

@@ -100,7 +100,9 @@ class MISPAdapter(BaseView):
       self.misp_converter.tag = server_details.name
       self.misp_converter.user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
 
-      self.misp_converter.insert_event_from_xml(xml_string)
+      event = self.misp_converter.get_event_from_xml(xml_string)
+      self.event_controller.insert_event(self.get_user(), event, True, True)
+      self.logger.info('Received Event {0}'.format(event.uuid))
       pass
     else:
       raise
