@@ -20,7 +20,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-# pylint: disable=W0223
 class DateTime(TypeDecorator):
   """
   Used as workaround for MySQL DBs
@@ -28,8 +27,6 @@ class DateTime(TypeDecorator):
   impl = SdateTime
 
   def process_bind_param(self, value, engine):
-    if engine:
-      pass
     return value
 
   def process_result_value(self, value, engine):

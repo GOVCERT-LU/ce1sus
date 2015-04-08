@@ -77,7 +77,7 @@ class Merger(BaseController):
     local_object.attributes.append(attribute)
 
   def merge_attribute(self, local_attribute, rem_attribute, user):
-    if local_attribute.modified_on.replace(tzinfo=None) < rem_attribute.modified_on.replace(tzinfo=None):
+    if local_attribute.modified_on < rem_attribute.modified_on:
       self.logger.info('Attribute {0} will be updated'.format(local_attribute.uuid))
       self.logger.info('Attribute {0} dbcode will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.dbcode, rem_attribute.dbcode))
       local_attribute.dbcode = rem_attribute.dbcode
@@ -94,7 +94,7 @@ class Merger(BaseController):
 
   def merge_object(self, local_object, remote_object, parent, user):
     merges = False
-    if local_object.modified_on.replace(tzinfo=None) < remote_object.modified_on.replace(tzinfo=None):
+    if local_object.modified_on < remote_object.modified_on:
       self.logger.info('Object {0} will be updated'.format(local_object.uuid))
       self.logger.info('Object {0} dbcode will be replaced "{1}" by "{2}"'.format(local_object.uuid, local_object.dbcode, remote_object.dbcode))
       local_object.dbcode = remote_object.dbcode
@@ -148,7 +148,7 @@ class Merger(BaseController):
 
   def merge_observable(self, local_observable, remote_observable, user):
     merges = False
-    if local_observable.modified_on.replace(tzinfo=None) < remote_observable.modified_on.replace(tzinfo=None):
+    if local_observable.modified_on < remote_observable.modified_on:
       self.logger.info('Observable {0} will be updated'.format(local_observable.uuid))
       self.logger.info('Observable {0} title will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.title, remote_observable.title))
       local_observable.title = remote_observable.title
@@ -240,7 +240,7 @@ class Merger(BaseController):
   def merge_events(self, local_event, remote_event, user):
     # check which one is newer (utc is ignored as everything is in utc)
     merges = False
-    if remote_event.modified_on.replace(tzinfo=None) > local_event.modified_on.replace(tzinfo=None):
+    if remote_event.modified_on > local_event.modified_on:
       # take over all values and log the old ones to log
       self.logger.info('Event {0} will be updated'.format(local_event.uuid))
       self.logger.info('Event {0} title will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.title, remote_event.title))
@@ -282,7 +282,7 @@ class Merger(BaseController):
 
   def merge_report(self, local_report, remote_report, local_event, parent, user):
     merges = False
-    if remote_report.modified_on.replace(tzinfo=None) > local_report.modified_on.replace(tzinfo=None):
+    if remote_report.modified_on > local_report.modified_on:
       # take over all values and log the old ones to log
       self.logger.info('Report {0} will be updated'.format(local_event.uuid))
       self.logger.info('Report {0} title will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.title, remote_report.title))
@@ -315,7 +315,7 @@ class Merger(BaseController):
     return merges
 
   def merge_reference(self, local_reference, rem_reference, user):
-    if local_reference.modified_on.replace(tzinfo=None) < rem_reference.modified_on.replace(tzinfo=None):
+    if local_reference.modified_on < rem_reference.modified_on:
       self.logger.info('Reference {0} will be updated'.format(local_reference.uuid))
       self.logger.info('Reference {0} dbcode will be replaced "{1}" by "{2}"'.format(local_reference.uuid, local_reference.dbcode, rem_reference.dbcode))
       local_reference.dbcode = rem_reference.dbcode

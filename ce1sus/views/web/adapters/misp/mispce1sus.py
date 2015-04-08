@@ -8,7 +8,6 @@ Created on Feb 20, 2015
 from StringIO import StringIO
 from ce1sus_api.helpers.datumzait import DatumZait
 from copy import deepcopy
-from datetime import datetime
 from dateutil import parser
 from os import makedirs, remove
 from os.path import isdir, isfile
@@ -195,13 +194,13 @@ class MispConverter(BaseController):
 
     date = event_header.get('timestamp', None)
     if date:
-      rest_event.modified_on = datetime.utcfromtimestamp(int(date))
+      rest_event.modified_on = DatumZait.utcfromtimestamp(int(date))
     else:
       rest_event.modified_on = DatumZait.utcnow()
 
     date = event_header.get('publish_timestamp', None)
     if date:
-      rest_event.last_publish_date = datetime.utcfromtimestamp(int(date))
+      rest_event.last_publish_date = DatumZait.utcfromtimestamp(int(date))
     else:
       rest_event.last_publish_date = DatumZait.utcnow()
 
@@ -279,7 +278,7 @@ class MispConverter(BaseController):
 
     self.error_broker.insert(error, False)
 
-  def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid):
+  def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts):
     if '|' in type_:
       # it is a composed attribute
       if type_ in ('filename|md5', 'filename|sha1', 'filename|sha256'):
@@ -290,8 +289,8 @@ class MispConverter(BaseController):
           splitted_values = value.split('|')
           first_value = splitted_values[0]
           second_value = splitted_values[1]
-          self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None)
-          self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None)
+          self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts)
+          self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts)
         else:
           message = 'Composed attribute {0} splits into more than 2 elements'.format(type_)
           self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
@@ -326,8 +325,8 @@ class MispConverter(BaseController):
           hive = None
 
       if hive:
-        self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Hive', hive, ioc, share, event, None)
-      self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Key', key, ioc, share, event, None)
+        self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Hive', hive, ioc, share, event, None, ts)
+      self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Key', key, ioc, share, event, None, ts)
 
     elif category in ['external analysis', 'artifacts dropped', 'payload delivery'] and type_ == 'malware-sample':
       filename = value
@@ -340,8 +339,8 @@ class MispConverter(BaseController):
         filename = first_value
         second_value = splitted[1]
         second_type = self.get_hash_type(obj, observable, id_, category, type_, ioc, share, event, uuid, second_value)
-        self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None)
-        self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None)
+        self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts)
+        self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts)
       else:
         message = 'Composed attribute {0} splits into more than 2 elements'.format(type_)
         self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
@@ -357,7 +356,7 @@ class MispConverter(BaseController):
         raw_artifact = Object()
 
         self.set_properties(raw_artifact, share)
-        self.set_extended_logging(raw_artifact, event)
+        self.set_extended_logging(raw_artifact, event, ts)
         raw_artifact.definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, 'Artifact', None, None)
         if raw_artifact.definition:
           raw_artifact.definition_id = raw_artifact.definition.identifier
@@ -369,7 +368,6 @@ class MispConverter(BaseController):
 
         # add raw artifact
         attr = Attribute()
-
         attr.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, '', 'raw_artifact', None, raw_artifact, observable, attr)
         if attr.definition:
           attr.definition_id = attr.definition.identifier
@@ -391,7 +389,7 @@ class MispConverter(BaseController):
       attribute = Attribute()
       attribute.uuid = uuid
       self.set_properties(attribute, share)
-      self.set_extended_logging(attribute, event)
+      self.set_extended_logging(attribute, event, ts)
       attribute.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, category, type_, value, obj, observable, attribute)
       if attribute.definition:
         attribute.definition_id = attribute.definition.identifier
@@ -635,7 +633,7 @@ class MispConverter(BaseController):
       self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
       return None
 
-  def create_reference(self, uuid, category, type_, value, data, comment, ioc, share, event):
+  def create_reference(self, uuid, category, type_, value, data, comment, ioc, share, event, ts):
     reference = Reference()
     # TODO map reference
     # reference.identifier = uuid
@@ -645,22 +643,22 @@ class MispConverter(BaseController):
       reference.definition_id = definition.identifier
       reference.value = value
 
-      self.set_extended_logging(reference, event)
+      self.set_extended_logging(reference, event, ts)
       return reference
     else:
       return None
 
-  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ignore_uuid=False):
+  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, ignore_uuid=False):
     if (category in ['external analysis', 'internal reference', 'targeting data'] and type_ in ['attachment', 'comment', 'link', 'text', 'url']) or (category == 'internal reference' and type_ in ['text', 'comment']) or type_ == 'other' or (category == 'attribution' and type_ == 'comment') or category == 'other' or (category == 'antivirus detection' and type_ == 'link'):
       # make a report
       # Create Report it will be just a single one
-      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event)
+      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts)
       if len(event.reports) == 0:
         report = Report()
         # report.event = event
         report.event_id = event.identifier
 
-        self.set_extended_logging(report, event)
+        self.set_extended_logging(report, event, ts)
         if comment:
           if report.description:
             report.description = report.description + ' - ' + comment
@@ -670,12 +668,12 @@ class MispConverter(BaseController):
       if reference:
         event.reports[0].references.append(reference)
     elif category == 'attribution':
-      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event)
+      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts)
       reference.value = u'Attribution: "{0}"'.format(reference.value)
       if len(event.reports) == 0:
         report = Report()
 
-        self.set_extended_logging(report, event)
+        self.set_extended_logging(report, event, ts)
         if comment:
           if report.description:
             report.description = report.description + ' - ' + comment
@@ -692,7 +690,7 @@ class MispConverter(BaseController):
       obj = Object()
 
       self.set_properties(obj, share)
-      self.set_extended_logging(obj, event)
+      self.set_extended_logging(obj, event, ts)
       observable.object = obj
       definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, category, type_, value)
       if definition:
@@ -700,7 +698,7 @@ class MispConverter(BaseController):
         obj.observable = observable
         obj.observable_id = obj.observable.identifier
         # create attribute(s) for object
-        self.append_attributes(obj, observable, id_, category, type_, value, ioc, share, event, uuid)
+        self.append_attributes(obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts)
         if not observable.description:
           observable.description = None
         return observable
@@ -715,10 +713,6 @@ class MispConverter(BaseController):
 
   def make_observable(self, event, comment, shared, ignore_uuid=False):
     result_observable = Observable()
-
-    # The creator of the result_observable is the creator of the object
-    self.set_extended_logging(result_observable, event)
-
     if ignore_uuid:
       result_observable.event = event
     else:
@@ -736,14 +730,13 @@ class MispConverter(BaseController):
       result_observable.description = comment
 
     self.set_properties(result_observable, shared)
-
-    result_observable.created_at = DatumZait.utcnow()
-    result_observable.modified_on = DatumZait.utcnow()
+    # The creator of the result_observable is the creator of the object
+    self.set_extended_logging(result_observable, event, DatumZait.utcnow())
 
     return result_observable
 
-  def map_observable_composition(self, array, event, title, shared):
-    result_observable = self.make_observable(event, None, True)
+  def map_observable_composition(self, array, event, title, shared, ignore_uuid=False):
+    result_observable = self.make_observable(event, None, True, ignore_uuid)
     if title:
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
@@ -801,9 +794,11 @@ class MispConverter(BaseController):
             comment = e.text
           elif e.tag == 'uuid':
             uuid = e.text
+          elif e.tag == 'timestamp':
+            ts = e.text
       # ignore empty values:
       if value:
-        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ignore_uuid)
+        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, ignore_uuid)
         # returns all attributes for all context (i.e. report and normal properties)
         if observable and isinstance(observable, Observable):
           obj = observable.object
@@ -850,7 +845,7 @@ class MispConverter(BaseController):
     result_observables = list()
 
     if mal_email:
-      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share)
+      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'Malicious E-mail', event)
         result_observables.append(observable)
@@ -859,7 +854,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if artifacts:
-      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share)
+      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'Malware Artifacts', event)
         del artifacts[:]
@@ -868,7 +863,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if ips:
-      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share)
+      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'IP Watchlist', event)
         del ips[:]
@@ -877,7 +872,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if file_hashes:
-      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share)
+      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'File Hash Watchlist', event)
         del file_hashes[:]
@@ -886,7 +881,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if domains:
-      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share)
+      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'Domain Watchlist', event)
         del domains[:]
@@ -895,7 +890,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if c2s:
-      observable = self.map_observable_composition(c2s, event, 'C2', share)
+      observable = self.map_observable_composition(c2s, event, 'C2', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'C2', event)
         del c2s[:]
@@ -904,7 +899,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if urls:
-      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share)
+      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, 'URL Watchlist', event)
         del urls[:]
@@ -913,7 +908,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if others:
-      observable = self.map_observable_composition(others, event, 'Others', share)
+      observable = self.map_observable_composition(others, event, 'Others', share, ignore_uuid)
       if observable:
         indicator = self.map_indicator(observable, None, event)
         del others[:]
@@ -941,12 +936,12 @@ class MispConverter(BaseController):
 
     report = Report()
 
-    self.set_extended_logging(report, rest_event)
+    self.set_extended_logging(report, rest_event, DatumZait.utcnow())
     value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
-    reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event)
+    reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event, DatumZait.utcnow())
     report.references.append(reference)
     value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
-    reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event)
+    reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event, DatumZait.utcnow())
     report.references.append(reference)
 
     result.append(report)
@@ -973,11 +968,15 @@ class MispConverter(BaseController):
 
     return rest_events
 
-  def set_extended_logging(self, instance, event):
+  def set_extended_logging(self, instance, event, ts):
 
     instance.creator_group_id = event.creator_group_id
     instance.created_at = event.created_at
-    instance.modified_on = event.created_at
+
+    try:
+      instance.modified_on = DatumZait.utcfromtimestamp(int(ts))
+    except TypeError:
+      instance.modified_on = ts
     instance.modifier_id = self.user.identifier
     instance.creator_id = self.user.identifier
     instance.originating_group_id = event.creator_group_id
@@ -1030,7 +1029,7 @@ class MispConverter(BaseController):
   def map_indicator(self, observable, indicator_type, event):
     indicator = Indicator()
 
-    self.set_extended_logging(indicator, event)
+    self.set_extended_logging(indicator, event, DatumZait.utcnow())
 
     # indicator.event = event
     indicator.event_id = event.identifier
