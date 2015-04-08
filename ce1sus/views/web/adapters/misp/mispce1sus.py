@@ -8,10 +8,12 @@ Created on Feb 20, 2015
 from StringIO import StringIO
 from ce1sus_api.helpers.datumzait import DatumZait
 from copy import deepcopy
+from datetime import datetime
 from dateutil import parser
 from os import makedirs, remove
 from os.path import isdir, isfile
 import re
+from twisted.protocols.dict import Definition
 import urllib2
 from uuid import uuid4
 from zipfile import ZipFile
@@ -22,20 +24,19 @@ from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
+from ce1sus.db.brokers.event.eventbroker import EventBroker
+from ce1sus.db.brokers.mispbroker import ErrorMispBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.indicator import Indicator
+from ce1sus.db.classes.log import ErrorMispAttribute
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.syslogger import Syslogger
 import xml.etree.ElementTree as et
-from ce1sus.db.brokers.event.eventbroker import EventBroker
-from ce1sus.db.brokers.mispbroker import ErrorMispBroker
-from ce1sus.db.classes.log import ErrorMispAttribute
-from twisted.protocols.dict import Definition
 
 
 __author__ = 'Weber Jean-Paul'
@@ -191,6 +192,21 @@ class MispConverter(BaseController):
       rest_event.first_seen = parser.parse(date)
     else:
       rest_event.first_seen = DatumZait.utcnow()
+
+    date = event_header.get('timestamp', None)
+    if date:
+      rest_event.modified_on = datetime.utcfromtimestamp(int(date))
+    else:
+      rest_event.modified_on = DatumZait.utcnow()
+
+    date = event_header.get('publish_timestamp', None)
+    if date:
+      rest_event.last_publish_date = datetime.utcfromtimestamp(int(date))
+    else:
+      rest_event.last_publish_date = DatumZait.utcnow()
+
+    rest_event.created_at = rest_event.first_seen
+
     rest_event.tlp = event_header.get('tlp', 'amber')
     rest_event.risk = event_header.get('risk', 'None')
     # event.uuid = event_header.get('uuid', None)
@@ -634,7 +650,7 @@ class MispConverter(BaseController):
     else:
       return None
 
-  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event):
+  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ignore_uuid=False):
     if (category in ['external analysis', 'internal reference', 'targeting data'] and type_ in ['attachment', 'comment', 'link', 'text', 'url']) or (category == 'internal reference' and type_ in ['text', 'comment']) or type_ == 'other' or (category == 'attribution' and type_ == 'comment') or category == 'other' or (category == 'antivirus detection' and type_ == 'link'):
       # make a report
       # Create Report it will be just a single one
@@ -671,7 +687,7 @@ class MispConverter(BaseController):
       event.reports[0].references.append(reference)
 
     else:
-      observable = self.make_observable(event, comment, share)
+      observable = self.make_observable(event, comment, share, ignore_uuid)
       # create object
       obj = Object()
 
@@ -697,16 +713,21 @@ class MispConverter(BaseController):
     instance.properties.is_validated = False
     instance.properties.is_shareable = shared
 
-  def make_observable(self, event, comment, shared):
+  def make_observable(self, event, comment, shared, ignore_uuid=False):
     result_observable = Observable()
 
     # The creator of the result_observable is the creator of the object
     self.set_extended_logging(result_observable, event)
 
-    result_observable.event_id = event.identifier
+    if ignore_uuid:
+      result_observable.event = event
+    else:
+      result_observable.event_id = event.identifier
     # result_observable.event = event
-
-    result_observable.parent_id = event.identifier
+    if ignore_uuid:
+      result_observable.parent = event
+    else:
+      result_observable.parent_id = event.identifier
     # result_observable.parent = event
 
     if comment is None:
@@ -738,7 +759,7 @@ class MispConverter(BaseController):
 
     return result_observable
 
-  def parse_attributes(self, event, misp_event):
+  def parse_attributes(self, event, misp_event, ignore_uuid=False):
 
     # make lists
     mal_email = list()
@@ -782,7 +803,7 @@ class MispConverter(BaseController):
             uuid = e.text
       # ignore empty values:
       if value:
-        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event)
+        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ignore_uuid)
         # returns all attributes for all context (i.e. report and normal properties)
         if observable and isinstance(observable, Observable):
           obj = observable.object
@@ -906,12 +927,13 @@ class MispConverter(BaseController):
       self.syslogger.warning('Event {0} does not contain attributes. None detected'.format(event.uuid))
       return result_observables
 
-  def __make_single_event_xml(self, xml_event):
+  def __make_single_event_xml(self, xml_event, ignore_uuid=False):
     rest_event = Event()
 
     event_id = self.set_event_header(xml_event, rest_event)
-    self.event_broker.insert(rest_event, False)
-    observables = self.parse_attributes(rest_event, xml_event)
+    if not ignore_uuid:
+      self.event_broker.insert(rest_event, False)
+    observables = self.parse_attributes(rest_event, xml_event, ignore_uuid)
     rest_event.observables = observables
     # Append reference
 
@@ -954,8 +976,8 @@ class MispConverter(BaseController):
   def set_extended_logging(self, instance, event):
 
     instance.creator_group_id = event.creator_group_id
-    instance.created_at = DatumZait.utcnow()
-    instance.modified_on = DatumZait.utcnow()
+    instance.created_at = event.created_at
+    instance.modified_on = event.created_at
     instance.modifier_id = self.user.identifier
     instance.creator_id = self.user.identifier
     instance.originating_group_id = event.creator_group_id
@@ -967,9 +989,9 @@ class MispConverter(BaseController):
     xml_string = urllib2.urlopen(req).read()
     return xml_string
 
-  def get_event_from_xml(self, xml_string):
+  def get_event_from_xml(self, xml_string, ignore_uuid=False):
     xml = et.fromstring(xml_string)
-    rest_event = self.__make_single_event_xml(xml)
+    rest_event = self.__make_single_event_xml(xml, ignore_uuid)
     return rest_event
 
   def __get_dump_path(self, base, dirname):

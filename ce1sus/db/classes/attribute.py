@@ -178,6 +178,10 @@ class Attribute(ExtendedLogingInformations, Base):
   def value(self):
     return self.__get_value()
 
+  @property
+  def value_instance(self):
+    return self.__get_value_instance()
+
   @value.setter
   def value(self, value):
     self.__set_value(value)
