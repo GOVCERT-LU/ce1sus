@@ -2,10 +2,12 @@ Note:
 ---------------------------------
 Version 0.11.X is in developpment and will get the following features:
 * MISP Sync support
-* STIX support for observables, indicators, incidents
+* STIX support for observables, indicators
 * Redesing of frontend
 * Basic Authenication support
 * Ce1sus is completely RESTFULL
+* Can be used with forntend or without
+* Syncronisation interface
 
 ce1sus
 =======
