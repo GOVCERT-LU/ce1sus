@@ -8,14 +8,19 @@ Created on Feb 20, 2015
 from StringIO import StringIO
 from copy import deepcopy
 from dateutil import parser
+import json
 from os import makedirs, remove
 from os.path import isdir, isfile
 import re
+import time
 from twisted.protocols.dict import Definition
+from urllib2 import HTTPError
 import urllib2
 from uuid import uuid4
+from xml.etree.ElementTree import ParseError
 from zipfile import ZipFile
 
+from ce1sus.common.system import APP_REL
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
@@ -130,13 +135,13 @@ class MispConverter(BaseController):
 
   def get_api_header_parameters(self):
     return {'Accept': 'application/xml',
-            'Authorization': self.api_key}
+            'Authorization': self.api_key,
+            'User-Agent': 'ce1sus {0}'.format(APP_REL)}
 
   def __init__(self, config, api_url, api_key, misp_tag='Generic MISP', session=None):
     BaseController.__init__(self, config, session)
     self.api_url = api_url
     self.api_key = api_key
-    self.api_headers = self.get_api_header_parameters()
     self.tag = misp_tag
     self.object_definitions_broker = self.broker_factory(ObjectDefinitionBroker)
     self.attribute_definitions_broker = self.broker_factory(AttributeDefinitionBroker)
@@ -984,12 +989,16 @@ class MispConverter(BaseController):
   def get_xml_event(self, event_id):
     url = '{0}/events/{1}'.format(self.api_url, event_id)
 
-    req = urllib2.Request(url, None, self.api_headers)
+    req = urllib2.Request(url, None, self.get_api_header_parameters())
     xml_string = urllib2.urlopen(req).read()
     return xml_string
 
   def get_event_from_xml(self, xml_string, ignore_uuid=False):
-    xml = et.fromstring(xml_string)
+    try:
+      xml = et.fromstring(xml_string)
+    except ParseError:
+      xml = et.fromstring(xml_string[1:])
+      xml = xml[0]
     rest_event = self.__make_single_event_xml(xml, ignore_uuid)
     return rest_event
 
@@ -1046,8 +1055,10 @@ class MispConverter(BaseController):
     return indicator
 
   def __parse_event_list(self, xml_sting):
-    xml = et.fromstring(xml_sting)
-
+    try:
+      xml = et.fromstring(xml_sting)
+    except ParseError:
+      xml = et.fromstring(xml_sting[1:])
     event_list = {}
 
     for event in xml.iter(tag='Event'):
@@ -1066,9 +1077,79 @@ class MispConverter(BaseController):
           event_list[event_id][event_id_element.tag] = event_id_element.text
     return event_list
 
+  def get_index(self, unpublished=False):
+    url = '{0}/events/index'.format(self.api_url)
+    req = urllib2.Request(url, None, self.get_api_header_parameters())
+    xml_sting = urllib2.urlopen(req).read()
+    result = dict()
+    for event_id, event in self.__parse_event_list(xml_sting).items():
+      if event['published'] == '0' and not unpublished:
+        continue
+      id_ = event_id
+      uuid = event['uuid']
+      timestamp = DatumZait.utcfromtimestamp(int(event['timestamp']))
+      if id_:
+        result[uuid] = (id_, timestamp)
+
+    return result
+
+  def filter_event_push(self):
+    url = '{0}/events/filterEventIdsForPush'.format(self.api_url)
+    events = self.event_broker.get_all()
+    result = list()
+    for event in events:
+      eventdict = dict()
+      eventdict['Event'] = dict()
+      eventdict['Event']['uuid'] = event.uuid
+      eventdict['Event']['id'] = event.identifier
+      eventdict['Event']['timestamp'] = int(time.mktime(event.modified_on.timetuple()))
+      result.append(eventdict)
+
+    headers = self.get_api_header_parameters()
+    headers['Content-Type'] = 'application/json'
+    headers['Accept'] = 'application/json'
+    headers['Connection'] = 'close'
+    content = json.dumps(result)
+    headers['Content-Length'] = len(content)
+
+    req = urllib2.Request(url, content, headers)
+    xml_sting = urllib2.urlopen(req).read()
+    events_to_push = json.loads(xml_sting)
+    headers['Content-Type'] = 'application/xml'
+    headers['Accept'] = 'application/xml'
+    headers['Connection'] = 'close'
+    content = json.dumps(result)
+
+    for event_to_push in events_to_push:
+      url = '{0}/events'.format(self.api_url)
+      event = self.event_broker.get_by_uuid(event_to_push)
+      event_xml = self.ce1sus_misp_converter.make_misp_xml(event)
+      headers['Content-Length'] = len(event_xml)
+      req = urllib2.Request(url, event_xml, headers)
+      connection = urllib2.urlopen(req)
+      try:
+        if connection.msg == 'OK':
+          continue
+        else:
+          if connection.code == 302:
+            # it already exists
+            # TODO when the event alredy exists
+            # makes something with the url returned in the header
+            # ref: https://github.com/MISP/MISP/issues/449
+            continue
+          else:
+            # log error
+            response = connection.read()
+            self.logger.error(u'unexpected error occured {0}'.format(response))
+      except HTTPError as error:
+        self.logger.error('Error during push of event {0} on server with url {1}'.format(event.uuid, self.api_url))
+        self.logger.error(error)
+    return 'OK'
+
   def get_recent_events(self, limit=20, unpublished=False):
     url = '{0}/events/index/sort:date/direction:desc/limit:{1}'.format(self.api_url, limit)
-    req = urllib2.Request(url, None, self.api_headers)
+
+    req = urllib2.Request(url, None, self.get_api_header_parameters())
     xml_sting = urllib2.urlopen(req).read()
 
     result = list()
@@ -1085,7 +1166,7 @@ class MispConverter(BaseController):
     url = '{0}/attributes/download/{1}'.format(self.api_url, attribute_id)
     try:
       result = None
-      req = urllib2.Request(url, None, self.api_headers)
+      req = urllib2.Request(url, None, self.get_api_header_parameters())
       resp = urllib2.urlopen(req).read()
       binary = StringIO(resp)
       zip_file = ZipFile(binary)

@@ -52,7 +52,6 @@ class Ce1susMISP(BaseController):
     flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
     xml_event = self.make_event(event, flat_attribtues)
     result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
-    print result
     return result
 
   def __append_child(self, node, id_, value):
