@@ -7,8 +7,7 @@ Created on Jan 8, 2015
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger, \
-  Text
+from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
@@ -128,7 +127,7 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
 class Reference(ExtendedLogingInformations, Base):
   # Similar approach as for attributes
   report = relationship('Report', uselist=False, primaryjoin='Reference.report_id==Report.identifier')
-  report_id = Column('event_id', BigInteger, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  report_id = Column('report_id', BigInteger, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   definition_id = Column('definition_id', BigInteger,
                          ForeignKey('referencedefinitions.referencedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(ReferenceDefinition,

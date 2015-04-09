@@ -34,6 +34,7 @@ from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
+from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 import xml.etree.ElementTree as et
 
 
@@ -131,8 +132,8 @@ class MispConverter(BaseController):
     return {'Accept': 'application/xml',
             'Authorization': self.api_key}
 
-  def __init__(self, config, api_url, api_key, misp_tag='Generic MISP'):
-    BaseController.__init__(self, config)
+  def __init__(self, config, api_url, api_key, misp_tag='Generic MISP', session=None):
+    BaseController.__init__(self, config, session)
     self.api_url = api_url
     self.api_key = api_key
     self.api_headers = self.get_api_header_parameters()
@@ -144,12 +145,10 @@ class MispConverter(BaseController):
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.event_broker = self.broker_factory(EventBroker)
     self.error_broker = self.broker_factory(ErrorMispBroker)
+    self.ce1sus_misp_converter = Ce1susMISP(config, session)
 
     self.dump = False
     self.file_location = None
-    self.dump = False
-    self.file_location = '/tmp'
-    self.user = None
 
   def set_event_header(self, event, rest_event, title_prefix=''):
     event_header = {}
@@ -323,6 +322,7 @@ class MispConverter(BaseController):
           hive = None
 
       if hive:
+        # TODO link hive
         self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Hive', hive, ioc, share, event, None, ts)
       self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Key', key, ioc, share, event, None, ts)
 
@@ -337,6 +337,7 @@ class MispConverter(BaseController):
         filename = first_value
         second_value = splitted[1]
         second_type = self.get_hash_type(obj, observable, id_, category, type_, ioc, share, event, uuid, second_value)
+        # TODO link filename and hash
         self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts)
         self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts)
       else:
@@ -684,6 +685,7 @@ class MispConverter(BaseController):
 
     else:
       observable = self.make_observable(event, comment, share, ignore_uuid)
+      observable.title = u'MISP: {0}/{1}'.format(category, type_)
       # create object
       obj = Object()
 

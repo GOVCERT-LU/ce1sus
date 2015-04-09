@@ -214,16 +214,19 @@ class Merger(BaseController):
     if local_observable.uuid == remote_observable.uuid:
       return True
     else:
-      if local_observable.object:
+      if local_observable.object and remote_observable.object:
         return self.is_object_the_same(local_observable.object, remote_observable.object)
       else:
         if remote_observable.observable_composition:
           for rem_obs in remote_observable.observable_composition.observables:
             same = False
-            for local_obs in local_observable.observable_composition.observables:
-              same = self.is_observable_the_same(local_obs, rem_obs)
-              if same:
-                return True
+            if local_observable.observable_composition:
+              for local_obs in local_observable.observable_composition.observables:
+                same = self.is_observable_the_same(local_obs, rem_obs)
+                if same:
+                  return True
+            else:
+              return False
     return False
 
   def merge_observables(self, local_observables, remote_observables, local_event, parent, user):

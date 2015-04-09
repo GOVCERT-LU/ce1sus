@@ -21,6 +21,7 @@ Release 0.11.0
 * Review right management (REL_0.10.0+)
 * STIX support for observables, indicators, incidents, TTP
 * Operators for observales
+* MISP Sync support
 
 Release 0.10.3
 --------------

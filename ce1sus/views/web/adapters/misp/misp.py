@@ -11,7 +11,7 @@ import json
 from ce1sus.controllers.common.merger import Merger
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
-from ce1sus.db.common.broker import IntegrityException
+from ce1sus.db.common.broker import IntegrityException, BrokerException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
@@ -28,21 +28,26 @@ __license__ = 'GPL v3+'
 
 class MISPAdapter(BaseView):
 
-  def __init__(self, config):
+  def __init__(self, config, session=None):
     BaseView.__init__(self, config)
-    self.event_controller = EventController(config)
+    self.event_controller = EventController(config, session)
     self.server_broker = self.event_controller.broker_factory(SyncServerBroker)
-    self.ce1sus_to_misp = Ce1susMISP(config)
+    self.ce1sus_to_misp = Ce1susMISP(config, session)
     self.login_handler = LoginHandler(config)
     self.logout_handler = LogoutHandler(config)
-    self.misp_converter = MispConverter(config, None, None, None)
-    self.merger = Merger(config)
+    self.misp_converter = MispConverter(config, None, None, None, session)
+    dump = config.get('MISPAdapter', 'dump', False)
+    file_loc = config.get('MISPAdapter', 'file', None)
+    self.misp_converter.dump = dump
+    self.misp_converter.file_location = file_loc
+    self.merger = Merger(config, session)
 
-  @rest_method(default=True)
-  @methods(allowed=['GET'])
-  def shadow_attributes(self, **args):
-    # called during pull request to get proposals and such stuff
-    pass
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def shadow_attributes(self, *vpath, **params):
+    # this is called from the misp server to see it his know events have new proposals
+    # TODO: Proposal for misp
+    raise cherrypy.HTTPError(404)
 
   @cherrypy.expose
   def test(self):
@@ -51,7 +56,7 @@ class MISPAdapter(BaseView):
     return self.ce1sus_to_misp.make_misp_xml(event)
 
   @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET', 'PUT', 'POST', 'DELETE'])
+  @cherrypy.tools.allow(methods=['GET', 'POST'])
   def events(self, *vpath, **params):
 
     headers = cherrypy.request.headers
@@ -79,15 +84,30 @@ class MISPAdapter(BaseView):
     # TODO: check if user has the right
     # TODO: check if user is registred
     if len(path) > 0:
+      detected = False
       if path[0] == 'filterEventIdsForPush':
         if method == 'POST':
           return_message = self.perform_push(body)
-      if path[0] == 'index':
+          detected = True
+      elif path[0] == 'index':
         if method == 'GET':
-          return_message = '<?xml version="1.0" encoding="UTF-8"?><response><xml_version>2.3.0</xml_version></response><!--Please note that this XML page is a representation of the /events/index page.Because the /events/index page is paginated you will have a limited number of results.You can for example ask: /events/index/limit:999.xml to get the 999 first records.You can also sort the table by using the sort and direction parameters. For example:/events/index/sort:date/direction:desc.xmlTo export all the events at once, with their attributes, use the export functionality. -->'
+          cherrypy.response.headers['Content-Type'] = 'application/xml; charset=UTF-8'
+          return_message = self.ce1sus_to_misp.make_index(self.get_user())
+          detected = True
+      if not detected:
+        try:
+          event_id = int(path[0])
+          event = self.event_controller.get_event_by_id(event_id)
+          # convert event to misp event
+          cherrypy.response.headers['Content-Type'] = 'application/xml; charset=UTF-8'
+          misp_event = self.ce1sus_to_misp.make_misp_xml(event)
+          return_message = misp_event
+        except ValueError:
+          raise cherrypy.HTTPError(404)
     else:
       # it is an insert of an event
       if method == 'POST':
+        cherrypy.response.headers['Content-Type'] = 'application/xml; charset=UTF-8'
         return_message = self.pushed_event(body)
 
     self.logout_handler.logout()
@@ -96,40 +116,46 @@ class MISPAdapter(BaseView):
   def pushed_event(self, xml_string):
     # instantiate misp converter
     user = self.get_user()
-    server_details = self.server_broker.get_server_by_user_id(user.identifier)
-    # check if it is a misp server else raise
-    if server_details.type == 'MISP':
-      self.misp_converter.api_key = server_details.user.api_key
-      self.misp_converter.api_url = server_details.baseurl
-      self.misp_converter.tag = server_details.name
-      user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
-      self.misp_converter.user = user
-      merged_event = None
-      try:
-        event = self.misp_converter.get_event_from_xml(xml_string)
-        self.logger.info('Received Event {0}'.format(event.uuid))
-        self.event_controller.insert_event(self.get_user(), event, True, True)
-      except IntegrityException as error:
-        self.logger.debug(error)
-        event = self.misp_converter.get_event_from_xml(xml_string, True)
-        # merge event with existing event
-        local_event = self.event_controller.get_event_by_uuid(event.uuid)
-        # TODO check if user can actually merge this event
-        merged_event = self.merger.merge_event(local_event, event, user)
-        if merged_event:
-          self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
-          self.event_controller.update_event(self.get_user(), merged_event, True, True)
-        else:
-          self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
-    else:
-      raise
-    # make db object
-    # event = self.misp_to_ce1sus.get_event_from_xml(xml_string)
-    # insert into db
+    try:
+      server_details = self.server_broker.get_server_by_user_id(user.identifier)
+      # check if it is a misp server else raise
+      if server_details.type == 'MISP':
+        self.misp_converter.api_key = server_details.user.api_key
+        self.misp_converter.api_url = server_details.baseurl
+        self.misp_converter.tag = server_details.name
+        user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
+        self.misp_converter.user = user
+        merged_event = None
+        try:
+          try:
+            event = self.misp_converter.get_event_from_xml(xml_string)
+            self.logger.info('Received Event {0}'.format(event.uuid))
+            self.event_controller.insert_event(self.get_user(), event, True, True)
+          except IntegrityException as error:
+            self.logger.debug(error)
+            event = self.misp_converter.get_event_from_xml(xml_string, True)
+            # merge event with existing event
+            local_event = self.event_controller.get_event_by_uuid(event.uuid)
+            # TODO check if user can actually merge this event
 
-    # return misp xml of the event
-    # return self.ce1sus_to_misp.make_misp_xml(event)$
-    return ''
+            # TODO make back request also to update the event on the remote MISP
+            merged_event = self.merger.merge_event(local_event, event, user)
+            if merged_event:
+              self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
+              self.event_controller.update_event(self.get_user(), merged_event, True, True)
+              event = merged_event
+            else:
+              self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
+        except BrokerException as error:
+          self.logger.error('Received a MISP Event which caused errors')
+          self.logger.error(error)
+          # TODO Dump xml
+        return self.ce1sus_to_misp.make_misp_xml(event)
+      else:
+        raise cherrypy.HTTPError(405)
+    except BrokerException as error:
+      self.logger.error(error)
+      raise cherrypy.HTTPError(404)
 
   def perform_push(self, send_events):
     incomming_events = dict()
