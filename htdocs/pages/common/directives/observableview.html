@@ -10,7 +10,7 @@
         <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!observable.properties.shared"></span></div>
         <div class="col-sm-4">
           <div class="btn-group" role="group">
-            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permissions.add || permission.propose"> <span
+            <button ng-if="!observable.object" type="button" class="btn btn-primary ce1sus-btn"ng-click="addObject()" ng-show="permission.propose"> <span
               class="glyphicon glyphicon-plus-sign"></span>
             </button>
             <button type="button" class="btn btn-default ce1sus-btn"ng-click="editObservable()" ng-show="permissions.modify"> <span
