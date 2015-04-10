@@ -48,18 +48,17 @@ class Ce1susMISP(BaseController):
     self.relations_controller = RelationController(config, session)
     self.events_controller = EventsController(config, session)
 
-  def make_misp_xml(self, event):
-    flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
-    xml_event = self.make_event(event, flat_attribtues)
-    result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
-    return result
-
   def __append_child(self, node, id_, value):
     child = etree.Element(id_)
     child.text = u'{0}'.format(value)
     node.append(child)
 
-  def make_event(self, event, attributes):
+  def create_event_xml(self, event, flat_attribtues, references):
+    xml_event = self.make_event(event, flat_attribtues, references)
+    result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
+    return result
+
+  def make_event(self, event, attributes, references):
     root = etree.Element('Event')
     self.__append_child(root, 'id', event.identifier)
     self.__append_child(root, 'org', event.creator_group.name)
@@ -88,12 +87,11 @@ class Ce1susMISP(BaseController):
       if xml_attr:
         root.append(xml_attr)
     counter = 0
-    for report in event.reports:
-      for reference in report.references:
-        counter = counter + 1
-        xml_ref = self.__make_reference(reference)
-        if xml_ref:
-          root.append(xml_ref)
+    for reference in references:
+      counter = counter + 1
+      xml_ref = self.__make_reference(reference)
+      if xml_ref:
+        root.append(xml_ref)
 
     self.__append_child(root, 'attribute_count', len(attributes) + counter)
     return root
@@ -280,8 +278,7 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'timestamp', int(time.mktime(event.modified_on.timetuple())))
     return root
 
-  def make_index(self, user):
-    events = self.events_controller.get_all_for_user(user)
+  def make_index(self, events):
     xml_events_str = ''
     for event in events:
       xml_event = self.__make_event(event)

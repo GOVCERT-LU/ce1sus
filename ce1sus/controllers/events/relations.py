@@ -6,12 +6,13 @@
 Created on Jan 2, 2015
 """
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
+from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
-from ce1sus.db.brokers.relationbroker import RelationBroker
 
 
 __author__ = 'Weber Jean-Paul'

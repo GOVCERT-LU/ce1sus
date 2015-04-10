@@ -64,3 +64,5 @@ class SyncServerController(BaseController):
   def get_all_types(self):
     values = ServerType.get_dictionary()
     return values
+
+

@@ -189,6 +189,7 @@ class EventController(BaseController):
 
   def get_event_user_permissions(self, event, user):
     try:
+      user = self.user_broker.getUserByUserName(user.username)
       # If is admin => give all rights the same is valid for the owenr
       isowner = is_event_owner(event, user)
       if isowner:
@@ -196,14 +197,17 @@ class EventController(BaseController):
         permissions.set_all()
       else:
         permissions = self.event_broker.get_event_user_permissions(event, user)
-        permissions = permissions.permissions
-      return permissions
+        if hasattr(permissions, 'permissions'):
+          permissions = permissions.permissions
+          return permissions
+        else:
+          return None
     except NothingFoundException as error:
       self.logger.debug(error)
       # The group was not associated to the event
       # if the event is still not visible the event has to have a lower or equal tlp level
       user_tlp = user.group.tlp_lvl
-      result = event.tlp.identifier >= user_tlp
+      result = event.tlp_level_id >= user_tlp
       if result:
         permissions = EventPermissions('0')
         # Set to default as the user can still view

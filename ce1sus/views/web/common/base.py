@@ -180,21 +180,27 @@ class BaseView(object):
     if not user.permissions.validate:
       raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
-  def is_event_viewable(self, event):
-    user = self.get_user()
+  def is_event_viewable(self, event, user=None):
+    if not user:
+      user = self.get_user()
     return self.is_user_allowed_to_perform(event, 'can_view', user)
 
   def check_if_event_is_viewable(self, event):
     self.check_permission(event, 'can_view')
 
-  def is_item_viewable(self, event, item):
-    user = self.get_user()
+  def is_item_viewable(self, event, item, user=None):
+    if not user:
+      user = self.get_user()
     if self.is_event_owner(event, user):
       return True
     else:
-      permissions = self.get_event_user_permissions(event, user)
-      if is_object_viewable(item, permissions):
-        return True
+      # check is the event is viewable then process to the iem
+      if self.is_event_viewable(event, user):
+        permissions = self.get_event_user_permissions(event, user)
+        if is_object_viewable(item, permissions):
+          return True
+        else:
+          return False
       else:
         return False
 
@@ -243,15 +249,18 @@ class BaseView(object):
 
   def is_user_allowed_to_perform(self, event, permission, user):
     permissions = self.get_event_user_permissions(event, user)
-    result = getattr(permissions, permission)
-    # if the result is still not set throw an error
-    log_msg = get_view_message(result, event.identifier, user.username, permission)
-    # update cache
-    self.logger.info(log_msg)
-    if result:
-      return result
+    if permissions:
+      result = getattr(permissions, permission)
+      # if the result is still not set throw an error
+      log_msg = get_view_message(result, event.identifier, user.username, permission)
+      # update cache
+      self.logger.info(log_msg)
+      if result:
+        return result
+      else:
+        raise Exception(u'Unknown error occurred during event checks')
     else:
-      raise Exception(u'Unknown error occurred during event checks')
+      return False
 
   def is_user_priviledged(self, user):
     self.logger.debug(u'Checking if user {0} is privileged'.format(user.username))
@@ -279,7 +288,7 @@ class BaseView(object):
       return True
 
   def check_if_user_can_set_validate_or_shared(self, event, instance, user, json):
-    # TODO: Involve if user == creator
+    # TODO: Involve if user == partof the originator
     properties = json.get('properties', None)
     if properties:
       permissions = self.get_event_user_permissions(event, user)

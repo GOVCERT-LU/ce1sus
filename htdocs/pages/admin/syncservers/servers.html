@@ -10,15 +10,13 @@
         sortable="'description'">{{item.description}}</td>
       <td data-title="'Base Url'" filter="{ 'baseurl': 'text' }"
         sortable="'baseurl'">{{item.baseurl}}</td>
-      <td data-title="'API Key'" filter="{ 'api_key': 'text' }"
-        sortable="'api_key'">{{item.user.api_key}}</td>
       <td data-title="'Verify ssl'">
         <span ng-show="item.verify_ssl" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
         <span ng-show="!item.verify_ssl" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
       </td>
       <td data-title="'Mode'">
-        <i ng-show="item.mode.is_push" class="fa fa-upload"></i>
-        <i ng-show="item.mode.is_pull" class="fa fa-download"></i>
+        <a href="" ng-click="pushServer(item)"><i ng-show="item.mode.is_push" class="fa fa-upload"></i></a>
+        <a href="" ng-click="pullServer(item)"><i ng-show="item.mode.is_pull" class="fa fa-download"></i></a>
       </td>
       <td data-title="'Options'">
       <div class="btn-group" role="group">

@@ -1,4 +1,4 @@
-{{currentuser|json}}
+
 <legend>Details</legend>
   <div class="btn-group" style="padding-bottom: 2px;">
     <button type="button" class="btn btn-default" ng-click="validateEvent()" ng-show="valiation">
@@ -8,7 +8,7 @@
     Edit
     </button>
 
-    <button class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal" ng-show="isAdmin">Change
+    <button ng-show="isAdmin" class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal">Change
       ownership</button>
     <button class="btn btn-danger" ng-click="removeEvent()" ng-show="event.userpermissions.delete">
       Delete</button>

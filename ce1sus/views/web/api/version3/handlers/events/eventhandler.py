@@ -95,7 +95,6 @@ class EventHandler(RestBaseHandler):
 
         return 'OK'
       else:
-        # TODO: make this cleaner
         raise cherrypy.HTTPError(403, 'No allowed')
     else:
       raise RestHandlerException(u'Invalid request')
@@ -139,7 +138,7 @@ class EventHandler(RestBaseHandler):
       # check if validated / shared as only the owner can do this
       self.check_if_user_can_set_validate_or_shared(event, event, user, json)
       event = self.assembler.update_event(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-      # TODO: make relations an populate the whole event by json
+
       self.event_controller.update_event(user, event, True, True)
       return self.__return_event(event, details, inflated)
     elif method == 'DELETE':
@@ -309,8 +308,9 @@ class EventHandler(RestBaseHandler):
         # return the complete with evety event attribute etc
         relations = self.relation_controller.get_relations_for_event(event)
         for relation in relations:
-          if self.is_event_viewable(event):
-            rel_event = relation.rel_event
+          rel_event = relation.rel_event
+          rel_attr = relation.rel_attribute
+          if self.is_event_viewable(rel_event) and self.is_item_viewable(rel_event, rel_attr):
             event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
             result.append(relation.to_dict(details, inflated, event_permissions))
 
@@ -319,8 +319,8 @@ class EventHandler(RestBaseHandler):
         # return only the unique events
         relations = self.relation_controller.get_related_events_for_event(event)
         for relation in relations:
-          if self.is_event_viewable(event):
-            rel_event = relation.rel_event
+          rel_event = relation.rel_event
+          if self.is_event_viewable(rel_event):
             event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
             result.append(rel_event.to_dict(details, inflated, event_permissions, False))
 
@@ -357,7 +357,8 @@ class EventHandler(RestBaseHandler):
         # return all observables from the event
         result = list()
         for report in event.get_reports_for_permissions(event_permission):
-          result.append(report.to_dict(details, inflated, event_permission))
+          if self.is_item_viewable(event, report):
+            result.append(report.to_dict(details, inflated, event_permission))
         return result
     if method == 'POST':
       self.check_if_user_can_add(event)

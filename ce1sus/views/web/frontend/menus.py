@@ -98,6 +98,8 @@ class GuiMenus(BaseView):
           child_menu_item['divider'] = True
           child_menus.append(child_menu_item)
 
+        referencesmgt = False
+
         if user.permissions.privileged:
           child_menu_item = dict()
           child_menu_item['title'] = 'References'
@@ -109,6 +111,8 @@ class GuiMenus(BaseView):
           child_menu_item = dict()
           child_menu_item['divider'] = True
           child_menus.append(child_menu_item)
+
+        syncserver = False
 
         if user.permissions.privileged:
           child_menu_item = dict()

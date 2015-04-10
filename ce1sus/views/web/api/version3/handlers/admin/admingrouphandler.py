@@ -39,7 +39,7 @@ class AdminGroupHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single group
           uuid = path.pop(0)
-          # TODO: add inflate
+
           group = self.group_controller.get_group_by_uuid(uuid)
 
           if len(path) > 0:

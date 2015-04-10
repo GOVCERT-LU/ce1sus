@@ -62,6 +62,26 @@ app.controller("SyncServersController", function($scope, Restangular, messages, 
     $scope.serverDetails = server;
     $modal({scope: $scope, template: 'pages/admin/syncservers/modals/editserver.html', show: true});
   };
+  $scope.pushServer = function(server){
+    message = {"type":"info","message":"Starting push for server "+server.identifier};
+    messages.setMessage(message);
+    Restangular.one('syncservers/push/',server.identifier).get().then(function(data) {
+      message = {"type":"success","message":"Pushed all to server "+server.identifier};
+      messages.setMessage(message);
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
+  $scope.pullServer = function(server){
+    message = {"type":"info","message":"Starting pull from server "+server.identifier};
+    messages.setMessage(message);
+    Restangular.one('syncservers/pull/',server.identifier).get().then(function(data) {
+      message = {"type":"success","message":"Pulled all from server "+server.identifier};
+      messages.setMessage(message);
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
 });
 
 app.controller("serverAddController", function($scope, Restangular, messages, $log, $routeSegment, $location) {

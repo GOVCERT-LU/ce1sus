@@ -44,7 +44,7 @@ class AdminUserHandler(RestBaseHandler):
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
-          # TODO: add inflate
+
           user = self.user_controller.get_user_by_uuid(uuid)
           if details:
             password = '*******************'

@@ -59,16 +59,11 @@ class ObservableComposition(Base):
 
   def get_observables_for_permissions(self, event_permissions):
     rel_objs = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for rel_obj in self.observables:
-          if rel_obj.properties.is_shareable:
-            rel_objs.append(rel_obj)
+    for rel_obj in self.observables:
+      if is_object_viewable(rel_obj, event_permissions):
+        rel_objs.append(rel_obj)
+
       # TODO take into account owner
-    else:
-      for rel_obj in self.observables:
-        if rel_obj.properties.is_validated_and_shared:
-          rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:

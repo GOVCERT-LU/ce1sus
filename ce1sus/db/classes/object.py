@@ -231,7 +231,6 @@ class Object(ExtendedLogingInformations, Base):
               }
 
   def populate(self, json, rest_insert=True):
-    # TODO: if inflated
     definition_uuid = json.get('definition_id', None)
     if not definition_uuid:
       definition = json.get('definition', None)

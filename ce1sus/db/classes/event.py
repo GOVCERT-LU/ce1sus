@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
 from ce1sus.db.classes.group import EventPermissions
@@ -176,16 +177,10 @@ class Event(ExtendedLogingInformations, Base):
 
   def get_observables_for_permissions(self, event_permissions):
     rel_objs = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for rel_obj in self.observables:
-          if rel_obj.properties.is_shareable:
-            rel_objs.append(rel_obj)
-      # TODO take into account owner
-    else:
-      for rel_obj in self.observables:
-        if rel_obj.properties.is_validated_and_shared:
-          rel_objs.append(rel_obj)
+    # TODO take into account owner
+    for rel_obj in self.observables:
+      if is_object_viewable(rel_obj, event_permissions):
+        rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:

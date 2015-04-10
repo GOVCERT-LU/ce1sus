@@ -1093,7 +1093,7 @@ class MispConverter(BaseController):
 
     return result
 
-  def filter_event_push(self):
+  def filter_event_push(self, parent, server_user):
     url = '{0}/events/filterEventIdsForPush'.format(self.api_url)
     events = self.event_broker.get_all()
     result = list()
@@ -1123,7 +1123,11 @@ class MispConverter(BaseController):
     for event_to_push in events_to_push:
       url = '{0}/events'.format(self.api_url)
       event = self.event_broker.get_by_uuid(event_to_push)
-      event_xml = self.ce1sus_misp_converter.make_misp_xml(event)
+      # cehck if event can be seen else ignore
+      if not parent.is_event_viewable(event, server_user):
+        continue
+      # use the other function as it filters unwanted stuff out
+      event_xml = parent.make_misp_xml(event, server_user)
       headers['Content-Length'] = len(event_xml)
       req = urllib2.Request(url, event_xml, headers)
       connection = urllib2.urlopen(req)

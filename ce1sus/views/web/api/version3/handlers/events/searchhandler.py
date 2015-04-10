@@ -65,8 +65,8 @@ class SearchHandler(RestBaseHandler):
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
     for found_value in results:
-      # TODO find a unified way to do this
-      # TODO: include user!!!!! IMPORTANT
+
+      # TODO: include user!!!!! IMPORTANT if the event is extracted by mistake
       if isinstance(found_value, Event):
         if self.__check_permissions(found_value, None):
           result.append({'event': found_value.to_dict(False, False),

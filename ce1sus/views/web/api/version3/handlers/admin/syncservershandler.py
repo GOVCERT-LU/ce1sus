@@ -6,8 +6,11 @@
 Created on Apr 2, 2015
 """
 from ce1sus.controllers.admin.syncserver import SyncServerController
-from ce1sus.controllers.base import ControllerException
+from ce1sus.controllers.base import ControllerException, \
+  ControllerNothingFoundException
 from ce1sus.db.classes.servers import SyncServer
+from ce1sus.views.web.adapters.misp.misp import MISPAdapter, \
+  MISPAdapterException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
@@ -24,6 +27,7 @@ class SyncServerHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
+    self.misp_adapter = MISPAdapter(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])
@@ -73,4 +77,40 @@ class SyncServerHandler(RestBaseHandler):
         raise RestHandlerException(u'Unrecoverable error')
 
     except ControllerException as error:
+      raise RestHandlerException(error)
+
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def push(self, **args):
+    try:
+      path = args.get('path')
+      if len(path) > 0:
+        uuid = path.pop(0)
+        server = self.sync_server_controller.get_server_by_uuid(uuid)
+        if server.type == 'MISP':
+          return self.misp_adapter.push(server)
+        else:
+          raise RestHandlerException('Not Implemented')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except (MISPAdapterException, ControllerException) as error:
+      raise RestHandlerException(error)
+
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def pull(self, **args):
+    try:
+      path = args.get('path')
+      if len(path) > 0:
+        uuid = path.pop(0)
+        server = self.sync_server_controller.get_server_by_uuid(uuid)
+        if server.type == 'MISP':
+          return self.misp_adapter.pull(server)
+        else:
+          raise RestHandlerException('Not Implemented')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except (MISPAdapterException, ControllerException) as error:
       raise RestHandlerException(error)

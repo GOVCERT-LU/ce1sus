@@ -308,8 +308,12 @@ app.controller("editEventController", function($scope, Restangular, messages,
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
     $log, $routeSegment, $location, useradmin, $modal, relations, Pagination) {
-  $scope.isAdmin = useradmin;
-
+  if (useradmin == 'false'){
+    $scope.isAdmin = false;
+  } else {
+    $scope.isAdmin = true;
+  }
+  
   $scope.relations = relations;
   $scope.pagination = Pagination.getNew(5,'relations');
   $scope.pagination.numPages = Math.ceil($scope.relations.length/$scope.pagination.perPage);
