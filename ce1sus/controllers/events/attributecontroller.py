@@ -68,8 +68,10 @@ class AttributeController(BaseController):
       for attribute in attributes:
         if owner:
           attribute.properties.is_validated = True
-          self.set_extended_logging(attribute, user, user.group, True)
-          self.attribute_broker.insert(attribute, commit=False)
+        else:
+          attribute.properties.is_proposal = True
+        self.set_extended_logging(attribute, user, user.group, True)
+        self.attribute_broker.insert(attribute, commit=False)
 
       self.attribute_broker.do_commit(commit)
       return attributes

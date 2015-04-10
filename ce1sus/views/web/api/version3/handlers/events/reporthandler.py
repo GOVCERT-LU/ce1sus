@@ -71,8 +71,9 @@ class ReportHandler(RestBaseHandler):
           self.check_item_is_viewable(event, report)
           return report.to_dict(details, inflated)
         elif method == 'PUT':
+          old_report = report
           self.check_if_event_is_modifiable(event)
-          self.check_if_user_can_set_validate_or_shared(event, report, user, json)
+          self.check_if_user_can_set_validate_or_shared(event, old_report, user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_report_id', None)
           # TODO Review the relations as they have to be removed at some point if they were existing
@@ -86,7 +87,7 @@ class ReportHandler(RestBaseHandler):
               self.report_controller.update_related_report(related_report, user, False)
           report = self.assembler.update_report(report, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.report_controller.update_report(report, user, True)
-          return report.to_dict(details, inflated, event_permissions)
+          return report.to_dict(details, inflated, event_permissions, user)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           self.report_controller.remove_report(report, user, True)
@@ -174,6 +175,7 @@ class ReportHandler(RestBaseHandler):
         else:
           reference = self.report_controller.get_reference_by_uuid(uuid)
           if method == 'PUT':
+            old_ref = reference
             self.check_if_event_is_modifiable(event)
             self.check_item_is_viewable(event, reference)
             definition_uuid = json.get('definition_id', None)
@@ -186,9 +188,13 @@ class ReportHandler(RestBaseHandler):
             handler_instance.is_rest_insert = self.is_rest_insert(headers)
             handler_instance.is_owner = self.is_event_owner(event, user)
 
-            self.check_if_user_can_set_validate_or_shared(event, reference, user, json)
+            self.check_if_user_can_set_validate_or_shared(event, old_ref, user, json)
+
             # Ask handler to process the json for the new attributes
             reference = handler_instance.update(reference, user, json)
+
+            self.logger.info(u'User {0} changed reference {1} from {2} to {3}'.format(user.username, old_ref.identifier, old_ref.value, reference.value))
+
             # TODO: check if there are no children attached
             self.report_controller.update_reference(reference, user, True)
 

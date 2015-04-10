@@ -54,8 +54,10 @@ class Ce1susMISP(BaseController):
     node.append(child)
 
   def create_event_xml(self, event, flat_attribtues, references):
+    # flat_attribtues and references must not contain anything which is not destined to be shared
     xml_event = self.make_event(event, flat_attribtues, references)
     result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
+    print result
     return result
 
   def make_event(self, event, attributes, references):
@@ -75,7 +77,10 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'proposal_email_lock', 0)
     self.__append_child(root, 'orgc', event.originating_group.name)
     self.__append_child(root, 'locked', 0)
-    self.__append_child(root, 'publish_timestamp', int(time.mktime(event.last_publish_date.timetuple())))
+    if event.last_publish_date:
+      self.__append_child(root, 'publish_timestamp', int(time.mktime(event.last_publish_date.timetuple())))
+    else:
+      self.__append_child(root, 'publish_timestamp', 0)
     self.__append_child(root, 'analysis', Ce1susMISP.analysis_id_map.get(event.analysis_id, 0))
     self.__append_child(root, 'threat_level_id', Ce1susMISP.threat_level_id_map.get(event.risk_id, 4))
     self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(event.tlp_level_id, 2))
@@ -120,10 +125,14 @@ class Ce1susMISP(BaseController):
     elif attr_def_name in ['HTTP_Method']:
       return 'http-method'
     elif attr_def_name in ['ipv4_addr', 'ipv4_net', 'ipv6_addr', 'ipv6_addr']:
-      if 'ource' in attribute.object.observable.description:
-        return 'ip-dst'
+      category = 'Network activity'
+      if attribute.object.observable.description:
+        if 'ource' in attribute.object.observable.description:
+          return 'ip-dst'
+        else:
+          return 'ip-src'
       else:
-        return 'ip-src'
+        return 'ip-dst'
     elif attr_def_name in ['url']:
       return 'url'
     elif attr_def_name in ['raw_artifact']:
@@ -203,7 +212,7 @@ class Ce1susMISP(BaseController):
       return 'Payload installation'
     elif obj_def_name in ['WindowsRegistryKey']:
       return 'Persistence mechanism'
-    elif obj_def_name in ['DomainName', 'Hostname', 'HTTPSession']:
+    elif obj_def_name in ['DomainName', 'Hostname', 'HTTPSession', 'Address']:
       return 'Network activity'
     elif obj_def_name in ['SNAFU']:
       # Is not mapped yet

@@ -1095,9 +1095,11 @@ class MispConverter(BaseController):
 
   def filter_event_push(self, parent, server_user):
     url = '{0}/events/filterEventIdsForPush'.format(self.api_url)
-    events = self.event_broker.get_all()
+    events = parent.get_all_events(server_user)
     result = list()
     for event in events:
+      if not parent.is_event_viewable(event, server_user):
+        continue
       eventdict = dict()
       eventdict['Event'] = dict()
       eventdict['Event']['uuid'] = event.uuid
@@ -1123,7 +1125,7 @@ class MispConverter(BaseController):
     for event_to_push in events_to_push:
       url = '{0}/events'.format(self.api_url)
       event = self.event_broker.get_by_uuid(event_to_push)
-      # cehck if event can be seen else ignore
+      # cehck if event can be seen else ignore, normally should not happen
       if not parent.is_event_viewable(event, server_user):
         continue
       # use the other function as it filters unwanted stuff out

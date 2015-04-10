@@ -133,10 +133,11 @@ class EventHandler(RestBaseHandler):
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
     elif method == 'PUT':
+      old_event = event
       user = self.get_user()
       self.check_if_event_is_modifiable(event)
       # check if validated / shared as only the owner can do this
-      self.check_if_user_can_set_validate_or_shared(event, event, user, json)
+      self.check_if_user_can_set_validate_or_shared(event, old_event, user, json)
       event = self.assembler.update_event(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
       self.event_controller.update_event(user, event, True, True)
@@ -165,8 +166,11 @@ class EventHandler(RestBaseHandler):
         else:
           raise PathParsingException(u'observale cannot be called without an ID')
         if method == 'PUT':
+          old_observable = observable
           self.check_if_event_is_modifiable(event)
-          self.check_if_user_can_set_validate_or_shared(event, observable, user, json)
+
+          self.check_if_user_can_set_validate_or_shared(event, old_observable, user, json)
+
           observable = self.assembler.update_observable(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.observable_controller.update_observable(observable, user, True)
           return observable.to_dict(details, inflated)
@@ -186,16 +190,16 @@ class EventHandler(RestBaseHandler):
         observable = self.observable_controller.get_observable_by_uuid(uuid)
         self.check_item_is_viewable(event, observable)
         if is_object_viewable(observable, event_permission):
-          return observable.to_dict(details, inflated, event_permission)
+          return observable.to_dict(details, inflated, event_permission, user)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
 
       else:
         # return all observables from the event
         result = list()
-        for observable in event.get_observables_for_permissions(event_permission):
+        for observable in event.get_observables_for_permissions(event_permission, user):
           if self.is_item_viewable(event, observable):
-            result.append(observable.to_dict(details, inflated, event_permission))
+            result.append(observable.to_dict(details, inflated, event_permission, user))
 
         return result
     except ControllerException as error:
@@ -228,7 +232,7 @@ class EventHandler(RestBaseHandler):
     user = self.get_user()
     event_permission = self.get_event_user_permissions(event, user)
     owner = self.is_event_owner(event, user)
-    result = event.to_dict(details, inflated, event_permission, owner)
+    result = event.to_dict(details, inflated, event_permission, user)
     result['userpermissions'] = event_permission.to_dict()
     result['userpermissions']['owner'] = owner
     return result
@@ -312,7 +316,7 @@ class EventHandler(RestBaseHandler):
           rel_attr = relation.rel_attribute
           if self.is_event_viewable(rel_event) and self.is_item_viewable(rel_event, rel_attr):
             event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
-            result.append(relation.to_dict(details, inflated, event_permissions))
+            result.append(relation.to_dict(details, inflated, event_permissions, self.get_user()))
 
         return result
       else:
@@ -322,7 +326,7 @@ class EventHandler(RestBaseHandler):
           rel_event = relation.rel_event
           if self.is_event_viewable(rel_event):
             event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
-            result.append(rel_event.to_dict(details, inflated, event_permissions, False))
+            result.append(rel_event.to_dict(details, inflated, event_permissions, self.get_user()))
 
         return result
     elif method == 'DELETE':
@@ -349,23 +353,23 @@ class EventHandler(RestBaseHandler):
         report = self.report_controller.get_report_by_uuid(uuid)
         self.check_item_is_viewable(event, report)
         if is_object_viewable(report, event_permission):
-          return report.to_dict(details, inflated, event_permission)
+          return report.to_dict(details, inflated, event_permission, user)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
 
       else:
         # return all observables from the event
         result = list()
-        for report in event.get_reports_for_permissions(event_permission):
+        for report in event.get_reports_for_permissions(event_permission, user):
           if self.is_item_viewable(event, report):
-            result.append(report.to_dict(details, inflated, event_permission))
+            result.append(report.to_dict(details, inflated, event_permission, user))
         return result
     if method == 'POST':
       self.check_if_user_can_add(event)
       report = self.assembler.assemble_report(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
       self.report_controller.insert_report(report, user)
-      return report.to_dict(details, inflated)
+      return report.to_dict(details, inflated, event_permission, user)
     else:
       raise RestHandlerException('Operation not supported')
     return list()

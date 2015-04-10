@@ -138,6 +138,11 @@ class Assembler(BaseController):
 
     if owner:
       event.properties.is_validated = True
+      event.properties.is_proposal = False
+    else:
+      event.properties.is_validated = False
+      event.properties.is_proposal = True
+
     observables = json.get('observables', None)
     if observables:
       for observable in observables:
@@ -170,8 +175,14 @@ class Assembler(BaseController):
     comment.populate(json, rest_insert)
     self.populate_extended_logging(comment, json, user, True)
     comment.event_id = event.identifier
+
     if owner:
       comment.properties.is_validated = True
+      comment.properties.is_proposal = False
+    else:
+      comment.properties.is_validated = False
+      comment.properties.is_proposal = True
+
     comment.properties.is_rest_instert = rest_insert
     comment.properties.is_web_insert = not rest_insert
     return comment
@@ -194,8 +205,12 @@ class Assembler(BaseController):
         composed.observables.append(obs)
     composed.properties.populate(json.get('properties'))
     if owner:
-      # The observable is directly validated as the owner can validate
       composed.properties.is_validated = True
+      composed.properties.is_proposal = False
+    else:
+      composed.properties.is_validated = False
+      composed.properties.is_proposal = True
+
     return composed
 
   def assemble_observable(self, event, json, user, owner=False, rest_insert=True):
@@ -221,10 +236,13 @@ class Assembler(BaseController):
     rel_observables = json.get('related_observables', None)
     if rel_observables:
       raise Exception('Not yet implemented')
-
     if owner:
-      # The observable is directly validated as the owner can validate
       observable.properties.is_validated = True
+      observable.properties.is_proposal = False
+    else:
+      observable.properties.is_validated = False
+      observable.properties.is_proposal = True
+
     observable.properties.is_rest_instert = rest_insert
     observable.properties.is_web_insert = not rest_insert
     return observable
@@ -285,8 +303,11 @@ class Assembler(BaseController):
     obj.parent_id = observable.identifier
 
     if owner:
-      # The attribute is directly validated as the owner can validate
       obj.properties.is_validated = True
+      obj.properties.is_proposal = False
+    else:
+      obj.properties.is_validated = False
+      obj.properties.is_proposal = True
 
     self.observable_controller.insert_object(obj, user, False)
 
@@ -345,7 +366,12 @@ class Assembler(BaseController):
     attribute.properties.is_web_insert = not rest_insert
 
     self.populate_extended_logging(attribute, json, user, True)
-
+    if owner:
+      attribute.properties.is_validated = True
+      attribute.properties.is_proposal = False
+    else:
+      attribute.properties.is_validated = False
+      attribute.properties.is_proposal = True
     return attribute
 
   def assemble_attribute_definition(self, json):
@@ -434,6 +460,12 @@ class Assembler(BaseController):
     if related_object.relation == 'None':
       related_object.relation = None
     obj.related_objects.append(related_object)
+    if owner:
+      related_object.properties.is_validated = True
+      related_object.properties.is_proposal = False
+    else:
+      related_object.properties.is_validated = False
+      related_object.properties.is_proposal = True
     return related_object
 
   def get_reference_definition(self, json):
@@ -463,6 +495,12 @@ class Assembler(BaseController):
         ref.populate(reference, rest_insert)
         # set definition
         self.populate_extended_logging(ref, reference, user, True)
+        if owner:
+          ref.properties.is_validated = True
+          ref.properties.is_proposal = False
+        else:
+          ref.properties.is_validated = False
+          ref.properties.is_proposal = True
         ref.properties.is_rest_instert = rest_insert
         ref.properties.is_web_insert = not rest_insert
         return ref
@@ -479,8 +517,11 @@ class Assembler(BaseController):
     self.populate_extended_logging(report, json, user, True)
     report.event = event
     if owner:
-      # The observable is directly validated as the owner can validate
       report.properties.is_validated = True
+      report.properties.is_proposal = False
+    else:
+      report.properties.is_validated = False
+      report.properties.is_proposal = True
     references = json.get('references', list())
     for reference in references:
       ref = self.assemble_reference(reference, user, owner, rest_insert)

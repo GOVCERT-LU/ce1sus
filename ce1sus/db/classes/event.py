@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
-from ce1sus.common.checks import is_object_viewable
+from ce1sus.common.checks import is_object_viewable, is_event_owner
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
 from ce1sus.db.classes.group import EventPermissions
@@ -175,12 +175,15 @@ class Event(ExtendedLogingInformations, Base):
     # TODO validation of an event
     return True
 
-  def get_observables_for_permissions(self, event_permissions):
+  def get_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.observables:
       if is_object_viewable(rel_obj, event_permissions):
         rel_objs.append(rel_obj)
+      else:
+        if rel_obj.creator.identifier == user.identifier:
+          rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:
@@ -194,11 +197,15 @@ class Event(ExtendedLogingInformations, Base):
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
     """
 
-  def get_reports_for_permissions(self, event_permissions):
+  def get_reports_for_permissions(self, event_permissions, user):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.reports:
-      rel_objs.append(rel_obj)
+      if is_object_viewable(rel_obj, event_permissions):
+        rel_objs.append(rel_obj)
+      else:
+        if rel_obj.creator.identifier == user.identifier:
+          rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:
@@ -212,8 +219,8 @@ class Event(ExtendedLogingInformations, Base):
       return self.reports.filter(Report.dbcode.op('&')(3) == 3).all()
     """
 
-  def observables_count_for_permissions(self, event_permissions):
-    return len(self.get_observables_for_permissions(event_permissions))
+  def observables_count_for_permissions(self, event_permissions, user):
+    return len(self.get_observables_for_permissions(event_permissions, user))
     """
     if event_permissions:
       if event_permissions.can_validate:
@@ -226,8 +233,8 @@ class Event(ExtendedLogingInformations, Base):
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
     """
 
-  def reports_count_for_permissions(self, event_permissions):
-    return len(self.get_reports_for_permissions(event_permissions))
+  def reports_count_for_permissions(self, event_permissions, user):
+    return len(self.get_reports_for_permissions(event_permissions, user))
     """
     if event_permissions:
       if event_permissions.can_validate:
@@ -240,17 +247,17 @@ class Event(ExtendedLogingInformations, Base):
       return self.reports.filter(Report.dbcode.op('&')(3) == 3).count()
     """
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None, owner=False):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     if inflated:
       observables = list()
       for observable in self.get_observables_for_permissions(event_permissions):
-        observables.append(observable.to_dict(complete, inflated, event_permissions))
+        observables.append(observable.to_dict(complete, inflated, event_permissions, user))
 
       observables_count = len(observables)
 
       reports = list()
-      for report in self.get_reports_for_permissions(event_permissions):
-        reports.append(report.to_dict(complete, inflated, event_permissions))
+      for report in self.get_reports_for_permissions(event_permissions, user):
+        reports.append(report.to_dict(complete, inflated, event_permissions, user))
 
       reports_count = len(reports)
 
@@ -263,7 +270,7 @@ class Event(ExtendedLogingInformations, Base):
       reports_count = -1
     if complete:
       comments = list()
-      if owner:
+      if is_event_owner(self, user):
         for comment in self.comments:
           comments.append(comment.to_dict())
       groups = list()

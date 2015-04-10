@@ -208,7 +208,7 @@ class Attribute(ExtendedLogingInformations, Base):
         return False
     return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     condition = None
     condition_id = None
     if self.condition:

@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
 from ce1sus.db.common.session import Base
@@ -153,7 +154,7 @@ class Reference(ExtendedLogingInformations, Base):
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(complete, inflated),
@@ -192,73 +193,55 @@ class Report(ExtendedLogingInformations, Base):
   event = relationship('Event', uselist=False, primaryjoin='Report.event_id==Event.identifier')
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
-  references = relationship('Reference', lazy='dynamic')
+  references = relationship('Reference')
   dbcode = Column('code', Integer, nullable=False, default=0)
   related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
 
   __bit_code = None
 
-  def references_count_for_permissions(self, event_permissions):
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.references.count()
-      else:
-        # count validated ones
-        return self.references.filter(Reference.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.references.filter(Reference.dbcode.op('&')(3) == 3).count()
+  def references_count_for_permissions(self, event_permissions, user):
+    return len(self.get_references_for_permissions(event_permissions, user))
 
-  def related_reports_count_for_permissions(self, event_permissions):
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_reports.count()
-      else:
-        # count validated ones
-        return self.related_reports.filter(Report.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.related_reports.filter(Report.dbcode.op('&')(3) == 3).count()
+  def related_reports_count_for_permissions(self, event_permissions, user):
+    return len(self.get_related_reports_for_permissions(event_permissions, user))
 
-  def get_references_for_permissions(self, event_permissions):
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.references.all()
+  def get_references_for_permissions(self, event_permissions, user):
+    references = list()
+    for ref in self.references:
+      if is_object_viewable(ref, event_permissions):
+        references.append(ref)
       else:
-        # count validated ones
-        return self.references.filter(Reference.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.references.filter(Reference.dbcode.op('&')(3) == 3).all()
+        if ref.creator.identifier == user.identifier:
+          references.append(ref)
+    return references
 
-  def get_related_reports_for_permissions(self, event_permissions):
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_reports.all()
+  def get_related_reports_for_permissions(self, event_permissions, user):
+    rel_reps = list()
+    for rel_rep in self.related_reports:
+      if is_object_viewable(rel_rep, event_permissions):
+        rel_reps.append(rel_rep)
       else:
-        # count validated ones
-        return self.related_reports.filter(Report.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.related_reports.filter(Report.dbcode.op('&')(3) == 3).all()
+        if rel_rep.creator.identifier == user.identifier:
+          rel_reps.append(rel_rep)
+    return rel_reps
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     references = list()
     related_reports = list()
-    for reference in self.get_references_for_permissions(event_permissions):
-      references.append(reference.to_dict(complete, inflated, event_permissions))
+    for reference in self.get_references_for_permissions(event_permissions, user):
+      references.append(reference.to_dict(complete, inflated, event_permissions, user))
 
     if references:
       references_count = len(references)
     else:
-      references_count = self.references_count_for_permissions(event_permissions)
+      references_count = self.references_count_for_permissions(event_permissions, user)
 
     if inflated:
-      for related_report in self.get_related_reports_for_permissions(event_permissions):
-        related_reports.append(related_report.to_dict(complete, inflated, event_permissions))
+      for related_report in self.get_related_reports_for_permissions(event_permissions, user):
+        related_reports.append(related_report.to_dict(complete, inflated, event_permissions, user))
       related_count = len(related_reports)
     else:
-      related_count = self.related_reports_count_for_permissions(event_permissions)
+      related_count = self.related_reports_count_for_permissions(event_permissions, user)
     if complete:
       return {'identifier': self.convert_value(self.uuid),
               'title': self.convert_value(self.title),

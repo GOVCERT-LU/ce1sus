@@ -90,11 +90,12 @@ class EventPermissions(BitBase):
 
   @property
   def can_propose(self):
+    # Not used anymore
     return self._get_value(EventPermissions.PROPOSE)
 
   @can_propose.setter
   def can_propose(self, value):
-    # Note if you can propose, you can see
+    # Not used anymore
     self._set_value(EventPermissions.PROPOSE, value)
 
   @property
@@ -151,13 +152,13 @@ class EventPermissions(BitBase):
     self.set_groups = True
 
   def set_default(self):
-    self.can_propose = True
+    # Set no default values
+    pass
 
   def to_dict(self):
     return {'add': self.can_add,
             'modify': self.can_modify,
             'validate': self.can_validate,
-            'propose': self.can_propose,
             'delete': self.can_delete,
             'set_groups': self.set_groups
             }

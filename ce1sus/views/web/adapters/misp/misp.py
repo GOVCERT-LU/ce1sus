@@ -53,12 +53,20 @@ class MISPAdapter(BaseView):
     # TODO: Proposal for misp
     raise cherrypy.HTTPError(404)
 
-  def make_index(self, server_user):
+  def get_all_events(self, server_user):
     events = self.event_controller.get_all()
     result = list()
     for event in events:
-      if self.is_event_viewable(event, server_user):
-        result.append(event)
+      if event.properties.is_validated:
+        if self.is_event_viewable(event, server_user):
+          result.append(event)
+      else:
+        if event.originating_group.identifier == server_user.group.identifier:
+          result.append(event)
+    return result
+
+  def make_index(self, server_user):
+    result = self.get_all_events(server_user)
     return self.ce1sus_to_misp.make_index(result)
 
   def pull(self, server_details):

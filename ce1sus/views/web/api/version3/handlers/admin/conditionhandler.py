@@ -9,7 +9,6 @@ from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.attribute import Condition
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
 
 
 __author__ = 'Weber Jean-Paul'
@@ -26,7 +25,7 @@ class ConditionHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
-  @require(privileged())
+  @require()
   def condition(self, **args):
     try:
       method = args.get('method')
@@ -46,6 +45,7 @@ class ConditionHandler(RestBaseHandler):
             result.append(condition.to_dict(details, inflated))
           return result
       elif method == 'POST':
+        self.check_if_admin()
         if len(path) > 0:
           raise RestHandlerException(u'No post definied on the given path')
         else:
@@ -56,6 +56,7 @@ class ConditionHandler(RestBaseHandler):
           self.condition_controller.insert_condition(condition)
           return condition.to_dict(details, inflated)
       elif method == 'PUT':
+        self.check_if_admin()
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
@@ -66,6 +67,7 @@ class ConditionHandler(RestBaseHandler):
         else:
           raise RestHandlerException(u'Cannot update condition as no identifier was given')
       elif method == 'DELETE':
+        self.check_if_admin()
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)

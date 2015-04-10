@@ -57,12 +57,14 @@ class ObservableComposition(Base):
   def validate(self):
     return True
 
-  def get_observables_for_permissions(self, event_permissions):
+  def get_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     for rel_obj in self.observables:
       if is_object_viewable(rel_obj, event_permissions):
         rel_objs.append(rel_obj)
-
+      else:
+        if rel_obj.creator.identifier == user.identifier:
+          rel_objs.append(rel_obj)
       # TODO take into account owner
     return rel_objs
     """
@@ -90,10 +92,10 @@ class ObservableComposition(Base):
       # count shared and validated
       return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
     """
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     observables = list()
-    for observable in self.get_observables_for_permissions(event_permissions):
-      observables.append(observable.to_dict(complete, inflated, event_permissions))
+    for observable in self.get_observables_for_permissions(event_permissions, user):
+      observables.append(observable.to_dict(complete, inflated, event_permissions, user))
 
     if observables:
       observables_count = len(observables)
@@ -117,9 +119,9 @@ class RelatedObservable(ExtendedLogingInformations, Base):
   confidence = Column('confidence', Integer)
   observable = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     # flatten related object
-    observable = self.observable.to_dict(complete, inflated, event_permissions)
+    observable = self.observable.to_dict(complete, inflated, event_permissions, user)
     observable['relation'] = self.convert_value(self.relation)
     observable['confidence'] = self.convert_value(self.confidence)
     observable['parent_observable_id'] = self.convert_value(self.parent_id)
@@ -152,8 +154,8 @@ class Observable(ExtendedLogingInformations, Base):
   related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id')
   __bit_code = None
 
-  def related_observables_count_for_permissions(self, event_permissions):
-    return len(self.get_related_observables_for_permissions(event_permissions))
+  def related_observables_count_for_permissions(self, event_permissions, user=None):
+    return len(self.get_related_observables_for_permissions(event_permissions, user))
     """
     if event_permissions:
       if event_permissions.can_validate:
@@ -170,17 +172,13 @@ class Observable(ExtendedLogingInformations, Base):
     return len(self.related_observables)
     # return self.related_objects.count()
 
-  def get_related_observables_for_permissions(self, event_permissions):
+  def get_related_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for rel_obj in self.related_observables:
-          if rel_obj.observable.properties.is_shareable:
-            rel_objs.append(rel_obj)
-      # TODO take into account owner
-    else:
-      for rel_obj in self.related_observables:
-        if rel_obj.observable.properties.is_validated_and_shared:
+    for rel_obj in self.related_observables:
+      if is_object_viewable(rel_obj, event_permissions):
+        rel_objs.append(rel_obj)
+      else:
+        if rel_obj.creator.identifier == user.identifier:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -210,31 +208,38 @@ class Observable(ExtendedLogingInformations, Base):
   def validate(self):
     return True
 
-  def get_object_for_permissions(self, event_permissions):
+  def get_object_for_permissions(self, event_permissions, user):
     if self.object:
       if is_object_viewable(self.object, event_permissions):
         return self.object
+      else:
+        if self.object.creator.identifier == user.identifier:
+          return self.object
     return None
 
-  def get_composed_observable_for_permissions(self, event_permissions):
+  def get_composed_observable_for_permissions(self, event_permissions, user):
     if self.observable_composition:
       if is_object_viewable(self.observable_composition, event_permissions):
         return self.observable_composition
+      else:
+        if self.observable_composition.creator.identifier == user.identifier:
+          return self.observable_composition
     return None
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     if inflated:
-      obj = self.get_object_for_permissions(event_permissions)
+      obj = self.get_object_for_permissions(event_permissions, user)
       if obj:
-        obj = obj.to_dict(complete, inflated, event_permissions)
+        obj = obj.to_dict(complete, inflated, event_permissions, user)
     else:
       obj = None
 
-    composed = self.get_composed_observable_for_permissions(event_permissions)
+    composed = self.get_composed_observable_for_permissions(event_permissions, user)
     if composed:
-      composed = composed.to_dict(complete, inflated, event_permissions)
+      composed = composed.to_dict(complete, inflated, event_permissions, user)
     related = list()
     if inflated:
+      # TODO: related observables
       """
       for related_observable in self.get_related_observables_for_permissions(event_permissions):
         related.append(related_observable.to_dict(complete, inflated, event_permissions))

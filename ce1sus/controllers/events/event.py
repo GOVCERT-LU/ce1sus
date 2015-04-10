@@ -176,6 +176,13 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_all_for_user(self, user):
+    try:
+      events = self.event_broker.get_all(user)
+      return events
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def change_owner(self, event, group_id, user, commit=True):
     try:
       group = self.group_broker.get_by_id(group_id)
@@ -195,6 +202,7 @@ class EventController(BaseController):
       if isowner:
         permissions = EventPermissions('0')
         permissions.set_all()
+        return permissions
       else:
         permissions = self.event_broker.get_event_user_permissions(event, user)
         if hasattr(permissions, 'permissions'):

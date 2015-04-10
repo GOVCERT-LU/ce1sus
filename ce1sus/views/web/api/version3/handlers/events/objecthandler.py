@@ -102,11 +102,12 @@ class ObjectHandler(RestBaseHandler):
         event_permissions = self.get_event_user_permissions(event, self.get_user())
         if method == 'GET':
           self.check_item_is_viewable(event, obj)
-          return obj.to_dict(details, inflated, event_permissions)
+          return obj.to_dict(details, inflated, event_permissions, user)
         elif method == 'PUT':
+          old_obj = obj
           self.check_if_event_is_modifiable(event)
           self.check_item_is_viewable(event, obj)
-          self.check_if_user_can_set_validate_or_shared(event, obj, user, json)
+          self.check_if_user_can_set_validate_or_shared(event, old_obj, user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
           # TODO Review the relations as they have to be removed at some point if they were existing
@@ -121,7 +122,7 @@ class ObjectHandler(RestBaseHandler):
               self.observable_controller.update_related_object(related_object, user, False)
           obj = self.assembler.update_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.observable_controller.update_object(obj, user, True)
-          return obj.to_dict(details, inflated, event_permissions)
+          return obj.to_dict(details, inflated, event_permissions, user)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           self.check_item_is_viewable(event, obj)
@@ -354,8 +355,10 @@ class ObjectHandler(RestBaseHandler):
         else:
           attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
           if method == 'PUT':
+            old_attr = attribute
             self.check_if_event_is_modifiable(event)
             self.check_item_is_viewable(event, attribute)
+            self.check_if_user_can_set_validate_or_shared(event, old_attr, user, json)
             definition_uuid = json.get('definition_id', None)
 
             if definition_uuid:
@@ -367,9 +370,18 @@ class ObjectHandler(RestBaseHandler):
             handler_instance.is_rest_insert = self.is_rest_insert(headers)
             handler_instance.is_owner = self.is_event_owner(event, user)
 
-            self.check_if_user_can_set_validate_or_shared(event, attribute, user, json)
             # Ask handler to process the json for the new attributes
             attribute = handler_instance.update(attribute, user, json)
+
+            if self.is_event_owner(event, user):
+              attribute.properties.is_validated = True
+              attribute.properties.is_proposal = False
+            else:
+              attribute.properties.is_validated = False
+              attribute.properties.is_proposal = True
+
+            self.logger.info(u'User {0} changed attribute {1} from {2} to {3}'.format(user.username, attribute.identifier, old_attr.value, attribute.value))
+
             # TODO: check if there are no children attached
             self.attribute_controller.update_attribute(attribute, user, True)
 

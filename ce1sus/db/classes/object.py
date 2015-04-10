@@ -10,10 +10,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, BigInteger
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException
-from ce1sus.db.common.session import Base
 from ce1sus.db.classes.definitions import ObjectDefinition
+from ce1sus.db.common.session import Base
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,9 +30,9 @@ class RelatedObject(Base):
   relation = Column('relation', BigInteger)
   object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     # flatten related object
-    obj = self.object.to_dict(complete, inflated, event_permissions)
+    obj = self.object.to_dict(complete, inflated, event_permissions, user)
     obj['relation'] = self.convert_value(self.relation)
     obj['parent_object_id'] = self.convert_value(self.parent_id)
     return {'identifier': self.convert_value(self.uuid),
@@ -92,18 +93,13 @@ class Object(ExtendedLogingInformations, Base):
         self.__bit_code = Properties(self.dbcode, self)
     return self.__bit_code
 
-  def get_attributes_for_permissions(self, event_permissions):
-    return self.attributes
+  def get_attributes_for_permissions(self, event_permissions, user):
     attributes = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for attribute in self.attributes:
-          if attribute.properties.is_shareable:
-            attributes.append(attribute)
-      # TODO take into account owner
-    else:
-      for attribute in self.attributes:
-        if attribute.properties.is_validated_and_shared:
+    for attribute in self.attributes:
+      if is_object_viewable(attribute, event_permissions):
+        attributes.append(attribute)
+      else:
+        if attribute.creator.identifier == user.identifier:
           attributes.append(attribute)
     return attributes
 
@@ -120,18 +116,14 @@ class Object(ExtendedLogingInformations, Base):
       return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).all()
     """
 
-  def get_related_objects_for_permissions(self, event_permissions):
+  def get_related_objects_for_permissions(self, event_permissions, user):
 
     rel_objs = list()
-    if event_permissions:
-      if event_permissions.can_validate:
-        for rel_obj in self.related_objects:
-          if rel_obj.object.properties.is_shareable:
-            rel_objs.append(rel_obj)
-      # TODO take into account owner
-    else:
-      for rel_obj in self.related_objects:
-        if rel_obj.object.properties.is_validated_and_shared:
+    for rel_obj in self.related_objects:
+      if is_object_viewable(rel_obj, event_permissions):
+        rel_objs.append(rel_obj)
+      else:
+        if rel_obj.creator.identifier == user.identifier:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -146,7 +138,7 @@ class Object(ExtendedLogingInformations, Base):
       return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).all()
     """
 
-  def attributes_count_for_permissions(self, event_permissions):
+  def attributes_count_for_permissions(self, event_permissions, user=None):
 
     """
     if event_permissions:
@@ -159,14 +151,14 @@ class Object(ExtendedLogingInformations, Base):
       # count shared and validated
       return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).count()
     """
-    return len(self.get_attributes_for_permissions(event_permissions))
+    return len(self.get_attributes_for_permissions(event_permissions, user))
 
   def attribute_count(self):
     return len(self.attributes)
     # return self.attributes.count()
 
-  def related_objects_count_for_permissions(self, event_permissions):
-    return len(self.get_related_objects_for_permissions(event_permissions))
+  def related_objects_count_for_permissions(self, event_permissions, user=None):
+    return len(self.get_related_objects_for_permissions(event_permissions, user))
     """
     if event_permissions:
       if event_permissions.can_validate:
@@ -183,23 +175,23 @@ class Object(ExtendedLogingInformations, Base):
     return len(self.related_objects)
     # return self.related_objects.count()
 
-  def to_dict(self, complete=True, inflated=False, event_permissions=None):
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     attributes = list()
-    for attribute in self.get_attributes_for_permissions(event_permissions):
-      attributes.append(attribute.to_dict(complete, inflated, event_permissions))
+    for attribute in self.get_attributes_for_permissions(event_permissions, user):
+      attributes.append(attribute.to_dict(complete, inflated, event_permissions, user))
     related = list()
 
     if attributes:
       attributes_count = len(attributes)
     else:
-      attributes_count = self.attributes_count_for_permissions(event_permissions)
+      attributes_count = self.attributes_count_for_permissions(event_permissions, user)
 
     if inflated:
-      for related_object in self.get_related_objects_for_permissions(event_permissions):
-        related.append(related_object.to_dict(complete, inflated, event_permissions))
+      for related_object in self.get_related_objects_for_permissions(event_permissions, user):
+        related.append(related_object.to_dict(complete, inflated, event_permissions, user))
       related_count = len(related)
     else:
-      related_count = self.related_objects_count_for_permissions(event_permissions)
+      related_count = self.related_objects_count_for_permissions(event_permissions, user)
     if complete:
       return {'identifier': self.convert_value(self.uuid),
               'definition_id': self.convert_value(self.definition.uuid),
