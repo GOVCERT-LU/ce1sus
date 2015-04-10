@@ -8,7 +8,7 @@ Created on Feb 17, 2015
 import cherrypy
 import json
 
-from ce1sus.controllers.common.merger import Merger
+from ce1sus.controllers.common.merger import Merger, MergingException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.db.common.broker import IntegrityException, BrokerException, NothingFoundException
@@ -187,7 +187,7 @@ class MISPAdapter(BaseView):
           # TODO check if user can view event
           # convert event to misp event
           cherrypy.response.headers['Content-Type'] = 'application/xml; charset=UTF-8'
-          misp_event = self.make_misp_xml(event)
+          misp_event = self.make_misp_xml(event, server_user)
           return_message = misp_event
         except ValueError:
           raise cherrypy.HTTPError(404)
@@ -195,7 +195,7 @@ class MISPAdapter(BaseView):
       # it is an insert of an event
       if method == 'POST':
         cherrypy.response.headers['Content-Type'] = 'application/xml; charset=UTF-8'
-        return_message = self.pushed_event(body)
+        return_message = self.pushed_event(body, server_user)
 
     self.logout_handler.logout()
     return return_message
@@ -218,17 +218,23 @@ class MISPAdapter(BaseView):
             event = self.misp_converter.get_event_from_xml(xml_string, True)
             # merge event with existing event
             local_event = self.event_controller.get_event_by_uuid(event.uuid)
-            self.is_event_viewable(local_event, server_user)
-            # TODO check if user can view even and modify this event
-
-            merged_event = self.merger.merge_event(local_event, event, user)
+            if self.is_event_viewable(local_event, server_user):
+              event_permissions = self.get_event_user_permissions(event, user)
+              try:
+                merged_event = self.merger.merge_event(local_event, event, user, event_permissions)
+              except MergingException:
+                raise cherrypy.HTTPError(405)
+            else:
+              # TODO log the changes
+              self.logger.warning('user {0} tried to change event {1} but does not have the right to see it'.format(user.username, event.identifer))
             if merged_event:
               self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
               self.event_controller.update_event(self.get_user(), merged_event, True, True)
               event = merged_event
             else:
               self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
-          return self.make_misp_xml(event)
+
+          return self.make_misp_xml(event, server_user)
         except BrokerException as error:
           self.logger.error('Received a MISP Event which caused errors')
           self.logger.error(error)

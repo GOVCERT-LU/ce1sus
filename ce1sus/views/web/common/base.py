@@ -183,7 +183,7 @@ class BaseView(object):
   def is_event_viewable(self, event, user=None):
     if not user:
       user = self.get_user()
-    if event.originating_group.identifier == user.group_id:
+    if event.originating_group_id == user.group_id:
       return True
     else:
       user_group = self.event_controller.group_broker.get_by_id(user.group_id)
