@@ -8,10 +8,11 @@ Created on Oct 29, 2014
 from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.references import ReferencesController
+from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.events.attributecontroller import AttributeController
+from ce1sus.db.classes.common import TLP
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.controllers.admin.syncserver import SyncServerController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -139,6 +140,22 @@ class TablesHandler(RestBaseHandler):
   @require(privileged())
   def tables(self, **args):
     values = self.attribute_definition_controller.get_all_tables()
+    result = list()
+    for key, value in values.iteritems():
+      result.append({'identifier': key, 'name': value})
+    return result
+
+
+class TLPHandler(RestBaseHandler):
+
+  def __init__(self, config):
+    RestBaseHandler.__init__(self, config)
+
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def tlps(self, **args):
+    values = TLP.get_dictionary()
     result = list()
     for key, value in values.iteritems():
       result.append({'identifier': key, 'name': value})

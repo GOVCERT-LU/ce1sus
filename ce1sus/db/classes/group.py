@@ -10,6 +10,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger, Boolean
 
+from ce1sus.db.classes.common import TLP
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -175,7 +176,7 @@ class EventPermissions(BitBase):
 class Group(Base):
   name = Column('name', Unicode(255), nullable=False, unique=True)
   description = Column('description', UnicodeText)
-  tlp_lvl = Column('tlplvl', Integer, default=4, nullable=False, index=True)
+  tlp_lvl = Column('tlplvl', Integer, default=3, nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   __default_bit_code = None
@@ -190,6 +191,25 @@ class Group(Base):
                           backref='parents',
                           order_by='Group.name',
                           )
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_lvl)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_lvl = TLP.get_by_value(text)
 
   @property
   def default_permissions(self):
@@ -222,12 +242,7 @@ class Group(Base):
     ObjectValidator.validateAlNum(self, 'name',
                                   withSymbols=True,
                                   minLength=3)
-    ObjectValidator.validateAlNum(self,
-                                  'description',
-                                  minLength=5,
-                                  withSpaces=True,
-                                  withNonPrintableCharacters=True,
-                                  withSymbols=True)
+    # TODO: validate
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, complete=True, inflated=False):
@@ -239,6 +254,8 @@ class Group(Base):
               'default_event_permissions': self.default_permissions.to_dict(),
               'email': self.convert_value(self.email),
               'gpg_key': self.convert_value(self.gpg_key),
+              'tlp_lvl': self.convert_value(self.tlp_lvl),
+              'tlp': self.convert_value(self.tlp),
               'children': dict(),
               }
     else:
@@ -251,6 +268,7 @@ class Group(Base):
     self.description = json.get('description', None)
     self.email = json.get('email', None)
     self.gpg_key = json.get('gpg_key', None)
+    self.tlp_lvl = json.get('tlp_lvl', 3)
     # permissions setting
     self.permissions.populate(json.get('permissions', {}))
     self.default_permissions.populate(json.get('default_event_permissions', {}))

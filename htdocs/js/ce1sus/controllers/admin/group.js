@@ -7,7 +7,7 @@
  * Created on Oct 29, 2014
  */
 
-app.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location, groups) {
+app.controller("groupController", function($scope, Restangular, messages, $routeSegment, $location, groups, tlps) {
 
   $scope.groups = groups;
   /*
@@ -16,7 +16,7 @@ app.controller("groupController", function($scope, Restangular, messages, $route
   }
   */
   $scope.$routeSegment = $routeSegment;
-
+  $scope.tlps = tlps;
 });
 
 app.controller("groupAddController", function($scope, Restangular, messages, $routeSegment,$location) {
@@ -78,6 +78,7 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
     if (!found){
       remaining.push(available_group);
     }
+
   }, $log);
   $scope.remaining = remaining;
 
@@ -152,6 +153,7 @@ app.controller("groupEditController", function($scope, Restangular, messages, $r
           if (entry.identifier == data.identifier) {
             entry.name = data.name;
           }
+          $scope.group = entry;
         }, $log);
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
       }

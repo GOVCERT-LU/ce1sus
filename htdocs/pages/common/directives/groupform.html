@@ -61,6 +61,16 @@
     </div>
   </div>
   <div class="row">
+      <label class="col-lg-3 control-label text-right">TLP *</label>
+      <div class="col-lg-9">
+        <select name="tlp_lvl" class="form-control"
+          ng-options="tlp.identifier as tlp.name for tlp in tlps"
+          ng-model="group.tlp_lvl">
+          <option style="display: none" value="">Select a TLP</option>
+        </select>
+      </div>
+    </div>
+  <div class="row">
     <label class="col-lg-3 control-label text-right">Permissions:
     </label>
     <div class="col-lg-9">

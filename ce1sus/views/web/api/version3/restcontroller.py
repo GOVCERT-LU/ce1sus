@@ -81,6 +81,7 @@ class RestController(BaseView):
     self.instances['indicatortypes'] = AdminIndicatorTypesHandler(config)
     self.instances['syncservers'] = SyncServerHandler(config)
     self.instances['servertypes'] = SyncServerTypesHandler(config)
+    self.instances['tlps'] = TLPHanlder(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):

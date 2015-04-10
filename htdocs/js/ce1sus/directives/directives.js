@@ -48,7 +48,8 @@ app.directive("groupForm", function() {
     restrict: "E",
     scope: {
       group: "=group",
-      editMode: "=edit"
+      editMode: "=edit",
+      tlps: "=tlps"
     },
     templateUrl: "pages/common/directives/groupform.html"
   };

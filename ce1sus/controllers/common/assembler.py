@@ -526,12 +526,10 @@ class Assembler(BaseController):
     for reference in references:
       ref = self.assemble_reference(reference, user, owner, rest_insert)
       report.references.append(ref)
-    if report.references:
-      report.properties.is_rest_instert = rest_insert
-      report.properties.is_web_insert = not rest_insert
-      return report
-    else:
-      return None
+
+    report.properties.is_rest_instert = rest_insert
+    report.properties.is_web_insert = not rest_insert
+    return report
 
   def update_report(self, report, json, user, owner=False, rest_insert=True):
     report.populate(json)

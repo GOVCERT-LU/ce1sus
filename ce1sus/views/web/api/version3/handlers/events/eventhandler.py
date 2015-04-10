@@ -365,6 +365,7 @@ class EventHandler(RestBaseHandler):
             result.append(report.to_dict(details, inflated, event_permission, user))
         return result
     if method == 'POST':
+      event_permission = self.get_event_user_permissions(event, user)
       self.check_if_user_can_add(event)
       report = self.assembler.assemble_report(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 

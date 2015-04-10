@@ -1119,7 +1119,15 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                    }, function(response) {
                                        throw generateErrorMessage(response);
                                    });
+                                 },
+                                 tlps: function(Restangular) {
+                                   return Restangular.one("tlps").getList(null, {"complete": false}).then(function (tlps) {
+                                     return tlps;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
                                  }
+                      
                                },
                                untilResolved: {
                                  templateUrl: 'pages/common/loading.html',

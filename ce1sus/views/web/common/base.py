@@ -186,12 +186,16 @@ class BaseView(object):
     if event.originating_group.identifier == user.group_id:
       return True
     else:
-      for eventgroup in event.groups:
-        group = eventgroup.group
-        if group.identifier == user.group_id:
-          return True
-        else:
-          return False
+      user_group = self.event_controller.group_broker.get_by_id(user.group_id)
+      if event.tlp_level_id >= user_group.tlp_lvl:
+        return True
+      else:
+        for eventgroup in event.groups:
+          group = eventgroup.group
+          if group.identifier == user.group_id:
+            return True
+          else:
+            return False
 
   def check_if_event_is_viewable(self, event):
     user = self.get_user()
