@@ -124,13 +124,13 @@ class MISPAdapter(BaseView):
     flat_attribtues = self.ce1sus_to_misp.relations_controller.get_flat_attributes_for_event(event)
     result = list()
     for flat_attribtue in flat_attribtues:
-      if self.is_item_viewable(event, flat_attribtue, server_user):
+      if self.is_item_viewable(event, flat_attribtue, server_user) and flat_attribtue.properties.is_shareable:
         result.append(flat_attribtue)
 
     references = list()
     for report in event.reports:
       for reference in report.references:
-        if self.is_item_viewable(event, reference, server_user):
+        if self.is_item_viewable(event, reference, server_user) and reference.properties.is_shareable:
           references.append(reference)
     result = self.ce1sus_to_misp.create_event_xml(event, result, references)
     return result
@@ -209,15 +209,16 @@ class MISPAdapter(BaseView):
         self.misp_converter.user = user
         merged_event = None
         try:
+          event_uuid = self.misp_converter.get_uuid_from_event_xml(xml_string)
           try:
-            event = self.misp_converter.get_event_from_xml(xml_string)
+            event = self.misp_converter.get_event_from_xml(xml_string, None)
             self.logger.info('Received Event {0}'.format(event.uuid))
             self.event_controller.insert_event(self.get_user(), event, True, True)
           except IntegrityException as error:
-            self.logger.debug(error)
-            event = self.misp_converter.get_event_from_xml(xml_string, True)
+            local_event = self.event_controller.get_event_by_uuid(event_uuid)
+            event = self.misp_converter.get_event_from_xml(xml_string, local_event)
             # merge event with existing event
-            local_event = self.event_controller.get_event_by_uuid(event.uuid)
+
             if self.is_event_viewable(local_event, server_user):
               event_permissions = self.get_event_user_permissions(event, user)
               try:
@@ -233,6 +234,8 @@ class MISPAdapter(BaseView):
               event = merged_event
             else:
               self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
+              # Log errors however
+              self.event_controller.event_broker.do_commit()
 
           return self.make_misp_xml(event, server_user)
         except BrokerException as error:

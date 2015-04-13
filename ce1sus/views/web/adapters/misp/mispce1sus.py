@@ -278,6 +278,8 @@ class MispConverter(BaseController):
     error.share = share
     error.message = comment
 
+    # TODO Find a way to log these elements in the DB
+
     self.error_broker.insert(error, False)
 
   def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts):
@@ -376,7 +378,14 @@ class MispConverter(BaseController):
         if attr.definition:
           attr.definition_id = attr.definition.identifier
           attr.value = data
-          obj.related_objects.append(raw_artifact)
+          if attr.validate():
+            obj.related_objects.append(raw_artifact)
+          else:
+            message = 'Value {0} was invalid for {1}'.format(attr.value, attr.definition_id)
+            self.logger.error(message)
+            self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+            return None
+
         else:
           message = 'Could not find attribute definition raw_artifact'
           self.logger.error(message)
@@ -400,6 +409,11 @@ class MispConverter(BaseController):
         attribute.object = obj
         attribute.object_id = attribute.object.identifier
         attribute.value = value
+        if not attribute.validate():
+          message = 'Value {0} was invalid for {1}'.format(attribute.value, attribute.definition_id)
+          self.logger.error(message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          return None
         # foo workaround
         def_name = attribute.definition.name
         attribute.definition = None
@@ -716,17 +730,16 @@ class MispConverter(BaseController):
     instance.properties.is_validated = False
     instance.properties.is_shareable = shared
 
-  def make_observable(self, event, comment, shared, ignore_uuid=False):
+  def make_observable(self, event, comment, shared, local_event=None):
     result_observable = Observable()
-    if ignore_uuid:
-      result_observable.event = event
+    if local_event:
+      result_observable.event_id = local_event.identifier
+      result_observable.parent_id = local_event.identifier
     else:
       result_observable.event_id = event.identifier
-    # result_observable.event = event
-    if ignore_uuid:
-      result_observable.parent = event
-    else:
       result_observable.parent_id = event.identifier
+    # result_observable.event = event
+
     # result_observable.parent = event
 
     if comment is None:
@@ -740,8 +753,8 @@ class MispConverter(BaseController):
 
     return result_observable
 
-  def map_observable_composition(self, array, event, title, shared, ignore_uuid=False):
-    result_observable = self.make_observable(event, None, True, ignore_uuid)
+  def map_observable_composition(self, array, event, title, shared, local_event=None):
+    result_observable = self.make_observable(event, None, True, local_event)
     if title:
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
@@ -757,7 +770,7 @@ class MispConverter(BaseController):
 
     return result_observable
 
-  def parse_attributes(self, event, misp_event, ignore_uuid=False):
+  def parse_attributes(self, event, misp_event, local_event=False):
 
     # make lists
     mal_email = list()
@@ -803,7 +816,7 @@ class MispConverter(BaseController):
             ts = e.text
       # ignore empty values:
       if value:
-        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, ignore_uuid)
+        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, local_event)
         # returns all attributes for all context (i.e. report and normal properties)
         if observable and isinstance(observable, Observable):
           obj = observable.object
@@ -850,7 +863,7 @@ class MispConverter(BaseController):
     result_observables = list()
 
     if mal_email:
-      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share, ignore_uuid)
+      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Malicious E-mail', event)
         result_observables.append(observable)
@@ -859,7 +872,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if artifacts:
-      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share, ignore_uuid)
+      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Malware Artifacts', event)
         del artifacts[:]
@@ -868,7 +881,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if ips:
-      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share, ignore_uuid)
+      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'IP Watchlist', event)
         del ips[:]
@@ -877,7 +890,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if file_hashes:
-      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share, ignore_uuid)
+      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'File Hash Watchlist', event)
         del file_hashes[:]
@@ -886,7 +899,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if domains:
-      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share, ignore_uuid)
+      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Domain Watchlist', event)
         del domains[:]
@@ -895,7 +908,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if c2s:
-      observable = self.map_observable_composition(c2s, event, 'C2', share, ignore_uuid)
+      observable = self.map_observable_composition(c2s, event, 'C2', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'C2', event)
         del c2s[:]
@@ -904,7 +917,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if urls:
-      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share, ignore_uuid)
+      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'URL Watchlist', event)
         del urls[:]
@@ -913,7 +926,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if others:
-      observable = self.map_observable_composition(others, event, 'Others', share, ignore_uuid)
+      observable = self.map_observable_composition(others, event, 'Others', share, local_event)
       if observable:
         indicator = self.map_indicator(observable, None, event)
         del others[:]
@@ -927,13 +940,15 @@ class MispConverter(BaseController):
       self.logger.warning('Event {0} does not contain attributes. None detected'.format(event.uuid))
       return result_observables
 
-  def __make_single_event_xml(self, xml_event, ignore_uuid=False):
+  def __make_single_event_xml(self, xml_event, local_event=None):
     rest_event = Event()
 
     event_id = self.set_event_header(xml_event, rest_event)
-    if not ignore_uuid:
+    if local_event:
+      rest_event.identifier = local_event.identifier
+    else:
       self.event_broker.insert(rest_event, False)
-    observables = self.parse_attributes(rest_event, xml_event, ignore_uuid)
+    observables = self.parse_attributes(rest_event, xml_event, local_event)
     rest_event.observables = observables
     # Append reference
 
@@ -993,13 +1008,22 @@ class MispConverter(BaseController):
     xml_string = urllib2.urlopen(req).read()
     return xml_string
 
-  def get_event_from_xml(self, xml_string, ignore_uuid=False):
+  def get_uuid_from_event_xml(self, xml_string):
     try:
       xml = et.fromstring(xml_string)
     except ParseError:
       xml = et.fromstring(xml_string[1:])
       xml = xml[0]
-    rest_event = self.__make_single_event_xml(xml, ignore_uuid)
+    event_uuid = xml.find('uuid').text
+    return event_uuid
+
+  def get_event_from_xml(self, xml_string, local_event):
+    try:
+      xml = et.fromstring(xml_string)
+    except ParseError:
+      xml = et.fromstring(xml_string[1:])
+      xml = xml[0]
+    rest_event = self.__make_single_event_xml(xml, local_event)
     return rest_event
 
   def __get_dump_path(self, base, dirname):

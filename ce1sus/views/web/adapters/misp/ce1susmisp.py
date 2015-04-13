@@ -12,6 +12,8 @@ from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.events import EventsController
+from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
+from ce1sus.db.brokers.event.reportbroker import ReportBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,6 +49,8 @@ class Ce1susMISP(BaseController):
     self.event_controller = EventController(config, session)
     self.relations_controller = RelationController(config, session)
     self.events_controller = EventsController(config, session)
+    self.rel_def_broker = self.broker_factory(ReferenceDefintionsBroker)
+    self.report_broker = self.broker_factory(ReportBroker)
 
   def __append_child(self, node, id_, value):
     child = etree.Element(id_)
@@ -63,7 +67,11 @@ class Ce1susMISP(BaseController):
   def make_event(self, event, attributes, references):
     root = etree.Element('Event')
     self.__append_child(root, 'id', event.identifier)
-    self.__append_child(root, 'org', event.creator_group.name)
+    if event.creator_group:
+      self.__append_child(root, 'org', event.creator_group.name)
+    else:
+      c_group = self.group_broker.get_by_id(event.creator_group_id)
+      self.__append_child(root, 'org', c_group.name)
 
     self.__append_child(root, 'info', event.description)
     if event.properties.is_shareable:
@@ -75,7 +83,13 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'uuid', event.uuid)
 
     self.__append_child(root, 'proposal_email_lock', 0)
-    self.__append_child(root, 'orgc', event.originating_group.name)
+
+    if event.originating_group:
+      self.__append_child(root, 'orgc', event.originating_group.name)
+    else:
+      group = self.group_broker.get_by_id(event.originating_group_id)
+      self.__append_child(root, 'orgc', group.name)
+
     self.__append_child(root, 'locked', 0)
     if event.last_publish_date:
       self.__append_child(root, 'publish_timestamp', int(time.mktime(event.last_publish_date.timetuple())))
@@ -94,7 +108,7 @@ class Ce1susMISP(BaseController):
     counter = 0
     for reference in references:
       counter = counter + 1
-      xml_ref = self.__make_reference(reference)
+      xml_ref = self.__make_reference(reference, event)
       if xml_ref:
         root.append(xml_ref)
 
@@ -102,7 +116,11 @@ class Ce1susMISP(BaseController):
     return root
 
   def get_attr_type(self, category, attribute):
-    attr_def_name = attribute.definition.name
+    if attribute.definition:
+      attr_def_name = attribute.definition.name
+    else:
+      attr_def = self.attr_def_broker.get_by_id(attribute.definition_id)
+      attr_def_name = attr_def.name
     if category in ['Artifacts dropped'] and attr_def_name in ['Artifact']:
       return 'attachment'
     elif attr_def_name in ['DomainName_Value']:
@@ -183,7 +201,12 @@ class Ce1susMISP(BaseController):
     return 'vulnerability'
 
   def get_reference_category_and_type(self, reference):
-    ref_def_name = reference.definition.name
+    if reference.definition:
+      ref_def_name = reference.definition.name
+    else:
+      ref_def = self.rel_def_broker.get_by_id(reference.definition_id)
+      ref_def_name = ref_def.name
+
     if ref_def_name in ['reference_external_identifier', 'reference_internal_case', 'reference_internal_identifier']:
       return 'Internal reference', 'other'
     elif ref_def_name in ['vulnerability_cve']:
@@ -196,7 +219,11 @@ class Ce1susMISP(BaseController):
       return None
 
   def get_attr_category(self, attribute):
-    obj_def_name = attribute.object.definition.name
+    if attribute.object.definition:
+      obj_def_name = attribute.object.definition.name
+    else:
+      obj_def = self.obj_def_broker.get_by_id(attribute.object.definition_id)
+      obj_def_name = obj_def.name
     if obj_def_name in ['Artifact']:
       return 'Artifacts dropped'
 
@@ -238,7 +265,11 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'uuid', attribute.uuid)
     self.__append_child(root, 'event_id', attribute.object.event_id)
     # TODO review this
-    self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(attribute.object.event.tlp_level_id, 2))
+    if attribute.object.event:
+      self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(attribute.object.event.tlp_level_id, 2))
+    else:
+      event = self.event_controller.get_event_by_id(attribute.object.event_id)
+      self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(event.tlp_level_id, 2))
     # TODO add comment
     if attribute.object.observable.description:
       self.__append_child(root, 'comment', attribute.object.observable.description)
@@ -248,7 +279,7 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'ShadowAttribtue', '')
     return root
 
-  def __make_reference(self, reference):
+  def __make_reference(self, reference, event=None):
     root = etree.Element('Attribute')
     self.__append_child(root, 'id', reference.identifier)
     self.__append_child(root, 'timestamp', int(time.mktime(reference.modified_on.timetuple())))
@@ -260,7 +291,11 @@ class Ce1susMISP(BaseController):
     ids = 0
     self.__append_child(root, 'to_ids', ids)
     self.__append_child(root, 'uuid', reference.uuid)
-    self.__append_child(root, 'event_id', reference.report.event_id)
+    if reference.report:
+      self.__append_child(root, 'event_id', reference.report.event_id)
+    else:
+      self.__append_child(root, 'event_id', event.identifier)
+
     # TODO review this
     self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(reference.report.event.tlp_level_id, 2))
     # TODO add comment

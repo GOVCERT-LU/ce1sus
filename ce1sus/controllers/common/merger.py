@@ -108,6 +108,7 @@ class Merger(BaseController):
           local_attribute.condition_id = rem_attribute.condition_id
           self.logger.info('Attribute {0} value will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.value, rem_attribute.value))
           local_attribute.value = rem_attribute.value
+
           local_attribute.modified_on = rem_attribute.modified_on
           local_attribute.modifier_id = user.identifier
           return True

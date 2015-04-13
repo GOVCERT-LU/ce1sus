@@ -118,6 +118,7 @@ class EventController(BaseController):
 
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(event, user, user.group, False)
+      # TODO relations on update
 
       self.event_broker.update(event, False)
       # generate relations if needed!
