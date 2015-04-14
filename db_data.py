@@ -1387,7 +1387,7 @@ def get_object_definitions(user, attribute_definitions):
   result[object_def.name] = object_def
 
   object_def = ObjectDefinition()
-  object_def.name = 'file'
+  object_def.name = 'File'
   object_def.description = 'The File object is intended to characterize generic files.'
   object_def.default_share = True
   object_def.creator = user
@@ -1420,7 +1420,7 @@ def get_object_definitions(user, attribute_definitions):
   result[object_def.name] = object_def
 
   object_def = ObjectDefinition()
-  object_def.name = 'file'
+  object_def.name = 'File'
   object_def.description = 'The File object is intended to characterize generic files.'
   object_def.default_share = True
   object_def.creator = user

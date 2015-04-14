@@ -704,8 +704,8 @@ class Migrator(object):
 
   def map_obj_def(self, line):
     name = line['name']
-    if 'file' in name:
-      name = 'file'
+    if 'file' in name or 'File' in name:
+      name = 'File'
     elif name == 'victim_targeting':
       return None
     elif name == 'user_account':
@@ -812,7 +812,7 @@ class Migrator(object):
         obs = self.make_attr_obs(attribute, 'Address', name, owner, event)
         composed_attribute.observables.append(obs)
       elif 'file' in name:
-        obs = self.make_attr_obs(attribute, 'file', name, owner, event)
+        obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
       elif 'email' in name:
         obs = self.make_attr_obs(attribute, 'email', name, owner, event)
@@ -821,7 +821,7 @@ class Migrator(object):
         self.notmapped.write('IOC Record comment could not be created the new event {0} and composed attribute {1}\n'.format(event.identifier, composed_attribute.identifier))
         self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
       elif 'hash' in name:
-        obs = self.make_attr_obs(attribute, 'file', name, owner, event)
+        obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
       elif name == 'encryption_key':
         self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
@@ -893,7 +893,7 @@ class Migrator(object):
 
         composed_attribute.observables.append(observable)
       elif name == 'vulnerability_cve':
-        obs = self.make_attr_obs(attribute, 'file', name, owner, event)
+        obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
       elif 'targeted' in name:
         self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.identifier))
@@ -1153,7 +1153,7 @@ class Migrator(object):
       raw_artifact.attributes.append(attribtue)
       # set the type
       attribute_line['uuid'] = u'{0}'.format(uuid4())
-      attribute_line['definition']['name'] = 'artifact_type'
+      attribute_line['definition']['name'] = 'content_type'
       attribute_line['value'] = 'Network Traffic'
       attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
       raw_artifact.attributes.append(attribtue)
@@ -1190,7 +1190,7 @@ class Migrator(object):
         attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
         raw_artifact.attributes.append(attribtue)
         # set the type
-        attribute_line['definition']['name'] = 'artifact_type'
+        attribute_line['definition']['name'] = 'content_type'
         attribute_line['value'] = 'File'
         attribute_line['uuid'] = uuid4()
         attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
@@ -1240,7 +1240,7 @@ class Migrator(object):
         attribtue = self.map_attribute(attribute_file, raw_artifact, owner)
         raw_artifact.attributes.append(attribtue)
         # set the type
-        attribute_file['definition']['name'] = 'artifact_type'
+        attribute_file['definition']['name'] = 'content_type'
         attribute_file['value'] = 'File'
         attribute_file['uuid'] = uuid4()
         attribtue = self.map_attribute(attribute_file, raw_artifact, owner)

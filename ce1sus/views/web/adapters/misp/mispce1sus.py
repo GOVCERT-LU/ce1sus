@@ -258,7 +258,7 @@ class MispConverter(BaseController):
     else:
       raise MispConverterException('Error determining group')
 
-  def log_element(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, comment):
+  def log_element(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, message):
     error = ErrorMispAttribute()
     error.orig_uuid = uuid
     error.category = category
@@ -276,7 +276,7 @@ class MispConverter(BaseController):
     else:
       error.is_ioc = False
     error.share = share
-    error.message = comment
+    error.message = message
 
     # TODO Find a way to log these elements in the DB
 
@@ -770,6 +770,16 @@ class MispConverter(BaseController):
 
     return result_observable
 
+  def is_obs_empty(self, observable):
+    empty = True
+    if observable.object:
+          if len(observable.object.attributes) > 0:
+            empty = False
+    if observable.observable_composition:
+      for obs in observable.observable_composition.observables:
+        sub_empty = self.is_obs_empty(obs)
+    return empty
+
   def parse_attributes(self, event, misp_event, local_event=False):
 
     # make lists
@@ -817,8 +827,11 @@ class MispConverter(BaseController):
       # ignore empty values:
       if value:
         observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, local_event)
+        empty = True
+        empty = self.is_obs_empty(observable)
+
         # returns all attributes for all context (i.e. report and normal properties)
-        if observable and isinstance(observable, Observable):
+        if observable and isinstance(observable, Observable) and not empty:
           obj = observable.object
           attr_def_name = None
           if obj:
@@ -1024,6 +1037,17 @@ class MispConverter(BaseController):
       xml = et.fromstring(xml_string[1:])
       xml = xml[0]
     rest_event = self.__make_single_event_xml(xml, local_event)
+
+    # Remove empty reports
+    reports = list()
+    for report in rest_event.reports:
+      if len(report.references) > 0:
+        reports.append(report)
+    rest_event.reports = reports
+
+    # Append the group of the misp user with all permissions as he inserted it !?
+
+
     return rest_event
 
   def __get_dump_path(self, base, dirname):

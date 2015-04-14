@@ -212,16 +212,21 @@ class EventController(BaseController):
         else:
           return None
     except NothingFoundException as error:
-      self.logger.debug(error)
       # The group was not associated to the event
+      self.logger.debug(error)
+
       # if the event is still not visible the event has to have a lower or equal tlp level
       user_tlp = user.group.tlp_lvl
       result = event.tlp_level_id >= user_tlp
+
       if result:
+        # Get the defaults for this group
+        usr_grp = user.group
+        permissions = usr_grp.default_permissions
+
+      else:
         permissions = EventPermissions('0')
-        # Set to default as the user can still view
-        permissions.set_default()
-        return permissions
+      return permissions
     except BrokerException as error:
       permissions = EventPermissions('0')
       return permissions

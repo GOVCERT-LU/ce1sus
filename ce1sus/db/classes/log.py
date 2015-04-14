@@ -5,7 +5,7 @@
 
 Created on Apr 7, 2015
 """
-from sqlalchemy.orm import relationship
+
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import BigInteger, UnicodeText, Unicode, Boolean
 

@@ -15,16 +15,7 @@
   <label class="col-lg-3 control-label text-right">CHKSUM</label>
   <div class="col-lg-9">{{object.chksum}}</div>
 </div>
-<div class="row">
-  <div class="col-lg-offset-3 col-lg-9">
-    <div class="btn-group">
-      <button type="button" class="btn btn-default"
-        data-template="pages/admin/object/modals/editobjectmodal.html"
-        bs-modal="modal" ng-show="showBtn()">Edit</button>
-      <button type="button" class="btn btn-danger" ng-click="removeObject()" ng-show="showBtn()">Delete</button>
-    </div>
-  </div>
-</div>
+
 <div class="row">
   <label class="col-lg-3 control-label text-right">Options
   </label>
@@ -40,4 +31,15 @@
     
   </div>
 </div>
+<div class="row">
+  <div class="col-lg-offset-3 col-lg-9">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default"
+        data-template="pages/admin/object/modals/editobjectmodal.html"
+        bs-modal="modal" ng-show="showBtn()">Edit</button>
+      <button type="button" class="btn btn-danger" ng-click="removeObject()" ng-show="showBtn()">Delete</button>
+    </div>
+  </div>
+</div>
+
 <add-rem-table title="Attribute" associated="object.attributes" all="attributes" route="attribute" owner="object"/>

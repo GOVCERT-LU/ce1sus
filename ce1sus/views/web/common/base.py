@@ -180,22 +180,44 @@ class BaseView(object):
     if not user.permissions.validate:
       raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
+  def __get_max_tlp(self, user_group):
+    if user_group.permissions.propagate_tlp:
+      max_tlp = user_group.tlp_lvl
+      for group in user_group.children:
+        if group.tlp_lvl < max_tlp:
+          max_tlp = group.tlp_lvl
+        # check for group children
+        child_max = self.__get_max_tlp(group)
+        if child_max < max_tlp:
+          max_tlp = child_max
+      return max_tlp
+    else:
+      user_group.tlp_lvl
+
   def is_event_viewable(self, event, user=None):
     if not user:
       user = self.get_user()
     if event.originating_group_id == user.group_id:
       return True
     else:
-      user_group = self.event_controller.group_broker.get_by_id(user.group_id)
-      if event.tlp_level_id >= user_group.tlp_lvl:
-        return True
+      if user:
+        user_group = self.event_controller.group_broker.get_by_id(user.group_id)
+        tlp_lvl = self.__get_max_tlp(user_group)
+        if event.tlp_level_id >= tlp_lvl:
+          return True
+        else:
+          grp_ids = list()
+          for group in user_group.children:
+            grp_ids.append(group.identifier)
+          grp_ids.append(user.group_id)
+
+          for eventgroup in event.groups:
+            group = eventgroup.group
+            if group.identifier in grp_ids:
+              return True
+          return False
       else:
-        for eventgroup in event.groups:
-          group = eventgroup.group
-          if group.identifier == user.group_id:
-            return True
-          else:
-            return False
+        return False
 
   def check_if_event_is_viewable(self, event):
     user = self.get_user()

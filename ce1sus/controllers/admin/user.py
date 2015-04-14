@@ -26,6 +26,11 @@ class UserController(BaseController):
 
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
+    salt = self.config.get('ce1sus', 'salt', None)
+    if salt:
+      self.salt = salt
+    else:
+      raise ControllerException('Salt was not defined in ce1sus.conf')
 
   def get_all_users(self):
     try:
@@ -55,7 +60,7 @@ class UserController(BaseController):
       user.activation_str = hashSHA1('{0}{1}'.format(user.plain_password, random.random()))
       user.activation_sent = DatumZait.utcnow()
       if user.plain_password:
-        user.password = hashSHA1(user.plain_password)
+        user.password = hashSHA1(user.plain_password + self.salt)
 
       # TODO: add api key and mail sending
 

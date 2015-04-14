@@ -178,6 +178,14 @@ class Maintenance(object):
     else:
       raise MaintenanceException('Class {0}.{1} does not implement HandlerBase'.format(modulename, classname))
 
+  def dump_definitions(self, dump_def, dump_dest):
+    if dump_def == 'attributes':
+      pass
+    elif dump_def == 'objects':
+      pass
+    else:
+      raise MaintenanceException('No definition assigned to {0}. It can either be attributes or objects'.format(dump_def))
+
 if __name__ == '__main__':
   parser = OptionParser()
   parser.add_option('--drop_rel', dest='drop_rel', action='store_true', default=False,
@@ -196,6 +204,10 @@ if __name__ == '__main__':
                     help='Function to register an installed references handler')
   parser.add_option('--class', dest='handler_class', type='string', default=None,
                     help='Class name of handler to register')
+  parser.add_option('--dump', dest='dump_def', type='string', default=None,
+                    help='[attributes|objects] Dumps specified definitions in json format. Must be used with --dest')
+  parser.add_option('--dest', dest='dump_dest', type='string', default=None,
+                    help='Destination file of the dump')
   (options, args) = parser.parse_args()
 
   basePath = dirname(abspath(__file__))
@@ -212,6 +224,13 @@ if __name__ == '__main__':
       maintenance.drop_relations(options.event_uuid)
     elif options.check_def_opt:
       maintenance.fix_chksums()
+    elif options.dump_def:
+      if options.dump_dest:
+        maintenance.dump_definitions(options.dump_def, options.dump_dest)
+      else:
+        print "No destination specified"
+        parser.print_help()
+        sys.exit(1)
     elif options.rebuild_opt:
       maintenance.rebuild_relations(options.event_uuid)
     elif options.attr_handler_reg_module:

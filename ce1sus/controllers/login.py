@@ -26,6 +26,11 @@ class LoginController(BaseController):
 
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
+    salt = self.config.get('ce1sus', 'salt', None)
+    if salt:
+      self.salt = salt
+    else:
+      raise ControllerException('Salt was not defined in ce1sus.conf')
 
   def get_user_by_usr_pwd(self, username, password):
     """
@@ -45,7 +50,7 @@ class LoginController(BaseController):
         if is_plugin_available('ldap', self.config):
           ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
           try:
-            user = self.user_broker.getUserByUsernameAndPassword(username, ldap_password_identifier)
+            user = self.user_broker.getUserByUsernameAndPassword(username, ldap_password_identifier, None)
             # user is present in DB, check if usr and pwd matching
             method = get_plugin_function('ldap', 'is_user_valid', self.config, 'internal_plugin')
             valid = method(username, password)
@@ -57,7 +62,7 @@ class LoginController(BaseController):
         # check if user is a pure DBUser
         if user is None:
           # the user was not specified as ldap user use traditional login
-          user = self.user_broker.getUserByUsernameAndPassword(username, password)
+          user = self.user_broker.getUserByUsernameAndPassword(username, password, self.salt)
 
       except NothingFoundException as error:
         self.logger.info(('A login attempt was made with username "{0}" '

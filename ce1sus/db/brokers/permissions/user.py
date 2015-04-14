@@ -88,7 +88,7 @@ class UserBroker(BrokerBase):
       raise BrokerException(error)
     return user
 
-  def getUserByUsernameAndPassword(self, username, password):
+  def getUserByUsernameAndPassword(self, username, password, salt=None):
     """
     Returns the user with the following username and password
 
@@ -101,10 +101,10 @@ class UserBroker(BrokerBase):
 
     :returns: User
     """
-    if password == 'EXTERNALAUTH':
-      passwd = password
+    if salt:
+      passwd = hashSHA1(password + salt)
     else:
-      passwd = hashSHA1(password, username)
+      passwd = password
 
     try:
       user = self.session.query(User).filter(User.username == username,
