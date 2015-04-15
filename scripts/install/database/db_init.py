@@ -99,7 +99,6 @@ if __name__ == '__main__':
   maintenance.register_handler('rthandler', 'references', 'RTHandler')
   maintenance.register_handler('texthandler', 'references', 'TextHandler')
 
-
   mail_templates = get_mail_templates(users[0])
 
   mail_ctrl = MailController(config, session)
