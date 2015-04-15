@@ -40,7 +40,7 @@ def dump_file(filename, brokerclass, connection):
   for item in items:
     try:
       print 'Dumping {0} {1}'.format(item.__class__.__name__, item.identifier)
-      dump_file.write(json.dumps(item.to_dict(), sort_keys=True, indent=4, separators=(',', ': ')))
+      dump_file.write(json.dumps(item.to_dict()))
     except TypeError as error:
       raise error
 
