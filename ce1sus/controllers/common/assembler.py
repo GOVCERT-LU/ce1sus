@@ -376,6 +376,7 @@ class Assembler(BaseController):
 
   def assemble_attribute_definition(self, json):
     attr_def = AttributeDefinition()
+
     return self.update_attribute_definition(attr_def, json)
 
   def assemble_reference_definition(self, json):
@@ -416,7 +417,7 @@ class Assembler(BaseController):
     default_condition_uuid = json.get('default_condition_id', None)
     if default_condition_uuid:
       default_condition = self.condition_broker.get_by_uuid(default_condition_uuid)
-      attr_def.default_condition_id = default_condition
+      attr_def.default_condition_id = default_condition.identifier
       attr_def.default_condition = default_condition
     else:
       raise AssemblerException('Attribute definition does not have a condition specified')

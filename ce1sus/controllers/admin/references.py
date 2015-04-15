@@ -7,10 +7,11 @@ Created on Feb 23, 2014
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker, ReferenceDefintionsBroker
+from ce1sus.db.classes.report import ReferenceHandler
+from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from ce1sus.db.classes.report import ReferenceHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -34,7 +35,13 @@ class ReferencesController(BaseController):
     self.reference_broker = self.broker_factory(ReferencesBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
 
-  def get_all(self):
+  def get_reference_definitions_all(self):
+    try:
+      return self.reference_definition_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_reference_all(self):
     try:
       return self.reference_broker.get_all()
     except BrokerException as error:
@@ -102,12 +109,16 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_reference_definition(self, reference_definition, user):
+  def insert_reference_definition(self, reference_definition, user, commit=True):
     try:
       reference_definition.chksum = gen_reference_chksum(reference_definition)
       user = self.user_broker.get_by_id(user.identifier)
+      if not reference_definition.reference_handler:
+        handler = self.reference_broker.get_handler_by_id(reference_definition.referencehandler_id)
+        reference_definition.reference_handler = handler
       self.set_simple_logging(reference_definition, user, insert=True)
-      reference_definition = self.reference_definition_broker.insert(reference_definition)
+      reference_definition = self.reference_definition_broker.insert(reference_definition, False)
+      self.reference_definition_broker.do_commit(commit)
       return reference_definition
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(reference_definition)
@@ -134,9 +145,9 @@ class ReferencesController(BaseController):
   def register_handler(self, uuid, module, description):
     try:
       reference_handler = ReferenceHandler()
-      reference_handler.identifier = uuid
+      reference_handler.uuid = uuid
       reference_handler.description = description
       reference_handler.module_classname = module
-      self.handler_broker.insert(reference_handler, True)
+      self.reference_definition_broker.insert(reference_handler, True)
     except BrokerException as error:
       raise ControllerException(error)

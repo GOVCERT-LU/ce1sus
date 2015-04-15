@@ -67,12 +67,13 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_object_definition(self, obj, user):
+  def insert_object_definition(self, obj, user, commit=True):
     try:
       obj.chksum = gen_obj_chksum(obj)
       user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(obj, user, insert=True)
-      self.obj_def_broker.insert(obj)
+      self.obj_def_broker.insert(obj, False)
+      self.obj_def_broker.do_commit(commit)
       return obj
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(obj)

@@ -396,9 +396,8 @@ class Migrator(object):
       report = self.make_report(line, owner, event)
       for attribute in line['attributes']:
         if attribute['definition']['name'] == 'comment' or attribute['definition']['name'] == 'description' or attribute['definition']['name'] == 'analysis_free_text' or attribute['definition']['name'] == 'reference_free_text':
-          if not report.description:
-            report.description = ''
-          report.description = report.description + '\n' + attribute['value']
+          attribute['definition']['name'] = 'comment'
+          reference = self.make_reference(attribute, report)
         else:
           reference = self.make_reference(attribute, report)
           if reference:
@@ -705,7 +704,7 @@ class Migrator(object):
     if definition:
       attribute.definition = definition
     else:
-      self.notmapped.write('Attribute Could not be mapped as definition is missing for the new object {0}\n'.format(obj.identifier))
+      self.notmapped.write('Attribute Could not be mapped as definition is missing for the new object {0}\n'.format(obj.uuid))
       self.notmapped.write('{0}\n'.format(json.dumps(line)))
       return None
 
@@ -849,8 +848,12 @@ class Migrator(object):
         obs = self.make_attr_obs(attribute, 'email', name, owner, event)
         composed_attribute.observables.append(obs)
       elif 'comment' in name:
-        self.notmapped.write('comment could not be created the new event {0} and composed attribute {1}\n'.format(event.uuid, composed_attribute.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+        # create a report
+        if not report:
+          report = self.make_report(attribute, owner, event)
+        attribute['definition']['name'] = 'comment'
+        reference = self.make_reference(attribute, report)
+        report.references.append(reference)
       elif 'hash' in name:
         obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
@@ -863,18 +866,18 @@ class Migrator(object):
       elif name == 'analysis_free_text':
         if not report:
           report = self.make_report(attribute, owner, event)
-          report.description = ''
-        report.description = report.description + '\n' + attribute['value']
-        event.reports.append(report)
+
+        attribute['definition']['name'] = 'comment'
+        reference = self.make_reference(attribute, report)
+        
       elif name == 'yara_rule':
         obs = self.make_attr_obs(attribute, 'IDSRule', name, owner, event)
         composed_attribute.observables.append(obs)
       elif name == 'reference_free_text':
         if not report:
           report = self.make_report(attribute, owner, event)
-          report.description = ''
-        report.description = report.description + '\n' + attribute['value']
-        event.reports.append(report)
+        attribute['definition']['name'] = 'comment'
+        reference = self.make_reference(attribute, report)
       elif 'http' in name:
         obs = self.make_attr_obs(attribute, 'HTTPSession', name, owner, event)
         composed_attribute.observables.append(obs)
@@ -954,7 +957,8 @@ class Migrator(object):
         composed_attribute.observables.append(obs)
       else:
         raise Exception('Mapping for {0} is not defined'.format(name))
-
+    if report:
+      event.reports.append(report)
     # if composed_attribute.observables.count() == 1:
     if len(composed_attribute.observables) == 1:
       composed_attribute.observables[0].event = event
@@ -1119,7 +1123,7 @@ class Migrator(object):
 
     composed_attribute.parent_id = observable.identifier
     composed_attribute.parent = observable
-
+    observable.observable_composition = composed_attribute
     attributes = line['attributes']
     for attribtue in attributes:
       name = attribtue['definition']['name']
@@ -1146,6 +1150,7 @@ class Migrator(object):
         composed_attribute.observables.append(attribute)
       else:
         raise Exception(name)
+    return observable
 
   def map_cybox(self, line, owner, observable, event):
 

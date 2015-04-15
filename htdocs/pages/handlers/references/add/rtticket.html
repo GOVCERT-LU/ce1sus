@@ -27,7 +27,11 @@
     </div>
   </div>
 </div>
-
+<center>
+  <div class="throbber" style="margin-top:10px" ng-show="loading">
+    Loading...
+  </div>
+</center>  
 <div class="form-group" ng-if="handlerdata" ng-controller="rtController">
   <table ng-table="tableParams" class="table table-striped table-bordered table-hover table-condensed" show-filter="true">
       <tr ng-repeat="ticket in $data">

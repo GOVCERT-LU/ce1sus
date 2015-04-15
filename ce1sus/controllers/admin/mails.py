@@ -57,3 +57,16 @@ class MailController(BaseController):
       raise ControllerException(u'Could not update mail due to: {0}'.format(message))
     except BrokerException as error:
       raise ControllerException(error)
+
+  def insert_mail(self, mail_template, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.set_simple_logging(mail_template, user, insert=False)
+      mail_template = self.mail_broker.insert(mail_template, False)
+      self.mail_broker.do_commit(commit)
+      return mail_template
+    except ValidationException as error:
+      message = ObjectValidator.getFirstValidationError(mail_template)
+      raise ControllerException(u'Could not insert mail due to: {0}'.format(message))
+    except BrokerException as error:
+      raise ControllerException(error)

@@ -11,7 +11,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, StaticBase
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 
@@ -26,12 +26,6 @@ _REL_INDICATOR_SIGHTINGS = Table('rel_indicator_sightings', Base.metadata,
                                  Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
                                  Column('sighting_id', BigInteger, ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                  )
-
-_REL_INDICATOR_TYPE = Table('rel_indicator_types', Base.metadata,
-                            Column('rit_id', BigInteger, primary_key=True, nullable=False, index=True),
-                            Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
-                            Column('indicatortype_id', BigInteger, ForeignKey('indicatortypes.indicatortype_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
-                            )
 
 
 _REL_INDICATOR_KILLCHAINPHASE = Table('rel_indicator_killchainphase', Base.metadata,
@@ -74,17 +68,34 @@ class Sighting(ExtendedLogingInformations, Base):
 
 
 class IndicatorType(Base):
-  name = Column('name', Unicode(255), nullable=False, unique=True)
-  description = Column('description', UnicodeText)
+
+  type = Column('type', Integer, default=None)
+  indicator_id = Column(BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+
+  @classmethod
+  def get_dictionary(cls):
+    return {0: 'Malicious E-mail',
+            1: 'IP Watchlist',
+            2: 'File Hash Watchlist',
+            3: 'Domain Watchlist',
+            4: 'URL Watchlist',
+            5: 'Malware Artifacts',
+            6: 'C2',
+            7: 'Anonymization',
+            8: 'Exfiltration',
+            9: 'Host Characteristics',
+            10: 'Compromised PKI Certificate',
+            11: 'Login Name',
+            12: 'IMEI Watchlist',
+            13: 'IMSI Watchlist'}
+
+  @property
+  def name(self):
+    return self.get_dictionary().get(self.type, None)
 
   def to_dict(self, complete=True, inflated=False):
-    if complete:
-      return {'identifier': self.convert_value(self.uuid),
-              'name': self.convert_value(self.name),
-              'description': self.convert_value(self.description)}
-    else:
-      return {'identifier': self.convert_value(self.uuid),
-              'name': self.convert_value(self.name)}
+    return {'identifier': self.convert_value(self.uuid),
+            'name': self.convert_value(self.name)}
 
 
 class ValidTimePosition(ExtendedLogingInformations, Base):
@@ -120,7 +131,7 @@ class Indicator(ExtendedLogingInformations, Base):
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   sightings = relationship('Sighting', secondary='rel_indicator_sightings')
   killchain = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
-  type_ = relationship('IndicatorType', secondary='rel_indicator_types')
+  types = relationship('IndicatorType')
   operator = Column('operator', Unicode(3), default=u'OR')
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*

@@ -25,9 +25,5 @@ class AdminIndicatorTypesHandler(RestBaseHandler):
   @methods(allowed=['GET'])
   @require()
   def default(self, **args):
-    values = self.indicator_controller.get_all_types()
-    result = list()
-    details = self.get_detail_value(args)
-    for value in values:
-      result.append(value.to_dict(details))
-    return result
+    # TODO inmplement indicator handler
+    return None

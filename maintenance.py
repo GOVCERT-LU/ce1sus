@@ -5,6 +5,7 @@
 
 Created on Jul 11, 2014
 """
+import json
 from optparse import OptionParser
 from os import remove
 from os.path import basename, dirname, abspath, isfile
@@ -60,7 +61,7 @@ class Maintenance(object):
     self.object_definition_controller = ObjectDefinitionController(config, directconnection)
     self.event_controller = EventController(config, directconnection)
     self.user_controller = UserController(config, directconnection)
-    self.reference_definition_controller = ReferencesController(config, directconnection)
+    self.reference_controller = ReferencesController(config, directconnection)
     self.verbose = False
 
     # set maintenance user
@@ -167,10 +168,10 @@ class Maintenance(object):
         print u'Adding handler {0}.{1}'.format(modulename, classname)
       uuid = instance.get_uuid()
       description = instance.get_description()
-      if type_ == 'attribute':
+      if type_ == 'attributes':
         self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
       elif type_ == 'references':
-        self.reference_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+        self.reference_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
       else:
         raise MaintenanceException('Type {0} for handlers is unknown'.format(type_))
 
@@ -179,14 +180,34 @@ class Maintenance(object):
       raise MaintenanceException('Class {0}.{1} does not implement HandlerBase'.format(modulename, classname))
 
   def dump_definitions(self, dump_def, dump_dest):
+    # check if file exists
+    if isfile(dump_dest):
+      raise MaintenanceException('File {0} is already existing'.format(dump_dest))
+
+    dump = list()
     if dump_def == 'attributes':
-      pass
+      attributes = self.attribute_definition_controller.get_all_attribute_definitions()
+      for attribute in attributes:
+        dump.append(attribute.to_dict(True, True))
     elif dump_def == 'objects':
-      pass
+      obejcts = self.object_definition_controller.get_all_object_definitions()
+      for obj in obejcts:
+        dump.append(obj.to_dict(True, True))
+    elif dump_def == 'references':
+      ref_defs = self.reference_controller.get_reference_definitions_all()
+      for ref_def in ref_defs:
+        dump.append(ref_def.to_dict(True, True))
     else:
       raise MaintenanceException('No definition assigned to {0}. It can either be attributes or objects'.format(dump_def))
 
+    # open an dump to file
+    dump_file = open(dump_dest, 'w+')
+    dump_file.write(json.dumps(dump))
+    dump_file.close()
+
 if __name__ == '__main__':
+  basePath = dirname(abspath(__file__))
+
   parser = OptionParser()
   parser.add_option('--drop_rel', dest='drop_rel', action='store_true', default=False,
                     help='Removes all existing relations')
@@ -205,12 +226,11 @@ if __name__ == '__main__':
   parser.add_option('--class', dest='handler_class', type='string', default=None,
                     help='Class name of handler to register')
   parser.add_option('--dump', dest='dump_def', type='string', default=None,
-                    help='[attributes|objects] Dumps specified definitions in json format. Must be used with --dest')
+                    help='[attributes|objects|references] Dumps specified definitions in json format. Must be used with --dest')
   parser.add_option('--dest', dest='dump_dest', type='string', default=None,
                     help='Destination file of the dump')
   (options, args) = parser.parse_args()
 
-  basePath = dirname(abspath(__file__))
   ce1susConfigFile = basePath + '/config/ce1sus.conf'
   config = Configuration(ce1susConfigFile)
   try:

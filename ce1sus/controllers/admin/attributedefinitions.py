@@ -78,7 +78,7 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_attribute_definition(self, attribute, user):
+  def insert_attribute_definition(self, attribute, user, commit=True):
     try:
       attribute.chksum = gen_attr_chksum(attribute)
       user = self.user_broker.get_by_id(user.identifier)
@@ -87,7 +87,8 @@ class AttributeDefinitionController(BaseController):
         handler = self.handler_broker.get_by_id(attribute.attributehandler_id)
         attribute.attribute_handler = handler
       self.set_simple_logging(attribute, user, insert=True)
-      attribute = self.attr_def_broker.insert(attribute)
+      attribute = self.attr_def_broker.insert(attribute, False)
+      self.attr_def_broker.do_commit(commit)
       return attribute
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(attribute)
@@ -142,6 +143,13 @@ class AttributeDefinitionController(BaseController):
   def get_all_types(self):
     try:
       return self.type_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def insert_attribute_type(self, attribute_type, commit=True):
+    try:
+      self.type_broker.insert(attribute_type)
+      self.type_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -209,7 +217,7 @@ class AttributeDefinitionController(BaseController):
   def register_handler(self, uuid, module, description):
     try:
       attribute_handler = AttributeHandler()
-      attribute_handler.identifier = uuid
+      attribute_handler.uuid = uuid
       attribute_handler.description = description
       attribute_handler.module_classname = module
       self.handler_broker.insert(attribute_handler, True)

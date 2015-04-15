@@ -197,7 +197,8 @@ class RestController(BaseView):
                 print 'Delete'
               result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
               # execute method
-
+              # set the correct headers
+              cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
               return dumps(result)
             except RestHandlerException as error:
               message = u'{0}'.format(error)

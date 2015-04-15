@@ -120,7 +120,7 @@ class Object(ExtendedLogingInformations, Base):
 
     rel_objs = list()
     for rel_obj in self.related_objects:
-      if is_object_viewable(rel_obj, event_permissions):
+      if is_object_viewable(rel_obj.object, event_permissions):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator.identifier == user.identifier:

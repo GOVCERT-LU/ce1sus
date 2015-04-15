@@ -7,6 +7,7 @@ Created on Jan 23, 2015
 """
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
+from ce1sus.db.classes.indicator import IndicatorType
 from ce1sus.db.common.broker import BrokerException
 
 
@@ -30,7 +31,9 @@ class IndicatorController(BaseController):
       raise ControllerException(error)
 
   def get_all_types(self):
-    try:
-      return self.indicator_type_broker.get_all()
-    except BrokerException as error:
-      raise ControllerException(error)
+    result = list()
+    for key in IndicatorType.get_dictionary().iterkeys():
+        it = IndicatorType()
+        it.type = key
+        result.append(it)
+    return result

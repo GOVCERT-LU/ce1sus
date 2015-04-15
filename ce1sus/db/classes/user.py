@@ -174,6 +174,10 @@ class User(Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, complete=True, inflated=False):
+    if self.group:
+      group_id = self.group.uuid
+    else:
+      group_id = None
     if complete:
       return {'identifier': self.convert_value(self.uuid),
               'name': self.convert_value(self.name),
@@ -184,7 +188,7 @@ class User(Base):
               'dbcode': self.convert_value(self.dbcode),
               'email': self.convert_value(self.email),
               'gpg_key': self.convert_value(self.gpg_key),
-              'group_id': self.convert_value(self.group.uuid),
+              'group_id': self.convert_value(group_id),
               'permissions': self.permissions.to_dict(),
               # TODO: add group to dict fct
               'group': None,

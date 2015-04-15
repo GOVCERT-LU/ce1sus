@@ -201,20 +201,23 @@ class BaseView(object):
       return True
     else:
       if user:
-        user_group = self.event_controller.group_broker.get_by_id(user.group_id)
-        tlp_lvl = self.__get_max_tlp(user_group)
-        if event.tlp_level_id >= tlp_lvl:
-          return True
-        else:
-          grp_ids = list()
-          for group in user_group.children:
-            grp_ids.append(group.identifier)
-          grp_ids.append(user.group_id)
+        if user.group_id:
+          user_group = self.event_controller.group_broker.get_by_id(user.group_id)
+          tlp_lvl = self.__get_max_tlp(user_group)
+          if event.tlp_level_id >= tlp_lvl:
+            return True
+          else:
+            grp_ids = list()
+            for group in user_group.children:
+              grp_ids.append(group.identifier)
+            grp_ids.append(user.group_id)
 
-          for eventgroup in event.groups:
-            group = eventgroup.group
-            if group.identifier in grp_ids:
-              return True
+            for eventgroup in event.groups:
+              group = eventgroup.group
+              if group.identifier in grp_ids:
+                return True
+            return False
+        else:
           return False
       else:
         return False

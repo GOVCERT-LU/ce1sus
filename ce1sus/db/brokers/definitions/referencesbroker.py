@@ -10,7 +10,7 @@ Created on Feb 21, 2014
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from ce1sus.db.classes.report import ReferenceDefinition, ReferenceHandler
+from ce1sus.db.classes.report import ReferenceDefinition, ReferenceHandler, Reference
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
 
@@ -26,7 +26,7 @@ class ReferencesBroker(BrokerBase):
     BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
-    return ReferenceDefinition
+    return Reference
 
   def get_all_handlers(self):
     try:
@@ -47,6 +47,17 @@ class ReferencesBroker(BrokerBase):
 
     return result
 
+  def get_handler_by_id(self, identifier):
+    try:
+      result = self.session.query(ReferenceHandler).filter(ReferenceHandler.identifier == identifier).one()
+    except NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+    except SQLAlchemyError as error:
+      raise BrokerException(error)
+
+    return result
 
 class ReferenceDefintionsBroker(BrokerBase):
 

@@ -41,7 +41,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
           return reference.to_dict(details, inflated)
         else:
           # return all
-          references = self.reference_controller.get_all()
+          references = self.reference_controller.get_reference_definitions_all()
           result = list()
           for reference in references:
             result.append(reference.to_dict(details, inflated))

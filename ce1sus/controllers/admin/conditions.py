@@ -46,9 +46,10 @@ class ConditionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_condition(self, condition):
+  def insert_condition(self, condition, commit=True):
     try:
-      self.condition_broker.insert(condition, True)
+      self.condition_broker.insert(condition, False)
+      self.condition_broker.do_commit(commit)
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(condition)
       raise ControllerException(u'Could not add condition due to: {0}'.format(message))

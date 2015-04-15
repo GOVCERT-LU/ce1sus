@@ -35,11 +35,14 @@ class Log(object):
       self.log_console = True
       self.log_file = ''
 
-    if do_log:
-      # create formatter
-      log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-      # datefmt = '%m/%d/%Y %I:%M:%S %p'
-      self.__formatter = logging.Formatter(log_format)
+    # create formatter
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    # datefmt = '%m/%d/%Y %I:%M:%S %p'
+    self.__formatter = logging.Formatter(log_format)
+
+    if not do_log:
+      self.__config_section = None
+      self.log_file = ''
 
   def __set_console_handler(self, logger):
     """

@@ -86,9 +86,7 @@ class BaseController:
     :returns: Instance of a broker
     """
     if issubclass(clazz, BrokerBase):
-      classname = clazz.__name__
-      if classname in BaseController.brokers:
-        return BaseController.brokers[classname]
+
       # need to create the broker
       self.logger.debug('Create broker for {0}'.format(clazz))
       if self.session:
@@ -96,7 +94,6 @@ class BaseController:
       else:
         instance = self.session_manager.broker_factory(clazz)
 
-      BaseController.brokers[classname] = instance
       return instance
 
     else:

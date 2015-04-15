@@ -399,6 +399,9 @@ app.directive("composedobservable", function($compile) {
       $scope.pagination = Pagination.getNew(5,'composedobservable.observable_composition');
       $scope.pagination.numPages = Math.ceil($scope.composedobservable.observable_composition.observables.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
+      
+      
+      
       $scope.removeComposedObservable = function() {
         var remove = false;
         if (confirm('Are you sure you want to delete this composed observable?')) {
@@ -427,6 +430,15 @@ app.directive("composedobservable", function($compile) {
       
       $scope.addObservable = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/add.html', show: true});
+      };
+      
+      $scope.getTitle = function(){
+        if ($scope.composedobservable.title){
+          return $scope.composedobservable.title;
+        } else {
+          return 'Composed observable';
+        }
+        
       };
       
       $scope.appendObservable =  function(observable){
@@ -1212,20 +1224,23 @@ app.directive("referenceHandler", function() {
     },
     controller: function($scope, $log, $templateCache, Restangular, messages ){
       //Resolve additional data
-
+      $scope.loading = false;
       $scope.getData = function() {
-        if (scope.type == 'edit') {
+        $scope.loading = true;
+        if ($scope.type == 'edit') {
           Restangular.one('referencehandlers', $scope.resource.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
             $scope.handlerdata = handlerdata;
           }, function(response) {
             handleError(response, messages);
           });
+          $scope.loading = false;
         } else {
           Restangular.one('referencehandlers', $scope.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {
             $scope.handlerdata = handlerdata;
           }, function(response) {
             handleError(response, messages);
           });
+          $scope.loading = false;
         }
       };
       
@@ -1239,7 +1254,7 @@ app.directive("referenceHandler", function() {
               muliline = $scope.resource.definition.reference_handler.is_multi_line;
             } else {
               regexp = $scope.definition.regex;
-              muliline = $scope.definition.attributehandler.is_multi_line;
+              muliline = $scope.definition.reference_handler.is_multi_line;
             }
             regexp = new RegExp(regexp);
             

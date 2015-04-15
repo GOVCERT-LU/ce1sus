@@ -99,8 +99,8 @@ class AdminAttributeHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           attr_def = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
+          self.assembler.update_attribute_definition(attr_def, json)
 
-          attr_def.populate(json)
           # set the new checksum
           self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())
           return attr_def.to_dict(details, inflated)
