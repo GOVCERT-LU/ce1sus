@@ -61,6 +61,9 @@ if __name__ == '__main__':
   #
   ce1susConfigFile = basePath + 'config/ce1sus.conf'
   config = Configuration(ce1susConfigFile)
+
+  config.get_section('Logger')['log'] = False
+
   session = SessionManager(config)
   engine = session.connector.get_engine()
   Base.metadata.create_all(engine, checkfirst=True)
