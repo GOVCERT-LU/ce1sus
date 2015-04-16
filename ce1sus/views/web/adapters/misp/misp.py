@@ -9,15 +9,16 @@ import cherrypy
 import json
 
 from ce1sus.controllers.common.merger import Merger, MergingException
+from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
-from ce1sus.db.common.broker import IntegrityException, BrokerException, NothingFoundException
+from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.common.broker import IntegrityException, BrokerException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.views.web.common.decorators import require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -45,6 +46,7 @@ class MISPAdapter(BaseView):
     self.misp_converter.dump = dump
     self.misp_converter.file_location = file_loc
     self.merger = Merger(config, session)
+    self.process_controller = ProcessController(config, session)
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
@@ -95,14 +97,16 @@ class MISPAdapter(BaseView):
       del recent_events[item_to_remove]
 
     for value in recent_events.itervalues():
+      self.process_controller.create_new_process(ProcessType.PULL, value[0], user, server_details)
+
       # fetch one event from misp
-      misp_event_xml = self.misp_converter.get_xml_event(value[0])
+      # misp_event_xml = self.misp_converter.get_xml_event(value[0])
       # make insert/merge
-      try:
-        self.__ins_merg_event(server_details, misp_event_xml)
-      except BrokerException as error:
-        self.logger.error(error)
-        # TODO dump xml or log it in browser
+      # try:
+      #  self.ins_merg_event(server_details, misp_event_xml)
+      # except BrokerException as error:
+      #  self.logger.error(error)
+      # TODO dump xml or log it in browser
 
     return 'OK'
 
@@ -200,7 +204,7 @@ class MISPAdapter(BaseView):
     self.logout_handler.logout()
     return return_message
 
-  def __ins_merg_event(self, server_details, xml_string, server_user=None):
+  def ins_merg_event(self, server_details, xml_string, server_user=None):
       if server_details.type == 'MISP':
         user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
         self.misp_converter.api_key = server_details.user.api_key
@@ -254,7 +258,7 @@ class MISPAdapter(BaseView):
       if server_details.type != 'MISP':
         raise cherrypy.HTTPError(409, 'Server is not a MISP Server')
       # check if it is a misp server else raise
-      return self.__ins_merg_event(server_details, xml_string, server_user)
+      return self.ins_merg_event(server_details, xml_string, server_user)
     except BrokerException as error:
       self.logger.error(error)
       raise cherrypy.HTTPError(404)

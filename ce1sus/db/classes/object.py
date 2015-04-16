@@ -99,7 +99,7 @@ class Object(ExtendedLogingInformations, Base):
       if is_object_viewable(attribute, event_permissions):
         attributes.append(attribute)
       else:
-        if attribute.creator.identifier == user.identifier:
+        if attribute.creator_group_id == user.group.identifier:
           attributes.append(attribute)
     return attributes
 
@@ -123,7 +123,7 @@ class Object(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj.object, event_permissions):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator.identifier == user.identifier:
+        if rel_obj.creator_group_id == user.group.identifier:
           rel_objs.append(rel_obj)
     return rel_objs
     """

@@ -1213,6 +1213,10 @@ class Migrator(object):
             return None
           else:
             attribute_line = element
+        else:
+          attribute = self.map_attribute(element, obj, owner)
+          if attribute:
+            obj.attributes.append(attribute)
 
       if attribute_line:
         line['attributes'].remove(attribute_line)
@@ -1234,6 +1238,10 @@ class Migrator(object):
 
         # append to the object
         obj.related_objects.append(create_related_obj(obj, raw_artifact))
+        attribute_line = None
+
+
+
     elif line['definition']['name'] == 'source_code':
 
       definition = self.map_obj_def({'name': 'Code', 'chksum': None})
@@ -1322,6 +1330,8 @@ class Migrator(object):
             obj.related_objects.append(related_object)
           pass
     self.logger.debug('Created object {0}'.format(obj))
+    if len(obj.attributes) == 0:
+      return None
     return obj
 
   def map_ce1sus_object(self, parent, line, owner, event):

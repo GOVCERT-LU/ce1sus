@@ -66,6 +66,12 @@ $ git clone https://github.com/sim0nx/eml_parser
 $ cd ..
 $ ln -s libs/eml_parser/eml_parser/eml_parser.py .
 
+1.2.3 Cybox
+------------------
+
+1.2.4 Stix
+------------------
+
 1.3. Database
 -------------
 
@@ -90,27 +96,23 @@ FLUSH PRIVILEGES;
 
 1.3.3 DB SCHEMA
 ----------------
-Import the schema to your database 'ce1sus'. The script for this can be found in docs/sql/scheme.sql 
-of your ce1sus installation directory.
+The creation of the db schema changed since 0.11.X and is now done via a script. To initialize the database do the following:
 
-$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/scheme_REL_0.8.0.sql
+$ cd scripts/installation/database
+$ python db_init.py
 
-Note: If there are update*.sql files in the doc/sql folder these then also have to be executed Version wise one after 
-      the other.
-
-e.g: Steps for REL_0.8.18
-
-$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/scheme_REL_0.8.0.sql
-$ mysql -u <USER> -p <DataBase name> < /path/to/ce1sus/doc/sql/update_to_REL_0.8.16.sql
+Everything needed will be created automatically. If there should be migrations the scripts for the migration will be provided 
+the scripts/migrations folder, use these in order.
 
 1.3.4 Remarks
 -------------
-Depending on your DB server it is advised to have a tmp folder with at least 1 GB space. 
+Depending on your DB server it is advised to have a tmp folder with at least 1 GB space.
+
 
 1.4 Ce1sus Configuration
 -------------------------
 
-1.4.1 Celsus.conf
+1.4.1a Celsus.conf
 -----------------
 Go to your ce1sus installation directory and create configuration file ce1sus.conf in the config directory 
 use the file config/ce1sus.conf_tmpl as template
@@ -121,9 +123,12 @@ The following sections have to be modified to the settings of your system
 
 [SessionManager]
 [ce1sus]
-[Handlers]
-[Mako]
-[Mailer] 
+[Logger]
+[LDAP]
+[Plugins]
+[Mailer]
+[MISPAdapter]
+[Errorhandler]
 
 The next paragraphs will explain in more detail what has to be changed and what the different elements in the 
 configuration do and their values.
@@ -147,7 +152,7 @@ The [ce1sus] section stores the general settings of ce1sus and has the following
 sendmails=[no|yes]                : If "yes" emails will be send to the users/groups who can access/see the event
                                     Note baseurl has to be set when sendemail=yes
                                     For more informations on emails send by ce1sus see section XXXX 
-useldap=no                        : If "yes" the users can also be authenticated by ldap
+useldap=[no|yes]                  : If "yes" the users can also be authenticated by ldap
                                     Note: When set [LDAP] section has to be set and look in section XXXX how ldab users 
                                           needs to be configured 
 environment=LOCAL_DEV             : Text displayed in the header of the ce1sus web page. Used to separate dev 
@@ -155,31 +160,9 @@ environment=LOCAL_DEV             : Text displayed in the header of the ce1sus w
                                     Note This value can be empty
 enableRestAPI=[yes|no]            : If "yes" the RESTAPI is enabled   
 baseurl=http://localhost:8080     : The root url of your ce1sus server, this url is needed to build the links in the emails
-
-The [Handlers] section stores the configuration the handlers used by ce1sus and has the following elements
-
-cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=  : Base url for cves. (used by the CVEHandler)
-files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
-                                                         uploaded files.
-                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
-                                                         (Used by FileHandler and FileWithHashesHandler)
-rt_user=                                               : The user used for accessing the RESTAPI for RT
-                                                         (Used by RTHandler)
-rt_password=                                           : The user password used for accessing the RESTAPI for RT
-rt_url=                                                : Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)
-
-When new handlers are added which requires a configuration they have to be added here. For more informations on handlers
-see section 2.1.5.1 
-
-The [ErrorHandler] section stores the configuration how ce1sus handles the errors and has the following elements
-
-debug=[no|yes]                                         : When set displays the error stacktrace
-                                                         Note: This value can be overridden by in the cherrypy.conf
-useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the 
-                                                         stacktrace.
-                                                         Note: When enabled the [Mailer] section has to be set!
-subject=ErrorOccureredForCelsus                        : Email subject for error mails
-receiver=                                              : Mail address of the error mail receiver
+maintenaceuseruuid=               : The user uuid which is used by the maintenance.py script and used for the sync mechanism
+usebasicauth=[yes|no]             : enable basic authentication
+salt=                             : A random used to salt the hashes of passwords
 
 The [Logger] section stores the configuration how the logs are stored/processed and has the following elements
 
@@ -191,25 +174,18 @@ level=[CRITICAL|ERROR|WARNING|INFO|DEBUG]              : Log level
 size=10000000                                          : Size in bytes of the file before it gets rotated
 backups=1000                                           : Number of log backups
 
-The [Mako] section stores the configuration of Mako and has the following elements
-
-templateRoot=/path/to/ce1sus/ce1sus/templates          : Absolute path to the dagr tempaltes
-                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus 
-                                                               installation directory
-projectRoot=/path/to/ce1sus/ce1sus/templates/ce1sus    : Absolute path of the ce1sus templates
-                                                         Note: replace "/path/to/ce1sus/ce1sus/" with your ce1sus 
-                                                               installation directory
-collectionsize=200                                     : Do not change this value unless you know what you are doing
-outputencoding=utf-8                                   : Do not change this value unless you know what you are doing
-tmpfolder=/path/to/desired/tmp/folder                  : The absolute file path where mako can store its 
-                                                         temporary files.
-                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
-
 The [LDAP] section stores the configuration of the LDAP plugin and has the following elements
 
 server=
 usetls=True
 users_dn=
+
+The LDAP configuration only makes sense if useldap is set on the ce1sus section and LdapPlugin is set in the Plugins section.
+
+The [Plugins] section defines which "Plugins" are available to use
+LdapPlugin=[Yes|No]                                    : Enables the Ldap plugin
+                                                         Note: If the ldapplugin is activated the section LDAP and the useldap
+                                                               in the ce1sus section have to be set
 
 The [Mailer] section stores the configuration for sending mails and has the following elements
 
@@ -220,6 +196,54 @@ user=                                                  : Not implemented
 password=                                              : Not implemented
 keyfile=                                               : Folder of the gpp files used to sign or encrypt (i.e. ~/gpgkey)
 passphrase=                                            : Pass-phrase for unlocking the gpg key
+
+The [MISPAdapter] section provides you to enable dumping of the gotten Misp events
+
+dump=[yes|no]           : Enable dumping of misps
+file=mispdump           : Absolute path to a folder where the misps should be dumped
+
+The [ErrorHandler] section stores the configuration how ce1sus handles the errors and has the following elements
+
+debug=[no|yes]                                         : When set displays the error stacktrace
+                                                         Note: This value can be overridden by in the cherrypy.conf
+useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the 
+                                                         stacktrace.
+                                                         Note: When enabled the [Mailer] section has to be set!
+subject=ErrorOccureredForCelsus                        : Email subject for error mails
+receiver=                                              : Mail address of the error mail receiver
+
+1.4.1b handler.conf
+-------------------
+Go to your ce1sus installation directory and create configuration file handlers.conf in the config directory 
+use the file config/handlers.conf_tmpl as template
+
+$ cp config/handlers.conf_tmpl config/handlers.conf
+
+The following sections have to be modified to the settings of your system
+
+[FileHandler]
+files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
+                                                         uploaded files as attributes.
+                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+
+[CVEHandler]
+cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=     : Base url for cves. (used by the CVEHandler)
+
+[RTHandler]
+rt_user=                                               : The user used for accessing the RESTAPI for RT
+                                                         (Used by RTHandler)
+rt_password=                                           : The user password used for accessing the RESTAPI for RT
+rt_url=                                                : Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)
+
+[FileReferenceHandler]
+files=/path/to/ce1sus/reference_files                 : The absolute file path where ce1sus can store/archive the 
+                                                         uploaded files in the refrence section.
+                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+
+[FileWithHashesHandler]
+files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
+                                                         uploaded files as attributes.
+                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
 
 1.4.2 Cherrypy.conf
 -------------------
@@ -332,6 +356,29 @@ Nginx shows a 404 or 403:
      the folder
 404: the root folder was set up incorrectly
 
+1.8 DB migration
+------------------
+If you are migrating from 0.10 to 0.11.0 proceed like stated below
+
+First dump your current database.
+
+$ cd scripts/migration
+$ python dump_0.10.py -c ../../config/ce1sus.conf --dest dumps
+
+The script will use the settings in the ce1sus.conf and dumps it into the folder ./dumps
+
+The next step is to setup a new db schema (drop the old one) and follow the steps described in 1.3.3
+
+Finally migrate the dropped data into the new database
+
+$ cd scripts/migration
+$ python migrate_0.10_to_0.11.0.py  -d dumps
+
+The script used the configuration of the later instance. 
+
+Note the migration can take some time depending on the volume of your database.
+
+
 2. Web Interface
 ================
 
@@ -340,14 +387,14 @@ The web interface of Ce1sus has two sections:
     1. Administration
          The administration section is used to:
              * Validate events inserted over the RESTAPI
-             * Define definitions for objects and attributes
+             * Define definitions for objects, attributes, references
              * User management
              * Group management
+             * Server managment
              * Editing mail templates
 
     2. User interface
          The event view is used to:
-             * View the 200 recent entries
              * Search for attributes
              * Add/Edit events
              * View events

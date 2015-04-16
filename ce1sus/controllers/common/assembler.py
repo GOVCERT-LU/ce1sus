@@ -166,6 +166,7 @@ class Assembler(BaseController):
 
   def update_event(self, event, json, user, owner=False, rest_insert=True):
     event.populate(json, rest_insert)
+    # TODO merge here
     self.populate_extended_logging(event, json, user, False)
     return event
 

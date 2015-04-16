@@ -7,11 +7,8 @@ Created on Oct 16, 2014
 """
 
 
-from apt_pkg import Group
-from datetime import datetime
 import json
 import os
-import sqlalchemy.exc
 import sys
 
 basePath = os.path.dirname(os.path.abspath(__file__)) + '/../../../'
@@ -35,6 +32,7 @@ import ce1sus.db.classes.observables
 import ce1sus.db.classes.relation
 import ce1sus.db.classes.report
 import ce1sus.db.classes.servers
+import ce1sus.db.classes.processitem
 from ce1sus.db.classes.types import AttributeType
 import ce1sus.db.classes.types
 from ce1sus.db.classes.user import User

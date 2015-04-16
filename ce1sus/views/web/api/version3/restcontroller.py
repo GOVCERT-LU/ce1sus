@@ -36,6 +36,7 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from ce1sus.views.web.api.version3.handlers.common.processhandler import ProcessHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -82,6 +83,7 @@ class RestController(BaseView):
     self.instances['syncservers'] = SyncServerHandler(config)
     self.instances['servertypes'] = SyncServerTypesHandler(config)
     self.instances['tlps'] = TLPHanlder(config)
+    self.instances['processes'] = ProcessHandler(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):

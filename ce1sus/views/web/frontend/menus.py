@@ -126,6 +126,19 @@ class GuiMenus(BaseView):
           child_menu_item['divider'] = True
           child_menus.append(child_menu_item)
 
+        bg_jobs = False
+        if user.permissions.privileged:
+          child_menu_item = dict()
+          child_menu_item['title'] = 'Background Jobs'
+          child_menu_item['section'] = 'admin/jobs'
+          child_menus.append(child_menu_item)
+          bg_jobs = True
+
+        if bg_jobs:
+          child_menu_item = dict()
+          child_menu_item['divider'] = True
+          child_menus.append(child_menu_item)
+
         usermgt = False
         if user.permissions.privileged:
           usermgt = True

@@ -178,7 +178,7 @@ class Observable(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj, event_permissions):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator.identifier == user.identifier:
+        if rel_obj.creator_group_id == user.group.identifier:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -213,7 +213,7 @@ class Observable(ExtendedLogingInformations, Base):
       if is_object_viewable(self.object, event_permissions):
         return self.object
       else:
-        if self.object.creator.identifier == user.identifier:
+        if self.object.creator_group_id == user.group.identifier:
           return self.object
     return None
 
@@ -222,7 +222,7 @@ class Observable(ExtendedLogingInformations, Base):
       if is_object_viewable(self.observable_composition, event_permissions):
         return self.observable_composition
       else:
-        if self.observable_composition.creator.identifier == user.identifier:
+        if self.observable_composition.creator_group_id == user.group.identifier:
           return self.observable_composition
     return None
 

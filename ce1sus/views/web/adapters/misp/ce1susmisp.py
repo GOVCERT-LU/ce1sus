@@ -73,7 +73,7 @@ class Ce1susMISP(BaseController):
       c_group = self.group_broker.get_by_id(event.creator_group_id)
       self.__append_child(root, 'org', c_group.name)
 
-    self.__append_child(root, 'info', event.description)
+    self.__append_child(root, 'info', u'{0} - {1}'.format(event.title, event.description))
     if event.properties.is_shareable:
       published = 1
     else:
@@ -106,11 +106,12 @@ class Ce1susMISP(BaseController):
       if xml_attr:
         root.append(xml_attr)
     counter = 0
-    for reference in references:
-      counter = counter + 1
-      xml_ref = self.__make_reference(reference, event)
-      if xml_ref:
-        root.append(xml_ref)
+    if references:
+      for reference in references:
+        counter = counter + 1
+        xml_ref = self.__make_reference(reference, event)
+        if xml_ref:
+          root.append(xml_ref)
 
     self.__append_child(root, 'attribute_count', len(attributes) + counter)
     return root
@@ -136,7 +137,7 @@ class Ce1susMISP(BaseController):
       return 'email-src'
     elif attr_def_name in ['email_subject']:
       return 'email-subject'
-    elif attr_def_name in ['file_name']:
+    elif attr_def_name in ['File_Name']:
       return 'filename'
     elif attr_def_name in ['Hostname_Value']:
       return 'hostname'
@@ -153,19 +154,30 @@ class Ce1susMISP(BaseController):
         return 'ip-dst'
     elif attr_def_name in ['url']:
       return 'url'
-    elif attr_def_name in ['raw_artifact']:
+    elif attr_def_name in ['is_type', 'content_type', 'File_Extension', 'File_Format', 'file_id', 'mime_type', 'Modified_Time', 'Magic_Number', 'WindowsRegistryKey_Hive', 'Accessed_Time', 'Created_Time', 'Size_In_Bytes', 'Protocol', 'Processor_Family', 'Targeted_Platforms', 'malware_file_type', 'URIType']:
+      # attributes which are not supported by misp
+      return None
+    elif attr_def_name in ['Raw_Artifact']:
       # wont return samples
       return None
       return 'malware-sample'
     elif attr_def_name in ['hash_md5']:
       return 'md5'
+    elif attr_def_name in ['hash_md5']:
+      return 'md5'
+    elif attr_def_name in ['hash_sha1']:
+      return 'sha1'
+    elif attr_def_name in ['hash_sha256']:
+      return 'sha256'
+    elif attr_def_name in ['hash_sha384', 'hash_sha512']:
+      return None
     elif attr_def_name in ['Mutex_name']:
       return 'mutex'
     elif attr_def_name in ['Pipe_Name']:
       return 'named pipe'
     elif attr_def_name in ['pattern-in-file']:
       return 'pattern-in-file'
-    elif attr_def_name in ['pattern-in-memory']:
+    elif attr_def_name in ['pattern-in-memory', 'memory']:
       return 'pattern-in-memory'
     elif attr_def_name in ['pattern-in-traffic']:
       return 'pattern-in-traffic'
@@ -216,7 +228,8 @@ class Ce1susMISP(BaseController):
     elif ref_def_name in ['comment']:
       return 'External analysis', 'comment'
     else:
-      return None
+      # report file names will no be exported
+      return None, None
 
   def get_attr_category(self, attribute):
     if attribute.object.definition:
@@ -235,11 +248,11 @@ class Ce1susMISP(BaseController):
       return 'Antivirus detection'
     elif obj_def_name in ['email']:
       return 'Payload delivery'
-    elif obj_def_name in ['file']:
+    elif obj_def_name in ['File']:
       return 'Payload installation'
     elif obj_def_name in ['WindowsRegistryKey']:
       return 'Persistence mechanism'
-    elif obj_def_name in ['DomainName', 'Hostname', 'HTTPSession', 'Address']:
+    elif obj_def_name in ['DomainName', 'Hostname', 'HTTPSession', 'Address', 'URI']:
       return 'Network activity'
     elif obj_def_name in ['SNAFU']:
       # Is not mapped yet

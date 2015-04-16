@@ -1180,8 +1180,9 @@ class MispConverter(BaseController):
       event_xml = parent.make_misp_xml(event, server_user)
       headers['Content-Length'] = len(event_xml)
       req = urllib2.Request(url, event_xml, headers)
-      connection = urllib2.urlopen(req)
+
       try:
+        connection = urllib2.urlopen(req)
         if connection.msg == 'OK':
           continue
         else:

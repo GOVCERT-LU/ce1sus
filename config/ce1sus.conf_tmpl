@@ -20,6 +20,8 @@ environment=LOCAL_DEV
 baseurl=http://localhost:8080
 maintenaceuseruuid=9947840d-0591-42dd-9d1a-8db105683ec2
 usebasicauth=no
+#salt used for passwords
+salt=SomeReallyIntrestingRandom
 
 [Logger]
 log=Yes
@@ -43,3 +45,7 @@ port=25
 user=
 password=
 keyfile=
+
+[MISPAdapter]
+dump=yes
+file=mispdump

@@ -7,21 +7,10 @@ Created on Nov 13, 2014
 """
 from datetime import datetime
 
-from ce1sus.db.classes.definitions import ObjectDefinition, AttributeDefinition
 from ce1sus.db.classes.mailtemplate import MailTemplate
 from ce1sus.db.classes.user import User
 from ce1sus.db.classes.types import AttributeType
-from ce1sus.controllers.admin.attributedefinitions import gen_attr_chksum
-from ce1sus.db.classes.common import ValueTable
-from ce1sus.handlers.attributes.texthandler import TextHandler
-from ce1sus.handlers.attributes.multiplegenerichandler import MultipleGenericHandler
-from ce1sus.handlers.attributes.emailhandler import EmailHandler
-from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.db.classes.attribute import Condition
-from ce1sus.handlers.attributes.datehandler import DateHandler
-from ce1sus.handlers.attributes.cbvaluehandler import CBValueHandler
-from ce1sus.handlers.attributes.filehandler import FileHandler
-from ce1sus.controllers.admin.objectdefinitions import gen_obj_chksum
 from ce1sus.helpers.common.hash import hashSHA1
 
 
