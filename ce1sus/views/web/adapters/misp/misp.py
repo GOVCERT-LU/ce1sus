@@ -8,12 +8,13 @@ Created on Feb 17, 2015
 import cherrypy
 import json
 
+from ce1sus.controllers.base import ControllerIntegrityException
 from ce1sus.controllers.common.merger import Merger, MergingException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.db.common.broker import IntegrityException, BrokerException
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
@@ -28,6 +29,18 @@ __license__ = 'GPL v3+'
 
 
 class MISPAdapterException(Exception):
+  pass
+
+
+class MISPAdapterException405(Exception):
+  pass
+
+
+class MISPAdapterException409(Exception):
+  pass
+
+
+class MISPAdapterException500(Exception):
   pass
 
 
@@ -121,7 +134,7 @@ class MISPAdapter(BaseView):
     self.misp_converter.user = user
 
     # everything is handled inside here
-    return self.misp_converter.filter_event_push(self, server_details.user)
+    return self.misp_converter.filter_event_push(self, server_details)
 
   def make_misp_xml(self, event, server_user):
 
@@ -204,9 +217,12 @@ class MISPAdapter(BaseView):
     self.logout_handler.logout()
     return return_message
 
-  def ins_merg_event(self, server_details, xml_string, server_user=None):
+  def ins_merg_event(self, server_details, xml_string, server_user=None, user=None):
       if server_details.type == 'MISP':
-        user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
+        if user:
+          pass
+        else:
+          user = self.event_controller.user_broker.get_by_id(self.get_user().identifier)
         self.misp_converter.api_key = server_details.user.api_key
         self.misp_converter.api_url = server_details.baseurl
         self.misp_converter.tag = server_details.name
@@ -217,8 +233,8 @@ class MISPAdapter(BaseView):
           try:
             event = self.misp_converter.get_event_from_xml(xml_string, None)
             self.logger.info('Received Event {0}'.format(event.uuid))
-            self.event_controller.insert_event(self.get_user(), event, True, True)
-          except IntegrityException as error:
+            self.event_controller.insert_event(user, event, True, True)
+          except ControllerIntegrityException as error:
             local_event = self.event_controller.get_event_by_uuid(event_uuid)
             event = self.misp_converter.get_event_from_xml(xml_string, local_event)
             # merge event with existing event
@@ -228,13 +244,14 @@ class MISPAdapter(BaseView):
               try:
                 merged_event = self.merger.merge_event(local_event, event, user, event_permissions)
               except MergingException:
-                raise cherrypy.HTTPError(405)
+                raise MISPAdapterException405()
+                # raise cherrypy.HTTPError(405)
             else:
               # TODO log the changes
               self.logger.warning('user {0} tried to change event {1} but does not have the right to see it'.format(user.username, event.identifer))
             if merged_event:
               self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
-              self.event_controller.update_event(self.get_user(), merged_event, True, True)
+              self.event_controller.update_event(user, merged_event, True, True)
               event = merged_event
             else:
               self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
@@ -246,9 +263,11 @@ class MISPAdapter(BaseView):
           self.logger.error('Received a MISP Event which caused errors')
           self.logger.error(error)
           # TODO Dump xml
-          raise cherrypy.HTTPError(500)
+          raise MISPAdapterException500()
+          # raise cherrypy.HTTPError(500)
       else:
-        raise cherrypy.HTTPError(409, 'Server is not a MISP Server')
+        raise MISPAdapterException409('Server is not a MISP Server')
+        # raise cherrypy.HTTPError(409, 'Server is not a MISP Server')
 
   def pushed_event(self, xml_string, server_user):
     # instantiate misp converter
@@ -262,6 +281,12 @@ class MISPAdapter(BaseView):
     except BrokerException as error:
       self.logger.error(error)
       raise cherrypy.HTTPError(404)
+    except MISPAdapterException405 as error:
+      raise cherrypy.HTTPError(405)
+    except MISPAdapterException409 as error:
+      raise cherrypy.HTTPError(409)
+    except MISPAdapterException500 as error:
+      raise cherrypy.HTTPError(500)
 
   def perform_push(self, send_events):
     incomming_events = dict()

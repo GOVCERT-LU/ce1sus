@@ -10,8 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from ce1sus.db.classes.indicator import IndicatorType
 from ce1sus.db.classes.types import AttributeType
-from ce1sus.db.common.broker import BrokerBase, IntegrityException, NothingFoundException, \
-  TooManyResultsFoundException, BrokerException
+from ce1sus.db.common.broker import BrokerBase, IntegrityException, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -30,7 +29,12 @@ class IndicatorTypeBroker(BrokerBase):
 
   def get_type_by_name(self, name):
     try:
-      return self.session.query(IndicatorType).filter(IndicatorType.name == name).one()
+      for key, value in IndicatorType.get_dictionary().iteritems():
+        if value == name:
+          type_ = IndicatorType()
+          type_.type = key
+          return type_
+      raise NoResultFound
     except NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(name, self.__class__.__name__))
     except MultipleResultsFound:

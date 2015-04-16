@@ -29,6 +29,12 @@ class SyncServerController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_all_pull_servers(self):
+    pass
+
+  def get_all_push_servers(self):
+    pass
+
   def get_server_by_uuid(self, uuid):
     try:
       return self.sync_server_broker.get_by_uuid(uuid)

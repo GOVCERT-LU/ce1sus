@@ -24,7 +24,7 @@ class ProcessController(BaseController):
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
     self.process_broker = self.broker_factory(ProcessBroker)
-    self.user_controller = UserController(config)
+    self.user_controller = UserController(config, session)
 
   def get_all_process_items(self):
     try:
@@ -43,6 +43,9 @@ class ProcessController(BaseController):
         raise ControllerException(u'Type "{0}" is not supported'.format(type_))
       process_item.status = ProcessStatus.SCHEDULED
       process_item.event_uuid = event_uuid
+      if sync_server:
+        process_item.server_details_id = sync_server.identifier
+        process_item.server_details = sync_server
       self.set_simple_logging(process_item, user, True)
 
       self.process_broker.insert(process_item)

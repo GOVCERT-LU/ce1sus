@@ -22,6 +22,7 @@ from zipfile import ZipFile
 
 from ce1sus.common.system import APP_REL
 from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.common.process import ProcessController
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
@@ -36,6 +37,7 @@ from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.log import ErrorMispAttribute
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
@@ -103,6 +105,10 @@ class MispMappingException(MispConverterException):
   pass
 
 
+class MispPushException(MispConverterException):
+  pass
+
+
 class MispConverter(BaseController):
 
   ce1sus_risk_level = ['High', 'Medium', 'Low', 'None', 'Undefined']
@@ -151,6 +157,7 @@ class MispConverter(BaseController):
     self.event_broker = self.broker_factory(EventBroker)
     self.error_broker = self.broker_factory(ErrorMispBroker)
     self.ce1sus_misp_converter = Ce1susMISP(config, session)
+    self.process_controller = ProcessController(config, session)
 
     self.dump = False
     self.file_location = None
@@ -772,12 +779,14 @@ class MispConverter(BaseController):
 
   def is_obs_empty(self, observable):
     empty = True
-    if observable.object:
-          if len(observable.object.attributes) > 0:
-            empty = False
-    if observable.observable_composition:
-      for obs in observable.observable_composition.observables:
-        sub_empty = self.is_obs_empty(obs)
+    if observable:
+      if observable.object:
+            if len(observable.object.attributes) > 0:
+              empty = False
+      if observable.observable_composition:
+        for obs in observable.observable_composition.observables:
+          # TODO find a way to determine this
+          sub_empty = self.is_obs_empty(obs)
     return empty
 
   def parse_attributes(self, event, misp_event, local_event=False):
@@ -961,6 +970,7 @@ class MispConverter(BaseController):
       rest_event.identifier = local_event.identifier
     else:
       self.event_broker.insert(rest_event, False)
+      pass
     observables = self.parse_attributes(rest_event, xml_event, local_event)
     rest_event.observables = observables
     # Append reference
@@ -1045,9 +1055,7 @@ class MispConverter(BaseController):
         reports.append(report)
     rest_event.reports = reports
 
-    # Append the group of the misp user with all permissions as he inserted it !?
-
-
+    # TODO: Append the group of the misp user with all permissions as he inserted it !?
     return rest_event
 
   def __get_dump_path(self, base, dirname):
@@ -1092,7 +1100,7 @@ class MispConverter(BaseController):
     indicator.event_id = event.identifier
 
     if indicator_type:
-      indicator.type_.append(self.get_indicator_type(indicator_type))
+      indicator.types.append(self.get_indicator_type(indicator_type))
 
     new_observable = clone_observable(observable)
     if new_observable:
@@ -1141,12 +1149,12 @@ class MispConverter(BaseController):
 
     return result
 
-  def filter_event_push(self, parent, server_user):
+  def filter_event_push(self, parent, server_details):
     url = '{0}/events/filterEventIdsForPush'.format(self.api_url)
-    events = parent.get_all_events(server_user)
+    events = parent.get_all_events(server_details.user)
     result = list()
     for event in events:
-      if not parent.is_event_viewable(event, server_user):
+      if not parent.is_event_viewable(event, server_details.user):
         continue
       eventdict = dict()
       eventdict['Event'] = dict()
@@ -1171,35 +1179,38 @@ class MispConverter(BaseController):
     content = json.dumps(result)
 
     for event_to_push in events_to_push:
-      url = '{0}/events'.format(self.api_url)
-      event = self.event_broker.get_by_uuid(event_to_push)
-      # cehck if event can be seen else ignore, normally should not happen
-      if not parent.is_event_viewable(event, server_user):
-        continue
-      # use the other function as it filters unwanted stuff out
-      event_xml = parent.make_misp_xml(event, server_user)
-      headers['Content-Length'] = len(event_xml)
-      req = urllib2.Request(url, event_xml, headers)
+      # schedule the events to push
 
-      try:
-        connection = urllib2.urlopen(req)
-        if connection.msg == 'OK':
-          continue
-        else:
-          if connection.code == 302:
-            # it already exists
-            # TODO when the event alredy exists
-            # makes something with the url returned in the header
-            # ref: https://github.com/MISP/MISP/issues/449
-            continue
-          else:
-            # log error
-            response = connection.read()
-            self.logger.error(u'unexpected error occured {0}'.format(response))
-      except HTTPError as error:
-        self.logger.error('Error during push of event {0} on server with url {1}'.format(event.uuid, self.api_url))
-        self.logger.error(error)
+      self.process_controller.create_new_process(ProcessType.PULL, event_to_push, server_details.user, server_details)
+
     return 'OK'
+
+  def push_event(self, event_xml):
+    url = '{0}/events'.format(self.api_url)
+    headers = self.get_api_header_parameters()
+    headers['Content-Type'] = 'application/xml'
+    headers['Accept'] = 'application/xml'
+    headers['Connection'] = 'close'
+    headers['Content-Length'] = len(event_xml)
+    req = urllib2.Request(url, event_xml, headers)
+
+    try:
+      connection = urllib2.urlopen(req)
+      if connection.msg == 'OK':
+        return True
+      else:
+        if connection.code == 302:
+          # it already exists
+          # TODO when the event alredy exists
+          # makes something with the url returned in the header
+          # ref: https://github.com/MISP/MISP/issues/449
+          return True
+        else:
+          # log error
+          response = connection.read()
+          raise MispPushException(u'unexpected error occured {0}'.format(response))
+    except HTTPError as error:
+      raise MispPushException(error)
 
   def get_recent_events(self, limit=20, unpublished=False):
     url = '{0}/events/index/sort:date/direction:desc/limit:{1}'.format(self.api_url, limit)

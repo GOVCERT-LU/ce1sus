@@ -164,10 +164,16 @@ class BaseView(object):
     """
     Returns the authorized cached events
     """
-    return self._get_from_session('_cp_events_cache', dict())
+    try:
+      return self._get_from_session('_cp_events_cache', dict())
+    except AttributeError:
+      return dict()
 
   def set_authorized_events_cache(self, cache):
-    self._put_to_session('_cp_events_cache', cache)
+    try:
+      self._put_to_session('_cp_events_cache', cache)
+    except AttributeError:
+      pass
 
   def check_if_admin(self):
     user = self.get_user()
@@ -239,7 +245,11 @@ class BaseView(object):
         if is_object_viewable(item, permissions):
           return True
         else:
-          return False
+          # check if owner
+          if item.creator_group_id == user.group.identifier:
+            return True
+          else:
+            return False
       else:
         return False
 

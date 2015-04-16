@@ -6,14 +6,15 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 from ce1sus.common.checks import is_event_owner
-from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, \
+  ControllerIntegrityException
 from ce1sus.db.brokers.event.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker
+from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -107,7 +108,7 @@ class EventController(BaseController):
     except IntegrityException as error:
       self.logger.debug(error)
       self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.uuid))
-      raise ControllerException(u'An event with uuid "{0}" already exists'.format(event.uuid))
+      raise ControllerIntegrityException(u'An event with uuid "{0}" already exists'.format(event.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 

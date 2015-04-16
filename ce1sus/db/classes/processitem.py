@@ -102,6 +102,7 @@ class ProcessItem(SimpleLogingInformations, Base):
     return {'identifier': self.convert_value(self.uuid),
             'status': self.convert_value(self.status),
             'type_': self.convert_value(self.type_),
-            'event': self.event.to_dict(True, False),
-            'event_id': self.convert_value(self.event.uuid),
+            'event_uuid': self.convert_value(self.event_uuid),
+            'server_details_id': self.convert_value(self.server_details_id),
+            'server_details': self.server_details.to_dict(True, False)
             }

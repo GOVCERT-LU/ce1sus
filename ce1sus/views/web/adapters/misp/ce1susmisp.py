@@ -60,8 +60,7 @@ class Ce1susMISP(BaseController):
   def create_event_xml(self, event, flat_attribtues, references):
     # flat_attribtues and references must not contain anything which is not destined to be shared
     xml_event = self.make_event(event, flat_attribtues, references)
-    result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
-    print result
+    result = self.wrapper(etree.tostring(xml_event))
     return result
 
   def make_event(self, event, attributes, references):
@@ -101,16 +100,18 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'ShadowAttribtue', '')
     self.__append_child(root, 'RelatedEvent', '')
     self.__append_child(root, 'date', event.created_at.date())
+    counter = 0
     for attribute in attributes:
       xml_attr = self.__make_attribute(attribute)
-      if xml_attr:
+      if xml_attr is not None:
+        counter = counter + 1
         root.append(xml_attr)
-    counter = 0
     if references:
       for reference in references:
-        counter = counter + 1
+
         xml_ref = self.__make_reference(reference, event)
         if xml_ref:
+          counter = counter + 1
           root.append(xml_ref)
 
     self.__append_child(root, 'attribute_count', len(attributes) + counter)
@@ -263,7 +264,7 @@ class Ce1susMISP(BaseController):
   def __make_attribute(self, attribute):
     root = etree.Element('Attribute')
     self.__append_child(root, 'id', attribute.identifier)
-    self.__append_child(root, 'timestamp', int(time.mktime(attribute.modified_on.timetuple())))
+
     category = self.get_attr_category(attribute)
     type_ = self.get_attr_type(category, attribute)
     if not type_:
@@ -284,6 +285,7 @@ class Ce1susMISP(BaseController):
       event = self.event_controller.get_event_by_id(attribute.object.event_id)
       self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(event.tlp_level_id, 2))
     # TODO add comment
+    self.__append_child(root, 'timestamp', int(time.mktime(attribute.modified_on.timetuple())))
     if attribute.object.observable.description:
       self.__append_child(root, 'comment', attribute.object.observable.description)
     else:
@@ -339,7 +341,7 @@ class Ce1susMISP(BaseController):
     xml_events_str = ''
     for event in events:
       xml_event = self.__make_event(event)
-      xml_event_str = etree.tostring(xml_event, pretty_print=True)
+      xml_event_str = etree.tostring(xml_event)
       xml_events_str = u'{0}\n{1}'.format(xml_events_str, xml_event_str)
     result = self.wrapper(xml_events_str)
     return result
