@@ -16,6 +16,7 @@ from ce1sus.helpers.common.config import Configuration
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.controllers.admin.user import UserController
+from ce1sus.db.brokers.event.eventbroker import EventBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -44,6 +45,7 @@ class Scheduler(object):
     self.misp_ctrl = MISPAdapter(config, directconnection)
     user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
     self.user_controller = UserController(config, directconnection)
+    self.event_broker = self.user_controller.broker_factory(EventBroker)
     if None:
       raise SchedulerException('maintenaceuseruuid was not defined in config')
     try:

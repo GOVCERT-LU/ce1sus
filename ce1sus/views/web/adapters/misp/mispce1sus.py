@@ -1181,7 +1181,7 @@ class MispConverter(BaseController):
     for event_to_push in events_to_push:
       # schedule the events to push
 
-      self.process_controller.create_new_process(ProcessType.PULL, event_to_push, server_details.user, server_details)
+      self.process_controller.create_new_process(ProcessType.PUSH, event_to_push, server_details.user, server_details)
 
     return 'OK'
 
