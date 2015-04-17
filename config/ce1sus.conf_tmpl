@@ -39,12 +39,15 @@ users_dn=
 
 #Configuration for the smtp server
 [Mailer]
-from=ce1sus
+from=ce1sus@ce1sus.lan
 smtp=
 port=25
 user=
 password=
-keyfile=
+gpgkeys=
+passphrase=
+keylength=4096
+expiredate=2023-01-01 
 
 [MISPAdapter]
 dump=yes
