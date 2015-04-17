@@ -67,7 +67,7 @@ class Scheduler(object):
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
     else:
-      # do the sync for all servers which are publish servers
+      # do the push for all servers which are push servers and mail to the users/groups
       pass
 
   def __pull(self, item):

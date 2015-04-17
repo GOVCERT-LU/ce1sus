@@ -75,6 +75,10 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/admin/syncservers/help", "main.layout.admin.syncservers.help")
         .when("/admin/syncservers/servers", "main.layout.admin.syncservers.servers")
         
+        .when("/admin/jobs", "main.layout.admin.bgjobs")
+        .when("/admin/jobs/help", "main.layout.admin.bgjobs.help")
+        .when("/admin/jobs/jobs", "main.layout.admin.bgjobs.jobs")
+        
         .when("/admin/object", "main.layout.admin.object")
         .when("/admin/object/:id", "main.layout.admin.object.objectDetails")
         .when("/admin/type", "main.layout.admin.type")
@@ -1108,7 +1112,51 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           
                         .up()
                         
-                
+                        .segment("bgjobs", {
+                               templateUrl: "pages/admin/bgjobs.html",
+                               controller: "MainJobscontroller",
+                               resolve: {
+                                 jobs: function(Restangular) {
+                                   return Restangular.one("processes").getList(null, {"complete": true}).then(function (jobs) {
+                                     return jobs;
+                                   }, function(response) {
+                                       throw generateErrorMessage(response);
+                                   });
+                                 }
+                          
+                               },
+                               untilResolved: {
+                                 templateUrl: 'pages/common/loading.html',
+                                 controller: 'loadingController'
+                               },
+                               resolveFailed: {
+                                 templateUrl: 'pages/common/error.html',
+                                 controller: 'errorController'
+                               }
+                        })
+                        .within()
+                           .segment("help", {
+                          "default": true,
+                          templateUrl: "pages/admin/bgjobs/help.html"})
+                          
+                          .segment("jobs", {
+                          templateUrl: "pages/admin/bgjobs/jobs.html",
+                          controller: "Jobscontroller",
+                          resolve: {
+                            
+                          },
+                          untilResolved: {
+                            templateUrl: 'pages/common/loading.html',
+                            controller: 'loadingController'
+                          },
+                          resolveFailed: {
+                            templateUrl: 'pages/common/error.html',
+                            controller: 'errorController'
+                          }
+                          })
+                          
+                        .up()
+                        
                       .segment("group", {
                                templateUrl: "pages/admin/groupmgt.html",
                                controller : "groupController",

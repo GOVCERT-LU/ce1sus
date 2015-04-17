@@ -1,0 +1,19 @@
+<div class="row">
+  <div class="col-lg-3">
+    <p/>
+    <div class="well">
+      <div class="scrollbarbox">
+        <ul class="nav nav-list">
+          <li ng-class="{active: ('main.layout.admin.bgjobs.help' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.bgjobs.help' | routeSegmentUrl }}">Help</a>
+          </li>
+          <li ng-class="{active: ('main.layout.admin.bgjobs.jobs' | routeSegmentStartsWith)}">
+            <a href="#{{ 'main.layout.admin.bgjobs.jobs' | routeSegmentUrl }}">Jobs</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-9 anim" app-view-segment="4">
+  </div>
+</div>

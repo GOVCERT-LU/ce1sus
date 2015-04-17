@@ -103,6 +103,15 @@ class ProcessController(BaseController):
     process_item.status = ProcessStatus.CANCELLED
     self.update_process_item(process_item, user)
 
+  def process_restart(self, process_item, user):
+    self.logger.critical(u'Process {0} restarted by user {1}'.format(process_item.identifier, user.identifier))
+    process_item.status = ProcessStatus.SCHEDULED
+    self.update_process_item(process_item, user)
+
+  def process_remove(self, process_item, user):
+    self.logger.critical(u'Process {0} removed by user {1}'.format(process_item.identifier, user.identifier))
+    self.remove_process_item_by_id(process_item.identifier)
+
   def update_process_item(self, process_item, user, commit=True):
     user = self.user_controller.get_user_by_id(user.identifier)
     self.set_simple_logging(process_item, user, False)
