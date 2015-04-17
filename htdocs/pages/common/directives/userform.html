@@ -95,6 +95,14 @@
     </div>
   </div>
   <div class="row">
+    <label class="col-lg-3 control-label text-right">Get notifications</label>
+    <div class="col-lg-9">
+        <input class="form-control" type="checkbox" name="notifications" value="notifications"  ng-model="user.notifications" />
+    </div>
+  </div>
+  
+  
+  <div class="row">
     <label class="col-lg-3 control-label text-right">GPG Key</label>
     <div class="col-lg-9">
       <textarea name="gpg_key" ng-model="user.gpg_key" cols=48 rows=20></textarea>

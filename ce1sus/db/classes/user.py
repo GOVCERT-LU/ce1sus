@@ -8,12 +8,11 @@ Created on Oct 28, 2014
 import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer, BigInteger
+from sqlalchemy.types import Unicode, DateTime, UnicodeText, Integer, BigInteger, Boolean
 
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
-from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 
@@ -112,6 +111,7 @@ class User(Base):
   group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
   group = relationship(Group, backref='users')
   plain_password = None
+  notifications = Column('notifications', Boolean, default=True, nullable=False)
 
   @property
   def can_access(self):
@@ -195,7 +195,8 @@ class User(Base):
               'last_login': self.convert_value(self.last_login),
               'password': self.convert_value(self.password),
               'sirname': self.convert_value(self.sirname),
-              'username': self.convert_value(self.username)
+              'username': self.convert_value(self.username),
+              'notifications': self.convert_value(self.notifications)
               }
     else:
       return {'identifier': self.uuid,
@@ -210,6 +211,7 @@ class User(Base):
     self.sirname = json.get('sirname', None)
     self.username = json.get('username', None)
     self.plain_password = json.get('password', None)
+    self.notifications = json.get('notifications', None)
     # permissions setting
     self.permissions.populate(json.get('permissions', {}))
     # TODO add group

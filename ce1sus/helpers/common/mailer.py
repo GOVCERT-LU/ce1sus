@@ -121,63 +121,55 @@ class Mailer(object):
 
   def import_gpg(self, key):
     if self.gpg:
-      public_keys_b4 = self.gpg.list_keys()
       self.gpg.import_keys(key)
-      public_keys = self.gpg.list_keys()
-
     else:
       raise MailerException('Gpg not initialized')
 
   def __sign_message(self, text):
-    if self.__key_path:
-      # gpg = gnupg.GPG(gnupghome=self.__key_path)
-      try:
-        if self.gpg:
-          # there should be at most one!
-          private_key = self.gpg.list_keys(True)[0]
-          signer_fingerprint = private_key.get('fingerprint', None)
-          if signer_fingerprint:
-            signed_data = self.gpg.sign(text,
-                                        keyid=signer_fingerprint,
-                                        passphrase=self.__passphrase)
-            message = str(signed_data)
-            if message:
-              return message
-            else:
-              info_log = getattr(self.get_logger(), 'info')
-              info_log('Something went wrong while signing')
-      except IndexError as error:
+    try:
+      if self.gpg:
+        # there should be at most one!
+        private_key = self.gpg.list_keys(True)[0]
+        signer_fingerprint = private_key.get('fingerprint', None)
+        if signer_fingerprint:
+          signed_data = self.gpg.sign(text,
+                                      keyid=signer_fingerprint,
+                                      passphrase=self.__passphrase)
+          message = str(signed_data)
+          if message:
+            return message
+          else:
+            info_log = getattr(self.get_logger(), 'info')
+            info_log('Something went wrong while signing')
+      else:
         info_log = getattr(self.get_logger(), 'info')
-        info_log(error)
-      except IndexError:
-        info_log = getattr(self.get_logger(), 'info')
-        info_log('No private key found. Not sending Mails')
-
-    info_log = getattr(self.get_logger(), 'info')
-    info_log('GPG Path not specified sending unsinged mail')
-    return text
+        info_log('GPG Path not specified sending unsinged mail')
+        return text
+    except IndexError as error:
+      info_log = getattr(self.get_logger(), 'info')
+      info_log(error)
+      info_log('No private key found. Not sending Mail')
 
   def __encrypt_message(self, text, reciever):
     self.get_logger().debug('Encrypting message')
-    if self.__key_path:
-      try:
-        if self.gpg:
-          # there should be at most one!
-          private_key = self.gpg.list_keys(True)[0]
-          signer_fingerprint = private_key.get('fingerprint', None)
-          if signer_fingerprint:
-            encrypted_data = self.gpg.encrypt(text, reciever,
-                                              sign=signer_fingerprint,
-                                              passphrase=self.__passphrase,
-                                              always_trust=True)
-            return str(encrypted_data)
-          else:
-            raise MailerException('PK fingerprint not found.')
+    try:
+      if self.gpg:
+        # there should be at most one!
+        private_key = self.gpg.list_keys(True)[0]
+        signer_fingerprint = private_key.get('fingerprint', None)
+        if signer_fingerprint:
+          encrypted_data = self.gpg.encrypt(text, reciever,
+                                            sign=signer_fingerprint,
+                                            passphrase=self.__passphrase,
+                                            always_trust=True)
+          return str(encrypted_data)
         else:
-          raise MailerException('No passphrase specified.')
-      except ImportError as error:
-        error_log = getattr(self.get_logger(), 'error')
-        error_log(error)
+          raise MailerException('PK fingerprint not found.')
+      else:
+        raise MailerException('Gpg not initialized')
+    except ImportError as error:
+      error_log = getattr(self.get_logger(), 'error')
+      error_log(error)
 
     info_log = getattr(self.get_logger(), 'info')
     info_log('GPG not installed not sending unencrypted mail')
