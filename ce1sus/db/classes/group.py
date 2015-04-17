@@ -191,6 +191,7 @@ class Group(Base):
                           backref='parents',
                           order_by='Group.name',
                           )
+  notifications = Column('notifications', Boolean, default=False, nullable=False)
 
   @property
   def tlp(self):
@@ -256,7 +257,8 @@ class Group(Base):
               'gpg_key': self.convert_value(self.gpg_key),
               'tlp_lvl': self.convert_value(self.tlp_lvl),
               'tlp': self.convert_value(self.tlp),
-              'children': dict(),
+              'children': list(),
+              'notifications': self.convert_value(self.notifications)
               }
     else:
       return {'identifier': self.uuid,
@@ -272,4 +274,4 @@ class Group(Base):
     # permissions setting
     self.permissions.populate(json.get('permissions', {}))
     self.default_permissions.populate(json.get('default_event_permissions', {}))
-    # TODO add group
+    self.notifications = json.get('notifications', None)

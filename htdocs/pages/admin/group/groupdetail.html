@@ -17,6 +17,13 @@
   <div class="col-lg-9">{{group.email}}</div>
 </div>
 <div class="row">
+  <label class="col-lg-3 control-label text-right">Get notifications</label>
+  <div class="col-lg-9">
+  <div ng-if="group.notifications">Yes</div>
+  <div ng-if="!group.notifications">No</div>
+  </div>
+</div>
+<div class="row">
   <label class="col-lg-3 control-label text-right">GPG Key</label>
   <div class="col-lg-9">{{group.gpg_key}}</div>
 </div>
