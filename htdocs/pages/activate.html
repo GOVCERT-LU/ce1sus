@@ -1,0 +1,37 @@
+<div class="text-center">
+  <h1>Ce1sus Library</h1>
+  <h2>User activation</h2>
+  
+  <div class="row">
+    <div class="col-lg-3">
+    </div>
+    <div class="col-lg-6">
+      <div ng-if="response.activated">
+        <div class="alert alert-success" role="alert">
+          <p>
+            <strong>The user is now activated</strong>
+          </p>
+          <p>
+          Please click <a href="#{{ 'main.layout.login' | routeSegmentUrl }}">here</a> to go to the login screen
+          </p>
+        </div>
+      </div>
+      <div ng-if="!response.activated">
+        <div class="alert alert-danger" role="alert">
+          <p>
+            <strong>The user cannot be activated due to:</strong>
+          </p>
+          <p>
+          {{response.errors}}
+          </p>
+          <p>
+          Please contact the owner of ce1sus for assistance
+          </p>
+        </div>
+  
+      </div>
+    </div>
+    <div class="col-lg-3">
+    </div>
+  </div>
+</div>

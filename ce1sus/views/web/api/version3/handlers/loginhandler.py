@@ -6,13 +6,17 @@
 Created on Oct 29, 2014
 """
 
+import cherrypy
+from datetime import datetime
+import math
 import string
 
-from ce1sus.controllers.base import ControllerException
+from ce1sus.controllers.admin.user import UserController
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.login import LoginController
+from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require
-import cherrypy
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -26,6 +30,7 @@ class LoginHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.login_controller = self.controller_factory(LoginController)
+    self.user_controller = self.controller_factory(UserController)
 
   @rest_method(default=True)
   @methods(allowed=['POST'])
@@ -69,6 +74,31 @@ class LoginHandler(RestBaseHandler):
     except ControllerException as error:
       self.logger.info(error)
       raise cherrypy.HTTPError(status=401, message='Credentials are incorrect.')
+
+  @rest_method()
+  @methods(allowed=['GET'])
+  def activation(self, **args):
+    try:
+      path = args.get('path')
+      if len(path) > 0:
+        act_str = path.pop(0)
+        user = self.user_controller.get_user_by_activation_str(act_str)
+        if user.is_activated:
+          return {'activated': False, 'errors': 'User is already activated'}
+        now = datetime.now()
+        time_diff = now - user.activation_sent
+        if math.floor((time_diff.seconds) / 3600) >= 24:
+          return {'activated': False, 'errors': 'Activation link expired'}
+        if user.permissions.disabled:
+          return {'activated': False, 'errors': 'Activation link is disabled'}
+        self.user_controller.activate_user(user, False)
+        return{'activated': True, 'errors': None}
+      else:
+        raise RestHandlerException('No uuid given')
+    except ControllerNothingFoundException as error:
+      return {'activated': False, 'errors': 'Activation link cannot be found'}
+    except ControllerException as error:
+      raise RestHandlerException(error)
 
 
 class LogoutHandler(RestBaseHandler):

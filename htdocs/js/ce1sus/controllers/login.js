@@ -25,6 +25,10 @@ app.controller("loginController", function($scope, Restangular, messages,
   $scope.$routeSegment = $routeSegment;
   
 });
+app.controller("activationController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location, activated) {
+  $scope.response = activated;
+});
 
 app.controller("logoutController", function($scope, Restangular,
     messages, $log, $routeSegment) {

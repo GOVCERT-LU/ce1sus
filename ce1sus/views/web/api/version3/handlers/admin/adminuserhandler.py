@@ -5,8 +5,10 @@
 
 Created on Oct 29, 2014
 """
+import random
 import re
 
+from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
@@ -28,6 +30,7 @@ class AdminUserHandler(RestBaseHandler):
   def __init__(self, config):
     RestBaseHandler.__init__(self, config)
     self.user_controller = self.controller_factory(UserController)
+    self.mail_controller = self.controller_factory(MailController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])
@@ -106,6 +109,48 @@ class AdminUserHandler(RestBaseHandler):
         else:
           raise RestHandlerException(u'Cannot delete user as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except ControllerException as error:
+      raise RestHandlerException(error)
+
+  @rest_method()
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def activate(self, **args):
+    details = self.get_detail_value(args)
+    inflated = self.get_inflated_value(args)
+    try:
+      path = args.get('path')
+      if len(path) > 0:
+        uuid = path.pop(0)
+        user = self.user_controller.get_user_by_uuid(uuid)
+        self.user_controller.activate_user(user)
+        return user.to_dict(details, inflated)
+      else:
+        raise RestHandlerException('No uuid given')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except ControllerException as error:
+      raise RestHandlerException(error)
+
+  @rest_method()
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def resentmail(self, **args):
+    try:
+      path = args.get('path')
+      if len(path) > 0:
+        uuid = path.pop(0)
+        user = self.user_controller.get_user_by_uuid(uuid)
+        # set new random password for user
+        user.plain_password = hashSHA1(u'{0}'.format(random.random()))
+        self.user_controller.set_activation_str(user)
+        self.user_controller.update_user(user)
+        self.mail_controller.send_activation_mail(user)
+        return 'Ok'
+      else:
+        raise RestHandlerException('No uuid given')
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:

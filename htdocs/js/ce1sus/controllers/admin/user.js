@@ -67,9 +67,10 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
 
 });
 
-app.controller("userDetailController", function($scope, $routeSegment,$user, $log, messages) {
+app.controller("userDetailController", function($scope, $routeSegment,$user, $log, messages, Restangular, showMailBtn) {
 
   $scope.user = $user;
+  $scope.showMailBtn= showMailBtn;
   
   $scope.$watch(function() {
     return $scope.user.group_id;
@@ -116,6 +117,30 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
   $scope.$routeSegment = $routeSegment;
   $scope.setUser = function(user){
     $scope.user = user;
+  };
+  
+  $scope.activate = function(){
+    
+    Restangular.one('user/activate',$scope.user.identifier).get({"complete": true, "inflated": true}).then(function(data) {
+      message = {"type":"success","message":"User Activated"};
+      messages.setMessage(message);
+      $scope.user = data;
+    }, function (response) {
+      handleError(response, messages);
+    });
+    
+  };
+  
+  $scope.resentmail = function(){
+    
+    Restangular.one('user/resentmail',$scope.user.identifier).get().then(function(data) {
+      message = {"type":"success","message":"Mail successfully sent to user "+item.username};
+      messages.setMessage(message);
+      $scope.user = data;
+    }, function (response) {
+      handleError(response, messages);
+    });
+    
   };
 
 });

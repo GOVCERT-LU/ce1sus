@@ -119,7 +119,7 @@ class User(Base):
 
   @property
   def is_activated(self):
-    return self.activated and self.activation_str is None
+    return self.activated
 
   @property
   def permissions(self):

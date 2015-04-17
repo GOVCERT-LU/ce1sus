@@ -31,6 +31,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
     
         .when('/', 'main.layout')
         .when("/home", "main.layout.home")
+        .when("/activate/:id", "main.layout.activate")
         .when("/login", "main.layout.login")
         .when("/logout", "main.layout.logout")
         .when("/about", "main.layout.about")
@@ -132,6 +133,27 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                      resolve: {
                        changelog: function(Restangular) {
                          return Restangular.oneUrl("text", "/welcome_message").get().then(function(message) {
+                             return message;
+                           }, function(response) {
+                             throw generateErrorMessage(response);
+                           });
+                       }
+                     },
+                     untilResolved: {
+                       templateUrl: 'pages/common/loading.html',
+                       controller: 'loadingController'
+                     },
+                     resolveFailed: {
+                       templateUrl: 'pages/common/error.html',
+                       controller: 'errorController'
+                     }
+                   })
+                   .segment('activate', {
+                     templateUrl: 'pages/activate.html',
+                     controller: 'activationController',
+                     resolve: {
+                       activated: function(Restangular, $routeSegment) {
+                         return Restangular.one("login/activation", $routeSegment.$routeParams.id).get().then(function(message) {
                              return message;
                            }, function(response) {
                              throw generateErrorMessage(response);
@@ -988,7 +1010,18 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                               }, function(response) {
                                   throw generateErrorMessage(response);
                               });
-                            }
+                            },
+                            showMailBtn: function(Restangular) {
+                              return Restangular.oneUrl("mailing", "/plugins/is_plugin_avaibable/mail").get().then(function (data) {
+                                if (data) {
+                                  return true;
+                                } else {
+                                  return false;
+                                }
+                              }, function(response) {
+                                  throw generateErrorMessage(response);
+                              });
+                            },
                           },
                           dependencies: ["id"],
                           untilResolved: {

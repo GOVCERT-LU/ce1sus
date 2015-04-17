@@ -7,6 +7,9 @@ Created on Jan 6, 2014
 """
 from email.mime.text import MIMEText
 import gnupg
+from os import makedirs
+import os
+from os.path import exists
 from smtplib import SMTPException, SMTP
 
 from ce1sus.helpers.common.debug import Log
@@ -54,38 +57,89 @@ class Mailer(object):
   def __init__(self, config):
     self.__config_section = config.get_section('Mailer')
     self.sender = self.__config_section.get('from')
+    if not self.sender:
+      raise MailerException('No from specified in config')
     self.logger = Log(config)
     self.__key_path = self.__config_section.get('gpgkeys', None)
-    self.__passphrase = self.__config_section.get('passphrase', None)
-    self.gpg = self.get_gpg()
+    if self.__key_path:
+      self.__passphrase = self.__config_section.get('passphrase', None)
+      if not self.__passphrase:
+        raise MailerException('No passphrase specified in config')
+      self.__keylength = self.__config_section.get('keylength', 2048)
+      self.__expiredate = self.__config_section.get('expiredate', None)
+      if not self.__expiredate:
+        raise MailerException('No expiration date specified in config')
+      self.__expiredate = u'{0}'.format(self.__expiredate.date())
+    self.gpg = self.__get_gpg()
 
-  def get_gpg(self):
+  def __get_gpg(self):
     if Mailer.pgp:
       return Mailer.pgp
     else:
-      self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
-      gpg = None
       if self.__key_path:
-        gpg = gnupg.GPG(gnupghome=self.__key_path)
+        self.get_logger().debug('Getting gpg from {0}'.format(self.__key_path))
+        gpg = None
+        if self.__key_path:
+          gpg = gnupg.GPG(gnupghome=self.__key_path)
+          # check if key exists else generate one
+          private_keys = gpg.list_keys(True)
+          if not private_keys:
+            self.get_logger().info('No private keys stored')
+            # !??!?
+            try:
+              os.environ['LOGNAME']
+            except KeyError:
+              os.environ["LOGNAME"] = "ce1sus"
+
+            input_data = gpg.gen_key_input(name_real='Ce1sus system',
+                                           name_email=self.sender,
+                                           expire_date=self.__expiredate,
+                                           key_type='RSA',
+                                           key_length=self.__keylength,
+                                           key_usage='',
+                                           subkey_type='RSA',
+                                           subkey_length=self.__keylength,
+                                           subkey_usage='encrypt,sign',
+                                           passphrase=self.__passphrase)
+            self.get_logger().info('Generating key for {0}'.format(self.sender))
+            key = gpg.gen_key(input_data)
+            key_str = u'{0}'.format(key)
+            keyfolder = self.__key_path + '/keys'
+            self.get_logger().info('Generated a new key for {0} keys are stored in {1}'.format(self.sender, keyfolder))
+            ascii_armored_public_keys = gpg.export_keys(key_str)
+            ascii_armored_private_keys = gpg.export_keys(key_str, True)
+            if not exists(keyfolder):
+              makedirs(keyfolder)
+
+            with open(keyfolder + '/ce1sus_keys.asc', 'w') as f:
+              f.write(ascii_armored_public_keys)
+              f.write(ascii_armored_private_keys)
         Mailer.pgp = gpg
-      return gpg
-  
+        return gpg
+      else:
+        return None
+
   def import_gpg(self, key):
-    
+    if self.gpg:
+      public_keys_b4 = self.gpg.list_keys()
+      self.gpg.import_keys(key)
+      public_keys = self.gpg.list_keys()
+
+    else:
+      raise MailerException('Gpg not initialized')
 
   def __sign_message(self, text):
     if self.__key_path:
       # gpg = gnupg.GPG(gnupghome=self.__key_path)
       try:
-        if self.__passphrase:
+        if self.gpg:
           # there should be at most one!
-          gpg = self.gpg
-          private_key = gpg.list_keys(True)[0]
+          private_key = self.gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            signed_data = gpg.sign(text,
-                                   keyid=signer_fingerprint,
-                                   passphrase=self.__passphrase)
+            signed_data = self.gpg.sign(text,
+                                        keyid=signer_fingerprint,
+                                        passphrase=self.__passphrase)
             message = str(signed_data)
             if message:
               return message
@@ -107,16 +161,15 @@ class Mailer(object):
     self.get_logger().debug('Encrypting message')
     if self.__key_path:
       try:
-        if self.__passphrase:
+        if self.gpg:
           # there should be at most one!
-          gpg = self.gpg
-          private_key = gpg.list_keys(True)[0]
+          private_key = self.gpg.list_keys(True)[0]
           signer_fingerprint = private_key.get('fingerprint', None)
           if signer_fingerprint:
-            encrypted_data = gpg.encrypt(text, reciever,
-                                         sign=signer_fingerprint,
-                                         passphrase=self.__passphrase,
-                                         always_trust=True)
+            encrypted_data = self.gpg.encrypt(text, reciever,
+                                              sign=signer_fingerprint,
+                                              passphrase=self.__passphrase,
+                                              always_trust=True)
             return str(encrypted_data)
           else:
             raise MailerException('PK fingerprint not found.')
@@ -160,15 +213,6 @@ class Mailer(object):
     except SMTPException as error:
       self.get_logger().critical(error)
       raise MailerException(error)
-
-  def add_gpg_key(self, data):
-    try:
-      gpg = self.gpg
-      gpg.import_keys(data)
-    except ImportError as error:
-      error_log = getattr(self.get_logger(), 'error')
-      error_log('Could not find gnupg will not import key')
-      error_log(error)
 
   def get_logger(self):
     """returns the internal logger"""

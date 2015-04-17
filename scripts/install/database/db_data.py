@@ -39,7 +39,7 @@ def get_users(config):
   user.activated = datetime.now()
   user.dbcode = 31
   user.activation_sent = None
-  user.activation_str = None
+  user.activation_str = 'e96e0b6cfdb77c4e957508315bf7b7124aea9fa0'
 
   result.append(user)
   return result
@@ -87,7 +87,7 @@ def get_mail_templates(user):
   mail.body = mail.body + 'If you run into any issues or have any feedback regarding Ce1sus, don\'t hesitate to contact us at ce1sus@ce1sus.lan\n\n'
   mail.body = mail.body + 'Looking forward to fostering the collaboration between our organisations through your active participation in this information sharing program.\n\n'
   mail.body = mail.body + 'Best Regards,\n\n'
-  mail.subject = 'Event[${event_id}] ${event_uuid} Published - ${event_tlp} - ${event_risk} - ${event_title}'
+  mail.subject = 'User Registration'
   mail.creator = user
   mail.modifier = user
 

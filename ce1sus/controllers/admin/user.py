@@ -5,8 +5,10 @@ module handing the attributes pages
 
 Created: Aug 26, 2013
 """
+from datetime import datetime
 import random
 
+from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
@@ -26,6 +28,7 @@ class UserController(BaseController):
 
   def __init__(self, config, session=None):
     BaseController.__init__(self, config, session)
+    self.mail_controller = MailController(config, session)
     salt = self.config.get('ce1sus', 'salt', None)
     if salt:
       self.salt = salt
@@ -57,8 +60,7 @@ class UserController(BaseController):
   def insert_user(self, user, validate=True, commit=True):
     try:
       # Add unset elements
-      user.activation_str = hashSHA1('{0}{1}'.format(user.plain_password, random.random()))
-      user.activation_sent = DatumZait.utcnow()
+      self.set_activation_str(user)
       if user.plain_password:
         user.password = hashSHA1(user.plain_password + self.salt)
 
@@ -66,25 +68,10 @@ class UserController(BaseController):
 
       self.user_broker.insert(user, validate=validate, commit=commit)
 
-      # if user.gpg_key:
-      #  self.mail_handler.import_gpg_key(user.gpg_key)
+      if user.gpg_key:
+        self.mail_controller.import_gpg_key(user.gpg_key)
+      self.mail_controller.send_activation_mail(user)
 
-      # send_mail = self._get_config().get('ce1sus', 'sendmail', False)
-      try:
-        # if send_mail:
-          # send activation mail
-        #  self.mail_handler.send_activation_mail(user)
-          # activate the user directly
-        # else:
-        #  user.activated = DatumZait.utcnow()
-        #  user.activation_str = None
-        #  self.user_broker.update(user)
-        # return user, True
-        pass
-      except Exception as error:
-        self.user_broker.update(user)
-        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
-        raise ControllerException(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except IntegrityException as error:
       raise ControllerIntegrityException(error)
     except ValidationException as error:
@@ -135,6 +122,29 @@ class UserController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_user_by_activation_str(self, act_str):
+    try:
+      return self.user_broker.get_user_by_act_str(act_str)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def activate_user(self, user, manual=True):
+    try:
+      user.activated = DatumZait.utcnow()
+      self.user_broker.update(user)
+      if manual:
+        self.logger.info(u'User {0} got manually activated'.format(user.username))
+      else:
+        self.logger.info(u'User {0} has activated himself'.format(user.username))
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def set_activation_str(self, user):
+    user.activation_str = hashSHA1('{0}{1}'.format(user.plain_password, random.random()))
+    user.activation_sent = datetime.utcnow()
+
   """
   def resend_mail(self, user):
     try:
@@ -142,7 +152,7 @@ class UserController(BaseController):
       self.user_broker.update(user)
     except Exception as error:
         self.user_broker.update(user)
-        self._get_logger().info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
+        self.logger.info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
         self.raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
     except (BrokerException, MailHandlerException) as error:
       raise ControllerException(error)

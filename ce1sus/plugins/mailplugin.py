@@ -20,7 +20,6 @@ class MailPlugin(BasePlugin):
   def __init__(self, config):
     BasePlugin.__init__(self, config)
     self.mailer = Mailer(config)
-    self.sender = ''
 
   @plugin_internal_method
   def create_mail(self, subject, reciever, body, encrypt=True):
@@ -41,4 +40,8 @@ class MailPlugin(BasePlugin):
 
   @plugin_internal_method
   def import_gpg_key(self, gpg_key):
-    self.mailer.add_gpg_key(gpg_key)
+    self.mailer.import_gpg(gpg_key)
+
+  @plugin_internal_method
+  def get_instance(self):
+    return self
