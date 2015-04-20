@@ -17,6 +17,8 @@ from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
+from ce1sus.helpers.common.datumzait import DatumZait
+from ce1sus.helpers.common.converters import ValueConverter
 
 
 __author__ = 'Weber Jean-Paul'
@@ -65,6 +67,8 @@ class Event(ExtendedLogingInformations, Base):
   risk_id = Column('risk_id', Integer(1), nullable=False, default=0)
   analysis_id = Column('analysis_id', Integer(1), nullable=False, default=0)
   comments = relationship('Comment')
+  last_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
+  first_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
@@ -299,7 +303,9 @@ class Event(ExtendedLogingInformations, Base):
                 'observables_count': observables_count,
                 'comments': comments,
                 'properties': self.properties.to_dict(),
-                'groups': groups
+                'groups': groups,
+                'last_seen': self.convert_value(self.last_seen),
+                'first_seen': self.convert_value(self.first_seen)
                 }
     else:
       result = {'identifier': self.convert_value(self.uuid),
@@ -323,6 +329,8 @@ class Event(ExtendedLogingInformations, Base):
                 'creator_group': self.creator_group.to_dict(complete, False),
                 'modifier_group': self.modifier.group.to_dict(complete, False),
                 'originating_group': self.originating_group.to_dict(complete, False),
+                'last_seen': self.convert_value(self.last_seen),
+                'first_seen': self.convert_value(self.first_seen),
                 'comments': None,
                 'properties': self.properties.to_dict()
                 }
@@ -339,6 +347,19 @@ class Event(ExtendedLogingInformations, Base):
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    # assemple first and last seen
+    first_seen = json.get('first_seen', None)
+    if first_seen:
+      first_seen = ValueConverter.set_date(first_seen)
+    else:
+      first_seen = DatumZait.utcnow()
+    self.first_seen = first_seen
+    last_seen = json.get('last_seen', None)
+    if last_seen:
+      last_seen = ValueConverter.set_date(last_seen)
+    else:
+      last_seen = DatumZait.utcnow()
+    self.last_seen = last_seen
 
 
 class Comment(ExtendedLogingInformations, Base):

@@ -12,6 +12,8 @@
       ownership</button>
     <button class="btn btn-danger" ng-click="removeEvent()" ng-show="event.userpermissions.delete">
       Delete</button>
+    <button class="btn btn-primary" ng-click="publishEvent()" ng-show="event.userpermissions.modify && !event.published">
+      Publish</button>
   </div>
 
 <div class="row">

@@ -112,6 +112,40 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">First seen</label>
+        <div class="col-lg-9">
+          <div class="row" style="padding-left:15px">
+            <div class="col-lg-9">
+              <div class="form-group">
+                <input size="10" class="form-control" ng-model="event.first_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text">
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="form-group">
+                <input size="8" class="form-control" ng-model="event.first_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-lg-3 control-label text-right">Last seen</label>
+        <div class="col-lg-9">
+          <div class="row" style="padding-left:15px">
+            <div class="col-lg-9">
+              <div class="form-group">
+                <input size="10" class="form-control" ng-model="event.last_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text">
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="form-group">
+                <input size="8" class="form-control" ng-model="event.last_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     
 </form>
