@@ -1435,8 +1435,8 @@ class Migrator(object):
 
     event.last_publish_date = convert_date(line['last_publish_date'])
 
-    convert_date(line['first_seen'])
-    convert_date(line['last_seen'])
+    event.first_seen = convert_date(line['first_seen'])
+    event.last_seen = convert_date(line['last_seen'])
 
     event.created_at = convert_date(line['created'])
     event.modified_on = convert_date(line['modified'])
