@@ -43,6 +43,7 @@ from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.indicator import Indicator, IndicatorType
 import ce1sus.db.classes.indicator
 import ce1sus.db.classes.indicator
+import ce1sus.db.classes.servers
 import ce1sus.db.classes.mailtemplate
 from ce1sus.db.classes.object import Object, RelatedObject
 import ce1sus.db.classes.object
