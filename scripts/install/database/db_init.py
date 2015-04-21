@@ -74,7 +74,7 @@ if __name__ == '__main__':
   all_users = get_users(config)
   users = list()
   for user in all_users:
-    user_ctrl.insert_user(user, False, False)
+    user_ctrl.insert_user(user, False, False, False)
     user_ctrl.update_user(user)
     users.append(user)
   user_ctrl.user_broker.do_commit(False)

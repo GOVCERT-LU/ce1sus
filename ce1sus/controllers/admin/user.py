@@ -57,7 +57,7 @@ class UserController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_user(self, user, validate=True, commit=True):
+  def insert_user(self, user, validate=True, commit=True, send_mail=True):
     try:
       # Add unset elements
       self.set_activation_str(user)
@@ -70,7 +70,9 @@ class UserController(BaseController):
 
       if user.gpg_key:
         self.mail_controller.import_gpg_key(user.gpg_key)
-      self.mail_controller.send_activation_mail(user)
+
+      if send_mail:
+        self.mail_controller.send_activation_mail(user)
 
     except IntegrityException as error:
       raise ControllerIntegrityException(error)
