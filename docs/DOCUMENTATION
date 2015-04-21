@@ -104,6 +104,9 @@ $ python db_init.py
 Everything needed will be created automatically. If there should be migrations the scripts for the migration will be provided 
 the scripts/migrations folder, use these in order.
 
+NOTE: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
+manually as this takes some time to generate them if the system is not busy.
+
 1.3.4 Remarks
 -------------
 Depending on your DB server it is advised to have a tmp folder with at least 1 GB space.

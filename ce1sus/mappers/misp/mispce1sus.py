@@ -13,7 +13,6 @@ from os import makedirs, remove
 from os.path import isdir, isfile
 import re
 import time
-from twisted.protocols.dict import Definition
 from urllib2 import HTTPError
 import urllib2
 from uuid import uuid4
@@ -641,7 +640,7 @@ class MispConverter(BaseController):
       name = name.title()
       definition = self.__find_attr_def(obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum)
       if definition:
-        return Definition
+        return definition
       else:
         message = u'Category "{0}" Type "{1}" with value "{2}" cannot be found'.format(category, type_, value)
         self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
