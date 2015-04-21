@@ -98,3 +98,18 @@ def can_user_download(event, user, cache=None):
     # check if the default group can download
     result = user.default_group.can_download
   return result
+
+
+def get_max_tlp(user_group):
+  if user_group.permissions.propagate_tlp:
+    max_tlp = user_group.tlp_lvl
+    for group in user_group.children:
+      if group.tlp_lvl < max_tlp:
+        max_tlp = group.tlp_lvl
+      # check for group children
+      child_max = get_max_tlp(group)
+      if child_max < max_tlp:
+        max_tlp = child_max
+    return max_tlp
+  else:
+    return user_group.tlp_lvl

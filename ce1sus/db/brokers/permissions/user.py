@@ -112,12 +112,12 @@ class UserBroker(BrokerBase):
 
     try:
       if old_pwd:
-              user = self.session.query(User).filter(User.username == username,
-                                                     or_(
-                                                         User.password == passwd,
-                                                         User.password == old_pwd,
-                                                        )
-                                                     ).one()
+        user = self.session.query(User).filter(User.username == username,
+                                               or_(
+                                                   User.password == passwd,
+                                                   User.password == old_pwd,
+                                                   )
+                                               ).one()
       else:
         user = self.session.query(User).filter(User.username == username, User.password == passwd).one()
     except sqlalchemy.orm.exc.NoResultFound:

@@ -7,7 +7,8 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message
+from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, \
+  get_max_tlp
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.user import UserRights
@@ -187,18 +188,7 @@ class BaseView(object):
       raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
   def __get_max_tlp(self, user_group):
-    if user_group.permissions.propagate_tlp:
-      max_tlp = user_group.tlp_lvl
-      for group in user_group.children:
-        if group.tlp_lvl < max_tlp:
-          max_tlp = group.tlp_lvl
-        # check for group children
-        child_max = self.__get_max_tlp(group)
-        if child_max < max_tlp:
-          max_tlp = child_max
-      return max_tlp
-    else:
-      user_group.tlp_lvl
+    return get_max_tlp(user_group)
 
   def is_event_viewable(self, event, user=None):
     if not user:

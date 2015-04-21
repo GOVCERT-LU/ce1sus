@@ -26,7 +26,7 @@ class EventsController(BaseController):
     self.event_broker = self.broker_factory(EventBroker)
     self.relation_controller = RelationController(config, session)
 
-  def get_events(self, offset, limit, user, parent, parameters=None):
+  def get_events(self, offset, limit, user, parameters=None):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       int_lim = int(limit) - 1
@@ -34,21 +34,13 @@ class EventsController(BaseController):
       isadmin = is_user_priviledged(user)
       if isadmin:
         events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
-        # nbr_total_events = self.event_broker.get_total_events()
 
-        nbr_total_events = len(events)
+        nbr_total_events = self.event_broker.get_total_events()
         return (events, nbr_total_events)
       else:
-
-        # events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
-        events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
-        result = list()
-        for event in events:
-          if parent.is_event_viewable(event, user):
-            result.append(event)
-        nbr_total_events = len(result)
-        # nbr_total_events = self.event_broker.get_total_events_for_user()
-        return (result, nbr_total_events)
+        events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
+        nbr_total_events = self.event_broker.get_total_events_for_user(user)
+        return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)
 
