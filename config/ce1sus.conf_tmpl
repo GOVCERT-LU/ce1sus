@@ -53,3 +53,12 @@ expiredate=2023-01-01
 [MISPAdapter]
 dump=yes
 file=mispdump
+
+[ErrorMails]
+enabled=yes
+receiver=
+sender=ce1sus@ce1sus.lan
+subject=ErrorOccureredForCelsus_Local_DEV
+smtp=
+level=error
+user=

@@ -8,6 +8,7 @@ Created on Oct 23, 2014
 import cherrypy
 import os
 import sys
+import logging
 
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.event import Event
@@ -28,6 +29,11 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+def my_log_traceback(severity=logging.CRITICAL):
+    """Write the last error's headers and traceback to the cherrypy error log witih a CRITICAL severity."""
+    from cherrypy import _cperror
+    h = ["  %s: %s" % (k, v) for k, v in cherrypy.request.header_list]
+    cherrypy.log('\nRequest Headers:\n' + '\n'.join(h) + '\n\n' + _cperror.format_exc(), "HTTP", severity=severity)
 
 
 def bootstrap():
@@ -56,6 +62,19 @@ def bootstrap():
 
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
+
+  cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
+
+  use_mailer = config.get('ErrorMails', 'enabled', False)
+  if use_mailer:
+    smtpserver = config.get('ErrorMails', 'smtp')
+    fromaddr = config.get('ErrorMails', 'sender')
+    toaddr = config.get('ErrorMails', 'receiver')
+    subject = config.get('ErrorMails', 'subject')
+    h = logging.handlers.SMTPHandler(smtpserver, fromaddr, toaddr, subject)
+    log_lvl = getattr(logging, config.get('ErrorMails', 'level', 'error').upper())
+    h.setLevel(log_lvl)
+    cherrypy.log.error_log.addHandler(h)
 
 if __name__ == '__main__':
 
