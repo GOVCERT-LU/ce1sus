@@ -7,6 +7,8 @@ Created on Jul 4, 2013
 """
 import re
 import sqlalchemy.orm.exc
+from sqlalchemy.sql.expression import or_
+
 from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerBase, ValidationException, BrokerException, NothingFoundException, TooManyResultsFoundException
 from ce1sus.helpers.common.hash import hashSHA1
@@ -102,13 +104,22 @@ class UserBroker(BrokerBase):
     :returns: User
     """
     if salt:
-      passwd = hashSHA1(password + salt)
+      passwd = hashSHA1(password, salt)
+      old_pwd = hashSHA1(password, username)
     else:
       passwd = password
+      old_pwd = None
 
     try:
-      user = self.session.query(User).filter(User.username == username,
-                                             User.password == passwd).one()
+      if old_pwd:
+              user = self.session.query(User).filter(User.username == username,
+                                                     or_(
+                                                         User.password == passwd,
+                                                         User.password == old_pwd,
+                                                        )
+                                                     ).one()
+      else:
+        user = self.session.query(User).filter(User.username == username, User.password == passwd).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found with ID :{0}'.format(username)
                                   )
