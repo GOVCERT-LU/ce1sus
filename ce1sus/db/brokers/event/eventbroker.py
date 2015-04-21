@@ -55,7 +55,7 @@ class EventBroker(BrokerBase):
 
   def __set_parameters(self, result, parameters):
           # add additinal filters
-    sorting_set = False
+
     if parameters:
       anal = parameters.get('filter[analysis]', None)
       if anal:
@@ -79,7 +79,6 @@ class EventBroker(BrokerBase):
         matching_ids = 1
         result = result.filter(Event.analysis_id.in_(matching_ids))
 
-      sorting_set = False
       # do a similar stuff for sorting
       anal = parameters.get('sorting[analysis]', None)
       if anal:
@@ -87,50 +86,48 @@ class EventBroker(BrokerBase):
           result = result.order_by(Event.analysis_id.desc())
         else:
           result = result.order_by(Event.analysis_id.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[creator_group_name]', None)
       if anal:
         if anal == 'desc':
           result = result.join(Event.creator_group).order_by(Group.name.desc())
         else:
           result = result.join(Event.creator_group).order_by(Group.name.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[created_at]', None)
       if anal:
         if anal == 'desc':
           result = result.order_by(Event.created_at.desc())
         else:
           result = result.order_by(Event.created_at.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[title]', None)
       if anal:
         if anal == 'desc':
           result = result.order_by(Event.title.desc())
         else:
           result = result.order_by(Event.title.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[status]', None)
       if anal:
         if anal == 'desc':
           result = result.order_by(Event.status_id.desc())
         else:
           result = result.order_by(Event.status_id.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[tlp]', None)
       if anal:
         if anal == 'desc':
           result = result.order_by(Event.tlp_level_id.desc())
         else:
           result = result.order_by(Event.tlp_level_id.asc())
-        sorting_set = True
+
       anal = parameters.get('sorting[id]', None)
       if anal:
         if anal == 'desc':
           result = result.order_by(Event.identifier.desc())
         else:
           result = result.order_by(Event.identifier.asc())
-        sorting_set = True
-    return sorting_set
 
   def get_all_limited(self, limit, offset, parameters=None):
     """Returns only a subset of entries"""
@@ -138,12 +135,8 @@ class EventBroker(BrokerBase):
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
       result = self.session.query(Event).filter(Event.dbcode.op('&')(4) == 4)
-      sorting_set = self.__set_parameters(result, parameters)
-      if sorting_set:
-        result = result.limit(limit).offset(offset).all()
-      else:
-        # it can be only one sorting
-        result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      self.__set_parameters(result, parameters)
+      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -174,13 +167,9 @@ class EventBroker(BrokerBase):
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
       # , Event.tlp_level_id >= tlp
       result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
+      self.__set_parameters(result, parameters)
 
-      sorting_set = self.__set_parameters(result, parameters)
-      if sorting_set:
-        result = result.limit(limit).offset(offset).all()
-      else:
-        # it can be only one sorting
-        result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
       # remove all the no viewable
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
@@ -207,31 +196,39 @@ class EventBroker(BrokerBase):
 
     return result
 
-  def get_total_events(self):
+  def get_total_events(self, parameters=None):
     try:
       # TODO add validation and published checks
-      result = self.session.query(Event).count()
+      result = self.session.query(Event)
+      self.__set_parameters(result, parameters)
+
+      result = result.count()
       # result = self.session.query(self.get_broker_class()).count()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
 
-  def get_total_events_for_user(self, user):
+  def get_total_events_for_user(self, user, parameters=None):
     try:
       group_ids = self.__get_all_group_ids_of_user(user)
       tlp = get_max_tlp(user.group)
       # TODO add validation and published checks
       # TODO: total events for user
-      result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids)))).count()
+      result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
+      self.__set_parameters(result, parameters)
+
+      result = result.count()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)
 
-  def get_all_unvalidated_total(self):
+  def get_all_unvalidated_total(self, parameters=None):
     try:
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).count()
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4)
+      self.__set_parameters(result, parameters)
+      result = result.count()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -239,12 +236,14 @@ class EventBroker(BrokerBase):
       raise BrokerException(error)
     return result
 
-  def get_all_unvalidated(self, limit=None, offset=None):
+  def get_all_unvalidated(self, limit=None, offset=None, parameters=None):
     """
     Returns all unvalidated events
     """
     try:
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4)
+      self.__set_parameters(result, parameters)
+      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:

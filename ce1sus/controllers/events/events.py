@@ -35,21 +35,21 @@ class EventsController(BaseController):
       if isadmin:
         events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
 
-        nbr_total_events = self.event_broker.get_total_events()
+        nbr_total_events = self.event_broker.get_total_events(parameters)
         return (events, nbr_total_events)
       else:
         events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
-        nbr_total_events = self.event_broker.get_total_events_for_user(user)
+        nbr_total_events = self.event_broker.get_total_events_for_user(user, parameters)
         return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)
 
-  def get_unvalidated_events(self, offset, limit, user):
+  def get_unvalidated_events(self, offset, limit, user, parameters=None):
     try:
       int_lim = int(limit) - 1
       int_off = int(offset) - 1
-      events = self.event_broker.get_all_unvalidated(int_lim, int_off)
-      nbr_total_events = self.event_broker.get_all_unvalidated_total()
+      events = self.event_broker.get_all_unvalidated(int_lim, int_off, parameters)
+      nbr_total_events = self.event_broker.get_all_unvalidated_total(parameters)
       return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)
