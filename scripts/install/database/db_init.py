@@ -59,18 +59,18 @@ if __name__ == '__main__':
   #
   ce1susConfigFile = basePath + 'config/ce1sus.conf'
   config = Configuration(ce1susConfigFile)
-
+  print "Getting config"
   config.get_section('Logger')['log'] = False
-
+  print "Creating DB"
   session = SessionManager(config)
   engine = session.connector.get_engine()
   Base.metadata.create_all(engine, checkfirst=True)
-
+  print "Populating DB and checking/creating gpg db"
   mysql_session = session.connector.get_direct_session()
   session = mysql_session
   user_ctrl = UserController(config, session)
   handler_broker = AttributeHandlerBroker(session)
-
+  print "Populate users"
   all_users = get_users(config)
   users = list()
   for user in all_users:
@@ -83,7 +83,7 @@ if __name__ == '__main__':
   maintenance = Maintenance(config)
 
   # Register handlers
-
+  print "Registering handlers"
   maintenance.register_handler('multiplegenerichandler', 'attributes', 'MultipleGenericHandler')
   maintenance.register_handler('filehandler', 'attributes', 'FileHandler')
   maintenance.register_handler('datehandler', 'attributes', 'DateHandler')
@@ -100,7 +100,7 @@ if __name__ == '__main__':
   maintenance.register_handler('texthandler', 'references', 'TextHandler')
 
   mail_templates = get_mail_templates(users[0])
-
+  print "Populating Mail templates"
   mail_ctrl = MailController(config, session)
 
   for mail_template in mail_templates:
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
   all_attr_types = get_attribute_type_definitions()
   attr_types = dict()
-
+  print "Populating attribute types"
   attr_ctrl = AttributeDefinitionController(config, session)
 
   for key, value in all_attr_types.iteritems():
@@ -123,7 +123,7 @@ if __name__ == '__main__':
   conditions = dict()
 
   cond_ctrl = ConditionController(config, session)
-
+  print "Populating conditions"
   for key, value in all_conditions.iteritems():
     cond_ctrl.insert_condition(value, False)
     conditions[key] = value
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
   with open('attributes.json') as data_file:
     attrs = json.load(data_file)
-
+  print "Populating attribute definitions"
   attr_dict = dict()
   for attr_json in attrs:
     attr_def = AttributeDefinition()
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     objs = json.load(data_file)
 
   obj_ctrl = ObjectDefinitionController(config, session)
-
+  print "Populating object definitions"
   for obj_json in objs:
     obj_def = ObjectDefinition()
     obj_def.populate(obj_json)
@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
   with open('references.json') as data_file:
     references = json.load(data_file)
-
+  print "Populating references definitions"
   for ref_json in references:
     ref_def = ReferenceDefinition()
     ref_def.populate(ref_json)
