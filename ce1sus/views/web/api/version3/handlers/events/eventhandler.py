@@ -183,6 +183,7 @@ class EventHandler(RestBaseHandler):
 
   def __process_observable_get(self, event, requested_object, details, inflated):
     user = self.get_user()
+
     try:
       event_permission = self.get_event_user_permissions(event, user)
       uuid = requested_object['object_uuid']

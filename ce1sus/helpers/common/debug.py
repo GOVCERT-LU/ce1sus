@@ -10,11 +10,40 @@ from logging.handlers import RotatingFileHandler
 from os import makedirs
 from os.path import exists, dirname
 
+from ce1sus.helpers.common.syslogger import Syslogger
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+
+
+class LogObject(object):
+
+  def __init__(self, logger, syslogger=None):
+    self.logger = logger
+    self.syslogger = syslogger
+
+  def error(self, message):
+    self.logger.error(message)
+    if self.syslogger:
+      self.syslogger.error(message)
+
+  def warning(self, message):
+    self.logger.warning(message)
+    if self.syslogger:
+      self.syslogger.warning(message)
+
+  def debug(self, message):
+    self.logger.debug(message)
+    if self.syslogger:
+      self.syslogger.debug(message)
+
+  def info(self, message):
+    self.logger.info(message)
+    if self.syslogger:
+      self.syslogger.info(message)
 
 
 class Log(object):
@@ -25,15 +54,26 @@ class Log(object):
     if config:
       self.__config_section = config.get_section('Logger')
       do_log = self.__config_section.get('log')
-      self.log_lvl = getattr(logging, self.__config_section.get('level').upper())
+      self.log_lvl_id = self.__config_section.get('level').upper()
+      self.log_lvl = getattr(logging, self.log_lvl_id)
       self.log_console = self.__config_section.get('logconsole')
       self.log_file = self.__config_section.get('log_file')
+      self.syslog = self.__config_section.get('syslog')
     else:
       self.__config_section = None
       do_log = True
       self.log_lvl = logging.INFO
       self.log_console = True
       self.log_file = ''
+      self.syslog = False
+
+    if self.syslog:
+      self.syslogger = Syslogger()
+      self.syslogger.level = self.syslogger.get_level_id(self.log_lvl_id.lower())
+      self.syslogger.log_syslog = True
+      self.syslogger.log_console = False
+    else:
+      self.syslogger = None
 
     # create formatter
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -90,7 +130,7 @@ class Log(object):
       if self.__config_section:
         self.__set_logfile(logger)
       self.__set_console_handler(logger)
-    return logger
+    return LogObject(logger, self.syslogger)
 
   def is_logger_cached(self, classname):
     """

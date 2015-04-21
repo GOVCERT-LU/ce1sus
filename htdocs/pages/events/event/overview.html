@@ -8,7 +8,7 @@
     Edit
     </button>
 
-    <button ng-show="isAdmin" class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal">Change
+    <button ng-if="isAdmin" class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal">Change
       ownership</button>
     <button class="btn btn-danger" ng-click="removeEvent()" ng-show="event.userpermissions.delete">
       Delete</button>

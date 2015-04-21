@@ -308,10 +308,10 @@ app.controller("editEventController", function($scope, Restangular, messages,
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
     $log, $routeSegment, $location, useradmin, $modal, relations, Pagination) {
-  if (useradmin == 'false'){
-    $scope.isAdmin = false;
-  } else {
+  if (useradmin){
     $scope.isAdmin = true;
+  } else {
+    $scope.isAdmin = false;
   }
   
   $scope.relations = relations;

@@ -7,8 +7,7 @@ Created on Oct 26, 2014
 """
 import cherrypy
 
-from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, \
-  get_max_tlp
+from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, get_max_tlp
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.user import UserRights
@@ -427,5 +426,9 @@ class BaseView(object):
     obj.activated = user.activated
     obj.sirname = user.sirname
     obj.permissions = UserRights(user.dbcode)
+    obj.group = GenObject()
+    obj.group.identifier = user.group.identifier
+    obj.group.name = user.group.name
+    obj.group.tlp_lvl = user.group.tlp_lvl
 
     return obj

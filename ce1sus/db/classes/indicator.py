@@ -11,7 +11,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties, StaticBase
+from ce1sus.db.classes.common import Properties
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 
