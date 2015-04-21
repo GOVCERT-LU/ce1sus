@@ -485,7 +485,7 @@ class Migrator(object):
       user.email = user_dict['email']
 
       try:
-        self.user_controller.insert_user(user, commit=False)
+        self.user_controller.insert_user(user, commit=False, send_mail=False)
       except ControllerIntegrityException as error:
         user = self.user_controller.get_user_by_username(user.username)
 
