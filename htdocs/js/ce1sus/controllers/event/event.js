@@ -353,6 +353,21 @@ app.controller("eventOverviewController", function($scope, Restangular, messages
     }
   };
   
+  $scope.publishEvent = function(){
+
+    Restangular.one("event", $routeSegment.$routeParams.id).post('publish',$scope.event).then(function (data) {
+      if (data) {
+        messages.setMessage({'type':'success','message':'Event sucessfully published'});
+        $scope.event.published = true;
+        $scope.event.properties.shared = true;
+      } else {
+        messages.setMessage({'type':'danger','message':'An unexpected error occured'});
+      }
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
+  
   $scope.removeComment = function(comment){
     if (confirm('Are you sure you want to delete this comment?')) {
       //restangularize Element

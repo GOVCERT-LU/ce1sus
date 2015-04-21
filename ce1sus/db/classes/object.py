@@ -48,10 +48,10 @@ class RelatedObject(Base):
 
 class Object(ExtendedLogingInformations, Base):
   # attributes = relationship('Attribute', lazy='dynamic')
-  attributes = relationship('Attribute')
+  attributes = relationship('Attribute', lazy='joined')
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigInteger, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship('ObjectDefinition')
+  definition = relationship('ObjectDefinition', lazy='joined')
 
   # related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
   related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')

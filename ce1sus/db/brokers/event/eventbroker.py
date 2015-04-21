@@ -10,8 +10,7 @@ from sqlalchemy.sql.expression import and_
 
 from ce1sus.db.classes.event import Event, EventGroupPermission
 from ce1sus.db.classes.group import Group
-from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, \
-  TooManyResultsFoundException
+from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
 
 __author__ = 'Weber Jean-Paul'

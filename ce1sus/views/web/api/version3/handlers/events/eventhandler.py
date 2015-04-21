@@ -61,6 +61,8 @@ class EventHandler(RestBaseHandler):
           return self.__change_event_group(method, event, json)
         elif requested_object['object_type'] == 'comment':
           return self.__process_commment(method, event, requested_object, details, inflated, json, headers)
+        elif requested_object['object_type'] == 'publish':
+          return self.__publish_event(method, event, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'validate':
           return self.__process_event_validate(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'group':
@@ -374,6 +376,15 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Operation not supported')
     return list()
+
+  def __publish_event(self, method, event, requested_object, details, inflated, json, headers):
+    user = self.get_user()
+    if method == 'POST':
+      self.event_controller.publish_event(event, user)
+
+      return 'Published event.'
+    else:
+      raise RestHandlerException('Method is undefined.')
 
   """
   @rest_method()

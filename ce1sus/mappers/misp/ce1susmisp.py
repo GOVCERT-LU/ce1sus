@@ -334,7 +334,7 @@ class Ce1susMISP(BaseController):
     else:
       value = 0
     self.__append_child(root, 'published', value)
-    self.__append_child(root, 'timestamp', int(time.mktime(event.modified_on.timetuple())))
+    self.__append_child(root, 'timestamp', int(time.mktime(event.last_publish_date.timetuple())))
     return root
 
   def make_index(self, events):

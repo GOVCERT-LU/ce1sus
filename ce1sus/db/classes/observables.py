@@ -141,8 +141,8 @@ class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True)
   description = Column('description', UnicodeText)
-  object = relationship('Object', back_populates='parent', uselist=False, primaryjoin='Object.parent_id==Observable.identifier')
-  observable_composition = relationship('ObservableComposition', uselist=False)
+  object = relationship('Object', back_populates='parent', uselist=False, primaryjoin='Object.parent_id==Observable.identifier', lazy='joined')
+  observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   keywords = relationship('ObservableKeyword', backref='observable')
   event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)

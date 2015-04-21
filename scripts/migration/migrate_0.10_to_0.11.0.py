@@ -485,7 +485,7 @@ class Migrator(object):
 
       try:
         self.user_controller.insert_user(user, commit=False)
-      except ControllerIntegrityException:
+      except ControllerIntegrityException as error:
         user = self.user_controller.get_user_by_username(user.username)
 
       users[id_] = user
@@ -1006,6 +1006,8 @@ class Migrator(object):
     return indicator
 
   def map_ioc_records(self, line, owner, parent_observable, event):
+    
+    
     attributes = line['attributes']
     # sort attributes first
     mal_email = list()
@@ -1032,6 +1034,9 @@ class Migrator(object):
         domains.append(attribute)
       elif 'url' in name:
         urls.append(attribute)
+      elif name == 'comment':
+        #create an report for it
+        pass
       else:
         others.append(attribute)
 
@@ -1441,6 +1446,9 @@ class Migrator(object):
     event.created_at = convert_date(line['created'])
     event.modified_on = convert_date(line['modified'])
     self.logger.debug('Created event {0}'.format(event))
+    # Publish event
+    event.properties.is_shareable = True
+
     return event
 
 

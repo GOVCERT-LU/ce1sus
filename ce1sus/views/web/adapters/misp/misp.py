@@ -16,8 +16,8 @@ from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.helpers.common.datumzait import DatumZait
-from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
-from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter
+from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
+from ce1sus.mappers.misp.mispce1sus import MispConverter
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.common.base import BaseView
 
@@ -103,7 +103,7 @@ class MISPAdapter(BaseView):
     # find the ones do not need to be updated
     for local_event in local_events:
       values = recent_events[local_event.uuid]
-      if values[1] <= local_event.modified_on:
+      if values[1] <= local_event.last_publish_date:
         items_to_remove.append(local_event.uuid)
 
     for item_to_remove in items_to_remove:
@@ -303,7 +303,7 @@ class MISPAdapter(BaseView):
       date = incomming_events[local_event.uuid]
       datetime_from_string = DatumZait.utcfromtimestamp(int(date))
 
-      if local_event.modified_on >= datetime_from_string:
+      if local_event.last_publish_date >= datetime_from_string:
         # remove the ones which are either new or
         remove.append(local_event.uuid)
       # check if the local event is not locked -> does not exist in ours

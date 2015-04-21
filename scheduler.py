@@ -14,7 +14,7 @@ from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
-from ce1sus.views.web.adapters.misp.mispce1sus import MispConverter, MispConverterException
+from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 

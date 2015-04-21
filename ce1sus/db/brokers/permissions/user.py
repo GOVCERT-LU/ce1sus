@@ -78,7 +78,7 @@ class UserBroker(BrokerBase):
     try:
       user = self.session.query(User).filter(User.username == username).one()
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found with ID :{0}'.format(username)
+      raise NothingFoundException(u'Nothing found with username :{0}'.format(username)
                                   )
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException(u'Too many results found for' +

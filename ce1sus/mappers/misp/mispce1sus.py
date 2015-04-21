@@ -41,7 +41,7 @@ from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
-from ce1sus.views.web.adapters.misp.ce1susmisp import Ce1susMISP
+from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 import xml.etree.ElementTree as et
 
 
@@ -200,6 +200,8 @@ class MispConverter(BaseController):
       rest_event.first_seen = parser.parse(date)
     else:
       rest_event.first_seen = DatumZait.utcnow()
+
+    rest_event.last_seen = rest_event.first_seen
 
     date = event_header.get('timestamp', None)
     if date:
