@@ -13,13 +13,14 @@ from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.db.brokers.event.eventbroker import EventBroker
+from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.config import Configuration
+from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
-from ce1sus.db.brokers.permissions.group import GroupBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -60,34 +61,58 @@ class Scheduler(object):
     except ControllerException as error:
       raise SchedulerException(error)
 
-  def __publish_event(self, event, server):
+  def __publish_event(self, item, event, server):
     # server publishing
+    if item.server_details.type == 'MISP':
+      self.__push_misp(item, event)
+    elif item.server_details.type == 'ce1sus':
+      # TODO sceduling for ce1sus
+      self.__push_ce1sus(item, event)
+    else:
+      raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
+
+  def __push_ce1sus(self, item, event):
     pass
+
+  def __push_misp(self, item, event):
+    # set the parameters for misp
+    self.misp_converter.api_key = item.server_details.user.api_key
+    self.misp_converter.api_url = item.server_details.baseurl
+    self.misp_converter.tag = item.server_details.name
+
+    # cehck if event can be seen else ignore, normally should not happen
+    if not self.misp_ctrl.is_event_viewable(event, item.server_details.user):
+      # Ignore push
+      return True
+    # use the other function as it filters unwanted stuff out
+    event_xml = self.misp_ctrl.make_misp_xml(event, item.server_details.user)
+
+    try:
+      self.misp_converter.push_event(event_xml)
+      self.process_controller.process_finished_success(item, self.user)
+    except MispConverterException as error:
+      # TODO Log
+      self.process_controller.process_finished_in_error(item, self.user)
+      raise SchedulerException('Error during push of event {0} on server with url {1} with error {2}'.format(event.uuid, item.server_details.baseurl, error))
 
   def __publish(self, item):
     try:
       event = self.event_broker.get_by_uuid(item.event_uuid)
       if item.server_details:
         # do the sync only for this server
-        if item.server_details.type == 'MISP':
-          pass
-        elif item.server_details.type == 'ce1sus':
-          # TODO sceduling for ce1sus
-          pass
-        else:
-          raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
+        self.__publish_event(item, event, item.server_details)
       else:
         # do the push for all servers which are push servers and mail to the users/groups
         servers = self.server_controller.get_all_servers()
         for server in servers:
-          self.__publish_event(event, server)
+          self.__publish_event(item, event, server)
 
         self.__send_mails(event, item.type_)
       # set event as published
-      # event.last_publish_date = DatumZait.utcnow()
-      # self.event_broker.update(event, True)
+      event.last_publish_date = DatumZait.utcnow()
+      self.event_broker.update(event, True)
       # remove item from queue
-      # self.process_controller.process_finished_success(item, self.user)
+      self.process_controller.process_finished_success(item, self.user)
     except (ControllerException, BrokerException) as error:
       self.process_controller.process_finished_in_error(item, self.user)
       raise SchedulerException(error)
@@ -180,30 +205,12 @@ class Scheduler(object):
     if item.server_details:
       # do the sync only for this server
       if item.server_details.type == 'MISP':
-        # set the parameters for misp
-        self.misp_converter.api_key = item.server_details.user.api_key
-        self.misp_converter.api_url = item.server_details.baseurl
-        self.misp_converter.tag = item.server_details.name
-
         event = self.event_broker.get_by_uuid(item.event_uuid)
-        # cehck if event can be seen else ignore, normally should not happen
-        if not self.misp_ctrl.is_event_viewable(event, item.server_details.user):
-          # Ignore push
-          return True
-        # use the other function as it filters unwanted stuff out
-        event_xml = self.misp_ctrl.make_misp_xml(event, item.server_details.user)
-
-        try:
-          self.misp_converter.push_event(event_xml)
-          self.process_controller.process_finished_success(item, self.user)
-        except MispConverterException as error:
-          # TODO Log
-          self.process_controller.process_finished_in_error(item, self.user)
-          raise SchedulerException('Error during push of event {0} on server with url {1} with error {2}'.format(event.uuid, item.server_details.baseurl, error))
+        self.__push_misp(item, event)
 
       elif item.server_details.type == 'ce1sus':
         # TODO sceduling for ce1sus
-        pass
+        self.__push_ce1sus(item, event)
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
     else:
