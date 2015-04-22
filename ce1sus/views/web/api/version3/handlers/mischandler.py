@@ -31,6 +31,7 @@ class VersionHandler(RestBaseHandler):
     result['application'] = APP_REL
     result['dataBase'] = DB_REL
     result['restApi'] = REST_REL
+    result['environment'] = self.config.get('ce1sus', 'environment', 'LOCAL_DEV')
     return result
 
 

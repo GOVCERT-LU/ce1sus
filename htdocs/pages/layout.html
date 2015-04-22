@@ -3,7 +3,8 @@
   <nav class="navbar navbar-inverse">
     <div class="container">
       <div class="navbar-header navbar-left">
-        <a class="navbar-brand" href="/">ce1sus Library</a>
+        <a class="navbar-brand" href="/">ce1sus Library <span ng-if="versionInformation.environment">[{{
+      versionInformation.environment }}]</span></a> 
       </div>
 
       <ul class="nav navbar-nav navbar-right">
@@ -40,7 +41,7 @@
     <div class="col-lg-6">Version {{
       versionInformation.application }}</div>
     <div class="col-lg-6">
-      Current route: <span ng-bind="$routeSegment.name"></span>
+      
     </div>
   </div>
 
