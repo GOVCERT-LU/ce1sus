@@ -13,8 +13,7 @@ from sqlalchemy.sql.expression import not_
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.relation import Relation
-from ce1sus.db.common.broker import BrokerBase, BrokerException, \
-  IntegrityException
+from ce1sus.db.common.broker import BrokerBase, BrokerException, IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'

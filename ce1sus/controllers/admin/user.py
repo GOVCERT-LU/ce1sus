@@ -84,6 +84,9 @@ class UserController(BaseController):
 
   def update_user(self, user):
     try:
+      if user.gpg_key:
+        self.mail_controller.import_gpg_key(user.gpg_key)
+
       self.user_broker.update(user)
       # add it again in case of changes
       # TODO import gpg key
@@ -147,15 +150,11 @@ class UserController(BaseController):
     user.activation_str = hashSHA1('{0}{1}'.format(user.plain_password, random.random()))
     user.activation_sent = datetime.utcnow()
 
-  """
-  def resend_mail(self, user):
+  def get_all_notifiable_users(self):
     try:
-      self.mail_handler.send_activation_mail(user)
-      self.user_broker.update(user)
-    except Exception as error:
-        self.user_broker.update(user)
-        self.logger.info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
-        self.raise_exception(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
-    except (BrokerException, MailHandlerException) as error:
+      users = self.user_broker.get_all_notifiable_users()
+      return users
+
+    except BrokerException as error:
       raise ControllerException(error)
-      """
+

@@ -186,19 +186,17 @@ class BaseView(object):
     if not user.permissions.validate:
       raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
-  def __get_max_tlp(self, user_group):
-    return get_max_tlp(user_group)
-
   def is_event_viewable(self, event, user=None):
+    # The same is in the mailer
     if not user:
       user = self.get_user()
-    if event.originating_group_id == user.group_id:
+    if is_event_owner(event, user):
       return True
     else:
       if user:
         if user.group_id:
           user_group = self.event_controller.group_broker.get_by_id(user.group_id)
-          tlp_lvl = self.__get_max_tlp(user_group)
+          tlp_lvl = get_max_tlp(user_group)
           if event.tlp_level_id >= tlp_lvl:
             return True
           else:

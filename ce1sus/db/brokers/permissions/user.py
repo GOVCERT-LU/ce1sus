@@ -171,3 +171,13 @@ class UserBroker(BrokerBase):
       raise TooManyResultsFoundException('Too many results found for activation_str :{0}'.format(activation_str))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
+
+  def get_all_notifiable_users(self):
+    try:
+
+      result = self.session.query(User).filter(User.notifications == 1, User.email != None).all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'No notifiable users found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

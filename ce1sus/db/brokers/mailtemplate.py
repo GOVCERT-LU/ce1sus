@@ -61,7 +61,7 @@ class MailTemplateBroker(BrokerBase):
   def get_publication_template(self):
     return self.__get_template(MailTemplateBroker.EVENT_PUBLICATION)
 
-  def get_notifcation_template(self):
+  def get_proposal_template(self):
     return self.__get_template(MailTemplateBroker.PROPOSAL)
 
   def get_update_template(self):

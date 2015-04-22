@@ -44,7 +44,9 @@ class ProcessType(StaticBase):
   PULL = u'Pull'
   PUSH = u'Push'
   PUBLISH = u'Publish'
+  PUBLISH_UPDATE = u'Publish Update'
   RELATIONS = u'Relations'
+  PROPOSAL = u'Proposal'
 
   TYPES = [PULL, PUSH, PUBLISH, RELATIONS]
 
@@ -54,6 +56,9 @@ class ProcessType(StaticBase):
             1: ProcessType.PUSH,
             2: ProcessType.PUBLISH,
             3: ProcessType.RELATIONS,
+            4: ProcessType.PUBLISH_UPDATE,
+            5: ProcessType.PROPOSAL
+
             }
 
 

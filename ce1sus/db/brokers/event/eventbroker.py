@@ -35,15 +35,19 @@ class EventBroker(BrokerBase):
     return Event
 
   def get_event_user_permissions(self, event, user):
+    group = user.group
+    return self.get_event_group_permissions(event, group)
+
+  def get_event_group_permissions(self, event, group):
     try:
       return self.session.query(EventGroupPermission).filter(and_(EventGroupPermission.event_id == event.identifier,
-                                                                  EventGroupPermission.group_id == user.group.identifier
+                                                                  EventGroupPermission.group_id == group.identifier
                                                                   )
                                                              ).one()
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for this cannot happen')
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('Group {0} was not associated to event {1}'.format(user.group.identifier, event.identifier))
+      raise NothingFoundException('Group {0} was not associated to event {1}'.format(group.identifier, event.identifier))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 

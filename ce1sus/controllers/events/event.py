@@ -235,6 +235,38 @@ class EventController(BaseController):
       permissions = EventPermissions('0')
       return permissions
 
+  def get_event_group_permissions(self, event, group):
+    try:
+      if group.identifier == event.originating_group_id:
+        permissions = EventPermissions('0')
+        permissions.set_all()
+        return permissions
+      else:
+        permissions = self.event_broker.get_event_group_permissions(event, group)
+        if hasattr(permissions, 'permissions'):
+          permissions = permissions.permissions
+          return permissions
+        else:
+          return None
+    except NothingFoundException as error:
+      # The group was not associated to the event
+      self.logger.debug(error)
+
+      # if the event is still not visible the event has to have a lower or equal tlp level
+      grp_tlp = group.tlp_lvl
+      result = event.tlp_level_id >= grp_tlp
+
+      if result:
+        # Get the defaults for this group
+        permissions = group.default_permissions
+
+      else:
+        permissions = EventPermissions('0')
+      return permissions
+    except BrokerException as error:
+      permissions = EventPermissions('0')
+      return permissions
+
   def get_comment_by_id(self, identifer):
     try:
       return self.comment_broker.get_by_id(identifer)
@@ -376,9 +408,12 @@ class EventController(BaseController):
 
   def publish_event(self, event, user):
     try:
+      type_ = ProcessType.PUBLISH
+      if event.last_publish_date:
+        type_ = ProcessType.PUBLISH_UPDATE
       event.properties.is_shareable = True
-      event.last_publish_date = DatumZait.utcnow()
+
       self.update_event(user, event, False, True)
-      self.process_controller.create_new_process(ProcessType.PUBLISH, event.uuid, user, None)
+      self.process_controller.create_new_process(type_, event.uuid, user, None)
     except BrokerException as error:
       raise ControllerException(error)

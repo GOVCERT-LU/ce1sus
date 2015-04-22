@@ -7,16 +7,19 @@ Created on Apr 16, 2015
 """
 from os.path import dirname, abspath
 
+from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.syncserver import SyncServerController
+from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.common.process import ProcessController
+from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.config import Configuration
-from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
-from ce1sus.controllers.admin.user import UserController
-from ce1sus.db.brokers.event.eventbroker import EventBroker
+from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
+from ce1sus.db.brokers.permissions.group import GroupBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -46,6 +49,8 @@ class Scheduler(object):
     user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
     self.user_controller = UserController(config, directconnection)
     self.event_broker = self.user_controller.broker_factory(EventBroker)
+    self.group_broker = self.user_controller.broker_factory(GroupBroker)
+    self.mail_controller = MailController(config, directconnection)
     if None:
       raise SchedulerException('maintenaceuseruuid was not defined in config')
     try:
@@ -55,20 +60,94 @@ class Scheduler(object):
     except ControllerException as error:
       raise SchedulerException(error)
 
-  def __publish(self, item):
+  def __publish_event(self, event, server):
+    # server publishing
+    pass
 
-    if item.server_details:
-      # do the sync only for this server
-      if item.server_details.type == 'MISP':
-        pass
-      elif item.server_details.type == 'ce1sus':
-        # TODO sceduling for ce1sus
-        pass
+  def __publish(self, item):
+    try:
+      event = self.event_broker.get_by_uuid(item.event_uuid)
+      if item.server_details:
+        # do the sync only for this server
+        if item.server_details.type == 'MISP':
+          pass
+        elif item.server_details.type == 'ce1sus':
+          # TODO sceduling for ce1sus
+          pass
+        else:
+          raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
       else:
-        raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
+        # do the push for all servers which are push servers and mail to the users/groups
+        servers = self.server_controller.get_all_servers()
+        for server in servers:
+          self.__publish_event(event, server)
+
+        self.__send_mails(event, item.type_)
+      # set event as published
+      # event.last_publish_date = DatumZait.utcnow()
+      # self.event_broker.update(event, True)
+      # remove item from queue
+      # self.process_controller.process_finished_success(item, self.user)
+    except (ControllerException, BrokerException) as error:
+      self.process_controller.process_finished_in_error(item, self.user)
+      raise SchedulerException(error)
+
+  def __send_mails(self, event, type_):
+    # send mails only if plugin is enabled
+    if self.mail_controller.mail_handler:
+      try:
+        seen_mails = list()
+
+        # send mails for the users who wants them
+        users = self.user_controller.get_all_notifiable_users()
+
+        for user in users:
+          # prevent double emails
+          if user.email in seen_mails:
+            continue
+          else:
+
+            if user.gpg_key:
+              seen_mails.append(user.email)
+              self.__send_mail(type_, event, user, None, True)
+            else:
+              # only send email when white
+              if event.tlp_level_id >= 3:
+                seen_mails.append(user.email)
+                self.__send_mail(type_, event, user, None, False)
+        # send the mails for the groups which want them
+        groups = self.group_broker.get_all_notifiable_groups()
+        for group in groups:
+          if group.email in seen_mails:
+            continue
+          else:
+            seen_mails.append(group.email)
+            if group.gpg_key:
+              self.__send_mail(type_, event, None, group, True)
+            else:
+              # only send email when white
+              if event.tlp_level_id >= 3:
+                self.__send_mail(type_, event, None, group, False)
+
+      except (ControllerException, BrokerException) as error:
+        raise SchedulerException(error)
+
+  def __get_mail(self, event, type_, user, group):
+    if type_ == ProcessType.PUBLISH:
+      return self.mail_controller.get_publication_mail(event, user, group)
+    elif type_ == ProcessType.PUBLISH_UPDATE:
+      return self.mail_controller.get_publication_update_mail(event, user, group)
+    elif type_ == ProcessType.PROPOSAL:
+      return self.mail_controller.get_proposal_mail(event, user, group)
     else:
-      # do the push for all servers which are push servers and mail to the users/groups
-      pass
+      raise SchedulerException(u'{0} is undefined'.format(type_))
+
+  def __send_mail(self, type_, event, user, group, encrypt):
+    # determine if it is an update
+    mail = self.__get_mail(event, type_, user, group)
+    mail.encrypt = encrypt
+    # send mail
+    self.mail_controller.send_mail(mail)
 
   def __pull(self, item):
     if item.server_details:
@@ -137,7 +216,7 @@ class Scheduler(object):
     for item in items:
       # decide type:
       self.process_controller.process_task(item, self.user)
-      if item.type_ == ProcessType.PUBLISH:
+      if item.type_ == ProcessType.PUBLISH or item.type_ == ProcessType.PUBLISH_UPDATE:
         self.__publish(item)
       elif item.type_ == ProcessType.PULL:
         self.__pull(item)
@@ -150,6 +229,8 @@ class Scheduler(object):
         else:
           # TODO: make relations
           pass
+      elif item.type_ == ProcessType.PROPOSAL:
+        self.__proposal(item)
 
 if __name__ == '__main__':
   basePath = dirname(abspath(__file__))

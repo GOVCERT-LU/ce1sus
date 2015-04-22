@@ -37,3 +37,12 @@ class GroupBroker(BrokerBase):
       raise TooManyResultsFoundException('Too many results found for name :{0}'.format(name))
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
+
+  def get_all_notifiable_groups(self):
+    try:
+      result = self.session.query(Group).filter(Group.notifications == 1, Group.email != None).all()
+      return result
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'No notifiable users found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
