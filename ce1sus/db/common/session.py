@@ -107,7 +107,7 @@ class SessionManager:
   sessionClazz manager for the session handling
   """
 
-  def __init__(self, config):
+  def __init__(self, config, session=None):
     """
     Creator
 
@@ -127,7 +127,8 @@ class SessionManager:
     else:
       raise SessionManagerException(('Protocol {0} '
                                     + 'is undefined').format(protocol))
-    self.__direct_session = None
+    self.__direct_session = session
+    self.__brokers = dict()
 
   def broker_factory(self, clazz):
     """
@@ -142,13 +143,30 @@ class SessionManager:
       raise BrokerInstantiationException('Class does not ' +
                                          'implement BrokerBase')
     if self.__config_section.get('usecherrypy', False):
-      session = self.connector.get_session()
+      if self.__direct_session:
+        session = self.__direct_session
+      else:
+        session = self.connector.get_session()
     else:
       if not self.__direct_session:
         self.__direct_session = self.connector.get_direct_session()
       session = self.__direct_session
-    broker = clazz(session)
-    return broker
+
+    session_id = id(session)
+    session_brokers = self.__brokers.get(session_id, None)
+    if session_brokers:
+      broker = session_brokers.get(clazz.__name__, None)
+      if broker:
+        return broker
+      else:
+        broker = clazz(session)
+        self.__brokers[session_id][clazz.__name__] = broker
+        return broker
+    else:
+      self.__brokers[session_id] = dict()
+      broker = clazz(session)
+      self.__brokers[session_id][clazz.__name__] = broker
+      return broker
 
   def close(self):
     """

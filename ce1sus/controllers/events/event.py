@@ -6,6 +6,7 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 from ce1sus.common.checks import is_event_owner
+from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.db.brokers.event.comments import CommentBroker
@@ -13,10 +14,10 @@ from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from ce1sus.db.classes.processitem import ProcessType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,6 +48,7 @@ class EventController(BaseController):
     self.comment_broker = self.broker_factory(CommentBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.process_controller = ProcessController(config, session)
+    self.server_controller = SyncServerController(config, session)
 
   def get_all_misp_events(self):
     try:
@@ -414,6 +416,12 @@ class EventController(BaseController):
       event.properties.is_shareable = True
 
       self.update_event(user, event, False, True)
-      self.process_controller.create_new_process(type_, event.uuid, user, None)
+      servers = self.server_controller.get_all_push_servers()
+      for server in servers:
+        self.process_controller.create_new_process(type_, event.uuid, user, server, False)
+      # add also mail
+      self.process_controller.create_new_process(type_, event.uuid, user, None, False)
+      self.process_controller.process_broker.do_commit(True)
+
     except BrokerException as error:
       raise ControllerException(error)

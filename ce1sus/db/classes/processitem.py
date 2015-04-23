@@ -66,7 +66,7 @@ class ProcessItem(SimpleLogingInformations, Base):
 
   db_status = Column('status', Integer, nullable=False, index=True, default=0)
   db_type = Column('type', Integer, nullable=False)
-  event_uuid = Column('event_uuid', Unicode(40), index=True)
+  event_uuid = Column('event_uuid', Unicode(40), index=True, nullable=False)
   server_details_id = Column('syncserver_id', BigInteger, ForeignKey('syncservers.syncserver_id', onupdate='cascade', ondelete='cascade'))
   server_details = relationship('SyncServer', uselist=False, primaryjoin='ProcessItem.server_details_id==SyncServer.identifier')
 
@@ -104,10 +104,13 @@ class ProcessItem(SimpleLogingInformations, Base):
     return True
 
   def to_dict(self, complete=True, inflated=False):
+    server_details = None
+    if self.server_details:
+      server_details = self.server_details.to_dict(True, False)
     return {'identifier': self.convert_value(self.uuid),
             'status': self.convert_value(self.status),
             'type_': self.convert_value(self.type_),
             'event_uuid': self.convert_value(self.event_uuid),
             'server_details_id': self.convert_value(self.server_details_id),
-            'server_details': self.server_details.to_dict(True, False)
+            'server_details': server_details
             }

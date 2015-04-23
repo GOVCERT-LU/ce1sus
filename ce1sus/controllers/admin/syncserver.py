@@ -30,10 +30,16 @@ class SyncServerController(BaseController):
       raise ControllerException(error)
 
   def get_all_pull_servers(self):
-    pass
+    try:
+      return self.sync_server_broker.get_all_pull_servers()
+    except BrokerException as error:
+      raise ControllerException(error)
 
   def get_all_push_servers(self):
-    pass
+    try:
+      return self.sync_server_broker.get_all_push_servers()
+    except BrokerException as error:
+      raise ControllerException(error)
 
   def get_server_by_uuid(self, uuid):
     try:

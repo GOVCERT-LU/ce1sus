@@ -32,7 +32,7 @@ class ProcessController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def create_new_process(self, type_, event_uuid, user, sync_server=None):
+  def create_new_process(self, type_, event_uuid, user, sync_server=None, commit=False):
     try:
       # if syncserver is none then it is for all the known servers
       user = self.user_controller.get_user_by_id(user.identifier)
@@ -48,7 +48,7 @@ class ProcessController(BaseController):
         process_item.server_details = sync_server
       self.set_simple_logging(process_item, user, True)
 
-      self.process_broker.insert(process_item)
+      self.process_broker.insert(process_item, commit)
       return process_item
     except BrokerException as error:
       raise ControllerException(error)

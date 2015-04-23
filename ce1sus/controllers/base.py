@@ -61,12 +61,7 @@ class BaseController:
   def __init__(self, config, session=None):
     self.config = config
     self.__logger = Log(self.config)
-    if session:
-      self.session = session
-      self.session_manager = None
-    else:
-      self.session = None
-      self.session_manager = SessionManager(config)
+    self.session_manager = SessionManager(config, session)
 
     self.user_broker = self.broker_factory(UserBroker)
     self.group_broker = self.broker_factory(GroupBroker)
@@ -88,11 +83,8 @@ class BaseController:
     if issubclass(clazz, BrokerBase):
 
       # need to create the broker
-      self.logger.debug('Create broker for {0}'.format(clazz))
-      if self.session:
-        instance = clazz(self.session)
-      else:
-        instance = self.session_manager.broker_factory(clazz)
+
+      instance = self.session_manager.broker_factory(clazz)
 
       return instance
 

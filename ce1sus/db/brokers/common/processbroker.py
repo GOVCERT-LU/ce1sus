@@ -28,7 +28,7 @@ class ProcessBroker(BrokerBase):
   def get_scheduled_process_items(self):
     try:
       process_id = ProcessStatus.SCHEDULED
-      result = self.session.query(ProcessItem.db_status == process_id)
+      result = self.session.query(ProcessItem).filter(ProcessItem.db_status == process_id)
       return result.all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('Nothing found')

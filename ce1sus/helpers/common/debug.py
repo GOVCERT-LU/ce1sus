@@ -45,6 +45,11 @@ class LogObject(object):
     if self.syslogger:
       self.syslogger.info(message)
 
+  def critical(self, message):
+    self.logger.critical(message)
+    if self.syslogger:
+      self.syslogger.error(message)
+
 
 class Log(object):
   """Log class"""

@@ -13,7 +13,6 @@ from os import makedirs, remove
 from os.path import isdir, isfile
 import re
 import time
-from urllib2 import HTTPError
 import urllib2
 from uuid import uuid4
 from xml.etree.ElementTree import ParseError
@@ -1210,7 +1209,7 @@ class MispConverter(BaseController):
           # log error
           response = connection.read()
           raise MispPushException(u'unexpected error occured {0}'.format(response))
-    except HTTPError as error:
+    except (urllib2.HTTPError, urllib2.URLError) as error:
       raise MispPushException(error)
 
   def get_recent_events(self, limit=20, unpublished=False):

@@ -52,6 +52,7 @@ class Scheduler(object):
     self.event_broker = self.user_controller.broker_factory(EventBroker)
     self.group_broker = self.user_controller.broker_factory(GroupBroker)
     self.mail_controller = MailController(config, directconnection)
+
     if None:
       raise SchedulerException('maintenaceuseruuid was not defined in config')
     try:
@@ -61,15 +62,20 @@ class Scheduler(object):
     except ControllerException as error:
       raise SchedulerException(error)
 
-  def __publish_event(self, item, event, server):
+  def __publish_event(self, item, event):
     # server publishing
-    if item.server_details.type == 'MISP':
+    if item.server_details:
+      server_details = item.server_details
+    else:
+      raise SchedulerException('Server could not be defined')
+
+    if server_details.type == 'MISP':
       self.__push_misp(item, event)
-    elif item.server_details.type == 'ce1sus':
+    elif server_details.type == 'ce1sus':
       # TODO sceduling for ce1sus
       self.__push_ce1sus(item, event)
     else:
-      raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
+      raise SchedulerException('Server type {0} is unkown'.format(server_details.type))
 
   def __push_ce1sus(self, item, event):
     pass
@@ -100,13 +106,9 @@ class Scheduler(object):
       event = self.event_broker.get_by_uuid(item.event_uuid)
       if item.server_details:
         # do the sync only for this server
-        self.__publish_event(item, event, item.server_details)
+        self.__publish_event(item, event)
       else:
-        # do the push for all servers which are push servers and mail to the users/groups
-        servers = self.server_controller.get_all_servers()
-        for server in servers:
-          self.__publish_event(item, event, server)
-
+        # it is to send emails
         self.__send_mails(event, item.type_)
       # set event as published
       event.last_publish_date = DatumZait.utcnow()
@@ -189,8 +191,8 @@ class Scheduler(object):
           self.misp_ctrl.ins_merg_event(item.server_details, misp_event_xml, item.server_details.user, self.user)
           self.process_controller.process_finished_success(item, self.user)
         except MISPAdapterException as error:
-          self.logger.error(error)
-          self.process_controller.process_finished_in_error(item, self.user)
+          raise SchedulerException(error)
+
           # TODO dump xml or log it in browser
       elif item.server_details.type == 'ce1sus':
         # TODO sceduling for ce1sus
@@ -219,25 +221,28 @@ class Scheduler(object):
 
   def process(self):
     # get all items
-    items = self.process_controller.get_all_process_items()
+    items = self.process_controller.get_scheduled_process_items(self.user)
     for item in items:
-      # decide type:
-      self.process_controller.process_task(item, self.user)
-      if item.type_ == ProcessType.PUBLISH or item.type_ == ProcessType.PUBLISH_UPDATE:
-        self.__publish(item)
-      elif item.type_ == ProcessType.PULL:
-        self.__pull(item)
-      elif item.type_ == ProcessType.PUSH:
-        self.__push(item)
-      elif item.type_ == ProcessType.RELATIONS:
-        # this is only possible if it is a ce1sus internal server, hence server details = none
-        if item.server_details:
-          raise SchedulerException('For relations the server details have to be none')
-        else:
-          # TODO: make relations
-          pass
-      elif item.type_ == ProcessType.PROPOSAL:
-        self.__proposal(item)
+      try:
+        # decide type:
+        self.process_controller.process_task(item, self.user)
+        if item.type_ == ProcessType.PUBLISH or item.type_ == ProcessType.PUBLISH_UPDATE:
+          self.__publish(item)
+        elif item.type_ == ProcessType.PULL:
+          self.__pull(item)
+        elif item.type_ == ProcessType.PUSH:
+          self.__push(item)
+        elif item.type_ == ProcessType.RELATIONS:
+          # this is only possible if it is a ce1sus internal server, hence server details = none
+          if item.server_details:
+            raise SchedulerException('For relations the server details have to be none')
+          else:
+            # TODO: make relations
+            pass
+        elif item.type_ == ProcessType.PROPOSAL:
+          self.__proposal(item)
+      except SchedulerException:
+        self.process_controller.process_finished_in_error(item, self.user)
 
 if __name__ == '__main__':
   basePath = dirname(abspath(__file__))

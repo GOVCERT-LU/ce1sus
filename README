@@ -27,7 +27,6 @@ Features
 ========
 
 * Creates relations between events through their attributes
-** Relation of attributes can be done over groups of attributes or the attribute itself
 * Stores and presents the event in a structured manner
 * Different levels of sharing
 ** Events can be shared with groups
@@ -41,6 +40,12 @@ Features
 * Completely interfaceable (REST API)
 * Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
+* Genuine Misp v2.x integration of push/pull requests
+* Cybox naming convention
+* Synchronization between ce1sus instances
+* Web-interface sync-server management (MISP and ce1sus)
+* Mail support
+
 
 Requirements
 ============
@@ -66,29 +71,26 @@ Requirements
 RoadMap
 =======
 
-v0.11.0
+v0.11.2
 -------
-* Genuine Misp v2.x integration of push/pull requests
 * Update documentation
-* Cybox naming convention
-* Help
-
-v0.11.1
--------
 * Password protection for compressed files
-* Web-interface sync-server management (Misp and ce1sus)
+* Relation of attributes can be done over groups of attributes
+
+v0.11.3
+-------
+* TAXII server integration
+
 
 Up the road 0.11.x
 -----------
-* Mail support
 * Share custom definitions
 * Profile management
 * More handlers
 * Improved search
 * Export of events (i.e. csv, xml)
-* STIX support currently only available in the ce1sus_api project
-* Enhance STIX/Cybox support
-* TAXII server integration
+* Enhanced STIX/Cybox support
+* Attributes additionally can be shared via TLP level
 
 
 Installation
