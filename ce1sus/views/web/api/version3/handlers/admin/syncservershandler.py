@@ -14,6 +14,8 @@ from ce1sus.views.web.adapters.misp.misp import MISPAdapter, \
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, \
+  Ce1susAdapterException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -28,6 +30,7 @@ class SyncServerHandler(RestBaseHandler):
     RestBaseHandler.__init__(self, config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
     self.misp_adapter = MISPAdapter(config)
+    self.ce1sus_adapter = Ce1susAdapter(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])
@@ -90,11 +93,13 @@ class SyncServerHandler(RestBaseHandler):
         server = self.sync_server_controller.get_server_by_uuid(uuid)
         if server.type == 'MISP':
           return self.misp_adapter.push(server)
+        elif server.type == 'Ce1sus':
+          return self.ce1sus_adapter.push(server)
         else:
           raise RestHandlerException('Not Implemented')
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
-    except (MISPAdapterException, ControllerException) as error:
+    except (MISPAdapterException, ControllerException, Ce1susAdapterException) as error:
       raise RestHandlerException(error)
 
   @rest_method(default=True)
@@ -108,9 +113,11 @@ class SyncServerHandler(RestBaseHandler):
         server = self.sync_server_controller.get_server_by_uuid(uuid)
         if server.type == 'MISP':
           return self.misp_adapter.pull(server)
+        elif server.type == 'Ce1sus':
+          return self.ce1sus_adapter.pull(server)
         else:
           raise RestHandlerException('Not Implemented')
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
-    except (MISPAdapterException, ControllerException) as error:
+    except (MISPAdapterException, ControllerException, Ce1susAdapterException) as error:
       raise RestHandlerException(error)

@@ -27,13 +27,21 @@ class EventsHandler(RestBaseHandler):
   def events(self, **args):
     # default settings as not to list to much
     parameters = args.get('parameters')
-    count = int(parameters.get('count', 10))
-    page = int(parameters.get('page', 1))
-    details = self.get_detail_value(args)
-    if page > 1:
-      offset = count * (page - 1)
+    count = parameters.get('count', None)
+    if count:
+      count = int(count)
     else:
-      offset = 1
+      count = None
+    page = parameters.get('page', None)
+    if page:
+      page = int(page)
+      if page > 1:
+        offset = count * (page - 1)
+      else:
+        offset = 1
+    else:
+      offset = None
+    details = self.get_detail_value(args)
 
     events, total_events = self.events_controller.get_events(offset, count, self.get_user(), parameters)
     result = list()

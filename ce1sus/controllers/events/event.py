@@ -185,7 +185,7 @@ class EventController(BaseController):
 
   def get_all_for_user(self, user):
     try:
-      events = self.event_broker.get_all(user)
+      events = self.event_broker.get_all_for_user(user)
       return events
     except BrokerException as error:
       raise ControllerException(error)

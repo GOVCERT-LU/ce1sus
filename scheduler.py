@@ -15,7 +15,7 @@ from ce1sus.controllers.common.process import ProcessController
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.db.common.broker import BrokerException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.datumzait import DatumZait
@@ -23,6 +23,7 @@ from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, \
   Ce1susAdapter
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
+from ce1sus.common.checks import is_event_owner
 
 
 __author__ = 'Weber Jean-Paul'
@@ -217,7 +218,25 @@ class Scheduler(object):
 
           # TODO dump xml or log it in browser
       elif item.server_details.type == 'ce1sus':
-        # TODO sceduling for ce1sus
+        self.ce1sus_adapter.server_details = item.server_details
+
+        rem_json = self.ce1sus_adapter.get_event_by_uuid(item.event_uuid, True, True, True, True)
+
+        # check if event exists
+        try:
+          event = self.event_broker.get_by_uuid(item.event_uuid)
+          # merge the event fetched
+          owner = is_event_owner(event, item.server_details.user)
+          event = self.ce1sus_adapter.assembler.update_event(event, rem_json, item.server_details.user, owner, True)
+          # TODO make relations here
+          self.event_broker.update(event)
+        except NothingFoundException:
+          event = self.ce1sus_adapter.assembler.assemble_event(event, rem_json, item.server_details.user, owner, True, False)
+          # TODO make relations here
+          self.event_broker.insert(event)
+        except BrokerException as error:
+          raise SchedulerException(error)
+
         pass
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
@@ -233,8 +252,23 @@ class Scheduler(object):
         self.__push_misp(item, event)
 
       elif item.server_details.type == 'ce1sus':
-        # TODO sceduling for ce1sus
-        self.__push_ce1sus(item, event)
+        self.ce1sus_adapter.server_details = item.server_details
+        rem_events = self.ce1sus_adapter.get_index()
+        event_uuids = list()
+        # TODO clean this up
+        for rem_event in rem_events:
+          event_uuids.append(rem_event.uuid)
+        try:
+          event = self.event_broker.get_by_uuid(item.event_uuid)
+          if event.uuid in event_uuids:
+            # do update
+            self.ce1sus_adapter.update_event(event, True, True)
+          else:
+            self.ce1sus_adapter.insert_event(event, True, True)
+
+        except BrokerException as error:
+          raise SchedulerException(error)
+
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
     else:
