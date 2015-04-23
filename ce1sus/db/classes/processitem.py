@@ -48,7 +48,7 @@ class ProcessType(StaticBase):
   RELATIONS = u'Relations'
   PROPOSAL = u'Proposal'
 
-  TYPES = [PULL, PUSH, PUBLISH, RELATIONS]
+  TYPES = [PULL, PUSH, PUBLISH, PUBLISH_UPDATE, RELATIONS, PROPOSAL]
 
   @classmethod
   def get_dictionary(cls):

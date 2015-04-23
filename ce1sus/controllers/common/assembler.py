@@ -127,14 +127,15 @@ class Assembler(BaseController):
       instance.creator_group = self.get_set_group(json.get('creator_group', None), user)
       instance.originating_group = self.get_set_group(json.get('originating_group', None), user)
 
-  def assemble_event(self, json, user, owner=False, rest_insert=True):
+  def assemble_event(self, json, user, owner=False, rest_insert=True, poponly=False):
 
     event = Event()
     event.populate(json, rest_insert)
     event.uuid = json.get('identifier', None)
     self.populate_extended_logging(event, json, user, True)
 
-    self.event_controller.insert_event(user, event, True, False)
+    if not poponly:
+      self.event_controller.insert_event(user, event, True, False)
 
     if owner:
       event.properties.is_validated = True

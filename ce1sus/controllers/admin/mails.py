@@ -264,8 +264,11 @@ class MailController(BaseController):
 
     # creating objects data
     if '${event_objects}' in body:
-      event_objects = self.__get_attributes(event, user, group, True, False)
+      event_objects = self.__get_attributes(event, user, group, False, False)
       body = body.replace(u'${event_objects}', event_objects)
+    if '${event_updated_objects}' in body:
+      event_objects = self.__get_attributes(event, user, group, True, False)
+      body = body.replace(u'${event_updated_objects}', event_objects)
 
     mail = Mail()
     mail.subject = subject

@@ -254,7 +254,7 @@ class Event(ExtendedLogingInformations, Base):
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     if inflated:
       observables = list()
-      for observable in self.get_observables_for_permissions(event_permissions):
+      for observable in self.get_observables_for_permissions(event_permissions, user):
         observables.append(observable.to_dict(complete, inflated, event_permissions, user))
 
       observables_count = len(observables)

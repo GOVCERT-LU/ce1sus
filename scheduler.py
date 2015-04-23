@@ -20,6 +20,8 @@ from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, \
+  Ce1susAdapter
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 
 
@@ -52,7 +54,7 @@ class Scheduler(object):
     self.event_broker = self.user_controller.broker_factory(EventBroker)
     self.group_broker = self.user_controller.broker_factory(GroupBroker)
     self.mail_controller = MailController(config, directconnection)
-
+    self.ce1sus_adapter = Ce1susAdapter(config, directconnection)
     if None:
       raise SchedulerException('maintenaceuseruuid was not defined in config')
     try:
@@ -71,14 +73,34 @@ class Scheduler(object):
 
     if server_details.type == 'MISP':
       self.__push_misp(item, event)
-    elif server_details.type == 'ce1sus':
+    elif server_details.type == 'Ce1sus':
       # TODO sceduling for ce1sus
       self.__push_ce1sus(item, event)
     else:
       raise SchedulerException('Server type {0} is unkown'.format(server_details.type))
 
-  def __push_ce1sus(self, item, event):
-    pass
+  def __push_ce1sus(self, item, event, dologin=True):
+    try:
+      self.ce1sus_adapter.server_details = item.server_details
+      if dologin:
+        self.ce1sus_adapter.login()
+      rem_event = self.ce1sus_adapter.get_event_by_uuid(event.uuid, False, False)
+      # check if server has the event already
+      if rem_event:
+        # update the event
+        self.ce1sus_adapter.update_event(event, True, True)
+      else:
+        # insert the event
+        self.ce1sus_adapter.insert_event(event, True, True)
+
+    except Ce1susAdapterException as error:
+      raise SchedulerException(error)
+
+    try:
+      if dologin:
+        self.ce1sus_adapter.logout()
+    except Ce1susAdapterException as error:
+      raise SchedulerException(error)
 
   def __push_misp(self, item, event):
     # set the parameters for misp
