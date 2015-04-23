@@ -37,7 +37,6 @@
           <th width="16%">Type</th>
           <th width="60%">Value</th>
           <th width="2%">IOC</th>
-          <th width="10%">Options</th>
         </tr>
       </thead>
       <tbody>
@@ -71,14 +70,7 @@
           <td>{{attributeflat.definition.name}}</td>
           <td>{{attributeflat.value}}</td>
           <td><span ng-if="attributeflat.ioc" class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></td>
-          <td>
-          
-          <a class="hand" ng-click="showAttributeDetails(attributeflat)" ng-show="attributeflat.definition"><span class="glyphicon glyphicon-eye-open"></span></a>
-          &nbsp;
-          <a class="hand"><span class="glyphicon glyphicon-pencil" ng-show="permissions.modify && attributeflat.definition"></span></a>
-          &nbsp;
-          <a class="hand red" ng-click="removeAttribute(attributeflat)" ng-show="permissions.delete && attributeflat.definition"><span class="glyphicon glyphicon-remove-circle"></span></a>
-          </td>
+
         </tr>
       </tbody>
     
