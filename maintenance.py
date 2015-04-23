@@ -112,6 +112,8 @@ class Maintenance(object):
         self.relation_controller.clear_relations_table()
         events = self.event_controller.get_all()
         for event in events:
+          if self.verbose:
+            print 'Rebuild relations for event {0}'.format(event.identifier)
           flat_attributes = self.relation_controller.get_flat_attributes_for_event(event)
           self.relation_controller.generate_bulk_attributes_relations(event, flat_attributes, False)
         self.relation_controller.relation_broker.do_commit(True)
