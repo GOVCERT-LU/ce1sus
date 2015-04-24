@@ -222,6 +222,27 @@ class Report(ExtendedLogingInformations, Base):
 
   __bit_code = None
 
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
+
   def references_count_for_permissions(self, event_permissions, user):
     return len(self.get_references_for_permissions(event_permissions, user))
 

@@ -23,7 +23,7 @@ __license__ = 'GPL v3+'
 # B: Release feature changes
 # C: Bug fixes/Small features
 APP_REL = '0.11.1'
-DB_REL = '0.9.5'
+DB_REL = '0.10.2'
 REST_REL = '0.3.0'
 
 

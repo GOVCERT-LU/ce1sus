@@ -44,7 +44,7 @@ Features
 * Cybox naming convention
 * Synchronization between ce1sus instances
 * Web-interface sync-server management (MISP and ce1sus)
-* Mail support
+* Mail notifications
 * Attributes/Objects/Observables additionally can be shared via TLP level
 
 

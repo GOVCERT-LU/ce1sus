@@ -19,9 +19,14 @@ Release 0.11.0
 * Enhanced ACL, for admins and users
 * Enhanced relation finder (Similar attributes can be grouped, but still the relation is done by ==)
 * Review right management (REL_0.10.0+)
-* STIX support for observables, indicators, incidents, TTP
-* Operators for observales
-* MISP Sync support
+* STIX support for (Currently supports Observables, Indicators, Markings, KillChains)
+* Operators for observales (Composed Observables)
+* Genuine Misp v2.x integration of push/pull requests
+* Cybox naming convention
+* Synchronization between ce1sus instances
+* Web-interface sync-server management (MISP and ce1sus)
+* Mail notifications
+* Attributes/Objects/Observables additionally can be shared via TLP level
 
 Release 0.10.3
 --------------
