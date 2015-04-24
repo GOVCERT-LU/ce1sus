@@ -7,7 +7,7 @@ Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import BigInteger, Unicode
+from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.common.session import Base
@@ -280,6 +280,54 @@ class Marking(ExtendedLogingInformations, Base):
 
 
 class MarkingStructure(ExtendedLogingInformations, Base):
+
+  SimpleMarkingStructure = 'simpleMarking:SimpleMarkingStructureType'
+  TLPMarkingStructure = 'tlpMarking:TLPMarkingStructureType'
+  TermsOfUseMarkingStructure = 'termsofuseMarkingStructure:TermsOfUseMarkingStructureType'
+
+  STRUCTURES = {0: SimpleMarkingStructure,
+                1: TLPMarkingStructure,
+                2: TermsOfUseMarkingStructure}
+
   marking_id = Column('marking_id', BigInteger, ForeignKey('markings.marking_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   marking_model_name = Column('marking_model_name', Unicode(255))
   marking_model_ref = Column('marking_model_ref', Unicode(255))
+  type_id = Column('type_id', Unicode(255), nullable=False)
+  value = Column('value', UnicodeText)
+
+  @property
+  def type_(self):
+    return MarkingStructure[self.type_id]
+
+  @type_.setter
+  def type_(self, text):
+    for key, value in MarkingStructure.STRUCTURES.iteritems():
+      if value == text:
+        self.type_id = key
+        break
+    if not self.type_id:
+      raise ValueError('Type {0} is not defined'.format(text))
+
+  @property
+  def color(self):
+    return self.value
+
+  @color.setter
+  def color(self, text):
+    self.value = text
+
+  @property
+  def statement(self):
+    return self.value
+
+  @statement.setter
+  def statement(self, text):
+    self.value = text
+
+  @property
+  def terms_of_use(self):
+    return self.value
+
+  @terms_of_use.setter
+  def terms_of_use(self, text):
+    self.value = text
