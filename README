@@ -5,23 +5,41 @@ ce1sus
 
 ce1sus is a threat information database.
 
-The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners.
+When the development of ce1sus started there were not many tools available to store Indicators of compromise (IOCs) available.
+Moreover the shared IOCs were received in many different formats, and often there was no real context given.  
 
-Ce1sus entries are modeled to represent the real-life case as as close as possible. 
+ce1sus has the goal to facilitate:
+
+1. Central database: Storing any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner 
+2. Sharing: Be compatible with open standards (STIX/Cybox) / or the most commonly used formats to facilitate the sharing trusted partners
+3. Automatized Import/Export: Synchronization of instances between trusted partners
+4. Ease of use: Generate informations out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
+5. Correlation: Automatically creating relations between seen threats
+6. Visualization: Represent the threat/analysis as close as possible to the  the real-life case in a structured manner
+
+The structuration of a threat provides context to others with nearly no efforts. An Example 
 
 Example:
 Email with a malicious attachment
 
-In such cases the event should start by an email object. That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object then will get a child object representing the attachment. If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
+In such cases the event should start by an email object. 
+That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. 
+This object then will get a child object representing the attachment. 
+If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
 
-Such structured events improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
+For this scenario one can directly deduce that then a child file was found that it is highly probable that the file came from this specific dropper
+and if the dropper file was not found one at least knows that the cases are related.  
+
+Such structures improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
 
 Note
 ----
 
+There are several branches, which are primarly used for development the master branch will be the release which is considered as stable
+
 This is still not the final release, we are still developing ce1sus.
 
-For any questions write a mail to the developers
+For any questions feel free to ask
 
 Features
 ========
@@ -72,13 +90,11 @@ Requirements
 RoadMap
 =======
 
-v0.11.2
+v0.11.1
 -------
-* Update documentation
-* Password protection for compressed files
 * Relation of attributes can be done over groups of attributes
 
-v0.11.3
+v0.11.2
 -------
 * TAXII server integration
 
@@ -91,8 +107,8 @@ Up the road 0.11.x
 * Improved search
 * Export of events (i.e. csv, xml, json)
 * Enhanced STIX/Cybox support
-
-
+* Show statistics on Home page
+* Password protection for compressed files
 
 Installation
 ============
