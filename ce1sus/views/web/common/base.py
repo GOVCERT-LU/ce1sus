@@ -14,6 +14,7 @@ from ce1sus.db.classes.user import UserRights
 from ce1sus.helpers.common.debug import Log
 from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
+from ce1sus.controllers.admin.user import UserController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -50,6 +51,7 @@ class BaseView(object):
     self.config = config
     self.__logger = Log(config)
     self.event_controller = EventController(config)
+    self.user_controller = UserController(config)
 
   @property
   def logger(self):
@@ -158,6 +160,8 @@ class BaseView(object):
     :returns: User
     """
     user = self._get_from_session(SESSION_USER)
+    if user:
+      user = self.user_controller.get_user_by_username(user.username)
     return user
 
   def get_authorized_events_cache(self):
@@ -229,7 +233,7 @@ class BaseView(object):
       # check is the event is viewable then process to the iem
       if self.is_event_viewable(event, user):
         permissions = self.get_event_user_permissions(event, user)
-        if is_object_viewable(item, permissions):
+        if is_object_viewable(item, permissions, user.group):
           return True
         else:
           # check if owner
@@ -424,9 +428,5 @@ class BaseView(object):
     obj.activated = user.activated
     obj.sirname = user.sirname
     obj.permissions = UserRights(user.dbcode)
-    obj.group = GenObject()
-    obj.group.identifier = user.group.identifier
-    obj.group.name = user.group.name
-    obj.group.tlp_lvl = user.group.tlp_lvl
 
     return obj

@@ -36,7 +36,7 @@ Features
 * Easy installation
 * Completely open source
 * Search
-* STIX Compatible (Currently supports Observables, Indicators)
+* STIX Compatible (Currently supports Observables, Indicators, Markings, KillChains)
 * Completely interfaceable (REST API)
 * Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
@@ -45,6 +45,7 @@ Features
 * Synchronization between ce1sus instances
 * Web-interface sync-server management (MISP and ce1sus)
 * Mail support
+* Attributes/Objects/Observables additionally can be shared via TLP level
 
 
 Requirements
@@ -88,9 +89,9 @@ Up the road 0.11.x
 * Profile management
 * More handlers
 * Improved search
-* Export of events (i.e. csv, xml)
+* Export of events (i.e. csv, xml, json)
 * Enhanced STIX/Cybox support
-* Attributes additionally can be shared via TLP level
+
 
 
 Installation

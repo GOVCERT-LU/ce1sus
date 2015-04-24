@@ -16,7 +16,7 @@ def is_user_priviledged(user):
   return user.permissions.privileged
 
 
-def is_object_viewable(instance, event_permissions, cache=None):
+def is_object_viewable(instance, event_permissions, user_group, cache=None):
   if instance.properties.is_validated and instance.properties.is_shareable:
     return True
   elif event_permissions:
@@ -28,10 +28,13 @@ def is_object_viewable(instance, event_permissions, cache=None):
       else:
         # check if the user owns the obejct then return True
         return False
-    else:
-      return False
-  else:
-    return False
+  if user_group:
+    # check if tlp matches
+    user_tlp = get_max_tlp(user_group)
+    if instance.tlp_level_id >= user_tlp:
+      return True
+
+  return False
 
 
 def is_event_owner(event, user):
@@ -93,7 +96,7 @@ def can_user_download(event, user, cache=None):
   :returns: Boolean
   """
   # TODO: rethink this
-  result = is_object_viewable(event, user, cache)
+  result = is_object_viewable(event, user, user.group, cache)
   if not result:
     # check if the default group can download
     result = user.default_group.can_download

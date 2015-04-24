@@ -192,7 +192,7 @@ class EventHandler(RestBaseHandler):
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_uuid(uuid)
         self.check_item_is_viewable(event, observable)
-        if is_object_viewable(observable, event_permission):
+        if is_object_viewable(observable, event_permission, user.group):
           return observable.to_dict(details, inflated, event_permission, user)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))

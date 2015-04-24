@@ -45,6 +45,14 @@ class GroupController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_group_by_name(self, group_name):
+    try:
+      return self.group_broker.get_by_name(group_name)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def insert_group(self, group, validate=True, commit=True):
     try:
       self.group_broker.insert(group, commit, validate)

@@ -10,7 +10,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, TLP
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
@@ -84,6 +84,27 @@ class Attribute(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
 
   __bit_code = None
+
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
 
   @property
   def properties(self):
@@ -226,6 +247,7 @@ class Attribute(ExtendedLogingInformations, Base):
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.modifier.group.to_dict(complete, False),
+            'tlp': self.convert_value(self.tlp),
             'properties': self.properties.to_dict()
             }
 
@@ -248,3 +270,4 @@ class Attribute(ExtendedLogingInformations, Base):
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()

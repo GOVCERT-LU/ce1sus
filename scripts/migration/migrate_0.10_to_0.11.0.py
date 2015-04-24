@@ -18,6 +18,7 @@ import time
 from types import ListType
 from uuid import uuid4
 
+
 basePath = dirname(abspath(__file__)) + '/../../'
 sys.path.insert(0, '../../')
 
@@ -27,7 +28,7 @@ from ce1sus.controllers.admin.group import GroupController
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.user import UserController
-from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
+from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.db.classes.attribute import Attribute
@@ -70,7 +71,6 @@ from ce1sus.helpers.common.debug import Log
 from ce1sus.helpers.common.objects import get_fields, get_class
 
 
-
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
@@ -107,6 +107,7 @@ def clone_attr(attribute, obj):
   attr.definition_id = attr.definition.identifier
   attr.dbcode = attribute.dbcode
   attr.is_ioc = attribute.is_ioc
+  attr.tlp_level_id = attribute.tlp_level_id
 
   attr.object = obj
   attr.object_id = attr.object.identifier
@@ -132,6 +133,7 @@ def clone_object(obj, observable, parent=None):
   new_obj.definition = obj.definition
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
+  new_obj.tlp_level_id = obj.tlp_level_id
 
   new_obj.observable = observable
   new_obj.observable_id = new_obj.observable.identifier
@@ -243,6 +245,7 @@ def clone_observable(observable):
   new_observable.originating_group_id = new_observable.originating_group.identifier
   new_observable.creator_group = observable.creator_group
   new_observable.creator_group_id = new_observable.creator_group.identifier
+  new_observable.tlp_level_id = observable.tlp_level_id
 
   if observable.object:
     obj = clone_object(observable.object, new_observable, None)
@@ -361,6 +364,7 @@ class Migrator(object):
     report.creator = self.get_users()[line['creator_id']]
     report.creator_id = report.creator.identifier
     set_db_code(report, line['dbcode'])
+    report.tlp_level_id = event.tlp_level_id
 
     report.created_at = convert_date(line['created'])
     report.modified_on = convert_date(line['modified'])
@@ -435,7 +439,10 @@ class Migrator(object):
       try:
         self.group_controller.insert_group(group, commit=False)
       except ControllerIntegrityException:
-        group = self.group_controller.get_group_by_uuid(group.uuid)
+        try:
+          group = self.group_controller.get_group_by_uuid(group.uuid)
+        except ControllerNothingFoundException:
+          group = self.group_controller.get_group_by_name(group.name)
 
       groups[id_] = group
 
@@ -515,6 +522,7 @@ class Migrator(object):
     obj.modifier_id = obj.modifier.identifier
     obj.originating_group = obj.creator_group
     obj.originating_group_id = obj.creator_group.identifier
+    obj.tlp_level_id = observable.parent.tlp_level_id
     return obj
 
   def make_observable(self, line, event):
@@ -544,6 +552,7 @@ class Migrator(object):
     result_observable.modified_on = convert_date(line['modified'])
     # db code is the same as for the object
     set_db_code(result_observable, line['dbcode'])
+    result_observable.tlp_level_id = event.tlp_level_id
 
     return result_observable
 
@@ -576,6 +585,7 @@ class Migrator(object):
     reference.creator = self.get_users()[attribute['creator_id']]
     reference.creator_id = reference.creator.identifier
     set_db_code(reference, attribute['dbcode'])
+    reference.tlp_level_id = report.tlp_level_id
 
     modifier_id = attribute.get('modifier_id')
     reference.created_at = convert_date(attribute['created'])
@@ -675,6 +685,7 @@ class Migrator(object):
     attribute.creator_id = attribute.creator.identifier
     attribute.created_at = convert_date(line['created'])
     attribute.modified_on = convert_date(line['modified'])
+    attribute.tlp_level_id = obj.event.tlp_level_id
 
     modifier_id = line.get('modifier_id')
     if modifier_id:
@@ -1413,6 +1424,8 @@ class Migrator(object):
     event.modifier = self.get_users()[line['modifier_id']]
     event.modifier_id = event.modifier.identifier
     event.tlp_level_id = line['tlp_level_id']
+
+
 
     event.originating_group = event.creator_group
     event.originating_group_id = event.creator_group.identifier

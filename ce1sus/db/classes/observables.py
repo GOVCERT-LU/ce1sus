@@ -11,7 +11,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, TLP
 from ce1sus.db.common.session import Base
 
 
@@ -60,7 +60,7 @@ class ObservableComposition(Base):
   def get_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     for rel_obj in self.observables:
-      if is_object_viewable(rel_obj, event_permissions):
+      if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator.identifier == user.identifier:
@@ -154,6 +154,27 @@ class Observable(ExtendedLogingInformations, Base):
   related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id')
   __bit_code = None
 
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
+
   def related_observables_count_for_permissions(self, event_permissions, user=None):
     return len(self.get_related_observables_for_permissions(event_permissions, user))
     """
@@ -175,7 +196,7 @@ class Observable(ExtendedLogingInformations, Base):
   def get_related_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     for rel_obj in self.related_observables:
-      if is_object_viewable(rel_obj, event_permissions):
+      if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator_group_id == user.group.identifier:
@@ -210,7 +231,7 @@ class Observable(ExtendedLogingInformations, Base):
 
   def get_object_for_permissions(self, event_permissions, user):
     if self.object:
-      if is_object_viewable(self.object, event_permissions):
+      if is_object_viewable(self.object, event_permissions, user.group):
         return self.object
       else:
         if self.object.creator_group_id == user.group.identifier:
@@ -219,7 +240,7 @@ class Observable(ExtendedLogingInformations, Base):
 
   def get_composed_observable_for_permissions(self, event_permissions, user):
     if self.observable_composition:
-      if is_object_viewable(self.observable_composition, event_permissions):
+      if is_object_viewable(self.observable_composition, event_permissions, user.group):
         return self.observable_composition
       else:
         if self.observable_composition.creator_group_id == user.group.identifier:
@@ -263,6 +284,7 @@ class Observable(ExtendedLogingInformations, Base):
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
                 'modifier_group': self.modifier.group.to_dict(complete, False),
+                'tlp': self.convert_value(self.tlp),
                 'properties': self.properties.to_dict()
                 }
     else:
@@ -274,6 +296,7 @@ class Observable(ExtendedLogingInformations, Base):
                 'modifier_group': self.modifier.group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
+                'tlp': self.convert_value(self.tlp),
                 'properties': self.properties.to_dict()
                 }
 
@@ -286,3 +309,4 @@ class Observable(ExtendedLogingInformations, Base):
     # TODO: make valid for inflated
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()

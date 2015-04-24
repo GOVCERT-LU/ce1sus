@@ -11,7 +11,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
 
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLogingInformations
-from ce1sus.db.classes.common import Properties, ValueException
+from ce1sus.db.classes.common import Properties, ValueException, TLP
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.objects import get_class
@@ -140,6 +140,27 @@ class Reference(ExtendedLogingInformations, Base):
                           primaryjoin='Reference.identifier==Reference.parent_id')
   __bit_code = None
 
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
+
   def populate(self, json, rest_insert=True):
     definition_uuid = json.get('definition_id', None)
     if not definition_uuid:
@@ -153,6 +174,7 @@ class Reference(ExtendedLogingInformations, Base):
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     return {'identifier': self.convert_value(self.uuid),
@@ -163,6 +185,7 @@ class Reference(ExtendedLogingInformations, Base):
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.modifier.group.to_dict(complete, False),
+            'tlp': self.convert_value(self.tlp),
             'properties': self.properties.to_dict()
             }
 
@@ -208,7 +231,7 @@ class Report(ExtendedLogingInformations, Base):
   def get_references_for_permissions(self, event_permissions, user):
     references = list()
     for ref in self.references:
-      if is_object_viewable(ref, event_permissions):
+      if is_object_viewable(ref, event_permissions, user.group):
         references.append(ref)
       else:
         if ref.creator.identifier == user.identifier:
@@ -218,7 +241,7 @@ class Report(ExtendedLogingInformations, Base):
   def get_related_reports_for_permissions(self, event_permissions, user):
     rel_reps = list()
     for rel_rep in self.related_reports:
-      if is_object_viewable(rel_rep, event_permissions):
+      if is_object_viewable(rel_rep, event_permissions, user.group):
         rel_reps.append(rel_rep)
       else:
         if rel_rep.creator.identifier == user.identifier:
@@ -255,11 +278,13 @@ class Report(ExtendedLogingInformations, Base):
               'properties': self.properties.to_dict(),
               # TODO related_reports
               'related_reports': related_reports,
+              'tlp': self.convert_value(self.tlp),
               'related_reports_count': related_count,
               }
     else:
       return {'identifier': self.identifier,
-              'title': self.title
+              'title': self.title,
+              'tlp': self.convert_value(self.tlp),
               }
 
   def populate(self, json, rest_insert=True):
@@ -270,6 +295,7 @@ class Report(ExtendedLogingInformations, Base):
     self.short_description = json.get('short_description', None)
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()
 
   @property
   def properties(self):

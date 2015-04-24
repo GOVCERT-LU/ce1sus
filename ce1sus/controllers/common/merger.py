@@ -129,6 +129,10 @@ class Merger(BaseController):
           self.set_dbcode(local_object, remote_object)
           local_object.modified_on = remote_object.modified_on
           local_object.modifier_id = user.identifier
+          if remote_object.tlp_level_id:
+            self.logger.info('TLP from object {0} will be changed from {1} to {2}'.format(local_object.uuid, local_object.tlp_level_id, remote_object.tlp_level_id))
+            local_object.tlp_level_id = remote_object.tlp_level_id
+
           merges = True
         else:
           self.logger.warning('User {0} tried to update object {1} but does not have the permissions for it'.format(user.username, local_object.identifier))
@@ -207,6 +211,9 @@ class Merger(BaseController):
           self.set_dbcode(local_observable, remote_observable)
           local_observable.modified_on = remote_observable.modified_on
           local_observable.modifier_id = user.identifier
+          if remote_observable.tlp_level_id:
+            self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_observable.uuid, local_observable.tlp_level_id, remote_observable.tlp_level_id))
+            local_observable.tlp_level_id = remote_observable.tlp_level_id
           merges = True
         else:
           self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username, local_observable.identifier))
@@ -400,6 +407,9 @@ class Merger(BaseController):
       local_report.title = remote_report.title
       local_report.modified_on = remote_report.modified_on
       local_report.modifier_id = user.identifier
+      if remote_report.tlp_level_id:
+        self.logger.info('TLP from report {0} will be changed from {1} to {2}'.format(local_report.uuid, local_report.tlp_level_id, remote_report.tlp_level_id))
+        local_report.tlp_level_id = remote_report.tlp_level_id
     for rem_reference in remote_report.references:
       # find the corresponding one
       found = False
@@ -425,6 +435,9 @@ class Merger(BaseController):
       local_reference.value = rem_reference.value
       local_reference.modified_on = rem_reference.modified_on
       local_reference.modifier_id = user.identifier
+      if rem_reference.tlp_level_id:
+        self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_reference.uuid, local_reference.tlp_level_id, rem_reference.tlp_level_id))
+        local_reference.tlp_level_id = rem_reference.tlp_level_id
       return True
     return False
 

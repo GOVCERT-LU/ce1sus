@@ -15,6 +15,7 @@ from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties, Ma
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
+from ce1sus.db.classes.ttp import TTPs
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.common.converters import ValueConverter
@@ -89,7 +90,7 @@ class Event(ExtendedLogingInformations, Base):
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
   reports = relationship('Report')
-  ttps = relationship('TTPs', uselist=False)
+  ttps = relationship(TTPs, uselist=False)
 
   @property
   def properties(self):
@@ -192,7 +193,7 @@ class Event(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.observables:
-      if is_object_viewable(rel_obj, event_permissions):
+      if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator_group_id == user.group.identifier:
@@ -214,7 +215,7 @@ class Event(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.reports:
-      if is_object_viewable(rel_obj, event_permissions):
+      if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator_group_id == user.group.identifier:

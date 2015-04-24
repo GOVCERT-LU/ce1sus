@@ -12,7 +12,7 @@ from sqlalchemy.types import Integer, BigInteger
 
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties, ValueException
+from ce1sus.db.classes.common import Properties, ValueException, TLP
 from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.db.common.session import Base
 
@@ -61,6 +61,27 @@ class Object(ExtendedLogingInformations, Base):
   observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
+  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
+
   @property
   def event(self):
     if self.observable:
@@ -96,7 +117,7 @@ class Object(ExtendedLogingInformations, Base):
   def get_attributes_for_permissions(self, event_permissions, user):
     attributes = list()
     for attribute in self.attributes:
-      if is_object_viewable(attribute, event_permissions):
+      if is_object_viewable(attribute, event_permissions, user.group):
         attributes.append(attribute)
       else:
         if attribute.creator_group_id == user.group.identifier:
@@ -120,7 +141,7 @@ class Object(ExtendedLogingInformations, Base):
 
     rel_objs = list()
     for rel_obj in self.related_objects:
-      if is_object_viewable(rel_obj.object, event_permissions):
+      if is_object_viewable(rel_obj.object, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.creator_group_id == user.group.identifier:
@@ -205,6 +226,7 @@ class Object(ExtendedLogingInformations, Base):
               'related_objects': related,
               'related_objects_count': related_count,
               'properties': self.properties.to_dict(),
+              'tlp': self.convert_value(self.tlp),
               'observable_id': self.convert_value(self.observable_id)
               }
     else:
@@ -219,6 +241,7 @@ class Object(ExtendedLogingInformations, Base):
               'related_objects': related,
               'related_objects_count': related_count,
               'properties': self.properties.to_dict(),
+              'tlp': self.convert_value(self.tlp),
               'observable_id': self.convert_value(self.observable_id)
               }
 
@@ -235,3 +258,4 @@ class Object(ExtendedLogingInformations, Base):
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()
