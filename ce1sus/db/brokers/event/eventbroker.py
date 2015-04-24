@@ -12,6 +12,7 @@ from ce1sus.db.classes.event import Event, EventGroupPermission
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 from ce1sus.common.checks import get_max_tlp
+from ce1sus.db.classes.common import Analysis, Status, TLP
 
 
 __author__ = 'Weber Jean-Paul'
@@ -57,13 +58,22 @@ class EventBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
+  def __find_id(self, dictionary, text):
+    result = list()
+    for key, value in dictionary.iteritems():
+      if text.lower() in value.lower():
+        result.append(key)
+
+    result.append(key + 1)
+    return result
+
   def __set_parameters(self, result, parameters):
     # add additinal filters
 
     if parameters:
       anal = parameters.get('filter[analysis]', None)
       if anal:
-        matching_ids = 1
+        matching_ids = self.__find_id(Analysis.get_dictionary(), anal)
         result = result.filter(Event.analysis_id.in_(matching_ids))
       anal = parameters.get('filter[creator_group_name]', None)
       if anal:
@@ -76,12 +86,12 @@ class EventBroker(BrokerBase):
         result = result.filter(Event.title.like('%{0}%'.format(anal)))
       anal = parameters.get('filter[status]', None)
       if anal:
-        matching_ids = 1
-        result = result.filter(Event.analysis_id.in_(matching_ids))
+        matching_ids = self.__find_id(Status.get_dictionary(), anal)
+        result = result.filter(Event.status_id.in_(matching_ids))
       anal = parameters.get('filter[tlp]', None)
       if anal:
-        matching_ids = 1
-        result = result.filter(Event.analysis_id.in_(matching_ids))
+        matching_ids = self.__find_id(TLP.get_dictionary(), anal)
+        result = result.filter(Event.tlp_level_id.in_(matching_ids))
 
       # do a similar stuff for sorting
       anal = parameters.get('sorting[analysis]', None)
