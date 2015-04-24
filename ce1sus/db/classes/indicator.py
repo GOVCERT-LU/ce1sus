@@ -11,7 +11,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties
+from ce1sus.db.classes.common import Properties, Marking
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 
@@ -40,11 +40,30 @@ _REL_INDICATOR_OBSERVABLE = Table('rel_indicator_observable', Base.metadata,
                                   Column('observable_id', BigInteger, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                   )
 
+_REL_INDICATOR_HANDLING = Table('rel_indicator_handling', Base.metadata,
+                                Column('rih_id', BigInteger, primary_key=True, nullable=False, index=True),
+                                Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                Column('marking_id', BigInteger, ForeignKey('markings.marking_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                )
+
+_REL_KILLCHAIN_KILLCHAINPHASES = Table('rel_killchain_killchainphase', Base.metadata,
+                                       Column('rkk_id', BigInteger, primary_key=True, nullable=False, index=True),
+                                       Column('killchain_id', BigInteger, ForeignKey('killchains.killchain_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                       Column('killchainphase_id', BigInteger, ForeignKey('killchainphases.killchainphase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                       )
+
+
+class Killchain(ExtendedLogingInformations, Base):
+  name = Column('name', Unicode(255))
+  reference = Column('reference', Unicode(255))
+  kill_chain_phases = relationship('KillChainPhase', secondary='rel_killchain_killchainphase')
+
 
 class KillChainPhase(Base):
-  # TODO enlarge, add the missing elements
+  phase_ref = Column('phase_ref', Integer(1))
   name = Column('name', Unicode(255))
-  ordinality = Column('ordinality', Integer(1))
+  ordinality = Column('ordinality', Integer)
+  phase_id = Column('phase_id', Integer)
 
 
 class Sighting(ExtendedLogingInformations, Base):
@@ -120,7 +139,7 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
 
 class Indicator(ExtendedLogingInformations, Base):
 
-  version = Column('version', BigInteger, default=u'1.0.0', nullable=False)
+  version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
   title = Column('title', Unicode(255), index=True, nullable=True)
   description = Column('description', UnicodeText)
   short_description = Column('short_description', Unicode(255))
@@ -130,8 +149,9 @@ class Indicator(ExtendedLogingInformations, Base):
   event = relationship('Event', uselist=False)
   event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   sightings = relationship('Sighting', secondary='rel_indicator_sightings')
-  killchain = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
+  killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   types = relationship('IndicatorType')
+  handling = relationship(Marking, secondary='rel_indicator_handling')
   operator = Column('operator', Unicode(3), default=u'OR')
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*

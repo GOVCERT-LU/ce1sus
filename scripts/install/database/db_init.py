@@ -35,6 +35,7 @@ import ce1sus.db.classes.servers
 import ce1sus.db.classes.processitem
 from ce1sus.db.classes.types import AttributeType
 import ce1sus.db.classes.types
+import ce1sus.db.classes.ttp
 from ce1sus.db.classes.user import User
 import ce1sus.db.classes.user
 import ce1sus.db.classes.values

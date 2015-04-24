@@ -5,6 +5,12 @@
 
 Created on Oct 16, 2014
 """
+from sqlalchemy.orm import relationship
+from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.types import BigInteger, Unicode
+
+from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
+from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
 
 
@@ -265,3 +271,15 @@ class Properties(BitBase):
       share = json.get('shared', False)
       self.is_shareable = share
       # Note proposal is handled internally only by the engine
+
+
+class Marking(ExtendedLogingInformations, Base):
+  version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
+  controlled_structure = Column('controlled_structure', Unicode(255))
+  markings = relationship('MarkingStructure')
+
+
+class MarkingStructure(ExtendedLogingInformations, Base):
+  marking_id = Column('marking_id', BigInteger, ForeignKey('markings.marking_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  marking_model_name = Column('marking_model_name', Unicode(255))
+  marking_model_ref = Column('marking_model_ref', Unicode(255))

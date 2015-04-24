@@ -6,25 +6,32 @@
 Created on Oct 16, 2014
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
+from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
 from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
 
 from ce1sus.common.checks import is_object_viewable, is_event_owner
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties
+from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties, Marking
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.converters import ValueConverter
+from ce1sus.helpers.common.datumzait import DatumZait
 
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
+
+
+_REL_EVENT_HANDLING = Table('rel_event_handling', Base.metadata,
+                            Column('eih_id', BigInteger, primary_key=True, nullable=False, index=True),
+                            Column('event_id', BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                            Column('marking_id', BigInteger, ForeignKey('markings.marking_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                            )
 
 
 class EventGroupPermission(ExtendedLogingInformations, Base):
@@ -69,6 +76,7 @@ class Event(ExtendedLogingInformations, Base):
   comments = relationship('Comment')
   last_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
   first_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
+  handling = relationship(Marking, secondary='rel_event_handling')
 
   # TODO: Add administration of minimal objects -> checked before publishing
 
@@ -81,6 +89,7 @@ class Event(ExtendedLogingInformations, Base):
   __bit_code = None
   last_publish_date = Column('last_publish_date', DateTime)
   reports = relationship('Report')
+  ttps = relationship('TTPs', uselist=False)
 
   @property
   def properties(self):
