@@ -109,17 +109,22 @@ class StixCelsusMapper(BaseController):
           if isinstance(structure, TLPMarkingStructure):
             # TODO: set desrcption with reference
             event.tlp = structure.color.title()
-    if not event.tlp:
+    if not event.tlp_level_id:
       event.tlp = 'White'
 
     # first and last seen
     if stix_header.information_source:
       # TODO review this
       time = stix_header.information_source.time
-      event.created_at = datetime.utcfromtimestamp(time.produced_time.value)
-      event.modified_on = datetime.utcfromtimestamp(time.received_time.value)
-      event.first_seen = datetime.utcfromtimestamp(time.start_time)
-      event.last_seen = datetime.utcfromtimestamp(time.end_time)
+      event.created_at = time.produced_time.value
+      if time.received_time:
+        event.modified_on = time.received_time.value
+      else:
+        event.modified_on = event.created_at
+
+      event.first_seen = time.start_time
+      event.last_seen = time.end_time
+
     else:
       # if these values were not set use now
       event.created_at = datetime.utcnow()

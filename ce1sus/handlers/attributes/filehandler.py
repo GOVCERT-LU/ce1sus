@@ -21,7 +21,6 @@ from ce1sus.db.classes.common import ValueTable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.helpers.common.config import ConfigException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
 import magic
@@ -98,7 +97,7 @@ class FileHandler(GenericHandler):
     Returns the temporary folder, and creates it when not existing
     """
     try:
-      tmp_path = self.get_base_path() + '/tmp/' + hasher.hashSHA1('{0}'.format(DatumZait.now()))
+      tmp_path = self.get_base_path() + '/tmp/' + hasher.hashSHA1('{0}'.format(datetime.utcnow()))
       if not exists(tmp_path):
         makedirs(tmp_path)
       return tmp_path
@@ -229,9 +228,9 @@ class FileHandler(GenericHandler):
     """
     Returns the string of the relative folder position
     """
-    dest_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
-                                     DatumZait.now().month,
-                                     DatumZait.now().day)
+    dest_path = '{0}/{1}/{2}'.format(datetime.utcnow().year,
+                                     datetime.utcnow().month,
+                                     datetime.utcnow().day)
     return dest_path
 
   def __get_orig_filename(self, attribtue):

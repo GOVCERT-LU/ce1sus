@@ -5,7 +5,10 @@
 
 Created on Nov 12, 2014
 """
+from uuid import uuid4
+
 from ce1sus.controllers.base import BaseController
+from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
@@ -15,7 +18,6 @@ from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
 from cybox.objects.hostname_object import Hostname
 from cybox.objects.uri_object import URI
-from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 
 
 __author__ = 'Weber Jean-Paul'
@@ -218,7 +220,11 @@ class CyboxMapper(BaseController):
     set_properties(ce1sus_object)
     # Create the container
     ce1sus_object.observable = observable
-    ce1sus_object.uuid = extract_uuid(cybox_object.id_)
+    if cybox_object.id_:
+      ce1sus_object.uuid = extract_uuid(cybox_object.id_)
+    else:
+      # unfortenatley one must be generated
+      ce1sus_object.uuid = uuid4()
     ce1sus_object.definition = self.get_object_definition(cybox_object.properties)
     set_extended_logging(ce1sus_object, user, user.group)
 

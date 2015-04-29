@@ -12,10 +12,11 @@ import json
 from lxml import etree
 
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
+from ce1sus.controllers.common.merger import Merger
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.views.web.common.decorators import require
 from stix.core.stix_package import STIXPackage
-from ce1sus.controllers.common.merger import Merger
 
 
 __author__ = 'Weber Jean-Paul'
@@ -33,6 +34,7 @@ class STIXAdapter(BaseView):
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
+  @require()
   def upload_xml(self, *vpath, **params):
     user = None
     try:
@@ -72,3 +74,4 @@ class STIXAdapter(BaseView):
     except ControllerException as error:
       self.logger.error(error)
       raise HTTPError(400, error.message)
+

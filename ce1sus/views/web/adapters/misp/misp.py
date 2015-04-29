@@ -22,6 +22,7 @@ from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.views.web.common.decorators import require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -65,6 +66,7 @@ class MISPAdapter(BaseView):
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
+  @require()
   def upload_xml(self, *vpath, **params):
     try:
       input_json = self.get_json()
@@ -119,7 +121,9 @@ class MISPAdapter(BaseView):
     except ControllerException as error:
       self.logger.error(error)
       raise HTTPError(400, error.message)
-
+    except Exception as error:
+      self.logger.critical(error)
+      raise HTTPError(500, error.message)
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def shadow_attributes(self, *vpath, **params):
