@@ -680,7 +680,7 @@ class MispConverter(BaseController):
       return None
 
   def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution, ignore_uuid=False):
-    if (category in ['external analysis', 'internal reference', 'targeting data'] and type_ in ['attachment', 'comment', 'link', 'text', 'url']) or (category == 'internal reference' and type_ in ['text', 'comment']) or type_ == 'other' or (category == 'attribution' and type_ == 'comment') or category == 'other' or (category == 'antivirus detection' and type_ == 'link'):
+    if (category in ['external analysis', 'internal reference', 'targeting data', 'antivirus detection'] and type_ in ['attachment', 'comment', 'link', 'text', 'url', 'text']) or (category == 'internal reference' and type_ in ['text', 'comment']) or type_ == 'other' or (category == 'attribution' and type_ == 'comment') or category == 'other' or (category == 'antivirus detection' and type_ == 'link'):
       # make a report
       # Create Report it will be just a single one
       reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution)
