@@ -117,7 +117,8 @@ class MISPAdapter(BaseView):
       self.logger.error(error)
       raise HTTPError(409, 'File is not a MISP XML')
     except ControllerException as error:
-      raise HTTPError(400, error)
+      self.logger.error(error)
+      raise HTTPError(400, error.message)
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])

@@ -11,8 +11,7 @@ from cherrypy._cperror import HTTPError
 import json
 from lxml import etree
 
-from ce1sus.controllers.base import ControllerException, \
-  ControllerIntegrityException
+from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
 from stix.core.stix_package import STIXPackage
@@ -39,7 +38,8 @@ class STIXAdapter(BaseView):
     try:
       user = self.user_controller.get_user_by_username(self.get_user().username)
     except ControllerException as error:
-      raise HTTPError(400, error)
+      self.logger.error(error)
+      raise HTTPError(400, error.message)
 
     input_json = self.get_json()
     filename = input_json['name']
@@ -70,15 +70,5 @@ class STIXAdapter(BaseView):
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
     except ControllerException as error:
-      raise HTTPError(400, error)
-
-  """
-  @rest_method()
-  @methods(allowed=['GET'])
-  def stix_import(self, **args):
-    stix_package = STIXPackage.from_xml('/home/jhemp/Downloads/CIMBL-150-CERTS.xml')
-    user = self.user_broker.get_all()[0]
-    event = self.stix_mapper.map_stix_package(stix_package, user)
-    self.event_controller.insert_event(user, event)
-    pass
-  """
+      self.logger.error(error)
+      raise HTTPError(400, error.message)
