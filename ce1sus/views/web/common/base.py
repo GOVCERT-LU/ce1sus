@@ -6,15 +6,16 @@
 Created on Oct 26, 2014
 """
 import cherrypy
+from json import loads
 
 from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, get_max_tlp
+from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.user import UserRights
 from ce1sus.helpers.common.debug import Log
 from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
-from ce1sus.controllers.admin.user import UserController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -52,6 +53,26 @@ class BaseView(object):
     self.__logger = Log(config)
     self.event_controller = EventController(config)
     self.user_controller = UserController(config)
+
+  def get_json(self):
+    json = {}
+    cl = cherrypy.request.headers.get('Content-Length', None)
+    if cl:
+      try:
+        rawbody = cherrypy.request.body.read(int(cl))
+        json = loads(rawbody)
+      except TypeError:
+        # wonder what's wrong restangular?!?
+        counter = 0
+        rawbody = ''
+        while True:
+          rawbody += cherrypy.request.body.readline(counter)
+          try:
+            json = loads(rawbody)
+            break
+          except ValueError:
+            counter += 1
+    return json
 
   @property
   def logger(self):

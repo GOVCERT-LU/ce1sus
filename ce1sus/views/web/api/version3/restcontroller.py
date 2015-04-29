@@ -164,23 +164,7 @@ class RestController(BaseView):
 
       http_method = cherrypy.request.method
 
-      json = {}
-      cl = cherrypy.request.headers.get('Content-Length', None)
-      if cl:
-        try:
-          rawbody = cherrypy.request.body.read(int(cl))
-          json = loads(rawbody)
-        except TypeError:
-          # wonder what's wrong restangular?!?
-          counter = 0
-          rawbody = ''
-          while True:
-            rawbody += cherrypy.request.body.readline(counter)
-            try:
-              json = loads(rawbody)
-              break
-            except ValueError:
-              counter += 1
+      json = self.get_json()
 
       method = getattr(handler_instance, method_name, None)
 

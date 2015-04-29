@@ -11,7 +11,6 @@ import random
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.db.common.broker import IntegrityException, BrokerException, ValidationException, DeletionException, NothingFoundException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
@@ -137,7 +136,7 @@ class UserController(BaseController):
 
   def activate_user(self, user, manual=True):
     try:
-      user.activated = DatumZait.utcnow()
+      user.activated = datetime.utcnow()
       self.user_broker.update(user)
       if manual:
         self.logger.info(u'User {0} got manually activated'.format(user.username))

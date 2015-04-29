@@ -8,17 +8,16 @@ Created on Feb 17, 2015
 import base64
 import cherrypy
 from cherrypy._cperror import HTTPError
+from datetime import datetime
 import json
 
-from ce1sus.controllers.base import ControllerIntegrityException, \
-  ControllerException
+from ce1sus.controllers.base import ControllerIntegrityException, ControllerException
 from ce1sus.controllers.common.merger import Merger, MergingException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
@@ -66,11 +65,9 @@ class MISPAdapter(BaseView):
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
-  @cherrypy.tools.json_out()
-  @cherrypy.tools.json_in()
   def upload_xml(self, *vpath, **params):
     try:
-      input_json = cherrypy.request.json
+      input_json = self.get_json()
       filename = input_json['name']
       data = input_json['data']['data']
       xml_string = base64.b64decode(data)
@@ -112,6 +109,7 @@ class MISPAdapter(BaseView):
             # Log errors however
             self.event_controller.event_broker.do_commit()
         event_permissions = self.event_controller.get_event_user_permissions(event, user)
+        cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
         return event.to_dict(complete, inflated, event_permissions, user)
       else:
         raise HTTPError(409, 'File does not end in xml or XML')
@@ -361,7 +359,7 @@ class MISPAdapter(BaseView):
     for local_event in local_events:
       # check if the local events were not modified
       date = incomming_events[local_event.uuid]
-      datetime_from_string = DatumZait.utcfromtimestamp(int(date))
+      datetime_from_string = datetime.utcfromtimestamp(int(date))
 
       if local_event.last_publish_date >= datetime_from_string:
         # remove the ones which are either new or

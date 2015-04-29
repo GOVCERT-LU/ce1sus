@@ -14,7 +14,6 @@ import string
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.login import LoginController
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.validator.valuevalidator import ValueValidator
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 

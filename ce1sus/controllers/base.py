@@ -5,13 +5,14 @@ for controllers.
 
 Created: Jul, 2013
 """
+from datetime import datetime
+
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.brokers.permissions.user import UserBroker
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.debug import Log
 
 
@@ -108,12 +109,12 @@ class BaseController:
         instance.creator_id = user.identifier
         instance.creator = user
       if not instance.created_at:
-        instance.created_at = DatumZait.utcnow()
+        instance.created_at = datetime.utcnow()
     if not (instance.modifier_id or instance.modifier):
       instance.modifier_id = user.identifier
       instance.modifier = user
     if not instance.modified_on:
-      instance.modified_on = DatumZait.utcnow()
+      instance.modified_on = datetime.utcnow()
 
   def set_extended_logging(self, instance, user, originating_group, insert=False):
     self.set_simple_logging(instance, user, insert)

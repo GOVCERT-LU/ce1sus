@@ -5,9 +5,10 @@
 
 Created on Oct 16, 2014
 """
+from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
-from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger
+from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger, DateTime
 
 from ce1sus.common.checks import is_object_viewable, is_event_owner
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
@@ -16,10 +17,8 @@ from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.classes.ttp import TTPs
-from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.common.converters import ValueConverter
-from ce1sus.helpers.common.datumzait import DatumZait
 
 
 __author__ = 'Weber Jean-Paul'
@@ -75,8 +74,8 @@ class Event(ExtendedLogingInformations, Base):
   risk_id = Column('risk_id', Integer(1), nullable=False, default=0)
   analysis_id = Column('analysis_id', Integer(1), nullable=False, default=0)
   comments = relationship('Comment')
-  last_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
-  first_seen = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
+  last_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
+  first_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   handling = relationship(Marking, secondary='rel_event_handling')
 
   # TODO: Add administration of minimal objects -> checked before publishing
@@ -362,13 +361,13 @@ class Event(ExtendedLogingInformations, Base):
     if first_seen:
       first_seen = ValueConverter.set_date(first_seen)
     else:
-      first_seen = DatumZait.utcnow()
+      first_seen = datetime.utcnow()
     self.first_seen = first_seen
     last_seen = json.get('last_seen', None)
     if last_seen:
       last_seen = ValueConverter.set_date(last_seen)
     else:
-      last_seen = DatumZait.utcnow()
+      last_seen = datetime.utcnow()
     self.last_seen = last_seen
 
 

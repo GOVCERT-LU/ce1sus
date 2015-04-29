@@ -5,13 +5,11 @@
 
 Created on Oct 16, 2014
 '''
+from datetime import datetime
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import ForeignKey, Column
-from sqlalchemy.types import BigInteger
-
-from ce1sus.db.common.broker import DateTime
-from ce1sus.helpers.common.datumzait import DatumZait
+from sqlalchemy.types import BigInteger, DateTime
 
 
 __author__ = 'Weber Jean-Paul'
@@ -22,8 +20,8 @@ __license__ = 'GPL v3+'
 
 class SimpleLogingInformations(object):
 
-  created_at = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
-  modified_on = Column(DateTime, default=DatumZait.utcnow(), nullable=False)
+  created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
+  modified_on = Column(DateTime, default=datetime.utcnow(), nullable=False)
   # TODO: remove validation errors
 
   @declared_attr

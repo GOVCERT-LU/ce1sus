@@ -5,6 +5,8 @@
 
 Created on Feb 18, 2015
 """
+from datetime import datetime
+
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
@@ -23,7 +25,6 @@ from ce1sus.db.classes.servers import SyncServer
 from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common import strings
-from ce1sus.helpers.common.datumzait import DatumZait
 
 
 __author__ = 'Weber Jean-Paul'
@@ -88,11 +89,11 @@ class Assembler(BaseController):
       if created_at:
         instance.created_at = strings.stringToDateTime(created_at)
       else:
-        instance.created_at = DatumZait.utcnow()
+        instance.created_at = datetime.utcnow()
 
     instance.modifier_id = db_user.identifier
     instance.modifier = db_user
-    instance.modified_on = DatumZait.utcnow()
+    instance.modified_on = datetime.utcnow()
 
   def get_set_group(self, json, user):
     """ If the group does not exist or cannot be created return the users group"""

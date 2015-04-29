@@ -20,24 +20,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class DateTime(TypeDecorator):
-  """
-  Used as workaround for MySQL DBs
-  """
-  impl = SdateTime
-
-  def process_bind_param(self, value, engine):
-    return value
-
-  def process_result_value(self, value, engine):
-    if engine:
-      pass
-    if value is None:
-      return None
-    else:
-      return value.replace(tzinfo=dateutil.tz.tzutc())
-
-
 class BrokerException(Exception):
   """Broker Exception"""
   pass

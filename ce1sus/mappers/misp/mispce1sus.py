@@ -7,6 +7,7 @@ Created on Feb 20, 2015
 """
 from StringIO import StringIO
 from copy import deepcopy
+from datetime import datetime
 from dateutil import parser
 import json
 from os import makedirs, remove
@@ -38,7 +39,6 @@ from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.classes.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 import xml.etree.ElementTree as et
 
@@ -200,21 +200,21 @@ class MispConverter(BaseController):
     if date:
       rest_event.first_seen = parser.parse(date)
     else:
-      rest_event.first_seen = DatumZait.utcnow()
+      rest_event.first_seen = datetime.utcnow()
 
     rest_event.last_seen = rest_event.first_seen
 
     date = event_header.get('timestamp', None)
     if date:
-      rest_event.modified_on = DatumZait.utcfromtimestamp(int(date))
+      rest_event.modified_on = datetime.utcfromtimestamp(int(date))
     else:
-      rest_event.modified_on = DatumZait.utcnow()
+      rest_event.modified_on = datetime.utcnow()
 
     date = event_header.get('publish_timestamp', None)
     if date:
-      rest_event.last_publish_date = DatumZait.utcfromtimestamp(int(date))
+      rest_event.last_publish_date = datetime.utcfromtimestamp(int(date))
     else:
-      rest_event.last_publish_date = DatumZait.utcnow()
+      rest_event.last_publish_date = datetime.utcnow()
 
     rest_event.created_at = rest_event.first_seen
 
@@ -765,7 +765,7 @@ class MispConverter(BaseController):
 
     self.set_properties(result_observable, shared)
     # The creator of the result_observable is the creator of the object
-    self.set_extended_logging(result_observable, event, DatumZait.utcnow())
+    self.set_extended_logging(result_observable, event, datetime.utcnow())
 
     return result_observable
 
@@ -993,12 +993,12 @@ class MispConverter(BaseController):
       report = Report()
       report.tlp = 'red'
 
-      self.set_extended_logging(report, rest_event, DatumZait.utcnow())
+      self.set_extended_logging(report, rest_event, datetime.utcnow())
       value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
-      reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event, DatumZait.utcnow(), '0')
+      reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event, datetime.utcnow(), '0')
       report.references.append(reference)
       value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
-      reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event, DatumZait.utcnow(), '0')
+      reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event, datetime.utcnow(), '0')
       report.references.append(reference)
 
       result.append(report)
@@ -1033,7 +1033,7 @@ class MispConverter(BaseController):
     instance.created_at = event.created_at
 
     try:
-      instance.modified_on = DatumZait.utcfromtimestamp(int(ts))
+      instance.modified_on = datetime.utcfromtimestamp(int(ts))
     except TypeError:
       instance.modified_on = ts
     instance.modifier_id = self.user.identifier
@@ -1091,9 +1091,9 @@ class MispConverter(BaseController):
     return rest_event
 
   def __get_dump_path(self, base, dirname):
-    sub_path = '{0}/{1}/{2}'.format(DatumZait.now().year,
-                                    DatumZait.now().month,
-                                    DatumZait.now().day)
+    sub_path = '{0}/{1}/{2}'.format(datetime.now().year,
+                                    datetime.now().month,
+                                    datetime.now().day)
     if self.file_location:
       path = '{0}/{1}/{2}'.format(base, sub_path, dirname)
       if not isdir(path):
@@ -1126,7 +1126,7 @@ class MispConverter(BaseController):
   def map_indicator(self, observable, indicator_type, event):
     indicator = Indicator()
 
-    self.set_extended_logging(indicator, event, DatumZait.utcnow())
+    self.set_extended_logging(indicator, event, datetime.utcnow())
 
     # indicator.event = event
     indicator.event_id = event.identifier
@@ -1175,7 +1175,8 @@ class MispConverter(BaseController):
         continue
       id_ = event_id
       uuid = event['uuid']
-      timestamp = DatumZait.utcfromtimestamp(int(event['timestamp']))
+
+      timestamp = datetime.utcfromtimestamp(int(event['timestamp']))
       if id_:
         result[uuid] = (id_, timestamp)
 

@@ -11,8 +11,8 @@ from uuid import uuid4
 
 from ce1sus.db.classes.observables import Observable
 from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.objects import get_class
+from datetime import datetime
 
 
 __author__ = 'Weber Jean-Paul'
@@ -292,8 +292,8 @@ class HandlerBase(object):
       observable.parent_id = event.identifier
       observable.parent = event
 
-      observable.created_at = DatumZait.utcnow()
-      observable.modified_on = DatumZait.utcnow()
+      observable.created_at = datetime.utcnow()
+      observable.modified_on = datetime.utcnow()
       observable.description = 'Auto generated'
       observable.uuid = uuid4()
 

@@ -8,9 +8,8 @@ Created on Oct 17, 2014
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date, BigInteger
+from sqlalchemy.types import Unicode, UnicodeText, Numeric, Date, BigInteger, DateTime
 
-from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 

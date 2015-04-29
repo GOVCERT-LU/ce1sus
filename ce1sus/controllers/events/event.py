@@ -16,7 +16,6 @@ from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 

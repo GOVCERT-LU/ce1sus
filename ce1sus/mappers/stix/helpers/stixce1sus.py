@@ -116,10 +116,10 @@ class StixCelsusMapper(BaseController):
     if stix_header.information_source:
       # TODO review this
       time = stix_header.information_source.time
-      event.created_at = time.produced_time.value
-      event.modified_on = time.received_time.value
-      event.first_seen = time.start_time
-      event.last_seen = time.end_time
+      event.created_at = datetime.utcfromtimestamp(time.produced_time.value)
+      event.modified_on = datetime.utcfromtimestamp(time.received_time.value)
+      event.first_seen = datetime.utcfromtimestamp(time.start_time)
+      event.last_seen = datetime.utcfromtimestamp(time.end_time)
     else:
       # if these values were not set use now
       event.created_at = datetime.utcnow()
@@ -140,7 +140,7 @@ class StixCelsusMapper(BaseController):
       event.last_seen = event.modified_on
     return event
 
-  def create_event(self, stix_package, user):
+  def create_event(self, stix_package, user, ignore_id=False):
     # First process the header
     event = self.__map_stix_package_header(stix_package, user)
     set_properties(event)
@@ -167,7 +167,8 @@ class StixCelsusMapper(BaseController):
       for incident in stix_package.incidents:
         raise StixCelsusMapperException(u'Incidents are not yet supported')
 
-    self.event_controller.insert_event(user, event, False, False)
+    if not ignore_id:
+      self.event_controller.insert_event(user, event, False, False)
 
     return event
 

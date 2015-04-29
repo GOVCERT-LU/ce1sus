@@ -39,10 +39,11 @@ class StixMapper(BaseController):
     else:
       raise StixMapperException(u'the base url was not specified in configuration')
 
-  def map_stix_package(self, stix_package, user):
-    event = self.stix_ce1sus_mapper.create_event(stix_package, user)
+  def map_stix_package(self, stix_package, user, make_insert=True, ignore_id=False):
+    event = self.stix_ce1sus_mapper.create_event(stix_package, user, ignore_id)
     set_extended_logging(event, user, user.group)
-    self.event_controller.insert_event(user, event, False, False)
+    if make_insert:
+      self.event_controller.insert_event(user, event, False, False)
 
     return event
 
