@@ -6,10 +6,12 @@
 Created on Nov 12, 2014
 """
 from datetime import datetime
+from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.db.classes.common import TLP
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.indicator import Indicator, Sighting
@@ -31,11 +33,11 @@ class StixCelsusMapperException(Exception):
 
 class StixCelsusMapper(BaseController):
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
-    self.cybox_mapper = CyboxMapper(config)
-    self.event_controller = EventController(config)
-    self.observable_controller = ObservableController(config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
+    self.cybox_mapper = CyboxMapper(config, session)
+    self.event_controller = EventController(config, session)
+    self.observable_controller = ObservableController(config, session)
 
   def init(self):
     groups = self.group_broker.get_all()
@@ -44,7 +46,9 @@ class StixCelsusMapper(BaseController):
   def __convert_info_soucre(self, info_source):
     if info_source and info_source.identity:
       identity = info_source.identity
-      identifier = extract_uuid(identity.id_)
+      identifier = None
+      if identity.id_:
+        identifier = extract_uuid(identity.id_)
       # check if group exits
       # Only based on the name as the id can vary
       group = self.groups.get(identity.name, None)
@@ -52,9 +56,14 @@ class StixCelsusMapper(BaseController):
         return group
       else:
         group = Group()
-        group.identifier = identifier
+        if identifier:
+          group.uuid = identifier
+        else:
+          # Unfortenately we must create our own
+          group.uuid = uuid4()
         group.name = identity.name
         group.description = u'Auto-generated from STIX'
+        group.tlp_lvl = 3
         self.group_broker.insert(group, False)
         self.groups[group.name] = group
       return group
@@ -84,7 +93,7 @@ class StixCelsusMapper(BaseController):
     self.init()
     self.cybox_mapper.init()
     event = Event()
-    event.identifier = extract_uuid(stix_package.id_)
+    event.uuid = extract_uuid(stix_package.id_)
     # event.uuid = stix_package.id_[-36:]
     stix_header = stix_package.stix_header
     event.title = stix_header.title
@@ -141,7 +150,7 @@ class StixCelsusMapper(BaseController):
     # First handle observables of the package
     if stix_package.observables:
       for observable in stix_package.observables.observables:
-        event.observables.append(self.cybox_mapper.create_observable(observable, event, user, False))
+        event.observables.append(self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False))
     pass
     # Then handle indicators
     if stix_package.indicators:
@@ -162,10 +171,21 @@ class StixCelsusMapper(BaseController):
 
     return event
 
+  def get_tlp_id_from_markings(self, indicator):
+    handling = indicator.handling
+    markings = handling.markings
+    for marking in markings:
+      for stucture in marking.marking_structures:
+        if isinstance(stucture, TLPMarkingStructure):
+          color = stucture.color
+          tlp_id = TLP.get_by_value(color.title())
+          return tlp_id
+    return None
+
   def create_indicator(self, indicator, event, user):
     ce1sus_indicator = Indicator()
     set_properties(ce1sus_indicator)
-    ce1sus_indicator.identifier = extract_uuid(indicator.id_)
+    ce1sus_indicator.uuid = extract_uuid(indicator.id_)
     ce1sus_indicator.title = indicator.title
     ce1sus_indicator.description = indicator.description
     ce1sus_indicator.originating_group = self.__convert_info_soucre(indicator.producer)
@@ -175,13 +195,18 @@ class StixCelsusMapper(BaseController):
     sightings = self.__convert_sightings(indicator.sightings, user)
     ce1sus_indicator.sightings = sightings
     # TODO: Add indicator types
+
+    # TODO: markings
     if indicator.kill_chain_phases:
       # TODO: Kill Chains
       pass
     # Note observable is actually observables[0]
     if indicator.observables:
+      tlp_id = self.get_tlp_id_from_markings(indicator)
+      if tlp_id is None:
+        tlp_id = event.tlp_level_id
       for observable in indicator.observables:
-        observable = self.cybox_mapper.create_observable(observable, event, user, True)
+        observable = self.cybox_mapper.create_observable(observable, event, user, tlp_id, True)
         ce1sus_indicator.observables.append(observable)
     set_extended_logging(ce1sus_indicator, user, user.group)
     return ce1sus_indicator

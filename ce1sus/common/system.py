@@ -22,7 +22,7 @@ __license__ = 'GPL v3+'
 # A: Major Release
 # B: Release feature changes
 # C: Bug fixes/Small features
-APP_REL = '0.11.1'
+APP_REL = '0.11.0'
 DB_REL = '0.10.2'
 REST_REL = '0.3.0'
 

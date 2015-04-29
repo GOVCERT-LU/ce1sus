@@ -6,6 +6,7 @@
 Created on Jan 30, 2014
 """
 
+
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
@@ -31,7 +32,9 @@ def is_object_viewable(instance, event_permissions, user_group, cache=None):
   if user_group:
     # check if tlp matches
     user_tlp = get_max_tlp(user_group)
-    if instance.tlp_level_id >= user_tlp:
+    if instance.__class__.__name__ == 'ObservableComposition':
+      return True
+    elif instance.tlp_level_id >= user_tlp:
       return True
 
   return False

@@ -386,14 +386,3 @@ class EventHandler(RestBaseHandler):
       return 'Published event.'
     else:
       raise RestHandlerException('Method is undefined.')
-
-  """
-  @rest_method()
-  @methods(allowed=['GET'])
-  def stix_import(self, **args):
-    stix_package = STIXPackage.from_xml('/home/jhemp/Downloads/CIMBL-150-CERTS.xml')
-    user = self.user_broker.get_all()[0]
-    event = self.stix_mapper.map_stix_package(stix_package, user)
-    self.event_controller.insert_event(user, event)
-    pass
-  """

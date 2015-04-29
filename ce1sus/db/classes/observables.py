@@ -38,7 +38,7 @@ class ObservableComposition(Base):
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'OR')
   # observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
-  observables = relationship('Observable', secondary='rel_observable_composition')
+  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   __bit_code = None
 

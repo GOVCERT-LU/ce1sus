@@ -1,5 +1,9 @@
 <h3>Add Event</h3>
-<div class="row">
+<button type="button" class="btn btn-default" data-animation="am-flip-x" bs-dropdown="dropdownFile">
+  Method
+</button>
+
+<div class="row" ng-if="!addMISPFile && !addSTIXFile">
   <div class="col-xs-offset-2 col-sm-offset-2 col-xs-5 col-sm-5">
     <event-form event='event' type="'add'" statuses='statuses' anlysises='anlysises' risks='risks' tlps='tlps'></event-form>
 
@@ -15,4 +19,75 @@
     </div>
   </div>
 
+</div>
+
+<div ng-if="!addMISPFile && addSTIXFile">
+  
+  <div ng-controller="uploadController">
+  <form name="uploadForm" class="form-horizontal" role="form" novalidate>
+  <div class="row">
+    <div class="col-xs-3 col-sm-3">
+      <div style="padding: 5px; text-align: right">
+        <h4>Add STIX XML File</h4>
+      </div>
+      <div class="col-xs-9 col-sm-9">
+      </div>
+    </div>
+  </div>
+    <div class="row">
+      <div class="col-xs-3 col-sm-3">
+        <div style="padding: 5px; text-align: right">
+          <label> Value:</label>
+        </div>
+      </div>
+      <div class="col-xs-9 col-sm-9">
+          <input type="file" ng-file-select ng-model="file" name="value"
+          ng-file-change="setFileValue(file)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3 col-sm-3">
+      </div>
+      <div class="col-xs-9 col-sm-9">
+        <button name="submit" type="submit" class="btn btn-primary" ng-disabled="uploadForm.$invalid" ng-click="addSTIX()">Save</button>
+      </div>
+    </div>
+    </form>
+  </div>
+  
+</div>
+
+<div ng-if="addMISPFile && !addSTIXFile">
+  <div ng-controller="uploadController">
+  <form name="uploadForm" class="form-horizontal" role="form" novalidate>
+    <div class="row">
+      <div class="col-xs-3 col-sm-3">
+        <div style="padding: 5px; text-align: right">
+        <h4>Add MISP XML File</h4>
+        </div>
+      </div>
+      <div class="col-xs-9 col-sm-9">
+      </div>
+    </div>
+  
+    <div class="row">
+      <div class="col-xs-3 col-sm-3">
+        <div style="padding: 5px; text-align: right">
+          <label> File:</label>
+        </div>
+      </div>
+      <div class="col-xs-9 col-sm-9">
+          <input type="file" ng-file-select ng-model="file" name="value"
+          ng-file-change="setFileValue(file)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-3 col-sm-3">
+      </div>
+      <div class="col-xs-9 col-sm-9">
+        <button name="submit" type="submit" class="btn btn-primary" ng-disabled="uploadForm.$invalid" ng-click="addMISP()">Save</button>
+      </div>
+    </div>
+    </form>
+  </div>
 </div>

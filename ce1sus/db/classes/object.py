@@ -28,7 +28,7 @@ class RelatedObject(Base):
   parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
   child_id = Column('child_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', BigInteger)
-  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
+  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined')
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     # flatten related object
@@ -54,7 +54,7 @@ class Object(ExtendedLogingInformations, Base):
   definition = relationship('ObjectDefinition', lazy='joined')
 
   # related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='dynamic')
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent = relationship('Observable', back_populates='object', primaryjoin='Object.parent_id==Observable.identifier', uselist=False)

@@ -25,12 +25,12 @@ class StixMapperException(Exception):
 
 class StixMapper(BaseController):
 
-  def __init__(self, config):
-    BaseController.__init__(self, config)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
     self.config = config
     ce1sus_url = config.get('ce1sus', 'baseurl', None)
-    self.event_controller = EventController(config)
-    self.stix_ce1sus_mapper = StixCelsusMapper(config)
+    self.event_controller = EventController(config, session)
+    self.stix_ce1sus_mapper = StixCelsusMapper(config, session)
     if ce1sus_url:
       # Set the namespaces
       cybox.utils.idgen.set_id_namespace(Namespace(ce1sus_url, 'ce1sus'))

@@ -19,7 +19,7 @@ from xml.etree.ElementTree import ParseError
 from zipfile import ZipFile
 
 from ce1sus.common.system import APP_REL
-from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.base import BaseController, ControllerIntegrityException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
@@ -37,7 +37,7 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.classes.report import Reference, Report
-from ce1sus.db.common.broker import BrokerException, NothingFoundException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 import xml.etree.ElementTree as et
@@ -160,6 +160,9 @@ class MispConverter(BaseController):
     self.dump = False
     self.file_location = None
 
+  def set_tlp(self, item, distribution):
+    item.tlp = MispConverter.distribution_to_tlp_map[distribution]
+
   def set_event_header(self, event, rest_event, title_prefix=''):
     event_header = {}
     for h in MispConverter.header_tags:
@@ -265,7 +268,7 @@ class MispConverter(BaseController):
     else:
       raise MispConverterException('Error determining group')
 
-  def log_element(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, message):
+  def log_element(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution):
     error = ErrorMispAttribute()
     error.orig_uuid = uuid
     error.category = category
@@ -289,7 +292,7 @@ class MispConverter(BaseController):
 
     self.error_broker.insert(error, False)
 
-  def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts):
+  def append_attributes(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts, distribution):
     if '|' in type_:
       # it is a composed attribute
       if type_ in ('filename|md5', 'filename|sha1', 'filename|sha256'):
@@ -300,16 +303,16 @@ class MispConverter(BaseController):
           splitted_values = value.split('|')
           first_value = splitted_values[0]
           second_value = splitted_values[1]
-          self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts)
-          self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts)
+          self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts, distribution)
+          self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts, distribution)
         else:
           message = 'Composed attribute {0} splits into more than 2 elements'.format(type_)
-          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
           # raise MispMappingException(message)
           return None
       else:
         message = 'Composed attribute {0} cannot be mapped'.format(type_)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException(message)
         return None
       pass
@@ -329,7 +332,7 @@ class MispConverter(BaseController):
       else:
         if hive[0:1] == 'H' and hive != 'HKCU_Classes':
           message = '"{0}" not defined'.format(hive)
-          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
           # raise MispMappingException(message)
           return None
         else:
@@ -337,8 +340,8 @@ class MispConverter(BaseController):
 
       if hive:
         # TODO link hive
-        self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Hive', hive, ioc, share, event, None, ts)
-      self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Key', key, ioc, share, event, None, ts)
+        self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Hive', hive, ioc, share, event, None, ts, distribution)
+      self.append_attributes(obj, observable, id_, category, 'WindowsRegistryKey_Key', key, ioc, share, event, None, ts, distribution)
 
     elif category in ['external analysis', 'artifacts dropped', 'payload delivery'] and type_ == 'malware-sample':
       filename = value
@@ -350,13 +353,13 @@ class MispConverter(BaseController):
         first_value = splitted[0]
         filename = first_value
         second_value = splitted[1]
-        second_type = self.get_hash_type(obj, observable, id_, category, type_, ioc, share, event, uuid, second_value)
+        second_type = self.get_hash_type(obj, observable, id_, category, type_, ioc, share, event, uuid, second_value, distribution)
         # TODO link filename and hash
-        self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts)
-        self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts)
+        self.append_attributes(obj, observable, id_, category, first_type, first_value, ioc, share, event, None, ts, distribution)
+        self.append_attributes(obj, observable, id_, category, second_type, second_value, ioc, share, event, None, ts, distribution)
       else:
         message = 'Composed attribute {0} splits into more than 2 elements'.format(type_)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException(message)
 
       # Download the attachment if it exists
@@ -367,21 +370,22 @@ class MispConverter(BaseController):
         self.logger.info(message)
         # build raw_artifact
         raw_artifact = Object()
-
+        self.set_tlp(raw_artifact, distribution)
         self.set_properties(raw_artifact, share)
         self.set_extended_logging(raw_artifact, event, ts)
-        raw_artifact.definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, 'Artifact', None, None)
+        raw_artifact.definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, 'Artifact', None, None, distribution)
         if raw_artifact.definition:
           raw_artifact.definition_id = raw_artifact.definition.identifier
         else:
           message = 'Could not find object definition Artifact'
-          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
           # raise MispMappingException(message)
           return None
 
         # add raw artifact
         attr = Attribute()
-        attr.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, '', 'raw_artifact', None, raw_artifact, observable, attr)
+        self.set_tlp(attr, distribution)
+        attr.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, '', 'raw_artifact', None, raw_artifact, observable, attr, distribution)
         if attr.definition:
           attr.definition_id = attr.definition.identifier
           attr.value = data
@@ -390,27 +394,28 @@ class MispConverter(BaseController):
           else:
             message = 'Value {0} was invalid for {1}'.format(attr.value, attr.definition_id)
             self.logger.error(message)
-            self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+            self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
             return None
 
         else:
           message = 'Could not find attribute definition raw_artifact'
           self.logger.error(message)
-          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
           return None
           # raise MispMappingException(message)
 
       else:
         message = u'Failed to download file "{0}" id:{1}, add manually'.format(filename, id_)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         self.logger.warning(message)
 
     else:
       attribute = Attribute()
+      self.set_tlp(attribute, distribution)
       attribute.uuid = uuid
       self.set_properties(attribute, share)
       self.set_extended_logging(attribute, event, ts)
-      attribute.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, category, type_, value, obj, observable, attribute)
+      attribute.definition = self.get_attibute_definition(id_, ioc, share, event, uuid, category, type_, value, obj, observable, attribute, distribution)
       if attribute.definition:
         attribute.definition_id = attribute.definition.identifier
         attribute.object = obj
@@ -419,7 +424,7 @@ class MispConverter(BaseController):
         if not attribute.validate():
           message = 'Value {0} was invalid for {1}'.format(attribute.value, attribute.definition_id)
           self.logger.error(message)
-          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+          self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
           return None
         # foo workaround
         def_name = attribute.definition.name
@@ -433,7 +438,7 @@ class MispConverter(BaseController):
 
         obj.attributes.append(attribute)
 
-  def get_hash_type(self, obj, observable, id_, category, type_, ioc, share, event, uuid, value):
+  def get_hash_type(self, obj, observable, id_, category, type_, ioc, share, event, uuid, value, distribution):
     '''Supports md5, sha1, sha-256, sha-384, sha-512'''
     hash_types = {32: 'hash_md5',
                   40: 'hash_sha1',
@@ -445,11 +450,11 @@ class MispConverter(BaseController):
       return hash_types[len(value)]
     else:
       message = 'Cannot map hash {0}'.format(value)
-      self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+      self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
       return None
       # raise MispMappingException(message)
 
-  def get_object_definition(self, obj, observable, id_, ioc, share, event, uuid, category, type_, value):
+  def get_object_definition(self, obj, observable, id_, ioc, share, event, uuid, category, type_, value, distribution):
     # compose the correct chksum/name
     chksum = None
     name = None
@@ -504,12 +509,12 @@ class MispConverter(BaseController):
         name = 'WindowsRegistryKey'
       else:
         message = u'Type "{0}" not defined'.format(type_)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException()
         return None
     elif category in ['targeting data']:
       message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
-      self.log_element(obj, observable, id_, category, type_, value, None, share, event, uuid, message)
+      self.log_element(obj, observable, id_, category, type_, value, None, share, event, uuid, message, distribution)
       return None
     if name or chksum:
       # search for it
@@ -521,11 +526,11 @@ class MispConverter(BaseController):
 
         # if here no def was found raise exception
         message = u'No object definition for "{0}"/"{1}" and value "{2}" can be found'.format(category, type_, value)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException(message)
         return None
 
-  def get_reference_definition(self, ioc, share, event, uuid, category, type_, value):
+  def get_reference_definition(self, ioc, share, event, uuid, category, type_, value, distribution):
     # compose the correct chksum/name
     chksum = None
     name = None
@@ -545,7 +550,7 @@ class MispConverter(BaseController):
         self.logger.error(error)
         # if here no def was found raise exception
         message = u'No reference definition for "{0}"/"{1}" and value "{2}" can be found'.format(category, type_, value)
-        self.log_element(None, None, None, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(None, None, None, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException(message)
         return None
 
@@ -557,7 +562,7 @@ class MispConverter(BaseController):
       self.logger.error(error)
       raise MispMappingException(u'Condition "{0}" is not defined'.format(condition))
 
-  def get_attibute_definition(self, id_, ioc, share, event, uuid, category, type_, value, obj, observable, attribute):
+  def get_attibute_definition(self, id_, ioc, share, event, uuid, category, type_, value, obj, observable, attribute, distribution):
     # compose the correct chksum/name
     chksum = None
     name = None
@@ -623,7 +628,7 @@ class MispConverter(BaseController):
     elif category == 'artifacts dropped':
       if type_ in ['text']:
         message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         return None
     elif category == 'payload installation':
       if type_ == 'attachment':
@@ -631,22 +636,22 @@ class MispConverter(BaseController):
     if not name:
       name = type_.replace('-', '_').replace(' ', '_')
 
-    definition = self.__find_attr_def(obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum)
+    definition = self.__find_attr_def(obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum, distribution)
 
     if definition:
       return definition
     else:
       name = name.title()
-      definition = self.__find_attr_def(obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum)
+      definition = self.__find_attr_def(obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum, distribution)
       if definition:
         return definition
       else:
         message = u'Category "{0}" Type "{1}" with value "{2}" cannot be found'.format(category, type_, value)
-        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+        self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         return None
         # raise MispMappingException(message)
 
-  def __find_attr_def(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum):
+  def __find_attr_def(self, obj, observable, id_, category, type_, value, ioc, share, event, uuid, name, chksum, distribution):
     try:
       definition = self.attribute_definitions_broker.get_defintion_by_name(name)
       return definition
@@ -655,15 +660,16 @@ class MispConverter(BaseController):
       return None
       # if here no def was found raise exception
       message = u'No attribute definition for "{0}"/"{1}" and value "{2}" can be found "{3}"'.format(category, type_, value, name)
-      self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+      self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
       return None
 
-  def create_reference(self, uuid, category, type_, value, data, comment, ioc, share, event, ts):
+  def create_reference(self, uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution):
     reference = Reference()
+    self.set_tlp(reference, distribution)
     # TODO map reference
     # reference.identifier = uuid
     reference.uuid = uuid
-    definition = self.get_reference_definition(ioc, share, event, uuid, category, type_, value)
+    definition = self.get_reference_definition(ioc, share, event, uuid, category, type_, value, distribution)
     if definition:
       reference.definition_id = definition.identifier
       reference.value = value
@@ -673,13 +679,14 @@ class MispConverter(BaseController):
     else:
       return None
 
-  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, ignore_uuid=False):
+  def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution, ignore_uuid=False):
     if (category in ['external analysis', 'internal reference', 'targeting data'] and type_ in ['attachment', 'comment', 'link', 'text', 'url']) or (category == 'internal reference' and type_ in ['text', 'comment']) or type_ == 'other' or (category == 'attribution' and type_ == 'comment') or category == 'other' or (category == 'antivirus detection' and type_ == 'link'):
       # make a report
       # Create Report it will be just a single one
-      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts)
+      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution)
       if len(event.reports) == 0:
         report = Report()
+        self.set_tlp(report, distribution)
         # report.event = event
         report.event_id = event.identifier
 
@@ -693,10 +700,11 @@ class MispConverter(BaseController):
       if reference:
         event.reports[0].references.append(reference)
     elif category == 'attribution':
-      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts)
+      reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution)
       reference.value = u'Attribution: "{0}"'.format(reference.value)
       if len(event.reports) == 0:
         report = Report()
+        self.set_tlp(report, distribution)
 
         self.set_extended_logging(report, event, ts)
         if comment:
@@ -710,21 +718,21 @@ class MispConverter(BaseController):
       event.reports[0].references.append(reference)
 
     else:
-      observable = self.make_observable(event, comment, share, ignore_uuid)
+      observable = self.make_observable(event, comment, share, distribution, ignore_uuid)
       observable.title = u'MISP: {0}/{1}'.format(category, type_)
       # create object
       obj = Object()
-
+      self.set_tlp(obj, distribution)
       self.set_properties(obj, share)
       self.set_extended_logging(obj, event, ts)
       observable.object = obj
-      definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, category, type_, value)
+      definition = self.get_object_definition(obj, observable, id_, ioc, share, event, uuid, category, type_, value, distribution)
       if definition:
         obj.definition_id = definition.identifier
         obj.observable = observable
         obj.observable_id = obj.observable.identifier
         # create attribute(s) for object
-        self.append_attributes(obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts)
+        self.append_attributes(obj, observable, id_, category, type_, value, ioc, share, event, uuid, ts, distribution)
         if not observable.description:
           observable.description = None
         return observable
@@ -737,8 +745,9 @@ class MispConverter(BaseController):
     instance.properties.is_validated = False
     instance.properties.is_shareable = shared
 
-  def make_observable(self, event, comment, shared, local_event=None):
+  def make_observable(self, event, comment, shared, distribution, local_event=None):
     result_observable = Observable()
+    self.set_tlp(result_observable, distribution)
     if local_event:
       result_observable.event_id = local_event.identifier
       result_observable.parent_id = local_event.identifier
@@ -760,8 +769,8 @@ class MispConverter(BaseController):
 
     return result_observable
 
-  def map_observable_composition(self, array, event, title, shared, local_event=None):
-    result_observable = self.make_observable(event, None, True, local_event)
+  def map_observable_composition(self, array, event, title, shared, distribution, local_event=None):
+    result_observable = self.make_observable(event, None, True, distribution, local_event)
     if title:
       result_observable.title = 'Indicators for "{0}"'.format(title)
     composed_attribute = ObservableComposition()
@@ -811,6 +820,7 @@ class MispConverter(BaseController):
       share = 1
       comment = ''
       uuid = None
+      distribution = None
 
       for a in MispConverter.attribute_tags:
         e = attrib.find(a)
@@ -833,9 +843,11 @@ class MispConverter(BaseController):
             uuid = e.text
           elif e.tag == 'timestamp':
             ts = e.text
+          elif e.tag == 'distribution':
+            distribution = e.text
       # ignore empty values:
       if value:
-        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, local_event)
+        observable = self.create_observable(id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution, local_event)
         empty = True
         empty = self.is_obs_empty(observable)
 
@@ -856,7 +868,7 @@ class MispConverter(BaseController):
               # raise MispMappingException(message)
           else:
             message = u'Misp Attribute "{0}" defined as "{1}"/"{2}" with value "{3}" resulted in an empty observable'.format(id_, category, type_, value)
-            self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message)
+            self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
             return None
             # raise MispMappingException(message)
 
@@ -885,7 +897,7 @@ class MispConverter(BaseController):
     result_observables = list()
 
     if mal_email:
-      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share, local_event)
+      observable = self.map_observable_composition(mal_email, event, 'Malicious E-mail', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Malicious E-mail', event)
         result_observables.append(observable)
@@ -894,7 +906,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if artifacts:
-      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share, local_event)
+      observable = self.map_observable_composition(artifacts, event, 'Malware Artifacts', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Malware Artifacts', event)
         del artifacts[:]
@@ -903,7 +915,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if ips:
-      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share, local_event)
+      observable = self.map_observable_composition(ips, event, 'IP Watchlist', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'IP Watchlist', event)
         del ips[:]
@@ -912,7 +924,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if file_hashes:
-      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share, local_event)
+      observable = self.map_observable_composition(file_hashes, event, 'File Hash Watchlist', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'File Hash Watchlist', event)
         del file_hashes[:]
@@ -921,7 +933,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if domains:
-      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share, local_event)
+      observable = self.map_observable_composition(domains, event, 'Domain Watchlist', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'Domain Watchlist', event)
         del domains[:]
@@ -930,7 +942,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if c2s:
-      observable = self.map_observable_composition(c2s, event, 'C2', share, local_event)
+      observable = self.map_observable_composition(c2s, event, 'C2', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'C2', event)
         del c2s[:]
@@ -939,7 +951,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if urls:
-      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share, local_event)
+      observable = self.map_observable_composition(urls, event, 'URL Watchlist', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, 'URL Watchlist', event)
         del urls[:]
@@ -948,7 +960,7 @@ class MispConverter(BaseController):
           event.indicators.append(indicator)
 
     if others:
-      observable = self.map_observable_composition(others, event, 'Others', share, local_event)
+      observable = self.map_observable_composition(others, event, 'Others', share, distribution, local_event)
       if observable:
         indicator = self.map_indicator(observable, None, event)
         del others[:]
@@ -963,42 +975,46 @@ class MispConverter(BaseController):
       return result_observables
 
   def __make_single_event_xml(self, xml_event, local_event=None):
-    rest_event = Event()
+    try:
+      rest_event = Event()
 
-    event_id = self.set_event_header(xml_event, rest_event)
-    if local_event:
-      rest_event.identifier = local_event.identifier
-    else:
-      self.event_broker.insert(rest_event, False)
-      pass
-    observables = self.parse_attributes(rest_event, xml_event, local_event)
-    rest_event.observables = observables
-    # Append reference
+      event_id = self.set_event_header(xml_event, rest_event)
+      if local_event:
+        rest_event.identifier = local_event.identifier
+      else:
+        self.event_broker.insert(rest_event, False)
+        pass
+      observables = self.parse_attributes(rest_event, xml_event, local_event)
+      rest_event.observables = observables
+      # Append reference
 
-    result = list()
+      result = list()
 
-    report = Report()
+      report = Report()
+      report.tlp = 'red'
 
-    self.set_extended_logging(report, rest_event, DatumZait.utcnow())
-    value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
-    reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event, DatumZait.utcnow())
-    report.references.append(reference)
-    value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
-    reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event, DatumZait.utcnow())
-    report.references.append(reference)
+      self.set_extended_logging(report, rest_event, DatumZait.utcnow())
+      value = u'{0}{1} Event ID {2}'.format('', self.tag, event_id)
+      reference = self.create_reference(None, None, 'reference_external_identifier', value, None, None, False, False, rest_event, DatumZait.utcnow(), '0')
+      report.references.append(reference)
+      value = u'{0}/events/view/{1}'.format(self.api_url, event_id)
+      reference = self.create_reference(None, None, 'link', value, None, None, False, False, rest_event, DatumZait.utcnow(), '0')
+      report.references.append(reference)
 
-    result.append(report)
+      result.append(report)
 
-    # check if there aren't any empty reports
+      # check if there aren't any empty reports
 
-    for event_report in rest_event.reports:
-      if event_report.references:
-        result.append(event_report)
+      for event_report in rest_event.reports:
+        if event_report.references:
+          result.append(event_report)
 
-    rest_event.reports = result
-    setattr(rest_event, 'misp_id', event_id)
+      rest_event.reports = result
+      setattr(rest_event, 'misp_id', event_id)
 
-    return rest_event
+      return rest_event
+    except IntegrityException as error:
+      raise ControllerIntegrityException(error)
 
   def parse_events(self, xml):
     events = xml.iterfind('./Event')
@@ -1037,8 +1053,15 @@ class MispConverter(BaseController):
     except ParseError:
       xml = et.fromstring(xml_string[1:])
       xml = xml[0]
-    event_uuid = xml.find('uuid').text
-    return event_uuid
+    event_uuid = xml.find('uuid')
+    if event_uuid is None:
+      event_uuid = xml[0].find('uuid')
+      if event_uuid is None:
+        raise MispConverterException('Not a MISP XML')
+      else:
+        return event_uuid.text
+    else:
+      return event_uuid.text
 
   def get_event_from_xml(self, xml_string, local_event):
     try:
@@ -1046,6 +1069,15 @@ class MispConverter(BaseController):
     except ParseError:
       xml = et.fromstring(xml_string[1:])
       xml = xml[0]
+    # test if right format
+    event_uuid = xml.find('uuid')
+    if event_uuid is None:
+      event_uuid = xml[0].find('uuid')
+      if event_uuid is None:
+        raise MispConverterException('Cannot detect xml')
+      else:
+        xml = xml[0]
+
     rest_event = self.__make_single_event_xml(xml, local_event)
 
     # Remove empty reports

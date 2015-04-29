@@ -310,7 +310,7 @@ uwsgi.
 
 Copy the file to uwsgi:
 
-$ cp config/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
+$ cp scripts/install/uwsgi/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
 
 Edit /etc/uwsgi/apps-available/ce1sus.ini and replace "/path/to/ce1sus" with your ce1sus installation path
 
@@ -331,7 +331,7 @@ In the config folder of your ce1sus installation folder you'll find ce1sus_tmpl 
 
 Copy the file to uwsgi:
 
-$ cp config/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
+$ cp scripts/install/nginx/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
 
 Create a self signed certificate for ce1sus:
 
@@ -384,6 +384,8 @@ Note the migration can take some time depending on the volume of your database.
 
 2. Web Interface
 ================
+
+Completely OUTDATED
 
 The web interface of Ce1sus has two sections:
 
@@ -766,4 +768,4 @@ WORK IN PROGRESS
 
 4. Known Issues
 ===============
-* Sending encrypted mails takes some time (Action performed on save)
+None

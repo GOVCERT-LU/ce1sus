@@ -5,10 +5,13 @@
 
 Created on Feb 17, 2015
 """
+import base64
 import cherrypy
+from cherrypy._cperror import HTTPError
 import json
 
-from ce1sus.controllers.base import ControllerIntegrityException
+from ce1sus.controllers.base import ControllerIntegrityException, \
+  ControllerException
 from ce1sus.controllers.common.merger import Merger, MergingException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
@@ -17,7 +20,7 @@ from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
-from ce1sus.mappers.misp.mispce1sus import MispConverter
+from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.common.base import BaseView
 
@@ -60,6 +63,63 @@ class MISPAdapter(BaseView):
     self.misp_converter.file_location = file_loc
     self.merger = Merger(config, session)
     self.process_controller = ProcessController(config, session)
+
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  @cherrypy.tools.json_out()
+  @cherrypy.tools.json_in()
+  def upload_xml(self, *vpath, **params):
+    try:
+      input_json = cherrypy.request.json
+      filename = input_json['name']
+      data = input_json['data']['data']
+      xml_string = base64.b64decode(data)
+      complete = params.get('complete', False)
+      inflated = params.get('inflated', False)
+      user = self.get_user()
+      user = self.user_controller.get_user_by_username(user.username)
+      if 'XML' in filename or 'xml' in filename:
+        self.logger.info('Starting to import xml form file {0}'.format(filename))
+        self.misp_converter.user = user
+        event_uuid = self.misp_converter.get_uuid_from_event_xml(xml_string)
+        try:
+          event = self.misp_converter.get_event_from_xml(xml_string, None)
+          self.logger.info('Received Event {0}'.format(event.uuid))
+          self.event_controller.insert_event(user, event, True, True)
+        except ControllerIntegrityException as error:
+          local_event = self.event_controller.get_event_by_uuid(event_uuid)
+          event = self.misp_converter.get_event_from_xml(xml_string, local_event)
+          # merge event with existing event
+
+          if self.is_event_viewable(local_event, user):
+            event_permissions = self.get_event_user_permissions(event, user)
+            try:
+              merged_event = self.merger.merge_event(local_event, event, user, event_permissions)
+            except MergingException:
+              raise MISPAdapterException405()
+              # raise cherrypy.HTTPError(405)
+          else:
+            # TODO log the changes
+            self.logger.warning('user {0} tried to change event {1} but does not have the right to see it'.format(user.username, event.identifer))
+            raise HTTPError(403, 'Not authorized')
+
+          if merged_event:
+            self.logger.info('Received Event {0} updates'.format(merged_event.uuid))
+            self.event_controller.update_event(user, merged_event, True, True)
+            event = merged_event
+          else:
+            self.logger.info('Received Event {0} did not need to update as it is up to date'.format(event.uuid))
+            # Log errors however
+            self.event_controller.event_broker.do_commit()
+        event_permissions = self.event_controller.get_event_user_permissions(event, user)
+        return event.to_dict(complete, inflated, event_permissions, user)
+      else:
+        raise HTTPError(409, 'File does not end in xml or XML')
+    except MispConverterException as error:
+      self.logger.error(error)
+      raise HTTPError(409, 'File is not a MISP XML')
+    except ControllerException as error:
+      raise HTTPError(400, error)
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])

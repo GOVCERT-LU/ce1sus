@@ -21,6 +21,7 @@ from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter
+from ce1sus.views.web.adapters.stixadapter import STIXAdapter
 
 
 __author__ = 'Weber Jean-Paul'
@@ -59,6 +60,7 @@ def bootstrap():
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
   cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
+  cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
 
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)

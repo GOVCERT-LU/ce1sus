@@ -232,6 +232,42 @@ app.controller("eventObservableController", function($scope, Restangular, messag
 
 app.controller("addEventController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
+
+  $scope.dropdownFile = [
+                     {
+                       "text": "Add STIX XML file",
+                       "click": "addStixXML()",
+                       "html": true
+                     },
+                     {
+                       "text": "Add MISP XML file",
+                       "click": "addMISPXML()",
+                       "html": true
+                     },
+                     {
+                       "text": "Add Manual",
+                       "click": "addManual()",
+                       "html": true
+                     },
+                   ];
+  
+  $scope.addMISPFile=false;
+  $scope.addSTIXFile=false;
+  
+  $scope.addManual=function(){
+    $scope.addMISPFile=false;
+    $scope.addSTIXFile=false;
+  };
+  
+  $scope.addMISPXML=function(){
+    $scope.addMISPFile=true;
+    $scope.addSTIXFile=false;
+  };
+  
+  $scope.addStixXML=function(){
+    $scope.addSTIXFile=true;
+    $scope.addMISPFile=false;
+  };
   
   var original_event = {};
   $scope.event={};
@@ -753,4 +789,65 @@ app.controller("eventRelationsController", function($scope, Restangular, message
           $defer.resolve($scope.relations);
       }
   }); 
+});
+
+app.controller("uploadController", function($scope, $timeout, $log, Restangular,$location, messages) {
+  $scope.file = {};
+  function converToRestFile(file) {
+    if (window.File && window.FileReader && window.FileList && window.Blob) {
+      // Great success! All the File APIs are supported.
+      if (file) {
+          var data;
+          $timeout(function() {
+            var fileReader = new FileReader();
+            fileReader.readAsDataURL(file);
+            fileReader.onload = function(e) {
+              $timeout(function() {
+                //I am only interested in the base 64 encodings
+                file.data =  e.target.result.split(",")[1];
+              });
+            };
+          });
+      } else {
+        alert('Error No file provided');
+      }
+    } else {
+      alert('The File APIs are not fully supported in this browser.');
+    }
+  }
+
+  
+  $scope.setFileValue = function(files){
+    var file = files[0];
+    
+    converToRestFile(file);
+    $scope.file = {};
+    $scope.file.data = file;
+    $scope.file.name = file.name;
+  };
+  
+  $scope.addMISP =function(){
+    Restangular.oneUrl('file','/MISP/0.1').post('upload_xml',$scope.file, {'complete':true, 'infated':true}).then(function (data) {
+      if (data) {
+        $location.path("/events/event/"+ data.identifier);
+      } else {
+        $location.path("/events/all");
+      }
+      messages.setMessage({'type':'success','message':'Event sucessfully added'});
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
+  $scope.addSTIX =function(){
+    Restangular.oneUrl('file','/STIX/0.1').post('upload_xml',$scope.file, {'complete':true, 'infated':true}).then(function (data) {
+      if (data) {
+        $location.path("/events/event/"+ data.identifier);
+      } else {
+        $location.path("/events/all");
+      }
+      messages.setMessage({'type':'success','message':'Event sucessfully added'});
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
 });
