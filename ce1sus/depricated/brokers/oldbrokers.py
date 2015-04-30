@@ -8,8 +8,7 @@ Created on Dec 22, 2014
 
 
 from ce1sus.db.common.broker import BrokerBase
-from ce1sus.depricated.classes.definitionclasses import OldAttributeDefinition, OldObjectDefinition, \
-  OldAttributeHandler
+from ce1sus.depricated.classes.definitionclasses import OldAttributeDefinition, OldObjectDefinition, OldAttributeHandler
 from ce1sus.depricated.classes.eventclasses import OldEvent
 from ce1sus.depricated.classes.oldce1susconfig import OldCe1susConfig
 from ce1sus.depricated.classes.permissionclasses import OldUser, OldGroup

@@ -5,7 +5,7 @@
 
 Created on Jan 8, 2015
 """
-from sqlalchemy.ext.declarative.api import declarative_base
+from sqlalchemy.ext.declarative import declarative_base
 
 
 __author__ = 'Weber Jean-Paul'

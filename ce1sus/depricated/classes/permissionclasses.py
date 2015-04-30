@@ -8,8 +8,8 @@ Created on Jul 4, 2013
 import re
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import DateTime
 
-from ce1sus.db.common.broker import DateTime
 from ce1sus.db.common.session import BaseClass
 from ce1sus.depricated.brokers.basefoo import BASE
 from ce1sus.depricated.helpers.bitdecoder import BitRight

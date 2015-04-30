@@ -6,11 +6,12 @@
 Created on Jan 8, 2015
 """
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.types import DateTime
 
-from ce1sus.db.common.broker import DateTime
 from ce1sus.depricated.brokers.basefoo import BASE
 from ce1sus.helpers.common.converters import ValueConverter
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
