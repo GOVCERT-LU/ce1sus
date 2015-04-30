@@ -54,6 +54,10 @@ expiredate=2023-01-01
 dump=yes
 file=mispdump
 
+[OpenIOCAdapter]
+file=openiocdump
+dump=yes
+
 [ErrorMails]
 enabled=yes
 receiver=

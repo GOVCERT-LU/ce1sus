@@ -41,7 +41,7 @@ import ce1sus.db.classes.user
 import ce1sus.db.classes.values
 from ce1sus.db.common.session import SessionManager, Base
 from ce1sus.helpers.common.config import Configuration
-from db_data import get_mail_templates, get_users, get_attribute_type_definitions, get_conditions
+from db_data import get_mail_templates, get_users, get_attribute_type_definitions
 from maintenance import Maintenance
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
 from ce1sus.controllers.admin.references import ReferencesController
