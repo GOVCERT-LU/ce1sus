@@ -131,7 +131,7 @@ if __name__ == '__main__':
     condition = Condition()
     condition.populate(condition_json)
     condition.uuid = condition_json.get('identifier')
-    conditions[key] = value
+    conditions[condition.uuid] = condition
     cond_ctrl.insert_condition(condition, False)
   cond_ctrl.condition_broker.do_commit(True)
 
