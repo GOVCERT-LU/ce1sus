@@ -17,8 +17,14 @@ from cybox.objects.address_object import Address
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
 from cybox.objects.hostname_object import Hostname
+from cybox.objects.process_object import Process
+from cybox.objects.win_process_object import WinProcess
 from cybox.objects.uri_object import URI
-
+from cybox.objects.win_event_log_object import WinEventLog
+from cybox.objects.user_account_object import UserAccount
+from cybox.objects.win_service_object import WinService
+from cybox.objects.win_registry_key_object import WinRegistryKey
+from cybox.objects.network_connection_object import NetworkConnection
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -66,6 +72,21 @@ class CyboxMapper(BaseController):
       definition = self.obj_defs.get('URI')
     elif isinstance(instance, DomainName):
       definition = self.obj_defs.get('DomainName')
+    elif isinstance(instance, Process):
+      if isinstance(instance, WinProcess):
+        definition = self.obj_defs.get('WinProcess')
+      if isinstance(instance, WinService):
+        definition = self.obj_defs.get('WinService')
+      else:
+        definition = self.obj_defs.get('Process')
+    elif isinstance(instance, WinEventLog):
+      definition = self.obj_defs.get('WinEventLog')
+    elif isinstance(instance, UserAccount):
+      definition = self.obj_defs.get('UserAccount')
+    elif isinstance(instance, WinRegistryKey):
+      definition = self.obj_defs.get('WindowsRegistryKey')
+    elif isinstance(instance, NetworkConnection):
+      definition = self.obj_defs.get('NetworkConnection')
     if definition:
       return definition
     else:
@@ -90,7 +111,7 @@ class CyboxMapper(BaseController):
       if instance.type_ == 'URL':
         definition = self.attr_defs.get('url')
       else:
-        raise CyboxMapperException(u'Note defined')
+        raise CyboxMapperException(u'Not defined')
     elif isinstance(instance, DomainName):
       definition = self.attr_defs.get('DomainName_Value')
     if definition:
@@ -118,67 +139,124 @@ class CyboxMapper(BaseController):
     attribute.value = value
     return attribute
 
-  def create_file_attributes(self, cybox_file, parent, is_indicator):
+  def create_file_attributes(self, cybox_file, parent, is_indicator, tlp_id):
     attributes = list()
     if cybox_file.encryption_algorithm:
-      attributes.append(self.__create_attribute_by_def('encryption_mechanism', parent, cybox_file.encryption_algorithm, is_indicator))
+      attributes.append(self.__create_attribute_by_def('encryption_mechanism', parent, cybox_file.encryption_algorithm, is_indicator, None, tlp_id))
     if cybox_file.accessed_time:
-      attributes.append(self.__create_attribute_by_def('Accessed_Time', parent, cybox_file.accessed_time, is_indicator))
+      attributes.append(self.__create_attribute_by_def('Accessed_Time', parent, cybox_file.accessed_time, is_indicator, None, tlp_id))
     if cybox_file.created_time:
-      attributes.append(self.__create_attribute_by_def('Created_Time', parent, cybox_file.created_time, is_indicator))
+      attributes.append(self.__create_attribute_by_def('Created_Time', parent, cybox_file.created_time, is_indicator, None, tlp_id))
     if cybox_file.file_extension:
-      attributes.append(self.__create_attribute_by_def('File_Extension', parent, cybox_file.file_extension, is_indicator))
-    if cybox_file.full_path and cybox_file.full_path.condition == 'Equals':
-      attributes.append(self.__create_attribute_by_def('Full_Path', parent, cybox_file.full_path, is_indicator))
-    if cybox_file.full_path and cybox_file.full_path.condition == 'Like':
-      attributes.append(self.__create_attribute_by_def('file_full_path_pattern', parent, cybox_file.full_path, is_indicator))
+      attributes.append(self.__create_attribute_by_def('File_Extension', parent, cybox_file.file_extension, is_indicator, None, tlp_id))
     if cybox_file.modified_time:
-      attributes.append(self.__create_attribute_by_def('file_modified_time', parent, cybox_file.modified_time, is_indicator))
-    if cybox_file.file_name and cybox_file.file_name.condition:
-      if cybox_file.file_name.condition == 'Equals':
-        attributes.append(self.__create_attribute_by_def('File_Name', parent, cybox_file.file_name, is_indicator))
-      if cybox_file.file_name.condition == 'Like':
-        attributes.append(self.__create_attribute_by_def('file_name_pattern', parent, cybox_file.file_name, is_indicator))
-    elif cybox_file.file_name:
-      # Default condition is EQUAL
-      attributes.append(self.__create_attribute_by_def('File_Name', parent, cybox_file.file_name, is_indicator))
+      attributes.append(self.__create_attribute_by_def('Modified_Time', parent, cybox_file.modified_time, is_indicator, None, tlp_id))
+    if cybox_file.file_name:
+      attributes.append(self.__create_attribute_by_def('File_Name', parent, cybox_file.file_name, is_indicator, cybox_file.file_name.condition, tlp_id))
     if cybox_file.hashes:
       # TODO: clean up  when cybox implements this differently
       try:
         if cybox_file.hashes.md5:
-          attributes.append(self.__create_attribute_by_def('hash_md5', parent, cybox_file.hashes.md5, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_md5', parent, cybox_file.hashes.md5, is_indicator, None, tlp_id))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha1:
-          attributes.append(self.__create_attribute_by_def('hash_sha1', parent, cybox_file.hashes.sha1, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha1', parent, cybox_file.hashes.sha1, is_indicator, None, tlp_id))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha256:
-          attributes.append(self.__create_attribute_by_def('hash_sha256', parent, cybox_file.hashes.sha256, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha256', parent, cybox_file.hashes.sha256, is_indicator, None, tlp_id))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha384:
-          attributes.append(self.__create_attribute_by_def('hash_sha384', parent, cybox_file.hashes.sha384, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha384', parent, cybox_file.hashes.sha384, is_indicator, None, tlp_id))
       except AttributeError:
         pass
       try:
         if cybox_file.hashes.sha512:
-          attributes.append(self.__create_attribute_by_def('hash_sha512', parent, cybox_file.hashes.sha512, is_indicator))
+          attributes.append(self.__create_attribute_by_def('hash_sha512', parent, cybox_file.hashes.sha512, is_indicator, None, tlp_id))
       except AttributeError:
         pass
 
+    if cybox_file.full_path:
+      attributes.append(self.__create_attribute_by_def('Full_Path', parent, cybox_file.full_path, is_indicator, cybox_file.full_path.condition, tlp_id))
+
     if cybox_file.size:
-      attributes.append(self.__create_attribute_by_def('Size_In_Bytes', parent, cybox_file.size, is_indicator))
+      attributes.append(self.__create_attribute_by_def('Size_In_Bytes', parent, cybox_file.size, is_indicator, None, tlp_id))
     if cybox_file.file_extension:
-      attributes.append(self.__create_attribute_by_def('File_Extension', parent, cybox_file.file_extension, is_indicator))
+      attributes.append(self.__create_attribute_by_def('File_Extension', parent, cybox_file.file_extension, is_indicator, None, tlp_id))
 
     if attributes:
       return attributes
     else:
+      # check it it is not an other type of file like WinExecutableFile
       raise CyboxMapperException('No attribute was created for file')
+
+  def create_process(self, process, parent, is_indicator, tlp_id):
+    attributes = list()
+    if process.name:
+      attributes.append(self.__create_attribute_by_def('Full_Path', parent, process.name, is_indicator, process.name.condition, tlp_id))
+
+    # check it it is not an other type of file like WinProcess
+    if isinstance(process, WinProcess):
+      if isinstance(process, WinService):
+        if process.service_name:
+          attributes.append(self.__create_attribute_by_def('Service_Name', parent, process.service_name, is_indicator, process.service_name.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      raise CyboxMapperException('No attribute was created for process')
+
+  def create_wineventlog(self, wineventlog, parent, is_indicator, tlp_id):
+    attributes = list()
+    if wineventlog.eid:
+      attributes.append(self.__create_attribute_by_def('EID', parent, wineventlog.eid, is_indicator, None, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for wineventlog')
+
+  def create_useraccount(self, useraccount, parent, is_indicator, tlp_id):
+    attributes = list()
+    if useraccount.username:
+      attributes.append(self.__create_attribute_by_def('Username', parent, useraccount.username, is_indicator, useraccount.username.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for useraccount')
+
+  def create_win_reg_key(self, win_reg_key, parent, is_indicator, tlp_id):
+    attributes = list()
+    if win_reg_key.key:
+      attributes.append(self.__create_attribute_by_def('WindowsRegistryKey_Key', parent, win_reg_key.key, is_indicator, win_reg_key.key.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
+  def create_network_connection(self, network_connection, parent, is_indicator, tlp_id):
+    attributes = list()
+    if network_connection.source_socket_address:
+      attributes.append(self.__create_attribute_by_def('is_type', parent, 'Source', False, None, tlp_id))
+      if network_connection.source_socket_address.port:
+        attributes.append(self.__create_attribute_by_def('Port', parent, network_connection.source_socket_address.port.port_value, False, None, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
 
   def create_attributes(self, properties, parent_object, tlp_id, is_indicator):
     # TODO: Create custom properties
@@ -192,11 +270,22 @@ class CyboxMapper(BaseController):
     elif isinstance(properties, Address):
       prop = properties.address_value
     elif isinstance(properties, File):
-      return self.create_file_attributes(properties, parent_object, is_indicator)
+      return self.create_file_attributes(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, URI):
       prop = properties.value
     elif isinstance(properties, DomainName):
       prop = properties.value
+    elif isinstance(properties, Process):
+      return self.create_process(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, WinEventLog):
+      return self.create_wineventlog(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, UserAccount):
+      return self.create_useraccount(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, WinRegistryKey):
+      return self.create_win_reg_key(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, NetworkConnection):
+      return self.create_network_connection(properties, parent_object, is_indicator, tlp_id)
+
     else:
       raise CyboxMapperException('No attribute definiton defined for {0}'.format(properties))
     counter = 0

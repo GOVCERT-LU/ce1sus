@@ -17,7 +17,7 @@
           </li>
           <li class="nav-header"><i class="fa fa-bars"></i> Attribute Definitions</li>
           <li ng-repeat="attribute_entry in attributes" ng-class="{active: ('main.layout.admin.attribute.attributeDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == attribute_entry.identifier}">
-          <a ng-href="#{{ 'main.layout.admin.attribute.attributeDetails' | routeSegmentUrl: {id: attribute_entry.identifier} }}">{{attribute_entry.name}}</a>
+          <a ng-href="#{{ 'main.layout.admin.attribute.attributeDetails' | routeSegmentUrl: {id: attribute_entry.identifier} }}">{{attribute_entry.name}}<span ng-show="!attribute_entry.cybox_std"> *</span></a>
           </li>
         </ul>
       </div>

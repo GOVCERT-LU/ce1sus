@@ -16,7 +16,7 @@
           </li>
           <li class="nav-header"><i class="fa fa-square"></i> Object Definitions</li>
           <li ng-repeat="object_entry in objects" ng-class="{active: ('main.layout.admin.object.objectDetails' | routeSegmentStartsWith) && ('id' | routeSegmentParam) == object_entry.identifier}">
-          <a ng-href="#{{ 'main.layout.admin.object.objectDetails' | routeSegmentUrl: {id: object_entry.identifier} }}">{{object_entry.name}}</a>
+            <a ng-href="#{{ 'main.layout.admin.object.objectDetails' | routeSegmentUrl: {id: object_entry.identifier} }}">{{object_entry.name}}<span ng-show="!object_entry.cybox_std"> *</span></a>
           </li>
         </ul>
       </div>

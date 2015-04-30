@@ -74,4 +74,3 @@ class STIXAdapter(BaseView):
     except ControllerException as error:
       self.logger.error(error)
       raise HTTPError(400, error.message)
-

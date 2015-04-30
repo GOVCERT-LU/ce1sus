@@ -245,6 +245,11 @@ app.controller("addEventController", function($scope, Restangular, messages,
                        "html": true
                      },
                      {
+                       "text": "Add OpenIOC file",
+                       "click": "addOpenIOCXML()",
+                       "html": true
+                     },
+                     {
                        "text": "Add Manual",
                        "click": "addManual()",
                        "html": true
@@ -253,20 +258,35 @@ app.controller("addEventController", function($scope, Restangular, messages,
   
   $scope.addMISPFile=false;
   $scope.addSTIXFile=false;
+  $scope.addOpenIOCFile=false;
+  $scope.addManual=false;
   
   $scope.addManual=function(){
     $scope.addMISPFile=false;
     $scope.addSTIXFile=false;
+    $scope.addOpenIOCFile=false;
+    $scope.addManual=true;
   };
   
   $scope.addMISPXML=function(){
     $scope.addMISPFile=true;
     $scope.addSTIXFile=false;
+    $scope.addOpenIOCFile=false;
+    $scope.addManual=false;
   };
   
   $scope.addStixXML=function(){
     $scope.addSTIXFile=true;
     $scope.addMISPFile=false;
+    $scope.addOpenIOCFile=false;
+    $scope.addManual=false;
+  };
+  
+  $scope.addOpenIOCXML=function(){
+    $scope.addSTIXFile=false;
+    $scope.addMISPFile=false;
+    $scope.addOpenIOCFile=true;
+    $scope.addManual=false;
   };
   
   var original_event = {};
@@ -850,4 +870,17 @@ app.controller("uploadController", function($scope, $timeout, $log, Restangular,
       handleError(response, messages);
     });
   };
+  $scope.addOpenIOC =function(){
+    Restangular.oneUrl('file','/OpenIOC/0.1').post('upload_xml',$scope.file, {'complete':true, 'infated':true}).then(function (data) {
+      if (data) {
+        $location.path("/events/event/"+ data.identifier);
+      } else {
+        $location.path("/events/all");
+      }
+      messages.setMessage({'type':'success','message':'Event sucessfully added'});
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
+  
 });

@@ -179,19 +179,23 @@ class StixCelsusMapper(BaseController):
 
   def get_tlp_id_from_markings(self, indicator):
     handling = indicator.handling
-    markings = handling.markings
-    for marking in markings:
-      for stucture in marking.marking_structures:
-        if isinstance(stucture, TLPMarkingStructure):
-          color = stucture.color
-          tlp_id = TLP.get_by_value(color.title())
-          return tlp_id
+    if handling:
+      markings = handling.markings
+      for marking in markings:
+        for stucture in marking.marking_structures:
+          if isinstance(stucture, TLPMarkingStructure):
+            color = stucture.color
+            tlp_id = TLP.get_by_value(color.title())
+            return tlp_id
     return None
 
   def create_indicator(self, indicator, event, user):
     ce1sus_indicator = Indicator()
     set_properties(ce1sus_indicator)
-    ce1sus_indicator.uuid = extract_uuid(indicator.id_)
+    if indicator.id_:
+      ce1sus_indicator.uuid = extract_uuid(indicator.id_)
+    else:
+      ce1sus_indicator.uuid = uuid4()
     ce1sus_indicator.title = indicator.title
     ce1sus_indicator.description = indicator.description
     ce1sus_indicator.originating_group = self.__convert_info_soucre(indicator.producer)
@@ -199,7 +203,8 @@ class StixCelsusMapper(BaseController):
     ce1sus_indicator.confidence = indicator.confidence
 
     sightings = self.__convert_sightings(indicator.sightings, user)
-    ce1sus_indicator.sightings = sightings
+    if sightings:
+      ce1sus_indicator.sightings = sightings
     # TODO: Add indicator types
 
     # TODO: markings

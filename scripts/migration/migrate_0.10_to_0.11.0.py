@@ -402,9 +402,9 @@ class Migrator(object):
       for attribute in line['attributes']:
         if attribute['definition']['name'] == 'comment' or attribute['definition']['name'] == 'description' or attribute['definition']['name'] == 'analysis_free_text' or attribute['definition']['name'] == 'reference_free_text':
           attribute['definition']['name'] = 'comment'
-          reference = self.make_reference(attribute, report)
+          reference = self.make_reference(attribute, report, event)
         else:
-          reference = self.make_reference(attribute, report)
+          reference = self.make_reference(attribute, report, event)
           if reference:
             report.references.append(reference)
       return report
@@ -577,7 +577,7 @@ class Migrator(object):
     else:
       raise Exception(u'Reference Definition {0} with chksum {1} not found in new setup'.format(name, chksum))
 
-  def make_reference(self, attribute, report):
+  def make_reference(self, attribute, report, event):
     reference = Reference()
     reference.uuid = attribute['uuid']
     reference.creator_group = self.get_groups()[attribute['creator_group_id']]
@@ -611,9 +611,18 @@ class Migrator(object):
           parent.children.append(reference)
       return reference
     else:
-      self.notmapped.write('Reference Could not be mapped as definition is missing for the new report {0}\n'.format(report.identifier))
-      self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+      self.log_not_mapped(event, report.uuid, 'report', attribute, 'Reference Could not be mapped as definition is missing for the new report')
     return None
+
+  def log_not_mapped(self, event, parent_id, parent_type, data, message):
+    line = dict()
+    line['event']['identifier'] = event.uuid
+    line['parent'] = dict()
+    line['parent']['type'] = parent_type
+    line['parent']['id'] = parent_id
+    line['data'] = data
+    line['reason'] = message
+    self.notmapped.write('{0}\n'.format(json.dumps(line)))
 
   def map_condition(self, name):
     for condition in self.conditions:
@@ -716,8 +725,7 @@ class Migrator(object):
     if definition:
       attribute.definition = definition
     else:
-      self.notmapped.write('Attribute Could not be mapped as definition is missing for the new object {0}\n'.format(obj.uuid))
-      self.notmapped.write('{0}\n'.format(json.dumps(line)))
+      self.log_not_mapped(event, obj.uuid, 'object', line, 'Attribute Could not be mapped as definition is missing for the new report')
       return None
 
     attribute.object = obj
@@ -790,8 +798,7 @@ class Migrator(object):
       obj.definition = self.map_obj_def({'name': obj_def, 'chksum': None})
 
     if not obj.definition:
-      self.notmapped.write('{0} could not be mapped\n'.format(obj_def))
-      self.notmapped.write('{0}\n'.format(json.dumps(line)))
+      self.log_not_mapped(event, obj.uuid, 'object', line, '{0} could not be mapped\n'.format(obj_def))
       return None
 
     attribute = self.map_attribute(line, obj, owner)
@@ -864,14 +871,14 @@ class Migrator(object):
         if not report:
           report = self.make_report(attribute, owner, event)
         attribute['definition']['name'] = 'comment'
-        reference = self.make_reference(attribute, report)
+        reference = self.make_reference(attribute, report, event)
         report.references.append(reference)
       elif 'hash' in name:
         obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
       elif name == 'encryption_key':
-        self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+        self.log_not_mapped(event, composed_attribute.uuid, 'observablecomposition', attribute, '{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
+
       elif name == 'ids_rules':
         obs = self.make_attr_obs(attribute, 'IDSRule', name, owner, event)
         composed_attribute.observables.append(obs)
@@ -880,7 +887,7 @@ class Migrator(object):
           report = self.make_report(attribute, owner, event)
 
         attribute['definition']['name'] = 'comment'
-        reference = self.make_reference(attribute, report)
+        reference = self.make_reference(attribute, report, event)
         
       elif name == 'yara_rule':
         obs = self.make_attr_obs(attribute, 'IDSRule', name, owner, event)
@@ -889,7 +896,7 @@ class Migrator(object):
         if not report:
           report = self.make_report(attribute, owner, event)
         attribute['definition']['name'] = 'comment'
-        reference = self.make_reference(attribute, report)
+        reference = self.make_reference(attribute, report, event)
       elif 'http' in name:
         obs = self.make_attr_obs(attribute, 'HTTPSession', name, owner, event)
         composed_attribute.observables.append(obs)
@@ -942,14 +949,14 @@ class Migrator(object):
         obs = self.make_attr_obs(attribute, 'File', name, owner, event)
         composed_attribute.observables.append(obs)
       elif 'targeted' in name:
-        self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+        self.log_not_mapped(event, composed_attribute.uuid, 'observablecomposition', attribute, '{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
+
       elif 'observable_location' in name:
-        self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+        self.log_not_mapped(event, composed_attribute.uuid, 'observablecomposition', attribute, '{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
+
       elif 'password' in name:
-        self.notmapped.write('{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(attribute)))
+        self.log_not_mapped(event, composed_attribute.uuid, 'observablecomposition', attribute, '{0} could not be mapped for ioc_redords on new composed observable {1}\n'.format(name, composed_attribute.uuid))
+
       elif 'traffic_content' in name:
         obs = self.make_attr_obs(attribute, 'forensic_records', 'traffic_content', owner, event)
         composed_attribute.observables.append(obs)
@@ -1225,8 +1232,7 @@ class Migrator(object):
         if element['definition']['name'] == 'raw_file' or element['definition']['name'] == 'raw_document_file':
           if attribute_line:
             # there are 2 attributes with raw file -> impossible to determine hat is what
-            self.notmapped.write('{0} could not be mapped for file on new object {1} as it contains 2 files\n'.format(line['definition']['name'], obj.uuid))
-            self.notmapped.write('{0}\n'.format(json.dumps(line)))
+            self.log_not_mapped(event, obj.uuid, 'object', line, '{0} could not be mapped for file on new object {1} as it contains 2 files\n'.format(line['definition']['name'], obj.uuid))
             return None
           else:
             attribute_line = element
@@ -1314,8 +1320,7 @@ class Migrator(object):
       if definition:
         obj.definition = definition
       else:
-        self.notmapped.write('Object Could not be mapped as definition is missing for the new observable {0}\n'.format(observable.uuid))
-        self.notmapped.write('{0}\n'.format(json.dumps(line)))
+        self.log_not_mapped(event, observable.uuid, 'observable', line, 'Object Could not be mapped as definition is missing for the new observable {0}\n'.format(observable.uuid))
         return None
         # set attributes
     for attribute in line['attributes']:
@@ -1401,8 +1406,7 @@ class Migrator(object):
 
         return observable
 
-    self.notmapped.write('Observable could not be created the new event {0}\n'.format(event.uuid))
-    self.notmapped.write('{0}\n'.format(json.dumps(line)))
+    self.log_not_mapped(event, event.uuid, 'event', line, 'Observable could not be created the new event {0}\n'.format(event.uuid))
     return None
 
   def map_event(self, line):
