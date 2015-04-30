@@ -1,0 +1,1 @@
+[{"identifier": "00dba852-7e1f-48b5-834b-5722c7d13190", "description": "The value matches 1:1", "value": "Equals"}, {"identifier": "0d34e1d1-d716-4bbd-bda5-9a611d798cdc", "description": "The value matches the pattern", "value": "FitsPattern"}, {"identifier": "83a57780-e1fb-469b-bfa1-26e6bed888ff", "description": "Contains", "value": "Contains"}]

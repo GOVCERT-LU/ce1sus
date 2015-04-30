@@ -35,6 +35,7 @@ from ce1sus.handlers.base import HandlerBase
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.hash import fileHashMD5
 from ce1sus.helpers.common.objects import get_class
+from ce1sus.controllers.admin.conditions import ConditionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -62,6 +63,7 @@ class Maintenance(object):
     self.event_controller = EventController(config, directconnection)
     self.user_controller = UserController(config, directconnection)
     self.reference_controller = ReferencesController(config, directconnection)
+    self.conditions_controller = ConditionController(config, directconnection)
     self.verbose = False
 
     # set maintenance user
@@ -199,6 +201,14 @@ class Maintenance(object):
       ref_defs = self.reference_controller.get_reference_definitions_all()
       for ref_def in ref_defs:
         dump.append(ref_def.to_dict(True, True))
+    elif dump_def == 'conditions':
+      conditions = self.conditions_controller.get_all_conditions()
+      for condition in conditions:
+        dump.append(condition.to_dict(True, True))
+    elif dump_def == 'types':
+      types = self.attribute_definition_controller.get_all_types()
+      for type_ in types:
+        dump.append(type_.to_dict(True, True))
     else:
       raise MaintenanceException('No definition assigned to {0}. It can either be attributes or objects'.format(dump_def))
 

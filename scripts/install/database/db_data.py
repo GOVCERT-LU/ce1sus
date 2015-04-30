@@ -105,21 +105,3 @@ def get_attribute_type_definitions():
   attribute_type.table_id = None
 
   return {attribute_type.uuid: attribute_type}
-
-
-def get_conditions():
-  result = dict()
-  condition = Condition()
-  condition.identifier = 1
-  condition.uuid = '00dba852-7e1f-48b5-834b-5722c7d13190'
-  condition.value = 'Equals'
-  condition.description = 'The value matches 1:1'
-  result[condition.uuid] = condition
-
-  condition = Condition()
-  condition.value = 'FitsPattern'
-  condition.identifier = 2
-  condition.uuid = '0d34e1d1-d716-4bbd-bda5-9a611d798cdc'
-  condition.description = 'The value matches the pattern'
-  result[condition.uuid] = condition
-  return result

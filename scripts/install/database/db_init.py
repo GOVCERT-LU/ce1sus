@@ -120,16 +120,21 @@ if __name__ == '__main__':
 
   attr_ctrl.type_broker.do_commit(False)
 
-  all_conditions = get_conditions()
   conditions = dict()
 
   cond_ctrl = ConditionController(config, session)
-  print "Populating conditions"
-  for key, value in all_conditions.iteritems():
-    cond_ctrl.insert_condition(value, False)
-    conditions[key] = value
 
-  cond_ctrl.condition_broker.do_commit(False)
+  with open('conditions.json') as data_file:
+    all_conditions = json.load(data_file)
+  print "Populating conditions"
+  for condition_json in all_conditions:
+    condition = Condition()
+    condition.populate(condition_json)
+    condition.uuid = condition_json.get('identifier')
+    conditions[key] = value
+    cond_ctrl.insert_condition(condition, False)
+  cond_ctrl.condition_broker.do_commit(True)
+
 
   # add attributes definitions
 
