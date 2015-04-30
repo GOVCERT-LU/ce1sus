@@ -616,10 +616,11 @@ class Migrator(object):
 
   def log_not_mapped(self, event, parent_id, parent_type, data, message):
     line = dict()
-    line['event']['identifier'] = event.uuid
+    line['event'] = dict()
+    line['event']['identifier'] = '{0}'.format(event.uuid)
     line['parent'] = dict()
     line['parent']['type'] = parent_type
-    line['parent']['id'] = parent_id
+    line['parent']['id'] = '{0}'.format(parent_id)
     line['data'] = data
     line['reason'] = message
     self.notmapped.write('{0}\n'.format(json.dumps(line)))
@@ -669,7 +670,7 @@ class Migrator(object):
     except ControllerException:
       raise Exception(u'Attribtue Definition "{0}" with chksum {1} not found in new setup'.format(name, chksum))
 
-  def map_attribute(self, line, obj, owner):
+  def map_attribute(self, line, obj, owner, event):
     if obj.definition.name == 'email':
       if line['definition']['name'] == 'raw_file' or line['definition']['name'] == 'file_name' or line['definition']['name'] == 'email_server':
         return None
@@ -740,7 +741,7 @@ class Migrator(object):
       line['definition']['name'] = 'is_c&c'
       line['definition']['chksum'] = 0
       line['value'] = 1
-      atribute = self.map_attribute(line, obj, owner)
+      atribute = self.map_attribute(line, obj, owner, event)
       obj.attributes.append(atribute)
 
     self.logger.debug('Created attribute {0}'.format(attribute))
@@ -801,7 +802,7 @@ class Migrator(object):
       self.log_not_mapped(event, obj.uuid, 'object', line, '{0} could not be mapped\n'.format(obj_def))
       return None
 
-    attribute = self.map_attribute(line, obj, owner)
+    attribute = self.map_attribute(line, obj, owner, event)
     if attribute:
       obj.attributes.append(attribute)
     else:
@@ -813,7 +814,7 @@ class Migrator(object):
       line['definition']['chksum'] = None
       line['uuid'] = u'{0}'.format(uuid4())
       line['value'] = 'DNS'
-      attribute = self.map_attribute(line, obj, owner)
+      attribute = self.map_attribute(line, obj, owner, event)
       if attribute:
         obj.attributes.append(attribute)
       else:
@@ -823,7 +824,7 @@ class Migrator(object):
       line['definition']['chksum'] = None
       line['uuid'] = u'{0}'.format(uuid4())
       line['value'] = 'URL'
-      attribute = self.map_attribute(line, obj, owner)
+      attribute = self.map_attribute(line, obj, owner, event)
       if attribute:
         obj.attributes.append(attribute)
       else:
@@ -936,12 +937,12 @@ class Migrator(object):
         if hive:
           attribute['definition']['name'] = 'WindowsRegistryKey_Hive'
           attribute['value'] = hive
-          new_attribute = self.map_attribute(attribute, obj, owner)
+          new_attribute = self.map_attribute(attribute, obj, owner, event)
           obj.attributes.append(new_attribute)
 
         attribute['definition']['name'] = 'WindowsRegistryKey_Key'
         attribute['value'] = key
-        new_attribute = self.map_attribute(attribute, obj, owner)
+        new_attribute = self.map_attribute(attribute, obj, owner, event)
         obj.attributes.append(new_attribute)
 
         composed_attribute.observables.append(observable)
@@ -1194,7 +1195,7 @@ class Migrator(object):
       # remove the assigned attributes from the object
       line['attributes'].remove(attribute_line)
 
-      attribtue = self.map_attribute(attribute_line, obj, owner)
+      attribtue = self.map_attribute(attribute_line, obj, owner, event)
       obj.attributes.append(attribtue)
 
       # then attach the raw artifact
@@ -1209,13 +1210,13 @@ class Migrator(object):
           break
       line['attributes'].remove(attribute_line)
       attribute_line['definition']['name'] = 'Raw_Artifact'
-      attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
+      attribtue = self.map_attribute(attribute_line, raw_artifact, owner, event)
       raw_artifact.attributes.append(attribtue)
       # set the type
       attribute_line['uuid'] = u'{0}'.format(uuid4())
       attribute_line['definition']['name'] = 'content_type'
       attribute_line['value'] = 'Network Traffic'
-      attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
+      attribtue = self.map_attribute(attribute_line, raw_artifact, owner, event)
       raw_artifact.attributes.append(attribtue)
 
       # attach the object
@@ -1237,7 +1238,7 @@ class Migrator(object):
           else:
             attribute_line = element
         else:
-          attribute = self.map_attribute(element, obj, owner)
+          attribute = self.map_attribute(element, obj, owner, event)
           if attribute:
             obj.attributes.append(attribute)
 
@@ -1250,13 +1251,13 @@ class Migrator(object):
         raw_artifact.definition = self.map_obj_def({'name': 'Artifact', 'chksum': None})
 
         attribute_line['definition']['name'] = 'Raw_Artifact'
-        attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
+        attribtue = self.map_attribute(attribute_line, raw_artifact, owner, event)
         raw_artifact.attributes.append(attribtue)
         # set the type
         attribute_line['definition']['name'] = 'content_type'
         attribute_line['value'] = 'File'
         attribute_line['uuid'] = uuid4()
-        attribtue = self.map_attribute(attribute_line, raw_artifact, owner)
+        attribtue = self.map_attribute(attribute_line, raw_artifact, owner, event)
         raw_artifact.attributes.append(attribtue)
 
         # append to the object
@@ -1286,11 +1287,11 @@ class Migrator(object):
       file_obj.definition = self.map_obj_def({'name': 'file', 'chksum': None})
       if attribute_hash:
         line['attributes'].remove(attribute_hash)
-        attribtue = self.map_attribute(attribute_hash, file_obj, owner)
+        attribtue = self.map_attribute(attribute_hash, file_obj, owner, event)
         file_obj.attributes.append(attribtue)
       if attribute_file_name:
         line['attributes'].remove(attribute_file_name)
-        attribtue = self.map_attribute(attribute_file_name, file_obj, owner)
+        attribtue = self.map_attribute(attribute_file_name, file_obj, owner, event)
         file_obj.attributes.append(attribtue)
       # append to the object
       obj.related_objects.append(create_related_obj(obj, file_obj))
@@ -1304,13 +1305,13 @@ class Migrator(object):
         raw_artifact.definition = self.map_obj_def({'name': 'Artifact', 'chksum': None})
 
         attribute_file['definition']['name'] = 'Raw_Artifact'
-        attribtue = self.map_attribute(attribute_file, raw_artifact, owner)
+        attribtue = self.map_attribute(attribute_file, raw_artifact, owner, event)
         raw_artifact.attributes.append(attribtue)
         # set the type
         attribute_file['definition']['name'] = 'content_type'
         attribute_file['value'] = 'File'
         attribute_file['uuid'] = uuid4()
-        attribtue = self.map_attribute(attribute_file, raw_artifact, owner)
+        attribtue = self.map_attribute(attribute_file, raw_artifact, owner, event)
         raw_artifact.attributes.append(attribtue)
 
         # append to the object
@@ -1324,7 +1325,7 @@ class Migrator(object):
         return None
         # set attributes
     for attribute in line['attributes']:
-      attribute = self.map_attribute(attribute, obj, owner)
+      attribute = self.map_attribute(attribute, obj, owner, event)
       if attribute:
         obj.attributes.append(attribute)
 
@@ -1377,7 +1378,7 @@ class Migrator(object):
 
         obj = self.make_object(line, observable)
         definition = self.map_obj_def({'name': 'UserAccount', 'chksum': None})
-        attribtue = self.map_attribute(attribute, obj, owner)
+        attribtue = self.map_attribute(attribute, obj, owner, event)
         obj.attributes.append(attribtue)
         observable.object = obj
         composed_attribute.observables.append(observable)
