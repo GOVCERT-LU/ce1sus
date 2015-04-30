@@ -18,7 +18,7 @@ useldap=yes
 environment=LOCAL_DEV
 #Not this has to be the external address for ce1sus
 baseurl=http://localhost:8080
-maintenaceuseruuid=9947840d-0591-42dd-9d1a-8db105683ec2
+maintenaceuseruuid=f49eb0ed-438d-49ef-aa19-1d615a3ba01d
 usebasicauth=no
 #salt used for passwords
 salt=SomeReallyIntrestingRandom
@@ -66,3 +66,7 @@ subject=ErrorOccureredForCelsus_Local_DEV
 smtp=
 level=error
 user=
+
+[Plugins]
+LdapPlugin=True
+MailPlugin=True
