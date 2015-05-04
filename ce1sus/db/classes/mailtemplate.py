@@ -21,9 +21,9 @@ __license__ = 'GPL v3+'
 
 class MailTemplate(SimpleLogingInformations, Base):
   """This is a container class for the Mails table."""
-  name = Column('name', Unicode(255), nullable=False)
-  body = Column('body', UnicodeText, nullable=False)
-  subject = Column('subject', Unicode(255), nullable=False)
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+  body = Column('body', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
+  subject = Column('subject', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
 
   def to_dict(self, complete=True, inflated=False):
     if complete:

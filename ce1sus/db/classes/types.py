@@ -20,9 +20,9 @@ __license__ = 'GPL v3+'
 
 class AttributeType(Base):
 
-  name = Column('name', Unicode(255), nullable=False, index=True, unique=True)
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False, index=True, unique=True)
   table_id = Column('table_id', Integer, index=True)
-  description = Column('description', UnicodeText)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
 
   def validate(self):
     # TODO: Add validation

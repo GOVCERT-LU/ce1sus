@@ -27,8 +27,8 @@ __license__ = 'GPL v3+'
 
 class ReferenceHandler(Base):
 
-  module_classname = Column('moduleClassName', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', UnicodeText, nullable=False)
+  module_classname = Column('moduleClassName', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True, index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
 
   @property
   def classname(self):
@@ -74,10 +74,10 @@ class ReferenceHandler(Base):
 
 class ReferenceDefinition(SimpleLogingInformations, Base):
 
-  name = Column('name', Unicode(45), unique=True, nullable=False, index=True)
-  description = Column('description', UnicodeText)
-  chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
-  regex = Column('regex', Unicode(255), nullable=False, default=u'^.+$')
+  name = Column('name', Unicode(45, collation='utf8_unicode_ci'), unique=True, nullable=False, index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  chksum = Column('chksum', Unicode(45, collation='utf8_unicode_ci'), unique=True, nullable=False, index=True)
+  regex = Column('regex', Unicode(255, collation='utf8_unicode_ci'), nullable=False, default=u'^.+$')
 
   referencehandler_id = Column('referencehandler_id', BigInteger, ForeignKey('referencehandlers.referencehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   reference_handler = relationship('ReferenceHandler',
@@ -134,7 +134,7 @@ class Reference(ExtendedLogingInformations, Base):
   definition = relationship(ReferenceDefinition,
                             primaryjoin='ReferenceDefinition.identifier==Reference.definition_id')
   dbcode = Column('code', Integer, nullable=False, default=0)
-  value = Column('value', UnicodeText, nullable=False)
+  value = Column('value', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
   parent_id = Column('parent_id', BigInteger, ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')
@@ -208,9 +208,9 @@ class Reference(ExtendedLogingInformations, Base):
 
 class Report(ExtendedLogingInformations, Base):
 
-  title = Column('title', Unicode(255), index=True)
-  description = Column('description', UnicodeText)
-  short_description = Column('short_description', Unicode(255))
+  title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  short_description = Column('short_description', Unicode(255, collation='utf8_unicode_ci'))
   parent_report_id = Column('parent_report_id', BigInteger, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent_report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event = relationship('Event', uselist=False, primaryjoin='Report.event_id==Event.identifier')

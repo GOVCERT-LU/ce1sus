@@ -62,15 +62,15 @@ class ServerMode(BitBase):
 
 class SyncServer(ExtendedLogingInformations, Base):
 
-  name = Column('name', Unicode(255))
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'))
   user_id = Column('user_id', BigInteger, ForeignKey('users.user_id', onupdate='restrict', ondelete='restrict'), index=True, unique=True)
   user = relationship('User', primaryjoin='SyncServer.user_id==User.identifier')
-  baseurl = Column('baseurl', Unicode(255), index=True)
+  baseurl = Column('baseurl', Unicode(255, collation='utf8_unicode_ci'), index=True)
   mode_code = Column('mode_id', Integer, index=True, default=0)
   type_id = Column('type_id', Integer, index=True)
-  description = Column('description', UnicodeText)
-  certificate = Column('certificat', UnicodeText)
-  ca_certificate = Column('ca_certificat', UnicodeText)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  certificate = Column('certificat', UnicodeText(collation='utf8_unicode_ci'))
+  ca_certificate = Column('ca_certificat', UnicodeText(collation='utf8_unicode_ci'))
   verify_ssl = Column('verify_ssl', Boolean)
   __mode_code = None
 

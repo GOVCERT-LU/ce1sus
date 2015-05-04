@@ -19,8 +19,8 @@ __license__ = 'GPL v3+'
 
 
 class Ce1susConfig(SimpleLogingInformations, Base):
-  key = Column('key', Unicode(255), nullable=False, index=True)
-  value = Column('value', UnicodeText, nullable=False)
+  key = Column('key', Unicode(255, collation='utf8_unicode_ci'), nullable=False, index=True)
+  value = Column('value', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
 
   def validate(self):
     # TODO: create validation for ce1susconfig

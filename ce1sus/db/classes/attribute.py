@@ -31,8 +31,8 @@ _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', Base.metadata,
 
 
 class Condition(Base):
-  value = Column('value', Unicode(40), unique=True)
-  description = Column('description', UnicodeText)
+  value = Column('value', Unicode(40, collation='utf8_unicode_ci'), unique=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
 
   def to_dict(self, complete=True, inflated=False):
     return {'identifier': self.convert_value(self.uuid),
@@ -50,7 +50,7 @@ class Condition(Base):
 
 
 class Attribute(ExtendedLogingInformations, Base):
-  description = Column('description', UnicodeText)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
 
   definition_id = Column('definition_id', BigInteger,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)

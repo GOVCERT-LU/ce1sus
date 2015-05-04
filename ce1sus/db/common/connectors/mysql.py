@@ -146,7 +146,7 @@ class MySqlConnector(Connector):
     """
     Returns the engine
     """
-    return create_engine(self.connection_string + '?charset=utf8',
+    return create_engine(self.connection_string + '?charset=utf8&use_unicode=0',
                          poolclass=QueuePool,
                          echo=self.debug,
                          encoding='utf-8',

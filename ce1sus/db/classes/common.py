@@ -274,8 +274,8 @@ class Properties(BitBase):
 
 
 class Marking(ExtendedLogingInformations, Base):
-  version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
-  controlled_structure = Column('controlled_structure', Unicode(255))
+  version = Column('version', Unicode(40, collation='utf8_unicode_ci'), default=u'1.0.0', nullable=False)
+  controlled_structure = Column('controlled_structure', Unicode(255, collation='utf8_unicode_ci'))
   markings = relationship('MarkingStructure')
 
 
@@ -290,10 +290,10 @@ class MarkingStructure(ExtendedLogingInformations, Base):
                 2: TermsOfUseMarkingStructure}
 
   marking_id = Column('marking_id', BigInteger, ForeignKey('markings.marking_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  marking_model_name = Column('marking_model_name', Unicode(255))
-  marking_model_ref = Column('marking_model_ref', Unicode(255))
-  type_id = Column('type_id', Unicode(255), nullable=False)
-  value = Column('value', UnicodeText)
+  marking_model_name = Column('marking_model_name', Unicode(255, collation='utf8_unicode_ci'))
+  marking_model_ref = Column('marking_model_ref', Unicode(255, collation='utf8_unicode_ci'))
+  type_id = Column('type_id', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+  value = Column('value', UnicodeText(collation='utf8_unicode_ci'))
 
   @property
   def type_(self):

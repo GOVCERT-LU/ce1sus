@@ -53,22 +53,22 @@ _REL_KILLCHAIN_KILLCHAINPHASES = Table('rel_killchain_killchainphase', Base.meta
 
 
 class Killchain(ExtendedLogingInformations, Base):
-  name = Column('name', Unicode(255))
-  reference = Column('reference', Unicode(255))
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'))
+  reference = Column('reference', Unicode(255, collation='utf8_unicode_ci'))
   kill_chain_phases = relationship('KillChainPhase', secondary='rel_killchain_killchainphase')
 
 
 class KillChainPhase(Base):
   phase_ref = Column('phase_ref', Integer)
-  name = Column('name', Unicode(255))
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'))
   ordinality = Column('ordinality', Integer)
   phase_id = Column('phase_id', Integer)
 
 
 class Sighting(ExtendedLogingInformations, Base):
   timestamp_precision = Column('timestamp_precision', BigInteger)
-  description = Column('description', UnicodeText)
-  confidence = Column('confidence', Unicode(5), default=u'HIGH', nullable=False)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
@@ -138,11 +138,11 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
 
 class Indicator(ExtendedLogingInformations, Base):
 
-  version = Column('version', Unicode(40), default=u'1.0.0', nullable=False)
-  title = Column('title', Unicode(255), index=True, nullable=True)
-  description = Column('description', UnicodeText)
-  short_description = Column('short_description', Unicode(255))
-  confidence = Column('confidence', Unicode(5), default=u'HIGH', nullable=False)
+  version = Column('version', Unicode(40, collation='utf8_unicode_ci'), default=u'1.0.0', nullable=False)
+  title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  short_description = Column('short_description', Unicode(255, collation='utf8_unicode_ci'))
+  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
   # TODO relation tables
   # TODO Markings
   event = relationship('Event', uselist=False)
@@ -151,7 +151,7 @@ class Indicator(ExtendedLogingInformations, Base):
   killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   types = relationship('IndicatorType')
   handling = relationship(Marking, secondary='rel_indicator_handling')
-  operator = Column('operator', Unicode(3), default=u'OR')
+  operator = Column('operator', Unicode(3, collation='utf8_unicode_ci'), default=u'OR')
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*
   # TODO add related indicators and TTP

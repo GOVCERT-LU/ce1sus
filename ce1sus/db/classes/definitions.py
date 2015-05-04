@@ -43,9 +43,9 @@ class AttributeDefinitionException(DefinitionException):
 
 class ObjectDefinition(SimpleLogingInformations, Base):
 
-  name = Column('name', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', UnicodeText)
-  chksum = Column('chksum', Unicode(255), unique=True, nullable=False, index=True)
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True, index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  chksum = Column('chksum', Unicode(255, collation='utf8_unicode_ci'), unique=True, nullable=False, index=True)
   default_share = Column('sharable', Boolean, default=False, nullable=False)
 
   # the relationship is flagged with true when it is a required attribute
@@ -106,10 +106,10 @@ class ObjectDefinition(SimpleLogingInformations, Base):
 
 class AttributeDefinition(SimpleLogingInformations, Base):
 
-  name = Column('name', Unicode(45), unique=True, nullable=False, index=True)
-  description = Column('description', UnicodeText)
-  chksum = Column('chksum', Unicode(45), unique=True, nullable=False, index=True)
-  regex = Column('regex', Unicode(255), nullable=False, default=u'^.+$')
+  name = Column('name', Unicode(45, collation='utf8_unicode_ci'), unique=True, nullable=False, index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  chksum = Column('chksum', Unicode(45, collation='utf8_unicode_ci'), unique=True, nullable=False, index=True)
+  regex = Column('regex', Unicode(255, collation='utf8_unicode_ci'), nullable=False, default=u'^.+$')
   table_id = Column('table_id', Integer, nullable=False, default=0)
   attributehandler_id = Column('attributehandler_id', BigInteger, ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   attribute_handler = relationship('AttributeHandler',
@@ -229,8 +229,8 @@ class AttributeDefinition(SimpleLogingInformations, Base):
 
 class AttributeHandler(Base):
 
-  module_classname = Column('moduleClassName', Unicode(255), nullable=False, unique=True, index=True)
-  description = Column('description', UnicodeText, nullable=False)
+  module_classname = Column('moduleClassName', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True, index=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
 
   @property
   def classname(self):

@@ -95,17 +95,17 @@ class UserRights(BitBase):
 
 
 class User(Base):
-  name = Column('name', Unicode(255), nullable=False)
-  sirname = Column('sirname', Unicode(255), nullable=False)
-  username = Column('username', Unicode(255), nullable=False, unique=True)
-  password = Column('password', Unicode(255), nullable=False)
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+  sirname = Column('sirname', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+  username = Column('username', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True)
+  password = Column('password', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
   last_login = Column('last_login', DateTime)
-  email = Column('email', Unicode(255), unique=True)
-  api_key = Column('apikey', Unicode(255), index=True)
-  gpg_key = Column('gpg_key', UnicodeText)
+  email = Column('email', Unicode(255, collation='utf8_unicode_ci'), unique=True)
+  api_key = Column('apikey', Unicode(255, collation='utf8_unicode_ci'), index=True)
+  gpg_key = Column('gpg_key', UnicodeText(collation='utf8_unicode_ci'))
   activated = Column('activated', DateTime)
   activation_sent = Column('activation_sent', DateTime)
-  activation_str = Column('activation_str', Unicode(255))
+  activation_str = Column('activation_str', Unicode(255, collation='utf8_unicode_ci'))
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)

@@ -174,15 +174,15 @@ class EventPermissions(BitBase):
 
 
 class Group(Base):
-  name = Column('name', Unicode(255), nullable=False, unique=True)
-  description = Column('description', UnicodeText)
+  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   tlp_lvl = Column('tlplvl', Integer, default=3, nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
   __default_bit_code = None
   default_dbcode = Column('default_code', Integer, default=0, nullable=False)
-  email = Column('email', Unicode(255), unique=True)
-  gpg_key = Column('gpg_key', UnicodeText)
+  email = Column('email', Unicode(255, collation='utf8_unicode_ci'), unique=True)
+  gpg_key = Column('gpg_key', UnicodeText(collation='utf8_unicode_ci'))
   send_usermails = Column('usermails', Boolean, default=False, nullable=False)
   children = relationship('Group',
                           secondary=_REL_MAINGROUP_GROUPS,

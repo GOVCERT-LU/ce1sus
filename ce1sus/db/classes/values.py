@@ -52,7 +52,7 @@ class ValueBase(object):
 class StringValue(ValueBase, Base):
   """This is a container class for the STRINGVALUES table."""
 
-  value = Column('value', Unicode(255), nullable=False, index=True)
+  value = Column('value', Unicode(255, collation='utf8_unicode_ci'), nullable=False, index=True)
 
   def validate(self):
     """
@@ -98,7 +98,7 @@ class TimeStampValue(ValueBase, Base):
 # pylint: disable=R0903
 class TextValue(ValueBase, Base):
   """This is a container class for the TEXTVALUES table."""
-  value = Column('value', UnicodeText, nullable=False)
+  value = Column('value', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
 
   def validate(self):
     """

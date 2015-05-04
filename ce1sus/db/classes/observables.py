@@ -140,7 +140,7 @@ class RelatedObservable(ExtendedLogingInformations, Base):
 class Observable(ExtendedLogingInformations, Base):
 
   title = Column('title', Unicode(255), index=True)
-  description = Column('description', UnicodeText)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   object = relationship('Object', back_populates='parent', uselist=False, primaryjoin='Object.parent_id==Observable.identifier', lazy='joined')
   observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   keywords = relationship('ObservableKeyword', backref='observable')

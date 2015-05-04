@@ -67,8 +67,8 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
 
 
 class Event(ExtendedLogingInformations, Base):
-  title = Column('title', Unicode(255), index=True, nullable=False)
-  description = Column('description', UnicodeText)
+  title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False)
+  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
   status_id = Column('status_id', Integer, default=0, nullable=False)
   risk_id = Column('risk_id', Integer, nullable=False, default=0)
@@ -374,7 +374,7 @@ class Event(ExtendedLogingInformations, Base):
 class Comment(ExtendedLogingInformations, Base):
   event_id = Column(BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   event = relationship('Event')
-  comment = Column('comment', UnicodeText, nullable=False)
+  comment = Column('comment', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
 
   def to_dict(self, complete=True, inflated=False):
     if complete:
