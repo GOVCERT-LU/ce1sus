@@ -14,16 +14,16 @@ ce1sus
 
 ce1sus is a threat information database.
 
-The purpose of ce1sus is to store any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners.
+The purpose of ce1sus is to store any information around all kinds of threats (i.e. scam, malware, phishing, ...). in a structured manner and share this information with trusted partners.
 
-Ce1sus entries are modeled to represent the real-life case as as close as possible. 
+Ce1sus entries are modeled to represent real-life cases as closely as possible. 
 
 Example:
 Email with a malicious attachment
 
-In such cases the event should start by an email object. That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object then will get a child object representing the attachment. If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
+In such cases the event should start with an email object. That object can then have all the attributes (i.e. email_from, email_body, ...) required to represent an email. This object will then get a child object representing the attachment. If this file is just a dropper, then the dropped file should be a child of the previous object and so forth.
 
-Such structured events improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
+Such structured events improve understanding of how the different attributes are related, and leads to a better overview on the relationship between events.
 
 Note
 ----
