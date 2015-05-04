@@ -56,7 +56,7 @@ class BaseClass(object):
   @declared_attr
   def uuid(cls):
     return Column('uuid',
-                  Unicode(45),
+                  Unicode(45, collation='utf8_unicode_ci'),
                   default=uuid.uuid4,
                   nullable=False,
                   index=True,

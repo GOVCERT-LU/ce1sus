@@ -327,13 +327,11 @@ class Migrator(object):
       for line in data_file:
         self.seen_attributes = dict()
         json_dict = json.loads(line)
-        if json_dict['identifier'] == 1061:
-          print u'Migrating Event # {0} - {1}'.format(json_dict['identifier'], json_dict['uuid'])
-          event = self.map_event(json_dict)
-          self.event_controller.event_broker.insert(event, not debug)
+        print u'Migrating Event # {0} - {1}'.format(json_dict['identifier'], json_dict['uuid'])
+        event = self.map_event(json_dict)
+        self.event_controller.event_broker.insert(event, not debug)
+        if debug:
           break
-          if debug:
-            break
     self.event_controller.event_broker.do_commit(True)
 
   def map_event_group(self, line, owner):
