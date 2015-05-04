@@ -154,7 +154,7 @@ class Observable(ExtendedLogingInformations, Base):
   related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id')
   __bit_code = None
 
-  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
 
   @property
   def tlp(self):

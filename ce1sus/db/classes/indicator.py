@@ -59,7 +59,7 @@ class Killchain(ExtendedLogingInformations, Base):
 
 
 class KillChainPhase(Base):
-  phase_ref = Column('phase_ref', Integer(1))
+  phase_ref = Column('phase_ref', Integer)
   name = Column('name', Unicode(255))
   ordinality = Column('ordinality', Integer)
   phase_id = Column('phase_id', Integer)

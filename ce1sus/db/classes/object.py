@@ -61,7 +61,7 @@ class Object(ExtendedLogingInformations, Base):
   observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
-  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
 
   @property
   def tlp(self):

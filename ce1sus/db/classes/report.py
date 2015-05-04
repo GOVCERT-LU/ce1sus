@@ -140,7 +140,7 @@ class Reference(ExtendedLogingInformations, Base):
                           primaryjoin='Reference.identifier==Reference.parent_id')
   __bit_code = None
 
-  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
 
   @property
   def tlp(self):
@@ -222,7 +222,7 @@ class Report(ExtendedLogingInformations, Base):
 
   __bit_code = None
 
-  tlp_level_id = Column('tlp_level_id', Integer(1), default=3, nullable=False)
+  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
 
   @property
   def tlp(self):
