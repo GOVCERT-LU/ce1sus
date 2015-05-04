@@ -302,7 +302,7 @@ class Migrator(object):
     self.users = dict()
     self.groups = dict()
     self.seen_attributes = dict()
-    self.seen_attribtues_uuids = list()
+
     self.seen_attr_defs = dict()
     self.seen_obj_defs = dict()
 
@@ -323,19 +323,18 @@ class Migrator(object):
 
   def start_events(self):
     debug = False
-    data_file = open(self.dumps_folder + '/events.txt', 'r')
-    lines = data_file.readlines()
-    for line in lines:
-      json_dict = json.loads(line)
-      print u'Migrating Event # {0} - {1}'.format(json_dict['identifier'], json_dict['uuid'])
-      if json_dict['uuid'] == '84ca657d-eee2-4202-99be-f78256eb876a' or not debug:
-        event = self.map_event(json_dict)
-        self.event_controller.event_broker.insert(event, True)
-        event = None
-        if debug:
-          break
+    with open(self.dumps_folder + '/events.txt', 'r') as data_file:
+      for line in data_file:
+        self.seen_attributes = dict()
+        json_dict = json.loads(line)
 
-    data_file.close()
+        if json_dict['identifier'] >= 10441:
+          print u'Migrating Event # {0} - {1}'.format(json_dict['identifier'], json_dict['uuid'])
+          event = self.map_event(json_dict)
+          self.event_controller.event_broker.insert(event, False)
+          if debug:
+            break
+    # self.event_controller.event_broker.do_commit(True)
 
   def map_event_group(self, line, owner):
     group = self.get_groups()[line['identifier']]
@@ -566,6 +565,8 @@ class Migrator(object):
       name = 'link'
     if name == 'mutex':
       return None
+    if name == 'vulnerability_free_text':
+      name = 'comment'
     chksum = line['chksum']
     found_def = None
     for definition in self.ressources:
@@ -599,6 +600,8 @@ class Migrator(object):
     reference.originating_group_id = reference.creator_group.identifier
 
     # TODO definition of report attribute
+    if attribute['definition'] == 'vulnerability_free_text':
+      line['value'] = '{0} - {1}'.format('vulnerability_free_text', line['value'])
     definition = self.map_reference_definition(attribute['definition'])
     if definition:
       reference.definition = definition
@@ -609,6 +612,7 @@ class Migrator(object):
         # TODO: To check this again!
         if parent:
           parent.children.append(reference)
+      self.seen_attributes[attribute['identifier']] = reference
       return reference
     else:
       self.log_not_mapped(event, report.uuid, 'report', attribute, 'Reference Could not be mapped as definition is missing for the new report')
@@ -680,10 +684,7 @@ class Migrator(object):
 
     attribute = Attribute()
     id_ = line['uuid']
-    if id_ in self.seen_attribtues_uuids:
-      id_ = uuid4()
 
-    self.seen_attribtues_uuids.append(id_)
     attribute.uuid = id_
     set_db_code(attribute, line['dbcode'])
 
@@ -918,11 +919,13 @@ class Migrator(object):
         hive = value[0:pos]
         if hive == 'HKLM' or 'HKEY_LOCAL_MACHINE' in hive:
           hive = 'HKEY_LOCAL_MACHINE'
-        elif hive == 'HKCU' or 'HKEY_CURRENT_USER' in hive or hive == 'HCKU':
+        elif hive == 'HKCU' or 'HKEY_CURRENT_USER' in hive:
           hive = 'HKEY_CURRENT_USER'
+        elif hive == 'HKEY_USERS' or hive == 'HCKU':
+          hive == 'HKEY_USERS'
         elif hive == 'HKEY_CURRENTUSER':
           hive = 'HKEY_CURRENT_USER'
-        elif hive == 'HKCR':
+        elif hive == 'HKCR' or hive == 'HKEY_CLASSES_ROOT':
           hive = 'HKEY_CLASSES_ROOT'
         else:
           if hive[0:1] == 'H' and hive != 'HKCU_Classes':
@@ -934,15 +937,21 @@ class Migrator(object):
         observable.object = obj
         definition = self.map_obj_def({'name': 'WindowsRegistryKey', 'chksum': None})
         obj.definition = definition
+        hive = False
         if hive:
+          hive = True
           attribute['definition']['name'] = 'WindowsRegistryKey_Hive'
           attribute['value'] = hive
-          new_attribute = self.map_attribute(attribute, obj, owner, event)
-          obj.attributes.append(new_attribute)
+          hive_attr = self.map_attribute(attribute, obj, owner, event)
+          obj.attributes.append(hive_attr)
 
+        if hive:
+          attribute['uuid'] = u'{0}'.format(uuid4())
         attribute['definition']['name'] = 'WindowsRegistryKey_Key'
         attribute['value'] = key
         new_attribute = self.map_attribute(attribute, obj, owner, event)
+        if hive:
+          new_attribute.parent = hive_attr
         obj.attributes.append(new_attribute)
 
         composed_attribute.observables.append(observable)
@@ -1178,7 +1187,7 @@ class Migrator(object):
     return observable
 
   def map_cybox(self, line, owner, observable, event):
-
+    notset = True
     obj = self.make_object(line, observable)
     if line['definition']['name'] == 'network_traffic':
       # Most these are pcaps hence building a file with a raw atrifact.
@@ -1191,6 +1200,7 @@ class Migrator(object):
         if element['definition']['name'] == 'file_name':
           attribute_line = element
           break
+      notset = False
 
       # remove the assigned attributes from the object
       line['attributes'].remove(attribute_line)
@@ -1210,6 +1220,7 @@ class Migrator(object):
           break
       line['attributes'].remove(attribute_line)
       attribute_line['definition']['name'] = 'Raw_Artifact'
+      line['uuid'] = u'{0}'.format(uuid4())
       attribtue = self.map_attribute(attribute_line, raw_artifact, owner, event)
       raw_artifact.attributes.append(attribtue)
       # set the type
@@ -1229,6 +1240,7 @@ class Migrator(object):
       obj.definition = definition
 
       attribute_line = None
+      notset = False
       for element in line['attributes']:
         if element['definition']['name'] == 'raw_file' or element['definition']['name'] == 'raw_document_file':
           if attribute_line:
@@ -1323,11 +1335,12 @@ class Migrator(object):
       else:
         self.log_not_mapped(event, observable.uuid, 'observable', line, 'Object Could not be mapped as definition is missing for the new observable {0}\n'.format(observable.uuid))
         return None
-        # set attributes
-    for attribute in line['attributes']:
-      attribute = self.map_attribute(attribute, obj, owner, event)
-      if attribute:
-        obj.attributes.append(attribute)
+      # set attributes
+    if notset:
+      for attribute in line['attributes']:
+        attribute = self.map_attribute(attribute, obj, owner, event)
+        if attribute:
+          obj.attributes.append(attribute)
 
     if line.get('children'):
       for child in line['children']:
