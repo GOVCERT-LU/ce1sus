@@ -7,7 +7,7 @@ Created on Dec 29, 2014
 """
 from ce1sus.controllers.events.events import EventsController
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require
-from ce1sus.views.web.common.decorators import privileged, validate
+from ce1sus.views.web.common.decorators import validate
 
 
 __author__ = 'Weber Jean-Paul'

@@ -6,16 +6,11 @@
 Created on Apr 2, 2015
 """
 from ce1sus.controllers.admin.syncserver import SyncServerController
-from ce1sus.controllers.base import ControllerException, \
-  ControllerNothingFoundException
-from ce1sus.db.classes.servers import SyncServer
-from ce1sus.views.web.adapters.misp.misp import MISPAdapter, \
-  MISPAdapterException
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, \
-  Ce1susAdapterException
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, Ce1susAdapterException
 
 
 __author__ = 'Weber Jean-Paul'

@@ -17,6 +17,7 @@ SESSION_KEY = '_cp_username'
 SESSION_CONFIG = '_cp_config'
 SESSION_USER = '_cp_user'
 
+
 def check_auth(*args, **kwargs):
   """A tool that looks in config for 'auth.require'. If found and it
   is not None, a login is required and the entry is evaluated as a list of

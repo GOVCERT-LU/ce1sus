@@ -43,3 +43,7 @@ magic.py
 /lib/
 /__init__.py
 /dumps/
+/eml_parser/
+/openioc_to_cybox.py
+/openioc.py
+/ioc_observable.py

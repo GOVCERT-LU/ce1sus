@@ -149,6 +149,13 @@ class Assembler(BaseController):
       self.event_controller.insert_event(user, event, True, False)
 
     if owner:
+      # check if the owner should stay
+      if event.creator_group.name == user.group.name:
+        owner = True
+      else:
+        owner = False
+
+    if owner:
       event.properties.is_validated = True
       event.properties.is_proposal = False
     else:

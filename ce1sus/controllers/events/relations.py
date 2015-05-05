@@ -6,7 +6,6 @@
 Created on Jan 2, 2015
 """
 
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.relationbroker import RelationBroker
