@@ -195,7 +195,7 @@ class Event(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator_group_id == user.group.identifier:
+        if rel_obj.creator_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -217,7 +217,7 @@ class Event(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator_group_id == user.group.identifier:
+        if rel_obj.creator_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
     """

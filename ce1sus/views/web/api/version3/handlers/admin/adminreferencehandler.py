@@ -25,7 +25,7 @@ class AdminReferenceDefinitionHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
-  @require(privileged())
+  @require()
   def reference(self, **args):
     try:
       method = args.get('method')
