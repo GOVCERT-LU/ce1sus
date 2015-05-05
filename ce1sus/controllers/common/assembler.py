@@ -114,6 +114,16 @@ class Assembler(BaseController):
           return group
         except BrokerException:
           group = None
+      else:
+        name = json.get('name', None)
+        if name:
+          try:
+            group = self.group_broker.get_by_name(name)
+          except NothingFoundException:
+            group = Group()
+            group.populate(json)
+            self.group_broker.insert(group, False)
+            return group
     if not group:
       try:
         group = self.group_broker.get_by_id(user.group_id)

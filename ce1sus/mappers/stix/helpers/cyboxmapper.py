@@ -17,14 +17,19 @@ from cybox.objects.address_object import Address
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
 from cybox.objects.hostname_object import Hostname
-from cybox.objects.process_object import Process
-from cybox.objects.win_process_object import WinProcess
-from cybox.objects.uri_object import URI
-from cybox.objects.win_event_log_object import WinEventLog
-from cybox.objects.user_account_object import UserAccount
-from cybox.objects.win_service_object import WinService
-from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.network_connection_object import NetworkConnection
+from cybox.objects.process_object import Process
+from cybox.objects.uri_object import URI
+from cybox.objects.user_account_object import UserAccount
+from cybox.objects.win_event_log_object import WinEventLog
+from cybox.objects.win_process_object import WinProcess
+from cybox.objects.win_registry_key_object import WinRegistryKey
+from cybox.objects.win_service_object import WinService
+from cybox.objects.win_volume_object import WinVolume
+from cybox.objects.disk_object import Disk
+from cybox.objects.win_kernel_hook_object import WinKernelHook
+from cybox.objects.win_driver_object import WinDriver
+from cybox.objects.win_executable_file_object import WinExecutableFile
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -66,6 +71,10 @@ class CyboxMapper(BaseController):
         definition = self.obj_defs.get('email')
       else:
         raise CyboxMapperException(u'Note defined')
+    elif isinstance(instance, WinDriver):
+      definition = self.obj_defs.get('WinDriver')
+    elif isinstance(instance, WinExecutableFile):
+      definition = self.obj_defs.get('WinExecutableFile')
     elif isinstance(instance, File):
       definition = self.obj_defs.get('File')
     elif isinstance(instance, URI):
@@ -85,8 +94,14 @@ class CyboxMapper(BaseController):
       definition = self.obj_defs.get('UserAccount')
     elif isinstance(instance, WinRegistryKey):
       definition = self.obj_defs.get('WindowsRegistryKey')
+    elif isinstance(instance, WinVolume):
+      definition = self.obj_defs.get('WinVolume')
     elif isinstance(instance, NetworkConnection):
       definition = self.obj_defs.get('NetworkConnection')
+    elif isinstance(instance, Disk):
+      definition = self.obj_defs.get('Disk')
+    elif isinstance(instance, WinKernelHook):
+      definition = self.obj_defs.get('WinKernelHook')
     if definition:
       return definition
     else:
@@ -257,6 +272,60 @@ class CyboxMapper(BaseController):
       # check it it is not an other type of file like WinExecutableFile
       raise CyboxMapperException('No attribute was created for win_reg_key')
 
+  def create_win_volume(self, win_volume, parent, is_indicator, tlp_id):
+    attributes = list()
+    if win_volume.drive_letter:
+      attributes.append(self.__create_attribute_by_def('Drive_Letter', parent, win_volume.drive_letter, False, win_volume.drive_letter.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
+  def create_disk(self, disk, parent, is_indicator, tlp_id):
+    attributes = list()
+    if disk.disk_name:
+      attributes.append(self.__create_attribute_by_def('Disk_Name', parent, disk.disk_name, False, disk.disk_name.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
+  def create_win_kernel_hook(self, win_kernel_hook, parent, is_indicator, tlp_id):
+    attributes = list()
+    if win_kernel_hook.hooked_module:
+      attributes.append(self.__create_attribute_by_def('Hooked_Module', parent, win_kernel_hook.hooked_module, False, win_kernel_hook.hooked_module.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
+  def create_win_driver(self, win_driver, parent, is_indicator, tlp_id):
+    attributes = list()
+    if win_driver.driver_name:
+      attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_driver.driver_name, False, win_driver.driver_name.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
+  def create_win_executable_file(self, win_executable_file, parent, is_indicator, tlp_id):
+    attributes = list()
+    if win_executable_file.driver_name:
+      attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_driver.driver_name, False, win_driver.driver_name.condition, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
 
   def create_attributes(self, properties, parent_object, tlp_id, is_indicator):
     # TODO: Create custom properties
@@ -269,6 +338,10 @@ class CyboxMapper(BaseController):
       prop = properties.hostname_value
     elif isinstance(properties, Address):
       prop = properties.address_value
+    elif isinstance(properties, WinDriver):
+      return self.create_win_driver(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, WinExecutableFile):
+      return self.create_win_executable_file(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, File):
       return self.create_file_attributes(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, URI):
@@ -285,7 +358,12 @@ class CyboxMapper(BaseController):
       return self.create_win_reg_key(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, NetworkConnection):
       return self.create_network_connection(properties, parent_object, is_indicator, tlp_id)
-
+    elif isinstance(properties, WinVolume):
+      return self.create_win_volume(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, Disk):
+      return self.create_disk(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, WinKernelHook):
+      return self.create_win_kernel_hook(properties, parent_object, is_indicator, tlp_id)
     else:
       raise CyboxMapperException('No attribute definiton defined for {0}'.format(properties))
     counter = 0

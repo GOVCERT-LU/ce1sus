@@ -28,7 +28,7 @@ class AdminIndicatorTypesHandler(RestBaseHandler):
     # TODO inmplement indicator handler
     details = self.get_detail_value(args)
     inflated = self.get_inflated_value(args)
-    types = self.indicator_controller.get_all()
+    types = self.indicator_controller.get_all_types()
     result = list()
     for type_ in types:
       result.append(type_.to_dict(details, inflated))

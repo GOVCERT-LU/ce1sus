@@ -477,8 +477,9 @@ class MispConverter(BaseController):
         name = 'HTTPSession'
       elif type_ in ['vulnerability', 'malware-sample', 'filename']:
         name = 'file'
-      elif type_ in ['text', 'as', 'comment', 'pattern-in-traffic']:
-
+      elif type_ == 'pattern-in-traffic':
+        name = 'forensic_records'
+      elif type_ in ['text', 'as', 'comment']:
         message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
         print message
         self.logger.warning(message)
@@ -494,7 +495,7 @@ class MispConverter(BaseController):
         name = 'Mutex'
       elif 'pipe' in type_:
         name = 'Pipe'
-      elif type_ == 'text':
+      elif type_ in ['text', 'others']:
         message = u'Category "{0}" Type "{1}" with value "{2}" not mapped map manually'.format(category, type_, value)
         print message
         self.logger.warning(message)
@@ -534,10 +535,14 @@ class MispConverter(BaseController):
     # compose the correct chksum/name
     chksum = None
     name = None
-    if type_ == 'url':
+    if category == 'artifacts dropped' and type_ == 'other':
+      return None
+    elif type_ == 'url':
       name = 'link'
     elif type_ in ['text', 'other']:
       name = 'comment'
+    elif type_ == 'attachment':
+      name = 'raw_file'
     else:
       name = type_
 
@@ -571,7 +576,7 @@ class MispConverter(BaseController):
       name = type_
 
     if 'pattern' in type_:
-      condition = self.get_condition('Like')
+      condition = self.get_condition('FitsPattern')
     else:
       condition = self.get_condition('Equals')
 
@@ -611,7 +616,7 @@ class MispConverter(BaseController):
       elif type_ in ['url']:
         name = 'url'
         if type_ == 'url' and '://' not in value:
-          attribute.condition = 'Like'
+          attribute.condition = self.get_condition('FitsPattern')
       elif type_ == 'http-method':
         name = 'HTTP_Method'
       elif type_ in ['vulnerability']:
@@ -677,6 +682,8 @@ class MispConverter(BaseController):
       self.set_extended_logging(reference, event, ts)
       return reference
     else:
+      message = u'Category {0} Type {1} with value {2} not mapped map manually'.format(category, type_, value)
+      self.log_element(None, None, None, category, type_, value, ioc, share, event, uuid, message, distribution)
       return None
 
   def create_observable(self, id_, uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution, ignore_uuid=False):
@@ -684,20 +691,20 @@ class MispConverter(BaseController):
       # make a report
       # Create Report it will be just a single one
       reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution)
-      if len(event.reports) == 0:
-        report = Report()
-        self.set_tlp(report, distribution)
-        # report.event = event
-        report.event_id = event.identifier
-
-        self.set_extended_logging(report, event, ts)
-        if comment:
-          if report.description:
-            report.description = report.description + ' - ' + comment
-          else:
-            report.description = comment
-        event.reports.append(report)
       if reference:
+        if len(event.reports) == 0:
+          report = Report()
+          self.set_tlp(report, distribution)
+          # report.event = event
+          report.event_id = event.identifier
+
+          self.set_extended_logging(report, event, ts)
+          if comment:
+            if report.description:
+              report.description = report.description + ' - ' + comment
+            else:
+              report.description = comment
+          event.reports.append(report)
         event.reports[0].references.append(reference)
     elif category == 'attribution':
       reference = self.create_reference(uuid, category, type_, value, data, comment, ioc, share, event, ts, distribution)
