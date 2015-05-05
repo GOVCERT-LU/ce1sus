@@ -11,13 +11,13 @@ Moreover the shared IOCs were received in many different formats, and often ther
 ce1sus has the goal to facilitate:
 
 1. Central database: Storing any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner 
-2. Sharing: Be compatible with open standards (STIX/Cybox) / or the most commonly used formats to facilitate the sharing trusted partners
+2. Sharing: Be compatible with open standards (STIX/CybOX) / or the most commonly used formats to facilitate the sharing trusted partners
 3. Automatized Import/Export: Synchronization of instances between trusted partners
-4. Ease of use: Generate informations out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
+4. Ease of use: Generate information out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
 5. Correlation: Automatically creating relations between seen threats
 6. Visualization: Represent the threat/analysis as close as possible to the  the real-life case in a structured manner
 
-The structuration of a threat provides context to others with nearly no efforts. An Example 
+The structure of a threat provides context to others with nearly no efforts. An Example 
 
 Example:
 Email with a malicious attachment
@@ -35,7 +35,7 @@ Such structures improve the understanding how the the different attributes are r
 Note
 ----
 
-There are several branches, which are primarly used for development the master branch will be the release which is considered as stable
+There are several branches, which are primarily used for development the master branch will be the release which is considered as stable
 
 This is still not the final release, we are still developing ce1sus.
 
@@ -54,12 +54,12 @@ Features
 * Easy installation
 * Completely open source
 * Search
-* STIX Compatible (Currently supports Observables, Indicators, Markings, KillChains)
+* STIX Compatible (Currently supports Observables, Indicators, Markings, Kill-Chains)
 * Completely interfaceable (REST API)
 * Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
-* Genuine Misp v2.x integration of push/pull requests
-* Cybox naming convention
+* Genuine MISP v2.x integration of push/pull requests
+* CybOX naming convention
 * Synchronization between ce1sus instances
 * Web-interface sync-server management (MISP and ce1sus)
 * Mail notifications
@@ -71,7 +71,7 @@ Requirements
 
 - python
   * python (2.7+)
-  * sqlalchemy (0.7.8+)
+  * SQLAlchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
@@ -82,12 +82,12 @@ Requirements
   * rtkit (optional)
   * gnupg (0.3.5+)
   * eml_parser (https://github.com/sim0nx/eml_parser/
-- mysql (5.1+)
-- nginx (1.4+)
-- uwsgi (1.2.3+, with python-2 support)
+- MySQL (5.1+)
+- Nginx (1.4+)
+- uWSGI (1.2.3+, with python-2 support)
 - memcached
 
-RoadMap
+Roadmap
 =======
 
 v0.11.1
@@ -105,8 +105,8 @@ Up the road 0.11.x
 * Profile management
 * More handlers
 * Improved search
-* Export of events (i.e. csv, xml, json)
-* Enhanced STIX/Cybox support
+* Export of events (i.e. CSV, XML, JSON)
+* Enhanced STIX/CybOX support
 * Show statistics on Home page
 * Password protection for compressed files
 
