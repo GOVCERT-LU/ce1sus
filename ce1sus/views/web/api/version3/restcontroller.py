@@ -6,7 +6,7 @@
 Created on Oct 23, 2014
 """
 import cherrypy
-from json import dumps, loads
+from json import dumps
 from uuid import UUID
 
 from ce1sus.helpers.common.objects import get_methods
