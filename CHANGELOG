@@ -13,8 +13,7 @@ Release 0.11.0
 * Handlers have a separate configuration file
 * Added View Types for attributes to decouple view and API
 * The interfaces accesses the API (the GUI now can be turned off)
-* Modify events via REST API: object/attribute add/remove
-* Proposal mechanism for REST API
+* Modify events via REST API: object/attribute add/remove/edit
 * submit proposals for adding objects/attributes via REST
 * Enhanced ACL, for admins and users
 * Enhanced relation finder (Similar attributes can be grouped, but still the relation is done by ==)

@@ -12,8 +12,7 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.name.$invalid && !addGroupForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="group.name"
-          type="text" required ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^[\d\w]+$/">
+          type="text" required ng-minlength=3 ng-maxlength=255>
         <p
           ng-show="addGroupForm.name.$invalid && !addGroupForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -21,8 +20,6 @@
           class="help-block">Name is too short.</p>
         <p ng-show="addGroupForm.name.$error.maxlength"
           class="help-block">Name is too long.</p>
-        <p ng-show="addGroupForm.name.$error.pattern" class="help-block">Name
-          is not alphanumeric.</p>
       </div>
     </div>
   </div>
