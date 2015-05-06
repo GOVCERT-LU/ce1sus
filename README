@@ -10,27 +10,27 @@ Moreover the shared IOCs were received in many different formats, and often ther
 
 ce1sus has the goal to facilitate:
 
-1. Central database: Storing any information around all kinds of threads (i.e. scam, malware, phishing, ...). in a structured manner 
+1. Central database: Storing any information around all kinds of threats (i.e. scam, malware, phishing, ...). in a structured manner 
 2. Sharing: Be compatible with open standards (STIX/CybOX) / or the most commonly used formats to facilitate the sharing trusted partners
 3. Automatized Import/Export: Synchronization of instances between trusted partners
 4. Ease of use: Generate information out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
 5. Correlation: Automatically creating relations between seen threats
-6. Visualization: Represent the threat/analysis as close as possible to the  the real-life case in a structured manner
+6. Visualization: Represent the real-life case as closely as possible
 
 The structure of a threat provides context to others with nearly no efforts. An Example 
 
 Example:
 Email with a malicious attachment
 
-In such cases the event should start by an email object. 
-That object then can have all the attributes (i.e. email_from, email_body, ...) required to represent an email. 
-This object then will get a child object representing the attachment. 
-If now this file is just a dropper then the dropped file should be a child of the previous object and so forth.
+In such cases the event should start with an email object. 
+That object can then have all the attributes (i.e. email_from, email_body, ...) required to represent an email. 
+This object will then get a child object representing the attachment. 
+If this file is just a dropper, then the dropped file should be a child of the previous object and so forth.
 
 For this scenario one can directly deduce that then a child file was found that it is highly probable that the file came from this specific dropper
 and if the dropper file was not found one at least knows that the cases are related.  
 
-Such structures improve the understanding how the the different attributes are related and leads to a better overview on relations between events.
+Such structures improve the understanding of how the different attributes are related, and leads to a better overview on the relationship between events.
 
 Note
 ----
@@ -101,11 +101,10 @@ v0.11.2
 
 Up the road 0.11.x
 -----------
-* Share custom definitions
 * Profile management
 * More handlers
 * Improved search
-* Export of events (i.e. CSV, XML, JSON)
+* Export of events (i.e. CSV)
 * Enhanced STIX/CybOX support
 * Show statistics on Home page
 * Password protection for compressed files
