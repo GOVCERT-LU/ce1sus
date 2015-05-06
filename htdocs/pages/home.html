@@ -5,8 +5,12 @@
     <br/>
     <p>
     <i class='icon-spinner icon-spin icon-large'></i>
+    <div ng-if="changelog=='Login'">
+    <a href="#/login">Login</a>
+    </div>
+    <div ng-if="changelog!='Login'">
     <plain-text text="changelog"/>
- 
+    </div>
     </p>
   </div>
 

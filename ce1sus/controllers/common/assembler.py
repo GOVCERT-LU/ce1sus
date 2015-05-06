@@ -5,7 +5,9 @@
 
 Created on Feb 18, 2015
 """
+from ce1sus.helpers.common import strings
 from datetime import datetime
+import re
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
@@ -24,7 +26,10 @@ from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition
 from ce1sus.db.classes.servers import SyncServer
 from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
-from ce1sus.helpers.common import strings
+from ce1sus.helpers.common.hash import hashSHA1
+from ce1sus.helpers.pluginfunctions import is_plugin_available, \
+  get_plugin_function
+from ce1sus.plugins.ldapplugin import LdapPlugin
 
 
 __author__ = 'Weber Jean-Paul'
@@ -49,6 +54,7 @@ class Assembler(BaseController):
     self.value_type_broker = self.broker_factory(AttributeTypeBroker)
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.references_broker = self.broker_factory(ReferencesBroker)
+    self.salt = self.config.get('ce1sus', 'salt', None)
 
   def get_user(self, json):
     uuid = json.get('identifier', None)
@@ -450,6 +456,20 @@ class Assembler(BaseController):
 
   def update_user(self, user, json):
     user.populate(json)
+    if self.salt:
+      salt = self.salt
+    else:
+      salt = user.username
+    # Do not update the password if it matches the masking
+    if user.plain_password:
+      fistcheck = True
+      if is_plugin_available('ldap', self.config):
+        ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
+        if user.plain_password == ldap_password_identifier:
+          user.password = ldap_password_identifier
+          fistcheck = False
+      if not re.match(r'^\*{8,}$', user.plain_password) and fistcheck:
+        user.password = hashSHA1(user.plain_password, salt)
     group_uuid = json.get('group_id', None)
     if group_uuid:
       group = self.group_broker.get_by_uuid(group_uuid)

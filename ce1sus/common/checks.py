@@ -22,7 +22,7 @@ def is_object_viewable(instance, event_permissions, user_group, cache=None):
     return True
   elif event_permissions:
     # check if the user owns the attribtue
-    if instance.properties.is_validated:
+    if not instance.properties.is_validated:
       # if the user has the view non shared set then show
       if event_permissions.can_validate:
         return True
