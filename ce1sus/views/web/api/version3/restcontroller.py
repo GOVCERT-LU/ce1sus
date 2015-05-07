@@ -5,11 +5,12 @@
 
 Created on Oct 23, 2014
 """
+from ce1sus.helpers.common.objects import get_methods
 import cherrypy
+from cherrypy.lib import file_generator
 from json import dumps
 from uuid import UUID
 
-from ce1sus.helpers.common.objects import get_methods
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
 from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminindicatorhandler import AdminIndicatorTypesHandler
@@ -23,6 +24,7 @@ from ce1sus.views.web.api.version3.handlers.admin.mailhandler import MailHandler
 from ce1sus.views.web.api.version3.handlers.admin.syncservershandler import SyncServerHandler
 from ce1sus.views.web.api.version3.handlers.common.definitions import StatusHandler, AnalysisHandler, RiskHandler, TLPHanlder, RelationHandler
 from ce1sus.views.web.api.version3.handlers.common.grouphandler import GroupHandler
+from ce1sus.views.web.api.version3.handlers.common.processhandler import ProcessHandler
 from ce1sus.views.web.api.version3.handlers.common.restchecks import ChecksHandler
 from ce1sus.views.web.api.version3.handlers.events.eventhandler import EventHandler
 from ce1sus.views.web.api.version3.handlers.events.eventshandler import EventsHandler
@@ -36,7 +38,6 @@ from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, H
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
-from ce1sus.views.web.api.version3.handlers.common.processhandler import ProcessHandler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -185,7 +186,10 @@ class RestController(BaseView):
             # execute method
             # set the correct headers
             cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
-            return dumps(result)
+            if isinstance(result, file_generator):
+              return result
+            else:
+              return dumps(result)
           except RestHandlerException as error:
             message = u'{0}'.format(error)
             self.logger.error(message)

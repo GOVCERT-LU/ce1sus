@@ -195,7 +195,7 @@ class Event(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator_group_id == user.group_id:
+        if rel_obj.originating_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -217,7 +217,7 @@ class Event(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj, event_permissions, user.group):
         rel_objs.append(rel_obj)
       else:
-        if rel_obj.creator_group_id == user.group_id:
+        if rel_obj.originating_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
     """
@@ -368,6 +368,9 @@ class Event(ExtendedLogingInformations, Base):
       last_seen = ValueConverter.set_date(last_seen)
     else:
       last_seen = datetime.utcnow()
+    last_publish_date = json.get('last_publish_date', None)
+    if last_publish_date:
+      last_publish_date = ValueConverter.set_date(last_publish_date)
     self.last_seen = last_seen
 
 

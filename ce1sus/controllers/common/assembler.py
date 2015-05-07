@@ -5,9 +5,12 @@
 
 Created on Feb 18, 2015
 """
+import base64
 from ce1sus.helpers.common import strings
 from datetime import datetime
+from os.path import dirname
 import re
+from shutil import move, rmtree
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
@@ -18,7 +21,7 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBr
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
-from ce1sus.db.classes.event import Comment, Event
+from ce1sus.db.classes.event import Comment, Event, EventGroupPermission
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
@@ -26,7 +29,9 @@ from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition
 from ce1sus.db.classes.servers import SyncServer
 from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
-from ce1sus.helpers.common.hash import hashSHA1
+from ce1sus.handlers.attributes.filehandler import FileHandler
+from ce1sus.handlers.references.filehandler import FileReferenceHandler
+from ce1sus.helpers.common.hash import hashSHA1, hashMD5, fileHashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, \
   get_plugin_function
 from ce1sus.plugins.ldapplugin import LdapPlugin
@@ -142,7 +147,12 @@ class Assembler(BaseController):
     self.populate_simple_logging(instance, json, user, insert)
     if insert:
       instance.creator_group = self.get_set_group(json.get('creator_group', None), user)
-      instance.originating_group = self.get_set_group(json.get('originating_group', None), user)
+      org_grp = json.get('originating_group', None)
+      if org_grp:
+        instance.originating_group = self.get_set_group(org_grp, user)
+      else:
+        instance.originating_group = instance.creator_group
+      instance.owner_group = user.group
 
   def assemble_event(self, json, user, owner=False, rest_insert=True, poponly=False):
 
@@ -184,6 +194,21 @@ class Assembler(BaseController):
       for comment in comments:
         com = self.assemble_comment(event, comment, user, owner, rest_insert)
         event.comments.append(com)
+
+    # Add the creator group
+    event_permission = EventGroupPermission()
+
+    event_permission.permissions = event.creator_group.default_permissions
+    # but he can insert add
+    event_permission.permissions.can_add = True
+    event_permission.permissions.can_propose = True
+    event_permission.permissions.can_modify = True
+    event_permission.permissions.can_delete = True
+    event_permission.group = event.creator_group
+    self.set_extended_logging(event_permission, user, user.group, True)
+
+    event.groups.append(event_permission)
+
     # TODO check if definitions do exist
     event.properties.is_rest_instert = rest_insert
     event.properties.is_web_insert = not rest_insert
@@ -376,7 +401,34 @@ class Assembler(BaseController):
     attribute.object = obj
     attribute.object_id = obj.identifier
 
-    attribute.value = json.get('value', None)
+    # attention to raw_artefacts!!!
+    value = json.get('value', None)
+    if definition.name == 'Raw_Artifact':
+
+      fh = FileHandler()
+
+      tmp_filename = hashMD5(datetime.utcnow())
+
+      binary_data = base64.b64decode(value)
+      tmp_folder = fh.get_tmp_folder()
+      tmp_path = tmp_folder + '/' + tmp_filename
+
+      file_obj = open(tmp_path, "w")
+      file_obj.write(binary_data)
+      file_obj.close
+
+      sha1 = fileHashSHA1(tmp_path)
+      rel_folder = fh.get_rel_folder()
+      dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
+
+      # move it to the correct place
+      move(tmp_path, dest_path)
+      # remove temp folder
+      rmtree(dirname(tmp_path))
+
+      attribute.value = rel_folder + '/' + sha1
+    else:
+      attribute.value = value
 
     condition_uuid = json.get('condition_id', None)
     if not condition_uuid:
@@ -501,12 +553,7 @@ class Assembler(BaseController):
     if related_object.relation == 'None':
       related_object.relation = None
     obj.related_objects.append(related_object)
-    if owner:
-      related_object.properties.is_validated = True
-      related_object.properties.is_proposal = False
-    else:
-      related_object.properties.is_validated = False
-      related_object.properties.is_proposal = True
+
     return related_object
 
   def get_reference_definition(self, json):
@@ -534,6 +581,38 @@ class Assembler(BaseController):
         ref.definition = definition
         ref.uuid = reference.get('identifier', None)
         ref.populate(reference, rest_insert)
+
+        value = reference.get('value', None)
+        if definition.name == 'raw_file':
+
+          fh = FileReferenceHandler()
+          filename = value.get('filename', None)
+          data = value.get('data', None)
+          if filename and data:
+            tmp_filename = hashMD5(datetime.utcnow())
+            binary_data = base64.b64decode(data)
+            tmp_folder = fh.get_tmp_folder()
+            tmp_path = tmp_folder + '/' + tmp_filename
+
+            file_obj = open(tmp_path, "w")
+            file_obj.write(binary_data)
+            file_obj.close
+
+            sha1 = fileHashSHA1(tmp_path)
+            rel_folder = fh.get_rel_folder()
+            dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
+
+            # move it to the correct place
+            move(tmp_path, dest_path)
+            # remove temp folder
+            rmtree(dirname(tmp_path))
+
+            ref.value = rel_folder + '/' + sha1 + '|' + filename
+          else:
+            raise AssemblerException('Reference file is malformated')
+        else:
+          ref.value = value
+
         # set definition
         self.populate_extended_logging(ref, reference, user, True)
         if owner:

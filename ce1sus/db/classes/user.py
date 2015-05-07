@@ -108,6 +108,7 @@ class User(Base):
   activation_str = Column('activation_str', Unicode(255, collation='utf8_unicode_ci'))
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
+
   group_id = Column('group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
   group = relationship(Group, backref='users')
   plain_password = None

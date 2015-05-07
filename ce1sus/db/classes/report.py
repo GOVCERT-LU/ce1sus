@@ -170,7 +170,7 @@ class Reference(ExtendedLogingInformations, Base):
     if self.definition:
       if self.definition.uuid != definition_uuid:
         raise ValueException(u'Reference definitions cannot be updated')
-    self.value = json.get('value', None)
+
     self.properties.populate(json.get('properties', None))
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert

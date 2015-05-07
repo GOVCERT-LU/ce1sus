@@ -162,9 +162,10 @@ class EventBroker(BrokerBase):
 
   def __get_group_ids_of_group(self, group):
     result = list()
-    result.append(group.identifier)
-    for group in group.children:
-      result = result + self.__get_group_ids_of_group(group)
+    if group:
+      result.append(group.identifier)
+      for group in group.children:
+        result = result + self.__get_group_ids_of_group(group)
     return result
 
   def __get_all_group_ids_of_user(self, user):

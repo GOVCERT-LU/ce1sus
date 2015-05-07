@@ -7,10 +7,11 @@ Created on Nov 13, 2014
 """
 from datetime import datetime
 
-from ce1sus.db.classes.mailtemplate import MailTemplate
-from ce1sus.db.classes.user import User
-from ce1sus.db.classes.types import AttributeType
 from ce1sus.db.classes.attribute import Condition
+from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.mailtemplate import MailTemplate
+from ce1sus.db.classes.types import AttributeType
+from ce1sus.db.classes.user import User
 from ce1sus.helpers.common.hash import hashSHA1
 
 
@@ -40,6 +41,17 @@ def get_users(config):
   user.dbcode = 31
   user.activation_sent = None
   user.activation_str = 'e96e0b6cfdb77c4e957508315bf7b7124aea9fa0'
+  user.api_key = '4a5e3a7e8aa200cbde64432df11c4b459b154499'
+
+  group = Group()
+  group.name = 'Administrators'
+  group.description = 'Administrators group'
+  group.tlp_lvl = 0
+  group.dbcode = 31
+  group.default_dbcode = 31
+  group.email = 'admin@example.com'
+
+  user.group = group
 
   result.append(user)
   return result

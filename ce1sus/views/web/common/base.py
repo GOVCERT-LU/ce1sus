@@ -215,7 +215,7 @@ class BaseView(object):
     # The same is in the mailer
     if not user:
       user = self.get_user()
-    if is_event_owner(event, user):
+    if self.is_event_owner(event, user):
       return True
     else:
       if user:
@@ -257,10 +257,6 @@ class BaseView(object):
         if is_object_viewable(item, permissions, user.group):
           return True
         else:
-          # check if owner
-          if item.creator_group_id == user.group.identifier:
-            return True
-          else:
             return False
       else:
         return False

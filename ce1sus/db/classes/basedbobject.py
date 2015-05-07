@@ -58,3 +58,12 @@ class ExtendedLogingInformations(SimpleLogingInformations):
   @declared_attr
   def originating_group(cls):
     return relationship('Group', primaryjoin='{0}.originating_group_id==Group.identifier'.format(cls.__name__))
+
+  @declared_attr
+  def owner_group_id(cls):
+    return Column('owner_group_id', BigInteger, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
+
+  @declared_attr
+  def owner_group(cls):
+    return relationship('Group', primaryjoin='{0}.owner_group_id==Group.identifier'.format(cls.__name__))
+

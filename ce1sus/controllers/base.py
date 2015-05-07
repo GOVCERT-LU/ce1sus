@@ -123,3 +123,5 @@ class BaseController:
         instance.creator_group = user.group
       if not instance.originating_group:
         instance.originating_group = originating_group
+      if not instance.owner_group:
+        instance.owner_group = user.group

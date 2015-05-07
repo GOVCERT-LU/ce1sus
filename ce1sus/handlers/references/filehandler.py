@@ -137,7 +137,7 @@ class FileReferenceHandler(GenericHandler):
       # main
       main_definition = self.get_main_definition()
 
-      internal_json['value'] = rel_folder + '/' + sha1
+      internal_json['value'] = rel_folder + '/' + sha1 + '|' + filename
       main_attribute = self.create_reference(report, main_definition, user, internal_json)
       # secondary
       attributes = list()
@@ -159,10 +159,13 @@ class FileReferenceHandler(GenericHandler):
   def update(self, attribute, user, json):
     raise HandlerException('FileHandler does not support updates')
 
-  def get_data(self, attribute, parameters):
-    if attribute:
-      rel_path = attribute.value
-      event = attribute.object.event
+  def get_data(self, reference, definition, parameters):
+    if reference:
+      splitted = reference.value.split('|')
+
+      rel_path = splitted[0]
+      filename = splitted[1]
+      event = reference.report.event
 
       user_can_download = can_user_download(event, self.user)
       if not user_can_download:
@@ -171,11 +174,9 @@ class FileReferenceHandler(GenericHandler):
       if base_path and rel_path:
         filepath = base_path + '/' + rel_path
         if isfile(filepath):
-          filename = self.__get_orig_filename(attribute)
           # create zipfile
           tmp_path = self.get_base_path()
-          if not filename:
-            filename = basename(filepath)
+
           tmp_path += '/' + basename(filepath) + '.zip'
           # remove file if it should exist
           try:
@@ -222,19 +223,6 @@ class FileReferenceHandler(GenericHandler):
                                      datetime.utcnow().month,
                                      datetime.utcnow().day)
     return dest_path
-
-  def __get_orig_filename(self, attribtue):
-    """
-    Returns the original filename
-    """
-    if attribtue.children:
-      for child in attribtue.children:
-        if child.definition.chksum == CHK_SUM_FILE_NAME:
-          return child.plain_value
-      # ok no filename has been found using the one from the attribute value
-      return basename(attribtue.value)
-    else:
-      return None
 
   def require_js(self):
     return False
