@@ -65,11 +65,12 @@ class SearchHandler(RestBaseHandler):
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
     for found_value in results:
-
+      user = self.get_user()
       # TODO: include user!!!!! IMPORTANT if the event is extracted by mistake
       if isinstance(found_value, Event):
         if self.__check_permissions(found_value, None):
-          result.append({'event': found_value.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(found_value, user)
+          result.append({'event': found_value.to_dict(False, False, eventpermissions, user),
                          'object': None,
                          'observable': None,
                          'attribute': None,
@@ -77,59 +78,66 @@ class SearchHandler(RestBaseHandler):
       elif isinstance(found_value, Object):
         event = found_value.event
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
-                         'object': found_value.to_dict(False, False),
-                         'observable': found_value.observable.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
+                         'object': found_value.to_dict(False, False, eventpermissions, user),
+                         'observable': found_value.observable.to_dict(False, False, eventpermissions, user),
                          'attribute': None,
                          })
       elif isinstance(found_value, Attribute):
         obj = found_value.object
         event = obj.event
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
-                         'object': obj.to_dict(False, False),
-                         'observable': obj.observable.to_dict(False, False),
-                         'attribute': found_value.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
+                         'object': obj.to_dict(False, False, eventpermissions, user),
+                         'observable': obj.observable.to_dict(False, False, eventpermissions, user),
+                         'attribute': found_value.to_dict(False, False, eventpermissions, user),
                          })
       elif isinstance(found_value, Observable):
         event = found_value.parent
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
                          'object': None,
-                         'observable': found_value.to_dict(False, False),
+                         'observable': found_value.to_dict(False, False, eventpermissions, user),
                          'attribute': None,
                          })
       elif isinstance(found_value, ObservableComposition):
         event = found_value.parent.parent
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
                          'object': None,
-                         'observable': found_value.to_dict(False, False),
+                         'observable': found_value.to_dict(False, False, eventpermissions, user),
                          'attribute': None,
                          })
       elif isinstance(found_value, Report):
         event = found_value.event
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
-                         'report': found_value.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
+                         'report': found_value.to_dict(False, False, eventpermissions, user),
                          'reference': None,
                          })
       elif isinstance(found_value, Reference):
         event = found_value.report.event
         if self.__check_permissions(event, found_value):
-          result.append({'event': event.to_dict(False, False),
-                         'report': found_value.report.to_dict(False, False),
-                         'reference': found_value.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
+                         'report': found_value.report.to_dict(False, False, eventpermissions, user),
+                         'reference': found_value.to_dict(False, False, eventpermissions, user),
                          })
       else:
         attribute = found_value.attribute
         obj = attribute.object
         event = obj.event
         if self.__check_permissions(event, attribute):
-          result.append({'event': event.to_dict(False, False),
-                         'observable': obj.observable.to_dict(False, False),
-                         'object': obj.to_dict(False, False),
-                         'attribute': attribute.to_dict(False, False),
+          eventpermissions = self.event_controller.get_event_user_permissions(event, user)
+          result.append({'event': event.to_dict(False, False, eventpermissions, user),
+                         'observable': obj.observable.to_dict(False, False, eventpermissions, user),
+                         'object': obj.to_dict(False, False, eventpermissions, user),
+                         'attribute': attribute.to_dict(False, False, eventpermissions, user),
                          })
     return result
 
