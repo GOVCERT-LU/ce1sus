@@ -5,6 +5,7 @@
 
 Created on Jan 30, 2014
 """
+from ce1sus.db.classes.common import TLP
 
 
 __author__ = 'Weber Jean-Paul'
@@ -18,24 +19,26 @@ def is_user_priviledged(user):
 
 
 def is_object_viewable(instance, event_permissions, user_group, cache=None):
-  if instance.properties.is_validated and instance.properties.is_shareable:
+  if instance.__class__.__name__ == 'ObservableComposition':
+    # always visible as the composed observable does not have a tlp level
+    return True
+  elif instance.properties.is_validated and instance.properties.is_shareable:
+    # free for all
     return True
   elif event_permissions:
-    # check if the user owns the attribtue
-    if not instance.properties.is_validated:
-      # if the user has the view non shared set then show
-      if event_permissions.can_validate:
+    # check if user can validate the object
+    if not instance.properties.is_validated and event_permissions.can_validate:
         return True
-      else:
-        # check if the user owns the obejct then return True
-        return False
+
   if user_group:
-    # check if tlp matches
-    user_tlp = get_max_tlp(user_group)
-    if instance.__class__.__name__ == 'ObservableComposition':
-      return True
-    elif instance.tlp_level_id >= user_tlp:
-      return True
+    if user_group.identifier == instance.owner_group_id or user_group.identifier == instance.creator_group_id or user_group.identifier == instance.originating_group_id:
+      # check if the user owns submitted or created the object then return True
+        return True
+    else:
+      # check if tlp matches
+      user_tlp = get_max_tlp(user_group)
+      if instance.tlp_level_id >= user_tlp:
+        return True
 
   return False
 
@@ -55,7 +58,7 @@ def is_event_owner(event, user):
     if is_user_priviledged(user):
       return True
     else:
-      if user.group_id == event.originating_group_id:
+      if user.group_id == event.owner_group_id:
         return True
       else:
         return False
@@ -98,24 +101,28 @@ def can_user_download(event, user, cache=None):
 
   :returns: Boolean
   """
-  # TODO: rethink this
-  result = is_object_viewable(event, user, user.group, cache)
-  if not result:
-    # check if the default group can download
-    result = user.default_group.can_download
-  return result
+  if user.permissions.privileged:
+    return True
+  if user.group:
+    result = user.group.permissions.can_download
+    return result
+  else:
+    return False
 
 
 def get_max_tlp(user_group):
-  if user_group.permissions.propagate_tlp:
-    max_tlp = user_group.tlp_lvl
-    for group in user_group.children:
-      if group.tlp_lvl < max_tlp:
-        max_tlp = group.tlp_lvl
-      # check for group children
-      child_max = get_max_tlp(group)
-      if child_max < max_tlp:
-        max_tlp = child_max
-    return max_tlp
+  if user_group:
+    if user_group.permissions.propagate_tlp:
+      max_tlp = user_group.tlp_lvl
+      for group in user_group.children:
+        if group.tlp_lvl < max_tlp:
+          max_tlp = group.tlp_lvl
+        # check for group children
+        child_max = get_max_tlp(group)
+        if child_max < max_tlp:
+          max_tlp = child_max
+      return max_tlp
+    else:
+      return user_group.tlp_lvl
   else:
-    return user_group.tlp_lvl
+    return TLP.get_by_value('White')
