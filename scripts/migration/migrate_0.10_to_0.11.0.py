@@ -360,6 +360,7 @@ class Migrator(object):
     report.creator_group_id = report.creator_group.identifier
     report.creator = self.get_users()[line['creator_id']]
     report.creator_id = report.creator.identifier
+
     set_db_code(report, line['dbcode'])
     report.tlp_level_id = event.tlp_level_id
 
@@ -373,6 +374,8 @@ class Migrator(object):
     report.modifier_id = report.modifier.identifier
     report.originating_group = report.creator_group
     report.originating_group_id = report.creator_group.identifier
+    report.owner_group = report.creator_group
+    report.owner_group_id = report.creator_group_id
     report.event_id = event.identifier
     return report
 
@@ -520,6 +523,8 @@ class Migrator(object):
     obj.originating_group = obj.creator_group
     obj.originating_group_id = obj.creator_group.identifier
     obj.tlp_level_id = observable.parent.tlp_level_id
+    obj.owner_group = obj.creator_group
+    obj.owner_group_id = obj.creator_group_id
     return obj
 
   def make_observable(self, line, event):
@@ -550,7 +555,8 @@ class Migrator(object):
     # db code is the same as for the object
     set_db_code(result_observable, line['dbcode'])
     result_observable.tlp_level_id = event.tlp_level_id
-
+    result_observable.owner_group = result_observable.creator_group
+    result_observable.owner_group_id = result_observable.creator_group_id
     return result_observable
 
   def map_reference_definition(self, line):
@@ -596,7 +602,8 @@ class Migrator(object):
     reference.modifier_id = reference.modifier.identifier
     reference.originating_group = reference.creator_group
     reference.originating_group_id = reference.creator_group.identifier
-
+    reference.owner_group = reference.creator_group
+    reference.owner_group_id = reference.creator_group_id
     # TODO definition of report attribute
     if attribute['definition'] == 'vulnerability_free_text':
       line['value'] = '{0} - {1}'.format('vulnerability_free_text', line['value'])
@@ -695,6 +702,8 @@ class Migrator(object):
     attribute.created_at = convert_date(line['created'])
     attribute.modified_on = convert_date(line['modified'])
     attribute.tlp_level_id = obj.event.tlp_level_id
+    attribute.owner_group = attribute.creator_group
+    attribute.owner_group_id = attribute.creator_group_id
 
     modifier_id = line.get('modifier_id')
     if modifier_id:
@@ -1016,6 +1025,9 @@ class Migrator(object):
     indicator.modifier_id = indicator.modifier.identifier
     indicator.originating_group = indicator.creator_group
     indicator.originating_group_id = indicator.creator_group.identifier
+
+    indicator.owner_group = indicator.creator_group
+    indicator.owner_group_id = indicator.creator_group.identifier
 
     indicator.event = event
     indicator.event_id = event.identifier
@@ -1441,7 +1453,8 @@ class Migrator(object):
     event.modifier_id = event.modifier.identifier
     event.tlp_level_id = line['tlp_level_id']
 
-
+    event.owner_group = event.creator_group
+    event.owner_group_id = event.creator_group_id
 
     event.originating_group = event.creator_group
     event.originating_group_id = event.creator_group.identifier
