@@ -35,11 +35,6 @@ class RTHandler(GenericHandler):
   def get_description():
     return u'Handler for RT Tickets'
 
-  def insert(self, report, user, json):
-    definition = self.get_main_definition()
-    reference = self.create_reference(report, definition, user, json)
-    return reference, None, None
-
   def __convert_ticket_to_dict(self, ticket):
     return {'identifier': ticket.identifier,
             'title': ticket.title,

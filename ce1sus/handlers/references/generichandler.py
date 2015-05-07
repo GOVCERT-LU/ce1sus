@@ -30,6 +30,8 @@ class GenericHandler(HandlerBase):
   def insert(self, report, user, json):
     definition = self.get_main_definition()
     reference = self.create_reference(report, definition, user, json)
+    value = json.get('value', None)
+    reference.value = value
     return reference, None, None
 
   def get_data(self, reference, parameters):
