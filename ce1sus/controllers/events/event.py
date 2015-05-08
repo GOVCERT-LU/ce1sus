@@ -17,25 +17,13 @@ from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.controllers.events.relations import RelationController
 
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-
-def get_all_attributes_from_event(event):
-  attributes = list()
-  for obj in event.objects:
-    __get_all_attributes_from_obj(attributes, obj)
-  return attributes
-
-
-def __get_all_attributes_from_obj(attributes, obj):
-  attributes += obj.attributes
-  for child in obj.children:
-    __get_all_attributes_from_obj(attributes, child)
 
 
 class EventController(BaseController):
@@ -48,6 +36,7 @@ class EventController(BaseController):
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.process_controller = ProcessController(config, session)
     self.server_controller = SyncServerController(config, session)
+    self.relations_controller = RelationController(config, session)
 
   def get_all_misp_events(self):
     try:
@@ -99,12 +88,12 @@ class EventController(BaseController):
 
       # generate relations if needed!
 
-      """
-      attributes = get_all_attributes_from_event(event)
-      if (mkrelations == 'True' or mkrelations is True) and attributes:
-        self.relation_broker.generate_bulk_attributes_relations(event, attributes, False)
-      """
+      flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
+
+      if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
+        self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
       self.event_broker.do_commit(commit)
+
       return event
     except ValidationException:
       message = ObjectValidator.getFirstValidationError(event)

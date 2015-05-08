@@ -190,6 +190,7 @@ class Group(Base):
                           secondaryjoin='Group.identifier == group_has_groups.c.rel_group_id',
                           backref='parents',
                           order_by='Group.name',
+                          lazy='joined'
                           )
   notifications = Column('notifications', Boolean, default=False, nullable=False)
 
