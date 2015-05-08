@@ -84,14 +84,14 @@ class EventController(BaseController):
 
         event.groups.append(event_permission)
 
-      self.event_broker.insert(event, False)
-
       # generate relations if needed!
 
       flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
 
       if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
+
+      self.event_broker.insert(event, False)
       self.event_broker.do_commit(commit)
 
       return event

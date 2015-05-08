@@ -15,7 +15,9 @@ __license__ = 'GPL v3+'
 
 
 def is_user_priviledged(user):
-  return user.permissions.privileged
+  if user:
+    return user.permissions.privileged
+  return False
 
 
 def is_object_viewable(instance, event_permissions, user_group, cache=None):
