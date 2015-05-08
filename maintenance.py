@@ -5,6 +5,9 @@
 
 Created on Jul 11, 2014
 """
+from ce1sus.helpers.common.config import Configuration
+from ce1sus.helpers.common.objects import get_class
+from ce1sus.helpers.common.strings import stringToDateTime
 import json
 from optparse import OptionParser
 from os import remove
@@ -13,6 +16,7 @@ from shutil import copy, move
 import sys
 
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController, gen_attr_chksum
+from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController, gen_obj_chksum
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.user import UserController
@@ -32,10 +36,7 @@ from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, TextVa
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
-from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.hash import fileHashMD5
-from ce1sus.helpers.common.objects import get_class
-from ce1sus.controllers.admin.conditions import ConditionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -94,7 +95,7 @@ class Maintenance(object):
     except ControllerException as error:
       raise MaintenanceException(error)
 
-  def rebuild_relations(self, event_uuid=''):
+  def rebuild_relations(self, event_uuid='', from_date=''):
     try:
       if event_uuid:
         if self.verbose:
@@ -112,7 +113,13 @@ class Maintenance(object):
           print '(Re)Creation all relations'
         # drop all relations
         self.relation_controller.clear_relations_table()
-        events = self.event_controller.get_all()
+
+        if from_date:
+          from_date = stringToDateTime(from_date)
+          events = self.event_controller.get_all_from(from_date)
+        else:
+          events = self.event_controller.get_all()
+
         for event in events:
           if self.verbose:
             print 'Rebuild relations for event {0}'.format(event.identifier)
@@ -231,6 +238,8 @@ if __name__ == '__main__':
                     help='Check and correct definition checksums')
   parser.add_option('-r', dest='rebuild_opt', action='store_true', default=False,
                     help='Rebuild relations according to the definitions')
+  parser.add_option('--from', dest='from_datetime', type='string', default='',
+                    help='Date time for rebuilding the relations')
   parser.add_option('--reg-attr-handler', dest='attr_handler_reg_module', type='string', default='',
                     help='Function to register an installed attribute handler')
   parser.add_option('--reg-ref-handler', dest='ref_handler_reg_module', type='string', default='',
@@ -264,7 +273,7 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(1)
     elif options.rebuild_opt:
-      maintenance.rebuild_relations(options.event_uuid)
+      maintenance.rebuild_relations(options.event_uuid, options.from_datetime)
     elif options.attr_handler_reg_module:
       maintenance.register_handler(options.attr_handler_reg_module, 'attributes', options.handler_class)
     elif options.ref_handler_reg_module:

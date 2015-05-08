@@ -69,7 +69,7 @@ class ReportHandler(RestBaseHandler):
         event_permissions = self.get_event_user_permissions(event, user)
         if method == 'GET':
           self.check_item_is_viewable(event, report)
-          return report.to_dict(details, inflated)
+          return report.to_dict(details, inflated, event_permissions, user)
         elif method == 'PUT':
           old_report = report
           self.check_if_event_is_modifiable(event)
@@ -103,7 +103,7 @@ class ReportHandler(RestBaseHandler):
 
       self.report_controller.insert_report(child_obj, user, False)
 
-      return child_obj.to_dict(details, inflated)
+      return child_obj.to_dict(details, inflated, event_permissions, user)
     else:
       raise RestHandlerException('Please use report/{uuid}/ instead')
 
@@ -168,9 +168,9 @@ class ReportHandler(RestBaseHandler):
             return reference.to_dict(details, inflated)
           else:
             result = list()
-            for related_report in report.related_reports:
-              if self.is_item_viewable(event, related_report):
-                result.append(related_report.to_dict(details, inflated))
+            for reference in report.references:
+              if self.is_item_viewable(event, reference):
+                result.append(reference.to_dict(details, inflated))
             return result
         else:
           reference = self.report_controller.get_reference_by_uuid(uuid)

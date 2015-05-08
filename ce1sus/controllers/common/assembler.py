@@ -221,7 +221,6 @@ class Assembler(BaseController):
     event.properties.is_rest_instert = rest_insert
     event.properties.is_web_insert = not rest_insert
 
-
     return event
 
   def update_event(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), attr_defs=dict(), obj_defs=dict()):

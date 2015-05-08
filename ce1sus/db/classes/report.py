@@ -303,7 +303,7 @@ class Report(ExtendedLogingInformations, Base):
               'related_reports_count': related_count,
               }
     else:
-      return {'identifier': self.identifier,
+      return {'identifier': self.convert_value(self.uuid),
               'title': self.title,
               'tlp': self.convert_value(self.tlp),
               }

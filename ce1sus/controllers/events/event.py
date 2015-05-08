@@ -178,6 +178,13 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_all_from(self, from_datetime):
+    try:
+      events = self.event_broker.get_all_from(from_datetime)
+      return events
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def change_owner(self, event, group_id, user, commit=True):
     try:
       group = self.group_broker.get_by_id(group_id)

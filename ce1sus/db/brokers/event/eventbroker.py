@@ -212,6 +212,14 @@ class EventBroker(BrokerBase):
 
     return result
 
+  def get_all_from(self, from_datetime):
+    try:
+      result = self.session.query(Event).filter(Event.created_at >= from_datetime).all()
+      return result
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+
   def get_total_events(self, parameters=None):
     try:
       # TODO add validation and published checks
