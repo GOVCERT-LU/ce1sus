@@ -113,6 +113,9 @@ def clone_attr(attribute, obj):
   attr.object_id = attr.object.identifier
 
   attr.value = attribute.value
+
+  attr.owner_group = attr.creator_group
+  attr.owner_group_id = attr.creator_group.identifier
   return attr
 
 
@@ -134,6 +137,9 @@ def clone_object(obj, observable, parent=None):
   new_obj.definition_id = new_obj.definition.identifier
   new_obj.dbcode = obj.dbcode
   new_obj.tlp_level_id = obj.tlp_level_id
+
+  new_obj.owner_group = new_obj.creator_group
+  new_obj.owner_group_id = new_obj.creator_group.identifier
 
   new_obj.observable = observable
   new_obj.observable_id = new_obj.observable.identifier
@@ -203,6 +209,8 @@ def create_related_observable(parent, child):
   related_observable.modifier_id = related_observable.modifier.identifier
   related_observable.originating_group = related_observable.creator_group
   related_observable.originating_group_id = related_observable.creator_group.identifier
+  related_observable.owner_group = related_observable.creator_group
+  related_observable.owner_group_id = related_observable.creator_group.identifier
   return related_observable
 
 
@@ -219,6 +227,16 @@ def clone_rel_observable(rel_observable, parent_obs):
   new_rel_observable.parent = parent_obs
   new_rel_observable.parent_id = parent_obs.identifier
   new_rel_observable.relation = rel_observable.relation
+  new_rel_observable.creator_group = parent_obs.creator_group
+  new_rel_observable.creator_group_id = new_rel_observable.creator_group.identifier
+  new_rel_observable.creator = child.creator
+  new_rel_observable.creator_id = new_rel_observable.creator.identifier
+  new_rel_observable.modifier = child.modifier
+  new_rel_observable.modifier_id = new_rel_observable.modifier.identifier
+  new_rel_observable.originating_group = new_rel_observable.creator_group
+  new_rel_observable.originating_group_id = new_rel_observable.creator_group.identifier
+  new_rel_observable.owner_group = new_rel_observable.creator_group
+  new_rel_observable.owner_group_id = new_rel_observable.creator_group.identifier
   return new_rel_observable
 
 
@@ -245,6 +263,8 @@ def clone_observable(observable):
   new_observable.originating_group_id = new_observable.originating_group.identifier
   new_observable.creator_group = observable.creator_group
   new_observable.creator_group_id = new_observable.creator_group.identifier
+  new_observable.owner_group = new_observable.creator_group
+  new_observable.owner_group_id = new_observable.creator_group.identifier
   new_observable.tlp_level_id = observable.tlp_level_id
 
   if observable.object:
@@ -348,10 +368,13 @@ class Migrator(object):
     grouppermission.creator_group_id = grouppermission.creator_group.identifier
     grouppermission.creator = owner
     grouppermission.creator_id = grouppermission.creator.identifier
+    grouppermission.owner_group = grouppermission.creator_group
+    grouppermission.originating_group_id = grouppermission.owner_group.identifier
     grouppermission.modifier = owner
     grouppermission.modifier_id = grouppermission.modifier.identifier
     grouppermission.originating_group = grouppermission.creator_group
     grouppermission.originating_group_id = grouppermission.creator_group.identifier
+
     return grouppermission
 
   def make_report(self, line, owner, event):
@@ -375,7 +398,7 @@ class Migrator(object):
     report.originating_group = report.creator_group
     report.originating_group_id = report.creator_group.identifier
     report.owner_group = report.creator_group
-    report.owner_group_id = report.creator_group_id
+    report.owner_group_id = report.creator_group.identifier
     report.event_id = event.identifier
     return report
 
@@ -524,7 +547,7 @@ class Migrator(object):
     obj.originating_group_id = obj.creator_group.identifier
     obj.tlp_level_id = observable.parent.tlp_level_id
     obj.owner_group = obj.creator_group
-    obj.owner_group_id = obj.creator_group_id
+    obj.owner_group_id = obj.creator_group.identifier
     return obj
 
   def make_observable(self, line, event):
@@ -556,7 +579,7 @@ class Migrator(object):
     set_db_code(result_observable, line['dbcode'])
     result_observable.tlp_level_id = event.tlp_level_id
     result_observable.owner_group = result_observable.creator_group
-    result_observable.owner_group_id = result_observable.creator_group_id
+    # result_observable.owner_group_id = result_observable.creator_group.identifier
     return result_observable
 
   def map_reference_definition(self, line):
@@ -603,7 +626,7 @@ class Migrator(object):
     reference.originating_group = reference.creator_group
     reference.originating_group_id = reference.creator_group.identifier
     reference.owner_group = reference.creator_group
-    reference.owner_group_id = reference.creator_group_id
+    reference.owner_group_id = reference.creator_group.identifier
     # TODO definition of report attribute
     if attribute['definition'] == 'vulnerability_free_text':
       line['value'] = '{0} - {1}'.format('vulnerability_free_text', line['value'])
@@ -703,7 +726,7 @@ class Migrator(object):
     attribute.modified_on = convert_date(line['modified'])
     attribute.tlp_level_id = obj.event.tlp_level_id
     attribute.owner_group = attribute.creator_group
-    attribute.owner_group_id = attribute.creator_group_id
+    attribute.owner_group_id = attribute.creator_group.identifier
 
     modifier_id = line.get('modifier_id')
     if modifier_id:
@@ -1454,7 +1477,7 @@ class Migrator(object):
     event.tlp_level_id = line['tlp_level_id']
 
     event.owner_group = event.creator_group
-    event.owner_group_id = event.creator_group_id
+    event.owner_group_id = event.creator_group.identifier
 
     event.originating_group = event.creator_group
     event.originating_group_id = event.creator_group.identifier

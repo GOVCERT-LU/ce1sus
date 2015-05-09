@@ -104,41 +104,40 @@ class Assembler(BaseController):
     """ If the group does not exist or cannot be created return the users group"""
     group = None
     if json:
-
-      # check if group exists
-      uuid = json.get('identifier', None)
-      if uuid:
-        grp = seen_groups.get(uuid, None)
+      name = json.get('name', None)
+      if name:
+        grp = None
+        for value in seen_groups.itervalues():
+          if value.name == name:
+            grp = value
+            break
         if grp:
           group = grp
         else:
           try:
-            group = self.group_broker.get_by_uuid(uuid)
+            group = self.group_broker.get_by_name(name)
           except NothingFoundException:
-            # Create the group automatically
             group = Group()
             group.populate(json)
-            group.uuid = uuid
             self.group_broker.insert(group, False)
-
           seen_groups[group.uuid] = group
       else:
-        name = json.get('name', None)
-        if name:
-          grp = None
-          for value in seen_groups.itervalues():
-            if value.name == name:
-              grp = value
-              break
+        # check if group exists
+        uuid = json.get('identifier', None)
+        if uuid:
+          grp = seen_groups.get(uuid, None)
           if grp:
             group = grp
           else:
             try:
-              group = self.group_broker.get_by_name(name)
+              group = self.group_broker.get_by_uuid(uuid)
             except NothingFoundException:
+              # Create the group automatically
               group = Group()
               group.populate(json)
+              group.uuid = uuid
               self.group_broker.insert(group, False)
+
             seen_groups[group.uuid] = group
 
     if not group:
@@ -170,7 +169,8 @@ class Assembler(BaseController):
     self.populate_extended_logging(event, json, user, True, seen_groups)
 
     if not poponly:
-      self.event_controller.insert_event(user, event, True, False)
+      # self.event_controller.insert_event(user, event, True, False)
+      pass
 
     if owner:
       # check if the owner should stay
@@ -190,7 +190,8 @@ class Assembler(BaseController):
     if observables:
       for observable in observables:
         obs = self.assemble_observable(event, observable, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
-        event.observables.append(obs)
+        if obs:
+          event.observables.append(obs)
     reports = json.get('reports', None)
     if reports:
       for report in reports:
@@ -201,7 +202,8 @@ class Assembler(BaseController):
     if comments:
       for comment in comments:
         com = self.assemble_comment(event, comment, user, owner, rest_insert, seen_groups)
-        event.comments.append(com)
+        if com:
+          event.comments.append(com)
 
     # Add the creator group
     event_permission = EventGroupPermission()
@@ -261,8 +263,10 @@ class Assembler(BaseController):
     if observables:
       for observable in observables:
         obs = self.assemble_observable(event, observable, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
+        obs.event = None
         obs.event_id = None
-        composed.observables.append(obs)
+        if obs:
+          composed.observables.append(obs)
     composed.properties.populate(json.get('properties'))
     if owner:
       composed.properties.is_validated = True
@@ -270,16 +274,20 @@ class Assembler(BaseController):
     else:
       composed.properties.is_validated = False
       composed.properties.is_proposal = True
-
-    return composed
+    if composed.observables:
+      return composed
+    else:
+      return None
 
   def assemble_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
 
     observable = Observable()
     observable.uuid = json.get('identifier', None)
     observable.event_id = event.identifier
+    observable.event = event
     observable.populate(json, rest_insert)
     observable.parent_id = event.identifier
+    observable.parent = event
     self.populate_extended_logging(observable, json, user, True, seen_groups)
 
     # self.observable_controller.insert_observable(observable, user, False)
@@ -287,7 +295,8 @@ class Assembler(BaseController):
     composed_obs = json.get('observable_composition', None)
     if composed_obs:
       composed = self.assemble_composed_observable(event, composed_obs, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
-      observable.observable_composition = composed
+      if composed:
+        observable.observable_composition = composed
     else:
       obj = json.get('object')
       if obj:
@@ -305,7 +314,10 @@ class Assembler(BaseController):
 
     observable.properties.is_rest_instert = rest_insert
     observable.properties.is_web_insert = not rest_insert
-    return observable
+    if observable.object or observable.observable_composition:
+      return observable
+    else:
+      return None
 
   def update_observable(self, observable, json, user, owner=False, rest_insert=True, seen_groups=dict()):
     observable.populate(json, rest_insert)
@@ -390,11 +402,16 @@ class Assembler(BaseController):
     attributes = json.get('attributes')
     if attributes:
       for attribute in attributes:
-        attr = self.assemble_attribute(obj, attribute, user, owner, rest_insert, seen_groups, seen_attr_defs)
-        obj.attributes.append(attr)
+        if attribute.get('identifier', None) and attribute.get('value', None) and (attribute.get('definition', None) or attribute.get('definition_id', None)):
+          attr = self.assemble_attribute(obj, attribute, user, owner, rest_insert, seen_groups, seen_attr_defs)
+          if attr:
+            obj.attributes.append(attr)
     obj.properties.is_rest_instert = rest_insert
     obj.properties.is_web_insert = not rest_insert
-    return obj
+    if obj.attributes:
+      return obj
+    else:
+      return None
 
   def assemble_serversync(self, json):
     server = SyncServer()
@@ -411,7 +428,8 @@ class Assembler(BaseController):
 
   def assemble_attribute(self, obj, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict()):
     attribute = Attribute()
-    attribute.uuid = json.get('identifier', None)
+    uuid = json.get('identifier', None)
+    attribute.uuid = uuid
 
     definition = self.get_attribute_definition(json, seen_attr_defs)
     attribute.definition = definition
@@ -588,11 +606,12 @@ class Assembler(BaseController):
       else:
         try:
           definition = self.reference_definiton_broker.get_by_uuid(uuid)
+          seen_ref_def[uuid] = definition
         except NothingFoundException as error:
           raise ControllerNothingFoundException(error)
         except BrokerException as error:
           raise ControllerException(error)
-        seen_ref_def[uuid] = definition
+
         return definition
     raise ControllerException('Could not find "{0}" definition in the reference'.format(definition_json))
 
@@ -673,7 +692,10 @@ class Assembler(BaseController):
 
     report.properties.is_rest_instert = rest_insert
     report.properties.is_web_insert = not rest_insert
-    return report
+    if report.references:
+      return report
+    else:
+      return None
 
   def update_report(self, report, json, user, owner=False, rest_insert=True, seen_groups=dict()):
     report.populate(json)

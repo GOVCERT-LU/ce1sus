@@ -240,11 +240,12 @@ class Observable(ExtendedLogingInformations, Base):
 
   def get_composed_observable_for_permissions(self, event_permissions, user):
     if self.observable_composition:
-      if is_object_viewable(self.observable_composition, event_permissions, user.group):
-        return self.observable_composition
-      else:
-        if self.observable_composition.originating_group_id == user.group.identifier:
+      if user and user.group:
+        if is_object_viewable(self.observable_composition, event_permissions, user.group):
           return self.observable_composition
+        else:
+          if self.observable_composition.originating_group_id == user.group.identifier:
+            return self.observable_composition
     return None
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):

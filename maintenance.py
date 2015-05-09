@@ -109,15 +109,18 @@ class Maintenance(object):
         except ControllerNothingFoundException:
           raise MaintenanceException('Event with uuid "{0}" cannot be found'.format(event_uuid))
       else:
-        if self.verbose:
-          print '(Re)Creation all relations'
+
         # drop all relations
         self.relation_controller.clear_relations_table()
 
         if from_date:
           from_date = stringToDateTime(from_date)
+          if self.verbose:
+            print '(Re)Creation all relations for the events created from {0} on'.format(from_date)
           events = self.event_controller.get_all_from(from_date)
         else:
+          if self.verbose:
+            print '(Re)Creation all relations'
           events = self.event_controller.get_all()
 
         for event in events:
@@ -239,7 +242,7 @@ if __name__ == '__main__':
   parser.add_option('-r', dest='rebuild_opt', action='store_true', default=False,
                     help='Rebuild relations according to the definitions')
   parser.add_option('--from', dest='from_datetime', type='string', default='',
-                    help='Date time for rebuilding the relations')
+                    help='Date for rebuilding the relations (YYYY-MM-DD)')
   parser.add_option('--reg-attr-handler', dest='attr_handler_reg_module', type='string', default='',
                     help='Function to register an installed attribute handler')
   parser.add_option('--reg-ref-handler', dest='ref_handler_reg_module', type='string', default='',
