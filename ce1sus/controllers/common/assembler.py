@@ -373,12 +373,12 @@ class Assembler(BaseController):
 
     # set definition
     definition = self.get_object_definition(json, seen_obj_defs)
-    obj.definition = definition
+    # obj.definition = definition
     obj.definition_id = definition.identifier
 
     obj.observable_id = observable.identifier
     obj.observable = observable
-    obj.parent = observable
+    # obj.parent = observable
     obj.parent_id = observable.identifier
 
     if owner:
@@ -426,7 +426,7 @@ class Assembler(BaseController):
     attribute.uuid = uuid
 
     definition = self.get_attribute_definition(json, seen_attr_defs)
-    attribute.definition = definition
+    # attribute.definition = definition
     attribute.definition_id = definition.identifier
 
     attribute.object = obj
@@ -573,11 +573,10 @@ class Assembler(BaseController):
     child_obj_json = json.get('object')
     child_obj = self.assemble_object(obj.observable, child_obj_json, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
     # dereference object from observable
-    child_obj.parent = None
     child_obj.parent_id = None
     # update parent
     related_object = RelatedObject()
-    related_object.parent_id = obj.identifier
+    related_object.parent = obj
     related_object.child_id = child_obj.identifier
     related_object.object = child_obj
     related_object.relation = json.get('relation', None)
@@ -615,7 +614,7 @@ class Assembler(BaseController):
       definition = self.get_reference_definition(reference, seen_ref_def)
       if definition:
         ref = Reference()
-        ref.definition = definition
+        ref.definition_id = definition.identifier
         ref.uuid = reference.get('identifier', None)
         ref.populate(reference, rest_insert)
 

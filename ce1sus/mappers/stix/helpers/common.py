@@ -26,6 +26,8 @@ def set_extended_logging(instance, user, group):
   if not instance.originating_group:
     instance.originating_group = group
   instance.creator_group = group
+  instance.owner_group = user.group
+
   set_simple_logging(instance, user)
 
 

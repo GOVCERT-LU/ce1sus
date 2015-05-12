@@ -134,10 +134,11 @@ class ObjectHandler(RestBaseHandler):
   def __process_child_object(self, method, event, obj, requested_object, details, inflated, json, headers):
     user = self.get_user()
     if method == 'POST':
+      # workaround
+      # TODO find out why the parent gets deleted
       self.check_if_user_can_add(event)
       related_object = self.assembler.assemble_related_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-      self.observable_controller.insert_related_object(related_object, user, True)
-
+      self.observable_controller.update_object(obj, user, True)
       return related_object.to_dict(details, inflated)
     else:
       raise RestHandlerException('Please use object/{uuid}/ instead')
