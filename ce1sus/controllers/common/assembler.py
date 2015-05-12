@@ -314,10 +314,7 @@ class Assembler(BaseController):
 
     observable.properties.is_rest_instert = rest_insert
     observable.properties.is_web_insert = not rest_insert
-    if observable.object or observable.observable_composition:
-      return observable
-    else:
-      return None
+    return observable
 
   def update_observable(self, observable, json, user, owner=False, rest_insert=True, seen_groups=dict()):
     observable.populate(json, rest_insert)
@@ -408,10 +405,7 @@ class Assembler(BaseController):
             obj.attributes.append(attr)
     obj.properties.is_rest_instert = rest_insert
     obj.properties.is_web_insert = not rest_insert
-    if obj.attributes:
-      return obj
-    else:
-      return None
+    return obj
 
   def assemble_serversync(self, json):
     server = SyncServer()

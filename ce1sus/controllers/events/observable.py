@@ -68,6 +68,14 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def insert_related_object(self, related_object, user, commit=True):
+    try:
+      user = self.user_broker.get_by_id(user.identifier)
+      self.object_broker.insert(related_object, False)
+      self.object_broker.do_commit(commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def __set_extended_logging_object(self, obj, user, insert=True):
     self.set_extended_logging(obj, user, user.group, insert)
     for attribute in obj.attributes:

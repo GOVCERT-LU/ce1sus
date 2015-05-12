@@ -117,7 +117,10 @@ app.controller("objectChildAddController", function($scope, Restangular, message
       $scope.childObject.parent_id=$scope.$parent.$parent.object.identifier;
     }
     var objectID = $scope.$parent.$parent.object.identifier;
-    Restangular.one('object', objectID).post('object', $scope.childObject, {'complete':true, 'infated':true}).then(function (data) {
+    var itemToPost = {};
+    itemToPost.object = $scope.childObject;
+    itemToPost.relation = $scope.childObject.relation;
+    Restangular.one('object', objectID).post('object', itemToPost, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.$parent.object.related_objects.push(data);
     }, function (response) {
       handleError(response, messages);

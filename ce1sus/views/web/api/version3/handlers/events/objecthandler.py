@@ -136,7 +136,7 @@ class ObjectHandler(RestBaseHandler):
     if method == 'POST':
       self.check_if_user_can_add(event)
       related_object = self.assembler.assemble_related_object(obj, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-      self.observable_controller.update_object(related_object.object, user, True)
+      self.observable_controller.insert_related_object(related_object, user, True)
 
       return related_object.to_dict(details, inflated)
     else:
