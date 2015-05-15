@@ -43,7 +43,7 @@ class StixMapper(BaseController):
     event = self.stix_ce1sus_mapper.create_event(stix_package, user, ignore_id)
     set_extended_logging(event, user, user.group)
     if make_insert:
-      self.event_controller.insert_event(user, event, False, False)
+      self.event_controller.insert_event(user, event, True, False)
 
     return event
 

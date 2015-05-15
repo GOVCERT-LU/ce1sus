@@ -51,7 +51,7 @@ class STIXAdapter(BaseView):
     inflated = params.get('inflated', False)
     xml_string = base64.b64decode(data)
 
-    # STIX waants lxml instead of xml
+    # STIX wants lxml instead of xml
     xml = etree.fromstring(xml_string)
 
     stix_package = STIXPackage.from_xml(xml)

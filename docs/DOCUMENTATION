@@ -29,6 +29,8 @@ Ce1sus need the following packages:
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
 - memcached
+- python-stix (1.1.1.5) 
+- python-cybox (2.1.0.11)
 
 1.1.2 Installation of the requirements
 ---------------------------------------

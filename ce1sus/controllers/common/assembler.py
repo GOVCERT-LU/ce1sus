@@ -665,6 +665,11 @@ class Assembler(BaseController):
     else:
       return None
 
+  def assemble_child_report(self, report, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_ref_def=()):
+    child_report = self.assemble_report(event, json, user, owner, rest_insert, seen_groups, seen_ref_def)
+    report.related_reports.append(child_report)
+    return child_report
+
   def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_ref_def=()):
     report = Report()
     report.uuid = json.get('identifier', None)
@@ -685,10 +690,7 @@ class Assembler(BaseController):
 
     report.properties.is_rest_instert = rest_insert
     report.properties.is_web_insert = not rest_insert
-    if report.references:
-      return report
-    else:
-      return None
+    return report
 
   def update_report(self, report, json, user, owner=False, rest_insert=True, seen_groups=dict()):
     report.populate(json)

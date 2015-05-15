@@ -102,7 +102,7 @@ class ReportHandler(RestBaseHandler):
       child_obj = self.assembler.assemble_child_report(report, event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
       self.report_controller.insert_report(child_obj, user, False)
-
+      event_permissions = self.get_event_user_permissions(event, user)
       return child_obj.to_dict(details, inflated, event_permissions, user)
     else:
       raise RestHandlerException('Please use report/{uuid}/ instead')

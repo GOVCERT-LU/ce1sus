@@ -8,8 +8,7 @@ Created on Jan 9, 2015
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.brokers.event.reportbroker import ReportBroker, ReferenceBroker
-from ce1sus.db.common.broker import BrokerException, NothingFoundException, \
-  IntegrityException
+from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException
 
 
 __author__ = 'Weber Jean-Paul'
