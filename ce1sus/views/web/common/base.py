@@ -209,7 +209,7 @@ class BaseView(object):
   def check_if_admin_validate(self):
     user = self.get_user()
     if not user.permissions.validate:
-      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
+      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username, user.group.name))
 
   def is_event_viewable(self, event, user=None):
     # The same is in the mailer
@@ -243,7 +243,7 @@ class BaseView(object):
   def check_if_event_is_viewable(self, event):
     user = self.get_user()
     if not self.is_event_viewable(event, user):
-      raise cherrypy.HTTPError(403, 'User {0} cannot view this event'.format(user.username))
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot view this event'.format(user.username, user.group.name))
 
   def is_item_viewable(self, event, item, user=None):
     if not user:
@@ -286,13 +286,13 @@ class BaseView(object):
     user = self.get_user()
     result = self.is_user_allowed_to_perform(event, permission, user)
     if not result:
-      raise cherrypy.HTTPError(403, 'User {0} is not authorized perform action "{2}" on event {1}'.format(user.username, event.identifier, permission))
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} is not authorized perform action "{3}" on event {2}'.format(user.username, user.group.name, event.identifier, permission))
 
   def check_if_owner(self, event):
     user = self.get_user()
     owner = is_event_owner(event, user)
     if not owner:
-      raise cherrypy.HTTPError(403, 'User {0} is not owner of event {1}'.format(user.username, event.identifier))
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} does not own event {2}'.format(user.username, user.group.name, event.identifier))
 
   def check_if_user_can_add(self, event):
     user = self.get_user()
@@ -302,7 +302,7 @@ class BaseView(object):
       if not result:
         result = self.is_user_allowed_to_perform(event, 'can_propose', user)
     if not result:
-      raise cherrypy.HTTPError(403, 'User {0} can not add contents to event {1}'.format(user.username, event.identifier))
+      raise cherrypy.HTTPError(403, 'User {0}/{1} can not add contents to event {2}'.format(user.username, user.group.name, event.identifier))
 
   def is_user_allowed_to_perform(self, event, permission, user):
     permissions = self.get_event_user_permissions(event, user)
@@ -329,12 +329,12 @@ class BaseView(object):
     return result
 
   def is_event_owner(self, event, user):
-    self.logger.debug(u'Checking if user {0} is owner of event {1}'.format(user.username, event.identifier))
+    self.logger.debug(u'Checking if user/group {0}/{1} owns event {2}'.format(user.username, user.group.name, event.identifier))
     result = is_event_owner(event, user)
     if result:
-      self.logger.info(u'User {0} is owner of event {1}'.format(user.username, event.identifier))
+      self.logger.info(u'User/group {0}/{1} owns of event {2}'.format(user.username, user.group.name, event.identifier))
     else:
-      self.logger.info(u'User {0} is not owner of event {1}'.format(user.username, event.identifier))
+      self.logger.info(u'User/group {0}/{1} does not own of event {2}'.format(user.username, user.group.name, event.identifier))
     return result
 
   def is_rest_insert(self, headers):
@@ -378,19 +378,19 @@ class BaseView(object):
             if old_instance.properties.is_shareable == shared:
               return True
             else:
-              self.logger.info(u'User {0} has no right to share elements of event {1}'.format(user.username, event.identifier))
+              self.logger.info(u'User/group {0}/{1} has no right to share elements of event {2}'.format(user.username, user.group.name, event.identifier))
               return False
     return True
 
   def check_user_allowed_set_share(self, event, old_instance, user, json):
     shared = self.is_user_allowed_set_share(event, old_instance, user, json)
     if not shared:
-      raise cherrypy.HTTPError(403, 'User {0} cannot make this change'.format(user.username))
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot make this change'.format(user.username, user.group.name))
 
   def check_user_allowed_set_validate(self, event, old_instance, user, json):
     validate = self.is_user_allowed_set_validate(event, old_instance, user, json)
     if not validate:
-      raise cherrypy.HTTPError(403, 'User {0} can not validate elements of event {1}'.format(user.username, event.identifier))
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} can not validate elements of event {2}'.format(user.username, user.group.name, event.identifier))
 
   def is_if_user_can_set_validate_and_shared(self, event, old_instance, user, json):
     # TODO: Involve if user == partof the originator

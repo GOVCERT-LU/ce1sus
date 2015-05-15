@@ -13,7 +13,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, Marking
 from ce1sus.db.common.session import Base
-
+import stix.common.vocabs.IndicatorType as StixIndicatorType
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -66,9 +66,9 @@ class KillChainPhase(Base):
 
 
 class Sighting(ExtendedLogingInformations, Base):
-  timestamp_precision = Column('timestamp_precision', BigInteger)
+  timestamp_precision = Column('timestamp_precision', DateTime)
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
-  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
+  confidence = Column('confidence', Unicode(10, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
 
@@ -92,20 +92,20 @@ class IndicatorType(Base):
 
   @classmethod
   def get_dictionary(cls):
-    return {0: 'Malicious E-mail',
-            1: 'IP Watchlist',
-            2: 'File Hash Watchlist',
-            3: 'Domain Watchlist',
-            4: 'URL Watchlist',
-            5: 'Malware Artifacts',
-            6: 'C2',
-            7: 'Anonymization',
-            8: 'Exfiltration',
-            9: 'Host Characteristics',
-            10: 'Compromised PKI Certificate',
-            11: 'Login Name',
-            12: 'IMEI Watchlist',
-            13: 'IMSI Watchlist'}
+    return {0: StixIndicatorType.TERM_MALICIOUS_EMAIL,
+            1: StixIndicatorType.TERM_IP_WATCHLIST,
+            2: StixIndicatorType.TERM_FILE_HASH_WATCHLIST,
+            3: StixIndicatorType.TERM_DOMAIN_WATCHLIST,
+            4: StixIndicatorType.TERM_URL_WATCHLIST,
+            5: StixIndicatorType.TERM_MALWARE_ARTIFACTS,
+            6: StixIndicatorType.TERM_C2,
+            7: StixIndicatorType.TERM_ANONYMIZATION,
+            8: StixIndicatorType.TERM_EXFILTRATION,
+            9: StixIndicatorType.TERM_HOST_CHARACTERISTICS,
+            10: StixIndicatorType.TERM_COMPROMISED_PKI_CERTIFICATE,
+            11: StixIndicatorType.TERM_LOGIN_NAME,
+            12: StixIndicatorType.TERM_IMEI_WATCHLIST,
+            13: StixIndicatorType.TERM_IMSI_WATCHLIST}
 
   @property
   def name(self):

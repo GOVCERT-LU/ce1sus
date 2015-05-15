@@ -69,8 +69,10 @@ class CyboxMapper(BaseController):
     elif isinstance(instance, Address):
       if instance.category == 'e-mail':
         definition = self.obj_defs.get('email')
+      elif instance.category == 'ipv4-addr':
+        definition = self.obj_defs.get('Address')
       else:
-        raise CyboxMapperException(u'Note defined')
+        raise CyboxMapperException(u'Not defined')
     elif isinstance(instance, WinDriver):
       definition = self.obj_defs.get('WinDriver')
     elif isinstance(instance, WinExecutableFile):
@@ -120,8 +122,10 @@ class CyboxMapper(BaseController):
         else:
           # it can only be source that makes sense
           definition = self.attr_defs.get('email_sender')
+      elif instance.category == 'ipv4-addr':
+        definition = self.attr_defs.get('ipv4_addr')
       else:
-        raise CyboxMapperException(u'Note defined')
+        raise CyboxMapperException(u'Not defined')
     elif isinstance(instance, URI):
       if instance.type_ == 'URL':
         definition = self.attr_defs.get('url')
