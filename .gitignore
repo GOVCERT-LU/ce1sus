@@ -47,3 +47,12 @@ magic.py
 /openioc_to_cybox.py
 /openioc.py
 /ioc_observable.py
+
+config/ce1sus.conf
+config/cherrypy.conf
+config/handlers.conf
+gpg/
+
+cybox
+stix
+eml_parser
