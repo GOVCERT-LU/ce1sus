@@ -13,7 +13,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, Marking
 from ce1sus.db.common.session import Base
-import stix.common.vocabs.IndicatorType as StixIndicatorType
+from stix.common.vocabs import IndicatorType as StixIndicatorType
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

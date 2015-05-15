@@ -426,7 +426,7 @@ class Assembler(BaseController):
     attribute.uuid = uuid
 
     definition = self.get_attribute_definition(json, seen_attr_defs)
-    # attribute.definition = definition
+    attribute.definition = definition
     attribute.definition_id = definition.identifier
 
     attribute.object = obj
