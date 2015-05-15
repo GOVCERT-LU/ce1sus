@@ -66,7 +66,7 @@ class KillChainPhase(Base):
 
 
 class Sighting(ExtendedLogingInformations, Base):
-  timestamp_precision = Column('timestamp_precision', DateTime)
+  timestamp_precision = Column('timestamp_precision', Unicode(10, collation='utf8_unicode_ci'))
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   confidence = Column('confidence', Unicode(10, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
   dbcode = Column('code', Integer, default=0, nullable=False)
