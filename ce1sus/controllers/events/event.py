@@ -101,7 +101,7 @@ class EventController(BaseController):
     except IntegrityException as error:
       self.logger.debug(error)
       self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.uuid))
-      raise ControllerIntegrityException(u'An event with uuid "{0}" already exists'.format(event.uuid))
+      raise ControllerIntegrityException(error)
     except BrokerException as error:
       raise ControllerException(error)
 

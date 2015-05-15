@@ -30,9 +30,9 @@ class EventsController(BaseController):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       if offset:
-        int_off = int(offset) - 1
+        int_off = int(offset)
       if limit:
-        int_lim = int(limit) - 1
+        int_lim = int(limit)
 
       isadmin = is_user_priviledged(user)
       if isadmin:

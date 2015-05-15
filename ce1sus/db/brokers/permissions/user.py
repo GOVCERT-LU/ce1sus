@@ -105,7 +105,7 @@ class UserBroker(BrokerBase):
     """
     if salt:
       passwd = hashSHA1(password, salt)
-      old_pwd = hashSHA1(password, username)
+      old_pwd = hashSHA1(password + username)
     else:
       passwd = password
       old_pwd = None

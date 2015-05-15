@@ -8,11 +8,11 @@ Created on Jul 9, 2013
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_, or_
 
+from ce1sus.common.checks import get_max_tlp
+from ce1sus.db.classes.common import Analysis, Status, TLP
 from ce1sus.db.classes.event import Event, EventGroupPermission
 from ce1sus.db.classes.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
-from ce1sus.common.checks import get_max_tlp
-from ce1sus.db.classes.common import Analysis, Status, TLP
 
 
 __author__ = 'Weber Jean-Paul'
@@ -149,9 +149,9 @@ class EventBroker(BrokerBase):
     try:
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) == 4)
+      result = self.session.query(Event).distinct().filter(Event.dbcode.op('&')(4) == 4)
       result = self.__set_parameters(result, parameters)
-      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = result.limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -182,10 +182,10 @@ class EventBroker(BrokerBase):
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
       # , Event.tlp_level_id >= tlp
-      result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
+      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids), Event.owner_group_id == user.group_id)))
       result = self.__set_parameters(result, parameters)
 
-      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      result = result.limit(limit).offset(offset).all()
       # remove all the no viewable
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
@@ -203,7 +203,7 @@ class EventBroker(BrokerBase):
       # TODO: events for user
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids)))).all()
+      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids)))).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -239,7 +239,7 @@ class EventBroker(BrokerBase):
       tlp = get_max_tlp(user.group)
       # TODO add validation and published checks
       # TODO: total events for user
-      result = self.session.query(Event).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
+      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
       result = self.__set_parameters(result, parameters)
 
       result = result.count()
