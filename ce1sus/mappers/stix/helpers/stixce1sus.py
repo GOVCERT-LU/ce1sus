@@ -218,6 +218,8 @@ class StixCelsusMapper(BaseController):
         tlp_id = event.tlp_level_id
       for observable in indicator.observables:
         observable = self.cybox_mapper.create_observable(observable, event, user, tlp_id, True)
+        observable.event = None
+        observable.event_id = None
         ce1sus_indicator.observables.append(observable)
     set_extended_logging(ce1sus_indicator, user, user.group)
     return ce1sus_indicator

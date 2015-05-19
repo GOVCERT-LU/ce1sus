@@ -230,6 +230,170 @@ app.controller("eventObservableController", function($scope, Restangular, messag
 
 });
 
+app.controller("eventIndicatorController", function($scope, Restangular, messages,
+    $log, $routeSegment, $location,indicators, $anchorScroll, Pagination) {
+  $scope.permissions=$scope.event.userpermissions;
+  
+  $scope.getAttributes=function(){
+    var attributes = [];
+    function generateItems(object, observable, composed){
+      if (object.attributes.length > 0) {
+        angular.forEach(object.attributes, function(attribute, index) {
+          var item = {};
+          item.value = attribute.value;
+          item.definition = attribute.definition;
+          item.ioc = attribute.ioc;
+          item.shared = attribute.shared;
+          item.object = object.definition.name;
+          item.observable = observable.title;
+          if (attribute){
+            item.properties = attribute.properties;
+          } else {
+            if (object) {
+              item.properties = object.properties;
+            } else {
+              item.properties = observable.properties;
+            }
+          }
+          
+          if (composed) {
+            item.composed = composed.title;
+            item.composedoperator = composed.operator;
+            item.composedlength = composed.observables.length;
+          }
+          attributes.push(item);
+        }, $log);
+      } else {
+        var item = {};
+        item.observable = observable.title;
+        item.object = object.definition.name;
+        item.value = 'No attributes were definied';
+        attributes.push(item);
+      }
+      // continue with the related objects
+      angular.forEach(object.related_objects, function(relObject) {
+        generateItems(relObject.object, observable);
+      }, $log);
+    }
+    
+    function processObservavle(observable, composed){
+      if (observable.observable_composition){
+        angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
+          processObservavle(compobservable, observable.observable_composition);
+        },$log);
+      } else {
+        if (observable.object) {
+          generateItems(observable.object, observable, composed);
+        } else {
+          var item = {};
+          item.observable = observable.title;
+          item.object = 'No objects were definied';
+          attributes.push(item);
+        }
+      }
+    }
+    
+    angular.forEach($scope.indicators, function(indicator) {
+      angular.forEach(indicator.observables, function(observable) {
+        processObservavle(observable, null);
+      }, $log);
+    }, $log);
+    return attributes;
+  };
+  
+  $scope.indicators = indicators;
+  $scope.flat=false;
+  $scope.showFlat=function(){
+    $scope.flat=true;
+    $scope.flatAttributes = $scope.getAttributes();
+    $scope.pagination = Pagination.getNew(10,'flatAttributes');
+    $scope.pagination.numPages = Math.ceil($scope.flatAttributes.length/$scope.pagination.perPage);
+    $scope.pagination.setPages();
+  };
+  $scope.showStructured=function(){
+    $scope.flat=false;
+  };
+
+  $scope.writeTD=function(attribute, pagination){
+    var currentPosition = $scope.flatAttributes.indexOf(attribute);
+    if (currentPosition> 0){
+      if ($scope.flatAttributes[currentPosition-1].composedlength == attribute.composedlength){
+        if (currentPosition == pagination.page * pagination.perPage){
+          return true;
+        }
+        return false;
+      }
+      return true;
+    } 
+    return true;
+  };
+  
+  $scope.getFlatTitle = function(attributeflat){
+    if (attributeflat.composedoperator){
+      if (attributeflat.composed){
+        return attributeflat.composed;
+      } else {
+        return "Composed";
+      }
+    } else {
+      if (attributeflat.observable){
+        return attributeflat.observable;
+      } else {
+        return "Indicator";
+      }
+    }
+    return "Unknown";
+  };
+
+  $scope.getRowSpan = function(attribute, pagination){
+    var rowspan = 0;
+    if (attribute.composedlength) {
+      var currentLength = attribute.composedlength;
+      var currentPosition = $scope.flatAttributes.indexOf(attribute);
+      var startindex = 0;
+      for (var i = currentPosition; i >= 0; i--){
+        if ($scope.flatAttributes[i].composedlength){
+          if (currentLength != $scope.flatAttributes[i].composedlength){
+            startindex = i;
+            break;
+          }
+        }
+      }
+      var endPosition = (startindex + currentLength);
+      var remaining = endPosition - (pagination.page * pagination.perPage);
+      //TODO review I wonder why this works!? td is set incorrectly but stops where expected
+      if (remaining > 0) {
+        rowspan = remaining;
+        if (startindex > 0){
+          rowspan++;
+        }
+      } else {
+        rowspan = pagination.perPage+remaining;
+      }
+      
+
+    } else {
+      rowspan = 1;
+    }
+      
+    return rowspan;
+  };
+  $scope.dropdown = [
+                       {
+                         "text": "Structured",
+                         "click": "showStructured()",
+                         "html": true
+                       },
+                       {
+                         "text": "Flat",
+                         "click": "showFlat()",
+                         "html": true
+                       },
+                     ];
+
+
+});
+
 app.controller("addEventController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
 

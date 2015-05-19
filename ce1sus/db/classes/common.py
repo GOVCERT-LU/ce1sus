@@ -12,7 +12,7 @@ from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.bitdecoder import BitBase
-
+from stix.common.vocabs import HighMediumLow
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -148,21 +148,23 @@ class Confidence(StaticBase):
 
   @classmethod
   def get_dictionary(cls):
-    return {0: u'None',
-            1: u'Low',
-            2: u'Medium',
-            3: u'High'}
+    return {0: HighMediumLow.TERM_NONE,
+            1: HighMediumLow.TERM_LOW,
+            2: HighMediumLow.TERM_MEDIUM,
+            3: HighMediumLow.TERM_HIGH,
+            4: HighMediumLow.TERM_UNKNOWN}
 
 
 class Risk(StaticBase):
   """Static class defining the risk of an event"""
   @classmethod
   def get_dictionary(cls):
-    return {0: u'None',
-            1: u'Low',
-            2: u'Medium',
-            3: u'High',
-            4: u'Undefined'}
+    return {0: HighMediumLow.TERM_NONE,
+            1: HighMediumLow.TERM_LOW,
+            2: HighMediumLow.TERM_MEDIUM,
+            3: HighMediumLow.TERM_HIGH,
+            4: u'Undefined',
+            5: HighMediumLow.TERM_UNKNOWN}
 
 
 class ServerType(StaticBase):

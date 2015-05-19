@@ -54,6 +54,8 @@ class EventHandler(RestBaseHandler):
           return self.__process_event(method, event, details, inflated, json, headers)
         elif requested_object['object_type'] == 'observable':
           return self.__process_observable(method, event, requested_object, details, inflated, json, headers)
+        elif requested_object['object_type'] == 'indicator':
+          return self.__process_indicator(method, event, requested_object, details, inflated, json, headers)
         elif requested_object['object_type'] == 'observable_composition':
           return self.__process_composed_observable(method, event, requested_object, details, inflated, json)
         elif requested_object['object_type'] == 'changegroup':
@@ -148,6 +150,24 @@ class EventHandler(RestBaseHandler):
       self.check_if_event_is_deletable(event)
       self.event_controller.remove_event(self.get_user(), event)
       return 'Deleted event'
+
+  def __process_indicator(self, method, event, requested_object, details, inflated, json, headers):
+    user = self.get_user()
+
+    if method == 'GET':
+      self.check_if_event_is_viewable(event)
+      event_permission = self.get_event_user_permissions(event, user)
+      observable_id = requested_object['object_uuid']
+      if observable_id:
+        raise RestHandlerException('Not implemented')
+      else:
+        result = list()
+        for indicator in event.get_indicators_for_permissions(event_permission, user):
+          if self.is_item_viewable(event, indicator):
+            result.append(indicator.to_dict(details, inflated, event_permission, user))
+        return result
+    else:
+      raise RestHandlerException('Not implemented')
 
   def __process_observable(self, method, event, requested_object, details, inflated, json, headers):
     user = self.get_user()

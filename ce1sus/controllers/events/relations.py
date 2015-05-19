@@ -144,16 +144,16 @@ class RelationController(BaseController):
       for attribute in obj.attributes:
         result.append(attribute)
       for related_object in obj.related_objects:
-        result = result + self.make_object_attributes_flat(related_object.object)
+        result.extend(self.make_object_attributes_flat(related_object.object))
     return result
 
   def __process_observable(self, observable):
     result = list()
     if observable.observable_composition:
       for child_observable in observable.observable_composition.observables:
-        result + self.__process_observable(child_observable)
+        result.extend(self.__process_observable(child_observable))
     else:
-      result = result + self.make_object_attributes_flat(observable.object)
+      result.extend(self.make_object_attributes_flat(observable.object))
     return result
 
   def get_flat_attributes_for_event(self, event):
@@ -164,10 +164,14 @@ class RelationController(BaseController):
       for observable in event.observables:
         if observable.observable_composition:
           for obs in observable.observable_composition.observables:
-            flat_attriutes = flat_attriutes + self.__process_observable(obs)
+            flat_attriutes.extend(self.__process_observable(obs))
         else:
-          flat_attriutes = flat_attriutes + self.__process_observable(observable)
-
+          flat_attriutes.extend(self.__process_observable(observable))
+    if event.indicators:
+      for indicator in event.indicators:
+        if indicator.observables:
+          for observable in indicator.observables:
+            flat_attriutes.extend(self.__process_observable(observable))
     return flat_attriutes
 
   def remove_all_relations_by_definition_ids(self, id_list, commit=True):

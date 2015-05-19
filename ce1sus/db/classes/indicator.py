@@ -10,10 +10,12 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, Marking
 from ce1sus.db.common.session import Base
 from stix.common.vocabs import IndicatorType as StixIndicatorType
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -169,3 +171,66 @@ class Indicator(ExtendedLogingInformations, Base):
       else:
         self.__bit_code = Properties(self.dbcode, self)
     return self.__bit_code
+
+  def get_observables_for_permissions(self, event_permissions, user):
+    rel_objs = list()
+    # TODO take into account owner
+    for rel_obj in self.observables:
+      if is_object_viewable(rel_obj, event_permissions, user.group):
+        rel_objs.append(rel_obj)
+      else:
+        if rel_obj.originating_group_id == user.group_id:
+          rel_objs.append(rel_obj)
+    return rel_objs
+
+  def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
+    if inflated:
+      observables = list()
+      for observable in self.get_observables_for_permissions(event_permissions, user):
+        observables.append(observable.to_dict(complete, inflated, event_permissions, user))
+
+      observables_count = len(observables)
+    else:
+      observables = None
+      # observables_count = self.observables_count_for_permissions(event_permissions)
+      observables_count = -1
+
+    if complete:
+      result = {'identifier': self.convert_value(self.uuid),
+                'description': self.convert_value(self.description),
+                'short_description': self.convert_value(self.short_description),
+                'confidence': self.convert_value(self.confidence),
+                'operator': self.convert_value(self.operator),
+                'title': self.convert_value(self.title),
+                'properties': self.properties.to_dict(),
+                'creator_group': self.creator_group.to_dict(complete, False),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
+                'originating_group': self.originating_group.to_dict(complete, False),
+                'created_at': self.convert_value(self.created_at),
+                'modified_on': self.convert_value(self.modified_on),
+                'event_id': self.convert_value(self.event.uuid),
+                'observables': observables,
+                'observables_count': observables_count,
+                'version': self.convert_value(self.version),
+
+                }
+    else:
+      result = {'identifier': self.convert_value(self.uuid),
+                'short_description': self.convert_value(self.short_description),
+                'operator': self.convert_value(self.operator),
+                'title': self.convert_value(self.title),
+                'properties': self.properties.to_dict(),
+                'creator_group': self.creator_group.to_dict(complete, False),
+                'modifier_group': self.modifier.group.to_dict(complete, False),
+                'originating_group': self.originating_group.to_dict(complete, False),
+                'created_at': self.convert_value(self.created_at),
+                'published': self.convert_value(self.properties.is_shareable),
+                'modified_on': self.convert_value(self.modified_on),
+                'event_id': self.convert_value(self.event.uuid),
+                'observables': observables,
+                'observables_count': observables_count,
+                'version': self.convert_value(self.version),
+
+                }
+
+    return result

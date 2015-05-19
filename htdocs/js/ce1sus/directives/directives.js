@@ -463,6 +463,48 @@ app.directive("composedobservable", function($compile) {
   };
 });
 
+app.directive("indicator", function($compile) {
+  return {
+    restrict: "E",
+    replace: true,
+    transclude: true,
+    scope: {
+      indicator: "=indicator",
+      indent: "=indent",
+      permissions: "=permissions"
+    },
+    controller: function($scope, $modal, $log, messages, Restangular, $routeSegment){
+
+      $scope.getTitle = function(indicator){
+        if (indicator.title){
+          return indicator.title;
+        } else {
+          return "Indicator";
+        }
+      };
+      
+      $scope.showDetails = function(){
+        $modal({scope: $scope, template: 'pages/events/event/indicator/details.html', show: true});
+      };
+      
+    },
+    templateUrl: "pages/common/directives/indicatorview.html",
+    compile: function(tElement, tAttr, transclude) {
+      var contents = tElement.contents().remove();
+      var compiledContents;
+      return function(scope, iElement, iAttr) {
+
+          if(!compiledContents) {
+              compiledContents = $compile(contents, transclude);
+          }
+          compiledContents(scope, function(clone, scope) {
+                   iElement.append(clone); 
+          });
+      };
+    }
+  };
+});
+
 app.directive("observable", function($compile) {
   
   return {

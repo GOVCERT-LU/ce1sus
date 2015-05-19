@@ -1,0 +1,31 @@
+<div bs-collapse ng-transclude>
+  <div class="panel panel-default">
+    <div class="collapse-header" ng-class=" {'unvalidated' : !indicator.properties.validated && !indicator.properties.proposal, 'proposal': indicator.properties.proposal && !indicator.properties.validated, 'panel-heading':  indicator.properties.validated}">
+      <div class="row">
+        <div class="col-sm-7">
+            <h4 class="panel-title" id="Menu{{indicator.identifier}}">
+              <a class="hand" bs-collapse-toggle>{{getTitle(indicator)}}</a>
+            </h4>
+        </div>
+        <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!indicator.properties.shared"></span></div>
+        <div class="col-sm-4">
+          <div class="btn-group" role="group">
+
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="showDetails()"> <span
+              class="glyphicon glyphicon-eye-open"></span>
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-collapse collapse" bs-collapse-target>
+      <div class="collapse-body">
+        <span ng-repeat="observable in indicator.observables">
+          <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="event.userpermissions"></observable>
+          <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="event.userpermissions"></composedobservable>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

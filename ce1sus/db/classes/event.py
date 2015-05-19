@@ -188,6 +188,17 @@ class Event(ExtendedLogingInformations, Base):
     # TODO validation of an event
     return True
 
+  def get_indicators_for_permissions(self, event_permissions, user):
+    rel_objs = list()
+    # TODO take into account owner
+    for rel_obj in self.indicators:
+      if is_object_viewable(rel_obj, event_permissions, user.group):
+        rel_objs.append(rel_obj)
+      else:
+        if rel_obj.originating_group_id == user.group_id:
+          rel_objs.append(rel_obj)
+    return rel_objs
+
   def get_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     # TODO take into account owner
@@ -268,6 +279,12 @@ class Event(ExtendedLogingInformations, Base):
 
       observables_count = len(observables)
 
+      indicators = list()
+      for indicator in self.get_indicators_for_permissions(event_permissions, user):
+        indicators.append(indicator.to_dict(complete, inflated, event_permissions, user))
+
+      indicators_count = len(indicators)
+
       reports = list()
       for report in self.get_reports_for_permissions(event_permissions, user):
         reports.append(report.to_dict(complete, inflated, event_permissions, user))
@@ -281,6 +298,9 @@ class Event(ExtendedLogingInformations, Base):
       reports = None
       # reports_count = self.reports_count_for_permissions(event_permissions)
       reports_count = -1
+      indicators = None
+      indicators_count = -1
+
     if complete:
       comments = list()
       if is_event_owner(self, user):
@@ -310,6 +330,8 @@ class Event(ExtendedLogingInformations, Base):
                 'last_seen': self.convert_value(None),
                 'observables': observables,
                 'observables_count': observables_count,
+                'indicators': indicators,
+                'indicators_count': indicators_count,
                 'comments': comments,
                 'properties': self.properties.to_dict(),
                 'groups': groups,
@@ -329,6 +351,8 @@ class Event(ExtendedLogingInformations, Base):
                 'last_seen': self.convert_value(None),
                 'observables': observables,
                 'observables_count': observables_count,
+                'indicators': indicators,
+                'indicators_count': indicators_count,
                 'reports': reports,
                 'reports_count': reports_count,
                 'risk': self.convert_value(self.risk),
