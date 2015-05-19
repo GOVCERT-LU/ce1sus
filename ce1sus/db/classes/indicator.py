@@ -12,7 +12,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
 
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
-from ce1sus.db.classes.common import Properties, Marking
+from ce1sus.db.classes.common import Properties, Marking, TLP
 from ce1sus.db.common.session import Base
 from stix.common.vocabs import IndicatorType as StixIndicatorType
 
@@ -160,6 +160,27 @@ class Indicator(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
 
+  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
+
+  @property
+  def tlp(self):
+    """
+      returns the tlp level
+
+      :returns: String
+    """
+
+    return TLP.get_by_id(self.tlp_level_id)
+
+  @tlp.setter
+  def tlp(self, text):
+    """
+    returns the status
+
+    :returns: String
+    """
+    self.tlp_level_id = TLP.get_by_value(text)
+
   @property
   def properties(self):
     """
@@ -182,6 +203,19 @@ class Indicator(ExtendedLogingInformations, Base):
         if rel_obj.originating_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
+
+  def populate(self, json, rest_insert=True):
+    self.title = json.get('title', None)
+    self.description = json.get('description', None)
+    self.short_description = json.get('short_description', None)
+    self.operator = json.get('operator', None)
+    self.confidence = json.get('confidence', None)
+    self.version = json.get('version', None)
+    self.properties.populate(json.get('properties', None))
+    # TODO: make valid for inflated
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert
+    self.tlp = json.get('tlp', 'Amber').title()
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     if inflated:

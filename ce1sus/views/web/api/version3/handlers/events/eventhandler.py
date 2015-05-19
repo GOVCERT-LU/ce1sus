@@ -14,6 +14,7 @@ from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.event import EventGroupPermission
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,6 +30,7 @@ class EventHandler(RestBaseHandler):
     self.observable_controller = self.controller_factory(ObservableController)
     self.relation_controller = self.controller_factory(RelationController)
     self.report_controller = self.controller_factory(ReportController)
+    self.indicator_controller = self.controller_factory(IndicatorController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -165,7 +167,16 @@ class EventHandler(RestBaseHandler):
         for indicator in event.get_indicators_for_permissions(event_permission, user):
           if self.is_item_viewable(event, indicator):
             result.append(indicator.to_dict(details, inflated, event_permission, user))
-        return result
+        if result:
+          return result
+        else:
+          # generate indicators
+          indicators = self.indicator_controller.get_generic_indicators(event, user)
+          result = list()
+          for indicator in indicators:
+            if self.is_item_viewable(event, indicator):
+              result.append(indicator.to_dict(details, inflated, event_permission, user))
+          return result
     else:
       raise RestHandlerException('Not implemented')
 

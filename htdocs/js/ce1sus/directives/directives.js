@@ -953,7 +953,12 @@ app.directive("menu", function($compile, $timeout) {
               } else {
                 if (observable.hasOwnProperty('short_description')) {
                   if (!observable.title) {
-                    return "Report";
+                    if (observable.observables) {
+                      return "Indicator";
+                    } else {
+                      return "Report";
+                    }
+                    
                   }
                 } else {
                   return "Observable";

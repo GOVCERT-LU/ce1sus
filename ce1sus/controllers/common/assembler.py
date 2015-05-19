@@ -8,6 +8,7 @@ Created on Feb 18, 2015
 import base64
 from ce1sus.helpers.common import strings
 from datetime import datetime
+import grp
 from os.path import dirname
 import re
 from shutil import move, rmtree
@@ -23,6 +24,7 @@ from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.event import Comment, Event, EventGroupPermission
 from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition
@@ -34,7 +36,6 @@ from ce1sus.handlers.references.filehandler import FileReferenceHandler
 from ce1sus.helpers.common.hash import hashSHA1, hashMD5, fileHashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.plugins.ldapplugin import LdapPlugin
-import grp
 
 
 __author__ = 'Weber Jean-Paul'
@@ -192,6 +193,12 @@ class Assembler(BaseController):
         obs = self.assemble_observable(event, observable, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
         if obs:
           event.observables.append(obs)
+    indicators = json.get('indicators', None)
+    if indicators:
+      for indicator in indicators:
+        ind = self.assemble_indicator(event, indicator, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
+        if ind:
+          event.indicators.append(obs)
     reports = json.get('reports', None)
     if reports:
       for report in reports:
@@ -278,6 +285,14 @@ class Assembler(BaseController):
       return composed
     else:
       return None
+
+  def assemble_indicator(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
+    indicator = Indicator()
+    indicator.uuid = json.get('identifier', None)
+    indicator.event_id = event.identifier
+    indicator.event = event
+    indicator.populate(json, rest_insert)
+    self.populate_extended_logging(indicator, json, user, True, seen_groups)
 
   def assemble_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
 
