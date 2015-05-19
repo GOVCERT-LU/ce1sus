@@ -1,18 +1,15 @@
-﻿Documentation
-=============
+#﻿Documentation
 
 The documentation is still under development
 
+##1. Installation
+ 
 
-1. Installation
-=============== 
-
-1.1. Requirements
------------------
+###1.1. Requirements
 
 Ce1sus need the following packages:
 
-- python
+* python
   * python (2.7+)
   * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
@@ -32,58 +29,78 @@ Ce1sus need the following packages:
 - python-stix (1.1.1.5) 
 - python-cybox (2.1.0.11)
 
-1.1.2 Installation of the requirements
----------------------------------------
+###1.1.2 Installation of the requirements
 
 Debian based systems can execute the following command:
 
-$ sudo apt-get install python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
+``` shell
+sudo apt-get install python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
+```
 
-1.2. Clone the repository
--------------------------
+##1.2. Clone the repository
 
-$ git clone https://github.com/GOVCERT-LU/ce1sus
+``` shell
+git clone https://github.com/GOVCERT-LU/ce1sus
+```
 
-1.2.1 Python magic
------------------- 
+###1.2.1 Python magic
+ 
 One possibility to install python-magic is the following
 
 Go to your ce1sus installation directory and:
 
-$ mkdir libs
-$ cd libs
-$ git clone https://github.com/ahupp/python-magic
-$ cd ..
-$ ln -s libs/python-magic/magic.py .
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/ahupp/python-magic
+cd ..
+ln -s libs/python-magic/magic.py .
+```
 
 The important fact is that the magic package must be accessible with "import magic"
 
-1.2.2 Email parser
-------------------
+###1.2.2 Email parser
+
 One possibility to install eml_parser is the following
 
-$ mkdir libs
-$ cd libs
-$ git clone https://github.com/sim0nx/eml_parser
-$ cd ..
-$ ln -s libs/eml_parser/eml_parser/eml_parser.py .
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/sim0nx/eml_parser
+cd ..
+ln -s libs/eml_parser/eml_parser .
+```
 
-1.2.3 Cybox
-------------------
+###1.2.3 Cybox
 
-1.2.4 Stix
-------------------
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/CybOXProject/python-cybox.git v2.1.0.11
+cd ..
+ln -s libs/python-cybox/python-cybox/cybox .
+```
 
-1.3. Database
--------------
+###1.2.4 Stix
 
-1.3.1 Database creation
------------------------
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/STIXProject/python-stix.git v1.1.1.5
+cd ..
+ln -s libs/python-stix/python-stix/stix .
+```
+
+##1.3. Database
+
+
+###1.3.1 Database creation
+
 
 CREATE DATABASE ce1sus;
 
-1.3.2 DB User
--------------
+###1.3.2 DB User
+
 
 Create a db user for ce1sus user must have the following grants:
 
@@ -96,8 +113,8 @@ CREATE USER 'ce1sus'@'localhost' IDENTIFIED BY 'password';
 GRANT INSERT, SELECT, DELETE, UPDATE  ON 'ce1sus'. * TO 'ce1sus'@'localhost';
 FLUSH PRIVILEGES;
 
-1.3.3 DB SCHEMA
-----------------
+###1.3.3 DB SCHEMA
+
 The creation of the db schema changed since 0.11.X and is now done via a script. To initialize the database do the following:
 
 $ cd scripts/installation/database
@@ -106,19 +123,20 @@ $ python db_init.py
 Everything needed will be created automatically. If there should be migrations the scripts for the migration will be provided 
 the scripts/migrations folder, use these in order.
 
-NOTE: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
+*NOTE 1*: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
 manually as this takes some time to generate them if the system is not busy.
+*NOTE 2*: Set fir the database initialization the user in the configuration file to a user which has the permissions to create tables.
 
-1.3.4 Remarks
--------------
+###1.3.4 Remarks
+
 Depending on your DB server it is advised to have a tmp folder with at least 1 GB space.
 
 
-1.4 Ce1sus Configuration
--------------------------
+##1.4 Ce1sus Configuration
 
-1.4.1a Celsus.conf
------------------
+
+###1.4.1a Celsus.conf
+
 Go to your ce1sus installation directory and create configuration file ce1sus.conf in the config directory 
 use the file config/ce1sus.conf_tmpl as template
 
@@ -217,8 +235,8 @@ useMailer=[No|Yes]                                     : When set ce1sus sends t
 subject=ErrorOccureredForCelsus                        : Email subject for error mails
 receiver=                                              : Mail address of the error mail receiver
 
-1.4.1b handler.conf
--------------------
+###1.4.1b handler.conf
+
 Go to your ce1sus installation directory and create configuration file handlers.conf in the config directory 
 use the file config/handlers.conf_tmpl as template
 
@@ -250,8 +268,7 @@ files=/path/to/ce1sus/files                            : The absolute file path 
                                                          uploaded files as attributes.
                                                          The user (i.e 'www-data') of ce1sus must have access on that directory
 
-1.4.2 Cherrypy.conf
--------------------
+###1.4.2 Cherrypy.conf
 
 Go to your ce1sus installation directory and create configuration file cherrypy.conf in the config directory 
 use the file config/cherrypy.conf_tmpl as template
@@ -279,8 +296,8 @@ But we strongly advise you to use memcache
 Note: This is a standart cherrypy configuration file. For more information on that subject see 
       http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
 
-1.5 Test configurations
--------------------------
+##1.5 Test configurations
+
 Go to your ce1sus installation directory and launch
 
 $ python ce1sus-run.py
@@ -289,8 +306,8 @@ and access http://localhost:8080
 
 This is a method to see if ce1sus can start correctly. If this is the case continue to section 1.6
 
-1.5.1 Troubleshooting
----------------------
+###1.5.1 Troubleshooting
+
 If you are reading this you may have encoutered troubles when launching a local copy of ce1sus (see section 1.5). 
 
 Errors during stat:
@@ -301,8 +318,8 @@ Errors during stat:
 Cannot locate template for uri 'index/login.html'
 -> the path for the templates in ce1sus.conf '[Mako]' section was not set up correctly.
 
-1.6 uwsgi
----------
+##1.6 uwsgi
+
 Install uwsgi and uwsgi-plugin-python
 
 $ apt-get install uwsgi uwgsi-plugin-python
@@ -323,8 +340,8 @@ Restart service
 $ /etc/init.d/uwsgi restart
 
 
-1.7 nginx
----------
+##1.7 nginx
+
 Install nginx
 
 $ apt-get install nginx
@@ -353,16 +370,16 @@ $ /etc/init.d/nginx restart
 
 Login as admin with password admin
 
-1.7.1 Troubleshooting
----------------------
+###1.7.1 Troubleshooting
+
 Nginx shows a 404 or 403:
 
 403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from
      the folder
 404: the root folder was set up incorrectly
 
-1.8 DB migration
-------------------
+##1.8 DB migration
+
 If you are migrating from 0.10 to 0.11.0 proceed like stated below
 
 First dump your current database.
@@ -384,8 +401,7 @@ The script used the configuration of the later instance.
 Note the migration can take some time depending on the volume of your database.
 
 
-2. Web Interface
-================
+#2. Web Interface
 
 Completely OUTDATED
 
@@ -408,14 +424,14 @@ The web interface of Ce1sus has two sections:
              
     3. Event details
 
-2.1 Administration
-------------------
+##2.1 Administration
+
 
 This section describes the administration interface. This interface is only accessible to users with with the 
 privileged flag set.
 
-2.1.1 Validation
-----------------
+###2.1.1 Validation
+
 
 This list shows the unvalidated Events inserted via REST. The operations which can be performed are similar to the one 
 described in section 2.2.3 except that the main event overview cannot be edited.
@@ -425,8 +441,8 @@ To validate an event one has only to click on the "Validate All" button.
 Note: Unvalidated Events will not be viewable in the RecentEvent section, nor via search, nor in relations until they got
       validated.
 
-2.1.2 Usermanagment
--------------------
+###2.1.2 Usermanagment
+
 
 A user has the following properties:
 
@@ -450,8 +466,8 @@ Note: If ce1sus/sendmail is set the user will receive an activation mail and his
       If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
       If ce1sus/sendmail is not set the account is directly activated.
 
-2.1.3 Mails
-------------
+###2.1.3 Mails
+
 Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
 Therefore the section [Mailer] has to be configured. 
 
@@ -476,8 +492,8 @@ Note:
       while.
     
 
-2.1.4 Object Definition
-------------------------
+###2.1.4 Object Definition
+
 
 The objects definitions can be considered as attribute containers. These containers limit the choice of attributes and 
 ease the use for the user to choose an appropriate attribute, without being overwhelmed by attributes which may be 
@@ -500,15 +516,15 @@ Objects definitions can be added, edited and deleted. The deletion only works if
 
 Note: Do not forget to add attribute definitions to the object else one is only able to add the object to the event.
 
-2.1.4.1 Sharing of object definitions
--------------------------------------
+####2.1.4.1 Sharing of object definitions
+
 
 The shareing of object definitions is not yet implemented. Therefore it is suggested at least in the beginning not to 
 change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
 it.
 
-2.1.5 Attributes Definition
-----------------------------
+###2.1.5 Attributes Definition
+
 
 The attribute definition are the definition what an attribute can be.
 
@@ -531,15 +547,15 @@ Default Shareable          : The default value for sharing
                              Note: These values can be overridden, by the user
 Associated Object          : Objects which contain the attribute definiton
 
-2.1.4.1 Sharing of attribute definitions
--------------------------------------
+####2.1.4.1 Sharing of attribute definitions
+
 
 The shearing of attribute definitions is not yet implemented. Therefore it is suggested at least in the beginning not to
 change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
 it.
 
-2.1.5.1 Handlers
------------------
+####2.1.5.1 Handlers
+
 Ce1sus support custom handlers, these handlers are used to perform additional operations (i.e. parsing of the email) and
 display the attribute values depending on their configuration.
 
@@ -585,8 +601,8 @@ RTHandler             | Number               | Handler for RT Tickets
 TextHandler           | Text                 | Handler for large text i.e. YARA Rules
 ---------------------------------------------------------------------------------------------------------------------------
 
-2.1.5.1.1 Manual handler insertion
-----------------------------------
+#####2.1.5.1.1 Manual handler insertion
+
 There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is
 be explained below
 
@@ -597,8 +613,8 @@ be explained below
     * The uuid for the handler
 3b. (Optional) Create a configuration
 
-2.1.6 Groupmanagment
----------------------
+###2.1.6 Groupmanagment
+
 
 The group management consists of to types of groups: Maingroups (denoted groups) and collections of groups (denoted SubGroups).
 The Groups specify the main group for users and have the following properties:
@@ -619,12 +635,12 @@ Associated SubGroups       : SubGroup the group belongs to
 
 Note: It is engough that a group is associated to a subgroup to let the users of the group view an event.
 
-2.2 User interface
---------------
+##2.2 User interface
+
 The next sections describes the elements of the user interface.
 
-2.2.1 Event details
---------------------
+###2.2.1 Event details
+
 The event details are composed of the following views:
 
 Overview          : General details of the event, show also Relations beween other events and a possibility to add event comments
@@ -640,8 +656,8 @@ Groups             : Group management of the event. Ech group associated to the 
                      view the event. 
                      Note: Only priviledged users and users of the creator group can view/change the goups.
 
-2.2.1.1 Adding/Edit an Event
---------------------------
+#####2.2.1.1 Adding/Edit an Event
+
 
 The event has the following properties:
 
@@ -667,8 +683,8 @@ Last seen                                      : When the event was last seen. D
 Note: If ce1sus is configured to send mails, each time an events gets published the users allowed to see the events gets 
 a notification mail of the changes
 
-2.2.1.1 Adding/Edit Objects
----------------------------
+####2.2.1.1 Adding/Edit Objects
+
 
 To add an object the user must just select the object he wants and if this object should be shared. If the object is not
 shared the attribute will automatically be not shared.
@@ -690,8 +706,8 @@ Delete            (Cross)      : Removes an object
 Notes: * If the object header has a lock icon the object is not shared
        * If the object header is yellow the object has been proposed, for more informations on proposals see section 2.2.1.3
 
-2.2.1.2 Adding/Edit Attributes
--------------------------------
+####2.2.1.2 Adding/Edit Attributes
+
 
 Attributes can only be added if an object exits. The attribtues can change for every object as they were configured in 
 the administration section (see section 2.1.4 & 2.1.5). 
@@ -712,24 +728,23 @@ Notes: * If the attribute identifier is marked red the event is unpulbished.
        * If the attribute identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
        * Depending on the handler used the properties may vary.
 
-2.2.1.3 Proposal of objects/Attributes
---------------------------------------
+####2.2.1.3 Proposal of objects/Attributes
+
 Every user can propose attributes and objects to an event which is viewable to him. The proposals are made as if the proposing user is the owner of the event he wants to provide additional informations. The difference is that these proposed attributes will be marked (yellow color) to denote them as proposals. These proposals will only be visible by the proposing user and the event owner. As long as the proposed attribute had not been acknowledged by the owner, they can be deleted at any time, by the proposing user.
 
 Note: These attributes will not be visible to other users, unless the owner acknowledge them and then they will be part of the event and shown normally to all the users having access to the corresponding event.
 
 Remark: A future release will provide this feature also via REST.
 
-2.2.2 Search
-------------
+###2.2.2 Search
+
 
 The search supports currently only the search on attributes. The search results work the same way as the Recent events described
 in section 2.2.3.
 
 WORK IN PROGRESS
 
-2.2.3 Recent Entries
----------------------
+###2.2.3 Recent Entries
 
 The recent events list the last 200 entered events, by clicking, either on the identifier (number) or the eye icon in the
 options column, one enters view of the event. 
@@ -737,8 +752,8 @@ options column, one enters view of the event.
 Notes: * If the event identifier is marked red the event is unpulbished.
        * If the event identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
 
-3. REST API
-===========
+#3. REST API
+
 Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
 
 See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api 
@@ -748,8 +763,8 @@ Note: The events inserted over rest have to be validated by a privileged user, b
 
 WORK IN PROGRESS
 
-4. Maintenance tools
-===================
+#4. Maintenance tools
+
 The maintenance tool is a command line application, wich is deployed on the server. It offers the following functionalities:
 
 - Rebuild all relations according to the definitions
@@ -763,11 +778,11 @@ Use the following command for the syntax
 
 $ python maintenance.py -h 
 
-5. Developing Handlers
-=======================
+#5. Developing Handlers
+
 
 WORK IN PROGRESS
 
-4. Known Issues
-===============
+#4. Known Issues
+
 None
