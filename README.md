@@ -31,6 +31,8 @@ and if the dropper file was not found one at least knows that the cases are rela
 
 Such structures improve the understanding of how the different attributes are related, and leads to a better overview on the relationship between events.
 
+![ce1sus event](/doc/images/ce1sus_gui.png)
+
 ##Note
 
 There are several branches, which are primarily used for development the master branch will be the release which is considered as stable
