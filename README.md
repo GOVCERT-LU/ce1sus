@@ -31,7 +31,7 @@ and if the dropper file was not found one at least knows that the cases are rela
 
 Such structures improve the understanding of how the different attributes are related, and leads to a better overview on the relationship between events.
 
-#Note
+##Note
 
 There are several branches, which are primarily used for development the master branch will be the release which is considered as stable
 
@@ -39,7 +39,7 @@ This is still not the final release, we are still developing ce1sus.
 
 For any questions feel free to ask
 
-#Features
+##Features
 
 * Creates relations between events through their attributes
 * Stores and presents the event in a structured manner
@@ -63,7 +63,7 @@ For any questions feel free to ask
 * Attributes/Objects/Observables additionally can be shared via TLP level
 
 
-#Requirements
+##Requirements
 
 - python
   * python (2.7+)
@@ -83,18 +83,18 @@ For any questions feel free to ask
 - uWSGI (1.2.3+, with python-2 support)
 - memcached
 
-#Roadmap
+##Roadmap
 
-##v0.11.1
+###v0.11.1
 
 * Relation of attributes can be done over groups of attributes
 
-##v0.11.2
+###v0.11.2
 
 * TAXII server integration
 
 
-#Up the road 0.11.x
+##Up the road 0.11.x
 
 * Profile management
 * More handlers
@@ -104,12 +104,12 @@ For any questions feel free to ask
 * Show statistics on Home page
 * Password protection for compressed files
 
-#Installation
+##Installation
 
  
 For the installation please refer to the Documentation files
 
-#Remarks
+##Remarks
 
 
 For any questions feel free to ask.
