@@ -237,10 +237,10 @@ The **[Plugins]** section defines which "Plugins" are available to use
 
 |variable name | Description |
 |--------------|-------------|
-|LdapPlugin=[Yes|No]                                    | Enables the Ldap plugin|
+|LdapPlugin=[Yes,No]                                    | Enables the Ldap plugin|
 |                                                       | **Note**: If the ldapplugin is activated the section LDAP and the useldap|
 |                                                      |        in the ce1sus section have to be set|
-|MailPlugin=[Yes|No]                                    | Enables the mail plugin|
+|MailPlugin=[Yes,No]                                    | Enables the mail plugin|
 |                                                       |  **Note**: If the mail plugin is not enabled no mails will be send out, this has no impact except that new users have to be activated manually.|
 
 The **[Mailer]** section stores the configuration for sending mails and has the following elements
@@ -504,27 +504,25 @@ The script used the configuration of the later instance.
 The web interface of Ce1sus has two sections:
 
 1. Administration
-
-     The administration section is used to:
-         * Validate events inserted over the RESTAPI
-         * Define definitions for objects, attributes, references
-         * User management
-         * Group management
-         * Server managment
-         * Editing mail templates
+  The administration section is used to:
+     * Validate events inserted over the RESTAPI
+     * Define definitions for objects, attributes, references
+     * User management
+     * Group management
+     * Server managment
+     * Editing mail templates
 
 2. User interface
-
-     The event view is used to:
-         * Search for attributes
-         * Add/Edit events
-         * View events
-            * Overview
-            * Observables
-            * Indicators
-            * Relations
-            * Reports
-            * Groups
+The event view is used to:
+  * Search for attributes
+  * Add/Edit events
+  * View events
+     * Overview
+     * Observables
+     * Indicators
+     * Relations
+     * Reports
+     * Groups
             
 3. Event details
 
