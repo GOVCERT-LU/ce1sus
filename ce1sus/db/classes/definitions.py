@@ -102,6 +102,7 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     self.name = json.get('name', None)
     self.description = json.get('description', None)
     self.default_share = json.get('default_share', False)
+    self.cybox_std = json.get('cybox_std', False)
 
 
 class AttributeDefinition(SimpleLogingInformations, Base):
@@ -225,6 +226,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.share = share
     self.regex = json.get('regex', None)
     self.table_id = json.get('table_id', None)
+    self.cybox_std = json.get('cybox_std', False)
 
 
 class AttributeHandler(Base):

@@ -5,8 +5,11 @@
 
 Created on Apr 16, 2015
 """
+from ce1sus.helpers.common.config import Configuration
+from datetime import datetime
 from os.path import dirname, abspath
 
+from ce1sus.common.checks import is_event_owner
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.admin.user import UserController
@@ -17,13 +20,9 @@ from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.db.common.session import SessionManager
-from ce1sus.helpers.common.config import Configuration
-from ce1sus.helpers.common.datumzait import DatumZait
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, \
-  Ce1susAdapter
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
-from ce1sus.common.checks import is_event_owner
 
 
 __author__ = 'Weber Jean-Paul'
@@ -134,7 +133,7 @@ class Scheduler(object):
         # it is to send emails
         self.__send_mails(event, item.type_)
       # set event as published
-      event.last_publish_date = DatumZait.utcnow()
+      event.last_publish_date = datetime.utcnow()
       self.event_broker.update(event, True)
       # remove item from queue
       self.process_controller.process_finished_success(item, self.user)

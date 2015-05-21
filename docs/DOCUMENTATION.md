@@ -111,9 +111,10 @@ ln -s libs/openioc-to-strix/opendioc_to_cybox.py .
 
 ###1.3.1 Database creation
 
-´´´sql
+``` sql
 CREATE DATABASE ce1sus;
-´´´
+``` 
+
 ###1.3.2 DB User
 
 
@@ -124,7 +125,7 @@ Create a db user for ce1sus user must have the following grants:
 * DELETE
 * UPDATE
 
-```sql
+``` sql
 CREATE USER 'ce1sus'@'localhost' IDENTIFIED BY 'password';
 GRANT INSERT, SELECT, DELETE, UPDATE  ON 'ce1sus'. * TO 'ce1sus'@'localhost';
 FLUSH PRIVILEGES;
@@ -144,6 +145,7 @@ the scripts/migrations folder, use these in order.
 
 **NOTE 1**: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
 manually as this takes some time to generate them if the system is not busy.
+
 **NOTE 2**: Set for the database initialization the user in the configuration file to a user which has the permissions to create tables.
 
 ###1.3.4 Remarks
@@ -179,7 +181,9 @@ configuration do and their values.
 
 The **[SessionManager]** section stores the settings of the database connection and has the following elements
 
-|protocol=[mysql+mysqldb | sqlite] | Defines the protocol used for the connection |
+|variable name | Description |
+|--------------|-------------|
+|protocol=[mysql+mysqldb,mylsql,sqlite] | Defines the protocol used for the connection |
 |username=                         | Username of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite| 
 |password=                         | Password of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite |
 |host=127.0.0.1                    | IP address of the db server|
@@ -187,13 +191,15 @@ The **[SessionManager]** section stores the settings of the database connection 
 |                                  |  If the sqlite protocol is chosen the element db must correspond to the absolute path|
 |                                  |  to the sqlite file|
 |port=3306                         | Port of the db server, is ignored for sqlite|
-|debug=[no | yes ]                 | If set to "yes" the sql queries will be shown in the logs| 
-|usecherrypy=[yes | no]            | If set to "yes" a single connection is used else multiples|
+|debug=[no,yes ]                 | If set to "yes" the sql queries will be shown in the logs| 
+|usecherrypy=[yes,no]            | If set to "yes" a single connection is used else multiples|
 |                                  |  **Note**: Do not change this value unless you know what you are doing|
 
 The **[ce1sus]** section stores the general settings of ce1sus and has the following elements
 
-|useldap=[no|yes]                  | If "yes" the users can also be authenticated by ldap|
+|variable name | Description |
+|--------------|-------------|
+|useldap=[no,yes]                  | If "yes" the users can also be authenticated by ldap|
 |                                  |  Note: When set [LDAP] section has to be set and look in section XXXX how ldab users| 
 |                                  |        needs to be configured |
 |environment=LOCAL_DEV             | Text displayed in the header of the ce1sus web page. Used to separate dev| 
@@ -201,30 +207,36 @@ The **[ce1sus]** section stores the general settings of ce1sus and has the follo
 |                                  |  **Note** This value can be empty|
 |baseurl=http://localhost:8080     | The root url of your ce1sus server, this url is needed to build the links in the emails|
 |maintenaceuseruuid=               | The user uuid which is used by the maintenance.py script and used for the sync mechanism|
-|usebasicauth=[yes|no]             | enable basic authentication|
+|usebasicauth=[yes,no]             | enable basic authentication|
 |salt=                             | A random used to salt the hashes of passwords|
 
 The **[Logger]** section stores the configuration how the logs are stored/processed and has the following elements
 
-|log=[Yes|No]                                           | If set ce1sus does log|
+|variable name | Description |
+|--------------|-------------|
+|log=[Yes,No]                                           | If set ce1sus does log|
 |                                                       |  **Note**: It is advised that this element is set to "yes"|
 |log_file=log/logger.txt                                | Absolute or relative path for storage of log files|
-|logConsole = [Yes|No]                                  | If set ce1sus logs to the console and the file|
-|level=[CRITICAL|ERROR|WARNING|INFO|DEBUG]              | Log level|
+|logConsole = [Yes,No]                                  | If set ce1sus logs to the console and the file|
+|level=[CRITICAL,ERROR,WARNING,INFO,DEBUG]              | Log level|
 |size=10000000                                          | Size in bytes of the file before it gets rotated|
 |backups=1000                                           | Number of log backups|
-|syslog=[Yes|No]                                        | Log to syslog|
+|syslog=[Yes,No]                                        | Log to syslog|
 
 The **[LDAP]** section stores the configuration of the LDAP plugin and has the following elements
 
-|server=|
-|usetls=True|
-|users_dn=|
+|variable name | Description |
+|--------------|-------------|
+|server=|The server to use for the ldap connection|
+|usetls=[True, False]|Use TLS|
+|users_dn=||
 
 The LDAP configuration only makes sense if useldap is set on the ce1sus section and LdapPlugin is set in the Plugins section.
 
 The **[Plugins]** section defines which "Plugins" are available to use
 
+|variable name | Description |
+|--------------|-------------|
 |LdapPlugin=[Yes|No]                                    | Enables the Ldap plugin|
 |                                                       | **Note**: If the ldapplugin is activated the section LDAP and the useldap|
 |                                                      |        in the ce1sus section have to be set|
@@ -233,6 +245,8 @@ The **[Plugins]** section defines which "Plugins" are available to use
 
 The **[Mailer]** section stores the configuration for sending mails and has the following elements
 
+|variable name | Description |
+|--------------|-------------|
 |from=ce1sus                                            | Sender email|
 |smtp=                                                  | Smtp server|
 |port=25                                                | Port of the smtp server|
@@ -245,60 +259,73 @@ The **[Mailer]** section stores the configuration for sending mails and has the 
 
 The **[MISPAdapter]** section provides you to enable dumping of the gotten Misp events
 
-|dump=[yes|no]           | Enable dumping of misps|
+|variable name | Description |
+|--------------|-------------|
+|dump=[yes,no]           | Enable dumping of misps|
 |file=mispdump           | Absolute path to a folder where the misps should be dumped|
 
 The [OpenIOCAdapter] section provides you to enable dumping of the gotten Misp events
 
-|dump=[yes|no]           | Enable dumping of openIOC xml|
+|variable name | Description |
+|--------------|-------------|
+|dump=[yes,no]           | Enable dumping of openIOC xml|
 |file=openiocdump        | Absolute path to a folder where the misps should be dumped|
 
 
 The **[ErrorMails]** section stores the configuration of the error mails. These mails are send in case a HTTP 500 error occurs.
 
-|enable=[no|yes]                                        | When set an mail is sent to the receiver with the error stack trace|
+|variable name | Description |
+|--------------|-------------|
+|enable=[no,yes]                                        | When set an mail is sent to the receiver with the error stack trace|
 |sender=ce1sus                                          | Sender email|
+|receiver=ce1sus                                        | The destiation address. Only one can be specified|
+|subject=ErrorOccureredForCelsus                        | Email subject for error mails|
 |smtp=                                                  | Smtp server|
 |port=25                                                | Port of the smtp server|
+|level=info                                             | Not used yet|
 |user=                                                  | Not implemented|
 |password                                               ||
-|useMailer=[No|Yes]                                     | When set ce1sus sends the "receiver" error mails containing the| 
-|                                                       | stacktrace.|
-|                                                       | **Note**: When enabled the [Mailer] section has to be set!|
-|subject=ErrorOccureredForCelsus                        | Email subject for error mails|
-|receiver=                                              | Mail address of the error mail receiver|
-|level=info                                             | Not used yet|
 
 ###1.4.1b handler.conf
 
 Go to your ce1sus installation directory and create configuration file handlers.conf in the config directory 
 use the file *config/handlers.conf_tmpl* as template
 
-´´´shell
+``` shell
 cp config/handlers.conf_tmpl config/handlers.conf
-´´´
+```
 The following sections have to be modified to the settings of your system
 
 **[FileHandler]**
+|variable name | Description |
+|--------------|-------------|
 |files=/path/to/ce1sus/files                           | The absolute file path where ce1sus can store/archive the| 
 |                                                      |  uploaded files as attributes.|
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[CVEHandler]**
+|variable name | Description |
+|--------------|-------------|
 |cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=     | Base url for cves. (used by the CVEHandler)|
 
 **[RTHandler]**
+|variable name | Description |
+|--------------|-------------|
 |rt_user=                                               | The user used for accessing the RESTAPI for RT|
 |                                                       | (Used by RTHandler)|
 |rt_password=                                           | The user password used for accessing the RESTAPI for RT|
 |rt_url=                                                | Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)|
 
 **[FileReferenceHandler]**
+|variable name | Description |
+|--------------|-------------|
 |files=/path/to/ce1sus/reference_files                 | The absolute file path where ce1sus can store/archive the| 
 |                                                      |  uploaded files in the refrence section.|
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[FileWithHashesHandler]**
+|variable name | Description |
+|--------------|-------------|
 |files=/path/to/ce1sus/files                            | The absolute file path where ce1sus can store/archive the| 
 |                                                       | uploaded files as attributes.|
 |                                                       | The user (i.e 'www-data') of ce1sus must have access on that directory|
@@ -308,12 +335,15 @@ The following sections have to be modified to the settings of your system
 Go to your ce1sus installation directory and create configuration file cherrypy.conf in the config directory 
 use the file *config/cherrypy.conf_tmpl* as template
 
-´´´shell
+``` shell
 cp config/cherrypy.conf_tmpl config/cherrypy.conf
-´´´
+``` 
+
 The following lines must be modified according to your installation
 
+``` ini
 tools.staticdir.root='/path/to/ce1sus/htdocs'
+```
 
 The session handling can be done in two ways:
 
@@ -323,21 +353,23 @@ tools.sessions.storage_type = 'Memcached'
 
 For files use:
 
+``` ini
 tools.sessions.timeout = 15
 tools.sessions.storage_type = "file"
 tools.sessions.storage_path = "/path/to/ce1sus/sessions"
+``` 
 
 But we strongly advise you to use memcache
  
-**Note**: This is a standart cherrypy configuration file. For more information on that subject see 
-      http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
+**Note**: This is a standart cherrypy configuration file. For more information on that subject see http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
 
 ##1.5 Test configurations
 
 Go to your ce1sus installation directory and launch
-´´´shell
+``` shell
 python ce1sus-run.py
-´´´
+```
+
 and access http://localhost:8080, except you configured in the cherrypy.conf that sockets had to be used
 
 This is a method to see if ce1sus can start correctly. If this is the case continue to section 1.6
@@ -348,102 +380,115 @@ If you are reading this you may have encoutered troubles when launching a local 
 
 Errors during stat:
 
+```
 *'MySQLConnection' object has no attribute 'get_characterset_info'*
 -> connector issues try change it to mysql+mysqldb or mysql
+```
 
 ##1.6 uwsgi
 
 Install uwsgi and uwsgi-plugin-python
-´´´shell
+``` shell
 apt-get install uwsgi uwgsi-plugin-python
-´´´
+``` 
 
 In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of 
 uwsgi. 
 
 Copy the file to uwsgi:
-´´´shell
+``` shell
 cp scripts/install/uwsgi/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
-´´´
+```
+
 Edit /etc/uwsgi/apps-available/ce1sus.ini and replace "/path/to/ce1sus" with your ce1sus installation path
 
 Enable ce1sus in uwsgi:
-´´´shell
+``` shell
 ln -s /etc/uwsgi/apps-available/ce1sus.ini /etc/uwsgi/apps-enabled/
-´´´
+``` 
+
 Restart service
-´´´shell
+``` shell
 /etc/init.d/uwsgi restart
-´´´
+```
 
 ##1.7 nginx
 
 Install nginx
 
-´´´shell
+``` shell
 apt-get install nginx
-´´´
+```
 
 In the config folder of your ce1sus installation folder you'll find ce1sus_tmpl a template for the configuration of nginx. 
 
 Copy the file to uwsgi:
-´´´shell
+
+``` shell
 cp scripts/install/nginx/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
-´´´
+``` 
 Create a self signed certificate for ce1sus:
-´´´shell
+
+``` shell
 openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/ce1sus.key -out /etc/ssl/certs/ce1sus.pem
 chmod 600 /etc/ssl/certs/ce1sus.pem
 chmod 600 /etc/ssl/private/ce1sus.key
-´´´
+```
+
 Edit /etc/nginx/sites-available/ce1sus and replace "/path/to/ce1sus" with your ce1sus installation path
 
 **Note**: If you have own already a certificat you need to adapt the confuration file of nginx accordingly.
 
 Enable the ce1sus site:
-´´´shell
+``` shell
 ln -s /etc/nginx/sites-available/ce1sus /etc/nginx/sites-enabled/
-´´´
+```
 
 Restart service
 
-´´´shell
+``` shell
 /etc/init.d/nginx restart
-´´´
+``` 
 Login as admin with password admin
 
 ###1.7.1 Troubleshooting
 
 Nginx shows a 404 or 403:
 
-403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from
-     the folder
+403: means that the folder is accessible but the file i.e. index.html is not available, location element is missing from the folder
+
 404: the root folder was set up incorrectly
 
 ##1.8. Scheduler
 
-´´´shell
+The scheduler has to run in the background to perform its actions. This is done via a cronjob.
+
+``` shell
 ------
-´´´
+```
 
 ##1.9 DB migration
 
 If you are migrating from 0.10 to 0.11.0 proceed like stated below
 
 First dump your current database.
-´´´shell
+
+``` shell
 cd scripts/migration
 python dump_0.10.py -c ../../config/ce1sus.conf --dest dumps
-´´´
+```
+
 The script will use the settings in the ce1sus.conf and dumps it into the folder ./dumps
 
 The next step is to setup a new db schema (drop the old one) and follow the steps described in 1.3.3
 
 Finally migrate the dropped data into the new database
-´´´shell
+
+``` shell
 cd scripts/migration
 python migrate_0.10_to_0.11.0.py  -d dumps
-´´´
+```
+
 The script used the configuration of the later instance. 
 
 **Note** the migration can take some time depending on the volume of your database.
@@ -454,6 +499,7 @@ The script used the configuration of the later instance.
 The web interface of Ce1sus has two sections:
 
 1. Administration
+
      The administration section is used to:
          * Validate events inserted over the RESTAPI
          * Define definitions for objects, attributes, references
@@ -463,6 +509,7 @@ The web interface of Ce1sus has two sections:
          * Editing mail templates
 
 2. User interface
+
      The event view is used to:
          * Search for attributes
          * Add/Edit events
@@ -501,6 +548,8 @@ Ce1sus offers, when ldap is enabled, to insert users from ldap. This is done by 
 
 A user has the following properties:
 
+|Field | description|
+|------|------------|
 |Identifier   | Generated id|
 |Name         ||
 |SirName      ||
@@ -520,7 +569,9 @@ A user has the following properties:
 |Group   | The group the user belongs to. This group is also denoted by creator group. |
 
 **Note**: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
+
           If the user account is not activated within 24 hours, the account stays in disabled mode to reenable it either activate it manually or resend the activation mail.
+
           In case the sendmail is not set one must activate the user manually.
           
 ###2.1.3 Groups
@@ -530,6 +581,8 @@ A user has the following properties:
 
 The Groups specify the group for users and have the following properties:
 
+|Field|Description|
+|---------------------------|---------------------|
 |Identifier                 | Generated identifier|
 |Name                       | Name of the group|
 |Description                | Description of the group|
@@ -561,6 +614,8 @@ standard.
 
 An object definition has the following properties:
 
+|Field|Description|
+|-----|-----------|
 |Identifier                 | Generated identifier|
 |Name                       | Name of the object container (i.e. Email)|
 |Checksum                   | Checksum of the object container. This checksum is used to identify an object container|
@@ -582,6 +637,8 @@ The attribute definition are the definition what an attribute can be.
 
 An attribute definition has the following properties:
 
+|Field | Description|
+|------|------------|
 |Identifier                 | Generated identifier|
 |Name                       | Name of the attribtue (i.e. mutex)|
 |Checksum                   | Checksum of the object container. This checksum is used to identify an object container|
@@ -670,18 +727,18 @@ Therefore the section **[Mailer]** has to be configured.
 
 If the configuration ce1sus/sendmail is set then ce1sus will send out mails for the following events:
 
-    * Event publication/updates
-    * Event validation if the event is published
-    * Adding a user
+* Event publication/updates
+* Event validation if the event is published
+* Adding a user
 
 Each mail of the above events use a template which can be configured via the admin interface, for more informations see 
 the descriptions of each template.
 
 **Note**:
-    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive 
-      the mail, regardless which TLP level it is.
-    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP 
-      while.
+* If an events gets published or updated only the users who are in the group or subgroup of an event will receive 
+  the mail, regardless which TLP level it is.
+* If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP 
+  while.
     
 
 ###2.1.5 BackgroundJobs
@@ -698,6 +755,8 @@ This is the view to ass severs which ce1sus syncs with. Currently only MISP and 
 
 The fields for a sync server are the following:
 
+|Field|Description|
+|-----|-----------|
 |Type| The type of the server currently only MISP and ce1sus|
 |Name                       | Name of the sever (i.e. circl misp)|
 |Description                | Description for the server|
@@ -720,6 +779,8 @@ The next sections describes the elements of the user interface.
 
 The event details are composed of the following views:
 
+|Field|Description|
+|-----|-----------|
 |Overview          | General details of the event, show also Relations beween other events and a possibility to add event comments|
 |                  | Note: The event comments are only viewable by priviledged users and the users of the creator group|
 |Observables | Lists all the elements seen though the event, the view can be seen under a list or strucktured form|
@@ -757,6 +818,7 @@ The observables can be viewed in their structured form or in a list like view. T
 The indicator view show the indicators of the event. It can also similar as the observables shown in a structured or list view.
 
 **Note** The indicators are created automatically for the attributes with the IOC flag set.
+
 **Note2** Indicators can currently only be created via the REST API, but as soon as indicators have been manually created, one must take care for all of the indicators are the automatically generated ones will not be available anymore.
 
 ####2.2.1.4 Relations
@@ -772,6 +834,8 @@ The groups associated to the event, provide the users of the group to view the e
 The other thing is that every associated group can have serveral permissions, which are only valdi for the event in context.
 
 The permissions available are the following
+|Permission|Description|
+|-----|-----------|
 |Add|Permission to add items to the event|
 |Modify| Permission to modify items in the event|
 |      | **Note** This does not imply that the add right or delete is also granted|
@@ -796,10 +860,10 @@ The event has the following properties:
 |                                               | **Note1**: Unpublished events are marked in a reddish color|
 |                                               | **Note2**: If an event was published and changes are made i.e adding an| 
 |                                               |        attribute the event will unpublish|
-|Status[Confirmed|Deleted|Draft|Expired]        | |
-|Analysis[Completed|Opened|None|Unknown|Stalled]||
-|Risk[High|Low|Medium|None|Undefined]           ||
-|TLP[Red|Amber|Green|White]                     ||
+|Status[Confirmed,Deleted,Draft,Expired]        | |
+|Analysis[Completed,Opened,None,Unknown,Stalled]||
+|Risk[High,Low,Medium,None,Undefined]           ||
+|TLP[Red,Amber,Green,White]                     ||
 |First seen                                     | When the event was first seen. Default "now()"|
 |Last seen                                      | When the event was last seen. Default "now()"|
 |                                               | **Note**: This value is updated by "now() as soon there are attributes/objects| 
@@ -807,6 +871,12 @@ The event has the following properties:
 
 **Note**: If ce1sus is configured to send mails, each time an events gets published the users allowed to see the events gets 
 a notification mail of the changes
+
+**Note**: The add event interface offers also the possibility to add the event via files. The currently supported formats are:
+* STIX xmls
+* MISP 2.3 xmls
+* OpenIOCs ioc files
+ 
 
 ####2.2.2.2 Adding/Edit Observables/Objects
 
@@ -817,6 +887,8 @@ shared the attribute will automatically be not shared.
 
 The object will be displayed as a container, where the object can be modified with the following options:
 
+|Field|Description|
+|-----|-----------|
 |Add Attribute     (Plus sign)  | See section 2.2.1.2|
 |Add child object  (Arrow down) | Add a new object as child|
 |Modify object     (Lines)      | Offers the possibility to change the child parent relations|
@@ -843,6 +915,8 @@ handled.
 
 These are the possible properties of an attribute:
 
+|Field|Description|
+|-----|-----------|
 |Type          | See attribute definitions in section 2.1.4|
 |Value         | The attribute value|
 |              | Note: These values are checked against the regex specified in their definition.|
@@ -850,9 +924,10 @@ These are the possible properties of an attribute:
 |              | Note: Not shared means that they are only visible by privileged users and the users of the creator group.|
 |Is an IOC     | Set the value if it is an IOC|
 
-**Notes**: * If the attribute identifier is marked red the event is unpulbished.
-       * If the attribute identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
-       * Depending on the handler used the properties may vary.
+**Notes**: 
+* If the attribute identifier is marked red the event is unpulbished.
+* If the attribute identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
+* Depending on the handler used the properties may vary.
 
 ####2.2.2.4 Proposal of objects/Attributes
 
@@ -879,8 +954,9 @@ WORK IN PROGRESS
 The recent events list the last 200 entered events, by clicking, either on the identifier (number) or the eye icon in the
 options column, one enters view of the event. 
 
-Notes: * If the event identifier is marked red the event is unpulbished.
-       * If the event identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
+**Notes:** 
+* If the event identifier is marked red the event is unpulbished.
+* If the event identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
 
 #3. REST API
 
@@ -898,9 +974,10 @@ The maintenance tool is a command line application, wich is deployed on the serv
 - Clear all the relations
 
 Use the following command for the syntax
-´´´shell
+
+``` shell
 python maintenance.py -h
-´´´ 
+```
 
 #5. Developing Handlers
 
