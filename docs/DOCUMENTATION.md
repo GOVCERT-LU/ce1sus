@@ -1,9 +1,10 @@
-#﻿Documentation
+#﻿DocumenFtation
 
 The documentation is still under development
 
 ##1. Installation
- 
+In the folder *scripts/install* there is a shell script which makes the a generic installation for you, for 
+further configurations please see the next sections
 
 ###1.1. Requirements
 
@@ -15,11 +16,11 @@ Ce1sus need the following packages:
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap (2.4.10+) (optional)
+  * python-ldap (2.4.10+)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
-  * rtkit (optional)
+  * rtkit
   * gnupg (0.3.5+)
   * eml_parser (https://github.com/sim0nx/eml_parser/
 - mysql (5.1+)
@@ -28,6 +29,8 @@ Ce1sus need the following packages:
 - memcached
 - python-stix (1.1.1.5) 
 - python-cybox (2.1.0.11)
+- openioc-to-stix
+
 
 ###1.1.2 Installation of the requirements
 
@@ -91,41 +94,57 @@ cd ..
 ln -s libs/python-stix/python-stix/stix .
 ```
 
+###1.2.5 OpenIOC
+
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/STIXProject/openioc-to-stix.git
+cd ..
+ln -s libs/openioc-to-stix/ioc_observable.py .
+ln -s libs/openioc-to-stix/openioc.py .
+ln -s libs/openioc-to-strix/opendioc_to_cybox.py .
+```
+
 ##1.3. Database
 
 
 ###1.3.1 Database creation
 
-
+´´´sql
 CREATE DATABASE ce1sus;
-
+´´´
 ###1.3.2 DB User
 
 
 Create a db user for ce1sus user must have the following grants:
 
-    - INSERT
-    - SELECT
-    - DELETE
-    - UPDATE
+* INSERT
+* SELECT
+* DELETE
+* UPDATE
 
+```sql
 CREATE USER 'ce1sus'@'localhost' IDENTIFIED BY 'password';
 GRANT INSERT, SELECT, DELETE, UPDATE  ON 'ce1sus'. * TO 'ce1sus'@'localhost';
 FLUSH PRIVILEGES;
+```
 
 ###1.3.3 DB SCHEMA
 
 The creation of the db schema changed since 0.11.X and is now done via a script. To initialize the database do the following:
 
-$ cd scripts/installation/database
-$ python db_init.py
+``` shell
+cd scripts/installation/database
+python db_init.py
+```
 
 Everything needed will be created automatically. If there should be migrations the scripts for the migration will be provided 
 the scripts/migrations folder, use these in order.
 
-*NOTE 1*: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
+**NOTE 1**: db_init.py also will create gpg keys in case they are not existing at the given location. It is perferably to create them
 manually as this takes some time to generate them if the system is not busy.
-*NOTE 2*: Set fir the database initialization the user in the configuration file to a user which has the permissions to create tables.
+**NOTE 2**: Set for the database initialization the user in the configuration file to a user which has the permissions to create tables.
 
 ###1.3.4 Remarks
 
@@ -138,143 +157,160 @@ Depending on your DB server it is advised to have a tmp folder with at least 1 G
 ###1.4.1a Celsus.conf
 
 Go to your ce1sus installation directory and create configuration file ce1sus.conf in the config directory 
-use the file config/ce1sus.conf_tmpl as template
+use the file *config/ce1sus.conf_tmpl* as template
 
-$ cp config/ce1sus.conf_tmpl config/ce1sus.conf
+``` shell
+cp config/ce1sus.conf_tmpl config/ce1sus.conf
+```
 
 The following sections have to be modified to the settings of your system
 
-[SessionManager]
-[ce1sus]
-[Logger]
-[LDAP]
-[Plugins]
-[Mailer]
-[MISPAdapter]
-[Errorhandler]
+- [SessionManager]
+- [ce1sus]
+- [Logger]
+- [LDAP]
+- [Plugins]
+- [Mailer]
+- [MISPAdapter]
+- [Errorhandler]
 
 The next paragraphs will explain in more detail what has to be changed and what the different elements in the 
 configuration do and their values.
 
-The [SessionManager] section stores the settings of the database connection and has the following elements
+The **[SessionManager]** section stores the settings of the database connection and has the following elements
 
-protocol=[mysql+mysqldb | sqlite] : Defines the protocol used for the connection
-username=                         : Username of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite 
-password=                         : Password of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite 
-host=127.0.0.1                    : IP address of the db server
-db=                               : Database name i.e. "ce1sus" without quotes
-                                    If the sqlite protocol is chosen the element db must correspond to the absolute path
-                                    to the sqlite file
-port=3306                         : Port of the db server, is ignored for sqlite
-debug=[no | yes ]                 : If set to "yes" the sql queries will be shown in the logs 
-usecherrypy=[yes | no]            : If set to "yes" a single connection is used else multiples
-                                    Note: Do not change this value unless you know what you are doing
+|protocol=[mysql+mysqldb | sqlite] | Defines the protocol used for the connection |
+|username=                         | Username of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite| 
+|password=                         | Password of the db user i.e. "ce1sus" without quotes, can be left blank for sqlite |
+|host=127.0.0.1                    | IP address of the db server|
+|db=                               | Database name i.e. "ce1sus" without quotes|
+|                                  |  If the sqlite protocol is chosen the element db must correspond to the absolute path|
+|                                  |  to the sqlite file|
+|port=3306                         | Port of the db server, is ignored for sqlite|
+|debug=[no | yes ]                 | If set to "yes" the sql queries will be shown in the logs| 
+|usecherrypy=[yes | no]            | If set to "yes" a single connection is used else multiples|
+|                                  |  **Note**: Do not change this value unless you know what you are doing|
 
-The [ce1sus] section stores the general settings of ce1sus and has the following elements
+The **[ce1sus]** section stores the general settings of ce1sus and has the following elements
 
-sendmails=[no|yes]                : If "yes" emails will be send to the users/groups who can access/see the event
-                                    Note baseurl has to be set when sendemail=yes
-                                    For more informations on emails send by ce1sus see section XXXX 
-useldap=[no|yes]                  : If "yes" the users can also be authenticated by ldap
-                                    Note: When set [LDAP] section has to be set and look in section XXXX how ldab users 
-                                          needs to be configured 
-environment=LOCAL_DEV             : Text displayed in the header of the ce1sus web page. Used to separate dev 
-                                    environment and production.
-                                    Note This value can be empty
-enableRestAPI=[yes|no]            : If "yes" the RESTAPI is enabled   
-baseurl=http://localhost:8080     : The root url of your ce1sus server, this url is needed to build the links in the emails
-maintenaceuseruuid=               : The user uuid which is used by the maintenance.py script and used for the sync mechanism
-usebasicauth=[yes|no]             : enable basic authentication
-salt=                             : A random used to salt the hashes of passwords
+|useldap=[no|yes]                  | If "yes" the users can also be authenticated by ldap|
+|                                  |  Note: When set [LDAP] section has to be set and look in section XXXX how ldab users| 
+|                                  |        needs to be configured |
+|environment=LOCAL_DEV             | Text displayed in the header of the ce1sus web page. Used to separate dev| 
+|                                  |  environment and production.|
+|                                  |  **Note** This value can be empty|
+|baseurl=http://localhost:8080     | The root url of your ce1sus server, this url is needed to build the links in the emails|
+|maintenaceuseruuid=               | The user uuid which is used by the maintenance.py script and used for the sync mechanism|
+|usebasicauth=[yes|no]             | enable basic authentication|
+|salt=                             | A random used to salt the hashes of passwords|
 
-The [Logger] section stores the configuration how the logs are stored/processed and has the following elements
+The **[Logger]** section stores the configuration how the logs are stored/processed and has the following elements
 
-log=[Yes|No]                                           : If set ce1sus does log
-                                                         Note: It is advised that this element is set to "yes"
-log_file=log/logger.txt                                : Absolute or relative path for storage of log files
-logConsole = [Yes|No]                                  : If set ce1sus logs to the console and the file
-level=[CRITICAL|ERROR|WARNING|INFO|DEBUG]              : Log level
-size=10000000                                          : Size in bytes of the file before it gets rotated
-backups=1000                                           : Number of log backups
+|log=[Yes|No]                                           | If set ce1sus does log|
+|                                                       |  **Note**: It is advised that this element is set to "yes"|
+|log_file=log/logger.txt                                | Absolute or relative path for storage of log files|
+|logConsole = [Yes|No]                                  | If set ce1sus logs to the console and the file|
+|level=[CRITICAL|ERROR|WARNING|INFO|DEBUG]              | Log level|
+|size=10000000                                          | Size in bytes of the file before it gets rotated|
+|backups=1000                                           | Number of log backups|
+|syslog=[Yes|No]                                        | Log to syslog|
 
-The [LDAP] section stores the configuration of the LDAP plugin and has the following elements
+The **[LDAP]** section stores the configuration of the LDAP plugin and has the following elements
 
-server=
-usetls=True
-users_dn=
+|server=|
+|usetls=True|
+|users_dn=|
 
 The LDAP configuration only makes sense if useldap is set on the ce1sus section and LdapPlugin is set in the Plugins section.
 
-The [Plugins] section defines which "Plugins" are available to use
-LdapPlugin=[Yes|No]                                    : Enables the Ldap plugin
-                                                         Note: If the ldapplugin is activated the section LDAP and the useldap
-                                                               in the ce1sus section have to be set
+The **[Plugins]** section defines which "Plugins" are available to use
 
-The [Mailer] section stores the configuration for sending mails and has the following elements
+|LdapPlugin=[Yes|No]                                    | Enables the Ldap plugin|
+|                                                       | **Note**: If the ldapplugin is activated the section LDAP and the useldap|
+|                                                      |        in the ce1sus section have to be set|
+|MailPlugin=[Yes|No]                                    | Enables the mail plugin|
+|                                                       |  **Note**: If the mail plugin is not enabled no mails will be send out, this has no impact except that new users have to be activated manually.|
 
-from=ce1sus                                            : Sender email
-smtp=                                                  : Smtp server
-port=25                                                : Port of the smtp server
-user=                                                  : Not implemented
-password=                                              : Not implemented
-keyfile=                                               : Folder of the gpp files used to sign or encrypt (i.e. ~/gpgkey)
-passphrase=                                            : Pass-phrase for unlocking the gpg key
+The **[Mailer]** section stores the configuration for sending mails and has the following elements
 
-The [MISPAdapter] section provides you to enable dumping of the gotten Misp events
+|from=ce1sus                                            | Sender email|
+|smtp=                                                  | Smtp server|
+|port=25                                                | Port of the smtp server|
+|user=                                                  | Not implemented|
+|password=                                              | Not implemented|
+|keyfile=                                               | Folder of the gpp files used to sign or encrypt (i.e. ~/gpgkey)|
+|passphrase=                                            | Pass-phrase for unlocking the gpg key|
+|keylength=1024                                         | Length of the gpg key in case it should be generated automatically|
+|expiredate=[YYYY-MM-DD]                                | Expiry date of the generated key |
 
-dump=[yes|no]           : Enable dumping of misps
-file=mispdump           : Absolute path to a folder where the misps should be dumped
+The **[MISPAdapter]** section provides you to enable dumping of the gotten Misp events
 
-The [ErrorHandler] section stores the configuration how ce1sus handles the errors and has the following elements
+|dump=[yes|no]           | Enable dumping of misps|
+|file=mispdump           | Absolute path to a folder where the misps should be dumped|
 
-debug=[no|yes]                                         : When set displays the error stacktrace
-                                                         Note: This value can be overridden by in the cherrypy.conf
-useMailer=[No|Yes]                                     : When set ce1sus sends the "receiver" error mails containing the 
-                                                         stacktrace.
-                                                         Note: When enabled the [Mailer] section has to be set!
-subject=ErrorOccureredForCelsus                        : Email subject for error mails
-receiver=                                              : Mail address of the error mail receiver
+The [OpenIOCAdapter] section provides you to enable dumping of the gotten Misp events
+
+|dump=[yes|no]           | Enable dumping of openIOC xml|
+|file=openiocdump        | Absolute path to a folder where the misps should be dumped|
+
+
+The **[ErrorMails]** section stores the configuration of the error mails. These mails are send in case a HTTP 500 error occurs.
+
+|enable=[no|yes]                                        | When set an mail is sent to the receiver with the error stack trace|
+|sender=ce1sus                                          | Sender email|
+|smtp=                                                  | Smtp server|
+|port=25                                                | Port of the smtp server|
+|user=                                                  | Not implemented|
+|password                                               ||
+|useMailer=[No|Yes]                                     | When set ce1sus sends the "receiver" error mails containing the| 
+|                                                       | stacktrace.|
+|                                                       | **Note**: When enabled the [Mailer] section has to be set!|
+|subject=ErrorOccureredForCelsus                        | Email subject for error mails|
+|receiver=                                              | Mail address of the error mail receiver|
+|level=info                                             | Not used yet|
 
 ###1.4.1b handler.conf
 
 Go to your ce1sus installation directory and create configuration file handlers.conf in the config directory 
-use the file config/handlers.conf_tmpl as template
+use the file *config/handlers.conf_tmpl* as template
 
-$ cp config/handlers.conf_tmpl config/handlers.conf
-
+´´´shell
+cp config/handlers.conf_tmpl config/handlers.conf
+´´´
 The following sections have to be modified to the settings of your system
 
-[FileHandler]
-files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
-                                                         uploaded files as attributes.
-                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+**[FileHandler]**
+|files=/path/to/ce1sus/files                           | The absolute file path where ce1sus can store/archive the| 
+|                                                      |  uploaded files as attributes.|
+|                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
-[CVEHandler]
-cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=     : Base url for cves. (used by the CVEHandler)
+**[CVEHandler]**
+|cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=     | Base url for cves. (used by the CVEHandler)|
 
-[RTHandler]
-rt_user=                                               : The user used for accessing the RESTAPI for RT
-                                                         (Used by RTHandler)
-rt_password=                                           : The user password used for accessing the RESTAPI for RT
-rt_url=                                                : Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)
+**[RTHandler]**
+|rt_user=                                               | The user used for accessing the RESTAPI for RT|
+|                                                       | (Used by RTHandler)|
+|rt_password=                                           | The user password used for accessing the RESTAPI for RT|
+|rt_url=                                                | Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)|
 
-[FileReferenceHandler]
-files=/path/to/ce1sus/reference_files                 : The absolute file path where ce1sus can store/archive the 
-                                                         uploaded files in the refrence section.
-                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+**[FileReferenceHandler]**
+|files=/path/to/ce1sus/reference_files                 | The absolute file path where ce1sus can store/archive the| 
+|                                                      |  uploaded files in the refrence section.|
+|                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
-[FileWithHashesHandler]
-files=/path/to/ce1sus/files                            : The absolute file path where ce1sus can store/archive the 
-                                                         uploaded files as attributes.
-                                                         The user (i.e 'www-data') of ce1sus must have access on that directory
+**[FileWithHashesHandler]**
+|files=/path/to/ce1sus/files                            | The absolute file path where ce1sus can store/archive the| 
+|                                                       | uploaded files as attributes.|
+|                                                       | The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 ###1.4.2 Cherrypy.conf
 
 Go to your ce1sus installation directory and create configuration file cherrypy.conf in the config directory 
-use the file config/cherrypy.conf_tmpl as template
+use the file *config/cherrypy.conf_tmpl* as template
 
-$ cp config/cherrypy.conf_tmpl config/cherrypy.conf
-minimal 
+´´´shell
+cp config/cherrypy.conf_tmpl config/cherrypy.conf
+´´´
 The following lines must be modified according to your installation
 
 tools.staticdir.root='/path/to/ce1sus/htdocs'
@@ -293,16 +329,16 @@ tools.sessions.storage_path = "/path/to/ce1sus/sessions"
 
 But we strongly advise you to use memcache
  
-Note: This is a standart cherrypy configuration file. For more information on that subject see 
+**Note**: This is a standart cherrypy configuration file. For more information on that subject see 
       http://cherrypy.readthedocs.org/en/latest/tutorial/config.html
 
 ##1.5 Test configurations
 
 Go to your ce1sus installation directory and launch
-
-$ python ce1sus-run.py
-
-and access http://localhost:8080 
+´´´shell
+python ce1sus-run.py
+´´´
+and access http://localhost:8080, except you configured in the cherrypy.conf that sockets had to be used
 
 This is a method to see if ce1sus can start correctly. If this is the case continue to section 1.6
 
@@ -312,62 +348,68 @@ If you are reading this you may have encoutered troubles when launching a local 
 
 Errors during stat:
 
-'MySQLConnection' object has no attribute 'get_characterset_info'
+*'MySQLConnection' object has no attribute 'get_characterset_info'*
 -> connector issues try change it to mysql+mysqldb or mysql
-
-Cannot locate template for uri 'index/login.html'
--> the path for the templates in ce1sus.conf '[Mako]' section was not set up correctly.
 
 ##1.6 uwsgi
 
 Install uwsgi and uwsgi-plugin-python
-
-$ apt-get install uwsgi uwgsi-plugin-python
+´´´shell
+apt-get install uwsgi uwgsi-plugin-python
+´´´
 
 In the config folder of your ce1sus installation folder you'll find ce1sus.ini_tmpl a template for the configuration of 
 uwsgi. 
 
 Copy the file to uwsgi:
-
-$ cp scripts/install/uwsgi/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
-
+´´´shell
+cp scripts/install/uwsgi/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
+´´´
 Edit /etc/uwsgi/apps-available/ce1sus.ini and replace "/path/to/ce1sus" with your ce1sus installation path
 
 Enable ce1sus in uwsgi:
-$ ln -s /etc/uwsgi/apps-available/ce1sus.ini /etc/uwsgi/apps-enabled/
-
+´´´shell
+ln -s /etc/uwsgi/apps-available/ce1sus.ini /etc/uwsgi/apps-enabled/
+´´´
 Restart service
-$ /etc/init.d/uwsgi restart
-
+´´´shell
+/etc/init.d/uwsgi restart
+´´´
 
 ##1.7 nginx
 
 Install nginx
 
-$ apt-get install nginx
+´´´shell
+apt-get install nginx
+´´´
 
 In the config folder of your ce1sus installation folder you'll find ce1sus_tmpl a template for the configuration of nginx. 
 
 Copy the file to uwsgi:
-
-$ cp scripts/install/nginx/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
-
+´´´shell
+cp scripts/install/nginx/ce1sus_tmpl config/ce1sus.conf /etc/nginx/sites-available/ce1sus
+´´´
 Create a self signed certificate for ce1sus:
-
-$ openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/ce1sus.key -out /etc/ssl/certs/ce1sus.pem
-$ chmod 600 /etc/ssl/certs/ce1sus.pem
-$ chmod 600 /etc/ssl/private/ce1sus.key
-
+´´´shell
+openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/private/ce1sus.key -out /etc/ssl/certs/ce1sus.pem
+chmod 600 /etc/ssl/certs/ce1sus.pem
+chmod 600 /etc/ssl/private/ce1sus.key
+´´´
 Edit /etc/nginx/sites-available/ce1sus and replace "/path/to/ce1sus" with your ce1sus installation path
 
-Note: If you have own already a certificat you need to adapt the confuration file of nginx accordingly.
+**Note**: If you have own already a certificat you need to adapt the confuration file of nginx accordingly.
 
 Enable the ce1sus site:
-$ ln -s /etc/nginx/sites-available/ce1sus /etc/nginx/sites-enabled/
+´´´shell
+ln -s /etc/nginx/sites-available/ce1sus /etc/nginx/sites-enabled/
+´´´
 
 Restart service
-$ /etc/init.d/nginx restart
 
+´´´shell
+/etc/init.d/nginx restart
+´´´
 Login as admin with password admin
 
 ###1.7.1 Troubleshooting
@@ -378,51 +420,61 @@ Nginx shows a 404 or 403:
      the folder
 404: the root folder was set up incorrectly
 
-##1.8 DB migration
+##1.8. Scheduler
+
+´´´shell
+------
+´´´
+
+##1.9 DB migration
 
 If you are migrating from 0.10 to 0.11.0 proceed like stated below
 
 First dump your current database.
-
-$ cd scripts/migration
-$ python dump_0.10.py -c ../../config/ce1sus.conf --dest dumps
-
+´´´shell
+cd scripts/migration
+python dump_0.10.py -c ../../config/ce1sus.conf --dest dumps
+´´´
 The script will use the settings in the ce1sus.conf and dumps it into the folder ./dumps
 
 The next step is to setup a new db schema (drop the old one) and follow the steps described in 1.3.3
 
 Finally migrate the dropped data into the new database
-
-$ cd scripts/migration
-$ python migrate_0.10_to_0.11.0.py  -d dumps
-
+´´´shell
+cd scripts/migration
+python migrate_0.10_to_0.11.0.py  -d dumps
+´´´
 The script used the configuration of the later instance. 
 
-Note the migration can take some time depending on the volume of your database.
+**Note** the migration can take some time depending on the volume of your database.
 
 
 #2. Web Interface
 
-Completely OUTDATED
-
 The web interface of Ce1sus has two sections:
 
-    1. Administration
-         The administration section is used to:
-             * Validate events inserted over the RESTAPI
-             * Define definitions for objects, attributes, references
-             * User management
-             * Group management
-             * Server managment
-             * Editing mail templates
+1. Administration
+     The administration section is used to:
+         * Validate events inserted over the RESTAPI
+         * Define definitions for objects, attributes, references
+         * User management
+         * Group management
+         * Server managment
+         * Editing mail templates
 
-    2. User interface
-         The event view is used to:
-             * Search for attributes
-             * Add/Edit events
-             * View events
-             
-    3. Event details
+2. User interface
+     The event view is used to:
+         * Search for attributes
+         * Add/Edit events
+         * View events
+            * Overview
+            * Observables
+            * Indicators
+            * Relations
+            * Reports
+            * Groups
+            
+3. Event details
 
 ##2.1 Administration
 
@@ -436,277 +488,350 @@ privileged flag set.
 This list shows the unvalidated Events inserted via REST. The operations which can be performed are similar to the one 
 described in section 2.2.3 except that the main event overview cannot be edited.
 
-To validate an event one has only to click on the "Validate All" button. 
+To validate an event one has only to click on the "Validate" button. 
 
-Note: Unvalidated Events will not be viewable in the RecentEvent section, nor via search, nor in relations until they got
+**Note**: Unvalidated Events will not be viewable in the RecentEvent section, nor via search, nor in relations until they got
       validated.
 
 ###2.1.2 Usermanagment
 
+![ce1sus user mgt](/docs/images/ce1sus_usermgt.png)
+
+Ce1sus offers, when ldap is enabled, to insert users from ldap. This is done by selecting the user from the list when "Add LDAP" is pressed. In case ldap is not enabled the button will not be shown. 
 
 A user has the following properties:
 
-Identifier   : Generated id
-Name         : 
-SirName      : 
-Username     : 
-Password     : The password's minimal requirements are lower, upper case, numbers, symbols and have a length of 8 characters.
-               Note if the password 'EXTERNALAUTH' is dispalyed the user is authenticated by LDAP (see section 1.4.1 for 
-               LDAP Configuration)
-Email        : The email has to be specified if the ce1sus is configured to sendmails.
-GPGKey       : If no gpg key was specified the user receives only mails for events with TLP White.
-               Note: Depending on the group settings the user may not recieve any mails. See section 2.1.6
-Privileged   : If set the user can access the administration area
-               Note: This will be changed for REL_0.9.20+
-Disabled     : If set the user cannot log in anymore
-API Access   : The REST API Key. If set the key is displayed else No is displayed.
-Main Group   : The main group the user belongs to. This group is also called creator group. 
+|Identifier   | Generated id|
+|Name         ||
+|SirName      ||
+|Username     ||
+|Password     | The password's minimal requirements are lower, upper case, numbers, symbols and have a length of 8 characters.|
+|             | **Note** if the password 'EXTERNALAUTH' is dispalyed the user is authenticated by LDAP (see section 1.4.1 for| 
+|             | LDAP Configuration)|
+|Email        | The email has to be specified if the ce1sus is configured to sendmails.|
+|Get notifications | If this is set the user gets nofitications on updates or publishing of new events|
+|GPGKey       | If no gpg key was specified the user receives only mails for events with TLP White.|
+|             | **Note**: Depending on the group settings the user may not recieve any mails. See section 2.1.6|
+|API Key  | The key to access the api|
+          | This key can be generated automatically over the button Gen. in the edit or add window.|
+|Privileged   | If set the user can access the administration area|
+|Disabled     | If set the user cannot log in anymore|
+|Manage own group | Not used yet | 
+|Group   | The group the user belongs to. This group is also denoted by creator group. |
 
-Note: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
-      If the user account is not activated within 24 hours, the account has to be deleted an reinserted.
-      If ce1sus/sendmail is not set the account is directly activated.
+**Note**: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
+          If the user account is not activated within 24 hours, the account stays in disabled mode to reenable it either activate it manually or resend the activation mail.
+          In case the sendmail is not set one must activate the user manually.
+          
+###2.1.3 Groups
 
-###2.1.3 Mails
+![ce1sus group mgt](/docs/images/ce1sus_usermgt.png)
 
-Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
-Therefore the section [Mailer] has to be configured. 
 
-Note: It is recommended to supply an GPG key for ce1sus else it is only possible to get notifications on event which 
-      have a TLP level of white. This folder/key has to be owned by the owner of ce1sus (i.e. www-data) 
+The Groups specify the group for users and have the following properties:
 
-If the configuration ErrorHandler/useMailer is set the configured receiver will receive mails on irregular behavior.
+|Identifier                 | Generated identifier|
+|Name                       | Name of the group|
+|Description                | Description of the group|
+|Email                      | group email|
+|GPGKey                     | If no gpg key was specified the group receives only mails for events with TLP White.|
+|                           | **Note**: Depending on the group settings the user may not receive any mails. See section 2.1.6|
+|Get notifications | If this is set the user gets nofitications on updates or publishing of new events|
+|TLP                        | TLP level for this group. If this is set i.e. Amber it is possible for this group to access all amber and lower events|
+|Can download files             | If set the users of the group can download files|
+|TLP Propagation | If this is set the highest level will be chosen from the group itself and its associcated groups|
+|Associated Groups       | Groups which are associvated to this group|
 
-If the configuration ce1sus/sendmail is set then ce1sus will send out mails for the following events:
+The default event permissions are the permissions set by default when the group is associated to an event. Please look section 2.2.3 for more informations on the different permissions.
 
-    * Event publication
-    * Event validation if the event is published
-    * Adding a user
+**Note**: It is enough that a group has an associated group to let the users of the group view an event.
 
-Each mail of the above events use a template which can be configured via the admin interface, for more informations see 
-the descriptions of each template.
+###2.1.4 Definitions
 
-Note:
-    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive 
-      the mail, regardless which TLP level it is.
-    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP 
-      while.
-    
+####2.1.4.1 Object
 
-###2.1.4 Object Definition
-
+![ce1sus object mgt](/docs/images/ce1sus_objmgt.png)
 
 The objects definitions can be considered as attribute containers. These containers limit the choice of attributes and 
 ease the use for the user to choose an appropriate attribute, without being overwhelmed by attributes which may be 
-ambiguous. These object containers will be refereed by object definitions.
+ambiguous. These object containers will be refereed by object definitions. These containers are based on the Cybox standart. The object definitions which cannot be edited and show the cybox logo, are part of the 
+standard. 
 
-Example: Object Email cannot have a mutex, therefore the attribute mutex is not part of the object container
+*Example*: Object Email cannot have a mutex, therefore the attribute mutex is not part of the object container
 
 An object definition has the following properties:
 
-Identifier                 : Generated identifier
-Name                       : Name of the object container (i.e. Email)
-Checksum                   : Checksum of the object container. This checksum is used to identify an object container
-                             Note: The checksum is the SHA1 hash of the name
-Description                : Description of the object
-Default Shareable          : The default value for sharing
-                             Note: These values can be overridden, by the user
-Associated Attributes      : Attributes which belong to the object container
+|Identifier                 | Generated identifier|
+|Name                       | Name of the object container (i.e. Email)|
+|Checksum                   | Checksum of the object container. This checksum is used to identify an object container|
+|                           | Note: The checksum is the SHA1 hash of the name|
+|Description                | Description of the object|
+|Default Shareable          | The default value for sharing|
+|                           | Note: These values can be overridden, by the user|
+|Associated Attributes      | Attributes which belong to the object container|
 
 Objects definitions can be added, edited and deleted. The deletion only works if the object is not referenced anymore.
 
-Note: Do not forget to add attribute definitions to the object else one is only able to add the object to the event.
+**Note**: Do not forget to add attribute definitions to the object else one is only able to add the object to the event.
 
-####2.1.4.1 Sharing of object definitions
+####2.1.4.2 Attributes
 
-
-The shareing of object definitions is not yet implemented. Therefore it is suggested at least in the beginning not to 
-change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
-it.
-
-###2.1.5 Attributes Definition
-
+![ce1sus object mgt](/docs/images/ce1sus_attrmgt.png)
 
 The attribute definition are the definition what an attribute can be.
 
-An object definition has the following properties:
+An attribute definition has the following properties:
 
-Identifier                 : Generated identifier
-Name                       : Name of the attribtue (i.e. mutex)
-Checksum                   : Checksum of the object container. This checksum is used to identify an object container
-                             Note: Checksum is SHA1(name || regex || class_index || handler.uuid)
-Description                : Description of the attribute
-Regular expression         : A regex of the value which the value has to be checked against
-                             Default is "^.+$"
-Value Type                 : The type of the value of the attribute.
-                             Possible types are String, Text, Number, Date
-                             Note: Each type is stored in a different table, to keep a proper database
-Handler                    : The handler used for the attribute. For more informations on handlers see section 2.1.5.1
-Relation-able              : If this value is set relations between objects are created on entering an attribute or via 
-                             the maintenance tools 
-Default Shareable          : The default value for sharing
-                             Note: These values can be overridden, by the user
-Associated Object          : Objects which contain the attribute definiton
+|Identifier                 | Generated identifier|
+|Name                       | Name of the attribtue (i.e. mutex)|
+|Checksum                   | Checksum of the object container. This checksum is used to identify an object container|
+|                           | **Note**: Checksum is SHA1(name + regex + class_index + handler.uuid)|
+|Description                | Description of the attribute|
+|Regular expression         | A regex of the value which the value has to be checked against|
+|                           | Default is "^.+$"|
+|Data Type                  | The type of the value of the attribute.(i.e. String, Number)|
+|                           | Possible types are String, Text, Number, Date|
+|                           | Note: Each type is stored in a different table, to keep a proper database|
+|Input handler              | The handler used for the attribute. For more informations on handlers see section 2.1.4.2|
+|Base type|Not implemented yet|
+|Default condifiton| The condition which is set by default. (i.e. Equals or Fits Pattern)|
+|Relation-able              | If this value is set relations between objects are created on entering an attribute or via| 
+|                           | the maintenance tools |
+|Default Shareable          | The default value for sharing|
+|                           | **Note**: These values can be overridden, by the user|
+|Associated Object          | Objects which have the attribute definiton associated|
 
-####2.1.4.1 Sharing of attribute definitions
-
-
-The shearing of attribute definitions is not yet implemented. Therefore it is suggested at least in the beginning not to
-change the existing attribute definitions or if there is in your opinion one missing to propose it so we can integrate 
-it.
-
-####2.1.5.1 Handlers
+#####2.1.4.2.1 Handlers
 
 Ce1sus support custom handlers, these handlers are used to perform additional operations (i.e. parsing of the email) and
-display the attribute values depending on their configuration.
+display the attribute values depending on their configuration. The handlers can even create complex structures. One also
+must know that the handlers can also provide an complex input form which can be used to create a basic structure for the event for instance.
 
 The handler will be in near future exchangeable therefore the uuid is required, note also that the uuid of the 
 AttribtueHandlers table should correspond to the one specified in the handler
 
 Ce1sus supports the following handlers:
 
-Handler Name          | Supoorted Types      | Description
----------------------------------------------------------------------------------------------------------------------------
-CBValueHandler        | String               | Handles values as combo-box. 
-                      |                      | The regex has to be under a similar form as "^yes$|^no$" for yes, no values
----------------------------------------------------------------------------------------------------------------------------
-                      |                      | Note the number of "|^no$" blocks is not limited
----------------------------------------------------------------------------------------------------------------------------
-CVEHandler            | String               | Handler for CVEs
-                      |                      | Creates a link to the entered CVE
----------------------------------------------------------------------------------------------------------------------------
-DateHandler           | Date                 | Handler for dates
-                      |                      | Note: Currently supports only text dates under the form of "YYYY-mm-dd 
-                      |                      | HH:MM:SS"
----------------------------------------------------------------------------------------------------------------------------
-FileHandler           | String               | Handles fileuploads and generates additional attributes as filename, 
-                      |                      | hash_sha1 of the file
-                      |                      | When uploaded the file can be downloaded as a zip file
----------------------------------------------------------------------------------------------------------------------------
-FileWithHashedHandler | String               | Handles fileuploads and generates additional attributes as filename, 
-                      |                      | hash_md5, hash_sha1, hash_sha256, hash_sha384, hash_sha512 of the file
-                      |                      | When uploaded the file can be downloaded as a zip file
----------------------------------------------------------------------------------------------------------------------------
-GernericHandler       | String, Text, Number | Generic one line handler
----------------------------------------------------------------------------------------------------------------------------
-LinkHandler           | String               | Handler for links
-                      |                      | The link is displayed as link
----------------------------------------------------------------------------------------------------------------------------
-MultipleGenericHandler| String, Text, Number | Generic multiple line hander
-                      |                      | Each new line is considered as new attribute with the same properties
----------------------------------------------------------------------------------------------------------------------------
-RTHandler             | Number               | Handler for RT Tickets
-                      |                      | RT Tickets can be chosen from a table or entered manually.
-                      |                      | Multiple RT Ticket numbers can be entered in a CSV format
----------------------------------------------------------------------------------------------------------------------------
-TextHandler           | Text                 | Handler for large text i.e. YARA Rules
----------------------------------------------------------------------------------------------------------------------------
+|Handler Name          | Supoorted Types      | Description|
+|----------------------|----------------------|------------|
+|CBValueHandler        | String               | Handles values as combo-box. |
+|                      |                      | The regex has to be under a similar form as "^yes$|^no$" for yes, no values|
+|                      |                      | Note the number of "|^no$" blocks is not limited|
+|CVEHandler            | String               | Handler for CVEs|
+|                      |                      | Creates a link to the entered CVE|
+|DateHandler           | Date                 | Handler for dates|
+|                      |                      | Note: Currently supports only text dates under the form of "YYYY-mm-dd| 
+|                      |                      | HH:MM:SS"|
+|FileHandler           | String               | Handles fileuploads and generates additional attributes as filename,| 
+|                      |                      | hash_sha1 of the file|
+|                      |                      | When uploaded the file can be downloaded as a zip file|
+|FileWithHashedHandler | String               | Handles fileuploads and generates additional attributes as filename, |
+|                      |                      | hash_md5, hash_sha1, hash_sha256, hash_sha384, hash_sha512 of the file|
+|                      |                      | When uploaded the file can be downloaded as a zip file|
+|GernericHandler       | String, Text, Number | Generic one line handler|
+|LinkHandler           | String               | Handler for links|
+|                      |                      | The link is displayed as link|
+|MultipleGenericHandler| String, Text, Number | Generic multiple line hander|
+|                      |                      | Each new line is considered as new attribute with the same properties|
+|RTHandler             | Number               | Handler for RT Tickets|
+|                      |                      | RT Tickets can be chosen from a table or entered manually.|
+|                      |                      | Multiple RT Ticket numbers can be entered in a CSV format|
+|TextHandler           | Text                 | Handler for large text i.e. YARA Rules|
 
-#####2.1.5.1.1 Manual handler insertion
+
+######2.1.4.2.1.1 Manual handler insertion
 
 There is not yet an automated installation of such handlers therefore they have to be installed manually. The process is
 be explained below
 
 1. Create a handler extending either the Generichandler or HandlerBase
-2. Place it in ce1sus.commom.handlers
-3. Insert into the Table AttributeHanlders
+2. Place it in ce1sus.handlers.attribute for attribute handlers or ce1sus.handlers.references for report references.
+3. Insert into the Table AttributeHanlders or Referencehandlers
     * The module and classname i.e. generichandler.GenericHandler
     * The uuid for the handler
-3b. (Optional) Create a configuration
+    * A descripiton
+3b. (Optional) Create a configuration in the *config/handlers.conf*
 
-###2.1.6 Groupmanagment
+####2.1.4.3 Conditions
+
+The conditions are straigt forward this is only to specify custom contitions on which the attribute can be used. This means that for instance "Equals" means that the attribute value matches 1:1, or "FitsPattern" for a value with wildcards.
+
+####2.1.4.4 Types
+
+Not yet implemented
+
+###2.1.4 Mails
+
+Ce1sus offers the possibility to send mails on different occasions. This however depends on the configuration. 
+Therefore the section **[Mailer]** has to be configured. 
+
+**Note**: It is recommended to supply an GPG key for ce1sus else it is only possible to get notifications on event which 
+      have a TLP level of white. This folder/key has to be owned by the owner of ce1sus (i.e. www-data) 
+
+If the configuration ce1sus/sendmail is set then ce1sus will send out mails for the following events:
+
+    * Event publication/updates
+    * Event validation if the event is published
+    * Adding a user
+
+Each mail of the above events use a template which can be configured via the admin interface, for more informations see 
+the descriptions of each template.
+
+**Note**:
+    * If an events gets published or updated only the users who are in the group or subgroup of an event will receive 
+      the mail, regardless which TLP level it is.
+    * If a user in one of the event groups has no GPG key specified, he will only receive a mail it the event is TLP 
+      while.
+    
+
+###2.1.5 BackgroundJobs
+
+Ce1sus processes some processing in the background, for instance sending emails or syncronisation. In this view one can see
+all the jobs which are sceduled.
 
 
-The group management consists of to types of groups: Maingroups (denoted groups) and collections of groups (denoted SubGroups).
-The Groups specify the main group for users and have the following properties:
+The view offers the possibility to reschedule, stop, delete the scheduled event.
 
-Identifier                 : Generated identifier
-Name                       : Name of the group
-Description                : Description of the group
-Download files             : If set the users of the group can download files
-TLP                        : TLP level for this group. If this is set i.e. Amber it is possible for this group to access 
-                             all amber events
-Email                      : group email
-GPGKey                     : If no gpg key was specified the group receives only mails for events with TLP White.
-                             Note: Depending on the group settings the user may not receive any mails. See section 2.1.6
-Send mails to users        : If set the notifications will be send to the group email instead what was specified on the
-                             user level. 
-                             Note: If set the field email must have a value. 
-Associated SubGroups       : SubGroup the group belongs to
+###2.1.5 SyncServers
 
-Note: It is engough that a group is associated to a subgroup to let the users of the group view an event.
+This is the view to ass severs which ce1sus syncs with. Currently only MISP and ce1sus instances can be entered.
+
+The fields for a sync server are the following:
+
+|Type| The type of the server currently only MISP and ce1sus|
+|Name                       | Name of the sever (i.e. circl misp)|
+|Description                | Description for the server|
+|Associated user | the user which has the informations to access the server. |
+|                | **Note**: The user should have the api key and username have to be set to the ones from the remote server|
+|Mode | The supported modes by the remote server|
+|     | **Push**: means that events can be pushed to this server|
+|     | **Pull**: means that events can be pulled from this server|
+|Certificate||
+|CA Certificate||
+|Verify ssl||
+
+**Note**: In this view one can also perform push all or pull all operations, by clicking on the corresponding buttons in the overview of the servers.
 
 ##2.2 User interface
 
 The next sections describes the elements of the user interface.
 
-###2.2.1 Event details
+###2.2.1 Events
 
 The event details are composed of the following views:
 
-Overview          : General details of the event, show also Relations beween other events and a possibility to add event comments
-                    Note: The event comments are only viewable by priviledged users and the users of the creator group
-Objects Structured: The structured view of the event objects
-                    Note: Objects can only be added in this view
-Objects Flat      : A flat view of the objects and attributes
-                    Note: As a suggestion search for attributes here
-Relations         : The relations of the event. These are more detailed as the one on the overview page. These relations
-                    show the related event, object and the attribute who made the relation, it the attribute is relation-able.
-                    See section 2.1.5 for more information on relations.
-Groups             : Group management of the event. Ech group associated to the event permits the users of that group to 
-                     view the event. 
-                     Note: Only priviledged users and users of the creator group can view/change the goups.
+|Overview          | General details of the event, show also Relations beween other events and a possibility to add event comments|
+|                  | Note: The event comments are only viewable by priviledged users and the users of the creator group|
+|Observables | Lists all the elements seen though the event, the view can be seen under a list or strucktured form|
+|Indicators | Lists all the indicators seen though the event, the view can be seen under a list or strucktured form|
+|           | **Note**: Currently these indicators are generated automatically. For the attribtues with the IOC flag set|
+|Relations         | The relations of the event. These are more detailed as the one on the overview page. These relations|
+|                  | show the related event, object and the attribute who made the relation, it the attribute is relation-able.|
+|                  | See section 2.1.5 for more information on relations.|
+|Groups            | Group management of the event. Ech group associated to the event permits the users of that group to| 
+|                  |  view the event. |
+|                  |  **Note**: Only users of groups with the *set group* flag set view/change the associated goups.|
 
-#####2.2.1.1 Adding/Edit an Event
+####2.2.1.1  Overview
 
+The Overview view gives a genral view of the event, like the other related events, wich group it inserted and from which group it came to you. And comments.
+
+**Note**: The comments are only viewable by the owner of the event. These are mainly used for comments related to the evnet.
+
+**Note2**: Owners or priviledged users can change the ownership of the evnet via the *Change ownership* button. 
+
+####2.2.1.2  Observables
+
+The observables are an implementation of the observables found in Cybox/STIX. 
+
+The observable does not require anything every field is optional.
+
+Inside such observable one can specify objects which then represent the item of an event like a File with all its attributes. The objects can have child objects. This is how the structures are set up.
+
+Currently combined observables can only be created via the REST API. 
+
+The observables can be viewed in their structured form or in a list like view. The view can be changed by selecting the desired view via the button *View Mode*
+
+####2.2.1.3 Indicators
+
+The indicator view show the indicators of the event. It can also similar as the observables shown in a structured or list view.
+
+**Note** The indicators are created automatically for the attributes with the IOC flag set.
+**Note2** Indicators can currently only be created via the REST API, but as soon as indicators have been manually created, one must take care for all of the indicators are the automatically generated ones will not be available anymore.
+
+####2.2.1.4 Relations
+The relations view shows all the relations found between events on their attribute level. 
+
+This view is not editable
+
+####2.2.1.5 Reports
+
+####2.2.1.6 Groups
+
+The groups associated to the event, provide the users of the group to view the event, event if the TLP level is too high. This is servers the purpose to cooperate/share informations of the event with all the parties involved.
+The other thing is that every associated group can have serveral permissions, which are only valdi for the event in context.
+
+The permissions available are the following
+|Add|Permission to add items to the event|
+|Modify| Permission to modify items in the event|
+|      | **Note** This does not imply that the add right or delete is also granted|
+|Delete| Permission to delete items|
+|      | **Note** This does not imply that the add right or modify is also granted|
+|Validate| Permission to validate items on the event|
+|Set Groups| Permissions to change the groups/permissions of groups|
+
+####2.2.2 Adding/Edit of an Event
+
+#####2.2.2.1 Adding/Edit an Event
 
 The event has the following properties:
 
-UUID                                           : Generated UUID to uniquely identify an event
-Title*                                         : Title (or Name) of the event
-                                                 Note: Is mandatory
-Description                                    : Short description of the event
-                                                 Note: This description will aways shown 
-Published                                      : If set the event is visible to the users who access is granted to, if 
-                                                 not the event is only visible by the users of the same group as the creator.
-                                                 Note1: Unpublished events are marked in a reddish color
-                                                 Note2: If an event was published and changes are made i.e adding an 
-                                                        attribute the event will unpublish
-Status[Confirmed|Deleted|Draft|Expired]        : 
-Analysis[Completed|Opened|None|Unknown|Stalled]:
-Risk[High|Low|Medium|None|Undefined]           :
-TLP[Red|Amber|Green|White]                     :
-First seen                                     : When the event was first seen. Default "now()"
-Last seen                                      : When the event was last seen. Default "now()"
-                                                 Note: This value is updated by "now() as soon there are attributes/objects 
-                                                       added to the event
+|UUID                                           | Generated UUID to uniquely identify an event|
+|Title*                                         | Title (or Name) of the event|
+|                                               | **Note**: Is mandatory|
+|Description                                    | Short description of the event|
+|                                               | **Note**: This description will aways shown| 
+|Published                                      | If set the event is visible to the users who access is granted to, if| 
+|                                               | not the event is only visible by the users of the same group as the creator.|
+|                                               | **Note1**: Unpublished events are marked in a reddish color|
+|                                               | **Note2**: If an event was published and changes are made i.e adding an| 
+|                                               |        attribute the event will unpublish|
+|Status[Confirmed|Deleted|Draft|Expired]        | |
+|Analysis[Completed|Opened|None|Unknown|Stalled]||
+|Risk[High|Low|Medium|None|Undefined]           ||
+|TLP[Red|Amber|Green|White]                     ||
+|First seen                                     | When the event was first seen. Default "now()"|
+|Last seen                                      | When the event was last seen. Default "now()"|
+|                                               | **Note**: This value is updated by "now() as soon there are attributes/objects| 
+|                                               |       added to the event|
 
-Note: If ce1sus is configured to send mails, each time an events gets published the users allowed to see the events gets 
+**Note**: If ce1sus is configured to send mails, each time an events gets published the users allowed to see the events gets 
 a notification mail of the changes
 
-####2.2.1.1 Adding/Edit Objects
-
+####2.2.2.2 Adding/Edit Observables/Objects
 
 To add an object the user must just select the object he wants and if this object should be shared. If the object is not
 shared the attribute will automatically be not shared.
 
-Note: Not shared means that they are only visible by priviledged users and the users of the creator group.
+**Note**: Not shared means that they are only visible by the owner of the event and the users of the creator group.
 
 The object will be displayed as a container, where the object can be modified with the following options:
 
-Add Attribute     (Plus sign)  : See section 2.2.1.2
-Add child object  (Arrow down) : Add a new object as child
-Modify object     (Lines)      : Offers the possibility to change the child parent relations
-Modify properties (Pencil)     : Change the value for shearing
-                                 Note: If an object is unshared all its attributes and children will also be unshared
-View details      (Eye)        : Shows the details of the object and its creation date
-Delete            (Cross)      : Removes an object
-                                 Note: If an object has children it is not possible to delete that object until its 
-                                       children are removed
+|Add Attribute     (Plus sign)  | See section 2.2.1.2|
+|Add child object  (Arrow down) | Add a new object as child|
+|Modify object     (Lines)      | Offers the possibility to change the child parent relations|
+|Modify properties (Pencil)     | Change the value for shearing|
+|                               | Note: If an object is unshared all its attributes and children will also be unshared|
+|View details      (Eye)        | Shows the details of the object and its creation date|
+|Delete            (Cross)      | Removes an object|
+|                               | **Note**: If an object has children it is not possible to delete that object until its| 
+|                               |       children are removed|
 
-Notes: * If the object header has a lock icon the object is not shared
+**Notes**: 
+       * If the object header has a lock icon the object is not shared
        * If the object header is yellow the object has been proposed, for more informations on proposals see section 2.2.1.3
 
-####2.2.1.2 Adding/Edit Attributes
+####2.2.2.3 Adding/Edit Attributes
 
 
 Attributes can only be added if an object exits. The attribtues can change for every object as they were configured in 
@@ -717,34 +842,39 @@ The configured handler (see section 2.1.5.1) specifies how the input fields look
 handled.
 
 These are the possible properties of an attribute:
-Type          : See attribute definitions in section 2.1.4
-Value         : The attribute value
-                Note: These values are checked against the regex specified in their definition.
-Shared        : Defines if the attribute is shared. The default value depends in the attribute definition.
-                Note: Not shared means that they are only visible by privileged users and the users of the creator group.
-Is an IOC     : Set the value if it is an IOC
 
-Notes: * If the attribute identifier is marked red the event is unpulbished.
+|Type          | See attribute definitions in section 2.1.4|
+|Value         | The attribute value|
+|              | Note: These values are checked against the regex specified in their definition.|
+|Shared        | Defines if the attribute is shared. The default value depends in the attribute definition.|
+|              | Note: Not shared means that they are only visible by privileged users and the users of the creator group.|
+|Is an IOC     | Set the value if it is an IOC|
+
+**Notes**: * If the attribute identifier is marked red the event is unpulbished.
        * If the attribute identifier is marked yellow the event got some proposals, for more informations on proposals see section 2.2.1.3
        * Depending on the handler used the properties may vary.
 
-####2.2.1.3 Proposal of objects/Attributes
+####2.2.2.4 Proposal of objects/Attributes
 
 Every user can propose attributes and objects to an event which is viewable to him. The proposals are made as if the proposing user is the owner of the event he wants to provide additional informations. The difference is that these proposed attributes will be marked (yellow color) to denote them as proposals. These proposals will only be visible by the proposing user and the event owner. As long as the proposed attribute had not been acknowledged by the owner, they can be deleted at any time, by the proposing user.
 
-Note: These attributes will not be visible to other users, unless the owner acknowledge them and then they will be part of the event and shown normally to all the users having access to the corresponding event.
+**Note**: These attributes will not be visible to other users, unless the owner acknowledge them and then they will be part of the event and shown normally to all the users having access to the corresponding event.
 
 Remark: A future release will provide this feature also via REST.
+
+####2.2.2.5 Remarks
+
+
 
 ###2.2.2 Search
 
 
-The search supports currently only the search on attributes. The search results work the same way as the Recent events described
+The search supports currently only the search on attributes and reports. The search results work the same way as the Recent events described
 in section 2.2.3.
 
 WORK IN PROGRESS
 
-###2.2.3 Recent Entries
+###2.2.3 Events
 
 The recent events list the last 200 entered events, by clicking, either on the identifier (number) or the eye icon in the
 options column, one enters view of the event. 
@@ -754,14 +884,7 @@ Notes: * If the event identifier is marked red the event is unpulbished.
 
 #3. REST API
 
-Ce1sus also offers a RESTAPI for more informations see the corresponding section in this document.
-
-See ./doc/ce1sus_api.ods for a basic overview of the different functions. For ease of use the repository ce1sus_api 
-provides all the required modules to access this API for python. Moreover ce1sus_api provides a script to import MISP events. 
-
-Note: The events inserted over rest have to be validated by a privileged user, before they will be accessible to others
-
-WORK IN PROGRESS
+Please refer to the rest api document for more informations of the api.
 
 #4. Maintenance tools
 
@@ -775,11 +898,11 @@ The maintenance tool is a command line application, wich is deployed on the serv
 - Clear all the relations
 
 Use the following command for the syntax
-
-$ python maintenance.py -h 
+´´´shell
+python maintenance.py -h
+´´´ 
 
 #5. Developing Handlers
-
 
 WORK IN PROGRESS
 

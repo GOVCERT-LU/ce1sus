@@ -9,12 +9,12 @@ Moreover the shared IOCs were received in many different formats, and often ther
 
 ce1sus has the goal to facilitate:
 
-1. Central database: Storing any information around all kinds of threats (i.e. scam, malware, phishing, ...). in a structured manner 
-2. Sharing: Be compatible with open standards (STIX/CybOX) / or the most commonly used formats to facilitate the sharing trusted partners
-3. Automatized Import/Export: Synchronization of instances between trusted partners
-4. Ease of use: Generate information out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
-5. Correlation: Automatically creating relations between seen threats
-6. Visualization: Represent the real-life case as closely as possible
+1. **Central database**: Storing any information around all kinds of threats (i.e. scam, malware, phishing, ...). in a structured manner 
+2. **Sharing**: Be compatible with open standards (STIX/CybOX) / or the most commonly used formats to facilitate the sharing trusted partners
+3. **Automatized Import/Export**: Synchronization of instances between trusted partners
+4. **Ease of use**: Generate information out of the obvious automatically (i.e. hashes, parsing of email headers, etc)
+5. **Correlation**: Automatically creating relations between seen threats
+6. **Visualization**: Represent the real-life case as closely as possible
 
 The structure of a threat provides context to others with nearly no efforts. An Example 
 
@@ -67,33 +67,32 @@ For any questions feel free to ask
 
 ##Requirements
 
-- python
+* python
   * python (2.7+)
-  * SQLAlchemy (0.7.8+)
+  * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
     ** https://github.com/ahupp/python-magic
-  * python-ldap (2.4.10+) (optional)
+  * python-ldap (2.4.10+)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
-  * rtkit (optional)
+  * rtkit
   * gnupg (0.3.5+)
   * eml_parser (https://github.com/sim0nx/eml_parser/
-- MySQL (5.1+)
-- Nginx (1.4+)
-- uWSGI (1.2.3+, with python-2 support)
+- mysql (5.1+)
+- nginx (1.4+)
+- uwsgi (1.2.3+, with python-2 support)
 - memcached
+- python-stix (1.1.1.5) 
+- python-cybox (2.1.0.11)
+- openioc-to-stix
 
 ##Roadmap
 
 ###v0.11.1
 
-* Relation of attributes can be done over groups of attributes
-
-###v0.11.2
-
-* TAXII server integration
+* Relation of attributes can be done over groups of attributes (types)
 
 
 ##Up the road 0.11.x
@@ -105,6 +104,7 @@ For any questions feel free to ask
 * Enhanced STIX/CybOX support
 * Show statistics on Home page
 * Password protection for compressed files
+* TAXII server integration
 
 ##Installation
 

@@ -21,3 +21,4 @@ tools.sessions.clean_up_delay = 5
 request.show_tracebacks=False
 #set the port for cherrypy
 server.socket_port = 8080
+server.socket_host = "0.0.0.0"
