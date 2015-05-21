@@ -838,6 +838,7 @@ The groups associated to the event, provide the users of the group to view the e
 The other thing is that every associated group can have serveral permissions, which are only valdi for the event in context.
 
 The permissions available are the following
+
 |Permission|Description|
 |-----|-----------|
 |Add|Permission to add items to the event|
@@ -854,6 +855,8 @@ The permissions available are the following
 
 The event has the following properties:
 
+|Field | description|
+|------|------------|
 |UUID                                           | Generated UUID to uniquely identify an event|
 |Title*                                         | Title (or Name) of the event|
 |                                               | **Note**: Is mandatory|
