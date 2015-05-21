@@ -297,6 +297,7 @@ cp config/handlers.conf_tmpl config/handlers.conf
 The following sections have to be modified to the settings of your system
 
 **[FileHandler]**
+
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/files                           | The absolute file path where ce1sus can store/archive the| 
@@ -304,11 +305,13 @@ The following sections have to be modified to the settings of your system
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[CVEHandler]**
+
 |variable name | Description |
 |--------------|-------------|
 |cveUrl=http://cve.mitre.org/cgi-bin/cvename.cgi?name=     | Base url for cves. (used by the CVEHandler)|
 
 **[RTHandler]**
+
 |variable name | Description |
 |--------------|-------------|
 |rt_user=                                               | The user used for accessing the RESTAPI for RT|
@@ -317,6 +320,7 @@ The following sections have to be modified to the settings of your system
 |rt_url=                                                | Base url of RT (i.e https://localhost/rt/Ticket/Display.html?id=)|
 
 **[FileReferenceHandler]**
+
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/reference_files                 | The absolute file path where ce1sus can store/archive the| 
@@ -324,6 +328,7 @@ The following sections have to be modified to the settings of your system
 |                                                      |  The user (i.e 'www-data') of ce1sus must have access on that directory|
 
 **[FileWithHashesHandler]**
+
 |variable name | Description |
 |--------------|-------------|
 |files=/path/to/ce1sus/files                            | The absolute file path where ce1sus can store/archive the| 
@@ -568,11 +573,10 @@ A user has the following properties:
 |Manage own group | Not used yet | 
 |Group   | The group the user belongs to. This group is also denoted by creator group. |
 
-**Note**: If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
-
-          If the user account is not activated within 24 hours, the account stays in disabled mode to reenable it either activate it manually or resend the activation mail.
-
-          In case the sendmail is not set one must activate the user manually.
+**Note**: 
+*If ce1sus/sendmail is set the user will receive an activation mail and his account has to be activated within 24 hours.
+*If the user account is not activated within 24 hours, the account stays in disabled mode to reenable it either activate it manually or resend the activation mail.
+*In case the sendmail is not set one must activate the user manually.
           
 ###2.1.3 Groups
 
