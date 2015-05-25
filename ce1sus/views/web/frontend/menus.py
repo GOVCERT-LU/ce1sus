@@ -175,9 +175,19 @@ class GuiMenus(BaseView):
 
       child_menus = list()
       child_menu_item = dict()
-      child_menu_item['title'] = 'About'
-      child_menu_item['section'] = '/about'
+      child_menu_item['title'] = 'Rest API'
+      child_menu_item['section'] = '/help/restapi'
       child_menus.append(child_menu_item)
+
+      child_menu_item = dict()
+      child_menu_item['divider'] = True
+      child_menus.append(child_menu_item)
+
+      child_menu_item = dict()
+      child_menu_item['title'] = 'About'
+      child_menu_item['section'] = '/help/about'
+      child_menus.append(child_menu_item)
+
       menu_item['submenus'] = child_menus
       menus.append(menu_item)
 

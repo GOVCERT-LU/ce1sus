@@ -33,8 +33,7 @@ from ce1sus.views.web.api.version3.handlers.events.observablehanlder import Obse
 from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, \
-  SyncServerTypesHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, SyncServerTypesHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
@@ -180,8 +179,6 @@ class RestController(BaseView):
         if http_method in method.allowed_http_methods:
           try:
             headers = cherrypy.request.headers
-            if http_method == 'DELETE':
-              print 'Delete'
             result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
             # execute method
             # set the correct headers
@@ -206,7 +203,7 @@ class RestController(BaseView):
         raise cherrypy.HTTPError(status=418, message=message)
 
     else:
-      message = u'Handler {0} \'s fucntion {1} is not a rest function'.format(handler_instance.name, method_name)
+      message = u'Handler {0} does not provide a function {1}'.format(handler_instance.name, method_name)
       self.logger.error(message)
-      raise cherrypy.HTTPError(status=418, message=message)
+      raise cherrypy.HTTPError(status=417, message=message)
   default._cp_config = {'methods_with_bodies': ("POST", "PUT", "DELETE")}

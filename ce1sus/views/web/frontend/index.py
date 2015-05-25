@@ -46,31 +46,11 @@ class IndexView(BaseView):
     # only for fetching the first page
     return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index.html'))
 
-    """
-    if not self.user_authenticated():
-      # check if there is a basic auth enabled
-      # use_basic_auth = self.config.get('ce1sus', 'usebasicauth', False)
-      use_basic_auth = True
-      if use_basic_auth:
-        try:
-          #ah = cherrypy.lib.httpauth.parseAuthorization(cherrypy.request.headers['authorization'])
-          return '{0}'.format(cherrypy.request.headers)
-          username = ah['username']
-          if username:
-            user = self.login_controller.get_user_by_username(username)
-            if user:
-              self.login_controller.update_last_login(user)
-              self.put_user_to_session(user)
-            else:
-              cherrypy.response.headers['www-authenticate'] = cherrypy.lib.httpauth.basicAuth('iuser')
-              raise cherrypy.HTTPError(401, "You are not authorized to access this resource")
-        except (KeyError, ControllerException):
-          cherrypy.response.headers['www-authenticate'] = cherrypy.lib.httpauth.basicAuth('iuser')
-          raise cherrypy.HTTPError(401, "You are not authorized to access this resource")
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  def swagger(self):
+    return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'swagger.html'))
 
-    # only for fetching the first page
-    return open(os.path.join(cherrypy.config.get("tools.staticdir.root"), u'index.html'))
-    """
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   @cherrypy.tools.json_out()

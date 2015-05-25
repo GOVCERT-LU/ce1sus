@@ -286,7 +286,8 @@ class Observable(ExtendedLogingInformations, Base):
                 'modified_on': self.convert_value(self.modified_on),
                 'modifier_group': self.modifier.group.to_dict(complete, False),
                 'tlp': self.convert_value(self.tlp),
-                'properties': self.properties.to_dict()
+                'properties': self.properties.to_dict(),
+                'originating_group': self.originating_group.to_dict(complete, False),
                 }
     else:
       result = {'identifier': self.convert_value(self.uuid),
@@ -298,7 +299,8 @@ class Observable(ExtendedLogingInformations, Base):
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),
                 'tlp': self.convert_value(self.tlp),
-                'properties': self.properties.to_dict()
+                'properties': self.properties.to_dict(),
+                'originating_group': self.originating_group.to_dict(complete, False),
                 }
 
     return result

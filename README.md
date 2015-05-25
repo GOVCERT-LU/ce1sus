@@ -72,21 +72,19 @@ For any questions feel free to ask
   * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
-    ** https://github.com/ahupp/python-magic
   * python-ldap (2.4.10+)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
-  * rtkit
+  * rtkit (0.6.0+)
   * gnupg (0.3.5+)
-  * eml_parser (https://github.com/sim0nx/eml_parser/
+  * eml_parser
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
-- memcached
 - python-stix (1.1.1.5) 
 - python-cybox (2.1.0.11)
-- openioc-to-stix
+- openioc-to-stix (0.12+)
 
 ##Roadmap
 

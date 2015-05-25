@@ -185,6 +185,7 @@ class Reference(ExtendedLogingInformations, Base):
             'created_at': self.convert_value(self.created_at),
             'modified_on': self.convert_value(self.modified_on),
             'modifier_group': self.modifier.group.to_dict(complete, False),
+            'originating_group': self.originating_group.to_dict(complete, False),
             'tlp': self.convert_value(self.tlp),
             'properties': self.properties.to_dict()
             }
@@ -301,11 +302,16 @@ class Report(ExtendedLogingInformations, Base):
               'related_reports': related_reports,
               'tlp': self.convert_value(self.tlp),
               'related_reports_count': related_count,
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
+              'originating_group': self.originating_group.to_dict(complete, False),
               }
     else:
       return {'identifier': self.convert_value(self.uuid),
               'title': self.title,
               'tlp': self.convert_value(self.tlp),
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on),
               }
 
   def populate(self, json, rest_insert=True):

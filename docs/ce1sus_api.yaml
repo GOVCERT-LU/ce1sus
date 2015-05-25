@@ -1,0 +1,1608 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  title: ce1sus API
+  description: Description of all the interfaces available in ce1sus
+  version: "0.3.0"
+schemes:
+  - "http"
+  - "https"
+basePath: /REST/0.3.0
+produces:
+  - application/json
+# Describe your paths here
+paths:
+paths:
+  /login:
+    post:
+      summary: Login
+      description: login into ce1sus. Session handling is required
+      parameters:
+        - name: credentials
+          in: body
+          description: Pet to add to the store
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        200:   
+          description: Logged in
+        405:
+          description: Method is not allowed
+        401:
+          description: Login failed
+      tags:
+        - login
+  /logout:
+    get:
+      summary: logout
+      description: logout of ce1sus. Session handling is required
+      responses:
+        200:   
+          description: Logged out
+      tags:
+        - logout
+  
+  /event:
+    post:
+      summary: Insertion of an event
+      description: Inserts a complete event, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: event
+          in: body
+          required: true
+          description: Inserted event
+          schema:
+            $ref: '#/definitions/Event'
+          
+      tags:
+        - Event
+
+      responses:
+        200:
+          description: The Event
+          schema:
+            $ref: '#/definitions/Event'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /event/{uuid}:
+    get:
+      summary: Get event by uuid
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+
+      responses:
+        200:
+          description: The Event
+          schema:
+            $ref: '#/definitions/Event'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Event not found
+    put:
+      summary: Update of an event
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: event
+          in: body
+          required: true
+          description: updated event
+          schema:
+            $ref: '#/definitions/Event'
+          
+      tags:
+        - Event
+
+      responses:
+        200:
+          description: The Event
+          schema:
+            $ref: '#/definitions/Event'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Event not found
+    delete:
+      summary: Deletion of an event
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+      tags:
+        - Event
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Event not found
+  /event/{uuid}/observable:
+    post:
+      summary: Insertion of an observable
+      description: Inserts a observable, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: event
+          in: body
+          required: true
+          description: inserted observable
+          schema:
+            $ref: '#/definitions/Observable'
+          
+      tags:
+        - Event
+        - Observable
+
+      responses:
+        200:
+          description: The Observable
+          schema:
+            $ref: '#/definitions/Observable'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /event/{uuid}/observable/{uuid2}:
+    get:
+      summary: Get event by uuid
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+        - Observable
+
+      responses:
+        200:
+          description: The Observable
+          schema:
+            $ref: '#/definitions/Observable'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Observable not found
+    put:
+      summary: Update of an event
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: Observable
+          in: body
+          required: true
+          description: updated Observable
+          schema:
+            $ref: '#/definitions/Observable'
+          
+      tags:
+        - Event
+        - Observable
+
+      responses:
+        200:
+          description: The Observable
+          schema:
+            $ref: '#/definitions/Observable'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Observable not found
+    delete:
+      summary: Deletion of an Observable, also its children will be deleted
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+      tags:
+        - Event
+        - Observable
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Observable not found
+
+  /observable/{uuid}/object:
+    post:
+      summary: Insertion of an object
+      description: Inserts a object, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: observable
+          in: body
+          required: true
+          description: inserted object
+          schema:
+            $ref: '#/definitions/Object'
+          
+      tags:
+        - Event
+        - Object
+
+      responses:
+        200:
+          description: The Object
+          schema:
+            $ref: '#/definitions/Object'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /observable/{uuid}/object/{uuid2}:
+    get:
+      summary: Get observable by uuid
+      description: |
+        Returns a specified observable
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+        - Object
+
+      responses:
+        200:
+          description: The Object
+          schema:
+            $ref: '#/definitions/Object'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Object not found
+    put:
+      summary: Update of an observable
+      description: |
+        Returns a specified observable
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: Object
+          in: body
+          required: true
+          description: updated Object
+          schema:
+            $ref: '#/definitions/Object'
+          
+      tags:
+        - Event
+        - Object
+
+      responses:
+        200:
+          description: The Object
+          schema:
+            $ref: '#/definitions/Object'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Object not found
+    delete:
+      summary: Deletion of an Object, also its children will be deleted
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the observable
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+      tags:
+        - Event
+        - Object
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Object not found
+  /object/{uuid}/attribute:
+    post:
+      summary: Insertion of an attribute
+      description: Inserts a attribute, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: object
+          in: body
+          required: true
+          description: inserted attribute
+          schema:
+            $ref: '#/definitions/Attribute'
+          
+      tags:
+        - Event
+        - Observable
+        - Object
+        - Attribute
+
+      responses:
+        200:
+          description: The Attribute
+          schema:
+            $ref: '#/definitions/Attribute'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /object/{uuid}/attribute/{uuid2}:
+    get:
+      summary: Get object by uuid
+      description: |
+        Returns a specified object
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the attribute
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+        - Observable
+        - Object
+        - Attribute
+
+      responses:
+        200:
+          description: The Attribute
+          schema:
+            $ref: '#/definitions/Attribute'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Attribute not found
+    put:
+      summary: Update of an object
+      description: |
+        Returns a specified object
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the attribute
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: Attribute
+          in: body
+          required: true
+          description: updated Attribute
+          schema:
+            $ref: '#/definitions/Attribute'
+          
+      tags:
+        - Event
+        - Observable
+        - Object
+        - Attribute
+
+      responses:
+        200:
+          description: The Attribute
+          schema:
+            $ref: '#/definitions/Attribute'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Attribute not found
+    delete:
+      summary: Deletion of an Attribute, also its children will be deleted
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the object
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the attribute
+          required: true
+      tags:
+        - Event
+        - Observable
+        - Object
+        - Attribute
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Attribute not found       
+  /event/{uuid}/report:
+    post:
+      summary: Insertion of an report
+      description: Inserts a report, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: event
+          in: body
+          required: true
+          description: inserted report
+          schema:
+            $ref: '#/definitions/Report'
+          
+      tags:
+        - Event
+        - Report
+
+      responses:
+        200:
+          description: The Report
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /event/{uuid}/report/{uuid2}:
+    get:
+      summary: Get event by uuid
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+        - Report
+
+      responses:
+        200:
+          description: The Report
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Report not found
+    put:
+      summary: Update of an event
+      description: |
+        Returns a specified event
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: Report
+          in: body
+          required: true
+          description: updated Report
+          schema:
+            $ref: '#/definitions/Report'
+          
+      tags:
+        - Event
+        - Report
+
+      responses:
+        200:
+          description: The Report
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Report not found
+    delete:
+      summary: Deletion of an Report, also its children will be deleted
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the event
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+      tags:
+        - Event
+        - Report
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Report not found
+  /report/{uuid}/reference:
+    post:
+      summary: Insertion of an reference
+      description: Inserts a reference, works also for a completely populdated one, and returns it afterwards.
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: report
+          in: body
+          required: true
+          description: inserted reference
+          schema:
+            $ref: '#/definitions/Reference'
+          
+      tags:
+        - Event
+        - Report
+        - Reference
+
+      responses:
+        200:
+          description: The Reference
+          schema:
+            $ref: '#/definitions/Reference'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+          
+  /report/{uuid}/reference/{uuid2}:
+    get:
+      summary: Get report by uuid
+      description: |
+        Returns a specified report
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the reference
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+      tags:
+        - Event
+        - Report
+        - Reference
+
+      responses:
+        200:
+          description: The Reference
+          schema:
+            $ref: '#/definitions/Reference'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Reference not found
+    put:
+      summary: Update of an report
+      description: |
+        Returns a specified report
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the reference
+          required: true
+        - name: complete
+          in: query
+          description: Return the complete informations
+          required: false
+          type: boolean
+          format: boolean
+        - name: inflated
+          in: query
+          description: Return the inflated informations (with all children)
+          required: false
+          type: boolean
+          format: boolean
+        - name: Reference
+          in: body
+          required: true
+          description: updated Reference
+          schema:
+            $ref: '#/definitions/Reference'
+          
+      tags:
+        - Event
+        - Report
+        - Reference
+
+      responses:
+        200:
+          description: The Reference
+          schema:
+            $ref: '#/definitions/Reference'
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Reference not found
+    delete:
+      summary: Deletion of an Reference, also its children will be deleted
+      description: |
+        nothing
+      parameters:
+        - name: uuid
+          in: path
+          type: string
+          description: uuid of the report
+          required: true
+        - name: uuid2
+          in: path
+          type: string
+          description: uuid of the reference
+          required: true
+      tags:
+        - Event
+        - Report
+        - Reference
+
+      responses:
+        200:
+          description: Deleted
+        403:
+          description: Not authorized
+        400:
+          description: Handled error occured
+        404:
+          description: Reference not found
+definitions:
+  Credentials:
+    properties:
+      usr:
+        type: string
+      pwd:
+        type: string
+  Event:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier
+      int_id:
+        type: integer
+        description: internal identifier
+      title:
+        type: string
+        description: Title of the event
+      description:
+        type: string
+        description: Description of the event
+      last_pubish_date:
+        type: string
+        description: Date of last publication
+      risk:
+        type: string
+        enum: ['None','Low','Medium','High','Unkown']
+      status:
+        type: string
+        enum: ['Confirmed','Draft','Deleted','Expired']
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red']      
+      analysis:
+        type: string
+        enum: ['None','Opened','Stalled','Completed','Unkown']
+      modified_on:
+        type: string
+        description: Date of last modification
+      created_at:
+        type: string
+        description: date of creation
+      first_seen:
+        type: string
+        description: First seen
+      observables_count:
+        type: integer
+        description: Count of the observables
+      observables:
+        type: array
+        items:
+          $ref: '#/definitions/Observable'
+      comments:
+        type: array
+        items:
+          $ref: '#/definitions/Comment'
+      properties:
+        $ref: '#/definitions/Properties'
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/EventGroupPermission'
+      reports:
+        type: array
+        items:
+          $ref: '#/definitions/Report'
+      originating_group:
+          $ref: '#/definitions/Group'
+      indicators:
+        type: array
+        items:
+          $ref: '#/definitions/Indicator'
+      last_pubish_date:
+        type: string
+        description: Date of last publication
+      
+  Indicator:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier  
+      description:
+        type: string
+        description: Description  
+      short_description:
+        type: string
+        description: short description
+      confidence:
+        type: string
+        description: confidence of the indicator
+        enum: ['None', 'Low', 'Medium', 'High']
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red']   
+      operator:
+        type: string
+        description: Operator 
+        enum: ['OR','AND']
+      title:
+        type: string
+        description: indicator title
+      properties:
+        $ref: '#/definitions/Properties'
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of creati
+      event_id:
+        type: string
+        description: UUID of the event
+      observables_count:
+        type: integer
+        description: Count of the observables
+      observables:
+        type: array
+        items:
+          $ref: '#/definitions/Observable'
+      version:
+        type: string
+        description: version of the indicator
+  
+  EventGroupPermission:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier     
+      group:
+        $ref: '#/definitions/Group'
+      permssions:
+        $ref: '#/definitions/EventPermissions'
+  EventPermissions:
+    properties:
+      add:
+        type: boolean
+        description: add
+      modify:
+        type: boolean
+        description: modify
+      validate:
+        type: boolean
+        description: valiadte
+      delete:
+        type: boolean
+        description: delete
+      set_groups:
+        type: boolean
+        description: set groups
+  Properties:
+    properties:
+      validated:
+        type: boolean
+        description: validated
+      shared:
+        type: boolean
+        description: shared
+      proposal:
+        type: boolean
+        description: proposal
+  Report:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier   
+      description:
+        type: string
+        description: Description  
+      short_description:
+        type: string
+        description: short description
+      title:
+        type: string
+        description: report title
+      refernces:
+        type: array
+        items:
+          $ref: '#/definitions/Reference'
+      references_count:
+        type: integer
+        description: references count
+      properties:
+        $ref: '#/definitions/Properties'
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red'] 
+      related_reports:
+        type: array
+        items:
+          $ref: '#/definitions/Report'
+      related_reports_count:
+        type: integer
+        description: related reports count      
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification
+  Reference:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      definition:
+        $ref: '#/definitions/ReferenceDefinition'
+      value:
+        type: string
+      properties:
+        $ref: '#/definitions/Properties'
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red'] 
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'        
+  ReferenceDefinition:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      description:
+        type: string
+        description: Description 
+      share:
+        type: boolean
+        description: Default share value
+      regex:
+        type: string
+        description: regualr expression to validate the value
+      chksum:
+        type: string
+        description: check sum of the definition
+      name:
+        type: string
+        description: Name of the definition
+      referencehandler_id:
+        type: string
+        description: reference handler indentifier
+      referencehandler:
+        $ref: '#/definitions/ReferenceHandler'
+  ReferenceHandler:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      name:
+        type: string
+        description: Name of the handler
+      description:
+        type: string
+        description: Description 
+  Observable:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      description:
+        type: string
+        description: Description  
+      title:
+        type: string
+        description: report title        
+      properties:
+        $ref: '#/definitions/Properties'
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'
+      version:
+        type: string
+        description: version of the indicator
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red']
+      object:
+        $ref: '#/definitions/Object'
+      observable_composition:
+        $ref: '#/definitions/ObservableComposition'
+      related_observables:
+        type: array
+        items:
+          $ref: '#/definitions/RelatedObservable'
+      related_observables_count:
+        type: integer
+        description: number of related observables
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification        
+  ObservableComposition:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier
+      operator:
+        type: string
+        description: Operator 
+        enum: [ 'OR','AND']
+      observables_count:
+        type: integer
+        description: Count of the observables
+      observables:
+        type: array
+        items:
+          $ref: '#/definitions/Observable'
+      properties:
+        $ref: '#/definitions/Properties'
+        
+  RelatedObservable:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier
+      relation:
+        type: string
+      observable:
+        $ref: '#/definitions/Observable'
+      confidence:
+        type: string
+        enum: [ 'None','Low','Medium','High']
+  Object:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier
+      properties:
+        $ref: '#/definitions/Properties'
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'      
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red']
+      observable_id:
+        type: string
+        description: Identifier of the observable
+      definition:
+        $ref: '#/definitions/ObjectDefinition'
+      definition_id:
+        type: string
+        description: Identifier of the definition
+      parent_id:
+        type: string
+        description: identifier of the parent
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification 
+      attributes_count:
+        type: integer
+      related:_objects_count:
+        type: integer    
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/Attribute'
+      related:_objects:
+        type: array
+        items:
+          $ref: '#/definitions/RelatedObject'
+  RelatedObject:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier  
+      relation:
+        type: string
+      object:
+        $ref: '#/definitions/Object'
+      parent_id:
+        type: string
+  Attribute:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier  
+      definition:
+        $ref: '#/definitions/AttributeDefiniton'
+      definition_id:
+        type: string
+        description: Identifier of the definition
+      tlp:
+        type: string
+        description: tlp level
+        enum: [ 'White','Green','Amber','Red']   
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification
+      properties:
+        $ref: '#/definitions/Properties'
+      value:
+        type: string
+      ioc:
+        type: boolean
+      condition_id:
+        type: string
+      conditon:
+        $ref: '#/definitions/Condition'
+  Condition:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      name:
+        type: string
+        description: Name of the table  
+  ObjectDefinition:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier
+      name:
+        type: string
+        description: name of the object definition
+      description:
+        type: string
+        description: description of the object definition
+      chksum:
+        type: string
+        description: check sum of the object definition
+      cybox_std:
+        type: boolean
+        description: Part of the cybox standard
+      default_share:
+        type: boolean
+        description: Set share by default
+      attributes:
+        type: array
+        items: 
+          $ref: '#/definitions/AttributeDefiniton'
+
+  AttributeDefiniton:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      description:
+        type: string
+        description: Description 
+      share:
+        type: boolean
+        description: Default share value
+      regex:
+        type: string
+        description: regualr expression to validate the value
+      chksum:
+        type: string
+        description: check sum of the definition
+      name:
+        type: string
+        description: Name of the definition
+      attributehandler_id:
+        type: string
+        description: reference handler indentifier
+      attributehandler:
+        $ref: '#/definitions/AttributeHandler'
+  AttributeHandler:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      name:
+        type: string
+        description: Name of the handler
+      description:
+        type: string
+        description: Description 
+      allowed_tables:
+        type: array
+        items: 
+          $ref: '#/definitions/AllowedTable'
+        description: tables on wich the handler works 
+  AllowedTable:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      name:
+        type: string
+        description: Name of the table  
+  Comment:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      creator_group:
+          $ref: '#/definitions/Group'
+      modifier_group:
+          $ref: '#/definitions/Group'
+      originating_group:
+          $ref: '#/definitions/Group'   
+      comment:
+        type: string
+      created_at:
+        type: string
+        description: date of creation
+      modified_on:
+        type: string
+        description: date of modification        
+  Group:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 
+      name:
+        type: string
+        description: Name of the group  
+      description:
+        type: string
+        description: Description 
+      email:
+        type: string
+        description: Description 
+      gpg_key:
+        type: string
+        description: Description 
+      tlp:
+        type: string
+        description: Description  
+        enum: [ 'White','Green','Amber','Red']
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/Group'  
+      notifications:
+        type: boolean
+        description: If set the group receives notifications 
+      permissions:
+        $ref: '#/definitions/Permissions'
+      default_event_permissions:
+        $ref: '#/definitions/EventPermissions'	
+  Permissions:
+    properties:
+      identifier:
+        type: string
+        description: Unique identifier 	
+      downloadfiles:
+        type: boolean
+      propagate_tlp:
+        type: boolean

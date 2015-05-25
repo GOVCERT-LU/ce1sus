@@ -34,7 +34,8 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
         .when("/activate/:id", "main.layout.activate")
         .when("/login", "main.layout.login")
         .when("/logout", "main.layout.logout")
-        .when("/about", "main.layout.about")
+        .when("/help/restapi", "main.layout.help.restapi")
+        .when("/help/about", "main.layout.help.about")
         .when("/events", "main.layout.events")
         .when("/events/all", "main.layout.events.allEvents")
         .when("/events/unpublished", "main.layout.events.unpublished")
@@ -178,9 +179,19 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                     templateUrl : "pages/logout.html",
                     controller : "logoutController"
                   })
-                  .segment('about', {
-                    templateUrl : "pages/about.html"
-                  })
+                  .segment('help', {
+                    templateUrl : "pages/help/layout.html"
+                      
+                  }).within()
+                    .segment("about", {
+                                'default': true,
+                                 templateUrl: "pages/help/about.html"
+                     })
+                    .segment("restapi", {
+                                 templateUrl: "pages/help/api.html",
+                                 controller: "swaggerController"
+                     })
+                  .up()
                   .segment('events', {
                     templateUrl : "pages/events.html",
                     controller: "eventController",

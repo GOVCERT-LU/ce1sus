@@ -15,21 +15,19 @@ Ce1sus need the following packages:
   * sqlalchemy (0.7.8+)
   * mysqldb (1.2.3)
   * python-magic (0.4.6+)
-    ** https://github.com/ahupp/python-magic
   * python-ldap (2.4.10+)
   * dateutil (1.5+)
   * cherrypy3 (3.2.2+)
   * memcache
-  * rtkit
+  * rtkit (0.6.0+)
   * gnupg (0.3.5+)
-  * eml_parser (https://github.com/sim0nx/eml_parser/
+  * eml_parser
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)
-- memcached
 - python-stix (1.1.1.5) 
 - python-cybox (2.1.0.11)
-- openioc-to-stix
+- openioc-to-stix (0.12+)
 
 
 ###1.1.2 Installation of the requirements
@@ -76,25 +74,45 @@ ln -s libs/eml_parser/eml_parser .
 
 ###1.2.3 Cybox
 
+One possibility to install eml_parser is the following
+
 ``` shell
 mkdir libs
 cd libs
 git clone https://github.com/CybOXProject/python-cybox.git v2.1.0.11
 cd ..
-ln -s libs/python-cybox/python-cybox/cybox .
+ln -s libs/python-cybox/cybox .
 ```
 
+The other is it to install it via pip.
+
 ###1.2.4 Stix
+
+One possibility to install eml_parser is the following
 
 ``` shell
 mkdir libs
 cd libs
 git clone https://github.com/STIXProject/python-stix.git v1.1.1.5
 cd ..
-ln -s libs/python-stix/python-stix/stix .
+ln -s libs/python-stix/stix .
+```
+
+###1.2.5 rtKit
+
+One possibility to install eml_parser is the following
+
+``` shell
+mkdir libs
+cd libs
+git clone https://github.com/z4r/python-rtkit.git 0.6.0
+cd ..
+ln -s libs/python-rtkit/rtkit .
 ```
 
 ###1.2.5 OpenIOC
+
+One possibility to install eml_parser is the following
 
 ``` shell
 mkdir libs
@@ -105,6 +123,8 @@ ln -s libs/openioc-to-stix/ioc_observable.py .
 ln -s libs/openioc-to-stix/openioc.py .
 ln -s libs/openioc-to-strix/opendioc_to_cybox.py .
 ```
+
+**Note**: This implementation may change in future
 
 ##1.3. Database
 
@@ -965,7 +985,7 @@ options column, one enters view of the event.
 
 #3. REST API
 
-Please refer to the rest api document for more informations of the api.
+For viewing the REST API Documentation please access on the server with the frontend the "/swagger" path (i.e. http://localhost:8080/swagger).
 
 #4. Maintenance tools
 

@@ -246,7 +246,7 @@ class Indicator(ExtendedLogingInformations, Base):
                 'observables': observables,
                 'observables_count': observables_count,
                 'version': self.convert_value(self.version),
-
+                'tlp': self.convert_value(self.tlp),
                 }
     else:
       result = {'identifier': self.convert_value(self.uuid),
@@ -258,13 +258,12 @@ class Indicator(ExtendedLogingInformations, Base):
                 'modifier_group': self.modifier.group.to_dict(complete, False),
                 'originating_group': self.originating_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
-                'published': self.convert_value(self.properties.is_shareable),
                 'modified_on': self.convert_value(self.modified_on),
                 'event_id': self.convert_value(self.event.uuid),
                 'observables': observables,
                 'observables_count': observables_count,
                 'version': self.convert_value(self.version),
-
+                'tlp': self.convert_value(self.tlp)
                 }
 
     return result
