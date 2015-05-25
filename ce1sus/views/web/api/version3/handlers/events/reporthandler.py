@@ -132,6 +132,7 @@ class ReportHandler(RestBaseHandler):
         handler_instance = self.__get_handler(definition)
         handler_instance.is_rest_insert = self.is_rest_insert(headers)
         handler_instance.is_owner = self.is_event_owner(event, user)
+
         # Ask handler to process the json for the new attributes
         reference, additional_references, related_reports = handler_instance.insert(report, user, json)
         # Check if not elements were attached to the object

@@ -175,6 +175,7 @@ class Reference(ExtendedLogingInformations, Base):
     self.properties.is_rest_instert = rest_insert
     self.properties.is_web_insert = not rest_insert
     self.tlp = json.get('tlp', 'Amber').title()
+    self.value = json.get('value', None)
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     return {'identifier': self.convert_value(self.uuid),

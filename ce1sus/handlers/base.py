@@ -93,6 +93,13 @@ class HandlerBase(object):
     else:
       raise HandlerException(u'Attribute definition with chksum {0} cannot be found'.format(chksum))
 
+  def get_reference_definition(self, chksum):
+    definition = self.reference_definitions.get(chksum, None)
+    if definition:
+      return definition
+    else:
+      raise HandlerException(u'Reference definition with chksum {0} cannot be found'.format(chksum))
+
   def get_condition_by_uuid(self, uuid):
     for condition in self.conditions:
       if condition.uuid == uuid:
@@ -229,6 +236,7 @@ class HandlerBase(object):
   def create_reference(self, report, definition, user, json):
     reference = get_class('ce1sus.db.classes.report', 'Reference')()
     # Note first the definition has to be specified else the value cannot be assigned
+    reference.uuid = uuid4()
     reference.definition = definition
 
     # Note second the object has to be specified
@@ -238,6 +246,7 @@ class HandlerBase(object):
 
     # set remaining stuff
     reference.populate(json)
+
     # set the definition id as in the definition as it might get overwritten
     reference.definition_id = definition.identifier
     self.set_provenance(reference)

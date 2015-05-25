@@ -32,7 +32,6 @@ __license__ = 'GPL v3+'
 
 
 CHK_SUM_FILE_NAME = '2234969e-1e72-4dfb-9f8e-fe08d02bef1d'
-CHK_SUM_HASH_SHA1 = 'e3c8a314-f8a7-4154-bf2e-565f062e5231'
 
 
 class FileReferenceHandler(GenericHandler):
@@ -48,8 +47,8 @@ class FileReferenceHandler(GenericHandler):
   def get_allowed_types():
     return [ValueTable.STRING_VALUE]
 
-  def get_additinal_attribute_chksums(self):
-    return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
+  def get_additinal_reference_chksums(self):
+    return list()
 
   @staticmethod
   def get_description():
@@ -126,22 +125,17 @@ class FileReferenceHandler(GenericHandler):
 
       # create attribtues
       internal_json = json
-      # main
+      # mainNone
       main_definition = self.get_main_definition()
 
       internal_json['value'] = rel_folder + '/' + sha1 + '|' + filename
       main_attribute = self.create_reference(report, main_definition, user, internal_json)
       # secondary
       attributes = list()
-      filename_definition = self.get_attriute_definition(CHK_SUM_FILE_NAME)
-      internal_json['value'] = filename
-      attribute = self.create_reference(report, filename_definition, user, internal_json)
-      attributes.append(attribute)
-
-      sha1_definition = self.get_attriute_definition(CHK_SUM_HASH_SHA1)
-      internal_json['value'] = sha1
-      attribute = self.create_reference(report, sha1_definition, user, internal_json)
-      attributes.append(attribute)
+      # filename_definition = self.get_reference_definition(CHK_SUM_FILE_NAME)
+      # internal_json['value'] = filename
+      # attribute = self.create_reference(report, filename_definition, user, internal_json)
+      # attributes.append(attribute)
 
       return main_attribute, attributes, None
 
