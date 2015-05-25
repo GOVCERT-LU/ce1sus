@@ -121,7 +121,10 @@ class BaseController:
     if insert:
       if not instance.creator_group:
         instance.creator_group = user.group
+        instance.creator_group_id = user.group.identifier
       if not instance.originating_group:
         instance.originating_group = originating_group
+        instance.originating_group_id = user.group.identifier
       if not instance.owner_group:
         instance.owner_group = user.group
+        instance.owner_group_id = user.group.identifier

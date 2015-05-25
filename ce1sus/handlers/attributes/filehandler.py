@@ -23,6 +23,7 @@ from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.helpers.common.config import ConfigException
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
+from ce1sus.db.classes.object import RelatedObject
 import magic
 
 
@@ -32,16 +33,17 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-CHK_SUM_FILE_NAME = 'beba24a09fe92b09002616e6d703b3a14306fed1'
-CHK_SUM_HASH_SHA1 = 'dc4e8dd46d60912abbfc3dd61c16ef1f91414032'
-CHK_SUM_HASH_SHA256 = '1350a97f87dfb644437814905cded4a86e58a480'
-CHK_SUM_HASH_SHA384 = '40c1ce5808fa21c6a90d27e4b08b7b7171a23b92'
-CHK_SUM_HASH_SHA512 = '6d2cf7df2da95b6f878a9be2b754de1e6d1f6224'
-CHK_SUM_SIZE_IN_BYTES = '9d99d7a9a888a8bfd0075090c33e6a707625673a'
-CHK_SUM_MAGIC_NUMBER = '75f5ca9e1dcfd81cdd03751a7ee45a1ef716a05d'
-CHK_SUM_MIME_TYPE = 'b7cc0982923b2a26f8665b44365b590400cff9bf'
-CHK_SUM_FILE_ID = '745af7b7cf3bf4c5a0b2b04ad9cd2c9b8da39fc1'
-CHK_SUM_HASH_MD5 = '8a3975c871c6df7ab9a890b8f0fd1fb6e4e6556e'
+CHK_SUM_FILE_NAME = '6582915e9e791da6785cd51232129824640ec967'
+CHK_SUM_HASH_SHA1 = '43493cca725be2c4e868cc79d9528eda89d22a3d'
+CHK_SUM_HASH_SHA256 = 'fb1f51c9d83919ecec54cfc2dc9bd04214f83155'
+CHK_SUM_HASH_SHA384 = 'f0c1d67d19aa775a37aff0b10c714ab9314a13a3'
+CHK_SUM_HASH_SHA512 = '78bc5b3d0e7075f86fc461eb3806ecc82fd5e0c0'
+CHK_SUM_SIZE_IN_BYTES = '3852c05026b29da99c5046d2e667c384b44d8350'
+CHK_SUM_MAGIC_NUMBER = 'c40aa7731fbced249920f5737d811c7f4cf570b6'
+CHK_SUM_MIME_TYPE = '90d148529e0f85ab2cee3a5f30188ac4bf7193e5'
+CHK_SUM_FILE_ID = 'e81cdce63d1c4fd020c929b2ff91da92f5ce14c3'
+CHK_SUM_HASH_MD5 = 'a6922165d23112a361f76cd4a5e076cae1e9226f'
+CHK_SUM_ARTEFACT = 'aa778b50a158bc996419912e96c1852b2ba59623'
 
 
 class FileHandler(GenericHandler):
@@ -59,6 +61,9 @@ class FileHandler(GenericHandler):
 
   def get_additinal_attribute_chksums(self):
     return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
+
+  def get_additional_object_chksums(self):
+    return [CHK_SUM_ARTEFACT]
 
   @staticmethod
   def get_description():
@@ -160,8 +165,21 @@ class FileHandler(GenericHandler):
       for attribtue in attributes:
         attribtue.parent = main_attribute
 
-      attributes.append(main_attribute)
-      return attributes, None
+      obj_def = self.get_object_definition(CHK_SUM_ARTEFACT)
+      childobj = self.create_object(obj.observable, obj_def, user, {}, False)
+
+      rel_obj = RelatedObject()
+      rel_obj.parent = obj
+      rel_obj.parent_id = obj.identifier
+      rel_obj.object = childobj
+
+      childobj.attributes.append(main_attribute)
+      # attributes.append(main_attribute)
+
+      childobjs = list()
+      childobjs.append(rel_obj)
+
+      return attributes, childobjs
 
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
@@ -268,10 +286,10 @@ class FileWithHashesHandler(FileHandler):
             CHK_SUM_HASH_MD5]
 
   def insert(self, obj, user, json):
-    attributes, sub_objects = FileHandler(self, obj, user, json)
+    attributes, sub_objects = super(FileWithHashesHandler, self).insert(obj, user, json)
 
     internal_json = json
-    main_attribute = self.get_main_attribute(attributes)
+    main_attribute = sub_objects[0].object.attributes[0]
 
     filepath = self.get_base_path() + '/' + main_attribute.value
 

@@ -48,7 +48,7 @@ class HandlerBase(object):
       raise HandlerException(error)
     self.__config = config
     self.attribute_definitions = dict()
-    self.oject_definitions = dict()
+    self.object_definitions = dict()
     self.user = None
     self.conditions = dict()
     self.is_multi_line = False
@@ -106,13 +106,13 @@ class HandlerBase(object):
     raise HandlerException(u'Attribute definition with uuid {0} cannot be found'.format(uuid))
 
   def get_object_definition_by_uuid(self, uuid):
-    for value in self.oject_definitions.itervalues():
+    for value in self.object_definitions.itervalues():
       if value.uuid == uuid:
         return value
     raise HandlerException(u'Object definition with uuid {0} cannot be found'.format(uuid))
 
   def get_object_definition(self, chksum):
-    definition = self.oject_definitions.get(chksum, None)
+    definition = self.object_definitions.get(chksum, None)
     if definition:
       return definition
     else:
@@ -201,16 +201,29 @@ class HandlerBase(object):
     # set remaining stuff
     attribute.populate(json)
     # set definition id
-    definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
-    attribute.definition = definition
+    # definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
+    # attribute.definition = definition
     attribute.definition_id = definition.identifier
 
     # set condition id
     condition = self.get_condition_by_uuid(attribute.cond_uuid)
     attribute.condition = condition
     attribute.condition_id = condition.identifier
-
+    # TODO fix this -> should take into account the ones from json
+    attribute.owner_group_id = user.group.identifier
+    attribute.owner_group = user.group
+    attribute.creator_group_id = user.group.identifier
+    attribute.creator_group = user.group
+    attribute.modifier_group_id = user.group.identifier
+    attribute.modifier_group = user.group
+    attribute.originating_group_id = user.group.identifier
+    attribute.originating_group = user.group
+    attribute.creator_id = user.identifier
+    attribute.modifier = user
+    attribute.modifier_id = user.identifier
+    attribute.creator = user
     self.set_provenance(attribute)
+
     return attribute
 
   def create_reference(self, report, definition, user, json):
@@ -235,6 +248,7 @@ class HandlerBase(object):
     obj = get_class('ce1sus.db.classes.object', 'Object')()
 
     obj.identifier = None
+    obj.populate(json)
     obj.definition = definition
     obj.definition_id = definition.identifier
 
@@ -244,9 +258,6 @@ class HandlerBase(object):
       obj.parent = obsevable
       obj.parent_id = obsevable.identifier
     # TODO create default value if value was not set for IOC and share
-
-    obj.populate(json)
-
     self.set_provenance(obj)
     return obj
 

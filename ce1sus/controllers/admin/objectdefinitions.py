@@ -61,7 +61,15 @@ class ObjectDefinitionController(BaseController):
 
   def get_object_definition_by_chksum(self, chksum):
     try:
-      return self.obj_def_broker.get_definition_by_chksum(chksum)
+      return self.obj_def_broker.get_defintion_by_chksum(chksum)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_object_definition_by_chksums(self, chksums):
+    try:
+      return self.obj_def_broker.get_defintion_by_chksums(chksums)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:

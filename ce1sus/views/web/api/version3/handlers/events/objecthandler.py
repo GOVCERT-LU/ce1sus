@@ -159,7 +159,7 @@ class ObjectHandler(RestBaseHandler):
     additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
 
     if additional_obj_defs_chksums:
-      additional_obj_definitions = self.object_definition_broker.get_defintion_by_chksums(additional_obj_defs_chksums)
+      additional_obj_definitions = self.object_definition_controller.get_object_definition_by_chksums(additional_obj_defs_chksums)
       for additional_obj_definition in additional_obj_definitions:
         handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
 
@@ -171,7 +171,7 @@ class ObjectHandler(RestBaseHandler):
 
     return handler_instance
 
-  def __make_attribute_insert_return(self, param_1, related_objects, observable, is_observable, details, inflated):
+  def __make_attribute_insert_return(self, param_1, related_objects, observable, is_observable, details, inflated, event_permissions, user):
     if is_observable:
       return {'observable': param_1.to_dict(), 'relpaced_observable': observable.to_dict(False, False)}
     else:
@@ -181,7 +181,7 @@ class ObjectHandler(RestBaseHandler):
         result_attriutes.append(attr.to_dict(details, inflated))
       if related_objects:
         for related_object in related_objects:
-          result_objects.append(related_object.to_dict(details, inflated))
+          result_objects.append(related_object.to_dict(details, inflated, event_permissions, user))
       return {'attributes': result_attriutes, 'related_objects': result_objects}
 
   def __get_attribtues_for_object(self, obj):
@@ -211,7 +211,7 @@ class ObjectHandler(RestBaseHandler):
       result = result + param_1
       if related_objects:
         for rel_obj in related_objects:
-          result = result + self.__get_attribtues_for_object(rel_obj)
+          result = result + self.__get_attribtues_for_object(rel_obj.object)
     return result
 
   def __process_attribute(self, method, event, obj, requested_object, details, inflated, json, headers):
@@ -231,6 +231,7 @@ class ObjectHandler(RestBaseHandler):
 
         is_observable = True
         # checks for param 1:
+        event_permissions = self.get_event_user_permissions(event, self.get_user())
         if isinstance(param_1, ListType):
           if len(param_1) > 0:
             first_element = param_1[0]
@@ -318,7 +319,7 @@ class ObjectHandler(RestBaseHandler):
           # TODO also check if there are no children attached
           if True:
             self.attribute_controller.insert_attributes(param_1, user, False, self.is_event_owner(event, user))
-            self.observable_controller.insert_handler_objects(related_objects, user, False, self.is_event_owner(event, user))
+            self.observable_controller.insert_handler_related_objects(related_objects, user, False, self.is_event_owner(event, user))
 
           else:
             raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
@@ -332,7 +333,7 @@ class ObjectHandler(RestBaseHandler):
         # TODO: add flag to skip this step
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attriutes, True)
 
-        result = self.__make_attribute_insert_return(param_1, related_objects, replaced_observable, is_observable, details, inflated)
+        result = self.__make_attribute_insert_return(param_1, related_objects, replaced_observable, is_observable, details, inflated, event_permissions, user)
         # clean up
         if not obj.attributes:
           # remove the empty attribute

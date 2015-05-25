@@ -62,6 +62,11 @@ class AttributeController(BaseController):
     # handle handler attributes
 
     try:
+      # set extended logging
+      for attribute in attributes:
+        self.set_extended_logging(attribute, user, user.group, True)
+        for child in attribute.children:
+          self.set_extended_logging(child, user, user.group, True)
 
       user = self.user_broker.get_by_id(user.identifier)
       # set owner
@@ -70,7 +75,7 @@ class AttributeController(BaseController):
           attribute.properties.is_validated = True
         else:
           attribute.properties.is_proposal = True
-        self.set_extended_logging(attribute, user, user.group, True)
+
         self.attribute_broker.insert(attribute, commit=False)
 
       self.attribute_broker.do_commit(commit)

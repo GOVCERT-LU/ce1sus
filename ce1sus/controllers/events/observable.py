@@ -76,6 +76,24 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def insert_handler_related_objects(self, related_objects, user, commit=True, owner=False):
+    # Validate children
+    validated = False
+    if related_objects:
+      for related_object in related_objects:
+        # TODO Validate related objects
+        # self.__validate_object(related_object)
+        self.set_extended_logging(related_object.object, user, user.group, True)
+        for attribute in related_object.object.attributes:
+          self.set_extended_logging(attribute, user, user.group, True)
+      validated = True
+
+    if validated:
+      for related_object in related_objects:
+        # self.set_extended_logging(related_object, user, user.group, True)
+        self.insert_related_object(related_object, user, False)
+    self.object_broker.do_commit(commit)
+
   def __set_extended_logging_object(self, obj, user, insert=True):
     self.set_extended_logging(obj, user, user.group, insert)
     for attribute in obj.attributes:
@@ -294,10 +312,12 @@ class ObservableController(BaseController):
     if related_objects:
       for related_object in related_objects:
         self.__validate_object(related_object)
+        self.set_extended_logging(related_object, user, user.group, True)
       validated = True
 
     if validated:
       for related_object in related_objects:
+        self.set_extended_logging(related_object, user, user.group, True)
         self.insert_object(related_object, user, False)
     self.object_broker.do_commit(commit)
 
