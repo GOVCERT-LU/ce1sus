@@ -7,11 +7,21 @@
           <h4 class="panel-title" id="Menu{{composedobservable.identifier}}">
             <a  class="hand" bs-collapse-toggle>{{getTitle()}}</a>
           </h4>
+          
         </div>
-        <div class="col-sm-1"></div>
+        <div class="col-sm-1"><span class="glyphicon glyphicon-lock" ng-if="!composedobservable.properties.shared"></span></div>
         <div class="col-sm-4" >
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-default ce1sus-btn" ng-click="addObservable()" ng-show="permissions.add"> <span class="glyphicon glyphicon-plus-sign"></span></button> 
+            <button type="button" class="btn btn-default ce1sus-btn" ng-click="addChildObservable()" ng-show="permissions.add"> <span
+              class="glyphicon glyphicon-download"></span>
+            </button> 
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="editComposedObservable()" ng-show="permissions.modify"> <span
+              class="glyphicon glyphicon-pencil"></span>
+            </button> 
+            <button type="button" class="btn btn-default ce1sus-btn"ng-click="showDetails()"> <span
+              class="glyphicon glyphicon-eye-open"></span>
+            </button> 
             <button type="button" class="btn btn-danger ce1sus-btn" ng-click="removeComposedObservable()" ng-show="permissions.delete"><span class="glyphicon glyphicon-remove-circle"></span></button>
           </div>
         </div>

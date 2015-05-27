@@ -1,0 +1,87 @@
+<div class="modal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" ng-click="$hide()">&times;</button>
+        <h4 class="modal-title">Composed Observable - {{composedobservable.identifier}} - Details</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <b>Identifier:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.identifier}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Title:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.title}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Operator:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.observable_composition.operator}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Description:</b>
+          </div>
+          <div class="col-md-9">
+            <textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{composedobservable.description}}</textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Version:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.version}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Created at:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.created_at}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>by:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.creator_group.name}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>Modified on:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.modified_on}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <b>by:</b>
+          </div>
+          <div class="col-md-9">
+            {{composedobservable.modifier_group.name}}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

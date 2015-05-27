@@ -32,5 +32,16 @@
       </div>
     </div>
   </div>
+  <div class="row" ng-if="showoperator">
+    <div class="col-md-3">
+      <b>Operator:</b>
+    </div>
+    <div class="col-md-9">
+      <select ng-model="observable.observable_composition.operator">
+        <option value="OR">OR</option>
+        <option value="AND">AND</option>
+      </select>
+    </div>
+  </div>
   <object-properties-form object="observable" type="type" permissions="permissions"></object-properties-form>
 </form>

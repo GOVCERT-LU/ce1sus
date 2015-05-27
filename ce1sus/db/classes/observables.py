@@ -110,6 +110,10 @@ class ObservableComposition(Base):
             'properties': self.properties.to_dict()
             }
 
+  def populate(self, json, rest_insert=True):
+    self.operator = json.get('operator', None)
+    self.properties.populate(json.get('properties', None))
+
 
 class RelatedObservable(ExtendedLogingInformations, Base):
   parent_id = Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

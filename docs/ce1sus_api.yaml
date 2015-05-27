@@ -388,6 +388,10 @@ paths:
           description: The Object
           schema:
             $ref: '#/definitions/Object'
+        200:
+          description: The Observable in case the observable has already an object. The system creates automatically a composed observable for you.
+          schema:
+            $ref: '#/definitions/Object'
         403:
           description: Not authorized
         400:

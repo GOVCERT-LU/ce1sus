@@ -333,6 +333,11 @@ class Assembler(BaseController):
 
   def update_observable(self, observable, json, user, owner=False, rest_insert=True, seen_groups=dict()):
     observable.populate(json, rest_insert)
+    # update also composed observable
+    composition = json.get('observable_composition', None)
+    if composition:
+      observable.observable_composition.populate(composition)
+
     self.populate_extended_logging(observable, json, user, False, seen_groups)
     return observable
 

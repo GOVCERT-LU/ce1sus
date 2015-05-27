@@ -94,21 +94,21 @@ class ObservableController(BaseController):
         self.insert_related_object(related_object, user, False)
     self.object_broker.do_commit(commit)
 
-  def __set_extended_logging_object(self, obj, user, insert=True):
+  def set_extended_logging_object(self, obj, user, insert=True):
     self.set_extended_logging(obj, user, user.group, insert)
     for attribute in obj.attributes:
       self.set_extended_logging(attribute, user, user.group, insert)
     if obj.related_objects:
       for rel_obj in obj.related_objects:
-        self.__set_extended_logging_object(rel_obj.object, user, insert)
+        self.set_extended_logging_object(rel_obj.object, user, insert)
         # TODO: check if relobject parent is set correctly
         rel_obj.parent = obj
 
-  def __set_extended_logging_observble(self, obs, user, insert=True):
+  def set_extended_logging_observble(self, obs, user, insert=True):
     if obs.object:
-      self.__set_extended_logging_object(obs.object, user, insert)
+      self.set_extended_logging_object(obs.object, user, insert)
     if obs.observable_composition:
-      self.__set_extended_logging_observble(obs, user, insert)
+      self.set_extended_logging_observble(obs, user, insert)
     self.set_extended_logging(obs, user, user.group, insert)
 
   def insert_composed_observable(self, observable, user, commit=True, owner=True):
@@ -116,7 +116,7 @@ class ObservableController(BaseController):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       for obs in observable.observable_composition.observables:
-        self.__set_extended_logging_observble(obs, user, True)
+        self.set_extended_logging_observble(obs, user, True)
       self.set_extended_logging(observable, user, user.group, True)
 
       self.observable_broker.insert(observable, False)
@@ -218,6 +218,12 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def update_observable_compositon(self, observable, user, commit=True):
+    try:
+      self.observable_broker.update(observable, commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def remove_observable(self, observable, user, commit=True):
     try:
       self.observable_broker.remove_by_id(observable.identifier)
@@ -227,20 +233,10 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def get_event_for_observable(self, observable):
-    try:
-      # TODO: implement recursive
-      if observable.event:
-        return observable.event
-      else:
-        composed_observables = self.composed_observable_broker.get_by_parent(observable)
-        if len(composed_observables) > 0:
-          return composed_observables[0].parent
-        else:
-          raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
-    except NothingFoundException as error:
-      raise ControllerNothingFoundException(error)
-    except BrokerException as error:
-      raise ControllerException(error)
+    if observable.parent:
+      return observable.parent
+    else:
+      raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
 
   def get_event_for_obj(self, obj):
     try:

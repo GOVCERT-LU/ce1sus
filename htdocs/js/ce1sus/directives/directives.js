@@ -429,7 +429,7 @@ app.directive("composedobservable", function($compile) {
       };
       
       $scope.addObservable = function(){
-        $modal({scope: $scope, template: 'pages/events/event/observable/add.html', show: true});
+        $modal({scope: $scope, template: 'pages/events/event/observable/addChild.html', show: true});
       };
       
       $scope.getTitle = function(){
@@ -443,6 +443,13 @@ app.directive("composedobservable", function($compile) {
       
       $scope.appendObservable =  function(observable){
         $scope.composedobservable.observable_composition.observables.push(observable);
+      };
+      
+      $scope.showDetails = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/composeddetails.html', show: true});
+      };
+      $scope.editComposedObservable = function(){
+        $modal({scope: $scope, template: 'pages/events/event/observable/composededit.html', show: true});
       };
       
     },
@@ -596,9 +603,31 @@ app.directive("observable", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/details.html', show: true});
       };
       
+      $scope.showAddObjectBtn = function(){
+        index = $scope.$parent.$parent.$parent.$parent.observables.indexOf($scope.observable);
+        if (index >= 0) {
+          return true;
+        }
+        else {
+          if ($scope.observable){
+            if ($scope.observable.object){
+              return false;
+            } else {
+              return true;
+            }
+          }
+            
+          
+        }
+      };
+      
       $scope.appendObservableObject = function(observableObject){
         if ($scope.observable.object) {
-          messages.setMessage({'type':'danger', 'message':'Observable has already an object'});
+          //observableObject is actually an observable 
+          index = $scope.$parent.$parent.$parent.$parent.observables.indexOf($scope.observable);
+          $scope.$parent.$parent.$parent.$parent.observables[index] = observableObject;
+          
+          
         } else {
           $scope.observable.object = observableObject;
         }
@@ -1004,7 +1033,8 @@ app.directive("observableForm", function() {
     scope: {
       observable: "=observable",
       type: "=type",
-      permissions:"=permissions"
+      permissions:"=permissions",
+      showoperator: "=showoperator"
     },
     templateUrl: "pages/common/directives/observableform.html"
   };

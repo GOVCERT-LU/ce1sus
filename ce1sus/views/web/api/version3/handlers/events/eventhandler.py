@@ -182,11 +182,12 @@ class EventHandler(RestBaseHandler):
 
   def __process_observable(self, method, event, requested_object, details, inflated, json, headers):
     user = self.get_user()
+    event_permissions = self.get_event_user_permissions(event, user)
     if method == 'POST':
       self.check_if_user_can_add(event)
       observable = self.assembler.assemble_observable(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
       self.observable_controller.insert_observable(observable, user, True)
-      return observable.to_dict(details, inflated)
+      return observable.to_dict(details, inflated, event_permissions, user)
     else:
       if method == 'GET':
         self.check_if_event_is_viewable(event)
@@ -206,7 +207,7 @@ class EventHandler(RestBaseHandler):
 
           observable = self.assembler.update_observable(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
           self.observable_controller.update_observable(observable, user, True)
-          return observable.to_dict(details, inflated)
+          return observable.to_dict(details, inflated, event_permissions, user)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           self.observable_controller.remove_observable(observable, user, True)
