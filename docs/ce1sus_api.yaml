@@ -1331,13 +1331,6 @@ definitions:
         $ref: '#/definitions/Object'
       observable_composition:
         $ref: '#/definitions/ObservableComposition'
-      related_observables:
-        type: array
-        items:
-          $ref: '#/definitions/RelatedObservable'
-      related_observables_count:
-        type: integer
-        description: number of related observables
       created_at:
         type: string
         description: date of creation

@@ -254,21 +254,15 @@ class Report(ExtendedLogingInformations, Base):
   def get_references_for_permissions(self, event_permissions, user):
     references = list()
     for ref in self.references:
-      if is_object_viewable(ref, event_permissions, user.group):
+      if is_object_viewable(ref, event_permissions, user):
         references.append(ref)
-      else:
-        if ref.creator.identifier == user.identifier:
-          references.append(ref)
     return references
 
   def get_related_reports_for_permissions(self, event_permissions, user):
     rel_reps = list()
     for rel_rep in self.related_reports:
-      if is_object_viewable(rel_rep, event_permissions, user.group):
+      if is_object_viewable(rel_rep, event_permissions, user):
         rel_reps.append(rel_rep)
-      else:
-        if rel_rep.creator.identifier == user.identifier:
-          rel_reps.append(rel_rep)
     return rel_reps
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):

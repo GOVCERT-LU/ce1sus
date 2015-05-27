@@ -254,7 +254,7 @@ class BaseView(object):
       # check is the event is viewable then process to the iem
       if self.is_event_viewable(event, user):
         permissions = self.get_event_user_permissions(event, user)
-        if is_object_viewable(item, permissions, user.group):
+        if is_object_viewable(item, permissions, user):
           return True
         else:
             return False

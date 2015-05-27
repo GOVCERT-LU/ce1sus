@@ -452,6 +452,10 @@ app.directive("composedobservable", function($compile) {
         $modal({scope: $scope, template: 'pages/events/event/observable/composededit.html', show: true});
       };
       
+      $scope.addChildObservable = function(){
+        alert('Hello');
+      };
+      
     },
     templateUrl: "pages/common/directives/composendobservableview.html",
     compile: function (element) {
@@ -734,28 +738,34 @@ app.directive("object", function($compile) {
           }, $log);
 
           related_objects = data.related_objects;
-          angular.forEach(related_objects, function(element) {
-            $scope.object.related_objects.push(element);
-          }, $log);
+          if (related_objects.length > 0 && attributes.length > 0) {
+            angular.forEach(related_objects, function(element) {
+              $scope.object.related_objects.push(element);
+            }, $log);
+          } else {
+            //append them to the parent object
+            angular.forEach(related_objects, function(element) {
+              $scope.$parent.$parent.$parent.object.related_objects.push(element);
+            }, $log);
+          }
+
           
         } else {
           // observables
           observable = data.observable;
-          relpacedObservable = data.relpaced_observable;
-          
           allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.observables;
+          if (!allObservables){
+            allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.observables;
+          }
           counter = -1;
           index = -1;
           angular.forEach(allObservables, function(element) {
             counter++;
-            if (element.identifier == relpacedObservable.identifier) {
+            if (element.identifier == observable.identifier) {
               index = counter;
             }
           }, $log);
-          //remove old element
-          //TODO: find a better way
-          var index = $routeSegment.chain.length;
-          $routeSegment.chain[index-1].reload();
+          allObservables[index] = observable;
         }
         
         

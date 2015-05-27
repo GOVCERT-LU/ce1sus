@@ -20,7 +20,7 @@ def is_user_priviledged(user):
   return False
 
 
-def is_object_viewable(instance, event_permissions, user_group, cache=None):
+def is_object_viewable(instance, event_permissions, user, cache=None):
   if instance.__class__.__name__ == 'ObservableComposition':
     # always visible as the composed observable does not have a tlp level
     return True
@@ -32,7 +32,8 @@ def is_object_viewable(instance, event_permissions, user_group, cache=None):
     if not instance.properties.is_validated and event_permissions.can_validate:
         return True
 
-  if user_group:
+  if user and user.group:
+    user_group = user.group
     if user_group.identifier == instance.owner_group_id or user_group.identifier == instance.creator_group_id or user_group.identifier == instance.originating_group_id:
       # check if the user owns submitted or created the object then return True
         return True

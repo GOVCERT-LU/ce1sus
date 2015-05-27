@@ -192,7 +192,7 @@ class Event(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.indicators:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
+      if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.originating_group_id == user.group_id:
@@ -203,7 +203,7 @@ class Event(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.observables:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
+      if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.originating_group_id == user.group_id:
@@ -225,7 +225,7 @@ class Event(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.reports:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
+      if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
       else:
         if rel_obj.originating_group_id == user.group_id:

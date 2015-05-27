@@ -38,7 +38,7 @@ class ObservableComposition(Base):
   parent = relationship('Observable')
   operator = Column('operator', Unicode(3), default=u'OR')
   # observables = relationship('Observable', secondary='rel_observable_composition', lazy='dynamic')
-  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined')
+  observables = relationship('Observable', secondary='rel_observable_composition', lazy='joined', backref='composed_parent')
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   __bit_code = None
 
@@ -60,12 +60,8 @@ class ObservableComposition(Base):
   def get_observables_for_permissions(self, event_permissions, user):
     rel_objs = list()
     for rel_obj in self.observables:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
+      if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
-      else:
-        if rel_obj.creator.identifier == user.identifier:
-          rel_objs.append(rel_obj)
-      # TODO take into account owner
     return rel_objs
     """
     if event_permissions:
@@ -154,8 +150,6 @@ class Observable(ExtendedLogingInformations, Base):
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   parent = relationship('Event', uselist=False, primaryjoin='Observable.parent_id==Event.identifier')
   parent_id = Column('parent_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
-  # related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id', lazy='dynamic')
-  related_observables = relationship('RelatedObservable', primaryjoin='Observable.identifier==RelatedObservable.parent_id')
   __bit_code = None
 
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
@@ -179,45 +173,6 @@ class Observable(ExtendedLogingInformations, Base):
     """
     self.tlp_level_id = TLP.get_by_value(text)
 
-  def related_observables_count_for_permissions(self, event_permissions, user=None):
-    return len(self.get_related_observables_for_permissions(event_permissions, user))
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_observables.count()
-      else:
-        # count validated ones
-        return self.related_observables.filter(Observable.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).count()
-    """
-
-  def related_observables_count(self):
-    return len(self.related_observables)
-    # return self.related_objects.count()
-
-  def get_related_observables_for_permissions(self, event_permissions, user):
-    rel_objs = list()
-    for rel_obj in self.related_observables:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
-        rel_objs.append(rel_obj)
-      else:
-        if rel_obj.originating_group_id == user.group.identifier:
-          rel_objs.append(rel_obj)
-    return rel_objs
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_observables.all()
-      else:
-        # count validated ones
-        return self.related_observables.filter(Observable.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.related_observables.filter(Observable.dbcode.op('&')(3) == 3).all()
-    """
-
   @property
   def properties(self):
     """
@@ -235,21 +190,15 @@ class Observable(ExtendedLogingInformations, Base):
 
   def get_object_for_permissions(self, event_permissions, user):
     if self.object:
-      if is_object_viewable(self.object, event_permissions, user.group):
+      if is_object_viewable(self.object, event_permissions, user):
         return self.object
-      else:
-        if self.object.originating_group_id == user.group.identifier:
-          return self.object
     return None
 
   def get_composed_observable_for_permissions(self, event_permissions, user):
     if self.observable_composition:
       if user and user.group:
-        if is_object_viewable(self.observable_composition, event_permissions, user.group):
+        if is_object_viewable(self.observable_composition, event_permissions, user):
           return self.observable_composition
-        else:
-          if self.observable_composition.originating_group_id == user.group.identifier:
-            return self.observable_composition
     return None
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
@@ -263,18 +212,6 @@ class Observable(ExtendedLogingInformations, Base):
     composed = self.get_composed_observable_for_permissions(event_permissions, user)
     if composed:
       composed = composed.to_dict(complete, inflated, event_permissions, user)
-    related = list()
-    if inflated:
-      # TODO: related observables
-      """
-      for related_observable in self.get_related_observables_for_permissions(event_permissions):
-        related.append(related_observable.to_dict(complete, inflated, event_permissions))
-      """
-      # TODO: find a way to omptimize this
-      related_count = len(related)
-    else:
-      # related_count = self.related_observables_count_for_permissions(event_permissions)
-      related_count = -1
 
     if complete:
       result = {'identifier': self.convert_value(self.uuid),
@@ -283,8 +220,6 @@ class Observable(ExtendedLogingInformations, Base):
                 'object': obj,
                 'version': self.convert_value(self.version),
                 'observable_composition': composed,
-                'related_observables': related,
-                'related_observables_count': related_count,
                 'creator_group': self.creator_group.to_dict(complete, False),
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on),

@@ -197,11 +197,8 @@ class Indicator(ExtendedLogingInformations, Base):
     rel_objs = list()
     # TODO take into account owner
     for rel_obj in self.observables:
-      if is_object_viewable(rel_obj, event_permissions, user.group):
+      if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
-      else:
-        if rel_obj.originating_group_id == user.group_id:
-          rel_objs.append(rel_obj)
     return rel_objs
 
   def populate(self, json, rest_insert=True):

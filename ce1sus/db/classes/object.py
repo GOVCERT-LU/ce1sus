@@ -28,7 +28,7 @@ class RelatedObject(Base):
   parent = relationship('Object', primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
   child_id = Column('child_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relation = Column('relation', BigInteger)
-  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined')
+  object = relationship('Object', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, lazy='joined', backref='related_object_parent')
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     # flatten related object
@@ -117,7 +117,7 @@ class Object(ExtendedLogingInformations, Base):
   def get_attributes_for_permissions(self, event_permissions, user):
     attributes = list()
     for attribute in self.attributes:
-      if is_object_viewable(attribute, event_permissions, user.group):
+      if is_object_viewable(attribute, event_permissions, user):
         attributes.append(attribute)
       else:
         if attribute.originating_group_id == user.group.identifier:
@@ -141,11 +141,8 @@ class Object(ExtendedLogingInformations, Base):
 
     rel_objs = list()
     for rel_obj in self.related_objects:
-      if is_object_viewable(rel_obj.object, event_permissions, user.group):
+      if is_object_viewable(rel_obj.object, event_permissions, user):
         rel_objs.append(rel_obj)
-      else:
-        if rel_obj.originating_group_id == user.group.identifier:
-          rel_objs.append(rel_obj)
     return rel_objs
     """
     if event_permissions:

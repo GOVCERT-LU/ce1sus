@@ -268,6 +268,21 @@ class HandlerBase(object):
       obj.parent_id = obsevable.identifier
     # TODO create default value if value was not set for IOC and share
     self.set_provenance(obj)
+
+    # TODO find a better way
+    obj.owner_group_id = user.group.identifier
+    obj.owner_group = user.group
+    obj.creator_group_id = user.group.identifier
+    obj.creator_group = user.group
+    obj.modifier_group_id = user.group.identifier
+    obj.modifier_group = user.group
+    obj.originating_group_id = user.group.identifier
+    obj.originating_group = user.group
+    obj.creator_id = user.identifier
+    obj.modifier = user
+    obj.modifier_id = user.identifier
+    obj.creator = user
+
     return obj
 
   def get_data(self, attribute, definition, parameters):
