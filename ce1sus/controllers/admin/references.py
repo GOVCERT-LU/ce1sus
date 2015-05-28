@@ -63,11 +63,11 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_reference(self, reference, user):
+  def update_reference(self, reference, user, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       self.set_simple_logging(reference, user, insert=False)
-      reference_definition = self.reference_broker.update(reference)
+      reference_definition = self.reference_broker.update(reference, commit)
       return reference_definition
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(reference_definition)
