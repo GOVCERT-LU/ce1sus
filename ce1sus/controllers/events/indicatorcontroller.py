@@ -83,13 +83,18 @@ class IndicatorController(BaseController):
         self.set_extended_logging(obj, user, user.group, True)
         # create observable
         obs = Observable()
-        obs.dbcode = attribute.object.parent.dbcode
-        obs.tile = attribute.object.parent.title
-        obs.description = attribute.object.parent.description
+        if attribute.object.parent:
+          obs.dbcode = attribute.object.parent.dbcode
+          obs.tile = attribute.object.parent.title
+          obs.description = attribute.object.parent.description
+          obs.tlp_level_id = attribute.object.parent.tlp_level_id
+        else:
+          obs.dbcode = attribute.object.dbcode
+          obs.tlp_level_id = attribute.object.tlp_level_id
         obs.object = obj
         obs.event = event
         self.set_extended_logging(obs, user, user.group, True)
-        obs.tlp_level_id = attribute.object.parent.tlp_level_id
+
         indicator.observables.append(obs)
 
     if indicator.observables:
