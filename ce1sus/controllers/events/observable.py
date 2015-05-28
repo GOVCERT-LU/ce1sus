@@ -70,7 +70,6 @@ class ObservableController(BaseController):
 
   def insert_related_object(self, related_object, user, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
       self.object_broker.insert(related_object, False)
       self.object_broker.do_commit(commit)
     except BrokerException as error:
@@ -89,9 +88,9 @@ class ObservableController(BaseController):
       validated = True
 
     if validated:
-      for related_object in related_objects:
+      # for related_object in related_objects:
         # self.set_extended_logging(related_object, user, user.group, True)
-        self.insert_related_object(related_object, user, False)
+      self.insert_related_object(related_object, user, False)
     self.object_broker.do_commit(commit)
 
   def set_extended_logging_object(self, obj, user, insert=True):
@@ -227,6 +226,16 @@ class ObservableController(BaseController):
   def remove_observable(self, observable, user, commit=True):
     try:
       self.observable_broker.remove_by_id(observable.identifier)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_observable_composition(self, compoed_observable, user, commit=True):
+    try:
+      for observable in compoed_observable.observables:
+        self.observable_broker.remove_by_id(observable.identifier)
+      self.composed_observable_broker.remove_by_id(compoed_observable.identifier)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:

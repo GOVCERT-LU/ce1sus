@@ -22,6 +22,7 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import ObservableComposition, Observable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
+from datetime import datetime
 
 
 __author__ = 'Weber Jean-Paul'
@@ -175,17 +176,20 @@ class ObjectHandler(RestBaseHandler):
     return handler_instance
 
   def __make_attribute_insert_return(self, param_1, related_objects, is_observable, details, inflated, event_permissions, user):
+    result_objects = list()
+    if related_objects:
+      for related_object in related_objects:
+        result_objects.append(related_object.to_dict(details, inflated, event_permissions, user))
+
     if is_observable and param_1:
-      return {'observable': param_1.to_dict(details, True, event_permissions, user)}
+      return {'observable': param_1.to_dict(details, True, event_permissions, user), 'related_objects': result_objects}
     else:
       result_attriutes = list()
-      result_objects = list()
+
       if param_1:
         for attr in param_1:
           result_attriutes.append(attr.to_dict(details, inflated))
-      if related_objects:
-        for related_object in related_objects:
-          result_objects.append(related_object.to_dict(details, inflated, event_permissions, user))
+
       return {'attributes': result_attriutes, 'related_objects': result_objects}
 
   def __get_attribtues_for_object(self, obj):
@@ -205,8 +209,11 @@ class ObjectHandler(RestBaseHandler):
     result = list()
     if is_observable and param_1:
       # then param 1 is an wrapped composed observable
-      for obs in param_1.observable_composition.observables:
-        result = result + self.__get_attribtues_for_observable(obs)
+      if param_1.observable_composition:
+        for obs in param_1.observable_composition.observables:
+          result = result + self.__get_attribtues_for_observable(obs)
+      else:
+        result = result + self.__get_attribtues_for_observable(param_1)
     else:
       if param_1:
         result = result + param_1
@@ -246,7 +253,7 @@ class ObjectHandler(RestBaseHandler):
           if not related_objects:
             is_observable = False
             raise RestHandlerException('Fist parameter and related_objects are not a list or are empty for handler {0}'.format(definition.attribute_handler.classname))
-
+        modified_obj = False
         if is_observable and param_1:
           # make a composed observable for the observables gotten an the observable of the originating object
           observable = obj.observable
@@ -261,17 +268,47 @@ class ObjectHandler(RestBaseHandler):
             composed_observable = test_composition
           else:
             if obj.attributes or obj.related_objects:
-              raise ControllerException('Cannot automatically detect what to do, please create manually either a composed observable or a related object first before insertion. As attributes can only be present once')
+              # then the references are done differently
+              # the object moves down into an other observable
 
-            # if the the object has no attributes and no related objects create a composed observable
-            # if there exists none create composed observable
-            composed_observable = ObservableComposition()
-            composed_observable.uuid = uuid4()
+              observable.event = None
+              observable.event_id = None
 
-            composed_observable.dbcode = observable.dbcode
-            composed_observable.parent = observable
+              # create a new observable
+              new_obs = Observable()
 
-            observable.observable_composition = composed_observable
+              new_obs.event = event
+              new_obs.event_id = event.identifier
+              new_obs.parent = event
+              new_obs.parent_id = event.identifier
+              new_obs.dbcode = observable.dbcode
+
+              self.attribute_controller.set_extended_logging(new_obs, user, event.owner_group, True)
+
+              composed_observable = ObservableComposition()
+              composed_observable.uuid = uuid4()
+
+              composed_observable.dbcode = observable.dbcode
+              composed_observable.parent = new_obs
+
+              new_obs.observable_composition = composed_observable
+
+              new_obs.observable_composition.observables.append(observable)
+              self.observable_controller.insert_observable(new_obs, user, commit=False)
+              first_obs = param_1.pop(0)
+              first_object = first_obs.object
+              for attr in first_object.attributes:
+                observable.object.attributes.append(attr)
+            else:
+              # if the the object has no attributes and no related objects create a composed observable
+              # if there exists none create composed observable
+              composed_observable = ObservableComposition()
+              composed_observable.uuid = uuid4()
+
+              composed_observable.dbcode = observable.dbcode
+              composed_observable.parent = observable
+
+              observable.observable_composition = composed_observable
 
           db_user = user = self.attribute_controller.user_broker.get_by_id(user.identifier)
           for obs in param_1:
@@ -281,14 +318,14 @@ class ObjectHandler(RestBaseHandler):
             obs.parent = event
             obs.parent_id = event.identifier
             # set extended logging
-            self.attribute_controller.set_extended_logging(obs, db_user, db_user.group, True)
+            self.attribute_controller.set_extended_logging(obs, db_user, event.owner_group, True)
 
             composed_observable.observables.append(obs)
 
           if test_composition:
-            self.observable_controller.update_observable_compositon(composed_observable, user, commit=True)
+            self.observable_controller.update_observable_compositon(composed_observable, user, commit=False)
           else:
-            self.observable_controller.update_observable(observable, user, commit=True)
+            self.observable_controller.update_observable(observable, user, commit=False)
           param_1 = composed_observable.parent
 
         else:
@@ -309,6 +346,12 @@ class ObjectHandler(RestBaseHandler):
                 # attach the related objects to the parent object!!
                 parent_obj = obj.related_object_parent[0].parent
                 parent_id = parent_obj.parent_id
+                if not obj.attributes:
+                  first_relObject = related_objects.pop(0)
+                  for attr in first_relObject.object.attributes:
+                    obj.attributes.append(attr)
+                  self.observable_controller.observable_broker.session.expunge(first_relObject)
+                  modified_obj = True
                 for related_object in related_objects:
                   related_object.parent = parent_obj
                   related_object.parent_id = parent_obj.identifier
@@ -326,7 +369,9 @@ class ObjectHandler(RestBaseHandler):
 
         # extract all the attributes to make relations
         flat_attriutes = self.__get_all_attribtues(param_1, related_objects, is_observable)
-
+        if modified_obj:
+          is_observable = True
+          param_1 = obj.observable
         # make relations
         # TODO: add flag to skip this step
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attriutes, True)

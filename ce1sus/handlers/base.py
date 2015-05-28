@@ -314,6 +314,7 @@ class HandlerBase(object):
 
       # set new uuid for the parent
 
+      # TODO change this to be more accurate
       observable.created_at = attribute.created_at
       observable.modified_on = attribute.modified_on
       observable.creator = attribute.creator
@@ -322,6 +323,10 @@ class HandlerBase(object):
       observable.modifier_id = attribute.modifier_id
       observable.originating_group = attribute.originating_group
       observable.originating_group_id = attribute.originating_group_id
+      observable.owner_group_id = attribute.creator.group.identifier
+      observable.owner_group = attribute.creator.group
+      observable.creator_group = attribute.originating_group
+      observable.creator_group_id = attribute.originating_group_id
 
       event = attribute.object.event
       observable.parent_id = event.identifier

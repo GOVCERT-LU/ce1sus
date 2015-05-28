@@ -210,6 +210,8 @@ class EventHandler(RestBaseHandler):
           return observable.to_dict(details, inflated, event_permissions, user)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
+          if observable.observable_composition:
+            self.observable_controller.remove_observable_composition(observable.observable_composition, user, True)
           self.observable_controller.remove_observable(observable, user, True)
           return 'Deleted observable'
 

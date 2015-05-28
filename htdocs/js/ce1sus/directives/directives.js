@@ -600,7 +600,14 @@ app.directive("observable", function($compile) {
       };
       
       $scope.addObject = function(){
-        $modal({scope: $scope, template: 'pages/events/event/observable/object/add.html', show: true});
+        var showModal = true;
+        if ($scope.observable.object) {
+          var r = confirm("Adding a second object to this observable will transform it into a composed one. Do you wish to continue?");
+          showModal = r;
+        }
+        if (showModal){
+          $modal({scope: $scope, template: 'pages/events/event/observable/object/add.html', show: true});
+        }
       };
       
       $scope.showDetails = function(){
@@ -689,10 +696,25 @@ app.directive("object", function($compile) {
             restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
             restangularObject.remove().then(function (data) {
               if ($scope.$parent.observable) {
-                $scope.$parent.observable.object = null;
+                $scope.$parent.$parent.$parent.observable.object = null;
               } else {
-                var index = $scope.$parent.object.related_objects.indexOf($scope.object);
-                $scope.$parent.object.related_objects.splice(index, 1);
+                counter = 0;
+                index = -1;
+                angular.forEach($scope.$parent.object.related_objects, function(element) {
+                  
+                  if (element.identifier == $scope.object.identifier) {
+                    index = counter;
+                  }
+                  counter++;
+                }, $log);
+                if (index >= 0) {
+                  $scope.$parent.object.related_objects.splice(index, 1);
+                } else {
+                  var index = $routeSegment.chain.length;
+                  
+                  $routeSegment.chain[index-1].reload();
+                }
+                
               }
               messages.setMessage({'type':'success','message':'Object sucessfully removed'});
             }, function (response) {

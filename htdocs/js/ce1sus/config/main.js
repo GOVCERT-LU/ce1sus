@@ -1301,5 +1301,5 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
 
 app.config(['growlProvider', function(growlProvider) {
   growlProvider.globalReversedOrder(true);
-  growlProvider.globalTimeToLive({success: 2000, error: 5000, warning: 4000, info: 3000});
+  growlProvider.globalTimeToLive({success: 2000, error: 10000, warning: 5000, info: 3000});
 }]);

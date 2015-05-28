@@ -124,7 +124,7 @@ class BaseController:
         instance.creator_group_id = user.group.identifier
       if not instance.originating_group:
         instance.originating_group = originating_group
-        instance.originating_group_id = user.group.identifier
+        instance.originating_group_id = originating_group.identifier
       if not instance.owner_group:
-        instance.owner_group = user.group
-        instance.owner_group_id = user.group.identifier
+        instance.owner_group = originating_group
+        instance.owner_group_id = originating_group.identifier
