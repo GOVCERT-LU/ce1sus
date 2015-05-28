@@ -216,9 +216,9 @@ class Scheduler(object):
           raise SchedulerException(error)
 
           # TODO dump xml or log it in browser
-      elif item.server_details.type == 'ce1sus':
+      elif item.server_details.type.lower() == 'ce1sus':
         self.ce1sus_adapter.server_details = item.server_details
-
+        self.ce1sus_adapter.login()
         rem_json = self.ce1sus_adapter.get_event_by_uuid(item.event_uuid, True, True, True, True)
 
         # check if event exists
@@ -230,12 +230,14 @@ class Scheduler(object):
           # TODO make relations here
           self.event_broker.update(event)
         except NothingFoundException:
-          event = self.ce1sus_adapter.assembler.assemble_event(event, rem_json, item.server_details.user, owner, True, False)
+          event = self.ce1sus_adapter.assembler.assemble_event(rem_json, item.server_details.user, True, True, False)
           # TODO make relations here
           self.event_broker.insert(event)
         except BrokerException as error:
+          self.ce1sus_adapter.logout()
           raise SchedulerException(error)
-
+        self.ce1sus_adapter.logout()
+        self.process_controller.process_finished_success(item, self.user)
         pass
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))

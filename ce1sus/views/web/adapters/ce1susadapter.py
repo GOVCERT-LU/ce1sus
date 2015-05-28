@@ -9,11 +9,12 @@ import json
 import requests
 
 from ce1sus.common.checks import is_event_owner
+from ce1sus.common.system import APP_REL
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.assembler import Assembler
+from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.common.system import APP_REL
 
 
 __author__ = 'Weber Jean-Paul'
@@ -52,6 +53,7 @@ class Ce1susAdapter(BaseController):
     self.session = requests.session()
     self.assembler = Assembler(config, session)
     self.event_controller = EventController(config, session)
+    self.process_controller = ProcessController(config, session)
 
   @property
   def apiUrl(self):
@@ -261,10 +263,10 @@ class Ce1susAdapter(BaseController):
         del event_uuids[item_to_remove]
 
       for rem_event in event_uuids.itervalues():
-        self.process_controller.create_new_process(ProcessType.PULL, rem_event.uuid, server_details.user, server_details)
-
+        self.process_controller.create_new_process(ProcessType.PULL, rem_event.uuid, server_details.user, server_details, True)
+      self.logout()
       return 'OK'
     except Ce1susAdapterException as error:
       self.logout()
       raise Ce1susAdapterException(error)
-    self.logout()
+
