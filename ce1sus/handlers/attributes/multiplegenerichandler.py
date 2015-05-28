@@ -55,23 +55,25 @@ class MultipleGenericHandler(GenericHandler):
         for value in values:
           value = value.strip('\n\r')
           json['value'] = value
-          attribute = self.create_attribute(obj, definition, user, json)
+          attribute = self.create_attribute(obj, definition, user, json, False)
 
           if create_observables:
             observable = self.create_observable(attribute)
-            sub_obj = self.create_object(observable, obj.definition, user, obj.to_dict())
-            attribute.object = sub_obj
+            sub_obj = self.create_object(observable, obj.definition, user, obj.to_dict(), True)
             attribute.object_id = sub_obj.identifier
-            observable.obejct = sub_obj
+            attribute.object = sub_obj
             sub_obj.attributes.append(attribute)
             observables.append(observable)
           else:
             # create related objects
-            sub_obj = self.create_object(obj.observable, obj.definition, user, obj.to_dict())
+            sub_obj = self.create_object(obj.observable, obj.definition, user, obj.to_dict(), False)
             sub_obj.parent = None
             sub_obj.parent_id = None
+            attribute.object_id = sub_obj.identifier
+            attribute.object = sub_obj
             sub_obj.attributes.append(attribute)
             rel_obj = RelatedObject()
+            rel_obj.parent_id = obj.related_object_parent[0].parent.identifier
             rel_obj.object = sub_obj
             related_objects.append(rel_obj)
 

@@ -7,7 +7,7 @@ Created on Jul 9, 2013
 """
 import sqlalchemy.orm.exc
 
-from ce1sus.db.classes.object import Object
+from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException
 
 
@@ -30,6 +30,15 @@ class ObjectBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Object
+
+  def get_parent_object_by_object(self, obj):
+    try:
+      result = self.session.query(RelatedObject).filter(RelatedObject.child_id == obj.identifier).one()
+      return result.parent
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('No parent found for object with ID {0} in {1}'.format(obj.identifier, self.__class__.__name__))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
   def get_all_by_observable_id(self, identifier):
     try:

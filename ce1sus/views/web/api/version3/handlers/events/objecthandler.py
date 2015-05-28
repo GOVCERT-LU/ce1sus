@@ -22,7 +22,6 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import ObservableComposition, Observable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
-from datetime import datetime
 
 
 __author__ = 'Weber Jean-Paul'
@@ -344,21 +343,19 @@ class ObjectHandler(RestBaseHandler):
               # attach the related object to the parent object if there is any
               if obj.related_object_parent:
                 # attach the related objects to the parent object!!
-                parent_obj = obj.related_object_parent[0].parent
-                parent_id = parent_obj.parent_id
+                parent_obj = self.observable_controller.get_parent_object_by_object(obj)
                 if not obj.attributes:
                   first_relObject = related_objects.pop(0)
                   for attr in first_relObject.object.attributes:
+                    attr.object = obj
+                    attr.object_id = obj.identifier
                     obj.attributes.append(attr)
-                  self.observable_controller.observable_broker.session.expunge(first_relObject)
                   modified_obj = True
                 for related_object in related_objects:
-                  related_object.parent = parent_obj
-                  related_object.parent_id = parent_obj.identifier
-                self.observable_controller.insert_handler_related_objects(related_objects, user, False, self.is_event_owner(event, user))
-                # update parent
-                parent_obj.parent_id = parent_id
+                  parent_obj.related_objects.append(related_object)
                 self.observable_controller.update_object(parent_obj, user, False)
+                # self.observable_controller.insert_handler_related_objects(related_objects, user, False, self.is_event_owner(event, user))
+
               else:
                 raise RestHandlerException('The object is a root object, cannot process this. Please ask for assistance')
 

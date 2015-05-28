@@ -200,6 +200,15 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def get_parent_object_by_object(self, obj):
+    try:
+      obj = self.object_broker.get_parent_object_by_object(obj)
+      return obj
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def get_object_by_uuid(self, uuid):
     try:
       obj = self.object_broker.get_by_uuid(uuid)

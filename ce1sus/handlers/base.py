@@ -180,7 +180,7 @@ class HandlerBase(object):
                                                        user,
                                                        json))
 
-  def create_attribute(self, obj, definition, user, json):
+  def create_attribute(self, obj, definition, user, json, set_parent=True):
     """
     Creates the attribute
 
