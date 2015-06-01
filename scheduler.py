@@ -227,11 +227,10 @@ class Scheduler(object):
           # merge the event fetched
           owner = is_event_owner(event, item.server_details.user)
           event = self.ce1sus_adapter.assembler.update_event(event, rem_json, item.server_details.user, owner, True)
-          # TODO make relations here
           self.event_controller.update_event(self.user, event, True, True)
         except ControllerNothingFoundException:
           event = self.ce1sus_adapter.assembler.assemble_event(rem_json, item.server_details.user, True, True, False)
-          # TODO make relations here
+          event.properties.is_validated = False
           self.event_controller.insert_event(self.user, event, True, True)
         except ControllerException as error:
           self.ce1sus_adapter.logout()

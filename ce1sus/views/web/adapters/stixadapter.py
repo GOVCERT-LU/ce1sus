@@ -58,7 +58,8 @@ class STIXAdapter(BaseView):
 
     try:
       event = self.stix_mapper.map_stix_package(stix_package, user)
-      self.event_controller.insert_event(user, event)
+      event.properties.is_validated = False
+      self.event_controller.insert_event(user, event, True, True)
       event_permissions = self.event_controller.get_event_user_permissions(event, user)
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(event.to_dict(complete, inflated, event_permissions, user))

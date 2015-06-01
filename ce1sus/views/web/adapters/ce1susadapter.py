@@ -269,4 +269,3 @@ class Ce1susAdapter(BaseController):
     except Ce1susAdapterException as error:
       self.logout()
       raise Ce1susAdapterException(error)
-

@@ -296,6 +296,7 @@ class MISPAdapter(BaseView):
           try:
             event = self.misp_converter.get_event_from_xml(xml_string, None)
             self.logger.info('Received Event {0}'.format(event.uuid))
+            event.properties.is_validated = False
             self.event_controller.insert_event(user, event, True, True)
           except ControllerIntegrityException as error:
             local_event = self.event_controller.get_event_by_uuid(event_uuid)
