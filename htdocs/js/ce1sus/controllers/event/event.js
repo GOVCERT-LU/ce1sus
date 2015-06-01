@@ -963,7 +963,7 @@ app.controller("eventRelationsController", function($scope, Restangular, message
     page: 1,            // show first page
     count: 10,          // count per page
   }, {
-      total: data.length, // length of data
+      total: relations_data.length, // length of data
       getData: function($defer, params) {
           // use build-in angular filter
           var orderedData = params.filter() ? $filter('filter')(relations_data, params.filter()) : relations_data;
