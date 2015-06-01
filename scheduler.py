@@ -15,14 +15,14 @@ from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.common.process import ProcessController
-from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.db.common.broker import BrokerException, NothingFoundException
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
 from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
+from ce1sus.controllers.events.event import EventController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -51,7 +51,7 @@ class Scheduler(object):
     self.misp_ctrl = MISPAdapter(config, directconnection)
     user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
     self.user_controller = UserController(config, directconnection)
-    self.event_broker = self.user_controller.broker_factory(EventBroker)
+    self.event_controller = EventController(config, directconnection)
     self.group_broker = self.user_controller.broker_factory(GroupBroker)
     self.mail_controller = MailController(config, directconnection)
     self.ce1sus_adapter = Ce1susAdapter(config, directconnection)
@@ -125,7 +125,7 @@ class Scheduler(object):
 
   def __publish(self, item):
     try:
-      event = self.event_broker.get_by_uuid(item.event_uuid)
+      event = self.event_controller.get_event_by_uuid(item.event_uuid)
       if item.server_details:
         # do the sync only for this server
         self.__publish_event(item, event)
@@ -134,7 +134,7 @@ class Scheduler(object):
         self.__send_mails(event, item.type_)
       # set event as published
       event.last_publish_date = datetime.utcnow()
-      self.event_broker.update(event, True)
+      self.event_controller.update_event(self.user, event, True, True)
       # remove item from queue
       self.process_controller.process_finished_success(item, self.user)
     except (ControllerException, BrokerException) as error:
@@ -223,17 +223,17 @@ class Scheduler(object):
 
         # check if event exists
         try:
-          event = self.event_broker.get_by_uuid(item.event_uuid)
+          event = self.event_controller.get_event_by_uuid(item.event_uuid)
           # merge the event fetched
           owner = is_event_owner(event, item.server_details.user)
           event = self.ce1sus_adapter.assembler.update_event(event, rem_json, item.server_details.user, owner, True)
           # TODO make relations here
-          self.event_broker.update(event)
-        except NothingFoundException:
+          self.event_controller.update_event(self.user, event, True, True)
+        except ControllerNothingFoundException:
           event = self.ce1sus_adapter.assembler.assemble_event(rem_json, item.server_details.user, True, True, False)
           # TODO make relations here
-          self.event_broker.insert(event)
-        except BrokerException as error:
+          self.event_controller.insert_event(self.user, event, True, True)
+        except ControllerException as error:
           self.ce1sus_adapter.logout()
           raise SchedulerException(error)
         self.ce1sus_adapter.logout()
@@ -249,7 +249,7 @@ class Scheduler(object):
     if item.server_details:
       # do the sync only for this server
       if item.server_details.type == 'MISP':
-        event = self.event_broker.get_by_uuid(item.event_uuid)
+        event = self.event_controller.get_event_by_uuid(item.event_uuid)
         self.__push_misp(item, event)
 
       elif item.server_details.type == 'ce1sus':
@@ -260,14 +260,14 @@ class Scheduler(object):
         for rem_event in rem_events:
           event_uuids.append(rem_event.uuid)
         try:
-          event = self.event_broker.get_by_uuid(item.event_uuid)
+          event = self.event_controller.get_event_by_uuid(item.event_uuid)
           if event.uuid in event_uuids:
             # do update
             self.ce1sus_adapter.update_event(event, True, True)
           else:
             self.ce1sus_adapter.insert_event(event, True, True)
 
-        except BrokerException as error:
+        except (BrokerException, ControllerException) as error:
           raise SchedulerException(error)
 
       else:

@@ -85,6 +85,7 @@ class EventHandler(RestBaseHandler):
           user = self.get_user()
           event = self.assembler.assemble_event(json, user, True, self.is_rest_insert(headers))
           self.event_controller.insert_event(user, event, True, True)
+
           return self.__return_event(event, details, inflated)
         else:
           raise RestHandlerException(u'Invalid request - Event cannot be called without ID')

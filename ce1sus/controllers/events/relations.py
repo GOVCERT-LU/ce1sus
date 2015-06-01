@@ -72,7 +72,7 @@ class RelationController(BaseController):
     # sport attributes by their definition
     partitions = dict()
     classes = dict()
-    values_attr_id = dict()
+    values_attr = dict()
     for attribute in attributes:
 
       value_table = attribute.definition.value_table
@@ -88,28 +88,29 @@ class RelationController(BaseController):
         if len(partitions[classname][len(partitions[classname]) - 1]) > limit:
           partitions[classname].append(list())
         partitions[classname][len(partitions[classname]) - 1].append(attribute.value)
-        values_attr_id[attribute.value] = attribute.identifier
+        values_attr[attribute.value] = attribute
 
     # search in partitions
     for classname, partitions in partitions.iteritems():
       for search_items in partitions:
         clazz = classes.get(classname)
-        self.find_relations_of_array(event, clazz, search_items, values_attr_id, commit)
+        self.find_relations_of_array(event, clazz, search_items, values_attr, commit)
     self.relation_broker.do_commit(commit)
 
-  def find_relations_of_array(self, event, clazz, search_items, values_attr_id, commit=False):
+  def find_relations_of_array(self, event, clazz, search_items, values_attr, commit=False):
     # collect relations
-    found_items = self.attribute_broker.get_attriutes_by_class_and_values(clazz, search_items)
+    unique_search_items = list(set(search_items))
+    found_items = self.attribute_broker.get_attriutes_by_class_and_values(clazz, unique_search_items)
     for found_item in found_items:
       # make insert foo
       if found_item.event_id != event.identifier:
         # make relation in both ways
         relation_entry = Relation()
-        relation_entry.event_id = event.identifier
+        relation_entry.event = event
         relation_entry.rel_event_id = found_item.event_id
-        attribute_id = values_attr_id.get(found_item.attribute.value, None)
-        if attribute_id:
-          relation_entry.attribute_id = attribute_id
+        attribute = values_attr.get(found_item.attribute.value, None)
+        if attribute:
+          relation_entry.attribute = attribute
         else:
           continue
         relation_entry.rel_attribute_id = found_item.attribute_id
