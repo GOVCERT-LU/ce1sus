@@ -13,7 +13,6 @@ from sqlalchemy.types import Integer, BigInteger
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, ValueException, TLP
-from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.db.common.session import Base
 
 

@@ -38,9 +38,9 @@ CHK_SUM_HASH_SHA1 = '43493cca725be2c4e868cc79d9528eda89d22a3d'
 CHK_SUM_HASH_SHA256 = 'fb1f51c9d83919ecec54cfc2dc9bd04214f83155'
 CHK_SUM_HASH_SHA384 = 'f0c1d67d19aa775a37aff0b10c714ab9314a13a3'
 CHK_SUM_HASH_SHA512 = '78bc5b3d0e7075f86fc461eb3806ecc82fd5e0c0'
-CHK_SUM_SIZE_IN_BYTES = '3852c05026b29da99c5046d2e667c384b44d8350'
+CHK_SUM_SIZE_IN_BYTES = 'f0533be2aab3335119f224cccab31e75854fe2cf'
 CHK_SUM_MAGIC_NUMBER = 'c40aa7731fbced249920f5737d811c7f4cf570b6'
-CHK_SUM_MIME_TYPE = '90d148529e0f85ab2cee3a5f30188ac4bf7193e5'
+CHK_SUM_MIME_TYPE = '0bc1a4b87f2df56c0e400883a71d5dfcb331f291'
 CHK_SUM_FILE_ID = 'e81cdce63d1c4fd020c929b2ff91da92f5ce14c3'
 CHK_SUM_HASH_MD5 = 'a6922165d23112a361f76cd4a5e076cae1e9226f'
 CHK_SUM_ARTEFACT = 'aa778b50a158bc996419912e96c1852b2ba59623'
@@ -262,6 +262,12 @@ class FileHandler(GenericHandler):
       # ok no filename has been found using the one from the attribute value
       return basename(attribtue.value)
     else:
+      # get parent object
+      if attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent:
+        for attribtue in attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent.attributes:
+          if attribtue.definition.chksum == CHK_SUM_FILE_NAME:
+            return attribtue.value
+
       return None
 
 

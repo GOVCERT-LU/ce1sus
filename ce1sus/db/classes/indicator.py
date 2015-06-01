@@ -153,7 +153,6 @@ class Indicator(ExtendedLogingInformations, Base):
   killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   types = relationship('IndicatorType')
   handling = relationship(Marking, secondary='rel_indicator_handling')
-  operator = Column('operator', Unicode(3, collation='utf8_unicode_ci'), default=u'OR')
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*
   # TODO add related indicators and TTP
@@ -205,7 +204,6 @@ class Indicator(ExtendedLogingInformations, Base):
     self.title = json.get('title', None)
     self.description = json.get('description', None)
     self.short_description = json.get('short_description', None)
-    self.operator = json.get('operator', None)
     self.confidence = json.get('confidence', None)
     self.version = json.get('version', None)
     self.properties.populate(json.get('properties', None))
@@ -231,7 +229,6 @@ class Indicator(ExtendedLogingInformations, Base):
                 'description': self.convert_value(self.description),
                 'short_description': self.convert_value(self.short_description),
                 'confidence': self.convert_value(self.confidence),
-                'operator': self.convert_value(self.operator),
                 'title': self.convert_value(self.title),
                 'properties': self.properties.to_dict(),
                 'creator_group': self.creator_group.to_dict(complete, False),

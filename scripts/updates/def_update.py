@@ -7,16 +7,17 @@ Created on Oct 16, 2014
 """
 
 
+from ce1sus.helpers.common.config import Configuration
 import json
 import os
 import sys
-
-basePath = os.path.dirname(os.path.abspath(__file__)) + '/../../'
-sys.path.insert(0, '../../')
+from uuid import uuid4
 
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.admin.mails import MailController
+from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
+from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.classes.attribute import Condition
@@ -29,22 +30,24 @@ import ce1sus.db.classes.log
 import ce1sus.db.classes.mailtemplate
 import ce1sus.db.classes.object
 import ce1sus.db.classes.observables
+import ce1sus.db.classes.processitem
 import ce1sus.db.classes.relation
+from ce1sus.db.classes.report import ReferenceDefinition
 import ce1sus.db.classes.report
 import ce1sus.db.classes.servers
-import ce1sus.db.classes.processitem
+import ce1sus.db.classes.ttp
 from ce1sus.db.classes.types import AttributeType
 import ce1sus.db.classes.types
-import ce1sus.db.classes.ttp
 from ce1sus.db.classes.user import User
 import ce1sus.db.classes.user
 import ce1sus.db.classes.values
 from ce1sus.db.common.session import SessionManager, Base
-from ce1sus.helpers.common.config import Configuration
 from maintenance import Maintenance
-from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
-from ce1sus.controllers.admin.references import ReferencesController
-from ce1sus.db.classes.report import ReferenceDefinition
+
+
+basePath = os.path.dirname(os.path.abspath(__file__)) + '/../../'
+sys.path.insert(0, '../../')
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -79,7 +82,7 @@ if __name__ == '__main__':
   user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
   user = user_controller.get_user_by_uuid(user_uuid)
 
-  all_bd_defs = attr_ctrl.get_all_attribute_definitions()
+  all_bd_defs = attr_ctrl.attr_def_broker.get_all()
   attr_defs = dict()
   for attr_def in all_bd_defs:
     attr_defs[attr_def.uuid] = attr_def
@@ -195,4 +198,4 @@ if __name__ == '__main__':
     else:
       ref_ctrl.update_reference(ref_def, user, False)
 
-  ref_ctrl.reference_definition_broker.do_commit(False)
+  ref_ctrl.reference_definition_broker.do_commit(True)

@@ -486,11 +486,25 @@ Nginx shows a 404 or 403:
 
 ##1.8. Scheduler
 
-The scheduler has to run in the background to perform its actions. This is done via a cronjob.
+The scheduler has to run in the background to performs the following actions:
 
-``` shell
-------
-```
+
+* Publication
+** Send Publication mail
+** Pushes the event to the syncronization servers
+* Pull (pulls all the scheduled events from a remote servers)
+* Push (Push all the scheduled events to a remote servers)
+* Proposal (Sends notification mails that a proposal has been inserted)
+* Relations (Generates the relations in the background)
+* Publish update (Sends out update mails for events)
+
+
+To activate the scheduler create a cronjob. The following example is set to run every 5 minutes.
+ 
+ ``` shell
+-------
+5 * * * * python /path/to/ce1sus/scheduler.py
+ ```
 
 ##1.9 DB migration
 

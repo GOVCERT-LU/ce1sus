@@ -11,7 +11,8 @@ from cherrypy._cperror import HTTPError
 import json
 from lxml import etree
 
-from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
+from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, \
+  ControllerNothingFoundException
 from ce1sus.controllers.common.merger import Merger
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
@@ -64,7 +65,7 @@ class STIXAdapter(BaseView):
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(event.to_dict(complete, inflated, event_permissions, user))
     except ControllerIntegrityException as error:
-      # TODO: merge
+      self.logger.debug(error)
       event = self.stix_mapper.map_stix_package(stix_package, user, False, True)
       local_event = self.event_controller.get_event_by_uuid(event.uuid)
       event_permissions = self.event_controller.get_event_user_permissions(event, user)
@@ -72,6 +73,9 @@ class STIXAdapter(BaseView):
       self.event_controller.update_event(user, merged_event, True, True)
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
+    except ControllerNothingFoundException as error:
+      self.logger.error(error)
+      raise HTTPError(404, error.message)
     except ControllerException as error:
       self.logger.error(error)
       raise HTTPError(400, error.message)

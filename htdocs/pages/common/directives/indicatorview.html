@@ -21,18 +21,26 @@
     </div>
     <div class="panel-collapse collapse" bs-collapse-target>
       <div class="collapse-body">
-        <table>
-          <tr>
-            <td style="background-color: #eaebff; width: 1%">{{indicator.operator}}</td>
-            <td style="width: 99%">
-              
-              <span ng-repeat="observable in indicator.observables">
-                <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="event.userpermissions"></observable>
-                <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="event.userpermissions"></composedobservable>
-              </span>
-            </td>
-          </tr>
-         </table>
+        <div ng-if="indicator.operator">
+          <table width="100%">
+            <tr>
+              <td style="background-color: #eaebff; width: 1%">{{indicator.operator}}</td>
+              <td style="width: 99%">
+                
+                <span ng-repeat="observable in indicator.observables">
+                  <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="event.userpermissions"></observable>
+                  <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="event.userpermissions"></composedobservable>
+                </span>
+              </td>
+            </tr>
+           </table>
+         </div>
+         <div ng-if="!indicator.operator">
+            <span ng-repeat="observable in indicator.observables">
+              <observable ng-if="!observable.observable_composition" observable="observable" indent="0" permissions="event.userpermissions"></observable>
+              <composedobservable ng-if="observable.observable_composition" composedobservable="observable" indent="0" permissions="event.userpermissions"></composedobservable>
+            </span>
+         </div>
       </div>
     </div>
   </div>

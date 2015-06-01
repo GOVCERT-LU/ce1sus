@@ -615,7 +615,13 @@ app.directive("observable", function($compile) {
       };
       
       $scope.showAddObjectBtn = function(){
-        index = $scope.$parent.$parent.$parent.$parent.observables.indexOf($scope.observable);
+        var index = -1;
+        var obs = $scope.$parent.$parent.$parent.$parent.observables;
+        if (obs){
+          index = $scope.$parent.$parent.$parent.$parent.observables.indexOf($scope.observable);
+        } else {
+          index = $scope.$parent.$parent.$parent.$parent.indicator.observables.indexOf($scope.observable);
+        }
         if (index >= 0) {
           return true;
         }
