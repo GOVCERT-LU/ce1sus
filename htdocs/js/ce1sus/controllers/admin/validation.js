@@ -4,6 +4,9 @@
 
 app.controller("adminValidationController", function($scope, Restangular,messages,
     $log, $routeSegment, $location, statuses, risks, tlps, analyses) {
+  
+  $scope.urlBase = '#/admin/validation/event/';
+  
   $scope.statuses=statuses;
   $scope.risks=risks;
   $scope.tlps=tlps;

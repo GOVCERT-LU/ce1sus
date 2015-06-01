@@ -307,7 +307,7 @@ class EventController(BaseController):
   def __validate_object(self, obj, user):
     self.__validate_instance(obj, user)
     for related_object in obj.related_objects:
-      self.__validate_instance(related_object.object, user)
+      self.__validate_object(related_object.object, user)
     for attribute in obj.attributes:
       self.__validate_instance(attribute, user)
 

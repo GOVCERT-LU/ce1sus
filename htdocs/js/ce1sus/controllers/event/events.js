@@ -6,6 +6,8 @@ app.controller("eventsController", function($scope, Restangular, messages,
     $log, $routeSegment, $location, ngTableParams) {
 
   
+  $scope.urlBase = '#/events/event/';
+  
   $scope.getTlpColor = function(tlpText){
     return getTlpColor(tlpText);
   };

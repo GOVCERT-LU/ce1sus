@@ -3,9 +3,9 @@
   <tbody>
     <tr ng-repeat="item in $data">
       <td data-title="'#'" 
-        sortable="'id'"><a href="#/events/event/{{item.identifier}}" >{{item.int_id}}</a></td>
+        sortable="'id'"><a href={{urlBase}}{{item.identifier}}" >{{item.int_id}}</a></td>
       <td data-title="'Title'" filter="{ 'title': 'text' }"
-        sortable="'title'"><a href="#/events/event/{{item.identifier}}" >{{item.title}}</a></td>
+        sortable="'title'"><a href="{{urlBase}}{{item.identifier}}" >{{item.title}}</a></td>
       <td data-title="'Analysis'" filter="{ 'analysis': 'text' }"
         sortable="'analysis'">{{item.analysis}}</td>
       <td data-title="'Status'" filter="{ 'status': 'text' }"

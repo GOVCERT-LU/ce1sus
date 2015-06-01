@@ -1,7 +1,7 @@
 
 <legend>Details</legend>
   <div class="btn-group" style="padding-bottom: 2px;">
-    <button type="button" class="btn btn-default" ng-click="validateEvent()" ng-show="valiation">
+    <button type="button" class="btn btn-default" ng-click="validateEvent()" ng-if="!event.properties.validated && event.userpermissions.validate">
     Validate
     </button>
     <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal" ng-show="event.userpermissions.modify">
