@@ -20,7 +20,8 @@ from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter,\
+  Ce1susAdapterNothingFoundException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 from ce1sus.controllers.events.event import EventController
 
@@ -254,21 +255,16 @@ class Scheduler(object):
       elif item.server_details.type == 'Ce1sus':
         self.ce1sus_adapter.server_details = item.server_details
         self.ce1sus_adapter.login()
-        rem_events = self.ce1sus_adapter.get_index()
-        event_uuids = list()
-
-        for rem_event in rem_events:
-          event_uuids.append(rem_event.uuid)
+        event = self.event_controller.get_event_by_uuid(item.event_uuid)
         try:
-          event = self.event_controller.get_event_by_uuid(item.event_uuid)
-          # check if an update is required or an insert
-          if event.uuid in event_uuids:
-            # do update
+          try:
+            rem_event = self.ce1sus_adapter.get_event_by_uuid(item.event_uuid, False, False, False, False)
             self.ce1sus_adapter.update_event(event, True, True)
-          else:
+          except Ce1susAdapterNothingFoundException:
             event.properties.validated = False
             self.ce1sus_adapter.insert_event(event, True, True)
 
+          self.process_controller.process_finished_success(item, item.server_details.user)
         except (BrokerException, ControllerException) as error:
           raise SchedulerException(error)
         finally:

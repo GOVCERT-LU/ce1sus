@@ -181,9 +181,10 @@ class Ce1susAdapter(BaseController):
   def insert_event(self, event, complete=False, inflated=False):
     url = '/event'
     url = self.__set_complete_inflated(url, complete, inflated)
+    event_permissions = self.event_controller.get_event_user_permissions(event, self.server_details.user)
     json = self.__request(url,
                           'POST',
-                          data=event.to_dict(True, True))
+                          data=event.to_dict(True, True, event_permissions, self.server_details.user))
     owner = is_event_owner(event, self.server_details.user)
     event = self.assembler.update_event(event, json, self.server_details.user, owner, True)
     return event

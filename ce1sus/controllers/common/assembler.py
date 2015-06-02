@@ -166,7 +166,14 @@ class Assembler(BaseController):
     if group:
       group_uuid = group.get('identifier', None)
       if group_uuid:
-        group = self.group_broker.get_by_uuid(group_uuid)
+        try:
+          group = self.group_broker.get_by_uuid(group_uuid)
+        except NothingFoundException:
+          # create new group
+          group = Group()
+          group.populate(group)
+          group.identifier = group_uuid
+
         event_permission.group = group
         self.set_extended_logging(event_permission, user, user.group, True)
         return event_permission
