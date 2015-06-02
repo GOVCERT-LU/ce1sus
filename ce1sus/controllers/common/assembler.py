@@ -162,16 +162,16 @@ class Assembler(BaseController):
     event_permission = EventGroupPermission()
     event_permission.populate(json)
 
-    group = json.get('group', None)
-    if group:
-      group_uuid = group.get('identifier', None)
+    group_json = json.get('group', None)
+    if group_json:
+      group_uuid = group_json.get('identifier', None)
       if group_uuid:
         try:
           group = self.group_broker.get_by_uuid(group_uuid)
         except NothingFoundException:
           # create new group
           group = Group()
-          group.populate(group)
+          group.populate(group_json)
           group.identifier = group_uuid
 
         event_permission.group = group
