@@ -6,13 +6,16 @@
 Created on Oct 16, 2014
 """
 
-
-from ce1sus.helpers.common.config import Configuration
 import json
 import os
+from os.path import dirname, abspath
 import sys
 from uuid import uuid4
 
+basePath = dirname(abspath(__file__)) + '/../../'
+sys.path.insert(0, '../../')
+
+from ce1sus.helpers.common.config import Configuration
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.admin.mails import MailController
@@ -43,11 +46,6 @@ import ce1sus.db.classes.user
 import ce1sus.db.classes.values
 from ce1sus.db.common.session import SessionManager, Base
 from maintenance import Maintenance
-
-
-basePath = os.path.dirname(os.path.abspath(__file__)) + '/../../'
-sys.path.insert(0, '../../')
-
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
