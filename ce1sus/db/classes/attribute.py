@@ -5,6 +5,9 @@
 
 Created on Oct 16, 2014
 """
+from base64 import b64encode
+from ce1sus.helpers.common.objects import get_class
+from ce1sus.helpers.common.validator.objectvalidator import FailedValidation, ObjectValidator
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
 from sqlalchemy.types import Integer, UnicodeText, Boolean, Unicode, BigInteger
@@ -14,8 +17,6 @@ from ce1sus.db.classes.common import Properties, TLP
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.values import StringValue, DateValue, TextValue, NumberValue
 from ce1sus.db.common.session import Base
-from ce1sus.helpers.common.objects import get_class
-from ce1sus.helpers.common.validator.objectvalidator import FailedValidation, ObjectValidator
 
 
 __author__ = 'Weber Jean-Paul'
@@ -236,11 +237,21 @@ class Attribute(ExtendedLogingInformations, Base):
       condition = self.condition.to_dict(complete, inflated)
       condition_id = self.convert_value(self.condition.uuid)
 
+    value = self.convert_value(self.value)
+    handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
+    if handler_uuid == '0be5e1a0-8dec-11e3-baa8-0800200c9a66':
+      # serve file
+      fh = self.definition.handler
+
+      filepath = fh.get_base_path() + '/' + value
+      with open(filepath, "rb") as raw_file:
+        value = b64encode(raw_file.read())
+
     return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(complete, False),
             'ioc': self.is_ioc,
-            'value': self.convert_value(self.value),
+            'value': value,
             'condition_id': condition_id,
             'condition': condition,
             'creator_group': self.creator_group.to_dict(complete, False),
