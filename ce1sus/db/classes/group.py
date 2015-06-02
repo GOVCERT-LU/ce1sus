@@ -194,6 +194,15 @@ class Group(Base):
                           )
   notifications = Column('notifications', Boolean, default=False, nullable=False)
 
+  def equals(self, group):
+    if self.uuid == group.uuid:
+      return True
+    else:
+      if self.name == group.name:
+        return True
+      else:
+        return False
+
   @property
   def tlp(self):
     """

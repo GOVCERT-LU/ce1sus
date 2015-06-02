@@ -249,7 +249,7 @@ class Assembler(BaseController):
     if event_permissions:
       for event_permission in event_permissions:
         ev_perm = self.assemble_group_permision(event_permission, user, owner, rest_insert, seen_groups)
-        if ev_perm:
+        if ev_perm and not ev_perm.group.equals(event.creator_group):
           event.groups.append(ev_perm)
 
     # Add the creator group

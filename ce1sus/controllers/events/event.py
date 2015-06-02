@@ -82,7 +82,14 @@ class EventController(BaseController):
         event_permission.group = group
         self.set_extended_logging(event_permission, user, user.group, True)
 
-        event.groups.append(event_permission)
+        found = False
+        for group in event.groups:
+          if event_permission.group.equals(group.group):
+            found = True
+            group.permissions = event_permission.permissions
+            break
+        if not found:
+          event.groups.append(event_permission)
 
       # generate relations if needed!
 
