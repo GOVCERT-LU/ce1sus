@@ -173,7 +173,7 @@ class Assembler(BaseController):
           try:
             name = group_json.get('name', None)
             if name:
-              group = self.group_broker.get_by_name()
+              group = self.group_broker.get_by_name(name)
             else:
               raise NothingFoundException()
           except NothingFoundException:
