@@ -265,7 +265,7 @@ class Scheduler(object):
             self.ce1sus_adapter.insert_event(event, True, True)
 
           self.process_controller.process_finished_success(item, item.server_details.user)
-        except (BrokerException, ControllerException) as error:
+        except (BrokerException, ControllerException, Ce1susAdapterException) as error:
           raise SchedulerException(error)
         finally:
           self.ce1sus_adapter.logout()

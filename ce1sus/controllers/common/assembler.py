@@ -169,10 +169,18 @@ class Assembler(BaseController):
         try:
           group = self.group_broker.get_by_uuid(group_uuid)
         except NothingFoundException:
-          # create new group
-          group = Group()
-          group.populate(group_json)
-          group.identifier = group_uuid
+          # try with the name
+          try:
+            name = group_json.get('name', None)
+            if name:
+              group = self.group_broker.get_by_name()
+            else:
+              raise NothingFoundException()
+          except NothingFoundException:
+            # create new group
+            group = Group()
+            group.populate(group_json)
+            group.identifier = group_uuid
 
         event_permission.group = group
         self.set_extended_logging(event_permission, user, user.group, True)
