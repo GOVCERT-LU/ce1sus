@@ -48,7 +48,8 @@ class ProcessController(BaseController):
         process_item.server_details = sync_server
       self.set_simple_logging(process_item, user, True)
 
-      self.process_broker.insert(process_item, commit)
+      self.process_broker.insert(process_item, False)
+      self.process_broker.do_commit(commit)
       return process_item
     except BrokerException as error:
       raise ControllerException(error)

@@ -251,24 +251,28 @@ class Scheduler(object):
         event = self.event_controller.get_event_by_uuid(item.event_uuid)
         self.__push_misp(item, event)
 
-      elif item.server_details.type == 'ce1sus':
+      elif item.server_details.type == 'Ce1sus':
         self.ce1sus_adapter.server_details = item.server_details
+        self.ce1sus_adapter.login()
         rem_events = self.ce1sus_adapter.get_index()
         event_uuids = list()
-        # TODO clean this up
+
         for rem_event in rem_events:
           event_uuids.append(rem_event.uuid)
         try:
           event = self.event_controller.get_event_by_uuid(item.event_uuid)
+          # check if an update is required or an insert
           if event.uuid in event_uuids:
             # do update
             self.ce1sus_adapter.update_event(event, True, True)
           else:
+            event.properties.validated = False
             self.ce1sus_adapter.insert_event(event, True, True)
 
         except (BrokerException, ControllerException) as error:
           raise SchedulerException(error)
-
+        finally:
+          self.ce1sus_adapter.logout()
       else:
         raise SchedulerException('Server type {0} is unkown'.format(item.server_details.type))
     else:

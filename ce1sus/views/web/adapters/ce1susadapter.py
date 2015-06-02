@@ -230,10 +230,12 @@ class Ce1susAdapter(BaseController):
           if event.last_publish_date and rem_event.last_publish_date:
             if event.last_publish_date > rem_event.last_publish_date:
               uuids_to_push.append(event.uuid)
+        else:
+          uuids_to_push.append(event.uuid)
 
       # pass
       for uuid_to_push in uuids_to_push:
-        self.process_controller.create_new_process(ProcessType.PUSH, uuid_to_push, self.server_details.user, server_details)
+        self.process_controller.create_new_process(ProcessType.PUSH, uuid_to_push, self.server_details.user, server_details, True)
     except Ce1susAdapterException as error:
       self.logout()
       raise Ce1susAdapterException(error)
