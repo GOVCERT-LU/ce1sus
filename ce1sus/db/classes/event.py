@@ -65,6 +65,9 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
             'permissions': self.permissions.to_dict(),
             'group': self.group.to_dict(complete, inflated)}
 
+  def populate(self, json):
+    self.uuid = json.get('uuid', None)
+    self.permissions.populate(json.get('permissions', None))
 
 class Event(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False)

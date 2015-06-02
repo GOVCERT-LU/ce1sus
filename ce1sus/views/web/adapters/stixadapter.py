@@ -11,8 +11,7 @@ from cherrypy._cperror import HTTPError
 import json
 from lxml import etree
 
-from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, \
-  ControllerNothingFoundException
+from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, ControllerNothingFoundException
 from ce1sus.controllers.common.merger import Merger
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView

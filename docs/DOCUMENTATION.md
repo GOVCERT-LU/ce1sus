@@ -532,6 +532,16 @@ The script used the configuration of the later instance.
 
 **Note** the migration can take some time depending on the volume of your database.
 
+##1.10 Definitions updates
+
+The default defintions for attributes and objects can update over time. To update these definitions simply run the following commands.
+
+``` shell
+cd scripts/update
+python def_update.py
+```
+
+**Note** Only the default definitions will update
 
 #2. Web Interface
 

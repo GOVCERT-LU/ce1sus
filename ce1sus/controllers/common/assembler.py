@@ -23,7 +23,7 @@ from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.event import Comment, Event, EventGroupPermission
-from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.group import Group, EventPermissions
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
@@ -158,6 +158,23 @@ class Assembler(BaseController):
         instance.originating_group = instance.creator_group
       instance.owner_group = user.group
 
+  def assemble_group_permision(self, json, user, owner=False, rest_insert=True, poponly=False):
+    event_permission = EventGroupPermission()
+    event_permission.populate(json)
+
+    group = json.get('group', None)
+    if group:
+      group_uuid = group.get('identifier', None)
+      if group_uuid:
+        group = self.group_broker.get_by_uuid(group_uuid)
+        event_permission.group = group
+        self.set_extended_logging(event_permission, user, user.group, True)
+        return event_permission
+      else:
+        return None
+    else:
+      return None
+
   def assemble_event(self, json, user, owner=False, rest_insert=True, poponly=False):
 
     event = Event()
@@ -211,6 +228,14 @@ class Assembler(BaseController):
         com = self.assemble_comment(event, comment, user, owner, rest_insert, seen_groups)
         if com:
           event.comments.append(com)
+
+    # add the eventGroupPermissions from the event
+    event_permissions = json.get('groups', None)
+    if event_permissions:
+      for event_permission in event_permissions:
+        ev_perm = self.assemble_group_permision(event_permission, user, owner, rest_insert, seen_groups)
+        if ev_perm:
+          event.groups.append(ev_perm)
 
     # Add the creator group
     event_permission = EventGroupPermission()

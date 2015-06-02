@@ -103,6 +103,9 @@ class ObjectDefinition(SimpleLogingInformations, Base):
     self.description = json.get('description', None)
     self.default_share = json.get('default_share', False)
     self.cybox_std = json.get('cybox_std', False)
+    chksum = json.get('chksum', None)
+    if chksum:
+      self.chksum = chksum
 
 
 class AttributeDefinition(SimpleLogingInformations, Base):
@@ -227,6 +230,9 @@ class AttributeDefinition(SimpleLogingInformations, Base):
     self.regex = json.get('regex', None)
     self.table_id = json.get('table_id', None)
     self.cybox_std = json.get('cybox_std', False)
+    chksum = json.get('chksum', None)
+    if chksum:
+      self.chksum = chksum
 
 
 class AttributeHandler(Base):
