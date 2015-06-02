@@ -239,7 +239,7 @@ class Attribute(ExtendedLogingInformations, Base):
 
     value = self.convert_value(self.value)
     handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
-    if handler_uuid == '0be5e1a0-8dec-11e3-baa8-0800200c9a66':
+    if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
       # serve file
       fh = self.definition.handler
 

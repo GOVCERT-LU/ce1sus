@@ -69,6 +69,7 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
     self.uuid = json.get('uuid', None)
     self.permissions.populate(json.get('permissions', None))
 
+
 class Event(ExtendedLogingInformations, Base):
   title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False)
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
@@ -328,7 +329,8 @@ class Event(ExtendedLogingInformations, Base):
                 'created_at': self.convert_value(self.created_at),
                 'published': self.convert_value(self.properties.is_shareable),
                 'modified_on': self.convert_value(self.modified_on),
-                # TODO: add first and last seen
+                'reports': reports,
+                'reports_count': reports_count,
                 'first_seen': self.convert_value(None),
                 'last_seen': self.convert_value(None),
                 'observables': observables,

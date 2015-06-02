@@ -494,7 +494,8 @@ class Assembler(BaseController):
 
     # attention to raw_artefacts!!!
     value = json.get('value', None)
-    if definition.name == 'Raw_Artifact':
+    handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
+    if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
 
       fh = FileHandler()
 
@@ -679,7 +680,8 @@ class Assembler(BaseController):
         ref.populate(reference, rest_insert)
 
         value = reference.get('value', None)
-        if definition.name == 'raw_file':
+        handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
+        if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66']:
 
           fh = FileReferenceHandler()
           filename = value.get('filename', None)
