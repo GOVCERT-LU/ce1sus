@@ -185,12 +185,38 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def __change_owner(self, instance, user, group):
+    instance.creator_group = group
+    self.set_extended_logging(instance, user, user.group, False)
+
+  def __change_owner_object(self, obj, user, group):
+    self.__change_owner(obj, user, group)
+    for attribute in obj.attributes:
+      self.__change_owner(attribute, user, group)
+    for rel_obj in obj.related_objects:
+      self.__change_owner_object(rel_obj.object, user, group)
+
+  def __change_owner_observable(self, observable, user, group):
+    self.__change_owner(observable, user, group)
+    if observable.object:
+      self.__change_owner_object(observable.object, user, group)
+    if observable.observable_composition:
+      for obs in observable.observable_composition.observables:
+        self.__change_owner_observable(obs, user, group)
+
   def change_owner(self, event, group_id, user, commit=True):
     try:
-      group = self.group_broker.get_by_id(group_id)
+      group = self.group_broker.get_by_uuid(group_id)
       user = self.user_broker.getUserByUserName(user.username)
-      event.creator_group = group
-      self.set_extended_logging(event, user, user.group, False)
+      self.__change_owner(event, user, group)
+      # TODO make change owner ship recursive
+      for observable in event.observables:
+        self.__change_owner_observable(observable, user, group)
+
+      for indicator in event.indicators:
+        for observable in indicator.observables:
+          self.__change_owner_observable(observable, user, group)
+
       self.event_broker.update(event, False)
       self.event_broker.do_commit(commit)
     except BrokerException as error:

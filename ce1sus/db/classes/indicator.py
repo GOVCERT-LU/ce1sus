@@ -153,7 +153,7 @@ class Indicator(ExtendedLogingInformations, Base):
   killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   types = relationship('IndicatorType')
   handling = relationship(Marking, secondary='rel_indicator_handling')
-  operator = Column('operator', Unicode(3, collation='utf8_unicode_ci'), default=u'OR')
+  operator = Column('operator', Unicode(3, collation='utf8_unicode_ci'))
   observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
   valid_time_positions = relationship('ValidTimePosition')  # 1:*
   # TODO add related indicators and TTP
