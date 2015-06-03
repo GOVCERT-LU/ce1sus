@@ -328,10 +328,6 @@ class FileWithHashesHandler(FileHandler):
     attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
     attributes.append(attribute)
 
-    internal_json['value'] = magic.from_file(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
-    attributes.append(attribute)
-
     # set parent
     for attribtue in attributes:
       attribtue.parent = main_attribute

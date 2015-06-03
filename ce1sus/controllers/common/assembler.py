@@ -680,7 +680,7 @@ class Assembler(BaseController):
         ref.populate(reference, rest_insert)
 
         value = reference.get('value', None)
-        handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
+        handler_uuid = '{0}'.format(definition.reference_handler.uuid)
         if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66']:
 
           fh = FileReferenceHandler()

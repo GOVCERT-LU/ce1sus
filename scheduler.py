@@ -15,15 +15,16 @@ from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.common.process import ProcessController
+from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.classes.report import Report, Reference
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter,\
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter, \
   Ce1susAdapterNothingFoundException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
-from ce1sus.controllers.events.event import EventController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -228,10 +229,12 @@ class Scheduler(object):
           # merge the event fetched
           owner = is_event_owner(event, item.server_details.user)
           event = self.ce1sus_adapter.assembler.update_event(event, rem_json, item.server_details.user, owner, True)
+          self.__insert_provenance_report(event, item.server_details)
           self.event_controller.update_event(self.user, event, True, True)
         except ControllerNothingFoundException:
           event = self.ce1sus_adapter.assembler.assemble_event(rem_json, item.server_details.user, True, True, False)
           event.properties.is_validated = False
+          self.__insert_provenance_report(event, item.server_details)
           self.event_controller.insert_event(self.user, event, True, True)
         except ControllerException as error:
           self.ce1sus_adapter.logout()
@@ -244,6 +247,20 @@ class Scheduler(object):
     else:
       # do the sync for all servers which are pull servers
       pass
+
+  def __insert_provenance_report(self, event, server_details):
+    report = Report()
+    report.event = event
+    self.ce1sus_adapter.set_extended_logging(report, server_details.user, server_details.user.group, True)
+
+    reference = Reference()
+    definition = self.misp_converter.reference_definitions_broker.get_by_uuid('dee2aa50-874e-4a92-9fd0-441171e76585')
+    reference.definition = definition
+    reference.value = '{0}/#/events/event/{1}'.format(server_details.baseurl, event.uuid)
+
+    report.references.append(reference)
+    event.reports.append(report)
+    self.ce1sus_adapter.set_extended_logging(reference, server_details.user, server_details.user.group, True)
 
   def __push(self, item):
     if item.server_details:
@@ -259,9 +276,14 @@ class Scheduler(object):
         try:
           try:
             rem_event = self.ce1sus_adapter.get_event_by_uuid(item.event_uuid, False, False, False, False)
+            self.__insert_provenance_report(event, item.server_details)
+            owner = is_event_owner(event, item.server_details.user)
+            event = self.ce1sus_adapter.assembler.update_event(event, rem_event, item.server_details.user, owner, True)
+            self.__insert_provenance_report(event, item.server_details)
             self.ce1sus_adapter.update_event(event, True, True)
           except Ce1susAdapterNothingFoundException:
             event.properties.validated = False
+            self.__insert_provenance_report(event, item.server_details)
             self.ce1sus_adapter.insert_event(event, True, True)
 
           self.process_controller.process_finished_success(item, item.server_details.user)
