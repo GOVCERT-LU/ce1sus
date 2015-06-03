@@ -107,6 +107,10 @@ class ProcessController(BaseController):
   def process_restart(self, process_item, user):
     self.logger.critical(u'Process {0} restarted by user {1}'.format(process_item.identifier, user.identifier))
     process_item.status = ProcessStatus.SCHEDULED
+    if process_item.status == ProcessType.PUBLISH:
+      process_item.status = ProcessType.REPUBLISH
+    if process_item.status == ProcessType.PUBLISH_UPDATE:
+      process_item.status = ProcessType.REPUBLISH_UPDATE
     self.update_process_item(process_item, user)
 
   def process_remove(self, process_item, user):

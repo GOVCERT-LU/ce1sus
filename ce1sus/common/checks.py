@@ -20,6 +20,39 @@ def is_user_priviledged(user):
   return False
 
 
+def is_event_viewable_group(event, group):
+  if group.identifier == event.owner_group_id:
+    return True
+  else:
+    tlp_lvl = get_max_tlp(group)
+    if event.tlp_level_id >= tlp_lvl:
+      return True
+    else:
+      grp_ids = list()
+      for group in group.children:
+        grp_ids.append(group.identifier)
+      grp_ids.append(group.identifier)
+
+      for eventgroup in event.groups:
+        group = eventgroup.group
+        if group.identifier in grp_ids:
+          return True
+      return False
+
+
+def is_event_viewable_user(event, user):
+  if is_event_owner(event, user):
+    return True
+  else:
+    if user:
+      if user.group:
+        return is_event_viewable_group(event, user.group)
+      else:
+        return False
+    else:
+      return False
+
+
 def is_object_viewable(instance, event_permissions, user, cache=None):
   if instance.__class__.__name__ == 'ObservableComposition':
     # always visible as the composed observable does not have a tlp level

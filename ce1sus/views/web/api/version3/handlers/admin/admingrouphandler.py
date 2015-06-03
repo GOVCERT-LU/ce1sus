@@ -9,7 +9,6 @@ from ce1sus.controllers.admin.group import GroupController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.group import Group
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
 
 
 __author__ = 'Weber Jean-Paul'
@@ -26,7 +25,7 @@ class AdminGroupHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])
-  @require(privileged())
+  @require()
   def group(self, **args):
     try:
       method = args.get('method')
@@ -63,6 +62,7 @@ class AdminGroupHandler(RestBaseHandler):
           return result
 
       elif method == 'POST':
+        self.check_if_admin()
         if len(path) > 0:
           uuid = path.pop(0)
           group = self.group_controller.get_group_by_uuid(uuid)
@@ -92,6 +92,7 @@ class AdminGroupHandler(RestBaseHandler):
           self.group_controller.insert_group(group)
           return group.to_dict(details, inflated)
       elif method == 'PUT':
+        self.check_if_admin()
         # update group
         if len(path) > 0:
           # if there is a uuid as next parameter then return single group
@@ -104,6 +105,7 @@ class AdminGroupHandler(RestBaseHandler):
           raise RestHandlerException(u'Cannot update group as no identifier was given')
 
       elif method == 'DELETE':
+        self.check_if_admin()
         # Remove group
         if len(path) > 0:
           # if there is a uuid as next parameter then return single group

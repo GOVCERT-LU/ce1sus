@@ -8,13 +8,16 @@ Created on Oct 29, 2014
 import cherrypy
 
 from ce1sus.common.checks import is_object_viewable
+from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.common.process import ProcessController
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.event import EventGroupPermission
+from ce1sus.db.classes.processitem import ProcessType
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
-from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -31,6 +34,8 @@ class EventHandler(RestBaseHandler):
     self.relation_controller = self.controller_factory(RelationController)
     self.report_controller = self.controller_factory(ReportController)
     self.indicator_controller = self.controller_factory(IndicatorController)
+    self.process_controller = self.controller_factory(ProcessController)
+    self.server_controller = self.controller_factory(SyncServerController)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
@@ -417,6 +422,17 @@ class EventHandler(RestBaseHandler):
     user = self.get_user()
     if method == 'POST':
       self.event_controller.publish_event(event, user)
+
+      type_ = ProcessType.PUBLISH
+      if event.last_publish_date:
+        type_ = ProcessType.PUBLISH_UPDATE
+      servers = self.server_controller.get_all_push_servers()
+      for server in servers:
+        if self.is_event_viewable(event, server.user):
+          self.process_controller.create_new_process(type_, event.uuid, user, server, False)
+      # add also mail
+      self.process_controller.create_new_process(type_, event.uuid, user, None, False)
+      self.process_controller.process_broker.do_commit(True)
 
       return 'Published event.'
     else:

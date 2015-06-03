@@ -9,7 +9,7 @@ from ce1sus.helpers.common.config import Configuration
 from datetime import datetime
 from os.path import dirname, abspath
 
-from ce1sus.common.checks import is_event_owner
+from ce1sus.common.checks import is_event_owner, is_event_viewable_user, is_event_viewable_group
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.admin.user import UserController
@@ -22,8 +22,7 @@ from ce1sus.db.classes.report import Report, Reference
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter, \
-  Ce1susAdapterNothingFoundException
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapterException, Ce1susAdapter, Ce1susAdapterNothingFoundException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 
 
@@ -76,7 +75,6 @@ class Scheduler(object):
     if server_details.type == 'MISP':
       self.__push_misp(item, event)
     elif server_details.type == 'Ce1sus':
-      # TODO sceduling for ce1sus
       self.__push_ce1sus(item, event)
     else:
       raise SchedulerException('Server type {0} is unkown'.format(server_details.type))
@@ -125,23 +123,32 @@ class Scheduler(object):
       self.process_controller.process_finished_in_error(item, self.user)
       raise SchedulerException('Error during push of event {0} on server with url {1} with error {2}'.format(event.uuid, item.server_details.baseurl, error))
 
-  def __publish(self, item):
-    try:
-      event = self.event_controller.get_event_by_uuid(item.event_uuid)
-      if item.server_details:
-        # do the sync only for this server
-        self.__publish_event(item, event)
-      else:
-        # it is to send emails
-        self.__send_mails(event, item.type_)
-      # set event as published
-      event.last_publish_date = datetime.utcnow()
-      self.event_controller.update_event(self.user, event, True, True)
-      # remove item from queue
-      self.process_controller.process_finished_success(item, self.user)
-    except (ControllerException, BrokerException) as error:
-      self.process_controller.process_finished_in_error(item, self.user)
-      raise SchedulerException(error)
+  def __publish(self, event_uuid, item_array):
+    event = self.event_controller.get_event_by_uuid(event_uuid)
+    item_publish = False
+    for item in item_array:
+      try:
+          if item.server_details:
+            # do the sync only for this server
+            self.__publish_event(item, event)
+          else:
+            # it is to send emails
+            self.__send_mails(event, item.type_)
+          # set event as published only if it is the furst publication
+          if item.type_ in [ProcessType.PUBLISH, ProcessType.PUBLISH_UPDATE]:
+            item_publish = True
+          # remove item from queue
+          self.process_controller.process_finished_success(item, self.user)
+      except (ControllerException, BrokerException) as error:
+        self.process_controller.process_finished_in_error(item, self.user)
+    # only update the publish date once
+    if item_publish:
+      try:
+        event.last_publish_date = datetime.utcnow()
+        self.event_controller.update_event(self.user, event, True, True)
+      except (ControllerException, BrokerException) as error:
+        self.process_controller.process_finished_in_error(item, self.user)
+        raise SchedulerException(error)
 
   def __send_mails(self, event, type_):
     # send mails only if plugin is enabled
@@ -157,36 +164,40 @@ class Scheduler(object):
           if user.email in seen_mails:
             continue
           else:
-
-            if user.gpg_key:
-              seen_mails.append(user.email)
-              self.__send_mail(type_, event, user, None, True)
-            else:
-              # only send email when white
-              if event.tlp_level_id >= 3:
+            # only send mails to users who can see the event!!!
+            if is_event_viewable_user(event, user):
+              if user.gpg_key:
                 seen_mails.append(user.email)
-                self.__send_mail(type_, event, user, None, False)
+                self.__send_mail(type_, event, user, None, True)
+              else:
+                # only send email when white
+                if event.tlp_level_id >= 3:
+                  seen_mails.append(user.email)
+                  self.__send_mail(type_, event, user, None, False)
+
         # send the mails for the groups which want them
         groups = self.group_broker.get_all_notifiable_groups()
         for group in groups:
-          if group.email in seen_mails:
-            continue
-          else:
-            seen_mails.append(group.email)
-            if group.gpg_key:
-              self.__send_mail(type_, event, None, group, True)
+            if group.email in seen_mails:
+              continue
             else:
-              # only send email when white
-              if event.tlp_level_id >= 3:
-                self.__send_mail(type_, event, None, group, False)
+              if is_event_viewable_group(event, group):
+                # only send mails to users who can see the event!!!
+                seen_mails.append(group.email)
+                if group.gpg_key:
+                  self.__send_mail(type_, event, None, group, True)
+                else:
+                  # only send email when white
+                  if event.tlp_level_id >= 3:
+                    self.__send_mail(type_, event, None, group, False)
 
       except (ControllerException, BrokerException) as error:
         raise SchedulerException(error)
 
   def __get_mail(self, event, type_, user, group):
-    if type_ == ProcessType.PUBLISH:
+    if type_ in [ProcessType.PUBLISH, ProcessType.REPUBLISH]:
       return self.mail_controller.get_publication_mail(event, user, group)
-    elif type_ == ProcessType.PUBLISH_UPDATE:
+    elif type_ in [ProcessType.PUBLISH_UPDATE, ProcessType.REPUBLISH_UPDATE]:
       return self.mail_controller.get_publication_update_mail(event, user, group)
     elif type_ == ProcessType.PROPOSAL:
       return self.mail_controller.get_proposal_mail(event, user, group)
@@ -300,13 +311,20 @@ class Scheduler(object):
   def process(self):
     # get all items
     items = self.process_controller.get_scheduled_process_items(self.user)
+
+    # sort out publications
+    publications = list()
+    remaining = list()
     for item in items:
+      self.process_controller.process_task(item, self.user)
+      if item.type_ in [ProcessType.PUBLISH, ProcessType.PUBLISH_UPDATE, ProcessType.REPUBLISH, ProcessType.REPUBLISH_UPDATE]:
+        publications.append(item)
+      else:
+        remaining.append(item)
+
+    for item in remaining:
       try:
-        # decide type:
-        self.process_controller.process_task(item, self.user)
-        if item.type_ == ProcessType.PUBLISH or item.type_ == ProcessType.PUBLISH_UPDATE:
-          self.__publish(item)
-        elif item.type_ == ProcessType.PULL:
+        if item.type_ == ProcessType.PULL:
           self.__pull(item)
         elif item.type_ == ProcessType.PUSH:
           self.__push(item)
@@ -322,6 +340,18 @@ class Scheduler(object):
       except SchedulerException:
         self.process_controller.process_finished_in_error(item, self.user)
 
+    grouped_publications = dict()
+    for item in publications:
+      items = grouped_publications.get(item.event_uuid, None)
+      if items is None:
+        grouped_publications[item.event_uuid] = list()
+      grouped_publications[item.event_uuid].append(item)
+
+    for key, item_array in grouped_publications.iteritems():
+      try:
+        self.__publish(key, item_array)
+      except SchedulerException:
+        self.process_controller.process_finished_in_error(item, self.user)
 if __name__ == '__main__':
   basePath = dirname(abspath(__file__))
   ce1susConfigFile = basePath + '/config/ce1sus.conf'

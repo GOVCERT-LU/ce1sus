@@ -28,6 +28,7 @@ class ProcessStatus(StaticBase):
   FINISHED = u'Finished'
   FAILED = u'Failed'
   CANCELLED = u'Cancelled'
+  RESCHEDULED = u'ReScheduled'
 
   @classmethod
   def get_dictionary(cls):
@@ -47,8 +48,9 @@ class ProcessType(StaticBase):
   PUBLISH_UPDATE = u'Publish Update'
   RELATIONS = u'Relations'
   PROPOSAL = u'Proposal'
-
-  TYPES = [PULL, PUSH, PUBLISH, PUBLISH_UPDATE, RELATIONS, PROPOSAL]
+  REPUBLISH = u'RePublish'
+  REPUBLISH_UPDATE = u'RePublish Update'
+  TYPES = [PULL, PUSH, PUBLISH, PUBLISH_UPDATE, RELATIONS, PROPOSAL, REPUBLISH, REPUBLISH_UPDATE]
 
   @classmethod
   def get_dictionary(cls):
@@ -57,8 +59,9 @@ class ProcessType(StaticBase):
             2: ProcessType.PUBLISH,
             3: ProcessType.RELATIONS,
             4: ProcessType.PUBLISH_UPDATE,
-            5: ProcessType.PROPOSAL
-
+            5: ProcessType.PROPOSAL,
+            6: ProcessType.REPUBLISH,
+            7: ProcessType.REPUBLISH_UPDATE
             }
 
 

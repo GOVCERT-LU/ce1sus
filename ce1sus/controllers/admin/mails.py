@@ -148,7 +148,7 @@ class MailController(BaseController):
       if event_permissions:
         result = ''
         for attribute in flat_attributes:
-          if is_object_viewable(attribute, event_permissions):
+          if is_object_viewable(attribute, event_permissions, user):
             if update:
               if attribute.created_at <= event.last_publish_date:
                 # skip the ones we are not intreseted
@@ -207,16 +207,26 @@ class MailController(BaseController):
     if relations:
       text = ''
       for relation in relations:
-        if relation.rel_event.published:
+        if relation.rel_event.properties.is_shareable:
           if update:
             if relation.rel_event.last_publish_date and relation.rel_event.last_publish_date >= event.last_publish_date:
+              if group:
+                if self.is_event_viewable(relation.rel_event, group):
+                  url = self.__get_event_url(relation.rel_event)
+                  text = u'{0}{1}\n'.format(text, url)
+              if user:
+                if self.is_event_viewable(relation.rel_event, user.group):
+                  url = self.__get_event_url(relation.rel_event)
+                  text = u'{0}{1}\n'.format(text, url)
+          else:
+            if group:
               if self.is_event_viewable(relation.rel_event, group):
                 url = self.__get_event_url(relation.rel_event)
                 text = u'{0}{1}\n'.format(text, url)
-          else:
-            if self.is_event_viewable(relation.rel_event, group):
-              url = self.__get_event_url(relation.rel_event)
-              text = u'{0}{1}\n'.format(text, url)
+            if user:
+              if self.is_event_viewable(relation.rel_event, user.group):
+                url = self.__get_event_url(relation.rel_event)
+                text = u'{0}{1}\n'.format(text, url)
     if not self.__remove_control_chars(text):
       text = 'None'
     if not text.strip():
