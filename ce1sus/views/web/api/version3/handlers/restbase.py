@@ -191,4 +191,3 @@ class RestBaseHandler(BaseView):
       return False
     else:
       return True
-
