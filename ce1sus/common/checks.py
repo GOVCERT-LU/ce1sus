@@ -67,7 +67,7 @@ def is_object_viewable(instance, event_permissions, user, cache=None):
 
     if user and user.group:
         user_group = user.group
-        if user_group.identifier == instance.owner_group_id or user_group.identifier == instance.creator_group_id or user_group.identifier == instance.originating_group_id:
+        if user_group.identifier in [instance.owner_group_id, instance.creator_group_id, instance.originating_group_id]:
             # check if the user owns submitted or created the object then return True
             return True
         else:

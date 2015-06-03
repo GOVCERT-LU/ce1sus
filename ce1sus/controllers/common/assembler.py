@@ -8,7 +8,6 @@ Created on Feb 18, 2015
 import base64
 from ce1sus.helpers.common import strings
 from datetime import datetime
-import grp
 from os.path import dirname
 import re
 from shutil import move, rmtree
@@ -23,7 +22,7 @@ from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.attribute import Attribute
 from ce1sus.db.classes.definitions import AttributeDefinition
 from ce1sus.db.classes.event import Comment, Event, EventGroupPermission
-from ce1sus.db.classes.group import Group, EventPermissions
+from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
@@ -35,7 +34,6 @@ from ce1sus.handlers.attributes.filehandler import FileHandler
 from ce1sus.handlers.references.filehandler import FileReferenceHandler
 from ce1sus.helpers.common.hash import hashSHA1, hashMD5, fileHashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
-from ce1sus.plugins.ldapplugin import LdapPlugin
 
 
 __author__ = 'Weber Jean-Paul'
@@ -101,7 +99,9 @@ class Assembler(BaseController):
         instance.modifier = user
         instance.modified_on = datetime.utcnow()
 
-    def get_set_group(self, json, user, seen_groups=dict()):
+    def get_set_group(self, json, user, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         """ If the group does not exist or cannot be created return the users group"""
         group = None
         if json:
@@ -146,7 +146,9 @@ class Assembler(BaseController):
 
         return group
 
-    def populate_extended_logging(self, instance, json, user, insert=False, seen_groups=dict()):
+    def populate_extended_logging(self, instance, json, user, insert=False, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         self.populate_simple_logging(instance, json, user, insert)
 
         if insert:
@@ -158,7 +160,7 @@ class Assembler(BaseController):
                 instance.originating_group = instance.creator_group
             instance.owner_group = user.group
 
-    def assemble_group_permision(self, json, user, owner=False, rest_insert=True, poponly=False):
+    def assemble_group_permision(self, json, user):
         event_permission = EventGroupPermission()
         event_permission.populate(json)
 
@@ -248,7 +250,7 @@ class Assembler(BaseController):
         event_permissions = json.get('groups', None)
         if event_permissions:
             for event_permission in event_permissions:
-                ev_perm = self.assemble_group_permision(event_permission, user, owner, rest_insert, seen_groups)
+                ev_perm = self.assemble_group_permision(event_permission, user)
                 if ev_perm and not ev_perm.group.equals(event.creator_group):
                     event.groups.append(ev_perm)
 
@@ -272,13 +274,21 @@ class Assembler(BaseController):
 
         return event
 
-    def update_event(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), attr_defs=dict(), obj_defs=dict()):
+    def update_event(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, attr_defs=None, obj_defs=None):
+        if obj_defs is None:
+            obj_defs = dict()
+        if attr_defs is None:
+            attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
         event.populate(json, rest_insert)
         # TODO merge here
         self.populate_extended_logging(event, json, user, False, seen_groups)
         return event
 
-    def assemble_comment(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict()):
+    def assemble_comment(self, event, json, user, owner=False, rest_insert=True, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         comment = Comment()
         comment.uuid = json.get('identifier', None)
         comment.populate(json, rest_insert)
@@ -296,12 +306,20 @@ class Assembler(BaseController):
         comment.properties.is_web_insert = not rest_insert
         return comment
 
-    def update_comment(self, comment, json, user, owner=False, rest_insert=True, seen_groups=dict()):
+    def update_comment(self, comment, json, user, owner=False, rest_insert=True, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         comment.populate(json, rest_insert)
         self.populate_extended_logging(comment, json, user, False, seen_groups)
         return comment
 
-    def assemble_composed_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
+    def assemble_composed_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None, seen_obj_defs=None):
+        if seen_obj_defs is None:
+            seen_obj_defs = dict()
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
         composed = ObservableComposition()
         composed.uuid = json.get('identifier', None)
         composed.operator = json.get('operator', 'OR')
@@ -326,7 +344,13 @@ class Assembler(BaseController):
         else:
             return None
 
-    def assemble_indicator(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
+    def assemble_indicator(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None, seen_obj_defs=None):
+        if seen_obj_defs is None:
+            seen_obj_defs = dict()
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
         indicator = Indicator()
         indicator.uuid = json.get('identifier', None)
         indicator.event_id = event.identifier
@@ -334,8 +358,13 @@ class Assembler(BaseController):
         indicator.populate(json, rest_insert)
         self.populate_extended_logging(indicator, json, user, True, seen_groups)
 
-    def assemble_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
-
+    def assemble_observable(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None, seen_obj_defs=None):
+        if seen_obj_defs is None:
+            seen_obj_defs = dict()
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
         observable = Observable()
         observable.uuid = json.get('identifier', None)
         observable.event_id = event.identifier
@@ -371,7 +400,9 @@ class Assembler(BaseController):
         observable.properties.is_web_insert = not rest_insert
         return observable
 
-    def update_observable(self, observable, json, user, owner=False, rest_insert=True, seen_groups=dict()):
+    def update_observable(self, observable, json, user, owner=False, rest_insert=True, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         observable.populate(json, rest_insert)
         # update also composed observable
         composition = json.get('observable_composition', None)
@@ -402,7 +433,9 @@ class Assembler(BaseController):
                 return definition
         raise ControllerException('Could not find a definition in the object')
 
-    def get_attribute_definition(self, json, seen_attr_defs=dict()):
+    def get_attribute_definition(self, json, seen_attr_defs=None):
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
         uuid = json.get('definition_id', None)
         if not uuid:
             definition = json.get('definition', None)
@@ -423,7 +456,13 @@ class Assembler(BaseController):
                 return definition
         raise ControllerException('Could not find a definition in the attribute')
 
-    def assemble_object(self, observable, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
+    def assemble_object(self, observable, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None, seen_obj_defs=None):
+        if seen_obj_defs is None:
+            seen_obj_defs = dict()
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
 
         obj = Object()
         obj.uuid = json.get('identifier', None)
@@ -453,7 +492,7 @@ class Assembler(BaseController):
         rel_objs = json.get('related_objects', None)
         if rel_objs:
             for rel_obj in rel_objs:
-                rel_obj_inst = self.assemble_related_object(obj, rel_obj, user, owner, rest_insert, seen_groups, seen_attr_defs=dict(), seen_obj_defs=dict())
+                rel_obj_inst = self.assemble_related_object(obj, rel_obj, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
                 obj.related_objects.append(rel_obj_inst)
 
         attributes = json.get('attributes')
@@ -480,7 +519,11 @@ class Assembler(BaseController):
             server.user_id = user.identifier
         return server
 
-    def assemble_attribute(self, obj, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict()):
+    def assemble_attribute(self, obj, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None):
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
         attribute = Attribute()
         uuid = json.get('identifier', None)
         attribute.uuid = uuid
@@ -624,12 +667,20 @@ class Assembler(BaseController):
             user.group = None
         return user
 
-    def update_object(self, obj, json, user, owner=False, rest_instert=True, seen_groups=dict()):
+    def update_object(self, obj, json, user, owner=False, rest_instert=True, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         obj.populate(json, rest_instert)
         self.populate_extended_logging(obj, json, user, False, seen_groups)
         return obj
 
-    def assemble_related_object(self, obj, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_attr_defs=dict(), seen_obj_defs=dict()):
+    def assemble_related_object(self, obj, json, user, owner=False, rest_insert=True, seen_groups=None, seen_attr_defs=None, seen_obj_defs=None):
+        if seen_obj_defs is None:
+            seen_obj_defs = dict()
+        if seen_attr_defs is None:
+            seen_attr_defs = dict()
+        if seen_groups is None:
+            seen_groups = dict()
 
         child_obj_json = json.get('object')
         child_obj = self.assemble_object(obj.observable, child_obj_json, user, owner, rest_insert, seen_groups, seen_attr_defs, seen_obj_defs)
@@ -669,7 +720,9 @@ class Assembler(BaseController):
                 return definition
         raise ControllerException('Could not find "{0}" definition in the reference'.format(definition_json))
 
-    def assemble_reference(self, reference, user, owner, rest_insert=True, seen_groups=dict(), seen_ref_def=dict()):
+    def assemble_reference(self, reference, user, owner, rest_insert=True, seen_groups=None, seen_ref_def=dict()):
+        if seen_groups is None:
+            seen_groups = dict()
         value = reference.get('value', None)
         if value:
             definition = self.get_reference_definition(reference, seen_ref_def)
@@ -727,12 +780,16 @@ class Assembler(BaseController):
         else:
             return None
 
-    def assemble_child_report(self, report, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_ref_def=()):
+    def assemble_child_report(self, report, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=()):
+        if seen_groups is None:
+            seen_groups = dict()
         child_report = self.assemble_report(event, json, user, owner, rest_insert, seen_groups, seen_ref_def)
         report.related_reports.append(child_report)
         return child_report
 
-    def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=dict(), seen_ref_def=()):
+    def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=()):
+        if seen_groups is None:
+            seen_groups = dict()
         report = Report()
         report.uuid = json.get('identifier', None)
         report.populate(json, rest_insert)
@@ -754,7 +811,9 @@ class Assembler(BaseController):
         report.properties.is_web_insert = not rest_insert
         return report
 
-    def update_report(self, report, json, user, owner=False, rest_insert=True, seen_groups=dict()):
+    def update_report(self, report, json, user, owner=False, rest_insert=True, seen_groups=None):
+        if seen_groups is None:
+            seen_groups = dict()
         report.populate(json)
         self.populate_extended_logging(report, json, user, False, seen_groups)
         return report

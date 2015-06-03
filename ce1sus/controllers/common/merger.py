@@ -102,21 +102,29 @@ class Merger(BaseController):
                 if event_permissions.can_modify:
                     self.logger.info('Attribute {0} will be updated'.format(local_attribute.uuid))
                     self.set_dbcode(local_attribute, rem_attribute)
-                    self.logger.info('Attribute {0} is_ioc will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.is_ioc, rem_attribute.is_ioc))
+                    self.logger.info('Attribute {0} is_ioc will be replaced "{1}" by "{2}"'.format(local_attribute.uuid,
+                                                                                                   local_attribute.is_ioc,
+                                                                                                   rem_attribute.is_ioc))
                     local_attribute.is_ioc = rem_attribute.is_ioc
-                    self.logger.info('Attribute {0} condition_id will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.condition_id, rem_attribute.condition_id))
+                    self.logger.info('Attribute {0} condition_id will be replaced "{1}" by "{2}"'.format(local_attribute.uuid,
+                                                                                                         local_attribute.condition_id,
+                                                                                                         rem_attribute.condition_id))
                     local_attribute.condition_id = rem_attribute.condition_id
-                    self.logger.info('Attribute {0} value will be replaced "{1}" by "{2}"'.format(local_attribute.uuid, local_attribute.value, rem_attribute.value))
+                    self.logger.info('Attribute {0} value will be replaced "{1}" by "{2}"'.format(local_attribute.uuid,
+                                                                                                  local_attribute.value,
+                                                                                                  rem_attribute.value))
                     local_attribute.value = rem_attribute.value
 
                     local_attribute.modified_on = rem_attribute.modified_on
                     local_attribute.modifier_id = user.identifier
                     return True
                 else:
-                    self.logger.warning('User {0} tried to update attribute {1} but does not have the permissions for it'.format(user.username, local_attribute.identifier))
+                    self.logger.warning('User {0} tried to update attribute {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                                 local_attribute.identifier))
                     raise MergingException()
         else:
-            self.logger.warning('User {0} tried to update attribute {1} but does not have the permissions for it'.format(user.username, local_attribute.identifier))
+            self.logger.warning('User {0} tried to update attribute {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                         local_attribute.identifier))
             raise MergingException()
         return False
 
@@ -130,12 +138,15 @@ class Merger(BaseController):
                     local_object.modified_on = remote_object.modified_on
                     local_object.modifier_id = user.identifier
                     if remote_object.tlp_level_id:
-                        self.logger.info('TLP from object {0} will be changed from {1} to {2}'.format(local_object.uuid, local_object.tlp_level_id, remote_object.tlp_level_id))
+                        self.logger.info('TLP from object {0} will be changed from {1} to {2}'.format(local_object.uuid,
+                                                                                                      local_object.tlp_level_id,
+                                                                                                      remote_object.tlp_level_id))
                         local_object.tlp_level_id = remote_object.tlp_level_id
 
                     merges = True
                 else:
-                    self.logger.warning('User {0} tried to update object {1} but does not have the permissions for it'.format(user.username, local_object.identifier))
+                    self.logger.warning('User {0} tried to update object {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                              local_object.identifier))
                     raise MergingException()
 
             for rem_attribute in remote_object.attributes:
@@ -148,7 +159,9 @@ class Merger(BaseController):
                             if not merges:
                                 merges = merged_attr
                         else:
-                            self.logger.warning('User {0} tried to update attribute {1} but does not have the permissions for it'.format(user.username, local_attribute.identifier))
+                            self.logger.warning(('User {0} tried to update attribute {1} but does not have the '
+                                                 + 'permissions for it').format(user.username,
+                                                                                local_attribute.identifier))
                             raise MergingException()
                         found = True
                 if not found:
@@ -157,14 +170,20 @@ class Merger(BaseController):
                         self.append_attribute(local_object, rem_attribute)
                         merges = True
                     else:
-                        self.logger.warning('User {0} tried to add an attribute to object {1} but does not have the permissions for it'.format(user.username, local_object.identifier))
+                        self.logger.warning(('User {0} tried to add an attribute to object {1} but does not have the '
+                                             + 'permissions for it').format(user.username,
+                                                                            local_object.identifier))
                         raise MergingException()
 
             for rem_related_object in remote_object.related_objects:
                 found = False
                 for local_related_object in local_object.related_objects:
                     if self.is_object_the_same(local_related_object, rem_related_object):
-                        merged_attr = self.merge_object(local_related_object.object, rem_related_object.object, local_related_object, user, event_permissions)
+                        merged_attr = self.merge_object(local_related_object.object,
+                                                        rem_related_object.object,
+                                                        local_related_object,
+                                                        user,
+                                                        event_permissions)
                         if not merges:
                             merges = merged_attr
                         found = True
@@ -173,10 +192,13 @@ class Merger(BaseController):
                         self.append_related_object(rem_related_object, local_object)
                         merges = True
                     else:
-                        self.logger.warning('User {0} tried to add an related object to object {1} but does not have the permissions for it'.format(user.username, local_object.identifier))
+                        self.logger.warning(('User {0} tried to add an related object to object {1} but does not have the permissions '
+                                             + 'for it').format(user.username,
+                                                                local_object.identifier))
                         raise MergingException()
         else:
-            self.logger.warning('User {0} tried to update object {1} but does not have the permissions for it'.format(user.username, local_object.identifier))
+            self.logger.warning('User {0} tried to update object {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                      local_object.identifier))
             raise MergingException()
         return merges
 
@@ -202,21 +224,30 @@ class Merger(BaseController):
             if local_observable.modified_on < remote_observable.modified_on:
                 if event_permissions.can_modify:
                     self.logger.info('Observable {0} will be updated'.format(local_observable.uuid))
-                    self.logger.info('Observable {0} title will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.title, remote_observable.title))
+                    self.logger.info('Observable {0} title will be replaced "{1}" by "{2}"'.format(local_observable.uuid,
+                                                                                                   local_observable.title,
+                                                                                                   remote_observable.title))
                     local_observable.title = remote_observable.title
-                    self.logger.info('Observable {0} description will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.description, remote_observable.description))
+                    self.logger.info('Observable {0} description will be replaced "{1}" by "{2}"'.format(local_observable.uuid,
+                                                                                                         local_observable.description,
+                                                                                                         remote_observable.description))
                     local_observable.description = remote_observable.description
-                    self.logger.info('Observable {0} version will be replaced "{1}" by "{2}"'.format(local_observable.uuid, local_observable.version, remote_observable.version))
+                    self.logger.info('Observable {0} version will be replaced "{1}" by "{2}"'.format(local_observable.uuid,
+                                                                                                     local_observable.version,
+                                                                                                     remote_observable.version))
                     local_observable.version = remote_observable.version
                     self.set_dbcode(local_observable, remote_observable)
                     local_observable.modified_on = remote_observable.modified_on
                     local_observable.modifier_id = user.identifier
                     if remote_observable.tlp_level_id:
-                        self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_observable.uuid, local_observable.tlp_level_id, remote_observable.tlp_level_id))
+                        self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_observable.uuid,
+                                                                                                          local_observable.tlp_level_id,
+                                                                                                          remote_observable.tlp_level_id))
                         local_observable.tlp_level_id = remote_observable.tlp_level_id
                     merges = True
                 else:
-                    self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username, local_observable.identifier))
+                    self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                                  local_observable.identifier))
                     raise MergingException()
 
             # merge objects
@@ -225,11 +256,17 @@ class Merger(BaseController):
                 if not merges:
                     merges = obj_merge
             if local_observable.observable_composition or remote_observable.observable_composition:
-                obj_merge = self.merge_observable_composition(local_observable.observable_composition, remote_observable.observable_composition, local_observable, local_observable.parent, user, event_permissions)
+                obj_merge = self.merge_observable_composition(local_observable.observable_composition,
+                                                              remote_observable.observable_composition,
+                                                              local_observable,
+                                                              local_observable.parent,
+                                                              user,
+                                                              event_permissions)
                 if not merges:
                     merges = obj_merge
         else:
-            self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username, local_observable.identifier))
+            self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                          local_observable.identifier))
             raise MergingException()
 
         # TODO merge related observables
@@ -242,7 +279,9 @@ class Merger(BaseController):
             self.logger.info('Observable Composition {0} will be updated'.format(local_observable_composition.uuid))
             self.set_dbcode(local_observable_composition, remote_observable_composition)
             if remote_observable_composition.operator:
-                self.logger.info('Observable Composition {0} operator will be replaced "{1}" by "{2}"'.format(local_observable_composition.uuid, local_observable_composition.operator, remote_observable_composition.operator))
+                self.logger.info('Observable Composition {0} operator will be replaced "{1}" by "{2}"'.format(local_observable_composition.uuid,
+                                                                                                              local_observable_composition.operator,
+                                                                                                              remote_observable_composition.operator))
                 local_observable_composition.operator = remote_observable_composition.operator
             merges = True
             for rem_obs in remote_observable_composition.observables:
@@ -262,10 +301,14 @@ class Merger(BaseController):
                         self.append_observable(rem_obs, local_event, local_observable_composition)
                         merges = True
                     else:
-                        self.logger.warning('User {0} tried to add an observable to observable composition {1} but does not have the permissions for it'.format(user.username, local_observable_composition.identifier))
+                        self.logger.warning(('User {0} tried to add an observable to observable composition {1} but '
+                                             + 'does not have the permissions for it').format(user.username,
+                                                                                              local_observable_composition.identifier))
                         raise MergingException()
         else:
-            self.logger.warning('User {0} tried to update observable composition {1} but does not have the permissions for it'.format(user.username, local_observable_composition.identifier))
+            self.logger.warning(('User {0} tried to update observable composition {1} but does not have the permissions'
+                                 + ' for it').format(user.username,
+                                                     local_observable_composition.identifier))
             raise MergingException()
         return merges
 
@@ -312,7 +355,9 @@ class Merger(BaseController):
                                 if not merges:
                                     merges = obs_merge
                             else:
-                                self.logger.warning('User {0} tried to update observable {1} but does not have the permissions for it'.format(user.username, local_observable.identifier))
+                                self.logger.warning(('User {0} tried to update observable {1} but does not ' +
+                                                     'have the permissions for it').format(user.username,
+                                                                                           local_observable.identifier))
                                 raise MergingException()
                             found = True
                             break
@@ -335,7 +380,8 @@ class Merger(BaseController):
                         self.logger.warning('User {0} tried to add an observable but does not have the permissions for it'.format(user.username))
                         raise MergingException()
         else:
-            self.logger.warning('User {0} tried to update observables on event {1} but does not have the permissions for it'.format(user.username, local_event.identifier))
+            self.logger.warning('User {0} tried to update observables on event {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                                    local_event.identifier))
             raise MergingException()
         return merges
 
@@ -345,24 +391,35 @@ class Merger(BaseController):
         if remote_event.modified_on > local_event.modified_on:
             if event_permissions:
                 if event_permissions.can_modify:
-                # take over all values and log the old ones to log
+                    # take over all values and log the old ones to log
                     self.logger.info('Event {0} will be updated'.format(local_event.uuid))
                     self.logger.info('Event {0} title will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.title, remote_event.title))
                     local_event.title = remote_event.title
-                    self.logger.info('Event {0} description will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.description, remote_event.description))
+                    self.logger.info('Event {0} description will be replaced "{1}" by "{2}"'.format(local_event.uuid,
+                                                                                                    local_event.description,
+                                                                                                    remote_event.description))
                     local_event.description = remote_event.description
-                    self.logger.info('Event {0} tlp_level_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.tlp_level_id, remote_event.tlp_level_id))
+                    self.logger.info('Event {0} tlp_level_id will be replaced "{1}" by "{2}"'.format(local_event.uuid,
+                                                                                                     local_event.tlp_level_id,
+                                                                                                     remote_event.tlp_level_id))
                     local_event.tlp_level_id = remote_event.tlp_level_id
-                    self.logger.info('Event {0} status_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.status_id, remote_event.status_id))
+                    self.logger.info('Event {0} status_id will be replaced "{1}" by "{2}"'.format(local_event.uuid,
+                                                                                                  local_event.status_id,
+                                                                                                  remote_event.status_id))
                     local_event.status_id = remote_event.status_id
-                    self.logger.info('Event {0} risk_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.risk_id, remote_event.risk_id))
+                    self.logger.info('Event {0} risk_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.risk_id,
+                                                                                                remote_event.risk_id))
                     local_event.risk_id = remote_event.risk_id
-                    self.logger.info('Event {0} analysis_id will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.analysis_id, remote_event.analysis_id))
+                    self.logger.info('Event {0} analysis_id will be replaced "{1}" by "{2}"'.format(local_event.uuid,
+                                                                                                    local_event.analysis_id,
+                                                                                                    remote_event.analysis_id))
                     local_event.analysis_id = remote_event.analysis_id
                     self.set_dbcode(local_event, local_event)
                     # event will get unpublished
                     local_event.properties.is_shareable = False
-                    self.logger.info('Event {0} title will be replaced "{1}" by "{2}"'.format(local_event.uuid, local_event.last_publish_date, remote_event.last_publish_date))
+                    self.logger.info('Event {0} title will be replaced "{1}" by "{2}"'.format(local_event.uuid,
+                                                                                              local_event.last_publish_date,
+                                                                                              remote_event.last_publish_date))
                     local_event.last_publish_date = remote_event.last_publish_date
 
                     local_event.modified_on = remote_event.modified_on
@@ -370,7 +427,8 @@ class Merger(BaseController):
 
                     merges = True
                 else:
-                    self.logger.warning('User {0} tried to update event {1} but does not have the permissions for it'.format(user.username, local_event.identifier))
+                    self.logger.warning('User {0} tried to update event {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                             local_event.identifier))
                     raise MergingException()
                 obs_merges = self.merge_observables(local_event.observables, remote_event.observables, local_event, local_event, user, event_permissions)
                 if not merges:
@@ -387,7 +445,8 @@ class Merger(BaseController):
                 else:
                     return None
             else:
-                self.logger.warning('User {0} tried to update event {1} but does not have the permissions for it'.format(user.username, local_event.identifier))
+                self.logger.warning('User {0} tried to update event {1} but does not have the permissions for it'.format(user.username,
+                                                                                                                         local_event.identifier))
                 raise MergingException()
         return None
 
@@ -398,9 +457,13 @@ class Merger(BaseController):
             self.logger.info('Report {0} will be updated'.format(local_event.uuid))
             self.logger.info('Report {0} title will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.title, remote_report.title))
             local_report.title = remote_report.title
-            self.logger.info('Report {0} description will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.description, remote_report.description))
+            self.logger.info('Report {0} description will be replaced "{1}" by "{2}"'.format(local_report.uuid,
+                                                                                             local_report.description,
+                                                                                             remote_report.description))
             local_report.description = remote_report.description
-            self.logger.info('Report {0} short_description will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.short_description, remote_report.short_description))
+            self.logger.info('Report {0} short_description will be replaced "{1}" by "{2}"'.format(local_report.uuid,
+                                                                                                   local_report.short_description,
+                                                                                                   remote_report.short_description))
             local_report.short_description = remote_report.short_description
             self.set_dbcode(local_report, remote_report)
             self.logger.info('Report {0} title will be replaced "{1}" by "{2}"'.format(local_report.uuid, local_report.title, remote_report.title))
@@ -408,7 +471,9 @@ class Merger(BaseController):
             local_report.modified_on = remote_report.modified_on
             local_report.modifier_id = user.identifier
             if remote_report.tlp_level_id:
-                self.logger.info('TLP from report {0} will be changed from {1} to {2}'.format(local_report.uuid, local_report.tlp_level_id, remote_report.tlp_level_id))
+                self.logger.info('TLP from report {0} will be changed from {1} to {2}'.format(local_report.uuid,
+                                                                                              local_report.tlp_level_id,
+                                                                                              remote_report.tlp_level_id))
                 local_report.tlp_level_id = remote_report.tlp_level_id
         for rem_reference in remote_report.references:
             # find the corresponding one
@@ -431,12 +496,16 @@ class Merger(BaseController):
         if local_reference.modified_on < rem_reference.modified_on:
             self.logger.info('Reference {0} will be updated'.format(local_reference.uuid))
             self.set_dbcode(local_reference, rem_reference)
-            self.logger.info('Reference {0} value will be replaced "{1}" by "{2}"'.format(local_reference.uuid, local_reference.value, rem_reference.value))
+            self.logger.info('Reference {0} value will be replaced "{1}" by "{2}"'.format(local_reference.uuid,
+                                                                                          local_reference.value,
+                                                                                          rem_reference.value))
             local_reference.value = rem_reference.value
             local_reference.modified_on = rem_reference.modified_on
             local_reference.modifier_id = user.identifier
             if rem_reference.tlp_level_id:
-                self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_reference.uuid, local_reference.tlp_level_id, rem_reference.tlp_level_id))
+                self.logger.info('TLP from observable {0} will be changed from {1} to {2}'.format(local_reference.uuid,
+                                                                                                  local_reference.tlp_level_id,
+                                                                                                  rem_reference.tlp_level_id))
                 local_reference.tlp_level_id = rem_reference.tlp_level_id
             return True
         return False
