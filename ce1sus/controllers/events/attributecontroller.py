@@ -17,72 +17,72 @@ __license__ = 'GPL v3+'
 
 
 class AttributeController(BaseController):
-  """event controller handling all actions in the event section"""
+    """event controller handling all actions in the event section"""
 
-  def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
-    self.attribute_broker = self.broker_factory(AttributeBroker)
+    def __init__(self, config, session=None):
+        BaseController.__init__(self, config, session)
+        self.attribute_broker = self.broker_factory(AttributeBroker)
 
-  def get_attribute_by_id(self, identifier):
-    try:
-      return self.attribute_broker.get_by_id(identifier)
-    except NothingFoundException as error:
-      raise ControllerNothingFoundException(error)
-    except BrokerException as error:
-      raise ControllerException(error)
+    def get_attribute_by_id(self, identifier):
+        try:
+            return self.attribute_broker.get_by_id(identifier)
+        except NothingFoundException as error:
+            raise ControllerNothingFoundException(error)
+        except BrokerException as error:
+            raise ControllerException(error)
 
-  def get_attribute_by_uuid(self, uuid):
-    try:
-      return self.attribute_broker.get_by_uuid(uuid)
-    except NothingFoundException as error:
-      raise ControllerNothingFoundException(error)
-    except BrokerException as error:
-      raise ControllerException(error)
+    def get_attribute_by_uuid(self, uuid):
+        try:
+            return self.attribute_broker.get_by_uuid(uuid)
+        except NothingFoundException as error:
+            raise ControllerNothingFoundException(error)
+        except BrokerException as error:
+            raise ControllerException(error)
 
-  def update_attribute(self, attribute, user, commit=True):
-    # TODO: include handler
-    try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(attribute, user, user.group, False)
-      # TODO integrate handlersd
-      self.attribute_broker.update(attribute)
-    except BrokerException as error:
-      raise ControllerException(error)
+    def update_attribute(self, attribute, user, commit=True):
+        # TODO: include handler
+        try:
+            user = self.user_broker.get_by_id(user.identifier)
+            self.set_extended_logging(attribute, user, user.group, False)
+            # TODO integrate handlersd
+            self.attribute_broker.update(attribute)
+        except BrokerException as error:
+            raise ControllerException(error)
 
-  def remove_attribute(self, attribute, user, commit=True):
-    # TODO: include handler
-    try:
-      self.attribute_broker.remove_by_id(attribute.identifier)
-    except BrokerException as error:
-      raise ControllerException(error)
+    def remove_attribute(self, attribute, user, commit=True):
+        # TODO: include handler
+        try:
+            self.attribute_broker.remove_by_id(attribute.identifier)
+        except BrokerException as error:
+            raise ControllerException(error)
 
-  def insert_attributes(self, attributes, user, commit=True, owner=True):
-    self.logger.debug('User {0} inserts a new attribute'.format(user.username))
+    def insert_attributes(self, attributes, user, commit=True, owner=True):
+        self.logger.debug('User {0} inserts a new attribute'.format(user.username))
 
-    # handle handler attributes
+        # handle handler attributes
 
-    try:
-      # set extended logging
-      for attribute in attributes:
-        self.set_extended_logging(attribute, user, user.group, True)
-        for child in attribute.children:
-          self.set_extended_logging(child, user, user.group, True)
+        try:
+            # set extended logging
+            for attribute in attributes:
+                self.set_extended_logging(attribute, user, user.group, True)
+                for child in attribute.children:
+                    self.set_extended_logging(child, user, user.group, True)
 
-      user = self.user_broker.get_by_id(user.identifier)
-      # set owner
-      for attribute in attributes:
-        if owner:
-          attribute.properties.is_validated = True
-        else:
-          attribute.properties.is_proposal = True
+            user = self.user_broker.get_by_id(user.identifier)
+            # set owner
+            for attribute in attributes:
+                if owner:
+                    attribute.properties.is_validated = True
+                else:
+                    attribute.properties.is_proposal = True
 
-        self.attribute_broker.insert(attribute, commit=False)
+                self.attribute_broker.insert(attribute, commit=False)
 
-      self.attribute_broker.do_commit(commit)
-      return attributes
-    except IntegrityException as error:
-      self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an attribute with uuid "{1}" but the uuid already exists'.format(user.username, attribute.uuid))
-      raise ControllerException(u'An attribute with uuid "{0}" already exists'.format(attribute.uuid))
-    except BrokerException as error:
-      raise ControllerException(error)
+            self.attribute_broker.do_commit(commit)
+            return attributes
+        except IntegrityException as error:
+            self.logger.debug(error)
+            self.logger.info(u'User {0} tried to insert an attribute with uuid "{1}" but the uuid already exists'.format(user.username, attribute.uuid))
+            raise ControllerException(u'An attribute with uuid "{0}" already exists'.format(attribute.uuid))
+        except BrokerException as error:
+            raise ControllerException(error)

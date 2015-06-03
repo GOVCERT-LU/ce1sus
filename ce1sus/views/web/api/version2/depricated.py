@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 
 class DepricatedView(BaseView):
 
-  @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET', 'POST', 'PUT', 'DELETE'])
-  def index(self):
-    raise cherrypy.HTTPError(status=410, message='The interface for version 0.2.0 is depricated use 0.3.0 instead')
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET', 'POST', 'PUT', 'DELETE'])
+    def index(self):
+        raise cherrypy.HTTPError(status=410, message='The interface for version 0.2.0 is depricated use 0.3.0 instead')

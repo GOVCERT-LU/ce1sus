@@ -17,5 +17,5 @@ __license__ = 'GPL v3+'
 
 class CommentBroker(BrokerBase):
 
-  def get_broker_class(self):
-    return Comment
+    def get_broker_class(self):
+        return Comment

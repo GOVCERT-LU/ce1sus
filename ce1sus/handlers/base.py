@@ -22,324 +22,324 @@ __license__ = 'GPL v3+'
 
 
 class HandlerException(Exception):
-  """
-  Exception base for handler exceptions
-  """
-  pass
+    """
+    Exception base for handler exceptions
+    """
+    pass
 
 
 class UndefinedException(HandlerException):
-  pass
+    pass
 
 
 class HandlerBase(object):
-  """
-  Base class for handlers
-
-  Note this class is pseudo abstract
-  """
-
-  def __init__(self):
-    # initalize the configuration for the handle and only the for the handlers
-    try:
-      basePath = dirname(abspath(__file__))
-      config = Configuration(basePath + '/../../config/handlers.conf')
-    except ConfigSectionNotFoundException as error:
-      raise HandlerException(error)
-    self.__config = config
-    self.attribute_definitions = dict()
-    self.object_definitions = dict()
-    self.user = None
-    self.conditions = dict()
-    self.is_multi_line = False
-    self.is_rest_insert = True
-    self.is_owner = False
-
-  @property
-  def reference_definitions(self):
-    return self.attribute_definitions
-
-  def get_config_value(self, key, default_value=None):
-    return self.__config.get(self.__class__.__name__, key.lower(), default_value)
-
-  @staticmethod
-  def get_uuid():
-    raise HandlerException('get_uuid not defined')
-
-  @staticmethod
-  def get_allowed_types():
-    raise HandlerException('get_allowed_types not defined')
-
-  @staticmethod
-  def get_description():
-    raise HandlerException('get_description not defined')
-
-  def get_additinal_attribute_chksums(self):
     """
-    Returns a list of additional attributes checksums required for the handling
+    Base class for handlers
+
+    Note this class is pseudo abstract
     """
-    raise HandlerException(('get_additinal_attribute_chksums not defined for {0}').format(self.__class__.__name__))
 
-  def get_additional_object_chksums(self):
-    raise HandlerException(('get_additional_object_chksums not defined for {0}').format(self.__class__.__name__))
+    def __init__(self):
+        # initalize the configuration for the handle and only the for the handlers
+        try:
+            basePath = dirname(abspath(__file__))
+            config = Configuration(basePath + '/../../config/handlers.conf')
+        except ConfigSectionNotFoundException as error:
+            raise HandlerException(error)
+        self.__config = config
+        self.attribute_definitions = dict()
+        self.object_definitions = dict()
+        self.user = None
+        self.conditions = dict()
+        self.is_multi_line = False
+        self.is_rest_insert = True
+        self.is_owner = False
 
-  def get_additinal_reference_chksums(self):
-    raise HandlerException(('get_additinal_reference_chksums not defined for {0}').format(self.__class__.__name__))
+    @property
+    def reference_definitions(self):
+        return self.attribute_definitions
 
-  def get_attriute_definition(self, chksum):
-    definition = self.attribute_definitions.get(chksum, None)
-    if definition:
-      return definition
-    else:
-      raise HandlerException(u'Attribute definition with chksum {0} cannot be found'.format(chksum))
+    def get_config_value(self, key, default_value=None):
+        return self.__config.get(self.__class__.__name__, key.lower(), default_value)
 
-  def get_reference_definition(self, chksum):
-    definition = self.reference_definitions.get(chksum, None)
-    if definition:
-      return definition
-    else:
-      raise HandlerException(u'Reference definition with chksum {0} cannot be found'.format(chksum))
+    @staticmethod
+    def get_uuid():
+        raise HandlerException('get_uuid not defined')
 
-  def get_condition_by_uuid(self, uuid):
-    for condition in self.conditions:
-      if condition.uuid == uuid:
-        return condition
-    raise HandlerException(u'Condition with uuid {0} cannot be found'.format(uuid))
+    @staticmethod
+    def get_allowed_types():
+        raise HandlerException('get_allowed_types not defined')
 
-  def get_attriute_definition_by_uuid(self, uuid):
-    for value in self.attribute_definitions.itervalues():
-      if value.uuid == uuid:
-        return value
-    raise HandlerException(u'Attribute definition with uuid {0} cannot be found'.format(uuid))
+    @staticmethod
+    def get_description():
+        raise HandlerException('get_description not defined')
 
-  def get_object_definition_by_uuid(self, uuid):
-    for value in self.object_definitions.itervalues():
-      if value.uuid == uuid:
-        return value
-    raise HandlerException(u'Object definition with uuid {0} cannot be found'.format(uuid))
+    def get_additinal_attribute_chksums(self):
+        """
+        Returns a list of additional attributes checksums required for the handling
+        """
+        raise HandlerException(('get_additinal_attribute_chksums not defined for {0}').format(self.__class__.__name__))
 
-  def get_object_definition(self, chksum):
-    definition = self.object_definitions.get(chksum, None)
-    if definition:
-      return definition
-    else:
-      raise HandlerException(u'Object definition with chksum {0} cannot be found'.format(chksum))
+    def get_additional_object_chksums(self):
+        raise HandlerException(('get_additional_object_chksums not defined for {0}').format(self.__class__.__name__))
 
-  def get_main_definition(self):
-    """
-    Returns the definition using this handler
-    """
-    chksums = self.get_additinal_attribute_chksums()
-    diff = list(set(self.attribute_definitions.keys()) - set(chksums))
-    if len(diff) == 1:
-      main_definition = self.attribute_definitions.get(diff[0], None)
-      if main_definition:
-        return main_definition
-      else:
-        raise HandlerException((u'Error determining main definition for {0}').format(self.__class__.__name__))
-    else:
-      raise HandlerException((u'Could not determine main definition for {0}').format(self.__class__.__name__))
+    def get_additinal_reference_chksums(self):
+        raise HandlerException(('get_additinal_reference_chksums not defined for {0}').format(self.__class__.__name__))
 
-  def insert(self, obj, user, json):
-    """
-    Process of the post over the RestAPI
+    def get_attriute_definition(self, chksum):
+        definition = self.attribute_definitions.get(chksum, None)
+        if definition:
+            return definition
+        else:
+            raise HandlerException(u'Attribute definition with chksum {0} cannot be found'.format(chksum))
 
-    :param obj: parent object
-    :type obj: Object
-    :param definitions: The reqiried definitions
-    :type definitions: List of attribute Definitions
-    :param user: The user calling the function
-    :type user: User
-    :param rest_attribute: Attribute inserting over rest
-    :type rest_attribute: ReatAttribue
+    def get_reference_definition(self, chksum):
+        definition = self.reference_definitions.get(chksum, None)
+        if definition:
+            return definition
+        else:
+            raise HandlerException(u'Reference definition with chksum {0} cannot be found'.format(chksum))
 
-    :returns: Attribute, [List of Attribute], [related_objects]
-    """
-    raise HandlerException(('insert is not defined for {0} with parameters '
-                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
-                                                       obj,
-                                                       user,
-                                                       json))
+    def get_condition_by_uuid(self, uuid):
+        for condition in self.conditions:
+            if condition.uuid == uuid:
+                return condition
+        raise HandlerException(u'Condition with uuid {0} cannot be found'.format(uuid))
 
-  def update(self, attribtue, user, json):
-    """
-    Process of the post over the RestAPI
+    def get_attriute_definition_by_uuid(self, uuid):
+        for value in self.attribute_definitions.itervalues():
+            if value.uuid == uuid:
+                return value
+        raise HandlerException(u'Attribute definition with uuid {0} cannot be found'.format(uuid))
 
-    :returns: Attribute
-    """
-    raise HandlerException(('update is not defined for {0} with parameters '
-                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
-                                                       attribtue,
-                                                       user,
-                                                       json))
+    def get_object_definition_by_uuid(self, uuid):
+        for value in self.object_definitions.itervalues():
+            if value.uuid == uuid:
+                return value
+        raise HandlerException(u'Object definition with uuid {0} cannot be found'.format(uuid))
 
-  def remove(self, attribtue, user, json):
-    raise HandlerException(('remove is not defined for {0} with parameters '
-                           + '{1},{2},{3},{4}').format(self.__class__.__name__,
-                                                       attribtue,
-                                                       user,
-                                                       json))
+    def get_object_definition(self, chksum):
+        definition = self.object_definitions.get(chksum, None)
+        if definition:
+            return definition
+        else:
+            raise HandlerException(u'Object definition with chksum {0} cannot be found'.format(chksum))
 
-  def create_attribute(self, obj, definition, user, json, set_parent=True):
-    """
-    Creates the attribute
+    def get_main_definition(self):
+        """
+        Returns the definition using this handler
+        """
+        chksums = self.get_additinal_attribute_chksums()
+        diff = list(set(self.attribute_definitions.keys()) - set(chksums))
+        if len(diff) == 1:
+            main_definition = self.attribute_definitions.get(diff[0], None)
+            if main_definition:
+                return main_definition
+            else:
+                raise HandlerException((u'Error determining main definition for {0}').format(self.__class__.__name__))
+        else:
+            raise HandlerException((u'Could not determine main definition for {0}').format(self.__class__.__name__))
 
-    :param params: The parameters
-    :type params: Dictionary
-    :param obj: The object the attributes belongs to
-    :type obj: BASE object
-    :param definition: Attribute definition
-    :type definition: AttributeDefinition
-    :param user: The user creating the attribute
-    :type user: User
+    def insert(self, obj, user, json):
+        """
+        Process of the post over the RestAPI
 
-    :returns: Attribute
-    """
-    attribute = get_class('ce1sus.db.classes.attribute', 'Attribute')()
+        :param obj: parent object
+        :type obj: Object
+        :param definitions: The reqiried definitions
+        :type definitions: List of attribute Definitions
+        :param user: The user calling the function
+        :type user: User
+        :param rest_attribute: Attribute inserting over rest
+        :type rest_attribute: ReatAttribue
 
-    # Note first the definition has to be specified else the value cannot be assigned
-    attribute.definition = definition
+        :returns: Attribute, [List of Attribute], [related_objects]
+        """
+        raise HandlerException(('insert is not defined for {0} with parameters '
+                               + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                           obj,
+                                                           user,
+                                                           json))
 
-    # Note second the object has to be specified
-    attribute.object = obj
-    attribute.object_id = obj.identifier
-    # TODO create default value if value was not set for IOC and share
+    def update(self, attribtue, user, json):
+        """
+        Process of the post over the RestAPI
 
-    # set remaining stuff
-    attribute.populate(json)
-    # set definition id
-    # definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
-    # attribute.definition = definition
-    attribute.definition_id = definition.identifier
+        :returns: Attribute
+        """
+        raise HandlerException(('update is not defined for {0} with parameters '
+                               + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                           attribtue,
+                                                           user,
+                                                           json))
 
-    # set condition id
-    condition = self.get_condition_by_uuid(attribute.cond_uuid)
-    attribute.condition = condition
-    attribute.condition_id = condition.identifier
-    # TODO fix this -> should take into account the ones from json
-    attribute.owner_group_id = user.group.identifier
-    attribute.owner_group = user.group
-    attribute.creator_group_id = user.group.identifier
-    attribute.creator_group = user.group
-    attribute.modifier_group_id = user.group.identifier
-    attribute.modifier_group = user.group
-    attribute.originating_group_id = user.group.identifier
-    attribute.originating_group = user.group
-    attribute.creator_id = user.identifier
-    attribute.modifier = user
-    attribute.modifier_id = user.identifier
-    attribute.creator = user
-    self.set_provenance(attribute)
+    def remove(self, attribtue, user, json):
+        raise HandlerException(('remove is not defined for {0} with parameters '
+                               + '{1},{2},{3},{4}').format(self.__class__.__name__,
+                                                           attribtue,
+                                                           user,
+                                                           json))
 
-    return attribute
+    def create_attribute(self, obj, definition, user, json, set_parent=True):
+        """
+        Creates the attribute
 
-  def create_reference(self, report, definition, user, json):
-    reference = get_class('ce1sus.db.classes.report', 'Reference')()
-    # Note first the definition has to be specified else the value cannot be assigned
-    reference.uuid = uuid4()
-    reference.definition = definition
+        :param params: The parameters
+        :type params: Dictionary
+        :param obj: The object the attributes belongs to
+        :type obj: BASE object
+        :param definition: Attribute definition
+        :type definition: AttributeDefinition
+        :param user: The user creating the attribute
+        :type user: User
 
-    # Note second the object has to be specified
-    reference.report = report
-    reference.report_id = report.identifier
-    # TODO create default value if value was not set for IOC and share
+        :returns: Attribute
+        """
+        attribute = get_class('ce1sus.db.classes.attribute', 'Attribute')()
 
-    # set remaining stuff
-    reference.populate(json)
+        # Note first the definition has to be specified else the value cannot be assigned
+        attribute.definition = definition
 
-    # set the definition id as in the definition as it might get overwritten
-    reference.definition_id = definition.identifier
-    self.set_provenance(reference)
-    return reference
+        # Note second the object has to be specified
+        attribute.object = obj
+        attribute.object_id = obj.identifier
+        # TODO create default value if value was not set for IOC and share
 
-  def create_object(self, obsevable, definition, user, json, has_parent_observable=True):
-    # TODO recreate object to new setup
-    obj = get_class('ce1sus.db.classes.object', 'Object')()
+        # set remaining stuff
+        attribute.populate(json)
+        # set definition id
+        # definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
+        # attribute.definition = definition
+        attribute.definition_id = definition.identifier
 
-    obj.identifier = None
-    obj.populate(json)
-    obj.definition = definition
-    obj.definition_id = definition.identifier
+        # set condition id
+        condition = self.get_condition_by_uuid(attribute.cond_uuid)
+        attribute.condition = condition
+        attribute.condition_id = condition.identifier
+        # TODO fix this -> should take into account the ones from json
+        attribute.owner_group_id = user.group.identifier
+        attribute.owner_group = user.group
+        attribute.creator_group_id = user.group.identifier
+        attribute.creator_group = user.group
+        attribute.modifier_group_id = user.group.identifier
+        attribute.modifier_group = user.group
+        attribute.originating_group_id = user.group.identifier
+        attribute.originating_group = user.group
+        attribute.creator_id = user.identifier
+        attribute.modifier = user
+        attribute.modifier_id = user.identifier
+        attribute.creator = user
+        self.set_provenance(attribute)
 
-    obj.observable = obsevable
-    obj.observable_id = obsevable.identifier
-    if has_parent_observable:
-      obj.parent = obsevable
-      obj.parent_id = obsevable.identifier
-    # TODO create default value if value was not set for IOC and share
-    self.set_provenance(obj)
+        return attribute
 
-    # TODO find a better way
-    obj.owner_group_id = user.group.identifier
-    obj.owner_group = user.group
-    obj.creator_group_id = user.group.identifier
-    obj.creator_group = user.group
-    obj.modifier_group_id = user.group.identifier
-    obj.modifier_group = user.group
-    obj.originating_group_id = user.group.identifier
-    obj.originating_group = user.group
-    obj.creator_id = user.identifier
-    obj.modifier = user
-    obj.modifier_id = user.identifier
-    obj.creator = user
+    def create_reference(self, report, definition, user, json):
+        reference = get_class('ce1sus.db.classes.report', 'Reference')()
+        # Note first the definition has to be specified else the value cannot be assigned
+        reference.uuid = uuid4()
+        reference.definition = definition
 
-    return obj
+        # Note second the object has to be specified
+        reference.report = report
+        reference.report_id = report.identifier
+        # TODO create default value if value was not set for IOC and share
 
-  def get_data(self, attribute, definition, parameters):
-    raise HandlerException(('frontend_get is not defined for {0}').format(self.__class__.__name__))
+        # set remaining stuff
+        reference.populate(json)
 
-  def get_view_type(self):
-    raise HandlerException(('get_view_type is not defined for {0}').format(self.__class__.__name__))
+        # set the definition id as in the definition as it might get overwritten
+        reference.definition_id = definition.identifier
+        self.set_provenance(reference)
+        return reference
 
-  def to_dict(self):
-    return {'name': self.__class__.__name__,
-            'view_type': self.get_view_type(),
-            'is_multi_line': self.is_multi_line
-            }
+    def create_object(self, obsevable, definition, user, json, has_parent_observable=True):
+        # TODO recreate object to new setup
+        obj = get_class('ce1sus.db.classes.object', 'Object')()
 
-  def require_js(self):
-    raise HandlerException(u'require_js is not defined for {0}'.format(self.__class__.__name__))
+        obj.identifier = None
+        obj.populate(json)
+        obj.definition = definition
+        obj.definition_id = definition.identifier
 
-  def set_provenance(self, instance):
-    if self.is_owner:
-      instance.properties.is_validated = True
-    instance.properties.is_rest_instert = self.is_rest_insert
-    instance.properties.is_web_insert = not self.is_rest_insert
+        obj.observable = obsevable
+        obj.observable_id = obsevable.identifier
+        if has_parent_observable:
+            obj.parent = obsevable
+            obj.parent_id = obsevable.identifier
+        # TODO create default value if value was not set for IOC and share
+        self.set_provenance(obj)
 
-  def get_classname(self):
-    return self.__class__.__name__
+        # TODO find a better way
+        obj.owner_group_id = user.group.identifier
+        obj.owner_group = user.group
+        obj.creator_group_id = user.group.identifier
+        obj.creator_group = user.group
+        obj.modifier_group_id = user.group.identifier
+        obj.modifier_group = user.group
+        obj.originating_group_id = user.group.identifier
+        obj.originating_group = user.group
+        obj.creator_id = user.identifier
+        obj.modifier = user
+        obj.modifier_id = user.identifier
+        obj.creator = user
 
-  def create_observable(self, attribute):
-      observable = Observable()
+        return obj
 
-      # set new uuid for the parent
+    def get_data(self, attribute, definition, parameters):
+        raise HandlerException(('frontend_get is not defined for {0}').format(self.__class__.__name__))
 
-      # TODO change this to be more accurate
-      observable.created_at = attribute.created_at
-      observable.modified_on = attribute.modified_on
-      observable.creator = attribute.creator
-      observable.modifier = attribute.modifier
-      observable.creator_id = attribute.creator_id
-      observable.modifier_id = attribute.modifier_id
-      observable.originating_group = attribute.originating_group
-      observable.originating_group_id = attribute.originating_group_id
-      observable.owner_group_id = attribute.creator.group.identifier
-      observable.owner_group = attribute.creator.group
-      observable.creator_group = attribute.originating_group
-      observable.creator_group_id = attribute.originating_group_id
+    def get_view_type(self):
+        raise HandlerException(('get_view_type is not defined for {0}').format(self.__class__.__name__))
 
-      event = attribute.object.event
-      observable.parent_id = event.identifier
-      observable.parent = event
+    def to_dict(self):
+        return {'name': self.__class__.__name__,
+                'view_type': self.get_view_type(),
+                'is_multi_line': self.is_multi_line
+                }
 
-      observable.created_at = datetime.utcnow()
-      observable.modified_on = datetime.utcnow()
-      observable.description = 'Auto generated'
-      observable.uuid = uuid4()
+    def require_js(self):
+        raise HandlerException(u'require_js is not defined for {0}'.format(self.__class__.__name__))
 
-      self.set_provenance(observable)
+    def set_provenance(self, instance):
+        if self.is_owner:
+            instance.properties.is_validated = True
+        instance.properties.is_rest_instert = self.is_rest_insert
+        instance.properties.is_web_insert = not self.is_rest_insert
 
-      if attribute.properties.is_shareable:
-        observable.properties.is_shareable = True
+    def get_classname(self):
+        return self.__class__.__name__
 
-      return observable
+    def create_observable(self, attribute):
+        observable = Observable()
+
+        # set new uuid for the parent
+
+        # TODO change this to be more accurate
+        observable.created_at = attribute.created_at
+        observable.modified_on = attribute.modified_on
+        observable.creator = attribute.creator
+        observable.modifier = attribute.modifier
+        observable.creator_id = attribute.creator_id
+        observable.modifier_id = attribute.modifier_id
+        observable.originating_group = attribute.originating_group
+        observable.originating_group_id = attribute.originating_group_id
+        observable.owner_group_id = attribute.creator.group.identifier
+        observable.owner_group = attribute.creator.group
+        observable.creator_group = attribute.originating_group
+        observable.creator_group_id = attribute.originating_group_id
+
+        event = attribute.object.event
+        observable.parent_id = event.identifier
+        observable.parent = event
+
+        observable.created_at = datetime.utcnow()
+        observable.modified_on = datetime.utcnow()
+        observable.description = 'Auto generated'
+        observable.uuid = uuid4()
+
+        self.set_provenance(observable)
+
+        if attribute.properties.is_shareable:
+            observable.properties.is_shareable = True
+
+        return observable

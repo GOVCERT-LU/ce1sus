@@ -20,36 +20,36 @@ __license__ = 'GPL v3+'
 
 
 class MailTemplate(SimpleLogingInformations, Base):
-  """This is a container class for the Mails table."""
-  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
-  body = Column('body', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
-  subject = Column('subject', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+    """This is a container class for the Mails table."""
+    name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
+    body = Column('body', UnicodeText(collation='utf8_unicode_ci'), nullable=False)
+    subject = Column('subject', Unicode(255, collation='utf8_unicode_ci'), nullable=False)
 
-  def to_dict(self, complete=True, inflated=False):
-    if complete:
-      return {'identifier': self.convert_value(self.uuid),
-              'name': self.convert_value(self.name),
-              'body': self.convert_value(self.body),
-              'subject': self.convert_value(self.subject)}
-    else:
-      return {'identifier': self.convert_value(self.uuid),
-              'name': self.convert_value(self.name)}
+    def to_dict(self, complete=True, inflated=False):
+        if complete:
+            return {'identifier': self.convert_value(self.uuid),
+                    'name': self.convert_value(self.name),
+                    'body': self.convert_value(self.body),
+                    'subject': self.convert_value(self.subject)}
+        else:
+            return {'identifier': self.convert_value(self.uuid),
+                    'name': self.convert_value(self.name)}
 
-  def populate(self, json):
-    self.name = json.get('name', None)
-    self.body = json.get('body', None)
-    self.subject = json.get('subject', None)
+    def populate(self, json):
+        self.name = json.get('name', None)
+        self.body = json.get('body', None)
+        self.subject = json.get('subject', None)
 
-  def validate(self):
-    """Validates the mail template object"""
-    ObjectValidator.validateAlNum(self, 'name', withSpaces=True, minLength=3,
-                                  withSymbols=True)
-    ObjectValidator.validateAlNum(self,
-                                  'body',
-                                  withNonPrintableCharacters=True,
-                                  withSpaces=True,
-                                  minLength=3,
-                                  withSymbols=True)
-    ObjectValidator.validateAlNum(self, 'subject', withSpaces=True, minLength=3,
-                                  withSymbols=True)
-    return ObjectValidator.isObjectValid(self)
+    def validate(self):
+        """Validates the mail template object"""
+        ObjectValidator.validateAlNum(self, 'name', withSpaces=True, minLength=3,
+                                      withSymbols=True)
+        ObjectValidator.validateAlNum(self,
+                                      'body',
+                                      withNonPrintableCharacters=True,
+                                      withSpaces=True,
+                                      minLength=3,
+                                      withSymbols=True)
+        ObjectValidator.validateAlNum(self, 'subject', withSpaces=True, minLength=3,
+                                      withSymbols=True)
+        return ObjectValidator.isObjectValid(self)

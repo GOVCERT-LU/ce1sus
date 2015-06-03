@@ -18,42 +18,42 @@ PLUGIN_ROOT = 'ce1sus.plugins'
 
 
 class PluginException(Exception):
-  pass
+    pass
 
 
 def plugin_web_method(method):
-  # TODO: check if the method has the right amount of arguments and the right ones
-  method.web_plugin = True
-  return method
+    # TODO: check if the method has the right amount of arguments and the right ones
+    method.web_plugin = True
+    return method
 
 
 def plugin_internal_method(method):
-  method.internal_plugin = True
-  return method
+    method.internal_plugin = True
+    return method
 
 
 class BasePlugin(object):
 
-  def __init__(self, config):
-    self.conig = config
-    self.__logger = Log(config)
-    self.session_manager = SessionManager(config)
+    def __init__(self, config):
+        self.conig = config
+        self.__logger = Log(config)
+        self.session_manager = SessionManager(config)
 
-  @property
-  def logger(self):
-    return self.__logger.get_logger(self.__class__.__name__)
+    @property
+    def logger(self):
+        return self.__logger.get_logger(self.__class__.__name__)
 
-  def broker_factory(self, clazz):
-    """
-    Instantiates a broker.
+    def broker_factory(self, clazz):
+        """
+        Instantiates a broker.
 
-    Note: In short sets up the broker in a correct manner with all the
-    required settings
+        Note: In short sets up the broker in a correct manner with all the
+        required settings
 
-    :param clazz: The BrokerClass to be instantiated
-    :type clazz: Extension of brokerbase
+        :param clazz: The BrokerClass to be instantiated
+        :type clazz: Extension of brokerbase
 
-    :returns: Instance of a broker
-    """
-    self.logger.debug('Create broker for {0}'.format(clazz))
-    return self.session_manager.broker_factory(clazz)
+        :returns: Instance of a broker
+        """
+        self.logger.debug('Create broker for {0}'.format(clazz))
+        return self.session_manager.broker_factory(clazz)

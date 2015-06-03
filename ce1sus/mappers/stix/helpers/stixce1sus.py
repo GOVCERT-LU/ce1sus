@@ -28,198 +28,198 @@ __license__ = 'GPL v3+'
 
 
 class StixCelsusMapperException(Exception):
-  pass
+    pass
 
 
 class StixCelsusMapper(BaseController):
 
-  def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
-    self.cybox_mapper = CyboxMapper(config, session)
-    self.event_controller = EventController(config, session)
-    self.observable_controller = ObservableController(config, session)
+    def __init__(self, config, session=None):
+        BaseController.__init__(self, config, session)
+        self.cybox_mapper = CyboxMapper(config, session)
+        self.event_controller = EventController(config, session)
+        self.observable_controller = ObservableController(config, session)
 
-  def init(self):
-    groups = self.group_broker.get_all()
-    self.groups = make_dict_definitions(groups)
+    def init(self):
+        groups = self.group_broker.get_all()
+        self.groups = make_dict_definitions(groups)
 
-  def __convert_info_soucre(self, info_source):
-    if info_source and info_source.identity:
-      identity = info_source.identity
-      identifier = None
-      if identity.id_:
-        identifier = extract_uuid(identity.id_)
-      # check if group exits
-      # Only based on the name as the id can vary
-      group = self.groups.get(identity.name, None)
-      if group:
-        return group
-      else:
-        group = Group()
-        if identifier:
-          group.uuid = identifier
+    def __convert_info_soucre(self, info_source):
+        if info_source and info_source.identity:
+            identity = info_source.identity
+            identifier = None
+            if identity.id_:
+                identifier = extract_uuid(identity.id_)
+            # check if group exits
+            # Only based on the name as the id can vary
+            group = self.groups.get(identity.name, None)
+            if group:
+                return group
+            else:
+                group = Group()
+                if identifier:
+                    group.uuid = identifier
+                else:
+                    # Unfortenately we must create our own
+                    group.uuid = uuid4()
+                group.name = identity.name
+                group.description = u'Auto-generated from STIX'
+                group.tlp_lvl = 3
+                self.group_broker.insert(group, False)
+                self.groups[group.name] = group
+            return group
         else:
-          # Unfortenately we must create our own
-          group.uuid = uuid4()
-        group.name = identity.name
-        group.description = u'Auto-generated from STIX'
-        group.tlp_lvl = 3
-        self.group_broker.insert(group, False)
-        self.groups[group.name] = group
-      return group
-    else:
-      return None
+            return None
 
-  def __convert_sightings(self, sightings, user):
-    if sightings:
-      if sightings._inner:
-        result = list()
-        for sighting in sightings._inner:
-          ce1sus_sigthing = Sighting()
-          ce1sus_sigthing.created_at = sighting.timestamp
-          ce1sus_sigthing.timestamp_precision = sighting.timestamp_precision
-          ce1sus_sigthing.creator_group = self.__convert_info_soucre(sighting.source)
-          ce1sus_sigthing.confidence = sighting.confidence
-          ce1sus_sigthing.description = sighting.description
-          set_extended_logging(ce1sus_sigthing, user, user.group)
-          result.append(ce1sus_sigthing)
-          return result
-      else:
+    def __convert_sightings(self, sightings, user):
+        if sightings:
+            if sightings._inner:
+                result = list()
+                for sighting in sightings._inner:
+                    ce1sus_sigthing = Sighting()
+                    ce1sus_sigthing.created_at = sighting.timestamp
+                    ce1sus_sigthing.timestamp_precision = sighting.timestamp_precision
+                    ce1sus_sigthing.creator_group = self.__convert_info_soucre(sighting.source)
+                    ce1sus_sigthing.confidence = sighting.confidence
+                    ce1sus_sigthing.description = sighting.description
+                    set_extended_logging(ce1sus_sigthing, user, user.group)
+                    result.append(ce1sus_sigthing)
+                    return result
+            else:
+                return None
+        else:
+            return None
+
+    def __map_stix_package_header(self, stix_package, user):
+        self.init()
+        self.cybox_mapper.init()
+        event = Event()
+        event.uuid = extract_uuid(stix_package.id_)
+        # event.uuid = stix_package.id_[-36:]
+        stix_header = stix_package.stix_header
+        event.title = stix_header.title
+        info_source = stix_header.information_source
+        event.description = stix_header.description
+        if info_source:
+            # set information source
+            set_extended_logging(event, user, self.__convert_info_soucre(info_source))
+        if isinstance(stix_header.handling, Marking):
+            # set tlp markings if available
+            for specification in stix_header.handling._markings:
+                for structure in specification.marking_structures:
+                    if isinstance(structure, TLPMarkingStructure):
+                        # TODO: set desrcption with reference
+                        event.tlp = structure.color.title()
+        if not event.tlp_level_id:
+            event.tlp = 'White'
+
+        # first and last seen
+        if stix_header.information_source:
+            # TODO review this
+            time = stix_header.information_source.time
+            event.created_at = time.produced_time.value
+            if time.received_time:
+                event.modified_on = time.received_time.value
+            else:
+                event.modified_on = event.created_at
+
+            event.first_seen = time.start_time
+            event.last_seen = time.end_time
+
+        else:
+            # if these values were not set use now
+            event.created_at = datetime.utcnow()
+            event.modified_on = datetime.utcnow()
+            event.first_seen = datetime.utcnow()
+            event.last_seen = datetime.utcnow()
+
+        # TODO find a way to add this in stix / read it out
+        event.status = 'Confirmed'
+        event.analysis = 'Unknown'
+        event.risk = 'Undefined'
+        event.properties.is_shareable = True
+        event.properties.is_rest_instert = True
+
+        if not event.first_seen:
+            event.first_seen = event.created_at
+        if not event.last_seen:
+            event.last_seen = event.modified_on
+        return event
+
+    def create_event(self, stix_package, user, ignore_id=False):
+        # First process the header
+        event = self.__map_stix_package_header(stix_package, user)
+        set_properties(event)
+        # TODO Make relations
+        set_extended_logging(event, user, user.group)
+
+        # First handle observables of the package
+        if stix_package.observables:
+            for observable in stix_package.observables.observables:
+                event.observables.append(self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False))
+        pass
+        # Then handle indicators
+        if stix_package.indicators:
+            # process iocs
+            for indicator in stix_package.indicators:
+                child = self.create_indicator(indicator, event, user)
+                if child:
+                    event.indicators.append(child)
+                else:
+                    raise Exception('None Value')
+
+        # Process incidents
+        if stix_package.incidents:
+            for incident in stix_package.incidents:
+                raise StixCelsusMapperException(u'Incidents are not yet supported')
+
+        if not ignore_id:
+            self.event_controller.insert_event(user, event, False, False)
+
+        return event
+
+    def get_tlp_id_from_markings(self, indicator):
+        handling = indicator.handling
+        if handling:
+            markings = handling.markings
+            for marking in markings:
+                for stucture in marking.marking_structures:
+                    if isinstance(stucture, TLPMarkingStructure):
+                        color = stucture.color
+                        tlp_id = TLP.get_by_value(color.title())
+                        return tlp_id
         return None
-    else:
-      return None
 
-  def __map_stix_package_header(self, stix_package, user):
-    self.init()
-    self.cybox_mapper.init()
-    event = Event()
-    event.uuid = extract_uuid(stix_package.id_)
-    # event.uuid = stix_package.id_[-36:]
-    stix_header = stix_package.stix_header
-    event.title = stix_header.title
-    info_source = stix_header.information_source
-    event.description = stix_header.description
-    if info_source:
-      # set information source
-      set_extended_logging(event, user, self.__convert_info_soucre(info_source))
-    if isinstance(stix_header.handling, Marking):
-      # set tlp markings if available
-      for specification in stix_header.handling._markings:
-        for structure in specification.marking_structures:
-          if isinstance(structure, TLPMarkingStructure):
-            # TODO: set desrcption with reference
-            event.tlp = structure.color.title()
-    if not event.tlp_level_id:
-      event.tlp = 'White'
-
-    # first and last seen
-    if stix_header.information_source:
-      # TODO review this
-      time = stix_header.information_source.time
-      event.created_at = time.produced_time.value
-      if time.received_time:
-        event.modified_on = time.received_time.value
-      else:
-        event.modified_on = event.created_at
-
-      event.first_seen = time.start_time
-      event.last_seen = time.end_time
-
-    else:
-      # if these values were not set use now
-      event.created_at = datetime.utcnow()
-      event.modified_on = datetime.utcnow()
-      event.first_seen = datetime.utcnow()
-      event.last_seen = datetime.utcnow()
-
-    # TODO find a way to add this in stix / read it out
-    event.status = 'Confirmed'
-    event.analysis = 'Unknown'
-    event.risk = 'Undefined'
-    event.properties.is_shareable = True
-    event.properties.is_rest_instert = True
-
-    if not event.first_seen:
-      event.first_seen = event.created_at
-    if not event.last_seen:
-      event.last_seen = event.modified_on
-    return event
-
-  def create_event(self, stix_package, user, ignore_id=False):
-    # First process the header
-    event = self.__map_stix_package_header(stix_package, user)
-    set_properties(event)
-    # TODO Make relations
-    set_extended_logging(event, user, user.group)
-
-    # First handle observables of the package
-    if stix_package.observables:
-      for observable in stix_package.observables.observables:
-        event.observables.append(self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False))
-    pass
-    # Then handle indicators
-    if stix_package.indicators:
-      # process iocs
-      for indicator in stix_package.indicators:
-        child = self.create_indicator(indicator, event, user)
-        if child:
-          event.indicators.append(child)
+    def create_indicator(self, indicator, event, user):
+        ce1sus_indicator = Indicator()
+        set_properties(ce1sus_indicator)
+        if indicator.id_:
+            ce1sus_indicator.uuid = extract_uuid(indicator.id_)
         else:
-          raise Exception('None Value')
+            ce1sus_indicator.uuid = uuid4()
+        ce1sus_indicator.title = indicator.title
+        ce1sus_indicator.description = indicator.description
+        ce1sus_indicator.originating_group = self.__convert_info_soucre(indicator.producer)
+        # TODO: Check if condifdence is in the supported range like Low Hiogh medium or even numbers?!
+        ce1sus_indicator.confidence = indicator.confidence
 
-    # Process incidents
-    if stix_package.incidents:
-      for incident in stix_package.incidents:
-        raise StixCelsusMapperException(u'Incidents are not yet supported')
+        sightings = self.__convert_sightings(indicator.sightings, user)
+        if sightings:
+            ce1sus_indicator.sightings = sightings
+        # TODO: Add indicator types
 
-    if not ignore_id:
-      self.event_controller.insert_event(user, event, False, False)
-
-    return event
-
-  def get_tlp_id_from_markings(self, indicator):
-    handling = indicator.handling
-    if handling:
-      markings = handling.markings
-      for marking in markings:
-        for stucture in marking.marking_structures:
-          if isinstance(stucture, TLPMarkingStructure):
-            color = stucture.color
-            tlp_id = TLP.get_by_value(color.title())
-            return tlp_id
-    return None
-
-  def create_indicator(self, indicator, event, user):
-    ce1sus_indicator = Indicator()
-    set_properties(ce1sus_indicator)
-    if indicator.id_:
-      ce1sus_indicator.uuid = extract_uuid(indicator.id_)
-    else:
-      ce1sus_indicator.uuid = uuid4()
-    ce1sus_indicator.title = indicator.title
-    ce1sus_indicator.description = indicator.description
-    ce1sus_indicator.originating_group = self.__convert_info_soucre(indicator.producer)
-    # TODO: Check if condifdence is in the supported range like Low Hiogh medium or even numbers?!
-    ce1sus_indicator.confidence = indicator.confidence
-
-    sightings = self.__convert_sightings(indicator.sightings, user)
-    if sightings:
-      ce1sus_indicator.sightings = sightings
-    # TODO: Add indicator types
-
-    # TODO: markings
-    if indicator.kill_chain_phases:
-      # TODO: Kill Chains
-      pass
-    # Note observable is actually observables[0]
-    if indicator.observables:
-      tlp_id = self.get_tlp_id_from_markings(indicator)
-      if tlp_id is None:
-        tlp_id = event.tlp_level_id
-      for observable in indicator.observables:
-        observable = self.cybox_mapper.create_observable(observable, event, user, tlp_id, True)
-        observable.event = None
-        observable.event_id = None
-        ce1sus_indicator.observables.append(observable)
-    set_extended_logging(ce1sus_indicator, user, user.group)
-    return ce1sus_indicator
+        # TODO: markings
+        if indicator.kill_chain_phases:
+            # TODO: Kill Chains
+            pass
+        # Note observable is actually observables[0]
+        if indicator.observables:
+            tlp_id = self.get_tlp_id_from_markings(indicator)
+            if tlp_id is None:
+                tlp_id = event.tlp_level_id
+            for observable in indicator.observables:
+                observable = self.cybox_mapper.create_observable(observable, event, user, tlp_id, True)
+                observable.event = None
+                observable.event_id = None
+                ce1sus_indicator.observables.append(observable)
+        set_extended_logging(ce1sus_indicator, user, user.group)
+        return ce1sus_indicator

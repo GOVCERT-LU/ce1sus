@@ -15,6 +15,6 @@ _REL_TTPS_KILLCHAINS = Table('rel_ttps_killchains', Base.metadata,
 
 
 class TTPs(ExtendedLogingInformations, Base):
-  event = relationship('Event', uselist=False)
-  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  kill_chains = relationship('Killchain', secondary='rel_ttps_killchains')
+    event = relationship('Event', uselist=False)
+    event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+    kill_chains = relationship('Killchain', secondary='rel_ttps_killchains')

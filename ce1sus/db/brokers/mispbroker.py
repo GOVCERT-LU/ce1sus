@@ -17,11 +17,11 @@ __license__ = 'GPL v3+'
 
 class ErrorMispBroker(BrokerBase):
 
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
+    def __init__(self, session):
+        BrokerBase.__init__(self, session)
 
-  def get_broker_class(self):
-    """
-    overrides BrokerBase.get_broker_class
-    """
-    return ErrorMispAttribute
+    def get_broker_class(self):
+        """
+        overrides BrokerBase.get_broker_class
+        """
+        return ErrorMispAttribute

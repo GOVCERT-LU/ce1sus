@@ -20,18 +20,18 @@ __license__ = 'GPL v3+'
 
 class ConditionBroker(BrokerBase):
 
-  def get_broker_class(self):
-    """
-    overrides BrokerBase.get_broker_class
-    """
-    return Condition
+    def get_broker_class(self):
+        """
+        overrides BrokerBase.get_broker_class
+        """
+        return Condition
 
-  def get_condition_by_value(self, value):
-    try:
-      return self.session.query(Condition).filter(Condition.value == value).one()
-    except NoResultFound:
-      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(value, self.__class__.__name__))
-    except MultipleResultsFound:
-      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(value))
-    except SQLAlchemyError as error:
-      raise BrokerException(error)
+    def get_condition_by_value(self, value):
+        try:
+            return self.session.query(Condition).filter(Condition.value == value).one()
+        except NoResultFound:
+            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(value, self.__class__.__name__))
+        except MultipleResultsFound:
+            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(value))
+        except SQLAlchemyError as error:
+            raise BrokerException(error)

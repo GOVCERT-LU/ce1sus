@@ -20,26 +20,26 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class ObservableBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
-
-  def get_broker_class(self):
     """
-    overrides BrokerBase.get_broker_class
+    This broker handles all operations on event objects
     """
-    return Observable
+    def __init__(self, session):
+        BrokerBase.__init__(self, session)
 
-  def get_by_id_and_event_id(self, identifier, event_id):
-    try:
-      result = self.session.query(Observable).filter(and_(Observable.identifier == identifier, Observable.event_id == event_id)).one()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException('No observable found with ID :{0} in event with ID {1}'.format(identifier, event_id))
-    except sqlalchemy.orm.exc.MultipleResultsFound:
-      raise TooManyResultsFoundException('Too many results found for observable with ID {0} in event with ID {1}'.format(identifier, event_id))
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      raise BrokerException(error)
+    def get_broker_class(self):
+        """
+        overrides BrokerBase.get_broker_class
+        """
+        return Observable
 
-    return result
+    def get_by_id_and_event_id(self, identifier, event_id):
+        try:
+            result = self.session.query(Observable).filter(and_(Observable.identifier == identifier, Observable.event_id == event_id)).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise NothingFoundException('No observable found with ID :{0} in event with ID {1}'.format(identifier, event_id))
+        except sqlalchemy.orm.exc.MultipleResultsFound:
+            raise TooManyResultsFoundException('Too many results found for observable with ID {0} in event with ID {1}'.format(identifier, event_id))
+        except sqlalchemy.exc.SQLAlchemyError as error:
+            raise BrokerException(error)
+
+        return result

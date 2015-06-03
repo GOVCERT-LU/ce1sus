@@ -20,118 +20,118 @@ __license__ = 'GPL v3+'
 
 class AdminObjectHandler(RestBaseHandler):
 
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-    self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
-    self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
+    def __init__(self, config):
+        RestBaseHandler.__init__(self, config)
+        self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
+        self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
-  @rest_method(default=True)
-  @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
-  @require()
-  def object(self, **args):
-    try:
-      method = args.get('method')
-      path = args.get('path')
-      details = self.get_detail_value(args)
-      json = args.get('json')
-      inflated = self.get_inflated_value(args)
-      if method == 'GET':
-        if len(path) > 0:
-          # if there is a uuid as next parameter then return single user
-          uuid = path.pop(0)
-          # TODO: add inflate
-          definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
-          if len(path) > 0:
-            type_ = uuid = path.pop(0)
-            if type_ == 'attributes':
-              if len(path) > 0:
-                raise RestHandlerException(u'Use the attribute api instead')
-              else:
-                result = list()
-                for attribute in definition.attributes:
-                  result.append(attribute.to_dict(details, inflated))
-                return result
-            else:
-              raise RestHandlerException(u'"{0}" is not supported'.format(type_))
-          else:
-            return definition.to_dict(details, inflated)
-        else:
-          # else return all
-          definitions = self.object_definition_controller.get_all_object_definitions()
-          result = list()
-          for definition in definitions:
-            result.append(definition.to_dict(details, inflated))
-          return result
-      elif method == 'POST':
-        self.check_if_admin()
-        if len(path) > 0:
-          uuid = path.pop(0)
-          definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
-          if len(path) > 0:
-            type_ = path.pop(0)
-            if type_ == 'attribute':
-              # get the object definition
-              if isinstance(json, list):
-                # TODO: add support for lists
-                raise RestHandlerException(u'POST of object attributes does not support lists')
+    @rest_method(default=True)
+    @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
+    @require()
+    def object(self, **args):
+        try:
+            method = args.get('method')
+            path = args.get('path')
+            details = self.get_detail_value(args)
+            json = args.get('json')
+            inflated = self.get_inflated_value(args)
+            if method == 'GET':
+                if len(path) > 0:
+                    # if there is a uuid as next parameter then return single user
+                    uuid = path.pop(0)
+                    # TODO: add inflate
+                    definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
+                    if len(path) > 0:
+                        type_ = uuid = path.pop(0)
+                        if type_ == 'attributes':
+                            if len(path) > 0:
+                                raise RestHandlerException(u'Use the attribute api instead')
+                            else:
+                                result = list()
+                                for attribute in definition.attributes:
+                                    result.append(attribute.to_dict(details, inflated))
+                                return result
+                        else:
+                            raise RestHandlerException(u'"{0}" is not supported'.format(type_))
+                    else:
+                        return definition.to_dict(details, inflated)
+                else:
+                    # else return all
+                    definitions = self.object_definition_controller.get_all_object_definitions()
+                    result = list()
+                    for definition in definitions:
+                        result.append(definition.to_dict(details, inflated))
+                    return result
+            elif method == 'POST':
+                self.check_if_admin()
+                if len(path) > 0:
+                    uuid = path.pop(0)
+                    definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
+                    if len(path) > 0:
+                        type_ = path.pop(0)
+                        if type_ == 'attribute':
+                            # get the object definition
+                            if isinstance(json, list):
+                                # TODO: add support for lists
+                                raise RestHandlerException(u'POST of object attributes does not support lists')
 
-              uuid = json.get('identifier', None)
-              if uuid:
-                attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
-                definition.attributes.append(attr)
-                self.object_definition_controller.update_object_definition(definition, self.get_user())
-                return 'OK'
-              else:
-                raise RestHandlerException(u'No id was specified in the json post')
-            else:
-              raise RestHandlerException(u'"{0}" is not supported'.format(type_))
-          else:
-            raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
-        else:
-          # Add new user
-          obj_def = ObjectDefinition()
-          obj_def.populate(json)
-          # set the new checksum
-          self.object_definition_controller.insert_object_definition(obj_def, self.get_user())
-          return obj_def.to_dict(details, inflated)
-      elif method == 'PUT':
-        self.check_if_admin()
-        # update user
-        if len(path) > 0:
-          # if there is a uuid as next parameter then return single user
-          uuid = path.pop(0)
-          obj_def = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
-          obj_def.populate(json)
-          # set the new checksum
-          self.object_definition_controller.update_object_definition(obj_def, self.get_user())
-          return obj_def.to_dict(details, inflated)
-        else:
-          raise RestHandlerException(u'Cannot update user as no identifier was given')
+                            uuid = json.get('identifier', None)
+                            if uuid:
+                                attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
+                                definition.attributes.append(attr)
+                                self.object_definition_controller.update_object_definition(definition, self.get_user())
+                                return 'OK'
+                            else:
+                                raise RestHandlerException(u'No id was specified in the json post')
+                        else:
+                            raise RestHandlerException(u'"{0}" is not supported'.format(type_))
+                    else:
+                        raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
+                else:
+                    # Add new user
+                    obj_def = ObjectDefinition()
+                    obj_def.populate(json)
+                    # set the new checksum
+                    self.object_definition_controller.insert_object_definition(obj_def, self.get_user())
+                    return obj_def.to_dict(details, inflated)
+            elif method == 'PUT':
+                self.check_if_admin()
+                # update user
+                if len(path) > 0:
+                    # if there is a uuid as next parameter then return single user
+                    uuid = path.pop(0)
+                    obj_def = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
+                    obj_def.populate(json)
+                    # set the new checksum
+                    self.object_definition_controller.update_object_definition(obj_def, self.get_user())
+                    return obj_def.to_dict(details, inflated)
+                else:
+                    raise RestHandlerException(u'Cannot update user as no identifier was given')
 
-      elif method == 'DELETE':
-        self.check_if_admin()
-        # Remove user
-        if len(path) > 0:
-          # if there is a uuid as next parameter then return single user
-          uuid = path.pop(0)
-          if len(path) > 0:
-            type_ = path.pop(0)
-            if len(path) > 0:
-              definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
-              uuid = path.pop(0)
-              attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
-              definition.attributes.remove(attr)
-              self.object_definition_controller.update_object_definition(definition, self.get_user())
-            else:
-              raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
-          else:
-            self.object_definition_controller.remove_definition_by_uuid(uuid)
+            elif method == 'DELETE':
+                self.check_if_admin()
+                # Remove user
+                if len(path) > 0:
+                    # if there is a uuid as next parameter then return single user
+                    uuid = path.pop(0)
+                    if len(path) > 0:
+                        type_ = path.pop(0)
+                        if len(path) > 0:
+                            definition = self.object_definition_controller.get_object_definitions_by_uuid(uuid)
+                            uuid = path.pop(0)
+                            attr = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
+                            definition.attributes.remove(attr)
+                            self.object_definition_controller.update_object_definition(definition, self.get_user())
+                        else:
+                            raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
+                    else:
+                        self.object_definition_controller.remove_definition_by_uuid(uuid)
 
-          return 'OK'
-        else:
-          raise RestHandlerException(u'Cannot delete user as no identifier was given')
-      raise RestHandlerException(u'Unrecoverable error')
-    except ControllerNothingFoundException as error:
-      raise RestHandlerNotFoundException(error)
-    except ControllerException as error:
-      raise RestHandlerException(error)
+                    return 'OK'
+                else:
+                    raise RestHandlerException(u'Cannot delete user as no identifier was given')
+            raise RestHandlerException(u'Unrecoverable error')
+        except ControllerNothingFoundException as error:
+            raise RestHandlerNotFoundException(error)
+        except ControllerException as error:
+            raise RestHandlerException(error)

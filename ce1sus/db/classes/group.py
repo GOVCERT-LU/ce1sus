@@ -29,259 +29,259 @@ _REL_MAINGROUP_GROUPS = Table('group_has_groups', Base.metadata,
 
 
 class GroupRights(BitBase):
-  """
-  The __bit_value is defined as follows:
-  [0] : User is privileged
-  [1] : User can validate
-  [2] : User can set group via rest inserts
-  """
+    """
+    The __bit_value is defined as follows:
+    [0] : User is privileged
+    [1] : User can validate
+    [2] : User can set group via rest inserts
+    """
 
-  DOWNLOAD = 0
-  TLP_PROPAGATION = 1
+    DOWNLOAD = 0
+    TLP_PROPAGATION = 1
 
-  @property
-  def can_download(self):
-    return self._get_value(GroupRights.DOWNLOAD)
+    @property
+    def can_download(self):
+        return self._get_value(GroupRights.DOWNLOAD)
 
-  @can_download.setter
-  def can_download(self, value):
-    self._set_value(GroupRights.DOWNLOAD, value)
+    @can_download.setter
+    def can_download(self, value):
+        self._set_value(GroupRights.DOWNLOAD, value)
 
-  @property
-  def propagate_tlp(self):
-    return self._get_value(GroupRights.TLP_PROPAGATION)
+    @property
+    def propagate_tlp(self):
+        return self._get_value(GroupRights.TLP_PROPAGATION)
 
-  @propagate_tlp.setter
-  def propagate_tlp(self, value):
-    self._set_value(GroupRights.TLP_PROPAGATION, value)
+    @propagate_tlp.setter
+    def propagate_tlp(self, value):
+        self._set_value(GroupRights.TLP_PROPAGATION, value)
 
-  def to_dict(self):
-    return {'downloadfiles': self.can_download,
-            'propagate_tlp': self.propagate_tlp}
+    def to_dict(self):
+        return {'downloadfiles': self.can_download,
+                'propagate_tlp': self.propagate_tlp}
 
-  def populate(self, json):
-    self.can_download = json.get('downloadfiles', False)
-    self.propagate_tlp = json.get('propagate_tlp', False)
+    def populate(self, json):
+        self.can_download = json.get('downloadfiles', False)
+        self.propagate_tlp = json.get('propagate_tlp', False)
 
 
 class EventPermissions(BitBase):
 
-  ADD = 0
-  MODIFY = 1
-  DELETE = 2
-  VALIDATE = 3
-  PROPOSE = 4
-  SET_GROUPS = 5
-  VIEW_SHARE = 6
+    ADD = 0
+    MODIFY = 1
+    DELETE = 2
+    VALIDATE = 3
+    PROPOSE = 4
+    SET_GROUPS = 5
+    VIEW_SHARE = 6
 
-  @property
-  def can_view(self):
-    return True
+    @property
+    def can_view(self):
+        return True
 
-  @property
-  def can_view_non_shared(self):
-    # TODO: implement non shared to see
-    # Note this is for non shared elements
-    return self._get_value(EventPermissions.VIEW_SHARE)
+    @property
+    def can_view_non_shared(self):
+        # TODO: implement non shared to see
+        # Note this is for non shared elements
+        return self._get_value(EventPermissions.VIEW_SHARE)
 
-  @can_view_non_shared.setter
-  def can_view_non_shared(self, value):
-    # Note this is for non shared elements
-    self._set_value(EventPermissions.VIEW_SHARE, value)
+    @can_view_non_shared.setter
+    def can_view_non_shared(self, value):
+        # Note this is for non shared elements
+        self._set_value(EventPermissions.VIEW_SHARE, value)
 
-  @property
-  def can_propose(self):
-    # Not used anymore
-    return self._get_value(EventPermissions.PROPOSE)
+    @property
+    def can_propose(self):
+        # Not used anymore
+        return self._get_value(EventPermissions.PROPOSE)
 
-  @can_propose.setter
-  def can_propose(self, value):
-    # Not used anymore
-    self._set_value(EventPermissions.PROPOSE, value)
+    @can_propose.setter
+    def can_propose(self, value):
+        # Not used anymore
+        self._set_value(EventPermissions.PROPOSE, value)
 
-  @property
-  def can_add(self):
-    return self._get_value(EventPermissions.ADD)
+    @property
+    def can_add(self):
+        return self._get_value(EventPermissions.ADD)
 
-  @can_add.setter
-  def can_add(self, value):
-    # if you can add you can see
-    self._set_value(EventPermissions.ADD, value)
+    @can_add.setter
+    def can_add(self, value):
+        # if you can add you can see
+        self._set_value(EventPermissions.ADD, value)
 
-  @property
-  def can_modify(self):
-    return self._get_value(EventPermissions.MODIFY)
+    @property
+    def can_modify(self):
+        return self._get_value(EventPermissions.MODIFY)
 
-  @can_modify.setter
-  def can_modify(self, value):
-    # if you can modify you can see
-    self._set_value(EventPermissions.MODIFY, value)
+    @can_modify.setter
+    def can_modify(self, value):
+        # if you can modify you can see
+        self._set_value(EventPermissions.MODIFY, value)
 
-  @property
-  def can_delete(self):
-    return self._get_value(EventPermissions.DELETE)
+    @property
+    def can_delete(self):
+        return self._get_value(EventPermissions.DELETE)
 
-  @can_delete.setter
-  def can_delete(self, value):
-    # if you can delete you can see
-    self._set_value(EventPermissions.DELETE, value)
+    @can_delete.setter
+    def can_delete(self, value):
+        # if you can delete you can see
+        self._set_value(EventPermissions.DELETE, value)
 
-  @property
-  def can_validate(self):
-    return self._get_value(EventPermissions.VALIDATE)
+    @property
+    def can_validate(self):
+        return self._get_value(EventPermissions.VALIDATE)
 
-  @can_validate.setter
-  def can_validate(self, value):
-    # if you can validate you can see
-    self._set_value(EventPermissions.VALIDATE, value)
+    @can_validate.setter
+    def can_validate(self, value):
+        # if you can validate you can see
+        self._set_value(EventPermissions.VALIDATE, value)
 
-  @property
-  def set_groups(self):
-    return self._get_value(EventPermissions.SET_GROUPS)
+    @property
+    def set_groups(self):
+        return self._get_value(EventPermissions.SET_GROUPS)
 
-  @set_groups.setter
-  def set_groups(self, value):
-    # if you can validate you can see
-    self._set_value(EventPermissions.SET_GROUPS, value)
+    @set_groups.setter
+    def set_groups(self, value):
+        # if you can validate you can see
+        self._set_value(EventPermissions.SET_GROUPS, value)
 
-  def set_all(self):
-    self.can_add = True
-    self.can_modify = True
-    self.can_delete = True
-    self.can_propose = True
-    self.can_validate = True
-    self.set_groups = True
+    def set_all(self):
+        self.can_add = True
+        self.can_modify = True
+        self.can_delete = True
+        self.can_propose = True
+        self.can_validate = True
+        self.set_groups = True
 
-  def set_default(self):
-    # Set no default values
-    pass
+    def set_default(self):
+        # Set no default values
+        pass
 
-  def to_dict(self):
-    return {'add': self.can_add,
-            'modify': self.can_modify,
-            'validate': self.can_validate,
-            'delete': self.can_delete,
-            'set_groups': self.set_groups
-            }
+    def to_dict(self):
+        return {'add': self.can_add,
+                'modify': self.can_modify,
+                'validate': self.can_validate,
+                'delete': self.can_delete,
+                'set_groups': self.set_groups
+                }
 
-  def populate(self, json):
-    self.can_add = json.get('add', False)
-    self.can_modify = json.get('modify', False)
-    self.can_validate = json.get('validate', False)
-    self.can_propose = json.get('propose', False)
-    self.can_delete = json.get('delete', False)
-    self.set_groups = json.get('set_groups', False)
+    def populate(self, json):
+        self.can_add = json.get('add', False)
+        self.can_modify = json.get('modify', False)
+        self.can_validate = json.get('validate', False)
+        self.can_propose = json.get('propose', False)
+        self.can_delete = json.get('delete', False)
+        self.set_groups = json.get('set_groups', False)
 
 
 class Group(Base):
-  name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True)
-  description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
-  tlp_lvl = Column('tlplvl', Integer, default=3, nullable=False, index=True)
-  dbcode = Column('code', Integer, default=0, nullable=False)
-  __bit_code = None
-  __default_bit_code = None
-  default_dbcode = Column('default_code', Integer, default=0, nullable=False)
-  email = Column('email', Unicode(255, collation='utf8_unicode_ci'), unique=True)
-  gpg_key = Column('gpg_key', UnicodeText(collation='utf8_unicode_ci'))
-  send_usermails = Column('usermails', Boolean, default=False, nullable=False)
-  children = relationship('Group',
-                          secondary=_REL_MAINGROUP_GROUPS,
-                          primaryjoin='Group.identifier == group_has_groups.c.group_id',
-                          secondaryjoin='Group.identifier == group_has_groups.c.rel_group_id',
-                          backref='parents',
-                          order_by='Group.name',
-                          lazy='joined'
-                          )
-  notifications = Column('notifications', Boolean, default=False, nullable=False)
+    name = Column('name', Unicode(255, collation='utf8_unicode_ci'), nullable=False, unique=True)
+    description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+    tlp_lvl = Column('tlplvl', Integer, default=3, nullable=False, index=True)
+    dbcode = Column('code', Integer, default=0, nullable=False)
+    __bit_code = None
+    __default_bit_code = None
+    default_dbcode = Column('default_code', Integer, default=0, nullable=False)
+    email = Column('email', Unicode(255, collation='utf8_unicode_ci'), unique=True)
+    gpg_key = Column('gpg_key', UnicodeText(collation='utf8_unicode_ci'))
+    send_usermails = Column('usermails', Boolean, default=False, nullable=False)
+    children = relationship('Group',
+                            secondary=_REL_MAINGROUP_GROUPS,
+                            primaryjoin='Group.identifier == group_has_groups.c.group_id',
+                            secondaryjoin='Group.identifier == group_has_groups.c.rel_group_id',
+                            backref='parents',
+                            order_by='Group.name',
+                            lazy='joined'
+                            )
+    notifications = Column('notifications', Boolean, default=False, nullable=False)
 
-  def equals(self, group):
-    if self.uuid == group.uuid:
-      return True
-    else:
-      if self.name == group.name:
-        return True
-      else:
-        return False
+    def equals(self, group):
+        if self.uuid == group.uuid:
+            return True
+        else:
+            if self.name == group.name:
+                return True
+            else:
+                return False
 
-  @property
-  def tlp(self):
-    """
-      returns the tlp level
+    @property
+    def tlp(self):
+        """
+          returns the tlp level
 
-      :returns: String
-    """
+          :returns: String
+        """
 
-    return TLP.get_by_id(self.tlp_lvl)
+        return TLP.get_by_id(self.tlp_lvl)
 
-  @tlp.setter
-  def tlp(self, text):
-    """
-    returns the status
+    @tlp.setter
+    def tlp(self, text):
+        """
+        returns the status
 
-    :returns: String
-    """
-    self.tlp_lvl = TLP.get_by_value(text)
+        :returns: String
+        """
+        self.tlp_lvl = TLP.get_by_value(text)
 
-  @property
-  def default_permissions(self):
-    if self.__default_bit_code is None:
-      if self.default_dbcode is None:
-        self.__default_bit_code = EventPermissions('0', self, 'default_dbcode')
-      else:
-        self.__default_bit_code = EventPermissions(self.default_dbcode, self, 'default_dbcode')
-    return self.__default_bit_code
+    @property
+    def default_permissions(self):
+        if self.__default_bit_code is None:
+            if self.default_dbcode is None:
+                self.__default_bit_code = EventPermissions('0', self, 'default_dbcode')
+            else:
+                self.__default_bit_code = EventPermissions(self.default_dbcode, self, 'default_dbcode')
+        return self.__default_bit_code
 
-  @property
-  def permissions(self):
-    """
-    Property for the bit_value
-    """
-    if self.__bit_code is None:
-      if self.dbcode is None:
-        self.__bit_code = GroupRights('0', self)
-      else:
-        self.__bit_code = GroupRights(self.dbcode, self)
-    return self.__bit_code
+    @property
+    def permissions(self):
+        """
+        Property for the bit_value
+        """
+        if self.__bit_code is None:
+            if self.dbcode is None:
+                self.__bit_code = GroupRights('0', self)
+            else:
+                self.__bit_code = GroupRights(self.dbcode, self)
+        return self.__bit_code
 
-  def validate(self):
-    """
-    Checks if the attributes of the class are valid
+    def validate(self):
+        """
+        Checks if the attributes of the class are valid
 
-    :returns: Boolean
-    """
-    # TODO: Verify validation of Group Object
-    ObjectValidator.validateAlNum(self, 'name',
-                                  withSymbols=True,
-                                  minLength=3)
-    # TODO: validate
-    return ObjectValidator.isObjectValid(self)
+        :returns: Boolean
+        """
+        # TODO: Verify validation of Group Object
+        ObjectValidator.validateAlNum(self, 'name',
+                                      withSymbols=True,
+                                      minLength=3)
+        # TODO: validate
+        return ObjectValidator.isObjectValid(self)
 
-  def to_dict(self, complete=True, inflated=False):
-    if complete:
-      return {'identifier': self.convert_value(self.uuid),
-              'name': self.convert_value(self.name),
-              'description': self.convert_value(self.description),
-              'permissions': self.permissions.to_dict(),
-              'default_event_permissions': self.default_permissions.to_dict(),
-              'email': self.convert_value(self.email),
-              'gpg_key': self.convert_value(self.gpg_key),
-              'tlp_lvl': self.convert_value(self.tlp_lvl),
-              'tlp': self.convert_value(self.tlp),
-              'children': list(),
-              'notifications': self.convert_value(self.notifications)
-              }
-    else:
-      return {'identifier': self.uuid,
-              'name': self.name
-              }
+    def to_dict(self, complete=True, inflated=False):
+        if complete:
+            return {'identifier': self.convert_value(self.uuid),
+                    'name': self.convert_value(self.name),
+                    'description': self.convert_value(self.description),
+                    'permissions': self.permissions.to_dict(),
+                    'default_event_permissions': self.default_permissions.to_dict(),
+                    'email': self.convert_value(self.email),
+                    'gpg_key': self.convert_value(self.gpg_key),
+                    'tlp_lvl': self.convert_value(self.tlp_lvl),
+                    'tlp': self.convert_value(self.tlp),
+                    'children': list(),
+                    'notifications': self.convert_value(self.notifications)
+                    }
+        else:
+            return {'identifier': self.uuid,
+                    'name': self.name
+                    }
 
-  def populate(self, json):
-    self.name = json.get('name', None)
-    self.description = json.get('description', None)
-    self.email = json.get('email', None)
-    self.gpg_key = json.get('gpg_key', None)
-    self.tlp_lvl = json.get('tlp_lvl', 3)
-    # permissions setting
-    self.permissions.populate(json.get('permissions', {}))
-    self.default_permissions.populate(json.get('default_event_permissions', {}))
-    self.notifications = json.get('notifications', None)
+    def populate(self, json):
+        self.name = json.get('name', None)
+        self.description = json.get('description', None)
+        self.email = json.get('email', None)
+        self.gpg_key = json.get('gpg_key', None)
+        self.tlp_lvl = json.get('tlp_lvl', 3)
+        # permissions setting
+        self.permissions.populate(json.get('permissions', {}))
+        self.default_permissions.populate(json.get('default_event_permissions', {}))
+        self.notifications = json.get('notifications', None)

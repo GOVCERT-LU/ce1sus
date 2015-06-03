@@ -17,12 +17,12 @@ __license__ = 'GPL v3+'
 
 
 class AttributeHandlerBroker(BrokerBase):
-  """
-  Attribute handler broker
-  """
+    """
+    Attribute handler broker
+    """
 
-  def get_broker_class(self):
-    """
-    overrides BrokerBase.get_broker_class
-    """
-    return AttributeHandler
+    def get_broker_class(self):
+        """
+        overrides BrokerBase.get_broker_class
+        """
+        return AttributeHandler
