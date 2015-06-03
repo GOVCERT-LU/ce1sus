@@ -39,56 +39,56 @@ def my_log_traceback(severity=logging.CRITICAL):
 
 
 def bootstrap():
-  basePath = os.path.dirname(os.path.abspath(__file__))
-  ce1susConfigFile = basePath + '/config/ce1sus.conf'
-  cherrypyConfigFile = basePath + '/config/cherrypy.conf'
+    basePath = os.path.dirname(os.path.abspath(__file__))
+    ce1susConfigFile = basePath + '/config/ce1sus.conf'
+    cherrypyConfigFile = basePath + '/config/cherrypy.conf'
 
-  try:
-    if os.path.isfile(cherrypyConfigFile):
-      cherrypy.config.update(cherrypyConfigFile)
-    else:
-      raise ConfigException('Could not find config file ' + cherrypyConfigFile)
-  except cherrypy._cperror as error:
-    raise ConfigException(error)
+    try:
+        if os.path.isfile(cherrypyConfigFile):
+            cherrypy.config.update(cherrypyConfigFile)
+        else:
+            raise ConfigException('Could not find config file ' + cherrypyConfigFile)
+    except cherrypy._cperror as error:
+        raise ConfigException(error)
 
-  # load configuration file
-  config = Configuration(ce1susConfigFile)
+    # load configuration file
+    config = Configuration(ce1susConfigFile)
 
-  cherrypy.tree.mount(IndexView(config), '/')
-  cherrypy.tree.mount(RestController(config), '/REST/0.3.0/')
-  cherrypy.tree.mount(DepricatedView(config), '/REST/0.2.0/')
-  cherrypy.tree.mount(GuiMenus(config), '/menus')
-  cherrypy.tree.mount(GuiPlugins(config), '/plugins')
+    cherrypy.tree.mount(IndexView(config), '/')
+    cherrypy.tree.mount(RestController(config), '/REST/0.3.0/')
+    cherrypy.tree.mount(DepricatedView(config), '/REST/0.2.0/')
+    cherrypy.tree.mount(GuiMenus(config), '/menus')
+    cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
-  cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
-  cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
-  cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
+    cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
+    cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
+    cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
 
-  # instantiate auth module
-  cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
+    # instantiate auth module
+    cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 
-  cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
+    cherrypy.tools.my_log_tracebacks = cherrypy.Tool('before_error_response', my_log_traceback)
 
-  use_mailer = config.get('ErrorMails', 'enabled', False)
-  if use_mailer:
-    smtpserver = config.get('ErrorMails', 'smtp')
-    fromaddr = config.get('ErrorMails', 'sender')
-    toaddr = config.get('ErrorMails', 'receiver')
-    subject = config.get('ErrorMails', 'subject')
-    h = logging.handlers.SMTPHandler(smtpserver, fromaddr, toaddr, subject)
-    log_lvl = getattr(logging, config.get('ErrorMails', 'level', 'error').upper())
-    h.setLevel(log_lvl)
-    cherrypy.log.error_log.addHandler(h)
+    use_mailer = config.get('ErrorMails', 'enabled', False)
+    if use_mailer:
+        smtpserver = config.get('ErrorMails', 'smtp')
+        fromaddr = config.get('ErrorMails', 'sender')
+        toaddr = config.get('ErrorMails', 'receiver')
+        subject = config.get('ErrorMails', 'subject')
+        h = logging.handlers.SMTPHandler(smtpserver, fromaddr, toaddr, subject)
+        log_lvl = getattr(logging, config.get('ErrorMails', 'level', 'error').upper())
+        h.setLevel(log_lvl)
+        cherrypy.log.error_log.addHandler(h)
 
 if __name__ == '__main__':
 
-  bootstrap()
-  try:
-    cherrypy.engine.start()
-    cherrypy.engine.block()
-  except cherrypy._cperror as e:
-    raise ConfigException(e)
+    bootstrap()
+    try:
+        cherrypy.engine.start()
+        cherrypy.engine.block()
+    except cherrypy._cperror as e:
+        raise ConfigException(e)
 else:
-  bootstrap()
-  cherrypy.engine.start()
-  application = cherrypy.tree
+    bootstrap()
+    cherrypy.engine.start()
+    application = cherrypy.tree

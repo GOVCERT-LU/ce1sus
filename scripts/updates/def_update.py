@@ -55,145 +55,145 @@ __license__ = 'GPL v3+'
 
 if __name__ == '__main__':
 
-  # want parent of parent directory aka ../../
-  # setup cherrypy
-  #
-  ce1susConfigFile = basePath + 'config/ce1sus.conf'
-  config = Configuration(ce1susConfigFile)
-  print "Getting config"
-  config.get_section('Logger')['log'] = False
-  print "Creating DB"
-  session = SessionManager(config)
-  mysql_session = session.connector.get_direct_session()
-  session = mysql_session
+    # want parent of parent directory aka ../../
+    # setup cherrypy
+    #
+    ce1susConfigFile = basePath + 'config/ce1sus.conf'
+    config = Configuration(ce1susConfigFile)
+    print "Getting config"
+    config.get_section('Logger')['log'] = False
+    print "Creating DB"
+    session = SessionManager(config)
+    mysql_session = session.connector.get_direct_session()
+    session = mysql_session
 
-  # add attributes definitions
+    # add attributes definitions
 
-  obj_ctrl = ObjectDefinitionController(config, session)
-  ref_ctrl = ReferencesController(config, session)
-  attr_ctrl = AttributeDefinitionController(config, session)
-  handler_broker = AttributeHandlerBroker(session)
-  cond_ctrl = ConditionController(config, session)
+    obj_ctrl = ObjectDefinitionController(config, session)
+    ref_ctrl = ReferencesController(config, session)
+    attr_ctrl = AttributeDefinitionController(config, session)
+    handler_broker = AttributeHandlerBroker(session)
+    cond_ctrl = ConditionController(config, session)
 
-  # user
-  user_controller = UserController(config, session)
-  user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
-  user = user_controller.get_user_by_uuid(user_uuid)
+    # user
+    user_controller = UserController(config, session)
+    user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
+    user = user_controller.get_user_by_uuid(user_uuid)
 
-  all_bd_defs = attr_ctrl.attr_def_broker.get_all()
-  attr_defs = dict()
-  for attr_def in all_bd_defs:
-    attr_defs[attr_def.uuid] = attr_def
+    all_bd_defs = attr_ctrl.attr_def_broker.get_all()
+    attr_defs = dict()
+    for attr_def in all_bd_defs:
+        attr_defs[attr_def.uuid] = attr_def
 
-  all_bd_defs = obj_ctrl.get_all_object_definitions()
-  obj_defs = dict()
-  for obj_def in all_bd_defs:
-    obj_defs[obj_def.uuid] = obj_def
+    all_bd_defs = obj_ctrl.get_all_object_definitions()
+    obj_defs = dict()
+    for obj_def in all_bd_defs:
+        obj_defs[obj_def.uuid] = obj_def
 
-  all_bd_defs = ref_ctrl.get_reference_definitions_all()
-  ref_defs = dict()
-  for ref_def in all_bd_defs:
-    ref_defs[ref_def.uuid] = ref_def
+    all_bd_defs = ref_ctrl.get_reference_definitions_all()
+    ref_defs = dict()
+    for ref_def in all_bd_defs:
+        ref_defs[ref_def.uuid] = ref_def
 
-  with open('../install/database/attributes.json') as data_file:
-    attrs = json.load(data_file)
+    with open('../install/database/attributes.json') as data_file:
+        attrs = json.load(data_file)
 
-  print "Updating attribute definitions"
+    print "Updating attribute definitions"
 
-  for attr_json in attrs:
-    # check if exists
-    uuid = attr_json.get('identifier')
-    attr_def = attr_defs.get(uuid, None)
+    for attr_json in attrs:
+        # check if exists
+        uuid = attr_json.get('identifier')
+        attr_def = attr_defs.get(uuid, None)
 
-    if attr_def is None:
-      attr_def = AttributeDefinition()
-      attr_def.uuid = uuid
-      new_one = True
-    else:
-      new_one = False
-    attr_def.populate(attr_json)
-    attr_def.uuid = attr_json.get('identifier')
-    attributehandler_uuid = attr_json.get('attributehandler_id', None)
-    attribute_handler = handler_broker.get_by_uuid(attributehandler_uuid)
-    attr_def.attributehandler_id = attribute_handler.identifier
-    attr_def.attribute_handler = attribute_handler
+        if attr_def is None:
+            attr_def = AttributeDefinition()
+            attr_def.uuid = uuid
+            new_one = True
+        else:
+            new_one = False
+        attr_def.populate(attr_json)
+        attr_def.uuid = attr_json.get('identifier')
+        attributehandler_uuid = attr_json.get('attributehandler_id', None)
+        attribute_handler = handler_broker.get_by_uuid(attributehandler_uuid)
+        attr_def.attributehandler_id = attribute_handler.identifier
+        attr_def.attribute_handler = attribute_handler
 
-    value_type_uuid = attr_json.get('type_id', None)
-    value_type = attr_ctrl.type_broker.get_by_uuid(value_type_uuid)
+        value_type_uuid = attr_json.get('type_id', None)
+        value_type = attr_ctrl.type_broker.get_by_uuid(value_type_uuid)
 
-    attr_def.value_type_id = value_type.identifier
+        attr_def.value_type_id = value_type.identifier
 
-    default_condition_uuid = attr_json.get('default_condition_id', None)
+        default_condition_uuid = attr_json.get('default_condition_id', None)
 
-    default_condition = cond_ctrl.get_condition_by_uuid(default_condition_uuid)
-    attr_def.default_condition_id = default_condition.identifier
+        default_condition = cond_ctrl.get_condition_by_uuid(default_condition_uuid)
+        attr_def.default_condition_id = default_condition.identifier
 
-    if new_one:
-      attr_ctrl.insert_attribute_definition(attr_def, user, False)
-    else:
-      attr_ctrl.attr_def_broker.update(attr_def, False)
+        if new_one:
+            attr_ctrl.insert_attribute_definition(attr_def, user, False)
+        else:
+            attr_ctrl.attr_def_broker.update(attr_def, False)
 
-    attr_defs[attr_def.uuid] = attr_def
+        attr_defs[attr_def.uuid] = attr_def
 
-  attr_ctrl.attr_def_broker.do_commit(False)
+    attr_ctrl.attr_def_broker.do_commit(False)
 
-  # add object definitions and make relations
-  with open('../install/database/objects.json') as data_file:
-    objs = json.load(data_file)
+    # add object definitions and make relations
+    with open('../install/database/objects.json') as data_file:
+        objs = json.load(data_file)
 
-  obj_ctrl = ObjectDefinitionController(config, session)
-  print "Updating object definitions"
-  for obj_json in objs:
+    obj_ctrl = ObjectDefinitionController(config, session)
+    print "Updating object definitions"
+    for obj_json in objs:
 
-    uuid = obj_json.get('identifier')
-    obj_def = obj_defs.get(uuid, None)
-    if obj_def is None:
-      obj_def = ObjectDefinition()
-      obj_def.uuid = uuid
-      new = True
-    else:
-      new = False
+        uuid = obj_json.get('identifier')
+        obj_def = obj_defs.get(uuid, None)
+        if obj_def is None:
+            obj_def = ObjectDefinition()
+            obj_def.uuid = uuid
+            new = True
+        else:
+            new = False
 
-    obj_def.populate(obj_json)
-    attrs = obj_json.get('attributes')
-    # clear all relations in case
-    obj_def.attributes = list()
-    for attr in attrs:
-      attr_uuid = attr.get('identifier')
-      obj_def.attributes.append(attr_defs[attr_uuid])
+        obj_def.populate(obj_json)
+        attrs = obj_json.get('attributes')
+        # clear all relations in case
+        obj_def.attributes = list()
+        for attr in attrs:
+            attr_uuid = attr.get('identifier')
+            obj_def.attributes.append(attr_defs[attr_uuid])
 
-    if new:
-      obj_ctrl.insert_object_definition(obj_def, user, False)
-    else:
-      obj_ctrl.obj_def_broker.update(obj_def, False)
+        if new:
+            obj_ctrl.insert_object_definition(obj_def, user, False)
+        else:
+            obj_ctrl.obj_def_broker.update(obj_def, False)
 
-  obj_ctrl.obj_def_broker.do_commit(False)
+    obj_ctrl.obj_def_broker.do_commit(False)
 
-  ref_ctrl = ReferencesController(config, session)
+    ref_ctrl = ReferencesController(config, session)
 
-  with open('../install/database/references.json') as data_file:
-    references = json.load(data_file)
-  print "Updating references definitions"
-  for ref_json in references:
-    uuid = ref_json.get('identifier')
-    ref_def = ref_defs.get(uuid, None)
-    if ref_def is None:
-      ref_def = ReferenceDefinition()
-      ref_def.uuid = uuid
-      new = True
-    else:
-      new = False
+    with open('../install/database/references.json') as data_file:
+        references = json.load(data_file)
+    print "Updating references definitions"
+    for ref_json in references:
+        uuid = ref_json.get('identifier')
+        ref_def = ref_defs.get(uuid, None)
+        if ref_def is None:
+            ref_def = ReferenceDefinition()
+            ref_def.uuid = uuid
+            new = True
+        else:
+            new = False
 
-    ref_def.populate(ref_json)
+        ref_def.populate(ref_json)
 
-    referencehandler_uuid = ref_json.get('referencehandler_id', None)
-    reference_handler = ref_ctrl.reference_broker.get_handler_by_uuid(referencehandler_uuid)
-    ref_def.referencehandler_id = reference_handler.identifier
-    ref_def.reference_handler = reference_handler
+        referencehandler_uuid = ref_json.get('referencehandler_id', None)
+        reference_handler = ref_ctrl.reference_broker.get_handler_by_uuid(referencehandler_uuid)
+        ref_def.referencehandler_id = reference_handler.identifier
+        ref_def.reference_handler = reference_handler
 
-    if new:
-      ref_ctrl.insert_reference_definition(ref_def, user, False)
-    else:
-      ref_ctrl.update_reference(ref_def, user, False)
+        if new:
+            ref_ctrl.insert_reference_definition(ref_def, user, False)
+        else:
+            ref_ctrl.update_reference(ref_def, user, False)
 
-  ref_ctrl.reference_definition_broker.do_commit(True)
+    ref_ctrl.reference_definition_broker.do_commit(True)
