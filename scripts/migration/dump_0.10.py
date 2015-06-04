@@ -5,10 +5,10 @@
 
 Created on Jan 8, 2015
 """
-import json, inspect
+import json
 import sys
 from os import makedirs
-from os.path import dirname, abspath, exists, isdir, realpath, split
+from os.path import dirname, abspath, exists, isdir, split
 from optparse import OptionParser
 
 basePath = dirname(abspath(__file__)) + '/../../'
@@ -17,15 +17,6 @@ sys.path.insert(0, '../../')
 from ce1sus.db.common.session import SessionManager
 from ce1sus.depricated.brokers.oldbrokers import OldEventBroker, OldAttributeDefinitionsBroker, OldObjectDefinitionsBroker, OldUserBroker, OldGroupBroker, OldConfigBroker, OldHandlerBroker
 from ce1sus.helpers.common.config import Configuration
-import ce1sus.db.classes.object
-import ce1sus.db.classes.definitions
-import ce1sus.db.classes.attribute
-import ce1sus.db.classes.values
-import ce1sus.db.classes.user
-import ce1sus.db.classes.event
-import ce1sus.db.classes.report
-import ce1sus.db.classes.observables
-import ce1sus.db.classes.indicator
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

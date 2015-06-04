@@ -1,6 +1,7 @@
 pep8:
   disable:
     - E111
+    - E114
 pylint:
   disable:
     - W0311

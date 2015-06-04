@@ -41,6 +41,10 @@ This is still not the final release, we are still developing ce1sus.
 
 For any questions feel free to ask
 
+#Build Status
+[![Code Health](https://landscape.io/github/nijel/stardicter/master/landscape.png)](https://landscape.io/github/GOVCERT-LU/ce1sus/0.11.X)
+
+
 ##Features
 
 * Creates relations between events through their attributes
@@ -107,7 +111,7 @@ For any questions feel free to ask
 ##Installation
 
  
-For the installation please refer to the Documentation files
+For the installation please refer to the Documentation files. Click [here](docs/DOCUMENTATION.md)
 
 ##Remarks
 
