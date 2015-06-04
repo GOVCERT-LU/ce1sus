@@ -793,7 +793,7 @@ class Assembler(BaseController):
     report.related_reports.append(child_report)
     return child_report
 
-  def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def):
+  def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=None):
     if seen_ref_def is None:
       seen_ref_def = dict()
     if seen_groups is None:
