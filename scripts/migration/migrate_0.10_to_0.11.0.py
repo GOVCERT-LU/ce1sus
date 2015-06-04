@@ -59,178 +59,6 @@ def convert_date(string_date):
   return strings.stringToDateTime(string_date)
 
 
-def clone_attr(attribute, obj):
-  attr = Attribute()
-  attr.uuid = uuid4()
-  attr.modified_on = attribute.modified_on
-  attr.created_at = attribute.created_at
-  attr.creator = attribute.creator
-  attr.creator_id = attr.creator.identifier
-  attr.modifier = attribute.modifier
-  attr.modifier_id = attr.modifier.identifier
-  attr.originating_group = attribute.originating_group
-  attr.originating_group_id = attr.originating_group.identifier
-  attr.creator_group = attribute.creator.group
-  attr.creator_group_id = attribute.creator.group_id
-  attr.definition = attribute.definition
-  attr.definition_id = attr.definition.identifier
-  attr.dbcode = attribute.dbcode
-  attr.is_ioc = attribute.is_ioc
-  attr.tlp_level_id = attribute.tlp_level_id
-
-  attr.object = obj
-  attr.object_id = attr.object.identifier
-
-  attr.value = attribute.value
-
-  attr.owner_group = attr.creator_group
-  attr.owner_group_id = attr.creator_group.identifier
-  return attr
-
-
-def clone_object(obj, observable, parent=None):
-  new_obj = Object()
-  # typical foo
-  new_obj.uuid = uuid4()
-  new_obj.modified_on = obj.modified_on
-  new_obj.created_at = obj.created_at
-  new_obj.creator = obj.creator
-  new_obj.creator_id = new_obj.creator.identifier
-  new_obj.modifier = obj.modifier
-  new_obj.modifier_id = new_obj.modifier.identifier
-  new_obj.originating_group = obj.originating_group
-  new_obj.originating_group_id = new_obj.originating_group.identifier
-  new_obj.creator_group = obj.creator.group
-  new_obj.creator_group_id = obj.creator.group_id
-  new_obj.definition = obj.definition
-  new_obj.definition_id = new_obj.definition.identifier
-  new_obj.dbcode = obj.dbcode
-  new_obj.tlp_level_id = obj.tlp_level_id
-
-  new_obj.owner_group = new_obj.creator_group
-  new_obj.owner_group_id = new_obj.creator_group.identifier
-
-  new_obj.observable = observable
-  new_obj.observable_id = new_obj.observable.identifier
-  new_obj.parent = parent
-  if new_obj.parent:
-    new_obj.parent_id = new_obj.parent.identifer
-
-  for item in obj.related_objects:
-    res = clone_object(item, observable, new_obj)
-    if res:
-      new_obj.related_objects.append(res)
-
-  for attribute in obj.attributes:
-    if attribute.is_ioc:
-      att = clone_attr(attribute, new_obj)
-      if att:
-        new_obj.attributes.append(att)
-  # if new_obj.attributes.count() > 0:
-  if len(new_obj.attributes) > 0:
-    return new_obj
-  else:
-    return None
-
-
-def clone_composed_observable(composed_observable):
-  new_composed_observable = ObservableComposition()
-  new_composed_observable.uuid = uuid4()
-  new_composed_observable.dbcode = composed_observable.dbcode
-
-  new_composed_observable.operator = composed_observable.operator
-  new_composed_observable.parent = composed_observable.parent
-  new_composed_observable.parent_id = composed_observable.parent_id
-
-  for obs in composed_observable.observables:
-    obs_i = clone_observable(obs)
-    if obs_i:
-      new_composed_observable.observables.append(obs_i)
-
-  # if new_composed_observable.observables.count() > 0:
-  if len(new_composed_observable.observables) > 0:
-    return new_composed_observable
-  else:
-    return None
-
-
-def create_related_obj(parent, child):
-  related_obj = RelatedObject()
-  related_obj.uuid = uuid4()
-  related_obj.parent = parent
-  related_obj.parent_id = related_obj.parent.identifier
-  related_obj.object = child
-  related_obj.child_id = related_obj.object.identifier
-  return related_obj
-
-
-def clone_rel_observable(rel_observable, parent_obs):
-  new_rel_observable = RelatedObservable()
-  new_rel_observable.uuid = uuid4()
-  new_rel_observable.observable = clone_observable(rel_observable.observable)
-  if new_rel_observable.observable:
-    new_rel_observable.child_id = new_rel_observable.observable.identifier
-  else:
-    return None
-  new_rel_observable.confidence = rel_observable.confidence
-
-  new_rel_observable.parent = parent_obs
-  new_rel_observable.parent_id = parent_obs.identifier
-  new_rel_observable.relation = rel_observable.relation
-  new_rel_observable.creator_group = parent_obs.creator_group
-  new_rel_observable.creator_group_id = rel_observable.creator_group.identifier
-  new_rel_observable.creator = new_rel_observable.creator
-  new_rel_observable.creator_id = rel_observable.creator.identifier
-  new_rel_observable.modifier = rel_observable.modifier
-  new_rel_observable.modifier_id = rel_observable.modifier.identifier
-  new_rel_observable.originating_group = rel_observable.creator_group
-  new_rel_observable.originating_group_id = rel_observable.creator_group.identifier
-  new_rel_observable.owner_group = rel_observable.creator_group
-  new_rel_observable.owner_group_id = rel_observable.creator_group.identifier
-  return new_rel_observable
-
-
-def clone_observable(observable):
-  new_observable = Observable()
-  new_observable.uuid = uuid4()
-  new_observable.title = observable.title
-  new_observable.dbcode = observable.dbcode
-  # do not set event as this will then be directly liked to the event!
-
-  new_observable.parent = observable.parent
-  new_observable.parent_id = observable.parent_id
-
-  new_observable.description = observable.description
-
-  # typical foo
-  new_observable.modified_on = observable.modified_on
-  new_observable.created_at = observable.created_at
-  new_observable.creator = observable.creator
-  new_observable.creator_id = new_observable.creator.identifier
-  new_observable.modifier = observable.modifier
-  new_observable.modifier_id = new_observable.modifier.identifier
-  new_observable.originating_group = observable.originating_group
-  new_observable.originating_group_id = new_observable.originating_group.identifier
-  new_observable.creator_group = observable.creator_group
-  new_observable.creator_group_id = new_observable.creator_group.identifier
-  new_observable.owner_group = new_observable.creator_group
-  new_observable.owner_group_id = new_observable.creator_group.identifier
-  new_observable.tlp_level_id = observable.tlp_level_id
-
-  if observable.object:
-    obj = clone_object(observable.object, new_observable, None)
-    if obj:
-      new_observable.object = obj
-
-  if observable.observable_composition:
-    composed = clone_composed_observable(observable.observable_composition)
-    if composed:
-      new_observable.observable_composition = composed
-
-    return new_observable
-  else:
-    return None
-
 
 class Migrator(object):
 
@@ -977,36 +805,6 @@ class Migrator(object):
         return item
     raise Exception('Type "{0}" is not defined'.format(indicator_type))
 
-  def map_indicator(self, observable, line, indicator_type, event):
-    indicator = Indicator()
-    indicator.uuid = uuid4()
-    indicator.creator_group = observable.creator_group
-    indicator.creator_group_id = indicator.creator_group.identifier
-    indicator.creator = observable.creator
-    indicator.creator_id = indicator.creator.identifier
-    indicator.modifier = observable.creator
-    indicator.modifier_id = indicator.modifier.identifier
-    indicator.originating_group = indicator.creator_group
-    indicator.originating_group_id = indicator.creator_group.identifier
-
-    indicator.owner_group = indicator.creator_group
-    indicator.owner_group_id = indicator.creator_group.identifier
-
-    indicator.event = event
-    indicator.event_id = event.identifier
-
-    if indicator_type:
-      indicator.types.append(self.get_indicator_type(indicator_type))
-
-    new_observable = clone_observable(observable)
-    if new_observable:
-      indicator.observables.append(new_observable)
-    else:
-      return None
-    indicator.created_at = observable.created_at
-    indicator.modified_on = observable.modified_on
-    return indicator
-
   def map_ioc_records(self, line, owner, parent_observable, event):
 
 
@@ -1047,75 +845,50 @@ class Migrator(object):
     if mal_email:
       observable = self.map_observable_composition(mal_email, line, owner, event, 'Malicious E-mail')
       if observable:
-
-        indicator = self.map_indicator(observable, line, 'Malicious E-mail', event)
         result_observables.append(observable)
         del mal_email[:]
-        if indicator:
-          event.indicators.append(indicator)
 
     if artifacts:
       observable = self.map_observable_composition(artifacts, line, owner, event, 'Malware Artifacts')
       if observable:
-        indicator = self.map_indicator(observable, line, 'Malware Artifacts', event)
         del artifacts[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if ips:
       observable = self.map_observable_composition(ips, line, owner, event, 'IP Watchlist')
       if observable:
-        indicator = self.map_indicator(observable, line, 'IP Watchlist', event)
         del ips[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if file_hashes:
       observable = self.map_observable_composition(file_hashes, line, owner, event, 'File Hash Watchlist')
       if observable:
-        indicator = self.map_indicator(observable, line, 'File Hash Watchlist', event)
         del file_hashes[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if domains:
       observable = self.map_observable_composition(domains, line, owner, event, 'Domain Watchlist')
       if observable:
-        indicator = self.map_indicator(observable, line, 'Domain Watchlist', event)
         del domains[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if c2s:
       observable = self.map_observable_composition(c2s, line, owner, event, 'C2')
       if observable:
-        indicator = self.map_indicator(observable, line, 'C2', event)
         del c2s[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if urls:
       observable = self.map_observable_composition(urls, line, owner, event, 'URL Watchlist')
       if observable:
-        indicator = self.map_indicator(observable, line, 'URL Watchlist', event)
         del urls[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     if others:
       observable = self.map_observable_composition(others, line, owner, event, 'Others')
       if observable:
-        indicator = self.map_indicator(observable, line, None, event)
         del others[:]
         result_observables.append(observable)
-        if indicator:
-          event.indicators.append(indicator)
 
     return result_observables
 
