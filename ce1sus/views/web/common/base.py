@@ -16,6 +16,7 @@ from ce1sus.db.classes.user import UserRights
 from ce1sus.helpers.common.debug import Log
 from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
+from cherrypy._cperror import CherryPyException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -159,8 +160,8 @@ class BaseView(object):
       session.delete()
       # session.clean_up()
       self.logger.debug('Session destroyed')
-    except:
-      pass
+    except CherryPyException as error:
+      self.logger.error(error)
 
   def _get_session(self):
     """
@@ -209,7 +210,7 @@ class BaseView(object):
   def check_if_admin_validate(self):
     user = self.get_user()
     if not user.permissions.validate:
-      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username, user.group.name))
+      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
   def is_event_viewable(self, event, user=None):
     # The same is in the mailer

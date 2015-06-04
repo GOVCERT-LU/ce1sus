@@ -6,7 +6,6 @@
 Created on Oct 29, 2014
 """
 import random
-import re
 
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.user import UserController

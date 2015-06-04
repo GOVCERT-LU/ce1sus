@@ -20,7 +20,6 @@ class InputException(Exception):
   """
   Base exception for input exceptions
   """
-pass
 
 
 def plaintext2html(text, tabstop=4, make_br=True, mask=False):

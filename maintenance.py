@@ -10,9 +10,7 @@ from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.strings import stringToDateTime
 import json
 from optparse import OptionParser
-from os import remove
-from os.path import basename, dirname, abspath, isfile
-from shutil import copy, move
+from os.path import dirname, abspath, isfile
 import sys
 
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController, gen_attr_chksum
@@ -23,20 +21,9 @@ from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.relations import RelationController
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition, AttributeHandler
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.mailtemplate import MailTemplate
-from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.relation import Relation
-from ce1sus.db.classes.report import Report, Reference, ReferenceDefinition, ReferenceHandler
-from ce1sus.db.classes.types import AttributeType
-from ce1sus.db.classes.user import User
-from ce1sus.db.classes.values import DateValue, StringValue, NumberValue, TextValue
-from ce1sus.db.common.broker import NothingFoundException, BrokerException
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.handlers.base import HandlerBase
-from ce1sus.helpers.common.hash import fileHashMD5
 
 
 __author__ = 'Weber Jean-Paul'

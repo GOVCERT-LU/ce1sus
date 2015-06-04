@@ -7,7 +7,6 @@ Created on Nov 13, 2014
 """
 from datetime import datetime
 
-from ce1sus.db.classes.attribute import Condition
 from ce1sus.db.classes.group import Group
 from ce1sus.db.classes.mailtemplate import MailTemplate
 from ce1sus.db.classes.types import AttributeType

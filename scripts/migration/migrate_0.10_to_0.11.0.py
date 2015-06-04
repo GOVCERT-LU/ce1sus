@@ -178,15 +178,15 @@ def clone_rel_observable(rel_observable, parent_obs):
   new_rel_observable.parent_id = parent_obs.identifier
   new_rel_observable.relation = rel_observable.relation
   new_rel_observable.creator_group = parent_obs.creator_group
-  new_rel_observable.creator_group_id = new_rel_observable.creator_group.identifier
-  new_rel_observable.creator = child.creator
-  new_rel_observable.creator_id = new_rel_observable.creator.identifier
-  new_rel_observable.modifier = child.modifier
-  new_rel_observable.modifier_id = new_rel_observable.modifier.identifier
-  new_rel_observable.originating_group = new_rel_observable.creator_group
-  new_rel_observable.originating_group_id = new_rel_observable.creator_group.identifier
-  new_rel_observable.owner_group = new_rel_observable.creator_group
-  new_rel_observable.owner_group_id = new_rel_observable.creator_group.identifier
+  new_rel_observable.creator_group_id = rel_observable.creator_group.identifier
+  new_rel_observable.creator = new_rel_observable.creator
+  new_rel_observable.creator_id = rel_observable.creator.identifier
+  new_rel_observable.modifier = rel_observable.modifier
+  new_rel_observable.modifier_id = rel_observable.modifier.identifier
+  new_rel_observable.originating_group = rel_observable.creator_group
+  new_rel_observable.originating_group_id = rel_observable.creator_group.identifier
+  new_rel_observable.owner_group = rel_observable.creator_group
+  new_rel_observable.owner_group_id = rel_observable.creator_group.identifier
   return new_rel_observable
 
 
@@ -456,7 +456,7 @@ class Migrator(object):
 
       try:
         self.user_controller.insert_user(user, commit=False, send_mail=False)
-      except ControllerIntegrityException as error:
+      except ControllerIntegrityException:
         user = self.user_controller.get_user_by_username(user.username)
 
       users[id_] = user
@@ -892,7 +892,7 @@ class Migrator(object):
         elif hive == 'HKCU' or 'HKEY_CURRENT_USER' in hive:
           hive = 'HKEY_CURRENT_USER'
         elif hive == 'HKEY_USERS' or hive == 'HCKU':
-          hive == 'HKEY_USERS'
+          hive = 'HKEY_USERS'
         elif hive == 'HKEY_CURRENTUSER':
           hive = 'HKEY_CURRENT_USER'
         elif hive == 'HKCR' or hive == 'HKEY_CLASSES_ROOT':

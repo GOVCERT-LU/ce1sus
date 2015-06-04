@@ -156,7 +156,7 @@ class StixCelsusMapper(BaseController):
     if stix_package.observables:
       for observable in stix_package.observables.observables:
         event.observables.append(self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False))
-    pass
+
     # Then handle indicators
     if stix_package.indicators:
       # process iocs

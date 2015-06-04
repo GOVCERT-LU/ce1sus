@@ -12,7 +12,6 @@ from sqlalchemy.types import Integer, Unicode, BigInteger, UnicodeText, Boolean
 
 from ce1sus.db.classes.basedbobject import SimpleLogingInformations
 from ce1sus.db.classes.common import ValueTable
-from ce1sus.db.classes.types import AttributeType
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.objects import get_class

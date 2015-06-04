@@ -64,7 +64,7 @@ class EmailHandler(FileWithHashesHandler):
       # create file in tmp
       file_obj = open(tmp_path, "w")
       file_obj.write(binary_data)
-      file_obj.close
+      file_obj.close()
 
       mail = decode_email(tmp_path, include_attachment_data=True)
       # remove unused files

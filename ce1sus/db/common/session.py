@@ -102,7 +102,7 @@ def ping_connection(dbapi_connection, connection_record, connection_proxy):
   cursor.close()
 
 
-class SessionManager:
+class SessionManager(object):
   """
   sessionClazz manager for the session handling
   """

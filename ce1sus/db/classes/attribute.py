@@ -5,7 +5,6 @@
 
 Created on Oct 16, 2014
 """
-from base64 import b64encode
 from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import FailedValidation, ObjectValidator
 from sqlalchemy.orm import relationship
@@ -244,6 +243,7 @@ class Attribute(ExtendedLogingInformations, Base):
       fh = self.definition.handler
 
       filepath = fh.get_base_path() + '/' + value
+      # TODO: Find a way not to do this aways
       # with open(filepath, "rb") as raw_file:
       #    value = b64encode(raw_file.read())
 

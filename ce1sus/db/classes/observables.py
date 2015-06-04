@@ -64,31 +64,11 @@ class ObservableComposition(Base):
       if is_object_viewable(rel_obj, event_permissions, user):
         rel_objs.append(rel_obj)
     return rel_objs
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.observables.all()
-      else:
-        # count validated ones
-        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
-    """
+
 
   def observables_count_for_permissions(self, event_permissions):
     return len(self.get_observables_for_permissions(event_permissions))
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.observables.count()
-      else:
-        # count validated ones
-        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
-    """
+
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     observables = list()
     for observable in self.get_observables_for_permissions(event_permissions, user):

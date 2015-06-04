@@ -8,7 +8,7 @@ Created on Jan 8, 2015
 import json
 import sys
 from os import makedirs
-from os.path import dirname, abspath, exists, isdir, split
+from os.path import dirname, abspath, exists, isdir
 from optparse import OptionParser
 
 basePath = dirname(abspath(__file__)) + '/../../'

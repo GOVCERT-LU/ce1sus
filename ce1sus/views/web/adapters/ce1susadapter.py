@@ -76,7 +76,7 @@ class Ce1susAdapter(BaseController):
     reason = error.message
     message = error.response.text
     code = error.response.status_code
-    """<p>An event with uuid "54f63b0f-0c98-4e74-ab95-60c718689696" already exists</p>"""
+    # "<p>An event with uuid "54f63b0f-0c98-4e74-ab95-60c718689696" already exists</p>
     try:
       pos = message.index('<p>') + 3
       message = message[pos:]

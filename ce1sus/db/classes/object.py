@@ -123,18 +123,6 @@ class Object(ExtendedLogingInformations, Base):
           attributes.append(attribute)
     return attributes
 
-    """
-    return self.attributes.all()
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.attributes.all()
-      else:
-        # count validated ones
-        return self.attributes.filter(Attribute.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).all()
-    """
 
   def get_related_objects_for_permissions(self, event_permissions, user):
 
@@ -143,31 +131,10 @@ class Object(ExtendedLogingInformations, Base):
       if is_object_viewable(rel_obj.object, event_permissions, user):
         rel_objs.append(rel_obj)
     return rel_objs
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_objects.all()
-      else:
-        # count validated ones
-        return self.related_objects.filter(Object.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).all()
-    """
+
 
   def attributes_count_for_permissions(self, event_permissions, user=None):
 
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.attributes.count()
-      else:
-        # count validated ones
-        return self.attributes.filter(Attribute.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.attributes.filter(Attribute.dbcode.op('&')(3) == 3).count()
-    """
     return len(self.get_attributes_for_permissions(event_permissions, user))
 
   def attribute_count(self):
@@ -176,17 +143,7 @@ class Object(ExtendedLogingInformations, Base):
 
   def related_objects_count_for_permissions(self, event_permissions, user=None):
     return len(self.get_related_objects_for_permissions(event_permissions, user))
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.related_objects.count()
-      else:
-        # count validated ones
-        return self.related_objects.filter(Object.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.related_objects.filter(Object.dbcode.op('&')(3) == 3).count()
-    """
+
 
   def related_object_count(self):
     return len(self.related_objects)

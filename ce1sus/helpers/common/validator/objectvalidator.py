@@ -79,7 +79,7 @@ class FailedValidation(object):
     return self.value
 
 
-class ObjectValidator:
+class ObjectValidator(object):
   """
   Utility Class for validating object attributes types
   """
@@ -110,7 +110,7 @@ class ObjectValidator:
     if minLength != 0 and maxLength != 0:
       quantifier = '{{{0},{1}}}'.format(minLength, maxLength)
     elif minLength == 0 and maxLength == 0:
-      quantifier = '*'.format(minLength, maxLength)
+      quantifier = '*'
     elif maxLength == 0:
       quantifier = '{{{0},}}'.format(minLength)
     elif minLength == 0:
@@ -289,8 +289,8 @@ class ObjectValidator:
         return False
 
       if minimal and maximal:
-        errorMsg += ('Smaller or equal than {0} and bigger or equal'
-                     + ' than {0}').format(minimal, maximal)
+        errorMsg += ('Smaller or equal than {0} and bigger or equal' +
+                     ' than {0}').format(minimal, maximal)
         result = minimal <= value <= maximal
       elif maximal:
         errorMsg += 'Bigger or equal than {0}'.format(maximal)
@@ -379,7 +379,7 @@ class ObjectValidator:
         return False
       stringToDateTime(value)
       return True
-    except InputException as error:
+    except InputException:
       if changeAttribute:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
       return False
@@ -445,9 +445,7 @@ class ObjectValidator:
     if hasattr(obj, attributeName):
       regex = unicode(getattr(obj, attributeName))
       try:
-        h = re.compile(regex)
-        # remove the unneeded variable
-        del h
+        re.compile(regex)
         result = True
       except error as e:
         errorMsg = e

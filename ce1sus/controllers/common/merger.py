@@ -9,7 +9,6 @@ from ce1sus.controllers.base import BaseController
 from ce1sus.db.classes.event import Event
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.classes.report import Report
-from __builtin__ import True
 
 
 __author__ = 'Weber Jean-Paul'

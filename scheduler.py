@@ -147,7 +147,6 @@ class Scheduler(object):
         event.last_publish_date = datetime.utcnow()
         self.event_controller.update_event(self.user, event, True, True)
       except (ControllerException, BrokerException) as error:
-        self.process_controller.process_finished_in_error(item, self.user)
         raise SchedulerException(error)
 
   def __send_mails(self, event, type_):

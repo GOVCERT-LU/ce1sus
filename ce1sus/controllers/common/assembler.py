@@ -102,7 +102,7 @@ class Assembler(BaseController):
   def get_set_group(self, json, user, seen_groups=None):
     if seen_groups is None:
       seen_groups = dict()
-    """ If the group does not exist or cannot be created return the users group"""
+    # If the group does not exist or cannot be created return the users group
     group = None
     if json:
       name = json.get('name', None)
@@ -550,7 +550,7 @@ class Assembler(BaseController):
 
       file_obj = open(tmp_path, "w")
       file_obj.write(binary_data)
-      file_obj.close
+      file_obj.close()
 
       sha1 = fileHashSHA1(tmp_path)
       rel_folder = fh.get_rel_folder()
@@ -698,7 +698,9 @@ class Assembler(BaseController):
 
     return related_object
 
-  def get_reference_definition(self, json, seen_ref_def=dict()):
+  def get_reference_definition(self, json, seen_ref_def=None):
+    if seen_ref_def is None:
+      seen_ref_def = dict()
     uuid = json.get('definition_id', None)
     if not uuid:
       definition_json = json.get('definition', None)
@@ -720,7 +722,9 @@ class Assembler(BaseController):
         return definition
     raise ControllerException('Could not find "{0}" definition in the reference'.format(definition_json))
 
-  def assemble_reference(self, reference, user, owner, rest_insert=True, seen_groups=None, seen_ref_def=dict()):
+  def assemble_reference(self, reference, user, owner, rest_insert=True, seen_groups=None, seen_ref_def=None):
+    if seen_ref_def is None:
+      seen_ref_def = dict()
     if seen_groups is None:
       seen_groups = dict()
     value = reference.get('value', None)
@@ -747,7 +751,7 @@ class Assembler(BaseController):
 
             file_obj = open(tmp_path, "w")
             file_obj.write(binary_data)
-            file_obj.close
+            file_obj.close()
 
             sha1 = fileHashSHA1(tmp_path)
             rel_folder = fh.get_rel_folder()
@@ -780,14 +784,18 @@ class Assembler(BaseController):
     else:
       return None
 
-  def assemble_child_report(self, report, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=()):
+  def assemble_child_report(self, report, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=None):
+    if seen_ref_def is None:
+      seen_ref_def = dict()
     if seen_groups is None:
       seen_groups = dict()
     child_report = self.assemble_report(event, json, user, owner, rest_insert, seen_groups, seen_ref_def)
     report.related_reports.append(child_report)
     return child_report
 
-  def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def=()):
+  def assemble_report(self, event, json, user, owner=False, rest_insert=True, seen_groups=None, seen_ref_def):
+    if seen_ref_def is None:
+      seen_ref_def = dict()
     if seen_groups is None:
       seen_groups = dict()
     report = Report()

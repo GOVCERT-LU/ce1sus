@@ -5,7 +5,6 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
-from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
@@ -13,7 +12,6 @@ from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableB
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
-from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 
 
@@ -50,7 +48,7 @@ class ObservableController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(observable, user, user.group, True)
       self.observable_broker.insert(observable, False)
-      # generate relations if needed!
+      # TODO: generate relations if needed!
 
       """
       attributes = get_all_attributes_from_event(event)
@@ -88,9 +86,9 @@ class ObservableController(BaseController):
       validated = True
 
     if validated:
-      # for related_object in related_objects:
+      for related_object in related_objects:
         # self.set_extended_logging(related_object, user, user.group, True)
-      self.insert_related_object(related_object, user, False)
+        self.insert_related_object(related_object, user, False)
     self.object_broker.do_commit(commit)
 
   def set_extended_logging_object(self, obj, user, insert=True):
@@ -119,7 +117,7 @@ class ObservableController(BaseController):
       self.set_extended_logging(observable, user, user.group, True)
 
       self.observable_broker.insert(observable, False)
-      # generate relations if needed!
+      # TODO: generate relations if needed!
 
       """
       attributes = get_all_attributes_from_event(event)
@@ -235,6 +233,7 @@ class ObservableController(BaseController):
   def remove_observable(self, observable, user, commit=True):
     try:
       self.observable_broker.remove_by_id(observable.identifier)
+      self.observable_broker.do_commit(commit)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
@@ -281,7 +280,7 @@ class ObservableController(BaseController):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(obj, user, user.group, False)
-      self.object_broker.update(obj)
+      self.object_broker.update(obj, commit)
     except BrokerException as error:
       raise ControllerException(error)
 

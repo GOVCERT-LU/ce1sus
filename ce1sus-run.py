@@ -7,12 +7,8 @@ Created on Oct 23, 2014
 """
 import cherrypy
 import os
-import sys
 import logging
 
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.object import Object
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.views.web.api.version2.depricated import DepricatedView
 from ce1sus.views.web.api.version3.restcontroller import RestController

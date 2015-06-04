@@ -10,7 +10,7 @@ import os
 import socket
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.pool import QueuePool
 
 from ce1sus.db.common.common import SessionObject, SessionManagerException, Connector
 from ce1sus.db.common.recepie.satool import SAEnginePlugin, SATool

@@ -213,17 +213,6 @@ class Event(ExtendedLogingInformations, Base):
         if rel_obj.originating_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.observables.all()
-      else:
-        # count validated ones
-        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).all()
-    """
 
   def get_reports_for_permissions(self, event_permissions, user):
     rel_objs = list()
@@ -235,45 +224,15 @@ class Event(ExtendedLogingInformations, Base):
         if rel_obj.originating_group_id == user.group_id:
           rel_objs.append(rel_obj)
     return rel_objs
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.reports.all()
-      else:
-        # count validated ones
-        return self.reports.filter(Report.dbcode.op('&')(1) == 1).all()
-    else:
-      # count shared and validated
-      return self.reports.filter(Report.dbcode.op('&')(3) == 3).all()
-    """
+
 
   def observables_count_for_permissions(self, event_permissions, user):
     return len(self.get_observables_for_permissions(event_permissions, user))
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.observables.count()
-      else:
-        # count validated ones
-        return self.observables.filter(Observable.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.observables.filter(Observable.dbcode.op('&')(3) == 3).count()
-    """
+
 
   def reports_count_for_permissions(self, event_permissions, user):
     return len(self.get_reports_for_permissions(event_permissions, user))
-    """
-    if event_permissions:
-      if event_permissions.can_validate:
-        return self.reports.count()
-      else:
-        # count validated ones
-        return self.reports.filter(Report.dbcode.op('&')(1) == 1).count()
-    else:
-      # count shared and validated
-      return self.reports.filter(Report.dbcode.op('&')(3) == 3).count()
-    """
+
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     if inflated:
@@ -347,13 +306,9 @@ class Event(ExtendedLogingInformations, Base):
       result = {'identifier': self.convert_value(self.uuid),
                 'int_id': self.convert_value(self.identifier),
                 'title': self.convert_value(self.title),
-                'creator_group': self.creator_group.to_dict(False),
                 'created_at': self.convert_value(self.created_at),
                 'published': self.convert_value(self.properties.is_shareable),
                 'modified_on': self.convert_value(self.modified_on),
-                # TODO: add first and last seen
-                'first_seen': self.convert_value(None),
-                'last_seen': self.convert_value(None),
                 'observables': observables,
                 'observables_count': observables_count,
                 'indicators': indicators,
@@ -401,7 +356,8 @@ class Event(ExtendedLogingInformations, Base):
     if last_publish_date:
       last_publish_date = ValueConverter.set_date(last_publish_date)
     self.last_seen = last_seen
-
+    self.properties.is_rest_instert = rest_insert
+    self.properties.is_web_insert = not rest_insert
 
 class Comment(ExtendedLogingInformations, Base):
   event_id = Column(BigInteger, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)

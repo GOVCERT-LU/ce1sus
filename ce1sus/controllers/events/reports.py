@@ -54,7 +54,7 @@ class ReportController(BaseController):
     try:
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(report, user, user.group, False)
-      self.report_broker.update(report)
+      self.report_broker.update(report, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -102,7 +102,7 @@ class ReportController(BaseController):
       user = self.user_broker.get_by_id(user.identifier)
       self.set_extended_logging(reference, user, user.group, False)
       # TODO integrate handlersd
-      self.reference_broker.update(reference)
+      self.reference_broker.update(reference, commit)
     except BrokerException as error:
       raise ControllerException(error)
 

@@ -161,6 +161,7 @@ class Ce1susMISP(BaseController):
     elif attr_def_name in ['Raw_Artifact']:
       # wont return samples
       return None
+      # TODO: set this correct
       return 'malware-sample'
     elif attr_def_name in ['hash_md5']:
       return 'md5'
@@ -200,6 +201,7 @@ class Ce1susMISP(BaseController):
     else:
       return 'other'
     # The following do not exists
+    # TODO: Find a way to implement these or don't
     return 'AS'
     return 'filename|md5'
     return 'filename|sha1'

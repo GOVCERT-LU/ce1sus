@@ -8,7 +8,6 @@ Created on Oct 30, 2014
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
-from ce1sus.views.web.common.decorators import privileged
 
 
 __author__ = 'Weber Jean-Paul'

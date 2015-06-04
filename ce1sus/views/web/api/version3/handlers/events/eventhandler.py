@@ -380,7 +380,6 @@ class EventHandler(RestBaseHandler):
       else:
         raise RestHandlerException(u'Cannot remove relations as no relation id was provided')
 
-      pass
     else:
       raise RestHandlerException('Operation not supported')
 

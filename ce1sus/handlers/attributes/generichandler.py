@@ -46,7 +46,7 @@ class GenericHandler(HandlerBase):
     attribute = self.create_attribute(obj, definition, user, json)
     return [attribute], None
 
-  def get_data(self, attribute, parameters):
+  def get_data(self, attribute, definition, parameters):
     return list()
 
   def get_view_type(self):

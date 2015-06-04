@@ -8,7 +8,6 @@ Created on Feb 23, 2014
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker, ReferenceDefintionsBroker
 from ce1sus.db.classes.report import ReferenceHandler
-from ce1sus.db.classes.user import User
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator

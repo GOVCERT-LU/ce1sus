@@ -40,7 +40,7 @@ class UserBroker(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def update(self, instance, commit=True):
+  def update(self, instance, commit=True, validate=True):
     """
     overrides BrokerBase.insert
     """
@@ -143,7 +143,7 @@ class UserBroker(BrokerBase):
     except sqlalchemy.exc.SQLAlchemyError as error:
       raise BrokerException(error)
 
-  def get_all(self):
+  def get_all(self, order=None):
     """
     Returns all get_broker_class() instances
 

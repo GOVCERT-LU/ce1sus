@@ -11,19 +11,13 @@ import cherrypy
 from cherrypy._cperror import HTTPError
 from datetime import datetime
 import json
-from lxml import etree
 from os import makedirs
-import os
 from os.path import exists
 from shutil import rmtree
-import sys
 from tempfile import gettempdir
-import traceback
-import warnings
 
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
 from ce1sus.controllers.common.merger import Merger
-import ce1sus.helpers.common.hash as hasher
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import require

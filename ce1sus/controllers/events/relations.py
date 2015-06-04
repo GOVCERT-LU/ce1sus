@@ -31,11 +31,13 @@ class RelationController(BaseController):
   def generate_attribute_relations(self, attribute, commit=False):
     try:
       """
+
       Generates the relations for the given attribue
       :param attribute:
       :type attribute: Attribute
       :param commit:
       :type commit: Boolean
+
       """
       if attribute.definition.relation:
         clazz = ValueBroker.get_class_by_attr_def(attribute.definition)

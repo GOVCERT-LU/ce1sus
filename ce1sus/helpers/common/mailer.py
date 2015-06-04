@@ -46,6 +46,7 @@ class Mail(object):
     """Formated plain message"""
     return u"""From: {0}\nTo: {1}\nSubject:{2}\n\n {3}""".format(self.sender,
                                                                  self.reciever,
+                                                                 self.subject,
                                                                  self.body)
 
 

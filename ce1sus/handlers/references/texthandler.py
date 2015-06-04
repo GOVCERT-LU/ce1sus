@@ -35,8 +35,5 @@ class TextHandler(GenericHandler):
   def get_additinal_attribute_chksums(self):
     return list()
 
-  def frontend_get(self, parameters):
-    return list()
-
   def get_view_type(self):
     return 'text'

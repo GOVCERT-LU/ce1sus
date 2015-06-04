@@ -87,7 +87,7 @@ def get_fields(obj):
       fields.append(name)
   if hasattr(obj, '__dict__'):
     for name in obj.__dict__:
-    # if not a private or protected value and not a method
+      # if not a private or protected value and not a method
       if not name.startswith('_') and not callable(getattr(obj, name, None)):
         if name not in fields:
           fields.append(name)
@@ -195,10 +195,10 @@ def compare_objects(object1, object2, raise_exceptions=True):
               value1 = getattr(object1, name)
               value2 = getattr(object2, name)
               # functions/methods will not be compared
-              if (not isfunction(value1) and not isinstance(value1, types.FunctionType)
-                  and not ismethod(value1)) and (not isfunction(value2) and
-                                                 not isinstance(value2, types.FunctionType)
-                                                 and not ismethod(value2)):
+              if (not isfunction(value1) and not isinstance(value1, types.FunctionType) and not
+                  ismethod(value1)) and (not isfunction(value2) and
+                                         not isinstance(value2, types.FunctionType)
+                                         and not ismethod(value2)):
                 attr_name = name
                 attr_value1 = value1
                 attr_value2 = value2

@@ -323,7 +323,8 @@ class CyboxMapper(BaseController):
   def create_win_executable_file(self, win_executable_file, parent, is_indicator, tlp_id):
     attributes = list()
     if win_executable_file.driver_name:
-      attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_driver.driver_name, False, win_driver.driver_name.condition, tlp_id))
+      # TODO
+      attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_executable_file.driver_name, False, win_executable_file.driver_name.condition, tlp_id))
 
     if attributes:
       return attributes

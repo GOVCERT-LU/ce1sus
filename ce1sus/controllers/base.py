@@ -53,7 +53,7 @@ class NotImplementedException(ControllerException):
 
 
 # pylint: disable=R0903
-class BaseController:
+class BaseController(object):
   """This is the base class for controlles all controllers should extend this
   class"""
 

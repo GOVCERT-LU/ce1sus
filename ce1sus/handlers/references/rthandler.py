@@ -41,7 +41,7 @@ class RTHandler(GenericHandler):
             'url': ticket.url
             }
 
-  def get_data(self, reference_uuid, definition, parameters):
+  def get_data(self, reference, definition, parameters):
     type_ = parameters.get('type', 'view')
     if type_ == 'view':
       return [self.rt_system.get_base_ticket_url()]

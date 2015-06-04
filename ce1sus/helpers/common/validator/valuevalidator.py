@@ -26,7 +26,7 @@ class Container(object):
     self.value = value
 
 
-class ValueValidator:
+class ValueValidator(object):
   """
   Utility Class for validating base types
   """

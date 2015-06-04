@@ -10,7 +10,6 @@ from ce1sus.controllers.base import ControllerNothingFoundException, ControllerE
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerNotFoundException, RestHandlerException
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.handlers.base import HandlerException
 
 
 __author__ = 'Weber Jean-Paul'

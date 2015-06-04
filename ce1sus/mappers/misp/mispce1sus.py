@@ -315,7 +315,7 @@ class MispConverter(BaseController):
         self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
         # raise MispMappingException(message)
         return None
-      pass
+
     elif type_ == 'regkey':
       value = value.replace('/', '\\')
       pos = value.find("\\")
@@ -662,7 +662,6 @@ class MispConverter(BaseController):
       return definition
     except BrokerException as error:
       self.logger.error(error)
-      return None
       # if here no def was found raise exception
       message = u'No attribute definition for "{0}"/"{1}" and value "{2}" can be found "{3}"'.format(category, type_, value, name)
       self.log_element(obj, observable, id_, category, type_, value, ioc, share, event, uuid, message, distribution)
@@ -990,7 +989,7 @@ class MispConverter(BaseController):
         rest_event.identifier = local_event.identifier
       else:
         self.event_broker.insert(rest_event, False)
-        pass
+
       observables = self.parse_attributes(rest_event, xml_event, local_event)
       rest_event.observables = observables
       # Append reference

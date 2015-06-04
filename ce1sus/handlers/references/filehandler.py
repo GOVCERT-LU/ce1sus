@@ -112,7 +112,7 @@ class FileReferenceHandler(GenericHandler):
       # create file in tmp
       file_obj = open(tmp_path, "w")
       file_obj.write(binary_data)
-      file_obj.close
+      file_obj.close()
 
       sha1 = hasher.fileHashSHA1(tmp_path)
       rel_folder = self.get_rel_folder()
