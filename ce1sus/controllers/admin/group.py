@@ -18,79 +18,79 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class GroupController(BaseController):
-    """Controller handling all the requests for groups"""
+  """Controller handling all the requests for groups"""
 
-    def __init__(self, config, session=None):
-        BaseController.__init__(self, config, session)
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
 
-    def get_group_by_uuid(self, uuid):
-        try:
-            return self.group_broker.get_by_uuid(uuid)
-        except NothingFoundException as error:
-            raise ControllerNothingFoundException(error)
-        except BrokerException as error:
-            raise ControllerException(error)
+  def get_group_by_uuid(self, uuid):
+    try:
+      return self.group_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def get_all_groups(self):
-        try:
-            return self.group_broker.get_all()
-        except BrokerException as error:
-            raise ControllerException(error)
+  def get_all_groups(self):
+    try:
+      return self.group_broker.get_all()
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def get_group_by_id(self, group_id):
-        try:
-            return self.group_broker.get_by_id(group_id)
-        except NothingFoundException as error:
-            raise ControllerNothingFoundException(error)
-        except BrokerException as error:
-            raise ControllerException(error)
+  def get_group_by_id(self, group_id):
+    try:
+      return self.group_broker.get_by_id(group_id)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def get_group_by_name(self, group_name):
-        try:
-            return self.group_broker.get_by_name(group_name)
-        except NothingFoundException as error:
-            raise ControllerNothingFoundException(error)
-        except BrokerException as error:
-            raise ControllerException(error)
+  def get_group_by_name(self, group_name):
+    try:
+      return self.group_broker.get_by_name(group_name)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def insert_group(self, group, validate=True, commit=True):
-        try:
-            self.group_broker.insert(group, commit, validate)
+  def insert_group(self, group, validate=True, commit=True):
+    try:
+      self.group_broker.insert(group, commit, validate)
 
-        except ValidationException as error:
-            message = ObjectValidator.getFirstValidationError(group)
-            raise ControllerException(u'Could not add group due to: {0}'.format(message))
-        except IntegrityException as error:
-            raise ControllerIntegrityException(error)
-        except (BrokerException) as error:
-            raise ControllerException(error)
+    except ValidationException as error:
+      message = ObjectValidator.getFirstValidationError(group)
+      raise ControllerException(u'Could not add group due to: {0}'.format(message))
+    except IntegrityException as error:
+      raise ControllerIntegrityException(error)
+    except (BrokerException) as error:
+      raise ControllerException(error)
 
-    def update_group(self, group):
-        try:
-            self.group_broker.update(group)
-            return group
-        except ValidationException as error:
-            message = ObjectValidator.getFirstValidationError(group)
-            raise ControllerException(u'Could not update group due to: {0}'.format(message))
-        except BrokerException as error:
-            raise ControllerException(error)
+  def update_group(self, group):
+    try:
+      self.group_broker.update(group)
+      return group
+    except ValidationException as error:
+      message = ObjectValidator.getFirstValidationError(group)
+      raise ControllerException(u'Could not update group due to: {0}'.format(message))
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def remove_group_by_id(self, identifier):
-        try:
-            self.group_broker.remove_by_id(identifier)
-        except IntegrityException as error:
-            raise ControllerException('Cannot delete group. The group is referenced by elements. Disable this group instead.')
-        except DeletionException:
-            raise ControllerException('This group cannot be deleted')
-        except BrokerException as error:
-            raise ControllerException(error)
+  def remove_group_by_id(self, identifier):
+    try:
+      self.group_broker.remove_by_id(identifier)
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete group. The group is referenced by elements. Disable this group instead.')
+    except DeletionException:
+      raise ControllerException('This group cannot be deleted')
+    except BrokerException as error:
+      raise ControllerException(error)
 
-    def remove_group_by_uuid(self, uuid):
-        try:
-            self.group_broker.remove_by_uuid(uuid)
-        except IntegrityException as error:
-            raise ControllerException('Cannot delete group. The group is referenced by elements. Disable this group instead.')
-        except DeletionException:
-            raise ControllerException('This group cannot be deleted')
-        except BrokerException as error:
-            raise ControllerException(error)
+  def remove_group_by_uuid(self, uuid):
+    try:
+      self.group_broker.remove_by_uuid(uuid)
+    except IntegrityException as error:
+      raise ControllerException('Cannot delete group. The group is referenced by elements. Disable this group instead.')
+    except DeletionException:
+      raise ControllerException('This group cannot be deleted')
+    except BrokerException as error:
+      raise ControllerException(error)

@@ -21,49 +21,49 @@ __license__ = 'GPL v3+'
 
 class IndicatorTypeBroker(BrokerBase):
 
-    def get_broker_class(self):
-        """
-        overrides BrokerBase.get_broker_class
-        """
-        return IndicatorType
+  def get_broker_class(self):
+    """
+    overrides BrokerBase.get_broker_class
+    """
+    return IndicatorType
 
-    def get_type_by_name(self, name):
-        try:
-            for key, value in IndicatorType.get_dictionary().iteritems():
-                if value == name:
-                    type_ = IndicatorType()
-                    type_.type = key
-                    return type_
-            raise NoResultFound
-        except NoResultFound:
-            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(name, self.__class__.__name__))
-        except MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(name))
-        except SQLAlchemyError as error:
-            raise BrokerException(error)
+  def get_type_by_name(self, name):
+    try:
+      for key, value in IndicatorType.get_dictionary().iteritems():
+        if value == name:
+          type_ = IndicatorType()
+          type_.type = key
+          return type_
+      raise NoResultFound
+    except NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(name, self.__class__.__name__))
+    except MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(name))
+    except SQLAlchemyError as error:
+      raise BrokerException(error)
 
 
 class AttributeTypeBroker(BrokerBase):
 
-    def get_broker_class(self):
-        """
-        overrides BrokerBase.get_broker_class
-        """
-        return AttributeType
+  def get_broker_class(self):
+    """
+    overrides BrokerBase.get_broker_class
+    """
+    return AttributeType
 
-    def remove_by_id(self, identifier, commit=True):
-        type_ = self.get_by_id(identifier)
-        if type_.table_id:
-            try:
-                BrokerBase.remove_by_id(self, identifier, commit)
-            except IntegrityException:
-                raise IntegrityException('Item is still referenced cannot delete it')
-        else:
-            raise IntegrityException('Cannot remove the None element')
+  def remove_by_id(self, identifier, commit=True):
+    type_ = self.get_by_id(identifier)
+    if type_.table_id:
+      try:
+        BrokerBase.remove_by_id(self, identifier, commit)
+      except IntegrityException:
+        raise IntegrityException('Item is still referenced cannot delete it')
+    else:
+      raise IntegrityException('Cannot remove the None element')
 
-    def update(self, instance, commit=True, validate=True):
-        type_ = self.get_by_id(instance.identifier)
-        if type_.table_id:
-            BrokerBase.update(self, instance, commit)
-        else:
-            raise IntegrityException('Cannot update the None element')
+  def update(self, instance, commit=True, validate=True):
+    type_ = self.get_by_id(instance.identifier)
+    if type_.table_id:
+      BrokerBase.update(self, instance, commit)
+    else:
+      raise IntegrityException('Cannot update the None element')

@@ -20,202 +20,202 @@ __license__ = 'GPL v3+'
 
 
 class ValueBroker(BrokerBase):
+  """
+  This broker is used internally to serparate the values to their
+  corresponding tables
+
+  Note: Only used by the AttributeBroker
+  """
+  def __init__(self, session):
+    BrokerBase.__init__(self, session)
+    self.__clazz = StringValue
+
+  @property
+  def clazz(self):
     """
-    This broker is used internally to serparate the values to their
-    corresponding tables
+    returns the class used for this value broker
 
-    Note: Only used by the AttributeBroker
+    Note: May vary during its lifetime
+
     """
-    def __init__(self, session):
-        BrokerBase.__init__(self, session)
-        self.__clazz = StringValue
+    return self.__clazz
 
-    @property
-    def clazz(self):
-        """
-        returns the class used for this value broker
+  @clazz.setter
+  def clazz(self, clazz):
+    """
+    setter for the class
+    """
+    self.__clazz = clazz
 
-        Note: May vary during its lifetime
+  def get_broker_class(self):
+    """
+    overrides BrokerBase.get_broker_class
+    """
+    return self.__clazz
 
-        """
-        return self.__clazz
+  @staticmethod
+  def get_class_by_attribute(attribute):
+    """
+    returns class for the attribute
 
-    @clazz.setter
-    def clazz(self, clazz):
-        """
-        setter for the class
-        """
-        self.__clazz = clazz
+    :param attribute: the attribute in context
+    :type attribute: Class
+    """
+    return ValueBroker.get_class_by_attr_def(attribute.definition)
 
-    def get_broker_class(self):
-        """
-        overrides BrokerBase.get_broker_class
-        """
-        return self.__clazz
+  @staticmethod
+  def get_class_by_string(classname):
+    """
+    returns class for the attribute
 
-    @staticmethod
-    def get_class_by_attribute(attribute):
-        """
-        returns class for the attribute
+    :param classname: the name of the class
+    :type classname: Class
+    """
+    return get_class('ce1sus.db.classes.values', u'{0}Value'.format(classname))
 
-        :param attribute: the attribute in context
-        :type attribute: Class
-        """
-        return ValueBroker.get_class_by_attr_def(attribute.definition)
+  @staticmethod
+  def get_class_by_attr_def(definition):
+    """
+    returns class for the attribute
 
-    @staticmethod
-    def get_class_by_string(classname):
-        """
-        returns class for the attribute
+    :param attribute: the attribute in context
+    :type attribute: Attribute
+    """
+    return ValueBroker.get_class_by_string(definition.value_table)
 
-        :param classname: the name of the class
-        :type classname: Class
-        """
-        return get_class('ce1sus.db.classes.values', u'{0}Value'.format(classname))
+  @staticmethod
+  def get_all_classes():
+    """returns instances of all the table class values"""
+    result = list()
+    table_names = ValueTable.get_all_table_names()
+    for table_name in table_names:
+      result.append(ValueBroker.get_class_by_string(table_name))
+    return result
 
-    @staticmethod
-    def get_class_by_attr_def(definition):
-        """
-        returns class for the attribute
+  def __set_class_by_attribute(self, attribute):
+    """
+    sets class for the attribute
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
-        """
-        return ValueBroker.get_class_by_string(definition.value_table)
+    :param attribute: the attribute in context
+    :type attribute: Attribute
+    """
+    self.__clazz = self.get_class_by_attribute(attribute)
 
-    @staticmethod
-    def get_all_classes():
-        """returns instances of all the table class values"""
-        result = list()
-        table_names = ValueTable.get_all_table_names()
-        for table_name in table_names:
-            result.append(ValueBroker.get_class_by_string(table_name))
-        return result
+  def __convert_attr_value_to_value(self, attribute, is_insert=True):
+    """
+    converts an Attribute to a Value object
 
-    def __set_class_by_attribute(self, attribute):
-        """
-        sets class for the attribute
+    :param attribute: the attribute in context
+    :type attribute: Attribute
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
-        """
-        self.__clazz = self.get_class_by_attribute(attribute)
+    :returns: Value
+    """
+    value_instance = self.__clazz()
+    value_instance.value = attribute.plain_value
+    if not is_insert:
+      value_instance.identifier = attribute.value_id
+    value_instance.attribute_id = attribute.identifier
+    value_instance.attribute = attribute
+    value_instance.event_id = attribute.object.event_id
+    return value_instance
 
-    def __convert_attr_value_to_value(self, attribute, is_insert=True):
-        """
-        converts an Attribute to a Value object
+  def get_by_attribute(self, attribute):
+    """
+    fetches one Value instance with the information of the given attribute
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
+    :param attribute: the attribute in context
+    :type attribute: Attribute
 
-        :returns: Value
-        """
-        value_instance = self.__clazz()
-        value_instance.value = attribute.plain_value
-        if not is_insert:
-            value_instance.identifier = attribute.value_id
-        value_instance.attribute_id = attribute.identifier
-        value_instance.attribute = attribute
-        value_instance.event_id = attribute.object.event_id
-        return value_instance
+    :returns : Value
+    """
 
-    def get_by_attribute(self, attribute):
-        """
-        fetches one Value instance with the information of the given attribute
+    self.__set_class_by_attribute(attribute)
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
+    try:
+      clazz = self.get_broker_class()
+      result = self.session.query(clazz).filter(clazz.attribute_id == attribute.identifier).one()
 
-        :returns : Value
-        """
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException(u'No value found with ID :{0} in {1}'.format(
+                                  attribute.identifier, self.get_broker_class()))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many value found for ID :{0} in {1}'.format(attribute.identifier,
+                                                                                          self.get_broker_class()))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-        self.__set_class_by_attribute(attribute)
+    return result
 
-        try:
-            clazz = self.get_broker_class()
-            result = self.session.query(clazz).filter(clazz.attribute_id == attribute.identifier).one()
+  def inser_by_attribute(self, attribute, commit=True):
+    """
+    Inserts one Value instance with the information of the given attribute
 
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException(u'No value found with ID :{0} in {1}'.format(
-                                        attribute.identifier, self.get_broker_class()))
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many value found for ID :{0} in {1}'.format(attribute.identifier,
-                                                                                                self.get_broker_class()))
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+    :param attribute: the attribute in context
+    :type attribute: Attribute
 
-        return result
+    :returns : Value
+    """
+    errors = not attribute.validate()
+    if errors:
+      raise ValidationException(u'Attribute to be inserted is invalid')
 
-    def inser_by_attribute(self, attribute, commit=True):
-        """
-        Inserts one Value instance with the information of the given attribute
+    self.__set_class_by_attribute(attribute)
+    value = self.__convert_attr_value_to_value(attribute, True)
+    value.identifier = None
+    BrokerBase.insert(self, value, commit)
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
+  def update_by_attribute(self, attribute, commit=True):
+    """
+    updates one Value instance with the information of the given attribute
 
-        :returns : Value
-        """
-        errors = not attribute.validate()
-        if errors:
-            raise ValidationException(u'Attribute to be inserted is invalid')
+    :param attribute: the attribute in context
+    :type attribute: Attribute
 
-        self.__set_class_by_attribute(attribute)
-        value = self.__convert_attr_value_to_value(attribute, True)
-        value.identifier = None
-        BrokerBase.insert(self, value, commit)
+    :returns : Value
+    """
+    errors = not attribute.validate()
+    if errors:
+      raise ValidationException(u'Attribute to be updated is invalid')
 
-    def update_by_attribute(self, attribute, commit=True):
-        """
-        updates one Value instance with the information of the given attribute
+    self.__set_class_by_attribute(attribute)
+    value = self.__convert_attr_value_to_value(attribute, False)
+    BrokerBase.update(self, value, commit)
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
+  def remove_by_attribute(self, attribute, commit):
+    """
+    Removes one Value with the information given by the attribute
 
-        :returns : Value
-        """
-        errors = not attribute.validate()
-        if errors:
-            raise ValidationException(u'Attribute to be updated is invalid')
+    :param attribute: the attribute in context
+    :type attribute: Attribute
+    :param commit: do a commit after
+    :type commit: Boolean
+    """
+    self.__set_class_by_attribute(attribute)
 
-        self.__set_class_by_attribute(attribute)
-        value = self.__convert_attr_value_to_value(attribute, False)
-        BrokerBase.update(self, value, commit)
+    try:
+      self.session.query(self.get_broker_class()).filter(self.get_broker_class().attribute_id == attribute.identifier
+                                                         ).delete(synchronize_session='fetch')
+      self.do_commit(commit)
+    except sqlalchemy.exc.OperationalError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-    def remove_by_attribute(self, attribute, commit):
-        """
-        Removes one Value with the information given by the attribute
+  def look_for_value(self, clazz, value):
+    """
+    returns a list of matching values
 
-        :param attribute: the attribute in context
-        :type attribute: Attribute
-        :param commit: do a commit after
-        :type commit: Boolean
-        """
-        self.__set_class_by_attribute(attribute)
+    :param clazz: Class to use for the lookup
+    :type clazz: Class
+    :param value: Value to look for
+    :type value: String
 
-        try:
-            self.session.query(self.get_broker_class()).filter(self.get_broker_class().attribute_id == attribute.identifier
-                                                               ).delete(synchronize_session='fetch')
-            self.do_commit(commit)
-        except sqlalchemy.exc.OperationalError as error:
-            self.session.rollback()
-            raise IntegrityException(error)
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
-
-    def look_for_value(self, clazz, value):
-        """
-        returns a list of matching values
-
-        :param clazz: Class to use for the lookup
-        :type clazz: Class
-        :param value: Value to look for
-        :type value: String
-
-        :returns: List of clazz
-        """
-        try:
-            return self.session.query(clazz).filter(clazz.value == value).all()
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    :returns: List of clazz
+    """
+    try:
+      return self.session.query(clazz).filter(clazz.value == value).all()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)

@@ -19,34 +19,34 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class RelatedObjectBroker(BrokerBase):
+  """
+  This broker handles all operations on event objects
+  """
+  def __init__(self, session):
+    BrokerBase.__init__(self, session)
+
+  def get_broker_class(self):
     """
-    This broker handles all operations on event objects
+    overrides BrokerBase.get_broker_class
     """
-    def __init__(self, session):
-        BrokerBase.__init__(self, session)
+    return RelatedObject
 
-    def get_broker_class(self):
-        """
-        overrides BrokerBase.get_broker_class
-        """
-        return RelatedObject
+  def get_parent_object_by_object_id(self, identifier):
+    try:
+      return self.session.query(Object).join(RelatedObject, RelatedObject.parent_id == Object.identifier).filter(RelatedObject.child_id == identifier).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-    def get_parent_object_by_object_id(self, identifier):
-        try:
-            return self.session.query(Object).join(RelatedObject, RelatedObject.parent_id == Object.identifier).filter(RelatedObject.child_id == identifier).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
-
-    def get_related_object_by_child_object_id(self, identifier):
-        try:
-            return self.session.query(RelatedObject).filter(RelatedObject.child_id == identifier).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+  def get_related_object_by_child_object_id(self, identifier):
+    try:
+      return self.session.query(RelatedObject).filter(RelatedObject.child_id == identifier).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

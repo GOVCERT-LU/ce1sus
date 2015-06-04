@@ -19,18 +19,18 @@ __license__ = 'GPL v3+'
 
 class ProcessBroker(BrokerBase):
 
-    def get_broker_class(self):
-        """
-        overrides BrokerBase.get_broker_class
-        """
-        return ProcessItem
+  def get_broker_class(self):
+    """
+    overrides BrokerBase.get_broker_class
+    """
+    return ProcessItem
 
-    def get_scheduled_process_items(self):
-        try:
-            process_id = ProcessStatus.SCHEDULED
-            result = self.session.query(ProcessItem).filter(ProcessItem.db_status == process_id)
-            return result.all()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found')
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+  def get_scheduled_process_items(self):
+    try:
+      process_id = ProcessStatus.SCHEDULED
+      result = self.session.query(ProcessItem).filter(ProcessItem.db_status == process_id)
+      return result.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)

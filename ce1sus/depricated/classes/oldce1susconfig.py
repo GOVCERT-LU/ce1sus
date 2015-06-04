@@ -19,22 +19,22 @@ __license__ = 'GPL v3+'
 
 
 class OldCe1susConfig(BASE):
-    """
-    Container class for the ce1sus configuration
-    """
-    __tablename__ = 'ce1sus'
-    identifier = Column('ce1sus_id', Integer, primary_key=True)
-    key = Column('key', String)
-    value = Column('value', String)
+  """
+  Container class for the ce1sus configuration
+  """
+  __tablename__ = 'ce1sus'
+  identifier = Column('ce1sus_id', Integer, primary_key=True)
+  key = Column('key', String)
+  value = Column('value', String)
 
-    def to_dict(self):
-        return {'identifier': BaseClass.convert_value(self.identifier),
-                'key': BaseClass.convert_value(self.key),
-                'value': BaseClass.convert_value(self.value)
-                }
+  def to_dict(self):
+    return {'identifier': BaseClass.convert_value(self.identifier),
+            'key': BaseClass.convert_value(self.key),
+            'value': BaseClass.convert_value(self.value)
+            }
 
-    def validate(self):
-        """
-        Returns true if the object is valid
-        """
-        return self
+  def validate(self):
+    """
+    Returns true if the object is valid
+    """
+    return self

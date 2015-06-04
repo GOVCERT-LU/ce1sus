@@ -17,19 +17,19 @@ __license__ = 'GPL v3+'
 
 class ChecksHandler(RestBaseHandler):
 
-    def __init__(self, config):
-        RestBaseHandler.__init__(self, config)
+  def __init__(self, config):
+    RestBaseHandler.__init__(self, config)
 
-    @rest_method(default=True)
-    @methods(allowed=['GET'])
-    @require()
-    def checks(self, **args):
-        try:
-            raise RestHandlerException('No checks selected')
-        except ControllerException as error:
-            raise RestHandlerException(error)
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require()
+  def checks(self, **args):
+    try:
+      raise RestHandlerException('No checks selected')
+    except ControllerException as error:
+      raise RestHandlerException(error)
 
-    @rest_method(default=True)
-    @methods(allowed=['GET'])
-    def isuseradmin(self, **args):
-        return is_user_priviledged(self.get_user())
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  def isuseradmin(self, **args):
+    return is_user_priviledged(self.get_user())

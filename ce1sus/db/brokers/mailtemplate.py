@@ -21,48 +21,48 @@ __license__ = 'GPL v3+'
 
 
 class MailTemplateBroker(BrokerBase):
+  """
+  Mail template broker
+  """
+  ACTIVATION = 'Activation'
+  EVENT_PUBLICATION = 'Publication'
+  EVENT_UPDATE = 'Update'
+  PROPOSAL = 'Proposal'
+
+  def __init__(self, session):
+    BrokerBase.__init__(self, session)
+
+  def get_broker_class(self):
+    return MailTemplate
+
+  def __get_template(self, identifier):
     """
-    Mail template broker
+    Returns the object by the given identifier
+
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
+
+    :returns: MailTemplate
     """
-    ACTIVATION = 'Activation'
-    EVENT_PUBLICATION = 'Publication'
-    EVENT_UPDATE = 'Update'
-    PROPOSAL = 'Proposal'
+    try:
+      result = self.session.query(MailTemplate).filter(MailTemplate.name == identifier).one()
+    except NoResultFound:
+      raise NothingFoundException(u'Nothing found for function_id :{0}'.format(identifier))
+    except MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for function_id :{0}'.format(identifier))
+    except SQLAlchemyError as error:
+      raise BrokerException(error)
 
-    def __init__(self, session):
-        BrokerBase.__init__(self, session)
+    return result
 
-    def get_broker_class(self):
-        return MailTemplate
+  def get_activation_template(self):
+    """Returns the template for the activation of users"""
+    return self.__get_template(MailTemplateBroker.ACTIVATION)
 
-    def __get_template(self, identifier):
-        """
-        Returns the object by the given identifier
+  def get_publication_template(self):
+    return self.__get_template(MailTemplateBroker.EVENT_PUBLICATION)
 
-        Note: raises a NothingFoundException or a TooManyResultsFound Exception
+  def get_proposal_template(self):
+    return self.__get_template(MailTemplateBroker.PROPOSAL)
 
-        :returns: MailTemplate
-        """
-        try:
-            result = self.session.query(MailTemplate).filter(MailTemplate.name == identifier).one()
-        except NoResultFound:
-            raise NothingFoundException(u'Nothing found for function_id :{0}'.format(identifier))
-        except MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for function_id :{0}'.format(identifier))
-        except SQLAlchemyError as error:
-            raise BrokerException(error)
-
-        return result
-
-    def get_activation_template(self):
-        """Returns the template for the activation of users"""
-        return self.__get_template(MailTemplateBroker.ACTIVATION)
-
-    def get_publication_template(self):
-        return self.__get_template(MailTemplateBroker.EVENT_PUBLICATION)
-
-    def get_proposal_template(self):
-        return self.__get_template(MailTemplateBroker.PROPOSAL)
-
-    def get_update_template(self):
-        return self.__get_template(MailTemplateBroker.EVENT_UPDATE)
+  def get_update_template(self):
+    return self.__get_template(MailTemplateBroker.EVENT_UPDATE)

@@ -22,49 +22,49 @@ __license__ = 'GPL v3+'
 
 class OldEventBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldEvent
+  def get_broker_class(self):
+    return OldEvent
 
 
 class OldUserBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldUser
+  def get_broker_class(self):
+    return OldUser
 
-    def get_all(self):
-        users = BrokerBase.get_all(self)
-        result = list()
-        for user in users:
-            if user.username != 'admin':
-                result.append(user)
-        return result
+  def get_all(self):
+    users = BrokerBase.get_all(self)
+    result = list()
+    for user in users:
+      if user.username != 'admin':
+        result.append(user)
+    return result
 
 
 class OldGroupBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldGroup
+  def get_broker_class(self):
+    return OldGroup
 
 
 class OldAttributeDefinitionsBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldAttributeDefinition
+  def get_broker_class(self):
+    return OldAttributeDefinition
 
 
 class OldObjectDefinitionsBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldObjectDefinition
+  def get_broker_class(self):
+    return OldObjectDefinition
 
 
 class OldConfigBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldCe1susConfig
+  def get_broker_class(self):
+    return OldCe1susConfig
 
 
 class OldHandlerBroker(BrokerBase):
 
-    def get_broker_class(self):
-        return OldAttributeHandler
+  def get_broker_class(self):
+    return OldAttributeHandler

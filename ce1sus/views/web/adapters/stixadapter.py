@@ -27,54 +27,54 @@ __license__ = 'GPL v3+'
 
 class STIXAdapter(BaseView):
 
-    def __init__(self, config, session=None):
-        BaseView.__init__(self, config)
-        self.stix_mapper = StixMapper(config, session)
-        self.merger = Merger(config, session)
+  def __init__(self, config, session=None):
+    BaseView.__init__(self, config)
+    self.stix_mapper = StixMapper(config, session)
+    self.merger = Merger(config, session)
 
-    @cherrypy.expose
-    @cherrypy.tools.allow(methods=['POST'])
-    @require()
-    def upload_xml(self, *vpath, **params):
-        user = None
-        try:
-            user = self.user_controller.get_user_by_username(self.get_user().username)
-        except ControllerException as error:
-            self.logger.error(error)
-            raise HTTPError(400, error.message)
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['POST'])
+  @require()
+  def upload_xml(self, *vpath, **params):
+    user = None
+    try:
+      user = self.user_controller.get_user_by_username(self.get_user().username)
+    except ControllerException as error:
+      self.logger.error(error)
+      raise HTTPError(400, error.message)
 
-        input_json = self.get_json()
-        filename = input_json['name']
-        self.logger.info('Starting to import xml form file {0}'.format(filename))
-        data = input_json['data']['data']
-        complete = params.get('complete', False)
-        inflated = params.get('inflated', False)
-        xml_string = base64.b64decode(data)
+    input_json = self.get_json()
+    filename = input_json['name']
+    self.logger.info('Starting to import xml form file {0}'.format(filename))
+    data = input_json['data']['data']
+    complete = params.get('complete', False)
+    inflated = params.get('inflated', False)
+    xml_string = base64.b64decode(data)
 
-        # STIX wants lxml instead of xml
-        xml = etree.fromstring(xml_string)
+    # STIX wants lxml instead of xml
+    xml = etree.fromstring(xml_string)
 
-        stix_package = STIXPackage.from_xml(xml)
+    stix_package = STIXPackage.from_xml(xml)
 
-        try:
-            event = self.stix_mapper.map_stix_package(stix_package, user)
-            event.properties.is_validated = False
-            self.event_controller.insert_event(user, event, True, True)
-            event_permissions = self.event_controller.get_event_user_permissions(event, user)
-            cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
-            return json.dumps(event.to_dict(complete, inflated, event_permissions, user))
-        except ControllerIntegrityException as error:
-            self.logger.debug(error)
-            event = self.stix_mapper.map_stix_package(stix_package, user, False, True)
-            local_event = self.event_controller.get_event_by_uuid(event.uuid)
-            event_permissions = self.event_controller.get_event_user_permissions(event, user)
-            merged_event = self.merger.merge_event(local_event, event, user, event_permissions)
-            self.event_controller.update_event(user, merged_event, True, True)
-            cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
-            return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
-        except ControllerNothingFoundException as error:
-            self.logger.error(error)
-            raise HTTPError(404, error.message)
-        except ControllerException as error:
-            self.logger.error(error)
-            raise HTTPError(400, error.message)
+    try:
+      event = self.stix_mapper.map_stix_package(stix_package, user)
+      event.properties.is_validated = False
+      self.event_controller.insert_event(user, event, True, True)
+      event_permissions = self.event_controller.get_event_user_permissions(event, user)
+      cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+      return json.dumps(event.to_dict(complete, inflated, event_permissions, user))
+    except ControllerIntegrityException as error:
+      self.logger.debug(error)
+      event = self.stix_mapper.map_stix_package(stix_package, user, False, True)
+      local_event = self.event_controller.get_event_by_uuid(event.uuid)
+      event_permissions = self.event_controller.get_event_user_permissions(event, user)
+      merged_event = self.merger.merge_event(local_event, event, user, event_permissions)
+      self.event_controller.update_event(user, merged_event, True, True)
+      cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+      return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
+    except ControllerNothingFoundException as error:
+      self.logger.error(error)
+      raise HTTPError(404, error.message)
+    except ControllerException as error:
+      self.logger.error(error)
+      raise HTTPError(400, error.message)

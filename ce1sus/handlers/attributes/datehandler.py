@@ -16,19 +16,19 @@ __license__ = 'GPL v3+'
 
 
 class DateHandler(GenericHandler):
-    """The generic handler for handling known atomic values"""
+  """The generic handler for handling known atomic values"""
 
-    @staticmethod
-    def get_uuid():
-        return '11406d00-8dec-11e3-baa8-0800200c9a66'
+  @staticmethod
+  def get_uuid():
+    return '11406d00-8dec-11e3-baa8-0800200c9a66'
 
-    @staticmethod
-    def get_description():
-        return u'Handler for Dates'
+  @staticmethod
+  def get_description():
+    return u'Handler for Dates'
 
-    @staticmethod
-    def get_allowed_types():
-        return [ValueTable.DATE_VALUE]
+  @staticmethod
+  def get_allowed_types():
+    return [ValueTable.DATE_VALUE]
 
-    def get_view_type(self):
-        return 'date'
+  def get_view_type(self):
+    return 'date'

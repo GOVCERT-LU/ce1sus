@@ -23,108 +23,108 @@ __license__ = 'GPL v3+'
 
 
 class ControllerException(Exception):
-    """
-    Base exception for the controller api
-    """
-    pass
+  """
+  Base exception for the controller api
+  """
+  pass
 
 
 class ControllerIntegrityException(ControllerException):
-    pass
+  pass
 
 
 class ControllerNothingFoundException(ControllerException):
-    pass
+  pass
 
 
 class SpecialControllerException(ControllerException):
-    """
-    SpecialControllerException
-    """
-    pass
+  """
+  SpecialControllerException
+  """
+  pass
 
 
 class NotImplementedException(ControllerException):
-    """
-    Not implemented exception
-    """
-    def __init__(self, message):
-        ControllerException.__init__(self, message)
+  """
+  Not implemented exception
+  """
+  def __init__(self, message):
+    ControllerException.__init__(self, message)
 
 
 # pylint: disable=R0903
 class BaseController:
-    """This is the base class for controlles all controllers should extend this
-    class"""
+  """This is the base class for controlles all controllers should extend this
+  class"""
 
-    brokers = dict()
+  brokers = dict()
 
-    def __init__(self, config, session=None):
-        self.config = config
-        self.__logger = Log(self.config)
-        self.session_manager = SessionManager(config, session)
+  def __init__(self, config, session=None):
+    self.config = config
+    self.__logger = Log(self.config)
+    self.session_manager = SessionManager(config, session)
 
-        self.user_broker = self.broker_factory(UserBroker)
-        self.group_broker = self.broker_factory(GroupBroker)
-        self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
-        self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
+    self.user_broker = self.broker_factory(UserBroker)
+    self.group_broker = self.broker_factory(GroupBroker)
+    self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
+    self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
 
-    def broker_factory(self, clazz):
-        """
-        Instantiates a broker.
+  def broker_factory(self, clazz):
+    """
+    Instantiates a broker.
 
-        Note: In short sets up the broker in a correct manner with all the
-        required settings
+    Note: In short sets up the broker in a correct manner with all the
+    required settings
 
-        :param clazz: The BrokerClass to be instantiated
-        :type clazz: Extension of brokerbase
+    :param clazz: The BrokerClass to be instantiated
+    :type clazz: Extension of brokerbase
 
-        :returns: Instance of a broker
-        """
-        if issubclass(clazz, BrokerBase):
+    :returns: Instance of a broker
+    """
+    if issubclass(clazz, BrokerBase):
 
             # need to create the broker
 
-            instance = self.session_manager.broker_factory(clazz)
+      instance = self.session_manager.broker_factory(clazz)
 
-            return instance
+      return instance
 
-        else:
-            raise ControllerException('Class does not implement BrokerBase')
+    else:
+      raise ControllerException('Class does not implement BrokerBase')
 
-    def get_session(self):
-        if self.session:
-            return self.session
-        else:
-            return self.session_manager.connector.get_session()
+  def get_session(self):
+    if self.session:
+      return self.session
+    else:
+      return self.session_manager.connector.get_session()
 
-    @property
-    def logger(self):
-        return self.__logger.get_logger(self.__class__.__name__)
+  @property
+  def logger(self):
+    return self.__logger.get_logger(self.__class__.__name__)
 
-    def set_simple_logging(self, instance, user, insert=False):
-        # set only if not already set :/
-        if insert:
-            if not (instance.creator_id or instance.creator):
-                instance.creator_id = user.identifier
-                instance.creator = user
-            if not instance.created_at:
-                instance.created_at = datetime.utcnow()
-        if not (instance.modifier_id or instance.modifier):
-            instance.modifier_id = user.identifier
-            instance.modifier = user
-        if not instance.modified_on:
-            instance.modified_on = datetime.utcnow()
+  def set_simple_logging(self, instance, user, insert=False):
+    # set only if not already set :/
+    if insert:
+      if not (instance.creator_id or instance.creator):
+        instance.creator_id = user.identifier
+        instance.creator = user
+      if not instance.created_at:
+        instance.created_at = datetime.utcnow()
+    if not (instance.modifier_id or instance.modifier):
+      instance.modifier_id = user.identifier
+      instance.modifier = user
+    if not instance.modified_on:
+      instance.modified_on = datetime.utcnow()
 
-    def set_extended_logging(self, instance, user, originating_group, insert=False):
-        self.set_simple_logging(instance, user, insert)
-        if insert:
-            if not instance.creator_group:
-                instance.creator_group = user.group
-                instance.creator_group_id = user.group.identifier
-            if not instance.originating_group:
-                instance.originating_group = originating_group
-                instance.originating_group_id = originating_group.identifier
-            if not instance.owner_group:
-                instance.owner_group = originating_group
-                instance.owner_group_id = originating_group.identifier
+  def set_extended_logging(self, instance, user, originating_group, insert=False):
+    self.set_simple_logging(instance, user, insert)
+    if insert:
+      if not instance.creator_group:
+        instance.creator_group = user.group
+        instance.creator_group_id = user.group.identifier
+      if not instance.originating_group:
+        instance.originating_group = originating_group
+        instance.originating_group_id = originating_group.identifier
+      if not instance.owner_group:
+        instance.owner_group = originating_group
+        instance.owner_group_id = originating_group.identifier

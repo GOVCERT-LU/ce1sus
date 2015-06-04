@@ -21,262 +21,262 @@ __license__ = 'GPL v3+'
 
 
 class BrokerException(Exception):
-    """Broker Exception"""
-    pass
+  """Broker Exception"""
+  pass
 
 
 class IntegrityException(BrokerException):
-    """Broker Exception"""
-    pass
+  """Broker Exception"""
+  pass
 
 
 class InstantiationException(BrokerException):
-    """Instantiation Exception"""
-    pass
+  """Instantiation Exception"""
+  pass
 
 
 class NothingFoundException(BrokerException):
-    """NothingFound Exception"""
-    pass
+  """NothingFound Exception"""
+  pass
 
 
 class TooManyResultsFoundException(BrokerException):
-    """Too many results found Exception"""
-    pass
+  """Too many results found Exception"""
+  pass
 
 
 class ValidationException(BrokerException):
-    """Invalid Exception"""
-    pass
+  """Invalid Exception"""
+  pass
 
 
 class DeletionException(BrokerException):
-    """
-    Deletion Exception
-    """
-    pass
+  """
+  Deletion Exception
+  """
+  pass
 
 # Created on Jul 4, 2013
 
 
 class BrokerBase(object):
-    """The base class for brokers providing the general methods"""
-    __metaclass__ = ABCMeta
+  """The base class for brokers providing the general methods"""
+  __metaclass__ = ABCMeta
 
-    def __init__(self, session):
-        self.__session = session
-        self.clazz = None
-        self.identifier = None
+  def __init__(self, session):
+    self.__session = session
+    self.clazz = None
+    self.identifier = None
 
-    def get_by_uuid(self, uuid):
-        try:
+  def get_by_uuid(self, uuid):
+    try:
 
-            result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                                'uuid') == uuid).one()
+      result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                          'uuid') == uuid).one()
 
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(uuid, self.__class__.__name__))
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(uuid))
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(uuid, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(uuid))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-        return result
+    return result
 
-    @property
-    def session(self):
-        """
-        Returns the db session
-        """
-        return self.__session.session
+  @property
+  def session(self):
+    """
+    Returns the db session
+    """
+    return self.__session.session
 
-    @abstractmethod
-    def get_broker_class(self):
-        """
-        Returns the used class
+  @abstractmethod
+  def get_broker_class(self):
+    """
+    Returns the used class
 
-        :returns: Class
-        """
-        return self.__class__
+    :returns: Class
+    """
+    return self.__class__
 
-    def get_by_id(self, identifier):
-        """
-        Returns the object by the given identifier
+  def get_by_id(self, identifier):
+    """
+    Returns the object by the given identifier
 
-        Note: raises a NothingFoundException or a TooManyResultsFound Exception
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
-        :param identifier: the id of the requested user object
-        :type identifier: integer
+    :param identifier: the id of the requested user object
+    :type identifier: integer
 
-        :returns: Object
-        """
-        try:
+    :returns: Object
+    """
+    try:
 
-            result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                                'identifier') == identifier).one()
+      result = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                          'identifier') == identifier).one()
 
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
-        except sqlalchemy.orm.exc.MultipleResultsFound:
-            raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
+    except sqlalchemy.orm.exc.MultipleResultsFound:
+      raise TooManyResultsFoundException('Too many results found for ID :{0}'.format(identifier))
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-        return result
+    return result
 
-    def get_all(self, order=None):
-        """
-        Returns all get_broker_class() instances
+  def get_all(self, order=None):
+    """
+    Returns all get_broker_class() instances
 
-        Note: raises a NothingFoundException or a TooManyResultsFound Exception
+    Note: raises a NothingFoundException or a TooManyResultsFound Exception
 
-        :returns: list of instances
-        """
-        try:
-            result = self.session.query(self.get_broker_class())
-            if order is None:
+    :returns: list of instances
+    """
+    try:
+      result = self.session.query(self.get_broker_class())
+      if order is None:
                 # colname = u'{0}.{1}'.format(self.get_broker_class().identifier.expression.table.fullname, self.get_broker_class().identifier.expression.key)
                 # result = result.order_by(colname)
-                pass
-            else:
-                result = result.order_by(order)
-            return result.all()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise NothingFoundException('Nothing found')
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+        pass
+      else:
+        result = result.order_by(order)
+      return result.all()
+    except sqlalchemy.orm.exc.NoResultFound:
+      raise NothingFoundException('Nothing found')
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-        return result
+    return result
 
-    def remove_by_id(self, identifier, commit=True):
-        """
-        Removes the <<get_broker_class()>> with the given identifier
+  def remove_by_id(self, identifier, commit=True):
+    """
+    Removes the <<get_broker_class()>> with the given identifier
 
-        :param identifier:  the id of the requested user object
-        :type identifier: integer
-        """
-        try:
-            self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                       'identifier') == identifier
-                                                               ).delete(synchronize_session='fetch')
-        except sqlalchemy.exc.IntegrityError as error:
-            self.session.rollback()
-            raise IntegrityException(error)
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    :param identifier:  the id of the requested user object
+    :type identifier: integer
+    """
+    try:
+      self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                 'identifier') == identifier
+                                                         ).delete(synchronize_session='fetch')
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-        self.do_commit(commit)
+    self.do_commit(commit)
 
-    def remove_by_uuid(self, identifier, commit=True):
-        """
-        Removes the <<get_broker_class()>> with the given identifier
+  def remove_by_uuid(self, identifier, commit=True):
+    """
+    Removes the <<get_broker_class()>> with the given identifier
 
-        :param identifier:  the id of the requested user object
-        :type identifier: integer
-        """
-        try:
-            self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
-                                                                       'uuid') == identifier
-                                                               ).delete(synchronize_session='fetch')
-        except sqlalchemy.exc.IntegrityError as error:
-            self.session.rollback()
-            raise IntegrityException(error)
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    :param identifier:  the id of the requested user object
+    :type identifier: integer
+    """
+    try:
+      self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(),
+                                                                 'uuid') == identifier
+                                                         ).delete(synchronize_session='fetch')
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-        self.do_commit(commit)
+    self.do_commit(commit)
 
-    def do_rollback(self):
-        """
-        Performs a rollback
-        """
-        try:
-            self.session.rollback()
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            raise BrokerException(error)
+  def do_rollback(self):
+    """
+    Performs a rollback
+    """
+    try:
+      self.session.rollback()
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      raise BrokerException(error)
 
-    def do_commit(self, commit=True):
-        """
-        General commit, or rollback in case of an exception
+  def do_commit(self, commit=True):
+    """
+    General commit, or rollback in case of an exception
 
-        :param commit: If set a commit is done else a flush
-        :type commit: Boolean
-        """
+    :param commit: If set a commit is done else a flush
+    :type commit: Boolean
+    """
 
-        try:
-            if commit:
-                self.session.commit()
-            else:
-                self.session.flush()
-        except sqlalchemy.exc.IntegrityError as error:
-            self.session.rollback()
-            raise IntegrityException(error)
-        except sqlalchemy.exc.DatabaseError as error:
-            self.session.rollback()
-            raise BrokerException(error)
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    try:
+      if commit:
+        self.session.commit()
+      else:
+        self.session.flush()
+    except sqlalchemy.exc.IntegrityError as error:
+      self.session.rollback()
+      raise IntegrityException(error)
+    except sqlalchemy.exc.DatabaseError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-    def insert(self, instance, commit=True, validate=True):
-        """
-        Insert a <<get_broker_class()>>
+  def insert(self, instance, commit=True, validate=True):
+    """
+    Insert a <<get_broker_class()>>
 
-        :param instance: The get_broker_class() to be inserted
-        :type instance: extension of Base
+    :param instance: The get_broker_class() to be inserted
+    :type instance: extension of Base
 
-        Note: handles the commit and the identifier of the user is taken
-               into account if set
-        """
-        if validate:
-            errors = not instance.validate()
-            if errors:
-                raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
-        try:
-            self.session.add(instance)
-            self.do_commit(commit)
-        except sqlalchemy.exc.IntegrityError as error:
-            raise IntegrityException(error)
-        except sqlalchemy.exc.DatabaseError as error:
-            self.session.rollback()
-            raise BrokerException(error)
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    Note: handles the commit and the identifier of the user is taken
+           into account if set
+    """
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
+    try:
+      self.session.add(instance)
+      self.do_commit(commit)
+    except sqlalchemy.exc.IntegrityError as error:
+      raise IntegrityException(error)
+    except sqlalchemy.exc.DatabaseError as error:
+      self.session.rollback()
+      raise BrokerException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-    def update(self, instance, commit=True, validate=True):
-        """
-        updates an <<get_broker_class()>>
+  def update(self, instance, commit=True, validate=True):
+    """
+    updates an <<get_broker_class()>>
 
-        :param instance: The get_broker_class() to be updated
-        :type instance: extension of Base
+    :param instance: The get_broker_class() to be updated
+    :type instance: extension of Base
 
-        """
-        if validate:
-            errors = not instance.validate()
-            if errors:
-                raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
-        # an elo den update
-        try:
-            self.session.merge(instance)
-            self.do_commit(commit)
-        except sqlalchemy.exc.IntegrityError as error:
-            raise IntegrityException(error)
+    """
+    if validate:
+      errors = not instance.validate()
+      if errors:
+        raise ValidationException('Instance to be inserted is invalid.{0}'.format(ObjectValidator.getFirstValidationError(instance)))
+    # an elo den update
+    try:
+      self.session.merge(instance)
+      self.do_commit(commit)
+    except sqlalchemy.exc.IntegrityError as error:
+      raise IntegrityException(error)
 
-        except sqlalchemy.exc.DatabaseError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    except sqlalchemy.exc.DatabaseError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-        except sqlalchemy.exc.SQLAlchemyError as error:
-            self.session.rollback()
-            raise BrokerException(error)
+    except sqlalchemy.exc.SQLAlchemyError as error:
+      self.session.rollback()
+      raise BrokerException(error)
 
-        self.do_commit(commit)
+    self.do_commit(commit)
 
-    def clean_list(self, result):
-        output = list()
-        for item in result:
-            output.append(item[0])
-        return output
+  def clean_list(self, result):
+    output = list()
+    for item in result:
+      output.append(item[0])
+    return output

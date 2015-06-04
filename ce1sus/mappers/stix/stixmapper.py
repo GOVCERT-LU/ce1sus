@@ -20,32 +20,32 @@ __license__ = 'GPL v3+'
 
 
 class StixMapperException(Exception):
-    pass
+  pass
 
 
 class StixMapper(BaseController):
 
-    def __init__(self, config, session=None):
-        BaseController.__init__(self, config, session)
-        self.config = config
-        ce1sus_url = config.get('ce1sus', 'baseurl', None)
-        self.event_controller = EventController(config, session)
-        self.stix_ce1sus_mapper = StixCelsusMapper(config, session)
-        if ce1sus_url:
+  def __init__(self, config, session=None):
+    BaseController.__init__(self, config, session)
+    self.config = config
+    ce1sus_url = config.get('ce1sus', 'baseurl', None)
+    self.event_controller = EventController(config, session)
+    self.stix_ce1sus_mapper = StixCelsusMapper(config, session)
+    if ce1sus_url:
             # Set the namespaces
-            cybox.utils.idgen.set_id_namespace(Namespace(ce1sus_url, 'ce1sus'))
-            stix.utils.idgen.set_id_namespace({ce1sus_url: 'ce1sus'})
+      cybox.utils.idgen.set_id_namespace(Namespace(ce1sus_url, 'ce1sus'))
+      stix.utils.idgen.set_id_namespace({ce1sus_url: 'ce1sus'})
 
-        else:
-            raise StixMapperException(u'the base url was not specified in configuration')
+    else:
+      raise StixMapperException(u'the base url was not specified in configuration')
 
-    def map_stix_package(self, stix_package, user, make_insert=True, ignore_id=False):
-        event = self.stix_ce1sus_mapper.create_event(stix_package, user, ignore_id)
-        set_extended_logging(event, user, user.group)
-        if make_insert:
-            self.event_controller.insert_event(user, event, True, False)
+  def map_stix_package(self, stix_package, user, make_insert=True, ignore_id=False):
+    event = self.stix_ce1sus_mapper.create_event(stix_package, user, ignore_id)
+    set_extended_logging(event, user, user.group)
+    if make_insert:
+      self.event_controller.insert_event(user, event, True, False)
 
-        return event
+    return event
 
-    def map_ce1sus_event(self, event):
-        raise StixMapperException(u'Not implemented')
+  def map_ce1sus_event(self, event):
+    raise StixMapperException(u'Not implemented')
