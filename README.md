@@ -42,8 +42,7 @@ This is still not the final release, we are still developing ce1sus.
 For any questions feel free to ask
 
 #Build Status
-[![Code Health](https://landscape.io/github/nijel/stardicter/master/landscape.png)](https://landscape.io/github/GOVCERT-LU/ce1sus/0.11.X)
-
+[![Code Health](https://landscape.io/github/GOVCERT-LU/ce1sus/0.11.X/landscape.svg?style=flat)](https://landscape.io/github/GOVCERT-LU/ce1sus/0.11.X)
 
 ##Features
 
