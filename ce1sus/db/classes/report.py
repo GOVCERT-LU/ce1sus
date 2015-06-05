@@ -7,6 +7,7 @@ Created on Jan 8, 2015
 """
 from base64 import b64encode
 from ce1sus.helpers.common.objects import get_class
+from os.path import isfile
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Unicode, UnicodeText, Boolean, Integer, BigInteger
@@ -16,6 +17,7 @@ from ce1sus.db.classes.basedbobject import ExtendedLogingInformations, SimpleLog
 from ce1sus.db.classes.common import Properties, ValueException, TLP
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
+from ce1sus.helpers.common.hash import hashSHA1, fileHashSHA1
 
 
 __author__ = 'Weber Jean-Paul'
@@ -186,10 +188,20 @@ class Reference(ExtendedLogingInformations, Base):
       split = value.split('|')
       fh = self.definition.handler
       filepath = fh.get_base_path() + '/' + split[0]
-      with open(filepath, "rb") as raw_file:
-        value = b64encode(raw_file.read())
+      # with open(filepath, "rb") as raw_file:
+      #  value = b64encode(raw_file.read())
+      data = 'File is MIA'
+      if isfile(filepath):
+        with open(filepath, "rb") as data_file:
+          data = b64encode(data_file.read())
 
-      value = {'filename': split[1], 'data': value}
+      if len(split) == 2:
+        value = {'filename': split[1], 'data': b64encode(data)}
+      else:
+        if isfile(filepath):
+          value = {'filename': fileHashSHA1(filepath), 'data': b64encode(data)}
+        else:
+          value = {'filename': None, 'data': b64encode(data)}
 
     return {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition.uuid),
