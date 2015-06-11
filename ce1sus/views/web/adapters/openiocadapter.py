@@ -11,13 +11,17 @@ import cherrypy
 from cherrypy._cperror import HTTPError
 from datetime import datetime
 import json
+from lxml import etree
 from os import makedirs
 from os.path import exists
 from shutil import rmtree
 from tempfile import gettempdir
+import warnings
+
 
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
 from ce1sus.controllers.common.merger import Merger
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import require
@@ -100,7 +104,7 @@ class OpenIOCAdapter(BaseView):
       event_permissions = self.event_controller.get_event_user_permissions(event, user)
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(event.to_dict(complete, inflated, event_permissions, user))
-    except ControllerIntegrityException as error:
+    except (ControllerIntegrityException, BrokerException) as error:
       # TODO: merge
       event = self.stix_mapper.map_stix_package(stix_package, user, False, True)
       local_event = self.event_controller.get_event_by_uuid(event.uuid)
@@ -109,9 +113,9 @@ class OpenIOCAdapter(BaseView):
       self.event_controller.update_event(user, merged_event, True, True)
       cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
       return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
-    except ControllerException as error:
+    except (ControllerException, BrokerException) as error:
       self.logger.error(error)
-      raise HTTPError(400, error.message)
+      raise HTTPError(400, '0'.format(error))
 
   def __make_stix_xml_string(self, filename, open_ioc_xml):
     # This is actually an adapted version of the openioc_to_stix.py to be compatible with ce1sus
@@ -130,6 +134,7 @@ class OpenIOCAdapter(BaseView):
       observables_cls = Observables.from_obj(observables_obj)
       stix.utils.set_id_namespace({"https://github.com/STIXProject/openioc-to-stix": "openiocToSTIX"})
       stix_package = STIXPackage()
+      stix_package.version = '1.1.1'
       input_namespaces = {"openioc": "http://openioc.org/"}
 
       stix_package.__input_namespaces__ = input_namespaces
@@ -145,8 +150,24 @@ class OpenIOCAdapter(BaseView):
         stix_package.add_indicator(indicator)
 
       stix_header = STIXHeader()
+      # set the correct header
+      file_obj = open(open_ioc_filename, 'rb')
+      file_contents = file_obj.read()
+      print file_contents
+      file_obj.close()
+      root = etree.fromstring(file_contents)
+      for child in root:
+
+        if  child.tag.endswith('short_description'):
+          stix_header.short_description = child.text
+        elif child.tag.endswith('description'):
+          stix_header.description = child.text
+        else:
+          if stix_header.description and stix_header.short_description:
+            break
+
       stix_header.package_intent = "Indicators - Malware Artifacts"
-      stix_header.description = "CybOX-represented Indicators Translated from OpenIOC File"
+      stix_header.description = '{0}\n\n CybOX-represented Indicators Translated from OpenIOC File'.format(stix_header.description)
       stix_package.stix_header = stix_header
 
       # Write the generated STIX Package as XML to the output file

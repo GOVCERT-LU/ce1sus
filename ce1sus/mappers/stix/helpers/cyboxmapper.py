@@ -14,6 +14,7 @@ from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable, ObservableComposition
 from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
 from cybox.objects.address_object import Address
+from cybox.objects.disk_object import Disk
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
 from cybox.objects.hostname_object import Hostname
@@ -21,15 +22,15 @@ from cybox.objects.network_connection_object import NetworkConnection
 from cybox.objects.process_object import Process
 from cybox.objects.uri_object import URI
 from cybox.objects.user_account_object import UserAccount
+from cybox.objects.win_driver_object import WinDriver
 from cybox.objects.win_event_log_object import WinEventLog
+from cybox.objects.win_executable_file_object import WinExecutableFile
+from cybox.objects.win_kernel_hook_object import WinKernelHook
 from cybox.objects.win_process_object import WinProcess
 from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.win_service_object import WinService
 from cybox.objects.win_volume_object import WinVolume
-from cybox.objects.disk_object import Disk
-from cybox.objects.win_kernel_hook_object import WinKernelHook
-from cybox.objects.win_driver_object import WinDriver
-from cybox.objects.win_executable_file_object import WinExecutableFile
+from cybox.objects.win_executable_file_object import PESection
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -256,7 +257,9 @@ class CyboxMapper(BaseController):
     attributes = list()
     if win_reg_key.key:
       attributes.append(self.__create_attribute_by_def('WindowsRegistryKey_Key', parent, win_reg_key.key, is_indicator, win_reg_key.key.condition, tlp_id))
-
+    if win_reg_key.values:
+      for value in win_reg_key.values:
+        attributes.append(self.__create_attribute_by_def('WindowsRegistryKey_RegistryValue_Data', parent, value.data.value, is_indicator, value.data.condition, tlp_id))
     if attributes:
       return attributes
     else:
@@ -313,24 +316,35 @@ class CyboxMapper(BaseController):
     attributes = list()
     if win_driver.driver_name:
       attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_driver.driver_name, False, win_driver.driver_name.condition, tlp_id))
-
+    if win_driver.device_object_list:
+      for do in win_driver.device_object_list:
+        if do.attached_to_driver_name:
+          attributes.append(self.__create_attribute_by_def('Attached_To_Driver_Name', parent, do.attached_to_driver_name, False, do.attached_to_driver_name.condition, tlp_id))
     if attributes:
       return attributes
     else:
       # check it it is not an other type of file like WinExecutableFile
-      raise CyboxMapperException('No attribute was created for win_reg_key')
+      raise CyboxMapperException('No attribute was created for win_driver')
 
   def create_win_executable_file(self, win_executable_file, parent, is_indicator, tlp_id):
     attributes = list()
-    if win_executable_file.driver_name:
+    if hasattr(win_executable_file, 'driver_name'):
       # TODO
       attributes.append(self.__create_attribute_by_def('Driver_Name', parent, win_executable_file.driver_name, False, win_executable_file.driver_name.condition, tlp_id))
+    if win_executable_file.sections:
+      for section in win_executable_file.sections:
+        if isinstance(section, PESection):
+          if section.section_header:
+            attributes.append(self.__create_attribute_by_def('Section_Header_Name', parent, section.section_header.name, False, section.section_header.name.condition, tlp_id))
+    if win_executable_file.digital_signature:
+      # TODO handle digital signatures
+      return list()
 
     if attributes:
       return attributes
     else:
       # check it it is not an other type of file like WinExecutableFile
-      raise CyboxMapperException('No attribute was created for win_reg_key')
+      raise CyboxMapperException('No attribute was created for win_executable_file')
 
   def create_attributes(self, properties, parent_object, tlp_id, is_indicator):
     # TODO: Create custom properties
@@ -402,13 +416,15 @@ class CyboxMapper(BaseController):
 
     # Create attributes
     attributes = self.create_attributes(cybox_object.properties, ce1sus_object, tlp_id, is_indicator)
-    for attribute in attributes:
-      set_extended_logging(attribute, user, user.group)
+    if attributes:
+      for attribute in attributes:
+        set_extended_logging(attribute, user, user.group)
 
-    ce1sus_object.attributes = attributes
-
-    # TODO: related_objects
-    return ce1sus_object
+      ce1sus_object.attributes = attributes
+      # TODO: related_objects
+      return ce1sus_object
+    else:
+      return None
 
   def create_observable(self, observable, event, user, tlp_id, is_indicator=False):
     ce1sus_observable = Observable()
@@ -427,9 +443,11 @@ class CyboxMapper(BaseController):
       for child in observable.observable_composition.observables:
         child_observable = self.create_observable(child, event, user, tlp_id, is_indicator)
         # As the observable is not on the root level remove the link to the parent
-        child_observable.event = None
-        composition.observables.append(child_observable)
+        if child_observable:
+          child_observable.event = None
+          composition.observables.append(child_observable)
       ce1sus_observable.observable_composition = composition
+      return ce1sus_observable
     else:
 
       ce1sus_observable.uuid = extract_uuid(observable.id_)
@@ -437,5 +455,7 @@ class CyboxMapper(BaseController):
       obj = self.create_object(observable.object_, ce1sus_observable, user, tlp_id, is_indicator)
       ce1sus_observable.object = obj
       # TODO
-
-    return ce1sus_observable
+      if obj:
+        return ce1sus_observable
+      else:
+        return None

@@ -188,8 +188,6 @@ class Reference(ExtendedLogingInformations, Base):
       split = value.split('|')
       fh = self.definition.handler
       filepath = fh.get_base_path() + '/' + split[0]
-      # with open(filepath, "rb") as raw_file:
-      #  value = b64encode(raw_file.read())
       data = 'File is MIA'
       if isfile(filepath):
         with open(filepath, "rb") as data_file:

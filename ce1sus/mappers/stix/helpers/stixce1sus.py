@@ -97,6 +97,12 @@ class StixCelsusMapper(BaseController):
     # event.uuid = stix_package.id_[-36:]
     stix_header = stix_package.stix_header
     event.title = stix_header.title
+    if not event.title:
+      event.title = stix_header.short_description
+    if not event.title:
+      event.title = stix_header.description
+    if not event.title:
+      event.title = 'Generated via STIX - No title'
     info_source = stix_header.information_source
     event.description = stix_header.description
     if info_source:
@@ -218,8 +224,9 @@ class StixCelsusMapper(BaseController):
         tlp_id = event.tlp_level_id
       for observable in indicator.observables:
         observable = self.cybox_mapper.create_observable(observable, event, user, tlp_id, True)
-        observable.event = None
-        observable.event_id = None
-        ce1sus_indicator.observables.append(observable)
+        if observable:
+          observable.event = None
+          observable.event_id = None
+          ce1sus_indicator.observables.append(observable)
     set_extended_logging(ce1sus_indicator, user, user.group)
     return ce1sus_indicator

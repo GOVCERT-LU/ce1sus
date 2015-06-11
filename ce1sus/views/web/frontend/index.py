@@ -12,6 +12,7 @@ from os.path import exists
 from ce1sus.controllers.login import LoginController
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.controllers.base import ControllerException
+from cherrypy.lib.auth import basic_auth
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,18 +30,20 @@ class IndexView(BaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def index(self):
-    # check if user sso set
-    basic_auth = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
-    if basic_auth:
-      username = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
-      if username:
-        try:
-          user = self.login_controller.get_user_by_username(username)
-          if user:
-            self.login_controller.update_last_login(user)
-            self.put_user_to_session(user)
-        except ControllerException:
-          pass
+    # check if basic auth. set
+    do_basicauth = self.config.get('ce1sus', 'usebasicauth', False)
+    if do_basicauth:
+      basic_auth = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
+      if basic_auth:
+        username = cherrypy.request.wsgi_environ.get('REMOTE_USER', None)
+        if username:
+          try:
+            user = self.login_controller.get_user_by_username(username)
+            if user:
+              self.login_controller.update_last_login(user)
+              self.put_user_to_session(user)
+          except ControllerException:
+            pass
 
     # check if basic auth is enabled an if the user is set
     # only for fetching the first page
