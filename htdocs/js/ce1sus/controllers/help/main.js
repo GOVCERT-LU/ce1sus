@@ -1,7 +1,7 @@
 app.controller('swaggerController', function($scope, $routeSegment, $window, $timeout) {
           var timer = $timeout(
               function() {
-                $window.open('/swagger', '_blank');
+                $window.open('/swagger.html', '_blank');
               }, 1000);
           timer.then(function() {
             console.log("Timer resolved!", Date.now());

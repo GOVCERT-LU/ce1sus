@@ -1009,7 +1009,7 @@ options column, one enters view of the event.
 
 #3. REST API
 
-For viewing the REST API Documentation please access on the server with the frontend the "/swagger" path (i.e. http://localhost:8080/swagger).
+For viewing the REST API Documentation please access on the server with the frontend the "/swagger.html" path (i.e. http://localhost:8080/swagger.html).
 
 #4. Maintenance tools
 
