@@ -90,12 +90,13 @@ class STIXAdapter(BaseView):
       # check if it is a uuid
       try:
         UUID(uuid_string, version=4)
+      except ValueError as error:
+        print error
+        raise HTTPError(400, 'The provided uuid "{0}" is not valid'.format(uuid_string))
+      try:
         event = self.event_controller.get_event_by_uuid(uuid_string)
         return self.stix_mapper.map_ce1sus_event(event, self.get_user())
       except ControllerNothingFoundException as error:
         raise  HTTPError(404, '{0}'.format(error.message))
-      except ValueError as error:
-        print error
-        raise HTTPError(400, 'The provided uuid "{0}" is not valid'.format(uuid_string))
     else:
       raise HTTPError(400, 'Cannot be called without a uuid')

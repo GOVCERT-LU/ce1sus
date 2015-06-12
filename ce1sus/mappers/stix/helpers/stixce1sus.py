@@ -213,6 +213,7 @@ class StixCelsusMapper(BaseController):
       ce1sus_indicator.sightings = sightings
     # TODO: Add indicator types
 
+
     # TODO: markings
     if indicator.kill_chain_phases:
       # TODO: Kill Chains

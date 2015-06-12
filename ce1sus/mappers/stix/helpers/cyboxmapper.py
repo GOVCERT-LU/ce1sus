@@ -5,15 +5,22 @@
 
 Created on Nov 12, 2014
 """
+from datetime import datetime
+from os.path import dirname
+from shutil import move, rmtree
 from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.object import Object
+from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.handlers.attributes.filehandler import FileHandler
+from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
 from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
+from cybox.common import Time
 from cybox.objects.address_object import Address
+from cybox.objects.artifact_object import Artifact
 from cybox.objects.disk_object import Disk
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.file_object import File
@@ -24,14 +31,14 @@ from cybox.objects.uri_object import URI
 from cybox.objects.user_account_object import UserAccount
 from cybox.objects.win_driver_object import WinDriver
 from cybox.objects.win_event_log_object import WinEventLog
+from cybox.objects.win_executable_file_object import PESection
 from cybox.objects.win_executable_file_object import WinExecutableFile
 from cybox.objects.win_kernel_hook_object import WinKernelHook
 from cybox.objects.win_process_object import WinProcess
 from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.win_service_object import WinService
 from cybox.objects.win_volume_object import WinVolume
-from cybox.objects.win_executable_file_object import PESection
-from cybox.common import Time
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -49,6 +56,7 @@ class CyboxMapper(BaseController):
     BaseController.__init__(self, config, session)
     # cache all definitions
     self.condition_broker = self.broker_factory(ConditionBroker)
+    self.fh = FileHandler()
 
   def init(self):
     attr_defs = self.attr_def_broker.get_all()
@@ -109,6 +117,8 @@ class CyboxMapper(BaseController):
       definition = self.obj_defs.get('Disk')
     elif isinstance(instance, WinKernelHook):
       definition = self.obj_defs.get('WinKernelHook')
+    elif isinstance(instance, Artifact):
+      definition = self.obj_defs.get('Artifact')
     if definition:
       return definition
     else:
@@ -305,6 +315,37 @@ class CyboxMapper(BaseController):
       # check it it is not an other type of file like WinExecutableFile
       raise CyboxMapperException('No attribute was created for win_reg_key')
 
+
+  def create_artifact(self, artifact, parent, is_indicator, tlp_id):
+    attributes = list()
+    if artifact.data:
+      tmp_filename = hashMD5(datetime.utcnow())
+      binary_data = artifact.data
+      tmp_folder = self.fh.get_tmp_folder()
+      tmp_path = tmp_folder + '/' + tmp_filename
+
+      # create file in tmp
+      file_obj = open(tmp_path, "w")
+      file_obj.write(binary_data)
+      file_obj.close()
+
+      sha1 = fileHashSHA1(tmp_path)
+      rel_folder = self.fh.get_rel_folder()
+      dest_path = self.fh.get_dest_folder(rel_folder) + '/' + sha1
+
+      # move it to the correct place
+      move(tmp_path, dest_path)
+      # remove temp folder
+      rmtree(dirname(tmp_path))
+      value = rel_folder + '/' + sha1
+      attributes.append(self.__create_attribute_by_def('Raw_Artifact', parent, value, False, None, tlp_id))
+
+    if attributes:
+      return attributes
+    else:
+      # check it it is not an other type of file like WinExecutableFile
+      raise CyboxMapperException('No attribute was created for win_reg_key')
+
   def create_win_kernel_hook(self, win_kernel_hook, parent, is_indicator, tlp_id):
     attributes = list()
     if win_kernel_hook.hooked_module:
@@ -387,6 +428,8 @@ class CyboxMapper(BaseController):
       return self.create_disk(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, WinKernelHook):
       return self.create_win_kernel_hook(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, Artifact):
+      return self.create_artifact(properties, parent_object, is_indicator, tlp_id)
     else:
       raise CyboxMapperException('No attribute definiton defined for {0}'.format(properties))
     counter = 0
@@ -419,22 +462,36 @@ class CyboxMapper(BaseController):
     set_properties(ce1sus_object)
     # Create the container
     ce1sus_object.observable = observable
-    if cybox_object.id_:
+    if hasattr(cybox_object, 'id'):
       ce1sus_object.uuid = extract_uuid(cybox_object.id_)
     else:
       # unfortenatley one must be generated
       ce1sus_object.uuid = uuid4()
-    ce1sus_object.definition = self.get_object_definition(cybox_object.properties)
+    if cybox_object.properties:
+      ce1sus_object.definition = self.get_object_definition(cybox_object.properties)
+      attributes = self.create_attributes(cybox_object.properties, ce1sus_object, tlp_id, is_indicator, seen_conditions)
+    else:
+      raise CyboxMapperException('No properties found')
     set_extended_logging(ce1sus_object, user, user.group)
 
     # Create attributes
-    attributes = self.create_attributes(cybox_object.properties, ce1sus_object, tlp_id, is_indicator, seen_conditions)
-    if attributes:
+    if cybox_object.related_objects:
+      for related_object in cybox_object.related_objects:
+        rel_obj = RelatedObject()
+        rel_obj.parent = ce1sus_object
+        rel_obj.relation = related_object.relationship
+        rel_obj.object = self.create_object(related_object, observable, user, tlp_id, is_indicator, seen_conditions)
+        if rel_obj.object:
+          rel_obj.object.parent = None
+          rel_obj.object.parent_id = None
+          ce1sus_object.related_objects.append(rel_obj)
+
+    if attributes or ce1sus_object.related_objects:
       for attribute in attributes:
         set_extended_logging(attribute, user, user.group)
 
       ce1sus_object.attributes = attributes
-      # TODO: related_objects
+
       return ce1sus_object
     else:
       return None
