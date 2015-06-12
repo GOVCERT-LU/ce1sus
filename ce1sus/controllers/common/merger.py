@@ -79,11 +79,6 @@ class Merger(BaseController):
       for observable in remote_observable.observable_composition.observables:
         # TODO find parent
         self.append_observable(observable, local_event, None)
-    if remote_observable.related_observables:
-      for rel_observable in remote_observable.related_observables:
-
-        pass
-        # TODO related observables
         # self.append_related_observable(rel_observable, local_event, remote_observable)
 
     if hasattr(parent, 'observables'):

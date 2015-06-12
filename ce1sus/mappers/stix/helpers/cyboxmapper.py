@@ -38,6 +38,7 @@ from cybox.objects.win_process_object import WinProcess
 from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.win_service_object import WinService
 from cybox.objects.win_volume_object import WinVolume
+from cybox.objects.email_message_object import EmailMessage
 
 
 __author__ = 'Weber Jean-Paul'
@@ -119,6 +120,8 @@ class CyboxMapper(BaseController):
       definition = self.obj_defs.get('WinKernelHook')
     elif isinstance(instance, Artifact):
       definition = self.obj_defs.get('Artifact')
+    elif isinstance(instance, EmailMessage):
+      definition = self.obj_defs.get('email')
     if definition:
       return definition
     else:
@@ -346,6 +349,51 @@ class CyboxMapper(BaseController):
       # check it it is not an other type of file like WinExecutableFile
       raise CyboxMapperException('No attribute was created for win_reg_key')
 
+  def create_emailmessage(self, cybox_email, parent, is_indicator, tlp_id):
+    attribtues = list()
+    if cybox_email.header:
+      if cybox_email.header.bcc:
+        for recipient in cybox_email.header.bcc:
+          pass
+      if cybox_email.header.cc:
+        for recipient in cybox_email.header.cc:
+          pass
+      if cybox_email.header.errors_to:
+        attribtues.append(self.__create_attribute_by_def('email_errors_to', parent, cybox_email.header.errors_to, is_indicator, cybox_email.header.errors_to.condition, tlp_id))
+      if cybox_email.header.message_id:
+        attribtues.append(self.__create_attribute_by_def('email_message_id', parent, cybox_email.header.message_id, is_indicator, None, tlp_id))
+      if cybox_email.header.mime_version:
+        attribtues.append(self.__create_attribute_by_def('email_mime_version', parent, cybox_email.header.mime_version, is_indicator, None, tlp_id))
+      if cybox_email.header.from_:
+        attribtues.append(self.__create_attribute_by_def('email_from', parent, cybox_email.header.from_.address_value, is_indicator, None, tlp_id))
+      if cybox_email.header.to:
+        attribtues.append(self.__create_attribute_by_def('email_to', parent, cybox_email.header.to.address_value, is_indicator, None, tlp_id))
+      if cybox_email.header.x_mailer:
+        attribtues.append(self.__create_attribute_by_def('email_x_mailer', parent, cybox_email.header.x_mailer.address_value, is_indicator, None, tlp_id))
+      if cybox_email.header.x_originating_ip:
+        attribtues.append(self.__create_attribute_by_def('email_x_originating_ip', parent, cybox_email.header.x_originating_ip, is_indicator, None, tlp_id))
+      if cybox_email.header.in_reply_to:
+        attribtues.append(self.__create_attribute_by_def('email_in_reply_to', parent, cybox_email.header.in_reply_to, is_indicator, None, tlp_id))
+        for recipient in cybox_email.header.in_reply_to:
+          pass
+      if cybox_email.subject:
+        attribtues.append(self.__create_attribute_by_def('email_subject', parent, cybox_email.subject, is_indicator, None, tlp_id))
+      if cybox_email.header.from_:
+        attribtues.append(self.__create_attribute_by_def('email_from', parent, cybox_email.header.from_.address_value, is_indicator, None, tlp_id))
+
+    if cybox_email.raw_body:
+      attribtues.append(self.__create_attribute_by_def('email_raw_body', parent, cybox_email.raw_body, is_indicator, None, tlp_id))
+    if cybox_email.raw_header:
+      attribtues.append(self.__create_attribute_by_def('email_raw_header', parent, cybox_email.raw_header, is_indicator, None, tlp_id))
+    if cybox_email.email_server:
+      attribtues.append(self.__create_attribute_by_def('email_server', parent, cybox_email.email_server, is_indicator, None, tlp_id))
+
+      # email_link
+      if attribtues:
+        return attribtues
+      else:
+        raise CyboxMapperException('No attribute was created for email')
+
   def create_win_kernel_hook(self, win_kernel_hook, parent, is_indicator, tlp_id):
     attributes = list()
     if win_kernel_hook.hooked_module:
@@ -430,6 +478,8 @@ class CyboxMapper(BaseController):
       return self.create_win_kernel_hook(properties, parent_object, is_indicator, tlp_id)
     elif isinstance(properties, Artifact):
       return self.create_artifact(properties, parent_object, is_indicator, tlp_id)
+    elif isinstance(properties, EmailMessage):
+      return self.create_emailmessage(properties, parent_object, is_indicator, tlp_id)
     else:
       raise CyboxMapperException('No attribute definiton defined for {0}'.format(properties))
     counter = 0
@@ -487,16 +537,19 @@ class CyboxMapper(BaseController):
           ce1sus_object.related_objects.append(rel_obj)
 
     if attributes or ce1sus_object.related_objects:
-      for attribute in attributes:
-        set_extended_logging(attribute, user, user.group)
+      if attributes:
+        for attribute in attributes:
+          set_extended_logging(attribute, user, user.group)
 
-      ce1sus_object.attributes = attributes
+        ce1sus_object.attributes = attributes
 
       return ce1sus_object
     else:
       return None
 
   def create_observable(self, observable, event, user, tlp_id, is_indicator=False, seen_conditions=None):
+    if observable.idref:
+      return None
     if not seen_conditions:
       seen_conditions = dict()
     ce1sus_observable = Observable()

@@ -6,6 +6,7 @@
 Created on Nov 12, 2014
 """
 from datetime import datetime
+from kombu.utils import uuid4
 
 
 __author__ = 'Weber Jean-Paul'
@@ -40,7 +41,10 @@ def set_simple_logging(instance, user):
 
 
 def extract_uuid(stix_identifier):
-  uuid = stix_identifier[-36:]
+  if stix_identifier:
+    uuid = stix_identifier[-36:]
+  else:
+    uuid = uuid4()
   return uuid
 
 

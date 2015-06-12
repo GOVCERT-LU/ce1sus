@@ -51,6 +51,8 @@ class StixCelsusMapper(BaseController):
         identifier = extract_uuid(identity.id_)
       # check if group exits
       # Only based on the name as the id can vary
+      if not identity.name:
+        identity.name = 'Default'
       group = self.groups.get(identity.name, None)
       if group:
         return group
@@ -161,7 +163,9 @@ class StixCelsusMapper(BaseController):
     # First handle observables of the package
     if stix_package.observables:
       for observable in stix_package.observables.observables:
-        event.observables.append(self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False, seen_conditions))
+        obs = self.cybox_mapper.create_observable(observable, event, user, event.tlp_level_id, False, seen_conditions)
+        if obs:
+          event.observables.append(obs)
 
     # Then handle indicators
     if stix_package.indicators:
