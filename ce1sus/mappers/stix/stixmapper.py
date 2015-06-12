@@ -6,11 +6,12 @@
 Created on Nov 12, 2014
 """
 from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.events.event import EventController
+from ce1sus.mappers.stix.helpers.ce1susstix import Ce1susStixMapper
 from ce1sus.mappers.stix.helpers.stixce1sus import StixCelsusMapper, set_extended_logging
 import cybox.utils.idgen
 from cybox.utils.nsparser import Namespace
 import stix.utils.idgen
-from ce1sus.controllers.events.event import EventController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -31,6 +32,7 @@ class StixMapper(BaseController):
     ce1sus_url = config.get('ce1sus', 'baseurl', None)
     self.event_controller = EventController(config, session)
     self.stix_ce1sus_mapper = StixCelsusMapper(config, session)
+    self.ce1sus_stix_mapper = Ce1susStixMapper(config, session)
     if ce1sus_url:
             # Set the namespaces
       cybox.utils.idgen.set_id_namespace(Namespace(ce1sus_url, 'ce1sus'))
@@ -47,5 +49,8 @@ class StixMapper(BaseController):
 
     return event
 
-  def map_ce1sus_event(self, event):
-    raise StixMapperException(u'Not implemented')
+  def map_ce1sus_event(self, event, user):
+    stix_package = self.ce1sus_stix_mapper.create_stix(event, user)
+
+
+    return stix_package.to_xml()

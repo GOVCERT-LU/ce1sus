@@ -5,14 +5,16 @@
 
 Created on Jan 23, 2015
 """
+from uuid import uuid4
+
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
+from ce1sus.db.classes.definitions import ObjectDefinition
 from ce1sus.db.classes.indicator import IndicatorType, Indicator
 from ce1sus.db.classes.object import Object
 from ce1sus.db.classes.observables import Observable
 from ce1sus.db.common.broker import BrokerException
-from ce1sus.db.classes.definitions import ObjectDefinition
 
 
 __author__ = 'Weber Jean-Paul'
@@ -60,6 +62,7 @@ class IndicatorController(BaseController):
     # indicator.event = event
     indicator.event_id = event.identifier
     indicator.event = event
+    indicator.description = 'Auto-generated indicators'
     indicator.dbcode = event.dbcode
     indicator.tlp_level_id = event.tlp_level_id
     indicator.title = 'Indicators for "{0}"'.format(indicator_type)
@@ -73,6 +76,7 @@ class IndicatorController(BaseController):
       if attribute.is_ioc:
                 # create object
         obj = Object()
+        obj.uuid = uuid4()
         obj.dbcode = attribute.object.dbcode
         obj.tlp_level_id = attribute.object.tlp_level_id
         obj.definition = ObjectDefinition()
@@ -83,6 +87,7 @@ class IndicatorController(BaseController):
         self.set_extended_logging(obj, user, user.group, True)
         # create observable
         obs = Observable()
+        obs.uuid = uuid4()
         if attribute.object.parent:
           obs.dbcode = attribute.object.parent.dbcode
           obs.tile = attribute.object.parent.title
@@ -122,13 +127,13 @@ class IndicatorController(BaseController):
           artifacts.append(attribute)
         elif 'c&c' in attr_def_name:
           c2s.append(attribute)
-        elif 'ipv' in attr_def_name:
+        elif 'ip' in attr_def_name:
           ips.append(attribute)
         elif 'hash' in attr_def_name:
           file_hashes.append(attribute)
         elif 'email' in attr_def_name:
           mal_email.append(attribute)
-        elif 'domain' in attr_def_name or 'hostname' in attr_def_name:
+        elif 'Domain' in attr_def_name or 'Hostname' in attr_def_name:
           domains.append(attribute)
         elif 'url' in attr_def_name:
           urls.append(attribute)
@@ -136,28 +141,36 @@ class IndicatorController(BaseController):
           others.append(attribute)
 
       ind = self.map_indicator(artifacts, 'Malware Artifacts', event, user)
+
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(c2s, 'C2', event, user)
       if ind:
         indicators.append(ind)
       ind = self.map_indicator(ips, 'IP Watchlist', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(mal_email, 'Malicious E-mail', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(domains, 'Domain Watchlist', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(urls, 'URL Watchlist', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(others, 'Others', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
       ind = self.map_indicator(file_hashes, 'File Hash Watchlist', event, user)
       if ind:
+        ind.uuid = uuid4()
         indicators.append(ind)
 
       return indicators

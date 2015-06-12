@@ -120,10 +120,10 @@ class MISPAdapter(BaseView):
       raise HTTPError(409, 'File is not a MISP XML')
     except ControllerException as error:
       self.logger.error(error)
-      raise HTTPError(400, error.message)
+      raise HTTPError(400, '{0}'.format(error.message))
     except Exception as error:
       self.logger.critical(error)
-      raise HTTPError(500, error.message)
+      raise HTTPError(500, '{0}'.format(error.message))
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   def shadow_attributes(self, *vpath, **params):

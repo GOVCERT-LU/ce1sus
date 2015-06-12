@@ -182,4 +182,4 @@ class OpenIOCAdapter(BaseView):
       return base_dir, open_stix_filename
     except Exception as error:
       self.logger.error(error)
-      raise cherrypy.HTTPError(500, error.message)
+      raise cherrypy.HTTPError(500, '{0}'.format(error.message))

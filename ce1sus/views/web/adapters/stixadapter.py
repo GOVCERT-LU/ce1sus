@@ -10,6 +10,7 @@ import cherrypy
 from cherrypy._cperror import HTTPError
 import json
 from lxml import etree
+from uuid import UUID
 
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, ControllerNothingFoundException
 from ce1sus.controllers.common.merger import Merger
@@ -31,6 +32,7 @@ class STIXAdapter(BaseView):
     BaseView.__init__(self, config)
     self.stix_mapper = StixMapper(config, session)
     self.merger = Merger(config, session)
+
 
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['POST'])
@@ -74,7 +76,26 @@ class STIXAdapter(BaseView):
       return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
     except ControllerNothingFoundException as error:
       self.logger.error(error)
-      raise HTTPError(404, error.message)
+      raise HTTPError(404, '{0}'.format(error.message))
     except ControllerException as error:
       self.logger.error(error)
-      raise HTTPError(400, error.message)
+      raise HTTPError(400, '{0}'.format(error.message))
+
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  @require()
+  def stix(self, *vpath, **params):
+    if len(vpath) > 0:
+      uuid_string = vpath[0]
+      # check if it is a uuid
+      try:
+        UUID(uuid_string, version=4)
+        event = self.event_controller.get_event_by_uuid(uuid_string)
+        return self.stix_mapper.map_ce1sus_event(event, self.get_user())
+      except ControllerNothingFoundException as error:
+        raise  HTTPError(404, '{0}'.format(error.message))
+      except ValueError as error:
+        print error
+        raise HTTPError(400, 'The provided uuid "{0}" is not valid'.format(uuid_string))
+    else:
+      raise HTTPError(400, 'Cannot be called without a uuid')

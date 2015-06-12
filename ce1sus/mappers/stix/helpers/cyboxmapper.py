@@ -31,6 +31,7 @@ from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.win_service_object import WinService
 from cybox.objects.win_volume_object import WinVolume
 from cybox.objects.win_executable_file_object import PESection
+from cybox.common import Time
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -56,6 +57,9 @@ class CyboxMapper(BaseController):
     self.obj_defs = make_dict_definitions(obj_defs)
     conditions = self.condition_broker.get_all()
     self.conditions = self.make_dict_conditions(conditions)
+
+  def get_time(self, start_time=None, end_time=None, produced_time=None, received_time=None):
+    return Time(start_time, end_time, produced_time, received_time)
 
   def make_dict_conditions(self, conditions):
     result = dict()
@@ -346,7 +350,7 @@ class CyboxMapper(BaseController):
       # check it it is not an other type of file like WinExecutableFile
       raise CyboxMapperException('No attribute was created for win_executable_file')
 
-  def create_attributes(self, properties, parent_object, tlp_id, is_indicator):
+  def create_attributes(self, properties, parent_object, tlp_id, is_indicator, seen_conditions):
     # TODO: Create custom properties
     attribute = Attribute()
     attribute.tlp_level_id = tlp_id
@@ -393,14 +397,23 @@ class CyboxMapper(BaseController):
       counter = counter + 1
     if counter > 1:
       raise CyboxMapperException(u'More values are present but this is not yet implemented')
-    attribute.condition = prop.condition
+    attribute.condition = self.get_condition(prop.condition, seen_conditions)
 
     if attribute.value:
       return [attribute]
     else:
       raise CyboxMapperException(u'Attribute mapping for {0} is not defined'.format(properties))
 
-  def create_object(self, cybox_object, observable, user, tlp_id, is_indicator):
+  def get_condition(self, value, seen_conditions):
+    condition = seen_conditions.get(value, None)
+    if condition:
+      return condition
+    else:
+      condition = self.condition_broker.get_condition_by_value(value)
+      seen_conditions[value] = condition
+    return condition
+
+  def create_object(self, cybox_object, observable, user, tlp_id, is_indicator, seen_conditions):
     ce1sus_object = Object()
     ce1sus_object.tlp_level_id = tlp_id
     set_properties(ce1sus_object)
@@ -415,7 +428,7 @@ class CyboxMapper(BaseController):
     set_extended_logging(ce1sus_object, user, user.group)
 
     # Create attributes
-    attributes = self.create_attributes(cybox_object.properties, ce1sus_object, tlp_id, is_indicator)
+    attributes = self.create_attributes(cybox_object.properties, ce1sus_object, tlp_id, is_indicator, seen_conditions)
     if attributes:
       for attribute in attributes:
         set_extended_logging(attribute, user, user.group)
@@ -426,7 +439,9 @@ class CyboxMapper(BaseController):
     else:
       return None
 
-  def create_observable(self, observable, event, user, tlp_id, is_indicator=False):
+  def create_observable(self, observable, event, user, tlp_id, is_indicator=False, seen_conditions=None):
+    if not seen_conditions:
+      seen_conditions = dict()
     ce1sus_observable = Observable()
     ce1sus_observable.tlp_level_id = tlp_id
     set_properties(ce1sus_observable)
@@ -441,7 +456,7 @@ class CyboxMapper(BaseController):
       composition = ObservableComposition()
       composition.operator = observable.observable_composition.operator
       for child in observable.observable_composition.observables:
-        child_observable = self.create_observable(child, event, user, tlp_id, is_indicator)
+        child_observable = self.create_observable(child, event, user, tlp_id, is_indicator, seen_conditions)
         # As the observable is not on the root level remove the link to the parent
         if child_observable:
           child_observable.event = None
@@ -452,7 +467,7 @@ class CyboxMapper(BaseController):
 
       ce1sus_observable.uuid = extract_uuid(observable.id_)
       # create a cybox object
-      obj = self.create_object(observable.object_, ce1sus_observable, user, tlp_id, is_indicator)
+      obj = self.create_object(observable.object_, ce1sus_observable, user, tlp_id, is_indicator, seen_conditions)
       ce1sus_observable.object = obj
       # TODO
       if obj:
