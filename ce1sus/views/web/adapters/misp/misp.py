@@ -10,8 +10,9 @@ import cherrypy
 from cherrypy._cperror import HTTPError
 from datetime import datetime
 import json
+from uuid import UUID
 
-from ce1sus.controllers.base import ControllerIntegrityException, ControllerException
+from ce1sus.controllers.base import ControllerIntegrityException, ControllerException, ControllerNothingFoundException
 from ce1sus.controllers.common.merger import Merger, MergingException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
@@ -381,3 +382,28 @@ class MISPAdapter(BaseView):
         result.append(key)
     cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
     return json.dumps(result)
+
+  @cherrypy.expose
+  @cherrypy.tools.allow(methods=['GET'])
+  @require()
+  def event(self, *vpath, **params):
+    if len(vpath) > 0:
+      uuid_string = vpath[0]
+      # check if it is a uuid
+      # check the mode
+      make_file = params.get('file', None)
+      if make_file == '':
+        cherrypy.response.headers['Content-Type'] = 'application/x-download'
+        cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_MISP.xml'.format(uuid_string)
+      try:
+        UUID(uuid_string, version=4)
+      except ValueError as error:
+        print error
+        raise HTTPError(400, 'The provided uuid "{0}" is not valid'.format(uuid_string))
+      try:
+        event = self.event_controller.get_event_by_uuid(uuid_string)
+        return self.make_misp_xml(event, self.get_user())
+      except ControllerNothingFoundException as error:
+        raise  HTTPError(404, '{0}'.format(error.message))
+    else:
+      raise HTTPError(400, 'Cannot be called without a uuid')

@@ -7,35 +7,37 @@ Created on Jun 12, 2015
 """
 
 from ce1sus.helpers.common.objects import get_class
+from os.path import isfile
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
-from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper
+from ce1sus.handlers.attributes.filehandler import FileHandler
+from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper, CyboxMapperException
 from cybox.common.object_properties import CustomProperties, Property
 from cybox.core.object import Object, RelatedObject
 from cybox.core.observable import Observable, ObservableComposition
+from cybox.objects.artifact_object import Artifact, Base64Encoding
+from cybox.objects.domain_name_object import DomainName
+from cybox.objects.email_message_object import EmailMessage, EmailRecipients, Links, EmailHeader, EmailAddress, Attachments
+from cybox.objects.network_connection_object import NetworkConnection
 from cybox.objects.process_object import Process
 from cybox.objects.uri_object import URI
+from cybox.objects.user_account_object import UserAccount
+from cybox.objects.win_driver_object import WinDriver
+from cybox.objects.win_event_log_object import WinEventLog
+from cybox.objects.win_kernel_hook_object import WinKernelHook
+from cybox.objects.win_registry_key_object import WinRegistryKey, RegistryValue, RegistryValues
+from cybox.objects.win_service_object import WinService
+from cybox.objects.win_volume_object import WinVolume
 from stix.common import InformationSource, Identity
 from stix.core import STIXPackage, STIXHeader
 from stix.data_marking import Marking, MarkingSpecification
 from stix.extensions.marking.tlp import TLPMarkingStructure
 from stix.indicator import Indicator
 from stix.indicator.valid_time import ValidTime
-from cybox.objects.win_event_log_object import WinEventLog
-from cybox.objects.user_account_object import UserAccount
-from cybox.objects.win_service_object import WinService
-from cybox.objects.win_registry_key_object import WinRegistryKey, RegistryValue, RegistryValues
-from cybox.objects.network_connection_object import NetworkConnection
-from cybox.objects.win_volume_object import WinVolume
-from cybox.objects.win_kernel_hook_object import WinKernelHook
-from cybox.objects.win_driver_object import WinDriver
-from ce1sus.handlers.attributes.filehandler import FileHandler
-from cybox.objects.domain_name_object import DomainName
-from cybox.objects.artifact_object import Artifact, Base64Encoding
-from cybox.objects.email_message_object import EmailMessage
-from os.path import isfile
+from cybox.objects.link_object import Link
+from cybox.objects.file_object import File
 
 
 __author__ = 'Weber Jean-Paul'
@@ -113,6 +115,100 @@ class Ce1susStixMapper(BaseController):
       custom_prop.condition = self.get_condition(attribute)
     instance.custom_properties.append(custom_prop)
 
+  def create_EmailAddress(self, attribute):
+    email = EmailAddress(attribute.value)
+    email.condition = self.get_condition(attribute)
+    return email
+
+  def __check_set_email_header(self, cybox_email):
+    if not cybox_email.header:
+      cybox_email.header = EmailHeader()
+
+  def populate_email(self, cybox_email, attribute):
+    # returns a cybox email object out of a ce1sus object
+    def_name = attribute.definition.name
+
+    if def_name == 'email_attachment_file_name':
+      attachment = File()
+      attachment.file_name = attribute.value
+      attachment.file_name.condition = self.get_condition(attribute)
+
+      # cybox_email.attachments = Attachments()
+      # cybox_email.attachments.append(File)
+
+    elif def_name == 'email_bcc':
+      self.__check_set_email_header(cybox_email)
+      if not cybox_email.header.bcc:
+        cybox_email.header.bcc = EmailRecipients()
+      cybox_email.header.bcc.append(self.create_EmailAddress(attribute))
+    elif def_name == 'email_cc':
+      self.__check_set_email_header(cybox_email)
+      if not cybox_email.header.cc:
+        cybox_email.header.cc = EmailRecipients()
+      cybox_email.header.bcc.append(self.create_EmailAddress(attribute))
+    elif def_name == 'email_errors_to':
+      self.__check_set_email_header(cybox_email)
+      self.set_check_attr(cybox_email, 'header.errors_to', attribute)
+    elif def_name == 'email_message_id':
+      self.__check_set_email_header(cybox_email)
+      self.set_check_attr(cybox_email, 'header.message_id', attribute)
+    elif def_name == 'email_mime_version':
+      self.__check_set_email_header(cybox_email)
+      self.set_check_attr(cybox_email, 'header.mime_version', attribute)
+    elif def_name == 'email_raw_body':
+      self.set_check_attr(cybox_email, 'raw_body', attribute)
+    elif def_name == 'email_raw_header':
+      self.set_check_attr(cybox_email, 'raw_header', attribute)
+    elif def_name == 'email_reply_to':
+      if not cybox_email.header.in_reply_to:
+        self.__check_set_email_header(cybox_email)
+        cybox_email.header.in_reply_to = EmailRecipients()
+      cybox_email.header.in_reply_to.append(self.create_EmailAddress(attribute))
+    elif def_name == 'email_server':
+      self.set_check_attr(cybox_email, 'email_server', attribute)
+    elif def_name == 'email_subject':
+      self.set_check_attr(cybox_email, 'subject', attribute)
+    elif def_name == 'email_from':
+      self.__check_set_email_header(cybox_email)
+      if not cybox_email.header.from_:
+        cybox_email.header.from_ = self.create_EmailAddress(attribute)
+    elif def_name == 'email_to':
+      self.__check_set_email_header(cybox_email)
+      if not cybox_email.header.to:
+        cybox_email.header.to = EmailRecipients()
+      cybox_email.header.to.append(self.create_EmailAddress(attribute))
+    elif def_name == 'email_x_mailer':
+      self.set_check_attr(cybox_email, 'header.x_mailer', attribute)
+    elif def_name == 'email_x_originating_ip':
+      self.set_check_attr(cybox_email, 'header.x_originating_ip', attribute)
+    elif 'hash' in def_name:
+      raise CyboxMapperException('Not defined')
+    elif def_name == 'email_link':
+      if not cybox_email.links:
+        cybox_email.links = Links()
+      cybox_email.links.append(Link(attribute.value))
+    else:
+      raise CyboxMapperException('Not defined for {0}'.format(def_name))
+
+  def set_check_attr(self, cybox_obj, proerty_name, attribute):
+    # TODO make this correct
+    cybox_value = None
+    if '.' in proerty_name:
+      properies = proerty_name.split('.')
+      prop1 = getattr(cybox_obj, properies[0])
+      if prop1:
+        cybox_value = getattr(prop1, properies[1])
+      else:
+        pass
+    else:
+      cybox_value = getattr(cybox_obj, proerty_name, None)
+    if cybox_value:
+      cybox_value.condition = self.get_condition(attribute)
+    else:
+      setattr(cybox_obj, proerty_name, attribute.value)
+      cybox_value = getattr(cybox_obj, proerty_name, None)
+      cybox_value.condition = self.get_condition(attribute)
+
   def map_attribtue(self, instance, attribute):
     definition_name = attribute.definition.name
     if hasattr(instance, definition_name.lower()):
@@ -122,7 +218,9 @@ class Ce1susStixMapper(BaseController):
     else:
       if 'hash' in definition_name:
         instance.add_hash(attribute.value)
-
+        pass
+      elif 'email' in definition_name:
+        self.populate_email(instance, attribute)
       elif definition_name == 'url':
         instance.type_ = URI.TYPE_URL
         instance.value = attribute.value

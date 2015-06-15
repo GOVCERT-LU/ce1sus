@@ -10,6 +10,24 @@ app.controller("eventController", function($scope, Restangular,messages,
   $scope.openedEvents = [];
   $scope.valiation = false;
 
+  $scope.dropdownexport = [
+                     {
+                       "text": "STIX xml",
+                       "click": "showStructured()",
+                       "html": true
+                     },
+                     {
+                       "text": "MISP xml",
+                       "click": "showFlat()",
+                       "html": true
+                     },
+                     {
+                       "text": "JSON",
+                       "click": "showFlat()",
+                       "html": true
+                     },
+                   ];
+  
   $scope.pushItem = function(event, guiOpen) {
     found = false;
     angular.forEach($scope.openedEvents, function(value, index) {

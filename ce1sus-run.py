@@ -20,6 +20,7 @@ from ce1sus.views.web.adapters.misp.misp import MISPAdapter
 from ce1sus.views.web.adapters.stixadapter import STIXAdapter
 from ce1sus.views.web.adapters.openiocadapter import OpenIOCAdapter
 from ce1sus.helpers.common.config import ConfigException
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susViewAdapter
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -59,7 +60,7 @@ def bootstrap():
   cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
   cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
   cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
-
+  cherrypy.tree.mount(Ce1susViewAdapter(config), '/ce1sus/0.1')
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 

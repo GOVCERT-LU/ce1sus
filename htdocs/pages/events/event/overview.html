@@ -1,21 +1,25 @@
 
 <legend>Details</legend>
-  <div class="btn-group" style="padding-bottom: 2px;">
-    <button type="button" class="btn btn-default" ng-click="validateEvent()" ng-if="!event.properties.validated && event.userpermissions.validate">
-    Validate
-    </button>
-    <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal" ng-show="event.userpermissions.modify">
-    Edit
-    </button>
+<div class="row">
+  <div class="col-xs-12 col-sm-12" style="text-align: left">
+    <div class="btn-group" style="padding-bottom: 2px;">
+      <button type="button" class="btn btn-default" ng-click="validateEvent()" ng-if="!event.properties.validated && event.userpermissions.validate">
+      Validate
+      </button>
+      <button type="button" class="btn btn-default" data-template="pages/events/event/modals/edit.html" bs-modal="modal" ng-show="event.userpermissions.modify">
+      Edit
+      </button>
+  
+      <button ng-if="isAdmin" class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal">Change
+        ownership</button>
+      <button class="btn btn-danger" ng-click="removeEvent()" ng-show="event.userpermissions.delete">
+        Delete</button>
+      <button class="btn btn-primary" ng-click="publishEvent()" ng-show="event.userpermissions.modify && !event.published">
+        Publish</button>
+    </div>
+   </div>
 
-    <button ng-if="isAdmin" class="btn btn-warning" data-template="pages/events/event/modals/changeowner.html" bs-modal="modal">Change
-      ownership</button>
-    <button class="btn btn-danger" ng-click="removeEvent()" ng-show="event.userpermissions.delete">
-      Delete</button>
-    <button class="btn btn-primary" ng-click="publishEvent()" ng-show="event.userpermissions.modify && !event.published">
-      Publish</button>
-  </div>
-
+</div>
 <div class="row">
   <div class="col-xs-12 col-sm-12" style="text-align: left">
     <div class="row">
@@ -73,6 +77,17 @@
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left; overflow: auto; height: 125px">
               {{event.description}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-3"
+            style="text-align: right; padding: 3px; padding-left: 15px">
+            <label> Export: </label>
+          </div>
+          <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
+            <a href="/STIX/0.1/event/{{event.identifier}}?file">STIX XML</a>
+            <a href="/MISP/0.1/event/{{event.identifier}}?file">MISP XML</a>
+            <a href="/ce1sus/0.1/event/{{event.identifier}}?file&complete=true&inflated=true">ce1sus JSON</a>
           </div>
         </div>
       </div>
@@ -157,6 +172,7 @@
     </div>
   </div>
 </div>
+
 <div ng_show="relations.length > 0">
   <legend>Relations</legend>
   <table class="table table-striped table-bordered table-hover table-condensed">

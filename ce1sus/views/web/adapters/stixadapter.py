@@ -84,10 +84,15 @@ class STIXAdapter(BaseView):
   @cherrypy.expose
   @cherrypy.tools.allow(methods=['GET'])
   @require()
-  def stix(self, *vpath, **params):
+  def event(self, *vpath, **params):
     if len(vpath) > 0:
       uuid_string = vpath[0]
       # check if it is a uuid
+      # check the mode
+      make_file = params.get('file', None)
+      if make_file == '':
+        cherrypy.response.headers['Content-Type'] = 'application/x-download'
+        cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_STIX.xml'.format(uuid_string)
       try:
         UUID(uuid_string, version=4)
       except ValueError as error:

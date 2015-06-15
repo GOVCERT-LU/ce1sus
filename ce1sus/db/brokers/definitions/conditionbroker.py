@@ -28,6 +28,8 @@ class ConditionBroker(BrokerBase):
 
   def get_condition_by_value(self, value):
     try:
+      if value == None:
+        value = 'Equals'
       return self.session.query(Condition).filter(Condition.value == value).one()
     except NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(value, self.__class__.__name__))
