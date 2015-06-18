@@ -188,7 +188,7 @@ class RestController(BaseView):
             else:
               return dumps(result)
           except RestHandlerException as error:
-            message = u'{0}'.format(error)
+            message = u'{0}'.format(error.message)
             self.logger.error(message)
             if isinstance(error, RestHandlerNotFoundException):
               raise cherrypy.HTTPError(status=404, message=message)

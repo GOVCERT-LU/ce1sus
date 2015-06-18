@@ -7,16 +7,16 @@ Created on Sep 5, 2014
 """
 import base64
 from datetime import datetime
-from eml_parser.eml_parser import decode_email
+from eml_parser.eml_parser import decode_email, decode_email_s
 from os import remove
 from os.path import dirname
-from shutil import rmtree
+from shutil import rmtree, move
 import types
 
-from ce1sus.db.classes.object import Object
-from ce1sus.handlers.base import HandlerException
+from ce1sus.db.classes.object import Object, RelatedObject
 from ce1sus.handlers.attributes.filehandler import FileWithHashesHandler
-from ce1sus.helpers.common.hash import hashMD5
+from ce1sus.handlers.base import HandlerException
+from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
 
 
 __author__ = 'Weber Jean-Paul'
@@ -27,10 +27,17 @@ __license__ = 'GPL v3+'
 
 CHK_SUM_EMAIL_CC = 'bb55aa952f379f3daf010d4d8c7851fd85c6a6b1'
 CHK_SUM_EMAIL_FROM = '7bbf788e418b7857406d7d0678cc78f1cbb73c44'
-CHK_SUM_EMAIL_SUBJECT = '68f982e660ec08a6a909c195fe2cc320a887a43f'
-CHK_SUM_EMAIL_SEND_DATE = '23f2d3c8648bc526b911c618bc539c36cc14cb71'
-CHK_SUM_EMAIL_MESSAGE_ID = 'a40a6a928e3a5b8b1965d9de1c90c09e325a2a87'
-CHK_SUM_EMAIL_SENDER = '9b05b345fdd81de5cdacab1e17b8a9ec746bab78'
+CHK_SUM_EMAIL_SUBJECT = 'bb65140f07b14cdd1d0f9221bd4b1a2cad604023'
+CHK_SUM_EMAIL_SEND_DATE = 'b17e97d7b9493b35d072c2a17971d748820dc42b'
+CHK_SUM_EMAIL_MESSAGE_ID = '42a435968231e7e9f0ba276b4b4171b75499c3fa'
+CHK_SUM_EMAIL_SENDER = 'e59877cca12082bdddcfd6298e7e8ec1a32266d0'
+CHK_SUM_IN_REPLY_TO = '93925e3261f71a019a75c6b4479d3e984863d5d2'
+CHK_SUM_EMAIL_RAW_BODY = 'aaddf3ade1a4448b1128a3098da3aebdd7eeef8c'
+CHK_SUM_EMAIL_RAW_HEADER = '750f9e8c90f16e5fd72d38e58282fa26422e6259'
+CHK_SUM_URL = 'd326821620e517e9c68b12aa74ce56417e46516d'
+
+CHK_SUM_URI = 'cb371c93c5aa0e62198efd303ae2c17474416d1a'
+
 
 
 class EmailHandler(FileWithHashesHandler):
@@ -46,109 +53,80 @@ class EmailHandler(FileWithHashesHandler):
   def get_view_type(self):
     return 'file'
 
+  def attach_attribute(self, obj, user, definition_chksum, value, json, attributes):
+    if value:
+      definition = self.get_attriute_definition(definition_chksum)
+      json['value'] = value
+      attribute = self.create_attribute(obj, definition, user, json)
+      attributes.append(attribute)
+
+
   def insert(self, obj, user, json):
     value = json.get('value', None)
     filename = value.get('name', None)
     data = value.get('data', None)
     if isinstance(data, types.DictionaryType):
-            # Workaround for the webfront end
+      # Workaround for the webfront end
       data = data.get('data', None)
 
     if filename and data:
-      # save file to tmp folder
-      tmp_filename = hashMD5(datetime.utcnow())
+      attributes = list()
+      related_objects = list()
       binary_data = base64.b64decode(data)
-      tmp_folder = self.get_tmp_folder()
-      tmp_path = tmp_folder + '/' + tmp_filename
+      # The eml file will not be saved
+      mail = decode_email_s(binary_data, include_raw_body=True, include_attachment_data=True)
+      # list
+      recieved = mail.get('received', None)
 
-      # create file in tmp
-      file_obj = open(tmp_path, "w")
-      file_obj.write(binary_data)
-      file_obj.close()
+      attachments = mail.get('attachments', None)
 
-      mail = decode_email(tmp_path, include_attachment_data=True)
-      # remove unused files
-      remove(tmp_path)
-      rmtree(dirname(tmp_path))
+      raw_body = mail.get('raw_body', None)
+      if raw_body:
+        raw_body = raw_body[0][1]
+        self.attach_attribute(obj, user, CHK_SUM_EMAIL_RAW_BODY, raw_body, json, attributes)
 
-      attributes = list()
-      cc_value = mail.get('cc', None)
-      fields = (mail.get('from', None),
-                mail.get('subject', None),
-                cc_value,
-                mail.get('date', None),
-                mail.get('message_id', None)
-                )
+      header = mail.get('header', None)
+      send_date = header.get('date', None)
+      self.attach_attribute(obj, user, CHK_SUM_EMAIL_SEND_DATE, send_date, json, attributes)
 
-      attributes = list()
-      internal_json = json
+      from_ = header.get('from', None)
+      self.attach_attribute(obj, user, CHK_SUM_EMAIL_FROM, from_, json, attributes)
 
-      if not (fields[0] and fields[1] and fields[3]):
-        raise HandlerException('Invalid eml file, eml file must contain FROM, SUBJECT and DATE')
+      in_reply_to = header.get('in-reply-to', None)
+      self.attach_attribute(obj, user, CHK_SUM_IN_REPLY_TO, in_reply_to[1:-1], json, attributes)
 
-      # create Email attributes
-      if fields[0]:
-        internal_json['value'] = fields[0]
-        attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_EMAIL_FROM), self.user, internal_json)
-        attributes.append(attribute)
+      message_id = header.get('message-id', None)
+      self.attach_attribute(obj, user, CHK_SUM_EMAIL_MESSAGE_ID, message_id, json, attributes)
 
-      if fields[1]:
-        internal_json['value'] = fields[1]
-        attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_EMAIL_SUBJECT), self.user, internal_json)
-        attributes.append(attribute)
+      subject = header.get('subject', None)
+      self.attach_attribute(obj, user, CHK_SUM_EMAIL_SUBJECT, subject, json, attributes)
 
-      if fields[2]:
-        internal_json['value'] = fields[2]
-        attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_EMAIL_CC), self.user, internal_json)
-        attributes.append(attribute)
+      # list
+      urls = mail.get('urls')
+      for url in urls:
+        rel_obj = RelatedObject()
+        rel_obj.parent = obj
+        rel_obj.parent_id = obj.identifier
+        childobj = self.create_object(obj.observable, self.get_object_definition(CHK_SUM_URI), user, {}, False)
+        rel_obj.object = childobj
 
-      if fields[3]:
-        internal_json['value'] = fields[3]
-        attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_EMAIL_SEND_DATE), self.user, internal_json)
-        attributes.append(attribute)
+        self.attach_attribute(childobj, user, CHK_SUM_URL, url, json, childobj.attributes)
+        related_objects.append(rel_obj)
+      return attributes, related_objects
 
-      if fields[4]:
-        internal_json['value'] = fields[4]
-        attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_EMAIL_MESSAGE_ID), self.user, internal_json)
-        attributes.append(attribute)
 
-      obj_definition = self.get_object_definition(CHK_SUM_GENERIC_FILE)
-
-      child_objects = list()
-      # Process attachments
-      for attachment_key in mail['attachments']:
-        attachment = mail['attachments'].get(attachment_key)
-        filename = attachment.get('filename')
-        raw_base64 = attachment.get('raw')
-
-        # create New object for this attachment
-        child_object = Object()
-        child_object.definition = obj_definition
-        child_object.definition_id = obj_definition.identifier
-
-        value_dict = {'name': filename, 'data': raw_base64}
-        internal_json['value'] = value_dict
-
-        file_attributes, sub_objects = FileWithHashesHandler.insert(self, obj, self.user, internal_json)
-
-        file_main_attribute = self.get_main_attribute(file_attributes)
-
-        file_main_attribute.children = file_attributes
-
-        child_object.attributes.append(file_main_attribute)
-        child_object.attributes = child_object.attributes + file_attributes
-
-        child_objects.append(child_object)
-
-      return attributes, child_objects
 
   def get_additional_object_chksums(self):
-    return [CHK_SUM_GENERIC_FILE]
+    return [CHK_SUM_URI] + FileWithHashesHandler.get_additional_object_chksums(self)
 
   def get_additinal_attribute_chksums(self):
     return [CHK_SUM_EMAIL_CC,
-            CHK_SUM_EMAIL_MESSAGE_ID,
             CHK_SUM_EMAIL_FROM,
-            CHK_SUM_EMAIL_SUBJECT,
+            CHK_SUM_EMAIL_MESSAGE_ID,
+            CHK_SUM_EMAIL_RAW_BODY,
+            CHK_SUM_EMAIL_RAW_HEADER,
             CHK_SUM_EMAIL_SEND_DATE,
-            CHK_SUM_RAW_FILE] + self.file_handler.get_additinal_attribute_chksums()
+            CHK_SUM_EMAIL_SENDER,
+            CHK_SUM_EMAIL_SUBJECT,
+            CHK_SUM_IN_REPLY_TO,
+            CHK_SUM_URL] + FileWithHashesHandler.get_additinal_attribute_chksums(self)
