@@ -180,7 +180,7 @@ class Object(ExtendedLogingInformations, Base):
               'related_objects_count': related_count,
               'properties': self.properties.to_dict(),
               'tlp': self.convert_value(self.tlp),
-              'observable_id': self.convert_value(self.observable_id)
+              'observable_id': self.convert_value(self.observable.uuid)
               }
     else:
       return {'identifier': self.convert_value(self.uuid),

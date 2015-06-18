@@ -280,12 +280,7 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'to_ids', ids)
     self.__append_child(root, 'uuid', attribute.uuid)
     self.__append_child(root, 'event_id', attribute.object.event_id)
-    # TODO review this
-    if attribute.object.event:
-      self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(attribute.object.event.tlp_level_id, 2))
-    else:
-      event = self.event_controller.get_event_by_id(attribute.object.event_id)
-      self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(event.tlp_level_id, 2))
+    self.__append_child(root, 'distribution', Ce1susMISP.distribution_to_tlp_map.get(attribute.tlp_level_id, 2))
     # TODO add comment
     self.__append_child(root, 'timestamp', int(time.mktime(attribute.modified_on.timetuple())))
     if attribute.object.observable.description:
