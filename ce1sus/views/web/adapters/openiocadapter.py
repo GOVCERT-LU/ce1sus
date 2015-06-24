@@ -115,7 +115,7 @@ class OpenIOCAdapter(BaseView):
       return json.dumps(merged_event.to_dict(complete, inflated, event_permissions, user))
     except (ControllerException, BrokerException) as error:
       self.logger.error(error)
-      raise HTTPError(400, '0'.format(error))
+      raise HTTPError(400, '0'.format(error.message))
 
   def __make_stix_xml_string(self, filename, open_ioc_xml):
     # This is actually an adapted version of the openioc_to_stix.py to be compatible with ce1sus
