@@ -6,7 +6,7 @@
 Created on Nov 12, 2014
 """
 from datetime import datetime
-from kombu.utils import uuid4
+from uuid import uuid4
 
 
 __author__ = 'Weber Jean-Paul'
