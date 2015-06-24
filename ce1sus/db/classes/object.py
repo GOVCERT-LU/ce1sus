@@ -151,6 +151,11 @@ class Object(ExtendedLogingInformations, Base):
 
   def to_dict(self, complete=True, inflated=False, event_permissions=None, user=None):
     attributes = list()
+    if self.observable:
+      uuid = self.convert_value(self.observable.uuid)
+    else:
+      uuid = self.convert_value(self.parent.uuid)
+
     for attribute in self.get_attributes_for_permissions(event_permissions, user):
       attributes.append(attribute.to_dict(complete, inflated, event_permissions, user))
     related = list()
@@ -180,7 +185,7 @@ class Object(ExtendedLogingInformations, Base):
               'related_objects_count': related_count,
               'properties': self.properties.to_dict(),
               'tlp': self.convert_value(self.tlp),
-              'observable_id': self.convert_value(self.observable.uuid)
+              'observable_id': uuid
               }
     else:
       return {'identifier': self.convert_value(self.uuid),
@@ -195,7 +200,7 @@ class Object(ExtendedLogingInformations, Base):
               'related_objects_count': related_count,
               'properties': self.properties.to_dict(),
               'tlp': self.convert_value(self.tlp),
-              'observable_id': self.convert_value(self.observable_id)
+              'observable_id': uuid
               }
 
   def populate(self, json, rest_insert=True):
