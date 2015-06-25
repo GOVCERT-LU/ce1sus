@@ -93,6 +93,8 @@ class STIXAdapter(BaseView):
       if make_file == '':
         cherrypy.response.headers['Content-Type'] = 'application/x-download'
         cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_STIX.xml'.format(uuid_string)
+      else:
+        cherrypy.response.headers['Content-Type'] = 'text/xml'
       try:
         UUID(uuid_string, version=4)
       except ValueError as error:

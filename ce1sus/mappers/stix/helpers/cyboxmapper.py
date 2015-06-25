@@ -374,8 +374,6 @@ class CyboxMapper(BaseController):
         attribtues.append(self.__create_attribute_by_def('email_x_originating_ip', parent, cybox_email.header.x_originating_ip, is_indicator, None, tlp_id))
       if cybox_email.header.in_reply_to:
         attribtues.append(self.__create_attribute_by_def('email_in_reply_to', parent, cybox_email.header.in_reply_to, is_indicator, None, tlp_id))
-        for recipient in cybox_email.header.in_reply_to:
-          pass
       if cybox_email.subject:
         attribtues.append(self.__create_attribute_by_def('email_subject', parent, cybox_email.subject, is_indicator, None, tlp_id))
       if cybox_email.header.from_:
@@ -513,6 +511,8 @@ class CyboxMapper(BaseController):
     # Create the container
     ce1sus_object.observable = observable
     if hasattr(cybox_object, 'id'):
+      ce1sus_object.uuid = extract_uuid(cybox_object.id)
+    elif hasattr(cybox_object, 'id_'):
       ce1sus_object.uuid = extract_uuid(cybox_object.id_)
     else:
       # unfortenatley one must be generated

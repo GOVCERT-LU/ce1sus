@@ -12,14 +12,18 @@ from os.path import isfile
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
+from ce1sus.db.classes.attribute import Condition
 from ce1sus.handlers.attributes.filehandler import FileHandler
 from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper, CyboxMapperException
+from cybox.common import Hash, HashList
 from cybox.common.object_properties import CustomProperties, Property
 from cybox.core.object import Object, RelatedObject
 from cybox.core.observable import Observable, ObservableComposition
 from cybox.objects.artifact_object import Artifact, Base64Encoding
 from cybox.objects.domain_name_object import DomainName
 from cybox.objects.email_message_object import EmailMessage, EmailRecipients, Links, EmailHeader, EmailAddress, Attachments
+from cybox.objects.file_object import File
+from cybox.objects.link_object import Link
 from cybox.objects.network_connection_object import NetworkConnection
 from cybox.objects.process_object import Process
 from cybox.objects.uri_object import URI
@@ -36,8 +40,6 @@ from stix.data_marking import Marking, MarkingSpecification
 from stix.extensions.marking.tlp import TLPMarkingStructure
 from stix.indicator import Indicator
 from stix.indicator.valid_time import ValidTime
-from cybox.objects.link_object import Link
-from cybox.objects.file_object import File
 
 
 __author__ = 'Weber Jean-Paul'
@@ -187,6 +189,11 @@ class Ce1susStixMapper(BaseController):
       if not cybox_email.links:
         cybox_email.links = Links()
       cybox_email.links.append(Link(attribute.value))
+    elif def_name == 'email_send_date':
+      cybox_email.date = attribute.value
+    elif def_name == 'email_in_reply_to':
+      self.__check_set_email_header(cybox_email)
+      cybox_email.header.in_reply_to = attribute.value
     else:
       raise CyboxMapperException('Not defined for {0}'.format(def_name))
 
@@ -207,7 +214,8 @@ class Ce1susStixMapper(BaseController):
     else:
       setattr(cybox_obj, proerty_name, attribute.value)
       cybox_value = getattr(cybox_obj, proerty_name, None)
-      cybox_value.condition = self.get_condition(attribute)
+      if hasattr(cybox_value, 'condition'):
+        cybox_value.condition = self.get_condition(attribute)
 
   def map_attribtue(self, instance, attribute):
     definition_name = attribute.definition.name
@@ -217,7 +225,21 @@ class Ce1susStixMapper(BaseController):
       value.condition = self.get_condition(attribute)
     else:
       if 'hash' in definition_name:
-        instance.add_hash(attribute.value)
+        if attribute.condition.value:
+          if attribute.condition.value:
+            if attribute.condition.value == "Equals":
+              exact = True
+            else:
+              exact = False
+          else:
+              exact = False
+        else:
+          exact = True
+        h = Hash(attribute.value, exact=exact)
+        h.condition = attribute.condition
+        if instance.hashes is None:
+            instance.hashes = HashList()
+        instance.hashes.append(h)
         pass
       elif 'email' in definition_name:
         self.populate_email(instance, attribute)
@@ -336,11 +358,24 @@ class Ce1susStixMapper(BaseController):
     for rel_object in rel_objects:
       ob = self.create_object(rel_object.object, event_permissions, user)
       if ob:
-        cybox_rel_object = RelatedObject(ob.properties, rel_object.relation)
-        cybox_rel_object.id_ = ob.id_
-        obj.related_objects.append(cybox_rel_object)
-    return obj
+        rel_obj = self.create_related_object(rel_object, event_permissions, user)
 
+        # cybox_rel_object = RelatedObject(properties=ob.properties, relationship=rel_object.relation)
+
+        obj.related_objects.append(rel_obj)
+    return obj
+  
+  def create_related_object(self, rel_object, event_permissions, user):
+    ob = self.create_object(rel_object.object, event_permissions, user)
+    rel_obj = RelatedObject(properties=ob.properties, relationship=rel_object.relation)
+    rel_obj.id_ = ob.id_
+    
+    for relobj in rel_object.object.related_objects:
+      
+      rel_child_obj = self.create_related_object(relobj, event_permissions, user)
+      rel_obj.related_objects.append(rel_child_obj)
+    
+    return rel_obj
   def create_composed_observable(self, ce1sus_composition, event_permissions, user):
     composition = ObservableComposition()
     composition.operator = ce1sus_composition.operator
