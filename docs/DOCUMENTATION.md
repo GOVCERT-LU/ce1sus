@@ -52,9 +52,7 @@ Go to your ce1sus installation directory and:
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/ahupp/python-magic
-cd ..
+git -C libs clone https://github.com/ahupp/python-magic
 ln -s libs/python-magic/magic.py .
 ```
 
@@ -66,21 +64,18 @@ One possibility to install eml_parser is the following
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/sim0nx/eml_parser
-cd ..
+git -C libs clone https://github.com/sim0nx/eml_parser
 ln -s libs/eml_parser/eml_parser .
 ```
 
 ###1.2.3 Cybox
 
-One possibility to install eml_parser is the following
+One possibility to install Cybox is the following
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/CybOXProject/python-cybox.git v2.1.0.11
-cd ..
+git -C libs clone https://github.com/CybOXProject/python-cybox.git
+git -C libs/python-cybox checkout 03beb70618c83071cd7db77d26eb0752ab3bc22a # checkout v2.1.0.11
 ln -s libs/python-cybox/cybox .
 ```
 
@@ -88,40 +83,37 @@ The other is it to install it via pip.
 
 ###1.2.4 Stix
 
-One possibility to install eml_parser is the following
+One possibility to install Stix is the following
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/STIXProject/python-stix.git v1.1.1.5
-cd ..
+git -C libs clone https://github.com/STIXProject/python-stix.git
+git -C libs/python-stix checkout 92f610076ad982b7577ede97f8f26982265e254b # checkout v1.1.1.5
 ln -s libs/python-stix/stix .
 ```
 
 ###1.2.5 rtKit
 
-One possibility to install eml_parser is the following
+One possibility to install rtKit is the following
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/z4r/python-rtkit.git 0.6.0
-cd ..
+git -C libs clone https://github.com/z4r/python-rtkit.git
+git -C libs/python-rtkit checkout 78306d1a44080adca2e302b429beabd3d578a211 # checkout v0.6.0
 ln -s libs/python-rtkit/rtkit .
 ```
 
 ###1.2.5 OpenIOC
 
-One possibility to install eml_parser is the following
+One possibility to install OpenIOC is the following
 
 ``` shell
 mkdir libs
-cd libs
-git clone https://github.com/STIXProject/openioc-to-stix.git
-cd ..
+mkdir libs
+git -C libs clone https://github.com/STIXProject/openioc-to-stix.git
 ln -s libs/openioc-to-stix/ioc_observable.py .
 ln -s libs/openioc-to-stix/openioc.py .
-ln -s libs/openioc-to-strix/opendioc_to_cybox.py .
+ln -s libs/openioc-to-stix/openioc_to_cybox.py .
 ```
 
 **Note**: This implementation may change in future
@@ -147,16 +139,16 @@ Create a db user for ce1sus user must have the following grants:
 
 ``` sql
 CREATE USER 'ce1sus'@'localhost' IDENTIFIED BY 'password';
-GRANT INSERT, SELECT, DELETE, UPDATE  ON 'ce1sus'. * TO 'ce1sus'@'localhost';
+GRANT INSERT, SELECT, DELETE, UPDATE  ON ce1sus.* TO 'ce1sus'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 ###1.3.3 DB SCHEMA
 
-The creation of the db schema changed since 0.11.X and is now done via a script. To initialize the database do the following:
+The creation of the db schema changed since 0.11.X and is now done via a script. Before executing db_init.py, copy and edit config files located in config/. Afterwards, you can initialize the database using db_init.py:
 
 ``` shell
-cd scripts/installation/database
+cd scripts/install/database
 python db_init.py
 ```
 
