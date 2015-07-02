@@ -7,7 +7,7 @@ Created on Sep 5, 2014
 """
 import base64
 from datetime import datetime
-from eml_parser.eml_parser import decode_email, decode_email_s
+from eml_parser.eml_parser import decode_email_s
 from os import remove
 from os.path import dirname
 from shutil import rmtree, move

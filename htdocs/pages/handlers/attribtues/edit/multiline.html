@@ -4,15 +4,13 @@
       <div
         ng-class="{ 'has-error' :form.value.$invalid && !form.value.$pristine }">
         <textarea class="form-control" name="value" ng-model="attribute.value"
-          type="text" ng-minlength=2 ng-maxlength=255 required  
+          type="text" ng-minlength=2 required  
           ng-pattern="patternexpression"></textarea>
         <p
           ng-show="form.value.$invalid && !form.value.$pristine"
           class="help-block">Value is required.</p>
         <p ng-show="form.value.$error.minlength"
           class="help-block">Value is too short.</p>
-        <p ng-show="form.value.$error.maxlength"
-          class="help-block">Value is too long.</p>
         <p ng-show="form.value.$error.pattern"
           class="help-block">Value does not match pattern "{{definition.regex}}"</p>
       </div>

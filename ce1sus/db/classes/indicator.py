@@ -6,9 +6,10 @@
 Created on Nov 11, 2014
 """
 
+from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, Table
-from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
+from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime, Boolean
 
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
@@ -53,10 +54,22 @@ _REL_KILLCHAIN_KILLCHAINPHASES = Table('rel_killchain_killchainphase', Base.meta
                                        Column('killchainphase_id', BigInteger, ForeignKey('killchainphases.killchainphase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
                                        )
 
+_REL_INDICATOR_RELATED_TTPS = Table('rel_indicator_related_ttps', Base.metadata,
+                                    Column('rirt_id', BigInteger, primary_key=True, nullable=False, index=True),
+                                    Column('indicator_id', BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                    Column('relatedttp_id', BigInteger, ForeignKey('relatedttps.relatedttp_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True)
+                                    )
+
 
 class Killchain(ExtendedLogingInformations, Base):
   name = Column('name', Unicode(255, collation='utf8_unicode_ci'))
   reference = Column('reference', Unicode(255, collation='utf8_unicode_ci'))
+  definer = Column('definer', Unicode(255, collation='utf8_unicode_ci'))
+
+  @property
+  def number_of_phases(self):
+    return len(self.kill_chain_phases)
+
   kill_chain_phases = relationship('KillChainPhase', secondary='rel_killchain_killchainphase')
 
 
@@ -68,11 +81,26 @@ class KillChainPhase(Base):
 
 
 class Sighting(ExtendedLogingInformations, Base):
+  timestamp = Column('timestamp_precision', DateTime, default=datetime.utcnow())
   timestamp_precision = Column('timestamp_precision', Unicode(10, collation='utf8_unicode_ci'))
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   confidence = Column('confidence', Unicode(10, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
+  # type reference = anyURI
+  reference = Column('reference', Unicode(255, collation='utf8_unicode_ci'))
+
+  # TODO: related observables
+  # related_observables = None
+
   dbcode = Column('code', Integer, default=0, nullable=False)
   __bit_code = None
+
+  @property
+  def source(self):
+    return self.owner_group
+
+  @source.setter
+  def source(self, value):
+    self.owner_group = value
 
   @property
   def properties(self):
@@ -89,7 +117,7 @@ class Sighting(ExtendedLogingInformations, Base):
 
 class IndicatorType(Base):
 
-  type = Column('type', Integer, default=None)
+  type = Column('type', Integer, default=None, nullable=False)
   indicator_id = Column(BigInteger, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
 
   @classmethod
@@ -140,27 +168,56 @@ class ValidTimePosition(ExtendedLogingInformations, Base):
 
 class Indicator(ExtendedLogingInformations, Base):
 
-  version = Column('version', Unicode(40, collation='utf8_unicode_ci'), default=u'1.0.0', nullable=False)
+  # base properties
   title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=True)
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   short_description = Column('short_description', Unicode(255, collation='utf8_unicode_ci'))
-  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
-  # TODO relation tables
-  # TODO Markings
-  event = relationship('Event', uselist=False)
-  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  sightings = relationship('Sighting', secondary='rel_indicator_sightings')
-  killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
-  types = relationship('IndicatorType')
+  version = Column('version', Unicode(40, collation='utf8_unicode_ci'), default=u'1.0.0', nullable=False)
   handling = relationship(Marking, secondary='rel_indicator_handling')
+  # information source = creator_group
+
+  observables = relationship('Observable', secondary='rel_indicator_observable')
+  types = relationship('IndicatorType')
+  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
+  indicated_ttps = relationship('RelatedTTP', secondary='rel_indicator_related_ttps')
+
+  # TODO: test_mechanism
+  # test_mechanisms = relationship('TestMechanisms', secondary='rel_indicator_test_meachanism')
+  alternative_id = Column('confidence', Unicode(255, collation='utf8_unicode_ci'))
+  # TODO: suggested_coas
+  # suggested_coas = relationship('RelatedCOA', secondary='rel_indicator_related_coas')
+  sightings = relationship('Sighting', secondary='rel_indicator_sightings')
+  # TODO: composite_indicator_expression
+  composite_indicator_expression = None
+  # TODO: review this relationsship. It can be a reference to one defined in the package, hence these are only references to these
+  killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
+  valid_time_positions = relationship('ValidTimePosition')
+  # TODO: related_indicators
+  # related_indicators = None
+  # TODO: related_campaigns
+  # related_campaigns = None
   operator = Column('operator', Unicode(3, collation='utf8_unicode_ci'))
-  observables = relationship('Observable', secondary='rel_indicator_observable')  # 1:*
-  valid_time_positions = relationship('ValidTimePosition')  # 1:*
-  # TODO add related indicators and TTP
+
+  @property
+  def observable_composition_operator(self):
+    return self.operator
+
+  @observable_composition_operator.setter
+  def observable_composition_operator(self, value):
+    self.operator = value
+
+  likely_impact = Column('confidence', Unicode(255, collation='utf8_unicode_ci'))
+  negate = Column('negate', Boolean, default=None)
+  # TODO: related_packages
+  # related_packages = None
+
+  # custom ones related to ce1sus internals
   dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
-
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
+
+  event = relationship('Event', uselist=False)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @property
   def tlp(self):

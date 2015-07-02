@@ -18,7 +18,7 @@ Release 0.11.0
 * Enhanced ACL, for admins and users
 * Enhanced relation finder (Similar attributes can be grouped, but still the relation is done by ==)
 * Review right management (REL_0.10.0+)
-* STIX support for (Currently supports Observables, Indicators, Markings, Kill Chains)
+* STIX support for everything except Cause of Actions
 * Operators for Observables (Composed Observables)
 * Genuine MISP v2.x integration of push/pull requests
 * CybOX naming convention

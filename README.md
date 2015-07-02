@@ -1,5 +1,3 @@
-0.11.X is still Under Development
-
 #ce1sus
 
 ce1sus is a threat information database.
@@ -60,7 +58,7 @@ For any questions feel free to ask
 * Completely interfaceable (REST API)
 * Can be used without the graphical web interface
 * Attribute handlers which can enrich your attribute
-* Genuine MISP v2.x integration of push/pull requests
+* Genuine MISP v2.3 integration of push/pull requests
 * CybOX naming convention
 * Synchronization between ce1sus instances
 * Web-interface sync-server management (MISP and ce1sus)

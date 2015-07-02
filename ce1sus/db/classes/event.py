@@ -5,6 +5,7 @@
 
 Created on Oct 16, 2014
 """
+from ce1sus.helpers.common.converters import ValueConverter
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
@@ -13,12 +14,13 @@ from sqlalchemy.types import Unicode, Integer, UnicodeText, BigInteger, DateTime
 from ce1sus.common.checks import is_object_viewable, is_event_owner
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Status, Risk, Analysis, TLP, Properties, Marking
+from ce1sus.db.classes.exploittarget import ExploitTarget
 from ce1sus.db.classes.group import EventPermissions
 from ce1sus.db.classes.indicator import Indicator
 from ce1sus.db.classes.observables import Observable
-from ce1sus.db.classes.ttp import TTPs
+from ce1sus.db.classes.ttp import TTP
 from ce1sus.db.common.session import Base
-from ce1sus.helpers.common.converters import ValueConverter
+from stix.common.vocabs import PackageIntent as StixPackageIntent
 
 
 __author__ = 'Weber Jean-Paul'
@@ -69,10 +71,139 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
     self.uuid = json.get('uuid', None)
     self.permissions.populate(json.get('permissions', None))
 
+class EventHeader(object):
+  """Wrapper to be more stix like and compatible with db scheme and preparation for stix 1.2"""
+  
+  def __init__(self, event):
+    self.event = event
+  
+  @property
+  def package_intents(self):
+    return self.event.package_intents
+  
+  @property
+  def title(self):
+    return self.event.title
+  
+  @property
+  def description(self):
+    return self.event.description
+  
+  @property
+  def short_description(self):
+    return self.event.short_description
+  
+  @property
+  def handling(self):
+    return self.event.handling
+  
+  @property
+  def information_source(self):
+    return self.event.information_source
+  
+  @property
+  def profiles(self):
+    return self.event.profiles
+
+  @package_intents.setter
+  def package_intents(self, value):
+    self.event.package_intents = value
+    
+  @title.setter
+  def title(self, value):
+    self.event.title = value
+    
+  @description.setter
+  def description(self, value):
+    self.event.description = value
+    
+  @short_description.setter
+  def short_description(self, value):
+    self.event.short_description = value
+    
+  @handling.setter
+  def handling(self, value):
+    self.event.handling = value
+    
+  @information_source.setter
+  def information_source(self, value):
+    self.event.information_source = value
+    
+  @profiles.setter
+  def profiles(self, value):
+    self.event.profiles = value
+
+class PackageIntent(Base):
+
+  intent_id = Column('intent_id', Integer, default=None, nullable=False)
+  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @classmethod
+  def get_dictionary(cls):
+    return {
+            0: StixPackageIntent.TERM_COLLECTIVE_THREAT_INTELLIGENCE,
+            1: StixPackageIntent.TERM_THREAT_REPORT,
+            2: StixPackageIntent.TERM_INDICATORS,
+            3: StixPackageIntent.TERM_INDICATORS_PHISHING ,
+            4: StixPackageIntent.TERM_INDICATORS_WATCHLIST ,
+            5: StixPackageIntent.TERM_INDICATORS_MALWARE_ARTIFACTS ,
+            6: StixPackageIntent.TERM_INDICATORS_NETWORK_ACTIVITY,
+            7: StixPackageIntent.TERM_INDICATORS_ENDPOINT_CHARACTERISTICS,
+            8: StixPackageIntent.TERM_CAMPAIGN_CHARACTERIZATION,
+            9: StixPackageIntent.TERM_THREAT_ACTOR_CHARACTERIZATION ,
+            10: StixPackageIntent.TERM_EXPLOIT_CHARACTERIZATION ,
+            11: StixPackageIntent.TERM_ATTACK_PATTERN_CHARACTERIZATION,
+            12: StixPackageIntent.TERM_MALWARE_CHARACTERIZATION,
+            13: StixPackageIntent.TERM_TTP_INFRASTRUCTURE,
+            14: StixPackageIntent.TERM_TTP_TOOLS,
+            15: StixPackageIntent.TERM_COURSES_OF_ACTION,
+            16: StixPackageIntent.TERM_INCIDENT,
+            17: StixPackageIntent.TERM_OBSERVATIONS,
+            18: StixPackageIntent.TERM_OBSERVATIONS_EMAIL,
+            19: StixPackageIntent.TERM_MALWARE_SAMPLES
+            }
+
+  @property
+  def name(self):
+    return self.get_dictionary().get(self.type, None)
+
+  def to_dict(self, complete=True, inflated=False):
+    return {'identifier': self.convert_value(self.uuid),
+            'name': self.convert_value(self.name)}
+
+
+  
 
 class Event(ExtendedLogingInformations, Base):
+  
+  campaigns = None
+  courses_of_action = None
+  exploit_targets = relationship(ExploitTarget)
+  
+  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
+  indicators = relationship(Indicator)
+  incidents = None
+  threat_actors = None
+  ttps = relationship(TTP, uselist=False)
+  # TODO: related_pagages
+  related_packages = None
+  #reports are not in 1.1.6 -> custom one
+  reports = relationship('Report')
+  
+  # stix header elements
   title = Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False)
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
+  short_description = Column('short_description', Unicode(255, collation='utf8_unicode_ci'))
+  handling = relationship(Marking, secondary='rel_event_handling')
+  __header = None
+  
+  @property
+  def header(self):
+    if not self.__header:
+      self.__header = EventHeader(self)
+    return self.__header
+  
+  # custom attributes
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
   status_id = Column('status_id', Integer, default=0, nullable=False)
   risk_id = Column('risk_id', Integer, nullable=False, default=0)
@@ -80,20 +211,16 @@ class Event(ExtendedLogingInformations, Base):
   comments = relationship('Comment')
   last_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   first_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
-  handling = relationship(Marking, secondary='rel_event_handling')
+  last_publish_date = Column('last_publish_date', DateTime)
 
-  # TODO: Add administration of minimal objects -> checked before publishing
-
-  groups = relationship('EventGroupPermission')
-  # observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier', lazy='dynamic')
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
-  indicators = relationship(Indicator)
+  #ce1sus specific
   __tlp_obj = None
+  groups = relationship('EventGroupPermission')
   dbcode = Column('code', Integer, nullable=False, default=0)
   __bit_code = None
-  last_publish_date = Column('last_publish_date', DateTime)
-  reports = relationship('Report')
-  ttps = relationship(TTPs, uselist=False)
+  
+  
+
 
   @property
   def properties(self):

@@ -5,14 +5,15 @@
 
 Created on Oct 16, 2014
 """
+from ce1sus.helpers.bitdecoder import BitBase
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import BigInteger, Unicode, UnicodeText
+from sqlalchemy.types import BigInteger, Unicode, UnicodeText, Integer
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.common.session import Base
-from ce1sus.helpers.bitdecoder import BitBase
 from stix.common.vocabs import HighMediumLow
+from stix.common.vocabs import IncidentEffect as StixIncidentEffect
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -333,3 +334,34 @@ class MarkingStructure(ExtendedLogingInformations, Base):
   @terms_of_use.setter
   def terms_of_use(self, text):
     self.value = text
+
+class IntendedEffect(Base):
+
+  type = Column('type', Integer, default=None, nullable=False)
+
+  @classmethod
+  def get_dictionary(cls):
+    return {
+            0: StixIncidentEffect.TERM_BRAND_OR_IMAGE_DEGRADATION,
+            1: StixIncidentEffect.TERM_LOSS_OF_COMPETITIVE_ADVANTAGE,
+            2: StixIncidentEffect.TERM_LOSS_OF_COMPETITIVE_ADVANTAGE_ECONOMIC,
+            3: StixIncidentEffect.TERM_LOSS_OF_COMPETITIVE_ADVANTAGE_MILITARY,
+            4: StixIncidentEffect.TERM_LOSS_OF_COMPETITIVE_ADVANTAGE_POLITICAL,
+            5: StixIncidentEffect.TERM_DATA_BREACH_OR_COMPROMISE,
+            6: StixIncidentEffect.TERM_DEGRADATION_OF_SERVICE,
+            7: StixIncidentEffect.TERM_DESTRUCTION,
+            8: StixIncidentEffect.TERM_DISRUPTION_OF_SERVICE_OR_OPERATIONS,
+            9: StixIncidentEffect.TERM_FINANCIAL_LOSS,
+            10: StixIncidentEffect.TERM_LOSS_OF_CONFIDENTIAL_OR_PROPRIETARY_INFORMATION_OR_INTELLECTUAL_PROPERTY,
+            11: StixIncidentEffect.TERM_REGULATORY_COMPLIANCE_OR_LEGAL_IMPACT,
+            12: StixIncidentEffect.TERM_UNINTENDED_ACCESS,
+            13: StixIncidentEffect.TERM_USER_DATA_LOSS,
+            }
+
+  @property
+  def name(self):
+    return self.get_dictionary().get(self.type, None)
+
+  def to_dict(self, complete=True, inflated=False):
+    return {'identifier': self.convert_value(self.uuid),
+            'name': self.convert_value(self.name)}
