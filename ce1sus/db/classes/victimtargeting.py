@@ -108,6 +108,7 @@ class VictimTargeting(ExtendedLogingInformations, Base):
   # targeted_technical_details = None
 
   # custom ones related to ce1sus internals
+  ttp_id = Column(BigInteger, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)

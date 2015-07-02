@@ -14,6 +14,7 @@ from sqlalchemy.types import Unicode, UnicodeText, Integer, BigInteger, DateTime
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
 from ce1sus.db.classes.common import Properties, Marking, TLP
+from ce1sus.db.classes.ttp import RelatedTTP
 from ce1sus.db.common.session import Base
 from stix.common.vocabs import IndicatorType as StixIndicatorType
 
@@ -81,7 +82,7 @@ class KillChainPhase(Base):
 
 
 class Sighting(ExtendedLogingInformations, Base):
-  timestamp = Column('timestamp_precision', DateTime, default=datetime.utcnow())
+  timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   timestamp_precision = Column('timestamp_precision', Unicode(10, collation='utf8_unicode_ci'))
   description = Column('description', UnicodeText(collation='utf8_unicode_ci'))
   confidence = Column('confidence', Unicode(10, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
@@ -179,16 +180,17 @@ class Indicator(ExtendedLogingInformations, Base):
   observables = relationship('Observable', secondary='rel_indicator_observable')
   types = relationship('IndicatorType')
   confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
-  indicated_ttps = relationship('RelatedTTP', secondary='rel_indicator_related_ttps')
+
+  indicated_ttps = relationship(RelatedTTP, secondary='rel_indicator_related_ttps')
 
   # TODO: test_mechanism
   # test_mechanisms = relationship('TestMechanisms', secondary='rel_indicator_test_meachanism')
-  alternative_id = Column('confidence', Unicode(255, collation='utf8_unicode_ci'))
+  alternative_id = Column('alternative_id', Unicode(255, collation='utf8_unicode_ci'))
   # TODO: suggested_coas
   # suggested_coas = relationship('RelatedCOA', secondary='rel_indicator_related_coas')
   sightings = relationship('Sighting', secondary='rel_indicator_sightings')
   # TODO: composite_indicator_expression
-  composite_indicator_expression = None
+  # composite_indicator_expression = None
   # TODO: review this relationsship. It can be a reference to one defined in the package, hence these are only references to these
   killchains = relationship('KillChainPhase', secondary='rel_indicator_killchainphase')
   valid_time_positions = relationship('ValidTimePosition')
