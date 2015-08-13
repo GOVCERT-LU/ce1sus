@@ -117,12 +117,12 @@ class Event(Entity, Base):
 
   @property
   def modified_on(self):
-    return Entity.modified_on
+    super(Entity, self).modified_on
 
   @modified_on.setter
   def modified_on(self, value):
-
-    Entity.modified_on = value
+    self.last_seen = value
+    super(Entity, self).modified_on = value
 
   @property
   def status(self):
