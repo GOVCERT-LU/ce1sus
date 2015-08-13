@@ -82,6 +82,7 @@ For any questions feel free to ask
   * rtkit (0.6.0+)
   * gnupg (0.3.5+)
   * eml_parser
+  * lxml
 - mysql (5.1+)
 - nginx (1.4+)
 - uwsgi (1.2.3+, with python-2 support)

@@ -176,6 +176,8 @@ class Maintenance(object):
       else:
         raise MaintenanceException('Type {0} for handlers is unknown'.format(type_))
 
+      return uuid
+
         # TODO check if the required files are available
     else:
       raise MaintenanceException('Class {0}.{1} does not implement HandlerBase'.format(modulename, classname))
