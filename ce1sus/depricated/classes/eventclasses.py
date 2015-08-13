@@ -12,7 +12,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 
-from ce1sus.db.classes.common import Status, Risk, Analysis, TLP
+from ce1sus.db.classes.internal.common import Status, Risk, Analysis, TLP
 from ce1sus.db.common.session import BaseClass
 from ce1sus.depricated.brokers.basefoo import BASE
 from ce1sus.depricated.classes.definitionclasses import OldObjectDefinition, OldAttributeDefinition

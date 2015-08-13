@@ -10,7 +10,7 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
-from ce1sus.db.classes.relation import Relation
+from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
 
 
@@ -24,7 +24,7 @@ class RelationController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 

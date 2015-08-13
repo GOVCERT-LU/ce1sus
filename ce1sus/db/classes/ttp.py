@@ -3,8 +3,11 @@ from sqlalchemy.schema import Table, Column, ForeignKey
 from sqlalchemy.types import BigInteger, Integer, Unicode, UnicodeText
 
 from ce1sus.db.classes.basedbobject import ExtendedLogingInformations
+from ce1sus.db.classes.behavior import Behavior
 from ce1sus.db.classes.common import Marking, TLP, Properties, IntendedEffect
+from ce1sus.db.classes.exploittarget import RelatedExploitTargets
 from ce1sus.db.classes.identity import Identity
+from ce1sus.db.classes.victimtargeting import VictimTargeting
 from ce1sus.db.common.session import Base
 from stix.common import vocabs
 
@@ -95,12 +98,10 @@ class Infrastructure(ExtendedLogingInformations, Base):
   short_description = Column('short_description', Unicode(255, collation='utf8_unicode_ci'))
 
   # custom ones related to ce1sus internals
+  ttpresource_id = Column('ttpresource_id', BigInteger, ForeignKey('ttpresources.ttpresource_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   dbcode = Column('code', Integer, default=0, nullable=False, index=True)
   __bit_code = None
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
-
-  ttp = relationship('TTP', uselist=False)
-  ttp_id = Column('ttp_id', BigInteger, ForeignKey('ttps.ttp_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @property
   def tlp(self):
@@ -145,8 +146,7 @@ class ToolInformation(ExtendedLogingInformations, Base):
   __bit_code = None
   tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
 
-  ttp = relationship('TTP', uselist=False)
-  ttp_id = Column('ttp_id', BigInteger, ForeignKey('ttps.ttp_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  ttpresource_id = Column('ttpresource_id', BigInteger, ForeignKey('ttpresources.ttpresource_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   @property
   def tlp(self):
@@ -234,20 +234,20 @@ class TTP(ExtendedLogingInformations, Base):
   version = Column('version', Unicode(40, collation='utf8_unicode_ci'), default=u'1.0.0', nullable=False)
   handling = relationship(Marking, secondary='rel_ttp_handling')
 
-  behavior = relationship('Behavior', uselist=False)
+  behavior = relationship(Behavior, uselist=False)
   # TODO: related TTPs
   # related_ttps = None
 
   intended_effects = relationship(IntendedEffect, secondary='rel_ttp_intendedeffect')
-  resources = relationship('TTPResource', uselist=False)
-  victim_targeting = relationship('VictimTargeting')
+  resources = relationship(TTPResource, uselist=False)
+  victim_targeting = relationship(VictimTargeting)
 
   # TODO: in the xsd but not in the python-stix
   # killchainphases = relationship('KillChainPhase', secondary='rel_ttp_killchainphase')
   # killchains = relationship('Killchain', secondary='rel_ttp_killchain')
 
 
-  exploit_targets = relationship('RelatedExploitTargets', uselist=False)
+  exploit_targets = relationship(RelatedExploitTargets, uselist=False)
 
   # custom ones related to ce1sus internals
   dbcode = Column('code', Integer, default=0, nullable=False, index=True)
@@ -287,3 +287,8 @@ class TTP(ExtendedLogingInformations, Base):
       else:
         self.__bit_code = Properties(self.dbcode, self)
     return self.__bit_code
+
+class RelatedTTP(ExtendedLogingInformations, Base):
+  confidence = Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False)
+  relationship = Column('relationship', Unicode(255, collation='utf8_unicode_ci'))
+  ttp_id = Column('ttp_id', BigInteger, ForeignKey('ttps.ttp_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

@@ -14,10 +14,10 @@ from uuid import UUID
 from ce1sus.common.checks import is_event_owner
 from ce1sus.common.system import APP_REL
 from ce1sus.controllers.base import BaseController, ControllerNothingFoundException
-from ce1sus.controllers.common.assembler import Assembler
+from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
-from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.classes.internal.backend.processitem import ProcessType
 from ce1sus.views.web.common.decorators import require
 from ce1sus.views.web.common.base import BaseView
 
@@ -51,6 +51,7 @@ class UnkownMethodException(Ce1susAdapterException):
 class Ce1susAdapter(BaseController):
 
   def __init__(self, config, session=None):
+    super(BaseController, self).__init__(config, session)
     self.server_details = None
     self.proxies = {}
     self.verify_ssl = False

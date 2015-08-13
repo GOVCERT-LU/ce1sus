@@ -8,8 +8,9 @@ Created on Nov 6, 2014
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from ce1sus.db.classes.indicator import IndicatorType
-from ce1sus.db.classes.types import AttributeType
+from ce1sus.db.classes.internal.backend.types import AttributeType
+from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
+from ce1sus.db.classes.cstix.indicator.indicator import IndicatorType
 from ce1sus.db.common.broker import BrokerBase, IntegrityException, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -29,10 +30,10 @@ class IndicatorTypeBroker(BrokerBase):
 
   def get_type_by_name(self, name):
     try:
-      for key, value in IndicatorType.get_dictionary().iteritems():
+      for key, value in VocabIndicatorType.get_dictionary().iteritems():
         if value == name:
           type_ = IndicatorType()
-          type_.type = key
+          type_.type_id = key
           return type_
       raise NoResultFound
     except NoResultFound:
@@ -66,4 +67,4 @@ class AttributeTypeBroker(BrokerBase):
     if type_.table_id:
       BrokerBase.update(self, instance, commit)
     else:
-      raise IntegrityException('Cannot update the None element')
+      raise IntegrityException('Cannot the table values')

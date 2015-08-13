@@ -10,7 +10,7 @@ Created on Feb 21, 2014
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from ce1sus.db.classes.report import ReferenceDefinition, ReferenceHandler, Reference
+from ce1sus.db.classes.internal.report import ReferenceDefinition, ReferenceHandler, Reference
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
 
@@ -21,9 +21,6 @@ __license__ = 'GPL v3+'
 
 
 class ReferencesBroker(BrokerBase):
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     return Reference
@@ -37,7 +34,7 @@ class ReferencesBroker(BrokerBase):
 
   def get_handler_by_uuid(self, uuid):
     try:
-      result = self.session.query(ReferenceHandler).filter(ReferenceHandler.uuid == uuid).one()
+      result = self.session.query(ReferenceHandler).filter(getattr(ReferenceHandler, 'uuid') == uuid).one()
     except NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(uuid, self.__class__.__name__))
     except MultipleResultsFound:
@@ -49,7 +46,7 @@ class ReferencesBroker(BrokerBase):
 
   def get_handler_by_id(self, identifier):
     try:
-      result = self.session.query(ReferenceHandler).filter(ReferenceHandler.identifier == identifier).one()
+      result = self.session.query(ReferenceHandler).filter(getattr(ReferenceHandler, 'identifier') == identifier).one()
     except NoResultFound:
       raise NothingFoundException('Nothing found with ID :{0} in {1}'.format(identifier, self.__class__.__name__))
     except MultipleResultsFound:
@@ -61,9 +58,6 @@ class ReferencesBroker(BrokerBase):
 
 
 class ReferenceDefintionsBroker(BrokerBase):
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     return ReferenceDefinition

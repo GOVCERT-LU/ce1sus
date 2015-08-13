@@ -6,13 +6,14 @@ module providing support for the base handler
 Created: Aug, 2013
 """
 
-from os.path import dirname, abspath
-from uuid import uuid4
-
-from ce1sus.db.classes.observables import Observable
 from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
 from ce1sus.helpers.common.objects import get_class
 from datetime import datetime
+from os.path import dirname, abspath
+from uuid import uuid4
+
+from ce1sus.db.classes.ccybox.core.observables import Observable
+from ce1sus.db.classes.internal.common import Properties
 
 
 __author__ = 'Weber Jean-Paul'
@@ -54,7 +55,7 @@ class HandlerBase(object):
     self.is_multi_line = False
     self.is_rest_insert = True
     self.is_owner = False
-
+    
   @property
   def reference_definitions(self):
     return self.attribute_definitions
@@ -180,6 +181,38 @@ class HandlerBase(object):
                                                        user,
                                                        json))
 
+  def set_base(self, instance, json, user, parent):
+    instance.properties = Properties('0', instance)
+
+    tlp = json.get('tlp', None)
+    if tlp:
+      tlp = tlp.title()
+    else:
+      tlp = parent.tlp
+    instance.tlp = tlp
+
+    instance.creator_group_id = user.group.identifier
+    instance.creator_group = user.group
+    instance.creator_id = user.identifier
+    instance.creator = user
+    instance.modifier = user
+    instance.modifier_id = user.identifier
+    instance.created_at = datetime.utcnow()
+    instance.modified_on = datetime.utcnow()
+    instance.properties.is_rest_instert = self.is_rest_insert
+    instance.properties.is_web_insert = not self.is_rest_insert
+    shared = json.get('properties', {}).get('shared', False)
+
+    if shared:
+      instance.properties.is_shareable = True
+
+    if self.is_owner:
+      instance.properties.is_validated = True
+    else:
+      instance.properties.is_proposal = True
+
+
+
   def create_attribute(self, obj, definition, user, json, set_parent=True):
     """
     Creates the attribute
@@ -195,7 +228,9 @@ class HandlerBase(object):
 
     :returns: Attribute
     """
-    attribute = get_class('ce1sus.db.classes.attribute', 'Attribute')()
+
+    attribute = get_class('ce1sus.db.classes.internal.attributes.attribute', 'Attribute')()
+    self.set_base(attribute, json, user, obj)
 
     # Note first the definition has to be specified else the value cannot be assigned
     attribute.definition = definition
@@ -203,85 +238,47 @@ class HandlerBase(object):
     # Note second the object has to be specified
     attribute.object = obj
     attribute.object_id = obj.identifier
-    # TODO create default value if value was not set for IOC and share
 
-    # set remaining stuff
-    attribute.populate(json)
     # set definition id
-    # definition = self.get_attriute_definition_by_uuid(attribute.def_uuid)
-    # attribute.definition = definition
-    attribute.definition_id = definition.identifier
-
+    attribute.definition = definition
+    condition_uuid = json.get('condition_id', None)
     # set condition id
-    condition = self.get_condition_by_uuid(attribute.cond_uuid)
-    attribute.condition = condition
-    attribute.condition_id = condition.identifier
-    # TODO fix this -> should take into account the ones from json
-    attribute.owner_group_id = user.group.identifier
-    attribute.owner_group = user.group
-    attribute.creator_group_id = user.group.identifier
-    attribute.creator_group = user.group
-    attribute.modifier_group_id = user.group.identifier
-    attribute.modifier_group = user.group
-    attribute.originating_group_id = user.group.identifier
-    attribute.originating_group = user.group
-    attribute.creator_id = user.identifier
-    attribute.modifier = user
-    attribute.modifier_id = user.identifier
-    attribute.creator = user
-    self.set_provenance(attribute)
+    if condition_uuid:
+      condition = self.get_condition_by_uuid(condition_uuid)
+      attribute.condition = condition
+      attribute.condition_id = condition.identifier
+
+    attribute.is_ioc = json.get('ioc', 0)
+    attribute.value = json.get('value', None)
+    attribute.tlp = json.get('tlp', 'Amber').title()
 
     return attribute
 
   def create_reference(self, report, definition, user, json):
-    reference = get_class('ce1sus.db.classes.report', 'Reference')()
+    reference = get_class('ce1sus.db.classes.internal.report', 'Reference')()
+    self.set_base(reference, json, user, report)
     # Note first the definition has to be specified else the value cannot be assigned
-    reference.uuid = uuid4()
     reference.definition = definition
 
     # Note second the object has to be specified
     reference.report = report
-    reference.report_id = report.identifier
-    # TODO create default value if value was not set for IOC and share
 
     # set remaining stuff
-    reference.populate(json)
+    reference.value = json.get('value', None)
 
-    # set the definition id as in the definition as it might get overwritten
-    reference.definition_id = definition.identifier
-    self.set_provenance(reference)
     return reference
 
   def create_object(self, obsevable, definition, user, json, has_parent_observable=True):
     # TODO recreate object to new setup
-    obj = get_class('ce1sus.db.classes.object', 'Object')()
+    obj = get_class('ce1sus.db.classes.internal.object', 'Object')()
+    self.set_base(obj, json, user, obsevable)
 
-    obj.identifier = None
-    obj.populate(json)
     obj.definition = definition
-    obj.definition_id = definition.identifier
 
     obj.observable = obsevable
-    obj.observable_id = obsevable.identifier
+
     if has_parent_observable:
       obj.parent = obsevable
-      obj.parent_id = obsevable.identifier
-    # TODO create default value if value was not set for IOC and share
-    self.set_provenance(obj)
-
-    # TODO find a better way
-    obj.owner_group_id = user.group.identifier
-    obj.owner_group = user.group
-    obj.creator_group_id = user.group.identifier
-    obj.creator_group = user.group
-    obj.modifier_group_id = user.group.identifier
-    obj.modifier_group = user.group
-    obj.originating_group_id = user.group.identifier
-    obj.originating_group = user.group
-    obj.creator_id = user.identifier
-    obj.modifier = user
-    obj.modifier_id = user.identifier
-    obj.creator = user
 
     return obj
 
@@ -300,46 +297,21 @@ class HandlerBase(object):
   def require_js(self):
     raise HandlerException(u'require_js is not defined for {0}'.format(self.__class__.__name__))
 
-  def set_provenance(self, instance):
-    if self.is_owner:
-      instance.properties.is_validated = True
-    instance.properties.is_rest_instert = self.is_rest_insert
-    instance.properties.is_web_insert = not self.is_rest_insert
-
   def get_classname(self):
     return self.__class__.__name__
 
   def create_observable(self, attribute):
     observable = Observable()
-
+    self.set_base(observable, {}, attribute.creator, attribute)
     # set new uuid for the parent
 
-    # TODO change this to be more accurate
-    observable.created_at = attribute.created_at
-    observable.modified_on = attribute.modified_on
-    observable.creator = attribute.creator
-    observable.modifier = attribute.modifier
-    observable.creator_id = attribute.creator_id
-    observable.modifier_id = attribute.modifier_id
-    observable.originating_group = attribute.originating_group
-    observable.originating_group_id = attribute.originating_group_id
-    observable.owner_group_id = attribute.creator.group.identifier
-    observable.owner_group = attribute.creator.group
-    observable.creator_group = attribute.originating_group
-    observable.creator_group_id = attribute.originating_group_id
-
     event = attribute.object.event
-    observable.parent_id = event.identifier
-    observable.parent = event
+    observable.event = event
 
     observable.created_at = datetime.utcnow()
     observable.modified_on = datetime.utcnow()
     observable.description = 'Auto generated'
     observable.uuid = uuid4()
-
-    self.set_provenance(observable)
-
-    if attribute.properties.is_shareable:
-      observable.properties.is_shareable = True
+    observable.properties = attribute.properties
 
     return observable

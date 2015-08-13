@@ -8,7 +8,7 @@ Created on Jul 9, 2013
 import sqlalchemy.orm
 from sqlalchemy.sql.expression import and_
 
-from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -20,11 +20,6 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class ComposedObservableBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     """
@@ -35,7 +30,7 @@ class ComposedObservableBroker(BrokerBase):
   def get_observable_by_id_and_parent_id(self, identifier, parent_id):
     try:
             # Returns an observable belonging to
-      result = self.session.query(Observable).join(ObservableComposition.observables).filter(and_(Observable.identifier == identifier, ObservableComposition.parent_id == parent_id)).one()
+      result = self.session.query(Observable).join(ObservableComposition.observables).filter(and_(getattr(Observable, 'identifier') == identifier, ObservableComposition.parent_id == parent_id)).one()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException('No observable found with ID :{0} in composed observable with ID {1}'.format(identifier, parent_id))
     except sqlalchemy.orm.exc.MultipleResultsFound:
@@ -57,7 +52,7 @@ class ComposedObservableBroker(BrokerBase):
   def get_by_observable_id(self, identifier):
     try:
       # TODO find a solution with one
-      result = self.session.query(ObservableComposition).join(ObservableComposition.observables).filter(Observable.identifier == identifier).all()
+      result = self.session.query(ObservableComposition).join(ObservableComposition.observables).filter(getattr(Observable, 'identifier') == identifier).all()
       if result:
         return result[0]
       else:

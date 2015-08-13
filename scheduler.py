@@ -17,8 +17,8 @@ from ce1sus.controllers.base import ControllerNothingFoundException, ControllerE
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.permissions.group import GroupBroker
-from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.db.classes.report import Report, Reference
+from ce1sus.db.classes.internal.backend.processitem import ProcessType
+from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.db.common.session import SessionManager
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException

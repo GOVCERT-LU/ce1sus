@@ -49,6 +49,7 @@ app.controller("mailEditController", function($scope, Restangular, messages, $ro
   };
   
   $scope.submitMail = function(){
+    $scope.mail.modified_on = new Date().getTime();
     $scope.mail.put().then(function (maildata) {
       if (maildata) {
         $scope.mail = maildata;

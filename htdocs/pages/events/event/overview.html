@@ -1,5 +1,6 @@
 
 <legend>Details</legend>
+
 <div class="row">
   <div class="col-xs-12 col-sm-12" style="text-align: left">
     <div class="btn-group" style="padding-bottom: 2px;">
@@ -30,7 +31,7 @@
             <label> Identifier: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">{{event.identifier}}</div>
+            <div style="text-align: left;">{{event.id_}}</div>
           </div>
         </div>
         <div class="row">
@@ -39,34 +40,21 @@
             <label> Title: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">{{event.title}}</div>
+            <div style="text-align: left;">{{event.stix_header.title}}</div>
           </div>
         </div>
         <div class="row">
           <div class="col-xs-3"
             style="text-align: right; padding: 3px; padding-left: 15px">
-            <label> Creator Group: </label>
+            <label> Information Sources: </label>
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">{{event.creator_group.name}}</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-3"
-            style="text-align: right; padding: 3px; padding-left: 15px">
-            <label> Originating Group: </label>
-          </div>
-          <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">{{event.originating_group.name}}</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-3"
-            style="text-align: right; padding: 3px; padding-left: 15px">
-            <label> Published: </label>
-          </div>
-          <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
-            <div style="text-align: left;">{{event.published}}</div>
+            <div style="text-align: left;">
+              {{event.stix_header.information_source.identity.name}} - {{getRolesName(event.stix_header.information_source.roles)}}
+              <div ng-repeat="informationSource in event.stix_header.information_source.contributing_sources">
+                <br>{{information_source.identity.name}} - {{information_source.roles}}
+              </div>
+            </div>
           </div>
         </div>
         <div class="row">
@@ -76,7 +64,17 @@
           </div>
           <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
             <div style="text-align: left; overflow: auto; height: 125px">
-              {{event.description}}</div>
+              {{event.event.stix_header.description.value}}</div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-xs-3"
+            style="text-align: right; padding: 3px; padding-left: 15px">
+            <label> Published: </label>
+          </div>
+          <div class="col-xs-9" style="padding: 3px; padding-left: 15px">
+            <div style="text-align: left;">{{event.published}}</div>
           </div>
         </div>
         <div class="row">

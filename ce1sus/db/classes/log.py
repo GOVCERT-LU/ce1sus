@@ -7,8 +7,9 @@ Created on Apr 7, 2015
 """
 
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import BigInteger, UnicodeText, Unicode, Boolean
+from sqlalchemy.types import Boolean
 
+from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType, UnicodeTextType, UnicodeType
 from ce1sus.db.common.session import Base
 
 
@@ -18,22 +19,22 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class ErrorMispAttribute(Base):
+class ErrorMispAttribute(BaseObject, Base):
 
-  object_id = Column('object_id', BigInteger, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'))
+  object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'))
 
-  value = Column('value', UnicodeText(collation='utf8_unicode_ci'))
-  category = Column('category', Unicode(255, collation='utf8_unicode_ci'))
-  type_ = Column('type', Unicode(255, collation='utf8_unicode_ci'))
-  observable_id = Column('observable_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'))
+  value = Column('value', UnicodeTextType())
+  category = Column('category', UnicodeType(255))
+  type_ = Column('type', UnicodeType(255))
+  observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'))
 
-  misp_id = Column('misp_id', Unicode(255, collation='utf8_unicode_ci'))
+  misp_id = Column('misp_id', UnicodeType(255))
   is_ioc = Column('is_ioc', Boolean)
   share = Column('share', Boolean)
 
-  event_id = Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'))
-  message = Column('message', UnicodeText(collation='utf8_unicode_ci'))
-  orig_uuid = Column('orig_uuid', Unicode(45, collation='utf8_unicode_ci'))
+  event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'))
+  message = Column('message', UnicodeTextType())
+  orig_uuid = Column('orig_uuid', UnicodeType(45))
 
   def validate(self):
     return True

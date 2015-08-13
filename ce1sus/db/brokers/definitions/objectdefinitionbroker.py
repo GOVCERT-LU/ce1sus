@@ -10,7 +10,7 @@ import sqlalchemy.orm.exc
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.definitionbase import DefinitionBrokerBase
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.db.classes.definitions import ObjectDefinition, AttributeDefinition
+from ce1sus.db.classes.internal.definitions import ObjectDefinition, AttributeDefinition
 from ce1sus.db.common.broker import NothingFoundException, BrokerException, IntegrityException
 
 
@@ -24,7 +24,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
   """This is the interface between python an the database"""
 
   def __init__(self, session):
-    DefinitionBrokerBase.__init__(self, session)
+    super(DefinitionBrokerBase, self).__init__(session)
     self.handler_broker = AttributeHandlerBroker(session)
     self.attribute_broker = AttributeDefinitionBroker(session)
 
@@ -49,12 +49,12 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
     :returns: list of AttributeDefinitions
     """
     try:
-      attributes = self.session.query(AttributeDefinition).join(ObjectDefinition.attributes).filter(ObjectDefinition.identifier == identifier).order_by(AttributeDefinition.name.asc()).all()
+      attributes = self.session.query(AttributeDefinition).join(ObjectDefinition.attributes).filter(getattr(ObjectDefinition, 'identifier') == identifier).order_by(AttributeDefinition.name.asc()).all()
       if not belong_in:
         attribute_ids = list()
         for attribute in attributes:
           attribute_ids.append(attribute.identifier)
-        attributes = self.session.query(AttributeDefinition).filter(~AttributeDefinition.identifier.in_(attribute_ids)).order_by(AttributeDefinition.name.asc()).all()
+        attributes = self.session.query(AttributeDefinition).filter(~getattr(AttributeDefinition, 'identifier').in_(attribute_ids)).order_by(AttributeDefinition.name.asc()).all()
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found for ID: {0}',
                                   format(identifier))
@@ -86,7 +86,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
     :type attr_id: Integer
     """
     try:
-      obj = self.session.query(ObjectDefinition).filter(ObjectDefinition.identifier == obj_id).one()
+      obj = self.session.query(ObjectDefinition).filter(getattr(ObjectDefinition, 'identifier') == obj_id).one()
       attribute = self.attribute_broker.get_by_id(attr_id)
       obj.add_attribute(attribute)
       additional_attributes_chksums = attribute.handler.get_additinal_attribute_chksums()
@@ -113,7 +113,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
     :type attr_id: Integer
     """
     try:
-      obj = self.session.query(ObjectDefinition).filter(ObjectDefinition.identifier == obj_id).one()
+      obj = self.session.query(ObjectDefinition).filter(getattr(ObjectDefinition, 'identifier') == obj_id).one()
       attribute = self.attribute_broker.get_by_id(attr_id)
       # check if chksum is not required
       required_chksums = self.attribute_broker.findallchksums(obj)

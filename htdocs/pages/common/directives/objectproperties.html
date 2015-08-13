@@ -9,7 +9,7 @@
         <b>Shared</b>
       </div>
       <div class="col-md-9">
-        <input class="form-control" type="checkbox" name="shared" value="shared" ng-model="item.properties.shared" />
+        <input class="form-control" type="checkbox" name="shared" value="shared" ng-model="item.properties.shared" ng-change="setModified(item.properties)"/>
       </div>
     </div>
     <div class="row" ng-if="permissions.validate && type!='add'">
@@ -17,7 +17,7 @@
         <b>Validated</b>
       </div>
       <div class="col-md-9">
-        <input class="form-control" type="checkbox" name="validated" value="validated"  ng-model="item.properties.validated" />
+        <input class="form-control" type="checkbox" name="validated" value="validated"  ng-model="item.properties.validated" ng-change="setModified(item.properties)"/>
       </div>
     </div>
   </div>

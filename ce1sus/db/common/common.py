@@ -83,7 +83,7 @@ class Connector(object):
     raise ConnectorException('Not implemented in {0}'.format(self.__class__.__name__))
 
   @abstractmethod
-  def get_direct_session(self):
+  def get_direct_session(self, instanciated=True):
     """
     Returns the session from the engine
     """

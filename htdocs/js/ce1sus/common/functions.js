@@ -172,3 +172,13 @@ function disableButton(item) {
     return false;
   }
 }
+
+function setModified(item) {
+  if (item) {
+    if (typeof(item.modified_set) == 'undefined') {
+      item.modified_on = new Date().getTime();
+      item.modified_set = true;
+    }
+  }
+  
+}

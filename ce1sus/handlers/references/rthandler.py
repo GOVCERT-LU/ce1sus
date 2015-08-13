@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class RTHandler(GenericHandler):
   """Handler for handling tickets"""
   def __init__(self):
-    GenericHandler.__init__(self)
+    super(GenericHandler, self).__init__()
     url = self.get_config_value('rt_url', None)
     usr = self.get_config_value('rt_user', None)
     pwd = self.get_config_value('rt_password', None)

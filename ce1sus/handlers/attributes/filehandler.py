@@ -17,15 +17,14 @@ import types
 import zipfile
 
 from ce1sus.common.checks import can_user_download
-from ce1sus.db.classes.common import ValueTable
+from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.helpers.common.config import ConfigException
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
-from ce1sus.db.classes.object import RelatedObject
+from ce1sus.db.classes.internal.object import RelatedObject
 import magic
-
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'

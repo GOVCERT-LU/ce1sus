@@ -7,7 +7,7 @@ Created on Jul 4, 2013
 """
 import sqlalchemy.orm.exc
 
-from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 

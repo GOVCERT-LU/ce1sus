@@ -19,9 +19,6 @@ __license__ = 'GPL v3+'
 class DefinitionBrokerBase(BrokerBase):
   """This is the interface between python an the database"""
 
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
-
   def get_defintion_by_chksum(self, chksum):
     """
     Returns the attribute definition object with the given name

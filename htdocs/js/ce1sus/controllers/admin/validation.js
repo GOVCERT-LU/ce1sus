@@ -25,7 +25,7 @@ app.controller("adminValidationController", function($scope, Restangular,message
       var url = '/admin/validation/event/'+event.identifier;
       $scope.openedEvents.push({
         icon: '',
-        title: event.title,
+        title: event.stix_header.title,
         section: 'main.layout.admin.validation.event',
         reload: false,
         close: true,

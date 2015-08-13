@@ -10,8 +10,7 @@ from ce1sus.controllers.base import BaseController, ControllerException, Control
 from ce1sus.db.brokers.event.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
-from ce1sus.db.classes.event import EventGroupPermission
-from ce1sus.db.classes.group import EventPermissions
+from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from ce1sus.controllers.events.relations import RelationController
@@ -27,7 +26,7 @@ class EventController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.event_broker = self.broker_factory(EventBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
@@ -49,7 +48,7 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_event(self, user, event, mkrelations=True, commit=True):
+  def insert_event(self, event, mkrelations=True, commit=True):
     """
     inserts an event
 
@@ -60,32 +59,9 @@ class EventController(BaseController):
 
     :returns: Event, Boolean
     """
-    self.logger.debug('User {0} inserts a new event'.format(user.username))
+
     try:
       # the the creator
-
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event, user, user.group, True)
-      if commit:
-        # do this only if there is a commit
-        # set the own user group to the groups of the event and fill permissions
-        permissions = self.get_event_user_permissions(event, user)
-        group = self.group_broker.get_by_id(user.group.identifier)
-
-        event_permission = EventGroupPermission()
-        event_permission.permissions = permissions
-        event_permission.group = group
-        self.set_extended_logging(event_permission, user, user.group, True)
-
-        found = False
-        for group in event.groups:
-          if event_permission.group.equals(group.group):
-            found = True
-            group.permissions = event_permission.permissions
-            break
-        if not found:
-          event.groups.append(event_permission)
-
       # generate relations if needed!
 
       flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
@@ -97,23 +73,20 @@ class EventController(BaseController):
       self.event_broker.do_commit(commit)
 
       return event
+
     except ValidationException:
       message = ObjectValidator.getFirstValidationError(event)
-      raise ControllerException(u'Could not update object definition due to: {0}'.format(message))
+      raise ControllerException(u'Could not update event due to: {0}'.format(message))
     except IntegrityException as error:
       self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an event with uuid "{1}" but the uuid already exists'.format(user.username, event.uuid))
       raise ControllerIntegrityException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_event(self, user, event, mkrelations=True, commit=True):
-    self.logger.debug('User {0} updates a event {1}'.format(user.username, event.identifier))
+  def update_event(self, event, mkrelations=True, commit=True):
     try:
       # the the creator
 
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event, user, user.group, False)
       # TODO relations on update
 
       self.event_broker.update(event, False)
@@ -189,7 +162,7 @@ class EventController(BaseController):
 
   def __change_owner(self, instance, user, group):
     instance.creator_group = group
-    self.set_extended_logging(instance, user, user.group, False)
+    self.set_extended_logging(instance, user, False)
 
   def __change_owner_object(self, obj, user, group):
     self.__change_owner(obj, user, group)
@@ -240,6 +213,7 @@ class EventController(BaseController):
           return permissions
         else:
           return None
+
     except NothingFoundException as error:
       # The group was not associated to the event
       self.logger.debug(error)
@@ -313,7 +287,7 @@ class EventController(BaseController):
   def insert_comment(self, user, comment):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(comment, user, user.group, True)
+      self.set_extended_logging(comment, user, True)
       self.comment_broker.insert(comment, True)
     except BrokerException as error:
       raise ControllerException(error)
@@ -321,7 +295,7 @@ class EventController(BaseController):
   def update_comment(self, user, comment):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(comment, user, user.group, False)
+      self.set_extended_logging(comment, user, False)
       self.comment_broker.update(comment, True)
     except BrokerException as error:
       raise ControllerException(error)
@@ -350,12 +324,12 @@ class EventController(BaseController):
 
   def __validate_instance(self, instance, user):
     instance.properties.is_validated = True
-    self.set_extended_logging(instance, user, user.group, False)
+    self.set_extended_logging(instance, user, False)
 
   def validate_event(self, event, user):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event, user, user.group, False)
+      self.set_extended_logging(event, user, False)
       self.__validate_instance(event, user)
       for observable in event.observables:
         self.__validate_observable(observable, user)
@@ -412,7 +386,7 @@ class EventController(BaseController):
   def insert_event_group_permission(self, user, event_group_permission, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event_group_permission, user, user.group, True)
+      self.set_extended_logging(event_group_permission, user, True)
       self.event_broker.insert_group_permission(event_group_permission, commit)
     except BrokerException as error:
       raise ControllerException(error)
@@ -420,7 +394,7 @@ class EventController(BaseController):
   def update_event_group_permissions(self, user, event_group_permission, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event_group_permission, user, user.group, False)
+      self.set_extended_logging(event_group_permission, user, False)
       self.event_broker.update_group_permission(event_group_permission, commit)
     except BrokerException as error:
       raise ControllerException(error)

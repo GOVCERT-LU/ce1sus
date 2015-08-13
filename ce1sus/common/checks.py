@@ -5,7 +5,7 @@
 
 Created on Jan 30, 2014
 """
-from ce1sus.db.classes.common import TLP
+from ce1sus.db.classes.internal.common import TLP
 
 
 __author__ = 'Weber Jean-Paul'
@@ -21,7 +21,7 @@ def is_user_priviledged(user):
 
 
 def is_event_viewable_group(event, group):
-  if group.identifier == event.owner_group_id:
+  if group.identifier == event.creator_group_id:
     return True
   else:
     tlp_lvl = get_max_tlp(group)
@@ -53,33 +53,39 @@ def is_event_viewable_user(event, user):
       return False
 
 
-def is_object_viewable(instance, event_permissions, user, cache=None):
-  if instance.__class__.__name__ == 'ObservableComposition':
-    # always visible as the composed observable does not have a tlp level
+def is_object_viewable(instance, cache_object):
+  if cache_object.owner:
     return True
-  elif instance.properties.is_validated and instance.properties.is_shareable:
-    # free for all
-    return True
-  elif event_permissions:
-    # check if user can validate the object
-    if not instance.properties.is_validated and event_permissions.can_validate:
-      return True
 
-  if user and user.group:
-    user_group = user.group
-    if user_group.identifier in [instance.owner_group_id, instance.creator_group_id, instance.originating_group_id]:
-      # check if the user owns submitted or created the object then return True
-      return True
-    else:
-      # check if tlp matches
-      user_tlp = get_max_tlp(user_group)
-      if instance.tlp_level_id >= user_tlp:
+  if hasattr(instance, 'properties') and hasattr(instance, 'tlp_level_id'):
+    if instance.properties.is_validated and instance.properties.is_shareable:
+      # only the items are shown which are supposed to be shown
+      return not instance.properties.marked_for_deletion
+
+    elif cache_object.event_permissions:
+      # check if user can validate the object
+      if not instance.properties.is_validated and cache_object.event_permissions.can_validate:
         return True
 
-  return False
+    if cache_object.user and cache_object.user.group:
+      user_group = cache_object.user.group
+      if user_group.identifier == instance.creator_group_id:
+        # check if the user owns submitted or created the object then return True
+        return True
+      else:
+        # check if tlp matches
+        user_tlp = get_max_tlp(user_group)
+        if instance.tlp_level_id >= user_tlp:
+          return True
 
+    return False
+  else:
+    return True
 
 def is_event_owner(event, user):
+  return is_instance_owner(event, user)
+
+def is_instance_owner(instance, user):
   """
   Returns true if the event is created by the user
 
@@ -90,11 +96,11 @@ def is_event_owner(event, user):
 
   :returns: Boolean
   """
-  if event and user:
+  if instance and user:
     if is_user_priviledged(user):
       return True
     else:
-      if user.group_id == event.owner_group_id:
+      if user.group_id == instance.creator_group_id:
         return True
       else:
         return False
@@ -125,6 +131,17 @@ def get_item_view_message(result, event_id, item_id, username, permission):
   else:
     return 'User "{1}" is not allowed perform action "{2}" on event "{0}" for item {3}'.format(event_id, username, permission, item_id)
 
+
+def can_user_update(instance, user, event_permissions, cache=None):
+  if is_instance_owner(instance, user):
+    return True
+  elif is_user_priviledged(user):
+    return True
+  else:
+    if event_permissions:
+      return event_permissions.can_modify
+    else:
+      return False
 
 def can_user_download(event, user, cache=None):
   """

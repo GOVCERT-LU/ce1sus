@@ -1,3 +1,5 @@
+
+
 <form name="addObservableObjectForm" class="form-horizontal" role="form" novalidate>
   <div class="row">
     <label class="col-lg-3"><b>Definition *</b></label>
@@ -6,16 +8,6 @@
         ng-options="definition.identifier as definition.name for definition in definitions"
         ng-model="observableobject.definition_id">
         <option style="display: none" value="">Select a definition</option>
-      </select>
-    </div>
-  </div>
-  <div class="row" ng-if="child">
-    <label class="col-lg-3"><b>Relation</b></label>
-    <div class="col-lg-9">
-      <select name="relation" class="form-control"
-        ng-options="relation.name as relation.name for relation in relations"
-        ng-model="observableobject.relation">
-        <option style="display: none" value="">Select a relation</option>
       </select>
     </div>
   </div>

@@ -20,9 +20,6 @@ __license__ = 'GPL v3+'
 class GroupController(BaseController):
   """Controller handling all the requests for groups"""
 
-  def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
-
   def get_group_by_uuid(self, uuid):
     try:
       return self.group_broker.get_by_uuid(uuid)
@@ -65,9 +62,9 @@ class GroupController(BaseController):
     except (BrokerException) as error:
       raise ControllerException(error)
 
-  def update_group(self, group):
+  def update_group(self, group, commit=True):
     try:
-      self.group_broker.update(group)
+      self.group_broker.update(group, commit)
       return group
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(group)

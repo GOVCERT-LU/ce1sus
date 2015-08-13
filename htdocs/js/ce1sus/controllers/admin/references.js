@@ -12,7 +12,7 @@ app.controller("referenceController", function($scope, Restangular, messages,
 
 });
 
-app.controller('referenceDetailController', function($scope, $routeSegment,$reference, $log) {
+app.controller('referenceDetailController', function($scope, $routeSegment,$reference, $log, messages, $location) {
   
   
   $scope.reference = $reference;
@@ -36,6 +36,31 @@ app.controller('referenceDetailController', function($scope, $routeSegment,$refe
         }, $log);
       }
     });
+  
+  $scope.removeReference = function(){
+    //remove user from user list
+    $scope.reference.remove().then(function (data) {
+      if (data) {
+        //remove the selected user and then go to the first one in case it exists
+        var index = 0;
+        angular.forEach($scope.references, function(entry) {
+          if (entry.identifier === $scope.reference.identifier){
+            $scope.references.splice(index, 1);
+            if ($scope.references.length > 0) {
+              $location.path("/admin/reference/"+ $scope.references[0].identifier);
+            } else {
+              $location.path("/admin/reference");
+            }
+          }
+          
+          index++;
+        }, $log);
+        messages.setMessage({'type':'success','message':'Reference sucessfully removed'});
+      }
+    }, function (response) {
+      handleError(response, messages);
+    });
+  };
 });
 
 app.controller("referenceAddController", function($scope, Restangular, messages, $routeSegment,$location, $log) {
@@ -58,9 +83,9 @@ app.controller("referenceAddController", function($scope, Restangular, messages,
   $scope.submitReference = function(){
     Restangular.all("referencedefinition").post($scope.reference).then(function (reference) {
       
-      if (data) {
-        $scope.references.push(data);
-        $location.path("/admin/reference/"+ data.identifier);
+      if (reference) {
+        $scope.references.push(reference);
+        $location.path("/admin/reference/"+ reference.identifier);
       }
       messages.setMessage({'type':'success','message':'Reference sucessfully added'});
       
@@ -101,19 +126,17 @@ app.controller("referenceEditController", function($scope, Restangular, messages
   };
   
   $scope.submitReference = function(){
-    $scope.reference.put($scope.reference).then(function (reference) {
+    $scope.reference.modified_on = new Date().getTime();
+    $scope.reference.put().then(function (reference) {
       
-      if (data) {
-        
-        
-        $scope.reference = data;
+      if (reference) {
         
         angular.forEach($scope.references, function(entry) {
-          if (entry.identifier == data.identifier) {
-            entry.name = data.name;
+          if (entry.identifier == reference.identifier) {
+            entry.name = reference.name;
           }
         }, $log);
-        $location.path("/admin/reference/"+ data.identifier);
+        $scope.reference = reference;
       }
       messages.setMessage({'type':'success','message':'Reference sucessfully added'});
       

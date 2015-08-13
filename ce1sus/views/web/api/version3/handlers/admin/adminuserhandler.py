@@ -10,6 +10,7 @@ import random
 from ce1sus.controllers.admin.mails import MailController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
@@ -27,7 +28,7 @@ class AdminUserHandler(RestBaseHandler):
   PASSWORD_MASK = '*******************'
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.user_controller = self.controller_factory(UserController)
     self.mail_controller = self.controller_factory(MailController)
 
@@ -38,9 +39,8 @@ class AdminUserHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
       json = args.get('json')
+      cache_object = self.get_cache_object(args)
       if method == 'GET':
 
         if len(path) > 0:
@@ -48,7 +48,7 @@ class AdminUserHandler(RestBaseHandler):
           uuid = path.pop(0)
 
           user = self.user_controller.get_user_by_uuid(uuid)
-          if details:
+          if cache_object.details:
             password = '*******************'
             if is_plugin_available('ldap', self.config):
               ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
@@ -58,39 +58,40 @@ class AdminUserHandler(RestBaseHandler):
 
             user.password = password
 
-            return user.to_dict(details, inflated)
+            return user.to_dict(cache_object)
           else:
-            return user.to_dict(details, inflated)
+            return user.to_dict(cache_object)
         else:
           # else return all
           users = self.user_controller.get_all_users()
           result = list()
           for user in users:
-            if details:
+            if cache_object.details:
               password = AdminUserHandler.PASSWORD_MASK
               if is_plugin_available('ldap', self.config):
                 ldap_password_identifier = get_plugin_function('ldap', 'get_ldap_pwd_identifier', self.config, 'internal_plugin')()
                 password = ldap_password_identifier
               user.password = password
-              result.append(user.to_dict(details, inflated))
+              result.append(user.to_dict(cache_object))
             else:
-              result.append(user.to_dict(details, inflated))
+              result.append(user.to_dict(cache_object))
           return result
       elif method == 'POST':
         # Add new user
-        user = self.assembler.assemble_user(json)
+
+        user = self.assembler.assemble(json, User, None, cache_object)
         user.password = hashSHA1(user.plain_password, user.username)
         self.user_controller.insert_user(user)
-        return user.to_dict(details, inflated)
+        return user.to_dict(cache_object)
       elif method == 'PUT':
         # update user
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           user = self.user_controller.get_user_by_uuid(uuid)
-          user = self.assembler.update_user(user, json)
+          self.updater.update(user, json, cache_object)
           self.user_controller.update_user(user)
-          return user.to_dict(details, inflated)
+          return user.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
 

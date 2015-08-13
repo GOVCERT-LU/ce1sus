@@ -10,7 +10,7 @@ app.controller("conditionController", function($scope, Restangular, messages,
 
 });
 
-app.controller('conditionDetailController', function($scope, $routeSegment,$condition, $log, messages) {
+app.controller('conditionDetailController', function($scope, $routeSegment,$condition, $log, messages, $location) {
   
   $scope.condition = $condition;
 
@@ -31,7 +31,7 @@ app.controller('conditionDetailController', function($scope, $routeSegment,$cond
         angular.forEach($scope.conditions, function(entry) {
           if (entry.identifier === $scope.condition.identifier){
             $scope.conditions.splice(index, 1);
-            if ($scope.condition.length > 0) {
+            if ($scope.conditions.length > 0) {
               $location.path("/admin/condition/"+ $scope.conditions[0].identifier);
             } else {
               $location.path("/admin/condition");
@@ -45,7 +45,6 @@ app.controller('conditionDetailController', function($scope, $routeSegment,$cond
     }, function (response) {
       handleError(response, messages);
     });
-    $scope.$hide();
   };
 });
 
@@ -73,6 +72,7 @@ app.controller("conditionEditController", function($scope, Restangular, messages
   };
   
   $scope.submitCondition = function(){
+    $scope.condition.modified_on = new Date().getTime();
     $scope.condition.put().then(function (conditiondata) {
       if (conditiondata) {
         $scope.condition = conditiondata;
@@ -109,8 +109,8 @@ app.controller("conditionAddController",function($scope, Restangular, messages, 
   };
   
   $scope.submitCondition = function(){
-    Restangular.all("condition").post($scope.condition).then(function (conditiondata) {
-      if (conditiondata) {
+    Restangular.all("condition").post($scope.condition).then(function (data) {
+      if (data) {
         $scope.conditions.push(data);
         $location.path("/admin/condition/"+ data.identifier);
       }

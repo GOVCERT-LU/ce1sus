@@ -17,9 +17,6 @@ __license__ = 'GPL v3+'
 
 class ChecksHandler(RestBaseHandler):
 
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-
   @rest_method(default=True)
   @methods(allowed=['GET'])
   @require()

@@ -1,19 +1,69 @@
 <ul class="nav nav-tabs">
-  <li ng-class="{active: $routeSegment.contains('overview')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/overview">Overview</a></li>
-  <li ng-class="{active: $routeSegment.contains('observables')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/observables">Observables</a></li>
-<li ng-class="{active: $routeSegment.contains('indicators')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/indicators">Indicators</a></li>
-  <li ng-class="{active: $routeSegment.contains('relations')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/relations">Relations</a></li>
-  <li ng-class="{active: $routeSegment.contains('reports')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/reports"
-    >Reports</a></li>
-  <li ng-class="{active: $routeSegment.contains('groups')}"><a
-    href="#/admin/validation/event/{{event.identifier}}/groups">Groups</a></li>
+  <li ng-class="{active: $routeSegment.contains('overview')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/overview">
+      <img src="/images/stix/icons/werner_icon40x40.png">
+    </a>
+ </li>
+ <li ng-class="{active: $routeSegment.contains('observables')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/observables">
+      <img src="/images/stix/icons/observable40x40.png" alt="Observables"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('indicators')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/indicators">
+      <img src="/images/stix/icons/indicator40x40.png" alt="Indicators"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('incidents')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/incidents">
+      <img src="/images/stix/icons/incident40x40.png" alt="Incidents"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('threatactor')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/threatactor">
+      <img src="/images/stix/icons/ThreatActor40x40.png" alt="ThreatActors"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('ttps')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/ttps">
+      <img src="/images/stix/icons/ttp40x40.png" alt="TTP"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('campaigns')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/campaigns">
+      <img src="/images/stix/icons/campaign40x40.png" alt="Campaign"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('exploittargets')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/exploittargets">
+      <img src="/images/stix/icons/exploittarget40x40.png" alt="Exploit Targets"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('coas')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/coas">
+      <img src="/images/stix/icons/coa40x40.png" alt="Course of Action"/>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('relations')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/relations">
+      <i class="fa fa-link fa-3x"></i>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('reports')}">
+    <a href="#/admin/validation/event/{{event.identifier}}/reports">
+    <i class="fa fa-book fa-3x"></i>
+    </a>
+  </li>
+  <li ng-class="{active: $routeSegment.contains('groups')}" ng-show="event.userpermissions.set_groups">
+    <a href="#/admin/validation/event/{{event.identifier}}/groups">
+      <i class="fa fa-users fa-3x"></i>
+    </a>
+  </li>
+    
   <li style="float: right;">
-    <a class="hand" ng-click="reloadPage()">Reload &#x21bb;</a>
+    <a class="hand" ng-click="reloadPage()">
+      <i class="fa fa-refresh fa-3x"></i>
+    </a>
   </li>
 </ul>
 <p>

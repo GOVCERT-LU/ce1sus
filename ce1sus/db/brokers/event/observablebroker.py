@@ -8,7 +8,7 @@ Created on Jul 9, 2013
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_
 
-from ce1sus.db.classes.observables import Observable
+from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -20,11 +20,6 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class ObservableBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     """

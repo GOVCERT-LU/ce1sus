@@ -68,9 +68,11 @@ app.controller("observableEditController", function($scope, Restangular, message
   };
   
   $scope.submitObservable = function(){
+
     var eventID = $routeSegment.$routeParams.id;
     //Lost the connection to the event
     restangularObservable = Restangular.restangularizeElement(null, $scope.working_copy, 'event/'+eventID+'/observable');
+    restangularObservable.modified_on = new Date().getTime();
     restangularObservable.put({'complete':true, 'inflated':true}).then(function (data) {
       $scope.$parent.$parent.setObservable(restangularObservable);
     }, function (response) {

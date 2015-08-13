@@ -414,7 +414,7 @@ uwsgi.
 
 Copy the file to uwsgi:
 ``` shell
-cp scripts/install/uwsgi/ce1sus.ini_tmpl config/ce1sus.conf /etc/uwsgi/apps-available/ce1sus.ini
+cp scripts/install/uwsgi/ce1sus.ini_tmpl /etc/uwsgi/apps-available/ce1sus.ini
 ```
 
 Edit /etc/uwsgi/apps-available/ce1sus.ini and replace "/path/to/ce1sus" with your ce1sus installation path

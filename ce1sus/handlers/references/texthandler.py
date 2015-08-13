@@ -5,7 +5,7 @@ module handing the generic handler
 
 Created: Aug 22, 2013
 """
-from ce1sus.db.classes.common import ValueTable
+from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.handlers.references.generichandler import GenericHandler
 
 

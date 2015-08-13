@@ -4,7 +4,7 @@
 
 app.controller("observableObjectAddController", function($scope, Restangular, messages, $routeSegment,$log) {
   $scope.definitions =[];
-  Restangular.one("objectdefinition").getList(null, {"complete": true}).then(function (objects) {
+  Restangular.one("objectdefinition").getList(null, {"complete": true, "inflated": false}).then(function (objects) {
     $scope.definitions = objects;
   }, function(response) {
     handleError(response, messages);
@@ -72,8 +72,7 @@ app.controller("objectChildAddController", function($scope, Restangular, message
     handleError(response, messages);
     $scope.$hide();
   });
-  var original_childObject = {'properties' : {'shared': false},
-      'definition_id': null};
+  var original_childObject = {'properties' : {'shared': false}, 'object': {'definition_id': null}};
   $scope.childObject=angular.copy(original_childObject);
   
   $scope.$watch(function() {
@@ -117,10 +116,7 @@ app.controller("objectChildAddController", function($scope, Restangular, message
       $scope.childObject.parent_id=$scope.$parent.$parent.object.identifier;
     }
     var objectID = $scope.$parent.$parent.object.identifier;
-    var itemToPost = {};
-    itemToPost.object = $scope.childObject;
-    itemToPost.relation = $scope.childObject.relation;
-    Restangular.one('object', objectID).post('object', itemToPost, {'complete':true, 'infated':true}).then(function (data) {
+    Restangular.one('object', objectID).post('object', $scope.childObject, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.$parent.object.related_objects.push(data);
     }, function (response) {
       handleError(response, messages);

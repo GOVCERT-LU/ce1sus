@@ -12,7 +12,7 @@ from os.path import isfile
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
-from ce1sus.db.classes.attribute import Condition
+from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.handlers.attributes.filehandler import FileHandler
 from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper, CyboxMapperException
 from cybox.common import Hash, HashList
@@ -55,7 +55,7 @@ class Ce1susStixMapperException(Exception):
 class Ce1susStixMapper(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.cybox_mapper = CyboxMapper(config, session)
     self.indicator_controller = IndicatorController(config, session)
     self.event_controller = EventController(config, session)

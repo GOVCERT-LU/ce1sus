@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Release 0.11.1
+--------------
+* Added STIX elements, Incidents, Threat Actor, Campaign, Course of Action, TTP, exploit Targets to database schema
+* Changed models to be more STIX like
+* New class structure and output
+* New assembler and merger
+* Fixed administration interface bugs
+* Relations can be found via groupings
+
 Release 0.11.0
 --------------
 * Basic Authentication support

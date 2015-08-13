@@ -8,7 +8,7 @@ Created on Jul 9, 2013
 import sqlalchemy
 
 from ce1sus.db.brokers.values import ValueBroker
-from ce1sus.db.classes.attribute import Attribute
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 
 
@@ -20,11 +20,7 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class AttributeBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
+
 
   def get_broker_class(self):
     """

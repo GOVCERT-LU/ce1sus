@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 class AdminIndicatorTypesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.indicator_controller = self.controller_factory(IndicatorController)
 
   @rest_method(default=True)
@@ -26,10 +26,10 @@ class AdminIndicatorTypesHandler(RestBaseHandler):
   @require()
   def default(self, **args):
     # TODO inmplement indicator handler
-    details = self.get_detail_value(args)
-    inflated = self.get_inflated_value(args)
+
+    cache_object = self.get_cache_object(args)
     types = self.indicator_controller.get_all_types()
     result = list()
     for type_ in types:
-      result.append(type_.to_dict(details, inflated))
+      result.append(type_.to_dict(cache_object))
     return result

@@ -7,7 +7,7 @@ Created on Jan 9, 2015
 """
 import sqlalchemy.exc
 
-from ce1sus.db.classes.report import Report, Reference
+from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 
 
@@ -19,17 +19,11 @@ __license__ = 'GPL v3+'
 
 class ReportBroker(BrokerBase):
 
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
-
   def get_broker_class(self):
     return Report
 
 
 class ReferenceBroker(BrokerBase):
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     return Reference

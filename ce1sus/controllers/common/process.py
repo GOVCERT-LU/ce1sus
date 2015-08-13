@@ -9,7 +9,7 @@ Created on Nov 8, 2014
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.common.processbroker import ProcessBroker
-from ce1sus.db.classes.processitem import ProcessItem, ProcessType, ProcessStatus
+from ce1sus.db.classes.internal.backend.processitem import ProcessItem, ProcessType, ProcessStatus
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 
 
@@ -22,7 +22,7 @@ __license__ = 'GPL v3+'
 class ProcessController(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.process_broker = self.broker_factory(ProcessBroker)
     self.user_controller = UserController(config, session)
 

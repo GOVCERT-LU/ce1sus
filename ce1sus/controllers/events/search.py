@@ -12,11 +12,11 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBr
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.brokers.event.searchbroker import SearchBroker
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.db.classes.report import Report, Reference
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.event import Event
+from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.views.web.api.version3.handlers.restbase import valid_uuid
 
@@ -30,7 +30,7 @@ __license__ = 'GPL v3+'
 class SearchController(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.attribute_definition_broker = self.broker_factory(AttributeDefinitionBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.search_broker = self.broker_factory(SearchBroker)
