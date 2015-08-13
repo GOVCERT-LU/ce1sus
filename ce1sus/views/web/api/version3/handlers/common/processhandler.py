@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class ProcessHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.process_controller = ProcessController(config)
 
   @rest_method(default=True)
@@ -30,19 +30,18 @@ class ProcessHandler(RestBaseHandler):
   def processes(self, **args):
     try:
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
 
       if len(path) > 0:
                 # if there is a uuid as next parameter then return single user
         uuid = path.pop(0)
         process = self.process_controller.get_process_item_by_uuid(uuid)
-        return process.to_dict(details, inflated)
+        return process.to_dict(cache_object)
       else:
         processes = self.process_controller.get_all_process_items()
         result = list()
         for process in processes:
-          result.append(process.to_dict(details, inflated))
+          result.append(process.to_dict(cache_object))
         return result
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)

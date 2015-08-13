@@ -9,7 +9,7 @@ import re
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 
-from ce1sus.db.classes.user import User
+from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.db.common.broker import BrokerBase, ValidationException, BrokerException, NothingFoundException, TooManyResultsFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 

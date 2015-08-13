@@ -6,13 +6,13 @@ module handing the obejcts pages
 Created: Aug, 2013
 """
 import cherrypy
-from os import getcwd
 from os.path import isfile
 from sqlalchemy import create_engine
 from sqlalchemy.interfaces import PoolListener
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.scoping import scoped_session
 
-from ce1sus.db.common.common import SessionObject, ConnectorException, Connector
+from ce1sus.db.common.common import SessionObject, Connector
 from ce1sus.db.common.recepie.satool import SAEnginePlugin, SATool
 
 
@@ -41,7 +41,7 @@ class SqliteSession(SessionObject):
   Session wrapper
   """
   def __init__(self, session=None):
-    SessionObject.__init__(self)
+    super(SessionObject, self).__init__()
     self.__session = session
 
   def get_session(self):
@@ -63,22 +63,30 @@ class SqliteConnector(Connector):
   Connector for sqlite dbs
   """
   def __init__(self, config):
-    Connector.__init__(self, config)
+    super(Connector, self).__init__(config)
     db_file = self.config.get('db')
     self.engine = None
     if not isfile(db_file):
+      # create one
+      f = open(db_file, 'w+')
+      f.close()
+      """
       raise ConnectorException('Cannot find file {0} in {1}'.format(db_file,
                                                                     getcwd()
                                                                     )
                                )
+      """
     self.connetion_string = 'sqlite:///{db}'.format(db=db_file)
 
     if self.config.get('usecherrypy'):
-      SAEnginePlugin(cherrypy.engine, self).subscribe()
-      self.sa_tool = SATool()
-      cherrypy.tools.db = self.sa_tool
+      try:
+        getattr(cherrypy.tools, 'db')
+      except AttributeError:
+        SAEnginePlugin(cherrypy.engine, self).subscribe()
+        self.sa_tool = SATool(self)
+        cherrypy.tools.db = self.sa_tool
+        cherrypy.config.update({'tools.db.on': 'True'})
       self.session = None
-      cherrypy.config.update({'tools.db.on': 'True'})
     else:
       self.session = self.get_direct_session()
 
@@ -100,14 +108,16 @@ class SqliteConnector(Connector):
                          echo_pool=self.debug,
                          strategy='plain')
 
-  def get_direct_session(self):
+  def get_direct_session(self, instanciated=True):
     """
     Returns the session from the engine
     """
     self.engine = self.get_engine()
-    session = sessionmaker(bind=self.engine,
-                           autocommit=False,
-                           autoflush=False)()
+    session = scoped_session(sessionmaker(bind=self.engine,
+                                          autocommit=False,
+                                          autoflush=False))
+    if instanciated:
+      session = session()
     return SqliteSession(session)
 
   def close(self):

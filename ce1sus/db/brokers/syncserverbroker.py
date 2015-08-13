@@ -8,7 +8,7 @@ Created on Apr 2, 2015
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import or_
 
-from ce1sus.db.classes.servers import SyncServer, ServerMode
+from ce1sus.db.classes.internal.backend.servers import SyncServer, ServerMode
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -19,9 +19,6 @@ __license__ = 'GPL v3+'
 
 
 class SyncServerBroker(BrokerBase):
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     return SyncServer

@@ -13,7 +13,7 @@ from lxml import etree
 from uuid import UUID
 
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException, ControllerNothingFoundException
-from ce1sus.controllers.common.merger import Merger
+from ce1sus.controllers.common.merger.merger import Merger
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import require
@@ -29,7 +29,7 @@ __license__ = 'GPL v3+'
 class STIXAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    BaseView.__init__(self, config)
+    super(BaseView, self).__init__(config)
     self.stix_mapper = StixMapper(config, session)
     self.merger = Merger(config, session)
 

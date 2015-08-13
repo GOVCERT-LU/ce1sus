@@ -7,7 +7,7 @@ Created on Dec 23, 2014
 """
 
 import sqlalchemy.orm.exc
-from ce1sus.db.classes.object import Object, RelatedObject
+from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -19,11 +19,6 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class RelatedObjectBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     """

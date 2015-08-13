@@ -27,7 +27,7 @@ class MailController(BaseController):
   """Controller handling all the requests for groups"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.mail_broker = self.broker_factory(MailTemplateBroker)
     self.event_broker = self.broker_factory(EventBroker)
     self.relation_controller = RelationController(config, session)
@@ -58,10 +58,8 @@ class MailController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_mail(self, mail_template, user):
+  def update_mail(self, mail_template):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(mail_template, user, insert=False)
       mail_template = self.mail_broker.update(mail_template)
       return mail_template
     except ValidationException as error:
@@ -70,10 +68,8 @@ class MailController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_mail(self, mail_template, user, commit=True):
+  def insert_mail(self, mail_template, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(mail_template, user, insert=False)
       mail_template = self.mail_broker.insert(mail_template, False)
       self.mail_broker.do_commit(commit)
       return mail_template
@@ -110,8 +106,8 @@ class MailController(BaseController):
 
         self.mail_handler.send_mail(mail)
     except Exception as error:
-      self.logger.info(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
-      raise ControllerException(u'Could not send activation email to "{0}" for user "{1}"'.format(user.email, user.username))
+      self.logger.error(u'Could not send activation email to "{0}" for user "{1}" Error:{2}'.format(user.email, user.username, error))
+
 
   def __process_subject(self, subject, event):
     self.logger.debug(u'Processing subject')

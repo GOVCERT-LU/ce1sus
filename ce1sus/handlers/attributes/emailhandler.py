@@ -13,7 +13,7 @@ from os.path import dirname
 from shutil import rmtree, move
 import types
 
-from ce1sus.db.classes.object import Object, RelatedObject
+from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.handlers.attributes.filehandler import FileWithHashesHandler
 from ce1sus.handlers.base import HandlerException
 from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1

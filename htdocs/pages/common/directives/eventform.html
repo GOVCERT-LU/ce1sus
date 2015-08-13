@@ -4,7 +4,7 @@
       <label class="col-lg-3 control-label text-right">Identifier</label>
       <div class="col-lg-9">
         <input class="form-control" name="identifier"
-          ng-model="event.identifier" type="text" disabled>
+          ng-model="event.id_" type="text" disabled>
       </div>
     </div>
     <div class="row">
@@ -12,8 +12,8 @@
       <div class="col-lg-9"">
         <div
           ng-class="{ 'has-error' : addEventForm.title.$invalid && !addEventForm.title.$pristine }">
-          <input class="form-control" name="title" ng-model="event.title"
-            type="text" required ng-minlength=3 ng-maxlength=255>
+          <input class="form-control" name="title" ng-model="event.stix_header.title"
+            type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(event.stix_header)">
           <p
             ng-show="addEventForm.title.$invalid && !addEventForm.title.$pristine"
             class="help-block">Title is required.</p>
@@ -29,8 +29,8 @@
       <div class="col-lg-9">
         <div
           ng-class="{ 'has-error' : addEventForm.description.$invalid && !addEventForm.description.$pristine }">
-          <textarea name="description" ng-model="event.description"
-            cols=48 rows=20 ng-minlength=3 required></textarea>
+          <textarea name="description" ng-model="event.stix_header.description.value"
+            cols=48 rows=20 ng-minlength=3 required ng-change="setModified(event.stix_header.description)"></textarea>
           <p
             ng-show="addEventForm.description.$invalid && !addEventForm.description.$pristine"
             class="help-block">Description is required.</p>
@@ -45,6 +45,7 @@
             <input type="checkbox" name="published"
               value="published" ng-model="event.published"
               ng-disabled="addEvent"
+              ng-change="setModified(event)"
             >
         </div>
       </div>
@@ -56,7 +57,7 @@
           <select name="status" class="form-control"
             ng-options="status.name as status.name for status in statuses"
             ng-model="event.status" required>
-            <option style="display: none" value="">Select a Status</option>
+            <option style="display: none" value="" >Select a Status</option>
           </select>
           <p
             ng-show="addEventForm.status.$invalid && !addEventForm.status.$pristine"
@@ -68,14 +69,14 @@
         <label class="col-lg-3 control-label text-right">Analysis *</label>
         <div class="col-lg-9">
           <div
-          ng-class="{ 'has-error' : addEventForm.anlysis.$invalid && !addEventForm.anlysis.$pristine }">
-            <select name="anlysis" class="form-control"
+          ng-class="{ 'has-error' : addEventForm.analysis.$invalid && !addEventForm.analysis.$pristine }">
+            <select name="analysis" class="form-control"
               ng-options="anlysis.name as anlysis.name for anlysis in anlysises"
-              ng-model="event.anlysis" required>
+              ng-model="event.analysis" required ng-change="setModified(event)">
               <option style="display: none" value="">Select an analysis</option>
             </select>
             <p
-            ng-show="addEventForm.anlysis.$invalid && !addEventForm.anlysis.$pristine"
+            ng-show="addEventForm.analysis.$invalid && !addEventForm.analysis.$pristine"
             class="help-block">Analysis is required.</p>
           </div>
         </div>
@@ -87,7 +88,7 @@
           ng-class="{ 'has-error' : addEventForm.risk.$invalid && !addEventForm.risk.$pristine }">
           <select name="risk" class="form-control"
             ng-options="risk.name as risk.name for risk in risks"
-            ng-model="event.risk" required>
+            ng-model="event.risk" required ng-change="setModified(event)">
             <option style="display: none" value="">Select a risk</option>
           </select>
             <p
@@ -103,7 +104,7 @@
           ng-class="{ 'has-error' : addEventForm.tlp.$invalid && !addEventForm.tlp.$pristine }">
           <select name="tlp" class="form-control"
             ng-options="tlp.name as tlp.name for tlp in tlps"
-            ng-model="event.tlp" required>
+            ng-model="event.tlp" required ng-change="setModified(event)">
             <option style="display: none" value="">Select a TLP level</option>
           </select>
             <p
@@ -118,12 +119,12 @@
           <div class="row" style="padding-left:15px">
             <div class="col-lg-9">
               <div class="form-group">
-                <input size="10" class="form-control" ng-model="event.first_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text">
+                <input size="10" class="form-control" ng-model="event.first_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text" ng-change="setModified(event)">
               </div>
             </div>
             <div class="col-lg-3">
               <div class="form-group">
-                <input size="8" class="form-control" ng-model="event.first_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text">
+                <input size="8" class="form-control" ng-model="event.first_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text" ng-change="setModified(event)">
               </div>
             </div>
           </div>
@@ -135,12 +136,12 @@
           <div class="row" style="padding-left:15px">
             <div class="col-lg-9">
               <div class="form-group">
-                <input size="10" class="form-control" ng-model="event.last_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text">
+                <input size="10" class="form-control" ng-model="event.last_seen" data-autoclose="1" placeholder="Date" bs-datepicker type="text" ng-change="setModified(event)">
               </div>
             </div>
             <div class="col-lg-3">
               <div class="form-group">
-                <input size="8" class="form-control" ng-model="event.last_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text">
+                <input size="8" class="form-control" ng-model="event.last_seen" data-time-format="HH:mm" data-autoclose="1" placeholder="Time" bs-timepicker type="text" ng-change="setModified(event)">
               </div>
             </div>
           </div>

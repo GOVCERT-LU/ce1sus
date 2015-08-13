@@ -29,15 +29,15 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBr
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.brokers.mispbroker import ErrorMispBroker
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.group import Group
-from ce1sus.db.classes.indicator import Indicator
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.event import Event
+from ce1sus.db.classes.internal.usrmgt.group import Group
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.log import ErrorMispAttribute
-from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.db.classes.processitem import ProcessType
-from ce1sus.db.classes.report import Reference, Report
+from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.internal.backend.processitem import ProcessType
+from ce1sus.db.classes.internal.report import Reference, Report
 from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 import xml.etree.ElementTree as et
@@ -143,7 +143,7 @@ class MispConverter(BaseController):
             'User-Agent': 'ce1sus {0}'.format(APP_REL)}
 
   def __init__(self, config, api_url, api_key, misp_tag='Generic MISP', session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.api_url = api_url
     self.api_key = api_key
     self.tag = misp_tag

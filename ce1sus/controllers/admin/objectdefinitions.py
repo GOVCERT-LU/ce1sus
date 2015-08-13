@@ -7,7 +7,7 @@ Created: Aug 26, 2013
 """
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, SpecialControllerException
-from ce1sus.db.classes.definitions import ObjectDefinition
+from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException, ValidationException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -25,9 +25,6 @@ def gen_obj_chksum(obj):
 
 class ObjectDefinitionController(BaseController):
   """Controller handling all the requests for objects"""
-
-  def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
 
   def get_defintion_by_name(self, name):
     try:
@@ -75,11 +72,8 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_object_definition(self, obj, user, commit=True):
+  def insert_object_definition(self, obj, commit=True):
     try:
-      obj.chksum = gen_obj_chksum(obj)
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(obj, user, insert=True)
       self.obj_def_broker.insert(obj, False)
       self.obj_def_broker.do_commit(commit)
       return obj
@@ -89,13 +83,10 @@ class ObjectDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_object_definition(self, obj, user, commit=True):
+  def update_object_definition(self, obj, commit=True):
     if obj.cybox_std:
       raise ControllerException(u'Could not update object definition as the object is part of the cybox standard')
     try:
-      obj.chksum = gen_obj_chksum(obj)
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(obj, user, insert=False)
       self.obj_def_broker.update(obj, commit)
       return obj
     except ValidationException as error:

@@ -20,7 +20,7 @@ class AttributeController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
 
   def get_attribute_by_id(self, identifier):
@@ -43,7 +43,7 @@ class AttributeController(BaseController):
     # TODO: include handler
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(attribute, user, user.group, False)
+      self.set_extended_logging(attribute, user, False)
       # TODO integrate handlersd
       self.attribute_broker.update(attribute)
     except BrokerException as error:
@@ -64,9 +64,9 @@ class AttributeController(BaseController):
     try:
       # set extended logging
       for attribute in attributes:
-        self.set_extended_logging(attribute, user, user.group, True)
+        self.set_extended_logging(attribute, user, True)
         for child in attribute.children:
-          self.set_extended_logging(child, user, user.group, True)
+          self.set_extended_logging(child, user, True)
 
       user = self.user_broker.get_by_id(user.identifier)
       # set owner

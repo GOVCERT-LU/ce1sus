@@ -10,10 +10,11 @@ from uuid import uuid4
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
-from ce1sus.db.classes.definitions import ObjectDefinition
-from ce1sus.db.classes.indicator import IndicatorType, Indicator
-from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.observables import Observable
+from ce1sus.db.classes.internal.definitions import ObjectDefinition
+from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.ccybox.core.observables import Observable
+from ce1sus.db.classes.cstix.common.vocabs import IndicatorType
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.common.broker import BrokerException
 
 
@@ -27,7 +28,7 @@ class IndicatorController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.indicator_type_broker = self.broker_factory(IndicatorTypeBroker)
     self.relation_controller = RelationController(config, session)
 
@@ -67,7 +68,7 @@ class IndicatorController(BaseController):
     indicator.tlp_level_id = event.tlp_level_id
     indicator.title = 'Indicators for "{0}"'.format(indicator_type)
     indicator.operator = 'OR'
-    self.set_extended_logging(indicator, user, user.group, True)
+    self.set_extended_logging(indicator, user, True)
 
     if indicator_type and indicator_type != 'Others':
       indicator.types.append(self.get_indicator_type(indicator_type))
@@ -84,7 +85,7 @@ class IndicatorController(BaseController):
         obj.definition.identifier = attribute.object.definition.identifier
         obj.definition_id = attribute.object.definition.identifier
         obj.attributes.append(attribute)
-        self.set_extended_logging(obj, user, user.group, True)
+        self.set_extended_logging(obj, user, True)
         # create observable
         obs = Observable()
         obs.uuid = uuid4()
@@ -98,7 +99,7 @@ class IndicatorController(BaseController):
           obs.tlp_level_id = attribute.object.tlp_level_id
         obs.object = obj
         obs.event = event
-        self.set_extended_logging(obs, user, user.group, True)
+        self.set_extended_logging(obs, user, True)
 
         indicator.observables.append(obs)
 

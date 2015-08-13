@@ -25,14 +25,14 @@ class ObservableController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.observable_broker = self.broker_factory(ObservableBroker)
     self.composed_observable_broker = self.broker_factory(ComposedObservableBroker)
     self.object_broker = self.broker_factory(ObjectBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.related_object_broker = self.broker_factory(RelatedObjectBroker)
 
-  def insert_observable(self, observable, user, commit=True):
+  def insert_observable(self, observable, commit=True):
     """
     inserts an event
 
@@ -43,10 +43,7 @@ class ObservableController(BaseController):
 
     :returns: Event, Boolean
     """
-    self.logger.debug('User {0} inserts a new observable'.format(user.username))
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(observable, user, user.group, True)
       self.observable_broker.insert(observable, False)
       # TODO: generate relations if needed!
 
@@ -59,62 +56,26 @@ class ObservableController(BaseController):
       return observable, True
     except ValidationException:
       return observable, False
-    except IntegrityException as error:
-      self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an observable with uuid "{1}" but the uuid already exists'.format(user.username, observable.uuid))
-      raise ControllerException(u'An observable with uuid "{0}" already exists'.format(observable.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_related_object(self, related_object, user, commit=True):
+  def insert_related_object(self, related_object, commit=True):
     try:
       self.object_broker.insert(related_object, False)
       self.object_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_handler_related_objects(self, related_objects, user, commit=True, owner=False):
+  def insert_handler_related_objects(self, related_objects, commit=True):
     # Validate children
     validated = False
-    if related_objects:
-      for related_object in related_objects:
-                # TODO Validate related objects
-                # self.__validate_object(related_object)
-        self.set_extended_logging(related_object.object, user, user.group, True)
-        for attribute in related_object.object.attributes:
-          self.set_extended_logging(attribute, user, user.group, True)
-      validated = True
-
     if validated:
       for related_object in related_objects:
-        # self.set_extended_logging(related_object, user, user.group, True)
-        self.insert_related_object(related_object, user, False)
+        self.insert_related_object(related_object, False)
     self.object_broker.do_commit(commit)
 
-  def set_extended_logging_object(self, obj, user, insert=True):
-    self.set_extended_logging(obj, user, user.group, insert)
-    for attribute in obj.attributes:
-      self.set_extended_logging(attribute, user, user.group, insert)
-    if obj.related_objects:
-      for rel_obj in obj.related_objects:
-        self.set_extended_logging_object(rel_obj.object, user, insert)
-        # TODO: check if relobject parent is set correctly
-        rel_obj.parent = obj
-
-  def set_extended_logging_observble(self, obs, user, insert=True):
-    if obs.object:
-      self.set_extended_logging_object(obs.object, user, insert)
-    if obs.observable_composition:
-      self.set_extended_logging_observble(obs, user, insert)
-    self.set_extended_logging(obs, user, user.group, insert)
-
-  def insert_composed_observable(self, observable, user, commit=True, owner=True):
-    self.logger.debug('User {0} inserts a new composed observable'.format(user.username))
+  def insert_composed_observable(self, observable, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      for obs in observable.observable_composition.observables:
-        self.set_extended_logging_observble(obs, user, True)
-      self.set_extended_logging(observable, user, user.group, True)
 
       self.observable_broker.insert(observable, False)
       # TODO: generate relations if needed!
@@ -128,10 +89,6 @@ class ObservableController(BaseController):
       return observable, True
     except ValidationException:
       return observable, False
-    except IntegrityException as error:
-      self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an observable with uuid "{1}" but the uuid already exists'.format(user.username, observable.uuid))
-      raise ControllerException(u'An observable with uuid "{0}" already exists'.format(observable.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -216,21 +173,19 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_observable(self, observable, user, commit=True):
-    try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(observable, user, user.group, True)
-      self.observable_broker.update(observable, commit)
-    except BrokerException as error:
-      raise ControllerException(error)
-
-  def update_observable_compositon(self, observable, user, commit=True):
+  def update_observable(self, observable, commit=True):
     try:
       self.observable_broker.update(observable, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable(self, observable, user, commit=True):
+  def update_observable_compositon(self, observable, commit=True):
+    try:
+      self.observable_broker.update(observable, commit)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_observable(self, observable, commit=True):
     try:
       self.observable_broker.remove_by_id(observable.identifier)
       self.observable_broker.do_commit(commit)
@@ -239,7 +194,7 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable_composition(self, compoed_observable, user, commit=True):
+  def remove_observable_composition(self, compoed_observable, commit=True):
     try:
       for observable in compoed_observable.observables:
         self.observable_broker.remove_by_id(observable.identifier)
@@ -250,8 +205,8 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def get_event_for_observable(self, observable):
-    if observable.parent:
-      return observable.parent
+    if observable.event:
+      return observable.event
     else:
       raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
 
@@ -263,28 +218,23 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_object(self, obj, user, commit=True):
+  def insert_object(self, obj, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(obj, user, user.group, True)
       self.object_broker.insert(obj, False)
       self.object_broker.do_commit(commit)
     except IntegrityException as error:
       self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert an object with uuid "{1}" but the uuid already exists'.format(user.username, obj.uuid))
       raise ControllerException(u'An object with uuid "{0}" already exists'.format(obj.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_object(self, obj, user, commit=True):
+  def update_object(self, obj, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(obj, user, user.group, False)
       self.object_broker.update(obj, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_object(self, obj, user, commit=True):
+  def remove_object(self, obj, commit=True):
     try:
       self.object_broker.remove_by_id(obj.identifier)
     except BrokerException as error:
@@ -302,36 +252,15 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_related_object(self, related_object, user, commit=True):
+  def update_related_object(self, related_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(related_object, user, user.group, True)
       self.related_object_broker.update(related_object, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def __validate_object(self, obj):
-    # validate
-    if obj.validate:
-      for related_object in obj.related_objects:
-        if not related_object.validate:
-          raise ControllerException('Related object is invalid')
-    else:
-      raise ControllerException('Object is invalid')
-
-  def insert_handler_objects(self, related_objects, user, commit=True, owner=False):
-    # Validate children
-    validated = False
-    if related_objects:
-      for related_object in related_objects:
-        self.__validate_object(related_object)
-        self.set_extended_logging(related_object, user, user.group, True)
-      validated = True
-
-    if validated:
-      for related_object in related_objects:
-        self.set_extended_logging(related_object, user, user.group, True)
-        self.insert_object(related_object, user, False)
+  def insert_handler_objects(self, related_objects, commit=True, owner=False):
+    for related_object in related_objects:
+      self.insert_object(related_object, False)
     self.object_broker.do_commit(commit)
 
   def get_composition_by_observable(self, observable):

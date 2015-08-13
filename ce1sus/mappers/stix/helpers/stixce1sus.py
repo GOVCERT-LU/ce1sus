@@ -11,14 +11,16 @@ from uuid import uuid4
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.common import TLP
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.group import Group
-from ce1sus.db.classes.indicator import Indicator, Sighting
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
+from ce1sus.db.classes.cstix.indicator.sightings import Sighting
+from ce1sus.db.classes.internal.common import TLP, Analysis, Risk, Status
+from ce1sus.db.classes.internal.event import Event
+from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
 from ce1sus.mappers.stix.helpers.cyboxmapper import CyboxMapper
 from stix.data_marking import Marking
 from stix.extensions.marking.tlp import TLPMarkingStructure
+from ce1sus.db.classes.cstix.common.confidence import Confidence
 
 
 __author__ = 'Weber Jean-Paul'
@@ -34,7 +36,7 @@ class StixCelsusMapperException(Exception):
 class StixCelsusMapper(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.cybox_mapper = CyboxMapper(config, session)
     self.event_controller = EventController(config, session)
     self.observable_controller = ObservableController(config, session)
@@ -61,7 +63,7 @@ class StixCelsusMapper(BaseController):
         if identifier:
           group.uuid = identifier
         else:
-          # Unfortenately we must create our own
+          # Unfortunately we must create our own
           group.uuid = uuid4()
         group.name = identity.name
         group.description = u'Auto-generated from STIX'
@@ -81,8 +83,9 @@ class StixCelsusMapper(BaseController):
           ce1sus_sigthing.created_at = sighting.timestamp
           ce1sus_sigthing.timestamp_precision = sighting.timestamp_precision
           ce1sus_sigthing.creator_group = self.__convert_info_soucre(sighting.source)
+          # TODO: Condidence
           ce1sus_sigthing.confidence = sighting.confidence
-          ce1sus_sigthing.description = sighting.description
+          # ce1sus_sigthing.description = sighting.description
           set_extended_logging(ce1sus_sigthing, user, user.group)
           result.append(ce1sus_sigthing)
           return result
@@ -106,7 +109,7 @@ class StixCelsusMapper(BaseController):
     if not event.title:
       event.title = 'Generated via STIX - No title'
     info_source = stix_header.information_source
-    event.description = stix_header.description
+    # event.description = stix_header.description
     if info_source:
       # set information source
       set_extended_logging(event, user, self.__convert_info_soucre(info_source))
@@ -118,7 +121,7 @@ class StixCelsusMapper(BaseController):
                         # TODO: set desrcption with reference
             event.tlp = structure.color.title()
     if not event.tlp_level_id:
-      event.tlp = 'White'
+      event.tlp = 'Amber'
 
     # first and last seen
     if stix_header.information_source:
@@ -141,9 +144,9 @@ class StixCelsusMapper(BaseController):
       event.last_seen = datetime.utcnow()
 
     # TODO find a way to add this in stix / read it out
-    event.status = 'Confirmed'
-    event.analysis = 'Unknown'
-    event.risk = 'Undefined'
+    event.status = Status.get_dictionary().values()[0]
+    event.analysis = Analysis.get_dictionary().values()[4]
+    event.risk = Risk.get_dictionary().values()[4]
     event.properties.is_shareable = True
     event.properties.is_rest_instert = True
 
@@ -199,6 +202,16 @@ class StixCelsusMapper(BaseController):
             return tlp_id
     return None
 
+  def map_confidence(self, instance, confidence, event, user):
+    instance.confidence = Confidence()
+    instance.confidence.value = confidence.value
+    # instance.confidence.description = confidence.description
+    instance.confidence.timestamp_precision = confidence.timestamp_precision
+    instance.confidence.timestamp = confidence.timestamp
+    # TODO: information source
+    # TODO: TLP/creator etc..
+    set_extended_logging(instance.confidence, user, user.group)
+
   def create_indicator(self, indicator, event, user):
     ce1sus_indicator = Indicator()
     set_properties(ce1sus_indicator)
@@ -207,10 +220,9 @@ class StixCelsusMapper(BaseController):
     else:
       ce1sus_indicator.uuid = uuid4()
     ce1sus_indicator.title = indicator.title
-    ce1sus_indicator.description = indicator.description
+    # ce1sus_indicator.description = indicator.description
     ce1sus_indicator.originating_group = self.__convert_info_soucre(indicator.producer)
-    # TODO: Check if condifdence is in the supported range like Low Hiogh medium or even numbers?!
-    ce1sus_indicator.confidence = indicator.confidence
+    self.map_confidence(ce1sus_indicator, indicator.confidence, event, user)
 
     sightings = self.__convert_sightings(indicator.sightings, user)
     if sightings:

@@ -1,0 +1,15 @@
+{"regex": "^.+$", 
+ "attributehandler": {"is_multi_line": false, 
+                      "name": "DateHandler", 
+                      "view_type": "date"
+                      }, 
+ "description": "The Accessed_Time field specifies the date/time the file was last accessed. ", 
+ "type_id": "a47fef10-298c-4731-8480-320cb34989c1", 
+ "cybox_std": true,
+ "share": true, 
+ "relation": false, 
+ "attributehandler_id": "11406d00-8dec-11e3-baa8-0800200c9a66", 
+ "table_id": 2, 
+ "default_condition_id": "00dba852-7e1f-48b5-834b-5722c7d13190",
+ "name": "NewOne"
+ }

@@ -6,16 +6,11 @@ module for session handling and brokers
 Created Jul, 2013
 """
 from abc import abstractmethod
-from datetime import datetime, date
-from decimal import Decimal
 from sqlalchemy import exc, event
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.pool import Pool
-from sqlalchemy.schema import Column
-from sqlalchemy.types import Unicode, BigInteger
-from uuid import UUID
-import uuid
 
+from ce1sus.common import convert_value
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.common import SessionManagerException, BrokerInstantiationException, ORMException
 from ce1sus.db.common.connectors.mysql import MySqlConnector
@@ -28,14 +23,6 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class fakefloat(float):
-  def __init__(self, value):
-    self._value = value
-
-  def __repr__(self):
-    return str(self._value)
-
-
 class BaseClass(object):
   __abstract__ = True
 
@@ -43,47 +30,17 @@ class BaseClass(object):
   def __tablename__(cls):
     return u'{0}s'.format(cls.__name__.lower())
 
-  @declared_attr
-  def identifier(cls):
-    return Column(u'{0}_id'.format(cls.__name__.lower()),
-                  BigInteger,
-                  primary_key=True,
-                  autoincrement=True,
-                  nullable=False,
-                  index=True,
-                  unique=True)
-
-  @declared_attr
-  def uuid(cls):
-    return Column('uuid',
-                  Unicode(45, collation='utf8_unicode_ci'),
-                  default=uuid.uuid4,
-                  nullable=False,
-                  index=True,
-                  unique=True)
-
   @abstractmethod
   def validate(self):
     raise ORMException(u'Validate method not implemented for {0}'.format(self.__class__.__name__))
 
   @staticmethod
   def convert_value(value):
-    # TODO: rethink the wrapped file foo
-    """converts the value None to '' else it will be send as None-Text"""
-    if value or value == 0:
-      if isinstance(value, datetime):
-    # return value.strftime('%m/%d/%Y %H:%M:%S %Z')
-        return value.isoformat()
-      if isinstance(value, date):
-        # return value.strftime('%Y-%m-%d')
-        return value.isoformat()
-      if isinstance(value, UUID):
-        return u'{0}'.format(value)
-      if isinstance(value, Decimal):
-        return fakefloat(value)
-      return value
-    else:
-      return ''
+    return convert_value(value)
+
+  @classmethod
+  def get_table_name(cls):
+    return cls.__tablename__
 
 Base = declarative_base(cls=BaseClass)
 

@@ -7,7 +7,7 @@ Created on Oct 28, 2014
 """
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.base import ControllerException
-from ce1sus.db.classes.user import User
+from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.helpers.common.ldaphandling import LDAPHandler, LDAPException, NothingFoundException
 from ce1sus.plugins.base import plugin_web_method, BasePlugin, PluginException, plugin_internal_method
 
@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class LdapPlugin(BasePlugin):
 
   def __init__(self, config):
-    BasePlugin.__init__(self, config)
+    super(BasePlugin, self).__init__(config)
     self.ldap_handler = LDAPHandler(config)
     self.user_controller = UserController(config)
 

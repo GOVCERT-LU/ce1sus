@@ -27,7 +27,7 @@ __license__ = 'GPL v3+'
 class LoginHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.login_controller = self.controller_factory(LoginController)
     self.user_controller = self.controller_factory(UserController)
 
@@ -36,6 +36,7 @@ class LoginHandler(RestBaseHandler):
   def login(self, **args):
     try:
       credentials = args.get('json', None)
+      cache_object = self.get_cache_object(args)
       user = None
       if credentials:
         usr = credentials.get('usr', None)
@@ -66,10 +67,12 @@ class LoginHandler(RestBaseHandler):
         # put in session
         self.put_user_to_session(user)
         self.logger.info('User "{0}" logged in'.format(user.username))
-        return user.to_dict(False, False)
+        cache_object.inflated = False
+        cache_object.complete = False
+        return user.to_dict(cache_object)
       else:
         self.logger.info('A login attempt was made by the disabled user {0}'.format(usr))
-        raise cherrypy.HTTPError(status=401, message='User or password are incorrect.')
+        raise cherrypy.HTTPError(status=403, message='User or password are incorrect.')
     except ControllerException as error:
       self.logger.info(error)
       raise cherrypy.HTTPError(status=401, message='Credentials are incorrect.')

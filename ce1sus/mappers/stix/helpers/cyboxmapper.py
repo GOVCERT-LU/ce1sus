@@ -12,9 +12,9 @@ from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.object import Object, RelatedObject
-from ce1sus.db.classes.observables import Observable, ObservableComposition
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.object import Object, RelatedObject
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.handlers.attributes.filehandler import FileHandler
 from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
 from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
@@ -54,7 +54,7 @@ class CyboxMapperException(Exception):
 class CyboxMapper(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     # cache all definitions
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.fh = FileHandler()
@@ -68,7 +68,7 @@ class CyboxMapper(BaseController):
     self.conditions = self.make_dict_conditions(conditions)
 
   def get_time(self, start_time=None, end_time=None, produced_time=None, received_time=None):
-    return Time(start_time, end_time, produced_time, received_time)
+    return CyboxTime(start_time, end_time, produced_time, received_time)
 
   def make_dict_conditions(self, conditions):
     result = dict()

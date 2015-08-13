@@ -9,7 +9,7 @@ from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionCon
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.db.classes.types import AttributeType
+from ce1sus.db.classes.internal.backend.types import AttributeType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class AttribueTypeHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
@@ -32,37 +32,37 @@ class AttribueTypeHandler(RestBaseHandler):
       method = args.get('method')
       json = args.get('json')
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
       if method == 'GET':
         if len(path) > 0:
           uuid = path.pop(0)
           type_ = self.attribute_definition_controller.get_type_by_uuid(uuid)
-          return type_.to_dict(details, inflated)
+          return type_.to_dict(cache_object)
         else:
           types = self.attribute_definition_controller.get_all_types()
           result = list()
           for type_ in types:
-            result.append(type_.to_dict(details, inflated))
+            result.append(type_.to_dict(cache_object))
           return result
       elif method == 'POST':
         if len(path) > 0:
           raise RestHandlerException(u'No post definied on the given path')
         else:
           # Add new type
-          type_ = AttributeType()
-          type_.populate(json)
+          type_ = self.assembler.assemble(json, AttributeType, None, cache_object)
           # set the new checksum
           self.attribute_definition_controller.insert_type(type_)
-          return type_.to_dict(details, inflated)
+          return type_.to_dict(cache_object)
       elif method == 'PUT':
         if len(path) > 0:
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           type_ = self.attribute_definition_controller.get_type_by_uuid(uuid)
-          type_.populate(json)
+
+          self.updater.update(type_, json, cache_object)
+
           self.attribute_definition_controller.update_type(type_)
-          return type_.to_dict(details, inflated)
+          return type_.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update type as no identifier was given')
       elif method == 'DELETE':

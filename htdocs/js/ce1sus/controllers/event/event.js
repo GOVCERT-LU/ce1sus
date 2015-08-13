@@ -39,7 +39,7 @@ app.controller("eventController", function($scope, Restangular,messages,
     if (!found) {
       $scope.openedEvents.push({
         icon: '',
-        title: event.title,
+        title: event.stix_header.title,
         section: 'main.layout.events.event',
         reload: false,
         close: true,
@@ -84,6 +84,16 @@ app.controller("viewEventController", function($scope, Restangular, messages,
     var index = $routeSegment.chain.length;
     
     $routeSegment.chain[index-1].reload();
+  };
+  
+  $scope.getRolesName = function(roles){
+    var rolesStr = '[';
+    angular.forEach(roles, function(role) {
+      rolesStr = rolesStr + role.name + ', '; 
+    });
+    
+    
+    return rolesStr + ']';
   };
 });
 

@@ -8,10 +8,12 @@ Created on Feb 5, 2014
 
 import re
 
-from ce1sus.controllers.common.assembler import Assembler
-from ce1sus.views.web.common.base import BaseView
-from ce1sus.handlers.base import HandlerException
 from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.common.assembler.assembler import Assembler
+from ce1sus.controllers.common.updater.updater import Updater
+from ce1sus.handlers.base import HandlerException
+from ce1sus.views.web.common.base import BaseView
+from ce1sus.common.classes.cacheobject import CacheObject
 
 
 __author__ = 'Weber Jean-Paul'
@@ -92,8 +94,23 @@ class RestBaseHandler(BaseView):
   controllers = dict()
 
   def __init__(self, config):
-    BaseView.__init__(self, config)
+    super(BaseView, self).__init__(config)
     self.assembler = Assembler(config)
+    self.updater = Updater(config)
+
+  def get_cache_object(self, args):
+    headers = args.get('headers')
+    cache_object = CacheObject(user=self.get_user(),
+                               rest_insert=self.is_rest_insert(headers),
+                               details=self.get_detail_value(args),
+                               inflated=self.get_inflated_value(args),
+                               flat=self.get_flat_value(args),
+                               )
+    return cache_object
+
+  def set_event_properties_cache_object(self, cache_object, event):
+    cache_object.event_permissions = self.get_event_user_permissions(event, cache_object.user)
+    cache_object.owner = self.is_event_owner(event, cache_object.user)
 
   def controller_factory(self, clazz):
     if issubclass(clazz, BaseController):

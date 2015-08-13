@@ -5,12 +5,12 @@
 
 Created on Oct 23, 2014
 """
+from ce1sus.helpers.common.objects import get_class
 import sqlalchemy.orm.exc
 
-from ce1sus.db.classes.common import ValueTable
-from ce1sus.db.classes.values import StringValue
+from ce1sus.db.classes.internal.attributes.values import StringValue
+from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException, ValidationException, IntegrityException
-from ce1sus.helpers.common.objects import get_class
 
 
 __author__ = 'Weber Jean-Paul'
@@ -27,7 +27,7 @@ class ValueBroker(BrokerBase):
   Note: Only used by the AttributeBroker
   """
   def __init__(self, session):
-    BrokerBase.__init__(self, session)
+    super(BrokerBase, self).__init__(session)
     self.__clazz = StringValue
 
   @property
@@ -71,7 +71,7 @@ class ValueBroker(BrokerBase):
     :param classname: the name of the class
     :type classname: Class
     """
-    return get_class('ce1sus.db.classes.values', u'{0}Value'.format(classname))
+    return get_class('ce1sus.db.classes.internal.attributes.values', u'{0}Value'.format(classname))
 
   @staticmethod
   def get_class_by_attr_def(definition):

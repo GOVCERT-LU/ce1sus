@@ -5,7 +5,6 @@ for controllers.
 
 Created: Jul, 2013
 """
-from datetime import datetime
 
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
@@ -48,8 +47,7 @@ class NotImplementedException(ControllerException):
   """
   Not implemented exception
   """
-  def __init__(self, message):
-    ControllerException.__init__(self, message)
+  pass
 
 
 # pylint: disable=R0903
@@ -101,30 +99,3 @@ class BaseController(object):
   @property
   def logger(self):
     return self.__logger.get_logger(self.__class__.__name__)
-
-  def set_simple_logging(self, instance, user, insert=False):
-    # set only if not already set :/
-    if insert:
-      if not (instance.creator_id or instance.creator):
-        instance.creator_id = user.identifier
-        instance.creator = user
-      if not instance.created_at:
-        instance.created_at = datetime.utcnow()
-    if not (instance.modifier_id or instance.modifier):
-      instance.modifier_id = user.identifier
-      instance.modifier = user
-    if not instance.modified_on:
-      instance.modified_on = datetime.utcnow()
-
-  def set_extended_logging(self, instance, user, originating_group, insert=False):
-    self.set_simple_logging(instance, user, insert)
-    if insert:
-      if not instance.creator_group:
-        instance.creator_group = user.group
-        instance.creator_group_id = user.group.identifier
-      if not instance.originating_group:
-        instance.originating_group = originating_group
-        instance.originating_group_id = originating_group.identifier
-      if not instance.owner_group:
-        instance.owner_group = originating_group
-        instance.owner_group_id = originating_group.identifier

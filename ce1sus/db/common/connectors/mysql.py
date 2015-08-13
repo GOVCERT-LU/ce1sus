@@ -28,7 +28,7 @@ class MySqlSession(SessionObject):
   """
 
   def __init__(self, session=None):
-    SessionObject.__init__(self)
+    super(SessionObject, self).__init__()
     self.__session = session
 
   def get_session(self):
@@ -50,11 +50,11 @@ class MySqlConnector(Connector):
   Connector for mysql dbs
   """
   def __init__(self, config):
-    Connector.__init__(self, config)
+    super(Connector, self).__init__(config)
     hostname = self.config.get('host')
     port = self.config.get('port')
     self.engine = None
-    self.connection_string = ('{prot}://{user}:{password}@{host}:{port}/{db}').format(prot=self.protocol,
+    self.connection_string = ('{prot}://{user}:{password}@{host}:{port}/{db}?charset=utf8&use_unicode=1').format(prot=self.protocol,
                                                                                       user=self.config.get('username'),
                                                                                       password=self.config.get('password'),
                                                                                       host=hostname,
@@ -68,7 +68,7 @@ class MySqlConnector(Connector):
       except AttributeError:
         self.__check_if_existing(hostname, port)
         SAEnginePlugin(cherrypy.engine, self).subscribe()
-        self.sa_tool = SATool()
+        self.sa_tool = SATool(self)
         cherrypy.tools.db = self.sa_tool
         cherrypy.config.update({'tools.db.on': 'True'})
       self.session = None
@@ -95,14 +95,16 @@ class MySqlConnector(Connector):
     else:
       return self.create_engine()
 
-  def get_direct_session(self):
+  def get_direct_session(self, instanciated=True):
     """
     Returns the session from the engine
     """
     self.engine = self.get_engine()
     session = scoped_session(sessionmaker(bind=self.engine,
                                           autocommit=False,
-                                          autoflush=False))()
+                                          autoflush=False))
+    if instanciated:
+      session = session()
     return MySqlSession(session)
 
   def is_service_existing(self, host, port):
@@ -146,7 +148,7 @@ class MySqlConnector(Connector):
     """
     Returns the engine
     """
-    return create_engine(self.connection_string + '?charset=utf8&use_unicode=0',
+    return create_engine(self.connection_string + '?charset=utf8&use_unicode=1',
                          poolclass=QueuePool,
                          echo=self.debug,
                          encoding='utf-8',

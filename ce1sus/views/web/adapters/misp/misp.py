@@ -13,11 +13,11 @@ import json
 from uuid import UUID
 
 from ce1sus.controllers.base import ControllerIntegrityException, ControllerException, ControllerNothingFoundException
-from ce1sus.controllers.common.merger import Merger, MergingException
+from ce1sus.controllers.common.merger.merger import Merger, MergingException
 from ce1sus.controllers.common.process import ProcessController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.brokers.syncserverbroker import SyncServerBroker
-from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.classes.internal.backend.processitem import ProcessType
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 from ce1sus.mappers.misp.mispce1sus import MispConverter, MispConverterException
@@ -51,7 +51,7 @@ class MISPAdapterException500(Exception):
 class MISPAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    BaseView.__init__(self, config)
+    super(BaseView, self).__init__(config)
     self.event_controller = EventController(config, session)
     self.server_broker = self.event_controller.broker_factory(SyncServerBroker)
     self.ce1sus_to_misp = Ce1susMISP(config, session)

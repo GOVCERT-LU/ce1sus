@@ -7,7 +7,7 @@ Created on Feb 2, 2014
 """
 import sqlalchemy.orm.exc
 
-from ce1sus.db.classes.config import Ce1susConfig
+from ce1sus.db.classes.internal.backend.config import Ce1susConfig
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
 

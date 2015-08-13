@@ -6,9 +6,10 @@
 Created on Nov 3, 2014
 """
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
-from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
+from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
+from ce1sus.db.classes.internal.definitions import AttributeDefinition
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -20,7 +21,7 @@ __license__ = 'GPL v3+'
 class AdminAttributeHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
     self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
 
@@ -32,8 +33,7 @@ class AdminAttributeHandler(RestBaseHandler):
       method = args.get('method')
       path = args.get('path')
       json = args.get('json')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
       if method == 'GET':
         if len(path) > 0:
                     # if there is a uuid as next parameter then return single user
@@ -48,19 +48,19 @@ class AdminAttributeHandler(RestBaseHandler):
               else:
                 result = list()
                 for obj in definition.objects:
-                  result.append(obj.to_dict(details, inflated))
+                  result.append(obj.to_dict(cache_object))
                 return result
             else:
               raise RestHandlerException(u'"{0}" is not supported'.format(type_))
           else:
-            return definition.to_dict(details, inflated)
+            return definition.to_dict(cache_object)
         else:
           # else return all
 
           definitions = self.attribute_definition_controller.get_all_attribute_definitions()
           result = list()
           for definition in definitions:
-            result.append(definition.to_dict(details, inflated))
+            result.append(definition.to_dict(cache_object))
           return result
       elif method == 'POST':
         self.check_if_admin()
@@ -88,10 +88,10 @@ class AdminAttributeHandler(RestBaseHandler):
             raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
         else:
           # Add new user
-          attr_def = self.assembler.assemble_attribute_definition(json)
+          attr_def = self.assembler.assemble(json, AttributeDefinition, None, cache_object)
           # set the new checksum
           self.attribute_definition_controller.insert_attribute_definition(attr_def, self.get_user())
-          return attr_def.to_dict(details, inflated)
+          return attr_def.to_dict(cache_object)
       elif method == 'PUT':
         self.check_if_admin()
         # update user
@@ -99,11 +99,10 @@ class AdminAttributeHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single user
           uuid = path.pop(0)
           attr_def = self.attribute_definition_controller.get_attribute_definitions_by_uuid(uuid)
-          self.assembler.update_attribute_definition(attr_def, json)
-
+          self.updater.update(attr_def, json, cache_object)
           # set the new checksum
           self.attribute_definition_controller.update_attribute_definition(attr_def, self.get_user())
-          return attr_def.to_dict(details, inflated)
+          return attr_def.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
 

@@ -28,6 +28,11 @@ app.controller('layoutController', function($scope, $routeSegment, version, menu
     }, $log);
     return subMenuArray;
   };
+  
+
+  
+  
+  
 });
 
 app.controller('homeController', function($scope, $routeSegment, changelog, $log) {

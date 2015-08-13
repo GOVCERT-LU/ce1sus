@@ -99,6 +99,10 @@ class Configuration(object):
       raise ConfigSectionNotFoundException('Section ' + section +
                                            ' is not found in ' + self.config_file)
 
+  def set(self, section, key, value):
+    section = self.get_section(section)
+    section[key] = value
+
   def get(self, section, key, default_value='@@NotSet'):
     """
     Returns the value for the given section key pair

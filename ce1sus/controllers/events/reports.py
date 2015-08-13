@@ -21,7 +21,7 @@ class ReportController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.report_broker = self.broker_factory(ReportBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
@@ -41,7 +41,7 @@ class ReportController(BaseController):
   def insert_report(self, report, user, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(report, user, user.group, True)
+      self.set_extended_logging(report, user, True)
       self.report_broker.insert(report)
     except IntegrityException as error:
       self.logger.debug(error)
@@ -53,7 +53,7 @@ class ReportController(BaseController):
   def update_report(self, report, user, commit=True):
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(report, user, user.group, False)
+      self.set_extended_logging(report, user, False)
       self.report_broker.update(report, commit)
     except BrokerException as error:
       raise ControllerException(error)
@@ -100,7 +100,7 @@ class ReportController(BaseController):
     # TODO: include handler
     try:
       user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(reference, user, user.group, False)
+      self.set_extended_logging(reference, user, False)
       # TODO integrate handlersd
       self.reference_broker.update(reference, commit)
     except BrokerException as error:
@@ -124,7 +124,7 @@ class ReportController(BaseController):
       if owner:
         reference.properties.is_validated = True
 
-      self.set_extended_logging(reference, user, user.group, True)
+      self.set_extended_logging(reference, user, True)
       self.reference_broker.insert(reference, False)
 
       if additional_references:
@@ -132,7 +132,7 @@ class ReportController(BaseController):
           if owner:
             additional_reference.properties.is_validated = True
 
-          self.set_extended_logging(additional_reference, user, user.group, True)
+          self.set_extended_logging(additional_reference, user, True)
           self.reference_broker.insert(additional_reference, commit=False)
 
       self.reference_broker.do_commit(commit)

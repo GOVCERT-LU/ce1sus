@@ -7,7 +7,7 @@ Created: Sep 19, 2013
 """
 import types
 
-from ce1sus.db.classes.object import RelatedObject
+from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.handlers.base import HandlerException
 
@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class MultipleGenericHandler(GenericHandler):
 
   def __init__(self):
-    GenericHandler.__init__(self)
+    super(GenericHandler, self).__init__()
     self.is_multi_line = True
 
   @staticmethod

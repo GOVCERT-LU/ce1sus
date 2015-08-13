@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class ValidationHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.events_controller = self.controller_factory(EventsController)
 
   @rest_method()
@@ -30,9 +30,10 @@ class ValidationHandler(RestBaseHandler):
     parameters = args.get('parameters')
     count = parameters.get('count', 10)
     page = parameters.get('page', 1)
-    details = self.get_detail_value(args)
+    cache_object = self.get_cache_object(args)
     events, total_events = self.events_controller.get_unvalidated_events(page, count, self.get_user(), parameters)
     result = list()
     for event in events:
-      result.append(event.to_dict(details, False))
+      event_dict = event.attribute_to_dict(event, cache_object)
+      result.append(event_dict)
     return {'total': total_events, 'data': result}

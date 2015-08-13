@@ -28,6 +28,9 @@ class BitBase(object):
     if hasattr(self.__parent_object, self.__attr_name):
       setattr(self.__parent_object, self.__attr_name, self.bit_code)
 
+  def get_classname(self):
+    return self.__class__.__name__
+
   @property
   def bit_code(self):
     return self.__bit_value
@@ -37,6 +40,14 @@ class BitBase(object):
     self.__bit_value = value
     if hasattr(self.__parent_object, self.__attr_name):
       setattr(self.__parent_object, self.__attr_name, self.bit_code)
+
+  @property
+  def uuid(self):
+    return self.__parent_object.uuid
+
+  @property
+  def modified_on(self):
+    return self.__parent_object.modified_on
 
   @property
   def parent(self):

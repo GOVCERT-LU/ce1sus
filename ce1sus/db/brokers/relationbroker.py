@@ -10,9 +10,9 @@ from sqlalchemy import or_
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import not_
 
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.definitions import AttributeDefinition
-from ce1sus.db.classes.relation import Relation
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.definitions import AttributeDefinition
+from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import BrokerBase, BrokerException, IntegrityException
 
 
@@ -23,10 +23,6 @@ __license__ = 'GPL v3+'
 
 
 class RelationBroker(BrokerBase):
-  """This is the interface between python an the database"""
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_relations_by_event(self, event, unique_events=True):
     """
@@ -109,7 +105,7 @@ class RelationBroker(BrokerBase):
 
   def get_all_rel_with_not_def_list(self, def_ids):
     try:
-      relations = self.session.query(Relation).join(Attribute, Relation.attribute_id == Attribute.identifier).join(AttributeDefinition, Attribute.definition_id == AttributeDefinition.identifier).filter(not_(AttributeDefinition.identifier.in_(def_ids))).all()
+      relations = self.session.query(Relation).join(Attribute, Relation.attribute_id == getattr(Attribute, 'identifier')).join(AttributeDefinition, Attribute.definition_id == getattr(AttributeDefinition, 'identifier')).filter(not_(getattr(AttributeDefinition, 'identifier').in_(def_ids))).all()
       if relations:
         return relations
       else:

@@ -18,9 +18,8 @@ from shutil import rmtree
 from tempfile import gettempdir
 import warnings
 
-
 from ce1sus.controllers.base import ControllerException, ControllerIntegrityException
-from ce1sus.controllers.common.merger import Merger
+from ce1sus.controllers.common.merger.merger import Merger
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.stix.stixmapper import StixMapper
 from ce1sus.views.web.common.base import BaseView
@@ -48,7 +47,7 @@ class OpenIOCException(Exception):
 class OpenIOCAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    BaseView.__init__(self, config)
+    super(BaseView, self).__init__(config)
     self.stix_mapper = StixMapper(config, session)
     self.merger = Merger(config, session)
     self.base = self.config.get('OpenIOCAdapter', 'file', None)

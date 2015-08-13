@@ -48,7 +48,7 @@ __license__ = 'GPL v3+'
 class RestController(BaseView):
 
   def __init__(self, config):
-    BaseView.__init__(self, config)
+    super(BaseView, self).__init__(config)
     self.instances = dict()
     self.catch_errors = self.config.get('ce1sus', 'catcherrors', False)
     # add instances known to rest and their first URL

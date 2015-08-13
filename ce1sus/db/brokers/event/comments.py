@@ -5,7 +5,7 @@
 
 Created on Dec 22, 2014
 """
-from ce1sus.db.classes.event import Comment
+from ce1sus.db.classes.internal.event import Comment
 from ce1sus.db.common.broker import BrokerBase
 
 

@@ -7,9 +7,8 @@ Created 12 Sept 2013
 """
 
 
-from cherrypy.process import plugins
-from sqlalchemy.orm import scoped_session, sessionmaker
 import cherrypy
+from cherrypy.process import plugins
 
 
 class SAEnginePlugin(plugins.SimplePlugin):
@@ -31,7 +30,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
     Finally we create a new 'bind' channel that the SA tool
     will use to map a session to the SA engine at request time.
     """
-    plugins.SimplePlugin.__init__(self, bus)
+    super(plugins.SimplePlugin, self).__init__(bus)
     self.sa_engine = None
     self.bus.subscribe("bind", self.bind)
     self.connector = connector
@@ -57,7 +56,7 @@ class SATool(cherrypy.Tool):
   http://www.defuze.org/archives/222-integrating-
                                     sqlalchemy-into-a-cherrypy-application.html
   """
-  def __init__(self):
+  def __init__(self, connector):
     """
     The SA tool is responsible for associating a SA session
     to the SA engine and attaching it to the current request.
@@ -70,12 +69,12 @@ class SATool(cherrypy.Tool):
     a requests starts and commits/rollbacks whenever
     the request terminates.
     """
-    cherrypy.Tool.__init__(self, 'on_start_resource',
-                           self.bind_session,
-                           priority=20)
+    super(cherrypy.Tool, self).__init__('on_start_resource',
+                                        self.bind_session,
+                                        priority=20)
+    self.connector = connector
 
-    self.session = scoped_session(sessionmaker(autoflush=False,
-                                               autocommit=False))
+    self.session = self.connector.get_direct_session(False).session
 
   def _setup(self):
     cherrypy.Tool._setup(self)

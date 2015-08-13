@@ -8,11 +8,11 @@ Created on Dec 31, 2014
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.search import SearchController
-from ce1sus.db.classes.attribute import Attribute
-from ce1sus.db.classes.event import Event
-from ce1sus.db.classes.object import Object
-from ce1sus.db.classes.observables import Observable, ObservableComposition
-from ce1sus.db.classes.report import Report, Reference
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.event import Event
+from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require
 
 
@@ -25,7 +25,7 @@ __license__ = 'GPL v3+'
 class SearchHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.search_controller = self.controller_factory(SearchController)
 
   @rest_method(default=True)

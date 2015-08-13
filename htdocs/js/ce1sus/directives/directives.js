@@ -38,6 +38,8 @@ app.directive("userForm", function() {
       $scope.generateAPIKey = function() {
         $scope.user.api_key = generateAPIKey();
       };
+
+      $scope.setModified = setModified;
     }
   };
 });
@@ -50,6 +52,9 @@ app.directive("groupForm", function() {
       group: "=group",
       editMode: "=edit",
       tlps: "=tlps"
+    },
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/groupform.html"
   };
@@ -213,8 +218,8 @@ app.directive("objectDefinitionForm", function() {
       editMode: "=edit"
     },
     templateUrl: "pages/common/directives/objectdefinitionform.html",
-    controller: function($scope){
-      
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
     }
   };
 });
@@ -338,6 +343,8 @@ app.directive("attributeDefinitionForm", function() {
         }
       });
       
+      $scope.setModified = setModified;
+      
     }
   };
 });
@@ -353,7 +360,7 @@ app.directive("referenceDefinitionForm", function() {
     },
     templateUrl: "pages/common/directives/referencedefinitionform.html",
     controller: function($scope, $log){
-      
+      $scope.setModified = setModified;
     }
   };
 });
@@ -367,7 +374,10 @@ app.directive("typeForm", function() {
       datatypes: "=datatypes",
       editMode: "=edit"
     },
-    templateUrl: "pages/common/directives/typeform.html"
+    templateUrl: "pages/common/directives/typeform.html",
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
+    }
   };
 });
 
@@ -380,7 +390,10 @@ app.directive("conditionForm", function() {
       condition: "=condition",
       type: "=type"
     },
-    templateUrl: "pages/common/directives/conditionform.html"
+    templateUrl: "pages/common/directives/conditionform.html",
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
+    }
   };
 });
 
@@ -455,7 +468,9 @@ app.directive("composedobservable", function($compile) {
       $scope.addChildObservable = function(){
         alert('Hello');
       };
-      
+
+      $scope.setModified = setModified;
+
     },
     templateUrl: "pages/common/directives/composendobservableview.html",
     compile: function (element) {
@@ -497,7 +512,9 @@ app.directive("indicator", function($compile) {
       $scope.showDetails = function(){
         $modal({scope: $scope, template: 'pages/events/event/indicator/details.html', show: true});
       };
-      
+
+      $scope.setModified = setModified;
+
     },
     templateUrl: "pages/common/directives/indicatorview.html",
     compile: function(tElement, tAttr, transclude) {
@@ -649,6 +666,10 @@ app.directive("observable", function($compile) {
           $scope.observable.object = observableObject;
         }
       };
+      
+
+      $scope.setModified = setModified;
+
     },
     templateUrl: "pages/common/directives/observableview.html",
     compile: function(tElement, tAttr, transclude) {
@@ -749,9 +770,7 @@ app.directive("object", function($compile) {
         $scope.attributeDetails = attribute;
         $modal({scope: $scope, template: 'pages/events/event/observable/object/attributes/details.html', show: true});
       };
-      
-      //TODO: edit Attribute
-      
+
       $scope.addChildObject = function(){
         $modal({scope: $scope, template: 'pages/events/event/observable/object/addChild.html', show: true});
       };
@@ -835,7 +854,9 @@ app.directive("object", function($compile) {
         }
         return '';
       };
-      
+
+      $scope.setModified = setModified;
+
     },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {
@@ -1074,7 +1095,10 @@ app.directive("observableForm", function() {
       permissions:"=permissions",
       showoperator: "=showoperator"
     },
-    templateUrl: "pages/common/directives/observableform.html"
+    templateUrl: "pages/common/directives/observableform.html",
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
+    }
   };
 });
 
@@ -1084,7 +1108,6 @@ app.directive("observableObjectForm", function() {
     restrict: "E",
     scope: {
       observableobject: "=observableobject",
-      child: "=child",
       definitions: '=',
       permissions: "=permissions",
       type: "=type"
@@ -1098,8 +1121,36 @@ app.directive("observableObjectForm", function() {
           handleError(response, messages);
         });
       } 
+
+      $scope.setModified = setModified;
+
     },
     templateUrl: "pages/common/directives/observableobjectform.html"
+  };
+});
+
+app.directive("relatedObjectForm", function() {
+  
+  return {
+    restrict: "E",
+    scope: {
+      observableobject: "=observableobject",
+      definitions: '=',
+      permissions: "=permissions",
+      type: "=type"
+    },
+    controller: function($scope, Restangular, messages){
+      //get the possible relations and add None
+      Restangular.one('relations').getList().then(function(relations) {
+        $scope.relations = relations;
+      }, function(response) {
+        handleError(response, messages);
+      });
+      
+      $scope.setModified = setModified;
+
+    },
+    templateUrl: "pages/common/directives/relatedobjectform.html"
   };
 });
 
@@ -1113,8 +1164,8 @@ app.directive("serverForm", function() {
       type: "=type",
       users: "=users"
     },
-    controller: function($scope, Restangular, messages){
-     
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/serverform.html"
   };
@@ -1130,8 +1181,8 @@ app.directive("eventReportForm", function() {
       permissions: "=permissions",
       type: "=type"
     },
-    controller: function($scope, Restangular, messages){
-
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/eventreportform.html"
   };
@@ -1164,7 +1215,8 @@ app.directive("objectAttributeForm", function() {
 
         
       };
-      
+
+      $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/objectattributeform.html"
   };
@@ -1195,6 +1247,9 @@ app.directive("reportReferenceForm", function() {
           return result;
         }
       };
+      
+      $scope.setModified = setModified;
+      
     },
     templateUrl: "pages/common/directives/reportreferenceform.html"
   };
@@ -1252,6 +1307,8 @@ app.directive("attributeHandler", function() {
         }
       };
 
+      $scope.setModified = setModified;
+      
       $scope.$watch('definition.regex', function() {
         $scope.patternexpression = (function() {
           if (($scope.type != 'view') ){
@@ -1406,6 +1463,8 @@ app.directive("referenceHandler", function() {
       });
       
 
+      $scope.setModified = setModified;
+
       $scope.patternexpression = /^.*$/;
     },
   };
@@ -1430,6 +1489,7 @@ app.directive("eventForm", function() {
       } else {
         $scope.addEvent = false;
       }
+      $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/eventform.html"
   };
@@ -1444,6 +1504,10 @@ app.directive("objectPropertiesForm", function() {
       type: "=type",
       permissions: "=permissions"
     },
+    controller: function($scope, $log){
+      $scope.setModified = setModified;
+    },
+    
     templateUrl: "pages/common/directives/objectproperties.html"
   };
 });

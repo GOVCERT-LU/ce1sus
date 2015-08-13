@@ -10,7 +10,7 @@ app.controller("objectController", function($scope, Restangular, messages,
 });
 
 app.controller("objectDetailController", function($scope, $injector, Restangular, messages,
-    $log, $routeSegment, $object, attributes) {
+    $log, $routeSegment, $object, attributes, $location) {
   $scope.object = $object;
   $scope.attributes = attributes;
   
@@ -26,23 +26,22 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
         //remove the selected user and then go to the first one in case it exists
         var index = 0;
         angular.forEach($scope.objects, function(entry) {
-          if (entry.identifier === $scope.objects.identifier){
+          if (entry.identifier === $scope.object.identifier){
             $scope.objects.splice(index, 1);
-            if ($scope.users.length > 0) {
+            if ($scope.objects.length > 0) {
               $location.path("/admin/object/"+ $scope.objects[0].identifier);
             } else {
               $location.path("/admin/object");
             }
           }
-          messages.setMessage({'type':'success','message':'Object sucessfully removed'});
+          
           index++;
         }, $log);
-        
+        messages.setMessage({'type':'success','message':'Object sucessfully removed'});
       }
     }, function (response) {
       handleError(response, messages);
     });
-    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;
@@ -73,9 +72,9 @@ app.controller("objectAddController", function($scope, Restangular, messages,
   $scope.submitObject = function(){
     Restangular.all("objectdefinition").post($scope.object).then(function (object) {
       
-      if (data) {
-        $scope.objects.push(data);
-        $location.path("/admin/object/"+ data.identifier);
+      if (object) {
+        $scope.objects.push(object);
+        $location.path("/admin/object/"+ object.identifier);
       }
       messages.setMessage({'type':'success','message':'Object sucessfully added'});
       
@@ -114,6 +113,7 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
   };
   
   $scope.submitObject = function(){
+    $scope.object.modified_on = new Date().getTime();
     $scope.object.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
         //update username in case

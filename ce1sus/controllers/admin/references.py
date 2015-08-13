@@ -7,7 +7,7 @@ Created on Feb 23, 2014
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker, ReferenceDefintionsBroker
-from ce1sus.db.classes.report import ReferenceHandler
+from ce1sus.db.classes.internal.report import ReferenceHandler
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -30,7 +30,7 @@ class ReferencesController(BaseController):
   """Controller handling all the requests for groups"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.reference_broker = self.broker_factory(ReferencesBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
 
@@ -62,10 +62,8 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_reference(self, reference, user, commit=True):
+  def update_reference(self, reference, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(reference, user, insert=False)
       reference_definition = self.reference_broker.update(reference, commit)
       return reference_definition
     except ValidationException as error:
@@ -96,10 +94,8 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_reference_definition(self, reference_definition, user):
+  def update_reference_definition(self, reference_definition):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(reference_definition, user, insert=False)
       reference_definition = self.reference_definition_broker.update(reference_definition)
       return reference_definition
     except ValidationException as error:
@@ -108,14 +104,8 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_reference_definition(self, reference_definition, user, commit=True):
+  def insert_reference_definition(self, reference_definition, commit=True):
     try:
-      reference_definition.chksum = gen_reference_chksum(reference_definition)
-      user = self.user_broker.get_by_id(user.identifier)
-      if not reference_definition.reference_handler:
-        handler = self.reference_broker.get_handler_by_id(reference_definition.referencehandler_id)
-        reference_definition.reference_handler = handler
-      self.set_simple_logging(reference_definition, user, insert=True)
       reference_definition = self.reference_definition_broker.insert(reference_definition, False)
       self.reference_definition_broker.do_commit(commit)
       return reference_definition

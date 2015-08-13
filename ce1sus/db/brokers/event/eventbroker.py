@@ -9,9 +9,9 @@ import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_, or_
 
 from ce1sus.common.checks import get_max_tlp
-from ce1sus.db.classes.common import Analysis, Status, TLP
-from ce1sus.db.classes.event import Event, EventGroupPermission
-from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.internal.common import Analysis, Status, TLP
+from ce1sus.db.classes.internal.event import Event, EventGroupPermission
+from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
 
@@ -23,11 +23,6 @@ __license__ = 'GPL v3+'
 
 # pylint: disable=R0904
 class EventBroker(BrokerBase):
-  """
-  This broker handles all operations on event objects
-  """
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
 
   def get_broker_class(self):
     """

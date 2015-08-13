@@ -15,9 +15,12 @@ from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.controllers.events.reports import ReportController
-from ce1sus.db.classes.event import EventGroupPermission
-from ce1sus.db.classes.processitem import ProcessType
+from ce1sus.db.classes.ccybox.core.observables import Observable
+from ce1sus.db.classes.internal.backend.processitem import ProcessType
+from ce1sus.db.classes.internal.event import EventGroupPermission, Comment, Event
+from ce1sus.db.classes.internal.report import Report
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
+from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 
 
 __author__ = 'Weber Jean-Paul'
@@ -29,7 +32,7 @@ __license__ = 'GPL v3+'
 class EventHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.observable_controller = self.controller_factory(ObservableController)
     self.relation_controller = self.controller_factory(RelationController)
     self.report_controller = self.controller_factory(ReportController)
@@ -44,42 +47,42 @@ class EventHandler(RestBaseHandler):
     try:
       method = args.get('method', None)
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
       requested_object = self.parse_path(path, method)
       json = args.get('json')
-      headers = args.get('headers')
+
       # get the event
       event_id = requested_object.get('event_id')
       if event_id:
         event = self.event_controller.get_event_by_uuid(event_id)
         # check if event is viewable by the current user
         self.check_if_event_is_viewable(event)
+        self.set_event_properties_cache_object(cache_object, event)
 
         if requested_object['object_type'] is None:
                     # return the event
-          return self.__process_event(method, event, details, inflated, json, headers)
+          return self.__process_event(method, event, json, cache_object)
         elif requested_object['object_type'] == 'observable':
-          return self.__process_observable(method, event, requested_object, details, inflated, json, headers)
+          return self.__process_observable(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'indicator':
-          return self.__process_indicator(method, event, requested_object, details, inflated, json, headers)
+          return self.__process_indicator(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'observable_composition':
-          return self.__process_composed_observable(method, event, requested_object, details, inflated, json)
+          return self.__process_composed_observable(method, event, requested_object, cache_object)
         elif requested_object['object_type'] == 'changegroup':
           self.check_if_admin()
-          return self.__change_event_group(method, event, json)
+          return self.__change_event_group(method, event, json, cache_object)
         elif requested_object['object_type'] == 'comment':
-          return self.__process_commment(method, event, requested_object, details, inflated, json, headers)
+          return self.__process_commment(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'publish':
-          return self.__publish_event(method, event, requested_object, details, inflated, json, headers)
+          return self.__publish_event(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'validate':
-          return self.__process_event_validate(method, event, requested_object, details, inflated, json)
+          return self.__process_event_validate(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'group':
-          return self.__process_event_group(method, event, requested_object, details, inflated, json)
+          return self.__process_event_group(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'relations':
-          return self.__process_event_relations(method, event, requested_object, details, inflated, json)
+          return self.__process_event_relations(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'report':
-          return self.__process_event_report(method, event, requested_object, details, inflated, json, headers)
+          return self.__process_event_report(method, event, requested_object, json, cache_object)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -87,11 +90,15 @@ class EventHandler(RestBaseHandler):
         # This can only happen when a new event is inserted
         if method == 'POST':
           # populate event
-          user = self.get_user()
-          event = self.assembler.assemble_event(json, user, True, self.is_rest_insert(headers))
-          self.event_controller.insert_event(user, event, True, True)
+          cache_object.owner = True
+          cache_object.event_permissions = EventPermissions('0')
+          cache_object.event_permissions.set_all()
 
-          return self.__return_event(event, details, inflated)
+          event = self.assembler.assemble(json, Event, None, cache_object)
+
+          self.event_controller.insert_event(event, True, True)
+
+          return self.__return_event(event, cache_object)
         else:
           raise RestHandlerException(u'Invalid request - Event cannot be called without ID')
     except ControllerNothingFoundException as error:
@@ -99,11 +106,11 @@ class EventHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __change_event_group(self, method, event, json):
+  def __change_event_group(self, method, event, json, cache_object):
     if method == 'PUT':
-      if self.is_user_priviledged(self.get_user()):
+      if self.is_user_priviledged(cache_object.user):
         group_id = json.get('identifier', None)
-        self.event_controller.change_owner(event, group_id, self.get_user())
+        self.event_controller.change_owner(event, group_id, cache_object.user)
 
         return 'OK'
       else:
@@ -111,13 +118,12 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException(u'Invalid request')
 
-  def __process_commment(self, method, event, requested_object, details, inflated, json, headers):
+  def __process_commment(self, method, event, requested_object, json, cache_object):
     self.check_if_owner(event)
-    user = self.get_user()
     if method == 'POST':
-      comment = self.assembler.assemble_comment(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-      self.event_controller.insert_comment(user, comment)
-      return comment.to_dict(details, inflated)
+      comment = self.assembler.assemble(json, Comment, event, cache_object)
+      self.event_controller.insert_comment(cache_object.user, comment)
+      return comment.to_dict()
     else:
       comment_id = requested_object['object_uuid']
       if comment_id:
@@ -125,79 +131,69 @@ class EventHandler(RestBaseHandler):
       else:
         raise PathParsingException(u'comment cannot be called without an ID')
       if method == 'GET':
-        return comment.to_dict(details, inflated)
+        return comment.to_dict()
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
-        comment = self.assembler.update_comment(comment, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-        self.event_controller.update_comment(user, comment)
-        return comment.to_dict(details, inflated)
+        comment = self.updater.update(comment, json, cache_object)
+        self.event_controller.update_comment(cache_object.user, comment)
+        return comment.to_dict()
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
-        self.event_controller.remove_comment(user, comment)
+        self.event_controller.remove_comment(cache_object.user, comment)
         return 'Deleted comment'
       else:
         raise RestHandlerException(u'Invalid request')
 
-  def __process_event(self, method, event, details, inflated, json, headers):
+  def __process_event(self, method, event, json, cache_object):
     if method == 'GET':
-      return self.__return_event(event, details, inflated)
+      return self.__return_event(event, cache_object)
     elif method == 'POST':
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
     elif method == 'PUT':
       old_event = event
-      user = self.get_user()
       self.check_if_event_is_modifiable(event)
       # check if validated / shared as only the owner can do this
-      self.check_if_user_can_set_validate_or_shared(event, old_event, user, json)
-      event = self.assembler.update_event(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-
-      self.event_controller.update_event(user, event, True, True)
-      return self.__return_event(event, details, inflated)
+      self.check_if_user_can_set_validate_or_shared(event, old_event, cache_object.user, json)
+      self.updater.update(event, json, cache_object)
+      self.event_controller.update_event(event, True, True)
+      return self.__return_event(event, cache_object)
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
-      self.event_controller.remove_event(self.get_user(), event)
+      self.event_controller.remove_event(cache_object.user, event)
       return 'Deleted event'
 
-  def __process_indicator(self, method, event, requested_object, details, inflated, json, headers):
-    user = self.get_user()
-
+  def __process_indicator(self, method, event, requested_object, json, cache_object):
     if method == 'GET':
       self.check_if_event_is_viewable(event)
-      event_permission = self.get_event_user_permissions(event, user)
       observable_id = requested_object['object_uuid']
       if observable_id:
         raise RestHandlerException('Not implemented')
       else:
-        result = list()
-        for indicator in event.get_indicators_for_permissions(event_permission, user):
-          if self.is_item_viewable(event, indicator):
-            result.append(indicator.to_dict(details, inflated, event_permission, user))
+        result = event.attributelist_to_dict(event.indicators, cache_object)
         if result:
           return result
         else:
           # generate indicators
-          indicators = self.indicator_controller.get_generic_indicators(event, user)
+          indicators = self.indicator_controller.get_generic_indicators(event, cache_object.user)
           result = list()
           for indicator in indicators:
             if self.is_item_viewable(event, indicator):
-              result.append(indicator.to_dict(details, inflated, event_permission, user))
+              result.append(indicator.to_dict(cache_object))
           return result
     else:
       raise RestHandlerException('Not implemented')
 
-  def __process_observable(self, method, event, requested_object, details, inflated, json, headers):
-    user = self.get_user()
-    event_permissions = self.get_event_user_permissions(event, user)
+  def __process_observable(self, method, event, requested_object, json, cache_object):
     if method == 'POST':
       self.check_if_user_can_add(event)
-      observable = self.assembler.assemble_observable(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-      self.observable_controller.insert_observable(observable, user, True)
-      return observable.to_dict(details, inflated, event_permissions, user)
+      observable = self.assembler.assemble(json, Observable, event, cache_object)
+      self.observable_controller.insert_observable(observable, True)
+      return observable.to_dict(cache_object)
     else:
       if method == 'GET':
         self.check_if_event_is_viewable(event)
-        return self.__process_observable_get(event, requested_object, details, inflated)
+        return self.__process_observable_get(event, requested_object, cache_object)
       else:
         observable_id = requested_object['object_uuid']
         if observable_id:
@@ -209,85 +205,77 @@ class EventHandler(RestBaseHandler):
           old_observable = observable
           self.check_if_event_is_modifiable(event)
 
-          self.check_if_user_can_set_validate_or_shared(event, old_observable, user, json)
+          self.check_if_user_can_set_validate_or_shared(event, old_observable, cache_object.user, json)
 
-          observable = self.assembler.update_observable(observable, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-          self.observable_controller.update_observable(observable, user, True)
-          return observable.to_dict(details, inflated, event_permissions, user)
+          self.updater.update(observable, json, cache_object)
+          self.observable_controller.update_observable(observable, True)
+          return observable.to_dict(cache_object)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           if observable.observable_composition:
-            self.observable_controller.remove_observable_composition(observable.observable_composition, user, True)
-          self.observable_controller.remove_observable(observable, user, True)
+            self.observable_controller.remove_observable_composition(observable.observable_composition, cache_object.user, True)
+          self.observable_controller.remove_observable(observable, cache_object.user, True)
           return 'Deleted observable'
 
-  def __process_observable_get(self, event, requested_object, details, inflated):
-    user = self.get_user()
-
+  def __process_observable_get(self, event, requested_object, cache_object):
     try:
-      event_permission = self.get_event_user_permissions(event, user)
+      event_permission = self.get_event_user_permissions(event, cache_object.user)
       uuid = requested_object['object_uuid']
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_uuid(uuid)
         self.check_item_is_viewable(event, observable)
-        if is_object_viewable(observable, event_permission, user):
-          return observable.to_dict(details, inflated, event_permission, user)
+        if is_object_viewable(observable, event_permission, cache_object.user):
+          return observable.to_dict(cache_object)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
 
       else:
         # return all observables from the event
-        result = list()
-        for observable in event.get_observables_for_permissions(event_permission, user):
-          if self.is_item_viewable(event, observable):
-            result.append(observable.to_dict(details, inflated, event_permission, user))
-
+        result = event.attributelist_to_dict(event.observables, cache_object)
         return result
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_composed_observable(self, method, event, requested_object, details, inflated, json):
+  def __process_composed_observable(self, method, event, requested_object, json, cache_object):
     if method == 'GET':
-      return self.__process_composed_observable_get(requested_object, details, inflated)
+      return self.__process_composed_observable_get(requested_object, cache_object)
     elif method == 'POST':
       raise RestHandlerException('Operation not supported')
     elif method == 'PUT':
       raise RestHandlerException('Operation not supported')
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
-      self.event_controller.remove_event(self.get_user(), event)
+      self.event_controller.remove_event(cache_object.user, event)
 
-  def __process_composed_observable_get(self, requested_object, details, inflated):
+  def __process_composed_observable_get(self, requested_object, cache_object):
     try:
       uuid = requested_object['object_uuid']
       if uuid:
         composed_observable = self.observable_controller.get_composed_observable_by_uuid(uuid)
-        return composed_observable.to_dict(details, inflated)
+        return composed_observable.to_dict()
       else:
         raise PathParsingException(u'observable_composition cannot be called without an ID')
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __return_event(self, event, details, inflated):
+  def __return_event(self, event, cache_object):
     # Add additional permissions for the user
-    user = self.get_user()
-    event_permission = self.get_event_user_permissions(event, user)
-    owner = self.is_event_owner(event, user)
-    result = event.to_dict(details, inflated, event_permission, user)
-    result['userpermissions'] = event_permission.to_dict()
-    result['userpermissions']['owner'] = owner
+
+    result = event.to_dict(cache_object)
+    result['userpermissions'] = cache_object.event_permissions.to_dict(cache_object)
+    result['userpermissions']['owner'] = cache_object.owner
     return result
 
-  def __process_event_validate(self, method, event, requested_object, details, inflated, json):
+  def __process_event_validate(self, method, event, requested_object, json, cache_object):
     if method != 'PUT':
       raise RestHandlerException('Operation not supported')
     self.check_if_admin_validate()
-    self.event_controller.validate_event(event, self.get_user())
+    self.event_controller.validate_event(event, cache_object.user)
     return 'Event validated'
 
-  def __process_event_group(self, method, event, requested_object, details, inflated, json):
+  def __process_event_group(self, method, event, requested_object, json, cache_object):
     if method == 'POST':
       self.check_if_event_group_can_change(event)
       # get group
@@ -308,7 +296,7 @@ class EventHandler(RestBaseHandler):
             # use defaults
             event_group_permission.dbcode = group.default_dbcode
 
-          self.event_controller.insert_event_group_permission(self.get_user(), event_group_permission, True)
+          self.event_controller.insert_event_group_permission(cache_object.user, event_group_permission, True)
           return event_group_permission.to_dict()
         else:
           raise RestHandlerException(u'Cannot add group as no group was provided')
@@ -325,7 +313,7 @@ class EventHandler(RestBaseHandler):
         if json_permissions:
           event_group = self.event_controller.get_event_group_by_uuid(uuid)
           event_group.permissions.populate(json_permissions)
-          self.event_controller.update_event_group_permissions(self.get_user(), event_group, True)
+          self.event_controller.update_event_group_permissions(cache_object.user, event_group, True)
           return event_group.to_dict()
         else:
           raise RestHandlerException(u'Cannot update group permissions for group {1} on event {0} as uuid was specified'.format(event.identifer, uuid))
@@ -340,7 +328,7 @@ class EventHandler(RestBaseHandler):
         # get group
         event_group_permission = self.event_controller.get_event_group_by_uuid(uuid)
 
-        self.event_controller.remove_group_permissions(self.get_user(), event_group_permission, True)
+        self.event_controller.remove_group_permissions(cache_object.user, event_group_permission, True)
         return 'OK'
       else:
         raise RestHandlerException(u'Cannot remove group as no group was provided')
@@ -348,18 +336,17 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Operation not supported')
 
-  def __process_event_relations(self, method, event, requested_object, details, inflated, json):
+  def __process_event_relations(self, method, event, requested_object, json, cache_object):
     if method == 'GET':
       result = list()
-      if details:
+      if cache_object.details:
         # return the complete with evety event attribute etc
         relations = self.relation_controller.get_relations_for_event(event)
         for relation in relations:
           rel_event = relation.rel_event
           rel_attr = relation.rel_attribute
           if self.is_event_viewable(rel_event) and self.is_item_viewable(rel_event, rel_attr):
-            event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
-            result.append(relation.to_dict(details, inflated, event_permissions, self.get_user()))
+            result.append(relation.to_dict(cache_object))
 
         return result
       else:
@@ -368,8 +355,7 @@ class EventHandler(RestBaseHandler):
         for relation in relations:
           rel_event = relation.rel_event
           if self.is_event_viewable(rel_event):
-            event_permissions = self.get_event_user_permissions(rel_event, self.get_user())
-            result.append(rel_event.to_dict(details, inflated, event_permissions, self.get_user()))
+            result.append(rel_event.to_dict(cache_object))
 
         return result
     elif method == 'DELETE':
@@ -383,44 +369,38 @@ class EventHandler(RestBaseHandler):
     else:
       raise RestHandlerException('Operation not supported')
 
-  def __process_event_report(self, method, event, requested_object, details, inflated, json, headers):
+  def __process_event_report(self, method, event, requested_object, json, cache_object):
 
-    user = self.get_user()
     if method == 'GET':
-      event_permission = self.get_event_user_permissions(event, user)
       uuid = requested_object['object_uuid']
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
         report = self.report_controller.get_report_by_uuid(uuid)
         self.check_item_is_viewable(event, report)
-        if is_object_viewable(report, event_permission):
-          return report.to_dict(details, inflated, event_permission, user)
+        if is_object_viewable(report, cache_object.event_permissions):
+          return report.to_dict(cache_object)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
 
       else:
         # return all observables from the event
-        result = list()
-        for report in event.get_reports_for_permissions(event_permission, user):
-          if self.is_item_viewable(event, report):
-            result.append(report.to_dict(details, inflated, event_permission, user))
+        cache_object.inflated = True
+        result = event.attributelist_to_dict(event.reports, cache_object)
         return result
     if method == 'POST':
-      event_permission = self.get_event_user_permissions(event, user)
-      self.check_if_user_can_add(event)
-      report = self.assembler.assemble_report(event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
 
-      self.report_controller.insert_report(report, user)
-      return report.to_dict(details, inflated, event_permission, user)
+      self.check_if_user_can_add(event)
+      report = self.assembler.assemble(json, Report, event, cache_object)
+      self.report_controller.insert_report(report, cache_object.user)
+      return report.to_dict(cache_object)
     else:
       raise RestHandlerException('Operation not supported')
     return list()
 
-  def __publish_event(self, method, event, requested_object, details, inflated, json, headers):
-    user = self.get_user()
+  def __publish_event(self, method, event, requested_object, json, cache_object):
     if method == 'POST':
-      self.event_controller.publish_event(event, user)
+      self.event_controller.publish_event(event, cache_object.user)
 
       type_ = ProcessType.PUBLISH
       if event.last_publish_date:
@@ -428,9 +408,9 @@ class EventHandler(RestBaseHandler):
       servers = self.server_controller.get_all_push_servers()
       for server in servers:
         if self.is_event_viewable(event, server.user):
-          self.process_controller.create_new_process(type_, event.uuid, user, server, False)
+          self.process_controller.create_new_process(type_, event.uuid, cache_object.user, server, False)
       # add also mail
-      self.process_controller.create_new_process(type_, event.uuid, user, None, False)
+      self.process_controller.create_new_process(type_, event.uuid, cache_object.user, None, False)
       self.process_controller.process_broker.do_commit(True)
 
       return 'Published event.'

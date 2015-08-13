@@ -17,7 +17,7 @@ app.controller("attributeController", function($scope, Restangular, messages,
 });
 
 app.controller("attributeDetailController", function($scope, Restangular, messages,
-    $log, $routeSegment, $attribute, objects) {
+    $log, $routeSegment, $attribute, objects, $location) {
   
   var identifier = $routeSegment.$routeParams.id;
   
@@ -49,23 +49,22 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
         //remove the selected user and then go to the first one in case it exists
         var index = 0;
         angular.forEach($scope.attributes, function(entry) {
-          if (entry.identifier === $scope.attributes.identifier){
+          if (entry.identifier === $scope.attribute.identifier){
             $scope.attributes.splice(index, 1);
-            if ($scope.users.length > 0) {
+            if ($scope.attributes.length > 0) {
               $location.path("/admin/attribute/"+ $scope.attributes[0].identifier);
             } else {
               $location.path("/admin/attribute");
             }
           }
-          messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
           index++;
         }, $log);
         
       }
+      messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
     }, function (response) {
       handleError(response, messages);
     });
-    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;
@@ -190,6 +189,7 @@ app.controller("attributeEditController", function($scope, Restangular, messages
   };
   
   $scope.submitAttribute = function(){
+    $scope.attribute.modified_on = new Date().getTime();
     $scope.attribute.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
         $scope.attribute = data;

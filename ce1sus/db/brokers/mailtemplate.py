@@ -10,7 +10,7 @@ Created on Feb 21, 2014
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from ce1sus.db.classes.mailtemplate import MailTemplate
+from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 
@@ -27,10 +27,7 @@ class MailTemplateBroker(BrokerBase):
   ACTIVATION = 'Activation'
   EVENT_PUBLICATION = 'Publication'
   EVENT_UPDATE = 'Update'
-  PROPOSAL = 'Proposal'
-
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
+  PROPOSAL = 'Proposal
 
   def get_broker_class(self):
     return MailTemplate

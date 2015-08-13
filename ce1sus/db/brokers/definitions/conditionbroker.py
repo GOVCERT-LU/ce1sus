@@ -8,7 +8,7 @@ Created on Nov 6, 2014
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from ce1sus.db.classes.attribute import Condition
+from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, TooManyResultsFoundException, BrokerException
 
 

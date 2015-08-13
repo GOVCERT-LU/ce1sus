@@ -6,7 +6,7 @@
 Created on Dec 19, 2014
 """
 from ce1sus.controllers.base import ControllerException
-from ce1sus.db.classes.common import Status, Analysis, Risk, TLP
+from ce1sus.db.classes.internal.common import Status, Analysis, Risk, TLP
 from ce1sus.mappers.stix.helpers.common import relation_definitions
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
 
@@ -18,9 +18,6 @@ __license__ = 'GPL v3+'
 
 
 class StatusHandler(RestBaseHandler):
-
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
@@ -34,9 +31,6 @@ class StatusHandler(RestBaseHandler):
 
 class AnalysisHandler(RestBaseHandler):
 
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-
   @rest_method(default=True)
   @methods(allowed=['GET'])
   @require()
@@ -48,9 +42,6 @@ class AnalysisHandler(RestBaseHandler):
 
 
 class RiskHandler(RestBaseHandler):
-
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])
@@ -64,9 +55,6 @@ class RiskHandler(RestBaseHandler):
 
 class TLPHanlder(RestBaseHandler):
 
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-
   @rest_method(default=True)
   @methods(allowed=['GET'])
   @require()
@@ -78,9 +66,6 @@ class TLPHanlder(RestBaseHandler):
 
 
 class RelationHandler(RestBaseHandler):
-
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
 
   @rest_method(default=True)
   @methods(allowed=['GET'])

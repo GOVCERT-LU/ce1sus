@@ -9,7 +9,7 @@ import sqlalchemy.orm.exc
 
 from ce1sus.db.brokers.definitions.definitionbase import DefinitionBrokerBase
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
-from ce1sus.db.classes.definitions import AttributeDefinition, ObjectDefinition
+from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.common.broker import NothingFoundException, BrokerException, IntegrityException
 
 
@@ -23,7 +23,7 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
   """This is the interface between python an the database"""
 
   def __init__(self, session):
-    DefinitionBrokerBase.__init__(self, session)
+    super(DefinitionBrokerBase, self).__init__(session)
     self.handler_broker = AttributeHandlerBroker(session)
 
   def get_broker_class(self):

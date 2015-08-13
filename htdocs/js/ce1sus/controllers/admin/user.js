@@ -67,7 +67,7 @@ app.controller("userAddController", function($scope, Restangular, messages, $rou
 
 });
 
-app.controller("userDetailController", function($scope, $routeSegment,$user, $log, messages, Restangular, showMailBtn) {
+app.controller("userDetailController", function($scope, $routeSegment,$user, $log, messages, Restangular, showMailBtn, $location) {
 
   $scope.user = $user;
   $scope.showMailBtn= showMailBtn;
@@ -111,7 +111,6 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
     }, function (response) {
       handleError(response, messages);
     });
-    $scope.$hide();
   };
 
   $scope.$routeSegment = $routeSegment;
@@ -168,6 +167,7 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
   };
   
   $scope.submitUser = function(){
+    $scope.user.modified_on = new Date().getTime();
     $scope.user.put().then(function (data) {
       if (data) {
         //update username in case

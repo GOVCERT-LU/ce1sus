@@ -19,9 +19,6 @@ __license__ = 'GPL v3+'
 # pylint: disable=R0904
 class SearchBroker(BrokerBase):
 
-  def __init__(self, session):
-    BrokerBase.__init__(self, session)
-
   def get_broker_class(self):
     """
     overrides BrokerBase.get_broker_class

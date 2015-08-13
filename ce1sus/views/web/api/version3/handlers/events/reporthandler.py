@@ -8,7 +8,8 @@ Created on Jan 9, 2015
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
 from ce1sus.controllers.events.reports import ReportController
-from ce1sus.db.classes.common import ValueException
+from ce1sus.db.classes.internal.common import ValueException
+from ce1sus.db.classes.internal.report import Report
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
@@ -22,7 +23,7 @@ __license__ = 'GPL v3+'
 class ReportHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.report_controller = self.controller_factory(ReportController)
 
   @rest_method(default=True)
@@ -32,24 +33,23 @@ class ReportHandler(RestBaseHandler):
     try:
       method = args.get('method', None)
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
       requested_object = self.parse_path(path, method)
       json = args.get('json')
-      headers = args.get('headers')
+      cache_object = self.get_cache_object(args)
       # get the event
       report_id = requested_object.get('event_id')
       if report_id:
         report = self.report_controller.get_report_by_uuid(report_id)
         event = report.event
         self.check_if_event_is_viewable(event)
+        self.set_event_properties_cache_object(cache_object, event)
         if requested_object['object_type'] is None:
                     # return the report
-          return self.__process_report(method, event, report, details, inflated, json, headers)
+          return self.__process_report(method, event, report, json, cache_object)
         elif requested_object['object_type'] == 'report':
-          return self.__process_child_report(method, event, report, requested_object, details, inflated, json, headers)
+          return self.__process_child_report(method, event, report, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'reference':
-          return self.__process_reference(method, event, report, requested_object, details, inflated, json, headers)
+          return self.__process_reference(method, event, report, requested_object, json, cache_object)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -60,20 +60,18 @@ class ReportHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __process_report(self, method, event, report, details, inflated, json, headers):
+  def __process_report(self, method, event, report, json, cache_object):
     try:
-      user = self.get_user()
       if method == 'POST':
         raise RestHandlerException('Please use event/{uuid}/report instead')
       else:
-        event_permissions = self.get_event_user_permissions(event, user)
         if method == 'GET':
           self.check_item_is_viewable(event, report)
-          return report.to_dict(details, inflated, event_permissions, user)
+          return report.to_dict(cache_object)
         elif method == 'PUT':
           old_report = report
           self.check_if_event_is_modifiable(event)
-          self.check_if_user_can_set_validate_or_shared(event, old_report, user, json)
+          self.check_if_user_can_set_validate_or_shared(event, old_report, cache_object.user, json)
           # check if there was not a parent set
           parent_id = json.get('parent_report_id', None)
           # TODO Review the relations as they have to be removed at some point if they were existing
@@ -84,26 +82,25 @@ class ReportHandler(RestBaseHandler):
             if related_report.parent_report_id != parent_id:
                             # unbind the earlier relation
               related_report.parent_report_id = parent_id
-              self.report_controller.update_related_report(related_report, user, False)
-          report = self.assembler.update_report(report, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
-          self.report_controller.update_report(report, user, True)
-          return report.to_dict(details, inflated, event_permissions, user)
+              self.report_controller.update_related_report(related_report, cache_object.user, False)
+          report = self.updater.update(report, json, cache_object)
+          self.report_controller.update_report(report, cache_object.user, True)
+          return report.to_dict(cache_object)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
-          self.report_controller.remove_report(report, user, True)
+          self.report_controller.remove_report(report, cache_object.user, True)
           return 'Deleted report'
     except ValueException as error:
       raise RestHandlerException(error)
 
-  def __process_child_report(self, method, event, report, requested_object, details, inflated, json, headers):
+  def __process_child_report(self, method, event, report, requested_object, json, cache_object):
     user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
-      child_obj = self.assembler.assemble_child_report(report, event, json, user, self.is_event_owner(event, user), self.is_rest_insert(headers))
+      child_obj = self.assembler.assemble(json, Report, event, cache_object)
 
       self.report_controller.insert_report(child_obj, user, False)
-      event_permissions = self.get_event_user_permissions(event, user)
-      return child_obj.to_dict(details, inflated, event_permissions, user)
+      return child_obj.to_dict(cache_object)
     else:
       raise RestHandlerException('Please use report/{uuid}/ instead')
 
@@ -122,7 +119,7 @@ class ReportHandler(RestBaseHandler):
     handler_instance.user = self.get_user()
     return handler_instance
 
-  def __process_reference(self, method, event, report, requested_object, details, inflated, json, headers):
+  def __process_reference(self, method, event, report, requested_object, json, cache_object):
     try:
       user = self.get_user()
       if method == 'POST':
@@ -130,8 +127,8 @@ class ReportHandler(RestBaseHandler):
         # Get needed handler
         definition = self.report_controller.get_reference_definitions_by_uuid(json.get('definition_id', None))
         handler_instance = self.__get_handler(definition)
-        handler_instance.is_rest_insert = self.is_rest_insert(headers)
-        handler_instance.is_owner = self.is_event_owner(event, user)
+        handler_instance.is_rest_insert = cache_object.rest_insert
+        handler_instance.is_owner = cache_object.owner
 
         # Ask handler to process the json for the new attributes
         reference, additional_references, related_reports = handler_instance.insert(report, user, json)
@@ -148,15 +145,15 @@ class ReportHandler(RestBaseHandler):
 
         # Return the generated references as json
         result_references = list()
-        result_references.append(reference.to_dict(details, inflated))
+        result_references.append(reference.to_dict(cache_object))
         if additional_references:
           for additional_reference in additional_references:
-            result_references.append(additional_reference.to_dict(details, inflated))
+            result_references.append(additional_reference.to_dict(cache_object))
 
         result_reports = list()
         if related_reports:
           for related_object in related_reports:
-            result_reports.append(related_object.to_dict(details, inflated))
+            result_reports.append(related_object.to_dict(cache_object))
 
         return {'references': result_references, 'related_reports': result_reports}
 
@@ -166,12 +163,12 @@ class ReportHandler(RestBaseHandler):
           if uuid:
             reference = self.report_controller.get_reference_by_uuid(uuid)
             self.check_item_is_viewable(event, reference)
-            return reference.to_dict(details, inflated)
+            return reference.to_dict(cache_object)
           else:
             result = list()
             for reference in report.references:
               if self.is_item_viewable(event, reference):
-                result.append(reference.to_dict(details, inflated))
+                result.append(reference.to_dict(cache_object))
             return result
         else:
           reference = self.report_controller.get_reference_by_uuid(uuid)
@@ -186,8 +183,8 @@ class ReportHandler(RestBaseHandler):
                 raise HandlerException('It is not possible to change the definition of references')
 
             handler_instance = self.__get_handler(reference.definition)
-            handler_instance.is_rest_insert = self.is_rest_insert(headers)
-            handler_instance.is_owner = self.is_event_owner(event, user)
+            handler_instance.is_rest_insert = cache_object.rest_insert
+            handler_instance.is_owner = cache_object.owner
 
             self.check_if_user_can_set_validate_or_shared(event, old_ref, user, json)
 
@@ -199,7 +196,7 @@ class ReportHandler(RestBaseHandler):
             # TODO: check if there are no children attached
             self.report_controller.update_reference(reference, user, True)
 
-            return reference.to_dict(details, inflated)
+            return reference.to_dict(cache_object)
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)
             self.check_item_is_viewable(event, reference)

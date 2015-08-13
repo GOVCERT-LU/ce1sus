@@ -7,7 +7,7 @@ Created on Oct 29, 2014
 """
 from ce1sus.controllers.admin.group import GroupController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
-from ce1sus.db.classes.group import Group
+from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 
 
@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class AdminGroupHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.group_controller = self.controller_factory(GroupController)
 
   @rest_method(default=True)
@@ -30,9 +30,8 @@ class AdminGroupHandler(RestBaseHandler):
     try:
       method = args.get('method')
       path = args.get('path')
-      details = self.get_detail_value(args)
       json = args.get('json')
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
       if method == 'GET':
 
         if len(path) > 0:
@@ -49,16 +48,16 @@ class AdminGroupHandler(RestBaseHandler):
 
               result = list()
               for child in group.children:
-                result.append(child.to_dict(details, inflated))
+                result.append(child.to_dict(cache_object))
               return result
 
-          return group.to_dict(details, inflated)
+          return group.to_dict(cache_object)
         else:
           # else return all
           groups = self.group_controller.get_all_groups()
           result = list()
           for group in groups:
-            result.append(group.to_dict(details, inflated))
+            result.append(group.to_dict(cache_object))
           return result
 
       elif method == 'POST':
@@ -87,10 +86,9 @@ class AdminGroupHandler(RestBaseHandler):
             raise RestHandlerException(u'If an id was specified you also must specify on which type it is associated')
         else:
           # Add new group
-          group = Group()
-          group.populate(json)
+          group = self.assembler.assemble(json, Group, None, cache_object)
           self.group_controller.insert_group(group)
-          return group.to_dict(details, inflated)
+          return group.to_dict(cache_object)
       elif method == 'PUT':
         self.check_if_admin()
         # update group
@@ -98,9 +96,9 @@ class AdminGroupHandler(RestBaseHandler):
           # if there is a uuid as next parameter then return single group
           uuid = path.pop(0)
           group = self.group_controller.get_group_by_uuid(uuid)
-          group.populate(json)
+          self.updater.update(group, json, cache_object)
           self.group_controller.update_group(group)
-          return group.to_dict(details, inflated)
+          return group.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update group as no identifier was given')
 

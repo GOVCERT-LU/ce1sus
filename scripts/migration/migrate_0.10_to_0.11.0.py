@@ -990,7 +990,7 @@ class Migrator(object):
       raw_artifact.attributes.append(attribtue)
 
       # attach the object
-      obj.related_objects.append(create_related_obj(obj, raw_artifact))
+      obj.related_objects.append(self.create_related_obj(obj, raw_artifact))
 
     elif 'file' in line['definition']['name']:
 
@@ -1031,7 +1031,7 @@ class Migrator(object):
         raw_artifact.attributes.append(attribtue)
 
         # append to the object
-        obj.related_objects.append(create_related_obj(obj, raw_artifact))
+        obj.related_objects.append(self.create_related_obj(obj, raw_artifact))
         attribute_line = None
 
 
@@ -1064,7 +1064,7 @@ class Migrator(object):
         attribtue = self.map_attribute(attribute_file_name, file_obj, owner, event)
         file_obj.attributes.append(attribtue)
       # append to the object
-      obj.related_objects.append(create_related_obj(obj, file_obj))
+      obj.related_objects.append(self.create_related_obj(obj, file_obj))
 
       if attribute_file:
         line['attributes'].remove(attribute_file)
@@ -1085,7 +1085,7 @@ class Migrator(object):
         raw_artifact.attributes.append(attribtue)
 
         # append to the object
-        file_obj.related_objects.append(create_related_obj(file_obj, raw_artifact))
+        file_obj.related_objects.append(self.create_related_obj(file_obj, raw_artifact))
     else:
       definition = self.map_obj_def(line['definition'])
       if definition:

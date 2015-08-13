@@ -27,7 +27,7 @@ class StixMapperException(Exception):
 class StixMapper(BaseController):
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.config = config
     ce1sus_url = config.get('ce1sus', 'baseurl', None)
     self.event_controller = EventController(config, session)

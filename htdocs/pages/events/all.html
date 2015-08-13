@@ -5,7 +5,7 @@
       <td data-title="'#'" 
         sortable="'id'"><a href="{{urlBase}}{{item.identifier}}" >{{item.int_id}}</a></td>
       <td data-title="'Title'" filter="{ 'title': 'text' }"
-        sortable="'title'"><a href="{{urlBase}}{{item.identifier}}" >{{item.title}}</a></td>
+        sortable="'title'"><a href="{{urlBase}}{{item.identifier}}" >{{item.stix_header.title}}</a></td>
       <td data-title="'Analysis'" filter="{ 'analysis': 'text' }"
         sortable="'analysis'">{{item.analysis}}</td>
       <td data-title="'Status'" filter="{ 'status': 'text' }"
@@ -13,8 +13,8 @@
       <td data-title="'TLP'" filter="{ 'tlp': 'text' }" sortable="'tlp'"
         ng-style="{'background-color': getTlpColor(item.tlp)}">
         {{item.tlp}}</td>
-      <td data-title="'Creator group'" filter="{ 'creator_group_name': 'text' }"
-        sortable="'creator_group_name'">{{item.creator_group.name}}</td>
+      <td data-title="'Initial Author'" filter="{ 'initial_author': 'text' }"
+        sortable="'initial_author'">{{item.stix_header.information_source.identity.name}}</td>
       <td data-title="'Created'" filter="{ 'created_at': 'text' }"
         sortable="'created_at'">{{item.created_at}}</td>
       <td data-title="'Options'">

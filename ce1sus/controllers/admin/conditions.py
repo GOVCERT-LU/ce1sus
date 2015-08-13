@@ -21,7 +21,7 @@ class ConditionController(BaseController):
   """Controller handling all the requests for objects"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
 
   def get_condition_by_id(self, identifier):
@@ -56,9 +56,9 @@ class ConditionController(BaseController):
     except (BrokerException) as error:
       raise ControllerException(error)
 
-  def update_condition(self, condition):
+  def update_condition(self, condition, commit=True):
     try:
-      self.condition_broker.update(condition, True)
+      self.condition_broker.update(condition, commit)
     except ValidationException as error:
       message = ObjectValidator.getFirstValidationError(condition)
       raise ControllerException(u'Could not add condition due to: {0}'.format(message))
@@ -67,7 +67,7 @@ class ConditionController(BaseController):
 
   def remove_condition_by_id(self, identifier):
     try:
-      self.group_broker.remove_by_id(identifier)
+      self.condition_broker.remove_by_id(identifier)
     except IntegrityException as error:
       raise ControllerException('Cannot delete condition. The condition is referenced by elements.')
     except BrokerException as error:
@@ -75,7 +75,7 @@ class ConditionController(BaseController):
 
   def remove_condition_by_uuid(self, uuid):
     try:
-      self.group_broker.remove_by_uuid(uuid)
+      self.condition_broker.remove_by_uuid(uuid)
     except IntegrityException as error:
       raise ControllerException('Cannot delete condition. The condition is referenced by elements.')
     except BrokerException as error:

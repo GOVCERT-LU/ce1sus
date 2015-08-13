@@ -5,15 +5,17 @@ String helper module
 
 Created: Jul, 2013
 """
+import cgi
+from datetime import datetime
+import dateutil.parser
+import re
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-import re
-import cgi
-import dateutil.parser
 
 
 class InputException(Exception):
@@ -97,9 +99,12 @@ def stringToDateTime(string):
   """
   try:
     if string:
-      return dateutil.parser.parse(string)
+      try:
+        return datetime.fromtimestamp(int(string) / 1000.0)
+      except ValueError:
+        return dateutil.parser.parse(string)
     return None
-  except:
+  except ValueError:
     raise InputException(u'Format of Date "{0}" is unknown'.format(string))
 
 

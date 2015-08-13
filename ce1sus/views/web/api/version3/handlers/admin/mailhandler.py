@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class MailHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.mail_controller = self.controller_factory(MailController)
 
   @rest_method(default=True)
@@ -31,28 +31,27 @@ class MailHandler(RestBaseHandler):
       method = args.get('method')
       json = args.get('json')
       path = args.get('path')
-      details = self.get_detail_value(args)
-      inflated = self.get_inflated_value(args)
+      cache_object = self.get_cache_object(args)
       if method == 'GET':
         if len(path) > 0:
                     # if there is a uuid as next parameter then return single mail
           uuid = path.pop(0)
           mail = self.mail_controller.get_by_uuid(uuid)
-          return mail.to_dict(details, inflated)
+          return mail.to_dict(cache_object)
         else:
           # return all
           mails = self.mail_controller.get_all()
           result = list()
           for mail in mails:
-            result.append(mail.to_dict(details, inflated))
+            result.append(mail.to_dict(cache_object))
           return result
       elif method == 'PUT':
         if len(path) > 0:
           uuid = path.pop(0)
           mail = self.mail_controller.get_by_uuid(uuid)
-          mail.populate(json)
-          self.mail_controller.update_mail(mail, self.get_user())
-          return mail.to_dict(details, inflated)
+          self.updater.update(mail, json, cache_object)
+          self.mail_controller.update_mail(mail)
+          return mail.to_dict(cache_object)
         else:
           raise RestHandlerException(u'Cannot update user as no identifier was given')
       raise RestHandlerException(u'Unrecoverable error')

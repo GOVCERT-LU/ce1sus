@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 class EventsHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.events_controller = self.controller_factory(EventsController)
 
   @rest_method(default=True)
@@ -28,6 +28,9 @@ class EventsHandler(RestBaseHandler):
     # default settings as not to list to much
     parameters = args.get('parameters')
     count = parameters.get('count', None)
+    cache_object = self.get_cache_object(args)
+    cache_object.inflated = False
+
     if count:
       count = int(count)
     else:
@@ -41,10 +44,12 @@ class EventsHandler(RestBaseHandler):
         offset = 1
     else:
       offset = None
-    details = self.get_detail_value(args)
 
-    events, total_events = self.events_controller.get_events(offset, count, self.get_user(), parameters)
+    events, total_events = self.events_controller.get_events(offset, count, cache_object.user, parameters)
     result = list()
     for event in events:
-      result.append(event.to_dict(details, False))
+      cache_object.event_permissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+      event = event.attribute_to_dict(event, cache_object)
+      if event:
+        result.append(event)
     return {'total': total_events, 'data': result}

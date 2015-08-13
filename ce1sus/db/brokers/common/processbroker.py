@@ -7,7 +7,7 @@ Created on Nov 9, 2014
 """
 import sqlalchemy.orm.exc
 
-from ce1sus.db.classes.processitem import ProcessItem, ProcessStatus
+from ce1sus.db.classes.internal.backend.processitem import ProcessItem, ProcessStatus
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException
 
 

@@ -9,8 +9,8 @@ from ce1sus.controllers.base import BaseController, SpecialControllerException, 
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
-from ce1sus.db.classes.common import ValueTable
-from ce1sus.db.classes.definitions import AttributeDefinition, AttributeHandler
+from ce1sus.db.classes.internal.common import ValueTable
+from ce1sus.db.classes.internal.definitions import AttributeDefinition, AttributeHandler
 from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
@@ -34,7 +34,7 @@ class AttributeDefinitionController(BaseController):
   """Controller handling all the requests for attributes"""
 
   def __init__(self, config, session=None):
-    BaseController.__init__(self, config, session)
+    super(BaseController, self).__init__(config, session)
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.type_broker = self.broker_factory(AttributeTypeBroker)
@@ -78,15 +78,8 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_attribute_definition(self, attribute, user, commit=True):
+  def insert_attribute_definition(self, attribute, commit=True):
     try:
-      attribute.chksum = gen_attr_chksum(attribute)
-      user = self.user_broker.get_by_id(user.identifier)
-      # check if handler is associated
-      if not attribute.attribute_handler:
-        handler = self.handler_broker.get_by_id(attribute.attributehandler_id)
-        attribute.attribute_handler = handler
-      self.set_simple_logging(attribute, user, insert=True)
       attribute = self.attr_def_broker.insert(attribute, False)
       self.attr_def_broker.do_commit(commit)
       return attribute
@@ -96,14 +89,10 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_attribute_definition(self, attribute, user, commit=True):
+  def update_attribute_definition(self, attribute, commit=True):
     if attribute.cybox_std:
       raise ControllerException(u'Could not update attribute definition as the attribute is part of the cybox standard')
     try:
-      attribute.chksum = gen_attr_chksum(attribute)
-
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_simple_logging(attribute, user, insert=False)
       attribute = self.attr_def_broker.update(attribute, commit)
       return attribute
     except ValidationException as error:
@@ -148,7 +137,7 @@ class AttributeDefinitionController(BaseController):
 
   def insert_attribute_type(self, attribute_type, commit=True):
     try:
-      self.type_broker.insert(attribute_type)
+      self.type_broker.insert(attribute_type, False)
       self.type_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
@@ -169,15 +158,15 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_type(self, type_):
+  def insert_type(self, type_, commit=True):
     try:
-      return self.type_broker.insert(type_)
+      return self.type_broker.insert(type_, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_type(self, type_):
+  def update_type(self, type_, commit=True):
     try:
-      return self.type_broker.update(type_)
+      return self.type_broker.update(type_, commit)
     except BrokerException as error:
       raise ControllerException(error)
 

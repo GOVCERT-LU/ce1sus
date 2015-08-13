@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 class MailPlugin(BasePlugin):
 
   def __init__(self, config):
-    BasePlugin.__init__(self, config)
+    super(BasePlugin, self).__init__(config)
     self.mailer = Mailer(config)
 
   @plugin_internal_method

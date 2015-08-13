@@ -10,7 +10,7 @@ from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionCon
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.events.attributecontroller import AttributeController
-from ce1sus.db.classes.common import TLP
+from ce1sus.db.classes.internal.common import TLP
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
 
@@ -38,7 +38,7 @@ class VersionHandler(RestBaseHandler):
 class HandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
     self.attribute_controller = self.controller_factory(AttributeController)
 
@@ -48,12 +48,13 @@ class HandlerHandler(RestBaseHandler):
   def handlers(self, **args):
     path = args.get('path')
     parameters = args.get('parameters')
+    cache_object = self.get_cache_object(args)
     if len(path) == 0:
       self.check_if_admin()
       handlers = self.attribute_definition_controller.get_all_handlers()
       result = list()
       for handler in handlers:
-        result.append(handler.to_dict())
+        result.append(handler.to_dict(cache_object))
       return result
     else:
       if len(path) > 1:
@@ -86,7 +87,7 @@ class HandlerHandler(RestBaseHandler):
 class ReferenceHandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.reference_controller = self.controller_factory(ReferencesController)
 
   @rest_method(default=True)
@@ -95,12 +96,13 @@ class ReferenceHandlerHandler(RestBaseHandler):
   def handlers(self, **args):
     path = args.get('path')
     parameters = args.get('parameters')
+    cache_object = self.get_cache_object(args)
     if len(path) == 0:
       self.check_if_admin()
       handlers = self.reference_controller.get_all_handlers()
       result = list()
       for handler in handlers:
-        result.append(handler.to_dict())
+        result.append(handler.to_dict(cache_object))
       return result
     else:
       if len(path) > 1:
@@ -133,7 +135,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
 class TablesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
@@ -149,9 +151,6 @@ class TablesHandler(RestBaseHandler):
 
 class TLPHandler(RestBaseHandler):
 
-  def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
-
   @rest_method(default=True)
   @methods(allowed=['GET'])
   @require(privileged())
@@ -166,7 +165,7 @@ class TLPHandler(RestBaseHandler):
 class SyncServerTypesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
 
   @rest_method(default=True)

@@ -6,7 +6,7 @@
 Created on Dec 20, 2013
 """
 
-from ce1sus.db.classes.definitions import AttributeHandler
+from ce1sus.db.classes.internal.definitions import AttributeHandler
 from ce1sus.db.common.broker import BrokerBase
 
 

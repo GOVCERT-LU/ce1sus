@@ -11,8 +11,8 @@ from json import loads
 from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, get_max_tlp
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.events.event import EventController
-from ce1sus.db.classes.group import EventPermissions
-from ce1sus.db.classes.user import UserRights
+from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
+from ce1sus.db.classes.internal.usrmgt.user import UserRights
 from ce1sus.helpers.common.debug import Log
 from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER

@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class GroupHandler(RestBaseHandler):
 
   def __init__(self, config):
-    RestBaseHandler.__init__(self, config)
+    super(RestBaseHandler, self).__init__(config)
     self.group_controller = self.controller_factory(GroupController)
 
   @rest_method(default=True)
@@ -28,7 +28,7 @@ class GroupHandler(RestBaseHandler):
   def groups(self, **args):
     try:
       path = args.get('path')
-      details = self.get_detail_value(args)
+      cache_object = self.get_cache_object(args)
       if len(path) > 0:
         raise RestHandlerException('Path is too long')
       else:
@@ -36,7 +36,7 @@ class GroupHandler(RestBaseHandler):
         groups = self.group_controller.get_all_groups()
         result = list()
         for group in groups:
-          result.append(group.to_dict(complete=details))
+          result.append(group.to_dict(cache_object))
         return result
 
     except ControllerException as error:
