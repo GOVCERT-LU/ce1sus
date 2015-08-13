@@ -28,7 +28,7 @@ class BaseChangeControllerException(ControllerException):
 class BaseChangeController(BaseController):
 
   def __init__(self, config, session):
-    super(BaseController, self).__init__(config, session)
+    super(BaseChangeController, self).__init__(config, session)
     self.event_controller = EventController(config, session)
 
   def __get_event(self, instance):

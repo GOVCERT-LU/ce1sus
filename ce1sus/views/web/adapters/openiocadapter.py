@@ -47,7 +47,7 @@ class OpenIOCException(Exception):
 class OpenIOCAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    super(BaseView, self).__init__(config)
+    super(OpenIOCAdapter, self).__init__(config)
     self.stix_mapper = StixMapper(config, session)
     self.merger = Merger(config, session)
     self.base = self.config.get('OpenIOCAdapter', 'file', None)

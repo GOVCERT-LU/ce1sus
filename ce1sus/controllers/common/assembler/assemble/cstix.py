@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class StixAssembler(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(StixAssembler, self).__init__(config, session)
 
   def assemble_stix_header(self, event, json, cache_object):
     instance = STIXHeader()

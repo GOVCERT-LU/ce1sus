@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class SyncServerController(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(SyncServerController, self).__init__(config, session)
     self.sync_server_broker = self.broker_factory(SyncServerBroker)
 
   def get_all_servers(self):

@@ -22,7 +22,7 @@ __license__ = 'GPL v3+'
 class ObservableHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ObservableHandler, self).__init__(config)
     self.observable_controller = self.controller_factory(ObservableController)
 
   @rest_method(default=True)

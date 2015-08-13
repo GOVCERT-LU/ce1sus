@@ -34,7 +34,7 @@ class AttributeDefinitionController(BaseController):
   """Controller handling all the requests for attributes"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(AttributeDefinitionController, self).__init__(config, session)
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.type_broker = self.broker_factory(AttributeTypeBroker)

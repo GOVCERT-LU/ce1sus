@@ -25,7 +25,7 @@ __license__ = 'GPL v3+'
 class SearchHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(SearchHandler, self).__init__(config)
     self.search_controller = self.controller_factory(SearchController)
 
   @rest_method(default=True)

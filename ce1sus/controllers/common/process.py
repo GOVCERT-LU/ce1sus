@@ -22,7 +22,7 @@ __license__ = 'GPL v3+'
 class ProcessController(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(ProcessController, self).__init__(config, session)
     self.process_broker = self.broker_factory(ProcessBroker)
     self.user_controller = UserController(config, session)
 

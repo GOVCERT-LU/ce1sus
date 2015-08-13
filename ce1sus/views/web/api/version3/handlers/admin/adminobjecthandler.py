@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class AdminObjectHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(AdminObjectHandler, self).__init__(config)
     self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 

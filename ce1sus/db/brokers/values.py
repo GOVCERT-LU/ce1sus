@@ -27,7 +27,7 @@ class ValueBroker(BrokerBase):
   Note: Only used by the AttributeBroker
   """
   def __init__(self, session):
-    super(BrokerBase, self).__init__(session)
+    super(ValueBroker, self).__init__(session)
     self.__clazz = StringValue
 
   @property

@@ -27,7 +27,7 @@ class MailController(BaseController):
   """Controller handling all the requests for groups"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(MailController, self).__init__(config, session)
     self.mail_broker = self.broker_factory(MailTemplateBroker)
     self.event_broker = self.broker_factory(EventBroker)
     self.relation_controller = RelationController(config, session)

@@ -143,7 +143,7 @@ class MispConverter(BaseController):
             'User-Agent': 'ce1sus {0}'.format(APP_REL)}
 
   def __init__(self, config, api_url, api_key, misp_tag='Generic MISP', session=None):
-    super(BaseController, self).__init__(config, session)
+    super(MispConverter, self).__init__(config, session)
     self.api_url = api_url
     self.api_key = api_key
     self.tag = misp_tag

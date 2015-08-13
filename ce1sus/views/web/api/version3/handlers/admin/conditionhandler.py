@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class ConditionHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ConditionHandler, self).__init__(config)
     self.condition_controller = self.controller_factory(ConditionController)
 
   @rest_method(default=True)

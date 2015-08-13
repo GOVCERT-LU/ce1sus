@@ -29,7 +29,7 @@ __license__ = 'GPL v3+'
 class STIXAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    super(BaseView, self).__init__(config)
+    super(STIXAdapter, self).__init__(config)
     self.stix_mapper = StixMapper(config, session)
     self.merger = Merger(config, session)
 

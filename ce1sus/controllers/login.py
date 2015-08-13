@@ -25,7 +25,7 @@ class ActivationTimedOut(Exception):
 class LoginController(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(LoginController, self).__init__(config, session)
     salt = self.config.get('ce1sus', 'salt', None)
     if salt:
       self.salt = salt

@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class EventMerger(BaseMerger):
 
   def __init__(self, config, session=None):
-    super(BaseMerger, self).__init__(config, session)
+    super(EventMerger, self).__init__(config, session)
     self.cybox_merger = CyboxMerger(config, session)
     self.stix_merger = STIXMerger(config, session)
 

@@ -36,7 +36,7 @@ class StixCelsusMapperException(Exception):
 class StixCelsusMapper(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(StixCelsusMapper, self).__init__(config, session)
     self.cybox_mapper = CyboxMapper(config, session)
     self.event_controller = EventController(config, session)
     self.observable_controller = ObservableController(config, session)

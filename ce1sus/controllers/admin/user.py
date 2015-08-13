@@ -26,7 +26,7 @@ class UserController(BaseController):
   """Controller handling all the requests for users"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(UserController, self).__init__(config, session)
     self.mail_controller = MailController(config, session)
     salt = self.config.get('ce1sus', 'salt', None)
     if salt:

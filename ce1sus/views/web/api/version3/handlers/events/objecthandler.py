@@ -47,7 +47,7 @@ __license__ = 'GPL v3+'
 class ObjectHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ObjectHandler, self).__init__(config)
     self.observable_controller = self.controller_factory(ObservableController)
     self.attribute_controller = self.controller_factory(AttributeController)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)

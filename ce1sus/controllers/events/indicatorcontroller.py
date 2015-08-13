@@ -28,7 +28,7 @@ class IndicatorController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(IndicatorController, self).__init__(config, session)
     self.indicator_type_broker = self.broker_factory(IndicatorTypeBroker)
     self.relation_controller = RelationController(config, session)
 

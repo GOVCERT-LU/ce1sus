@@ -33,7 +33,7 @@ __license__ = 'GPL v3+'
 class EventAssembler(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(EventAssembler, self).__init__(config, session)
     self.stix_assembler = StixAssembler(config, session)
     self.cybox_assembler = CyboxAssembler(config, session)
     self.ce1sus_assembler = Ce1susAssembler(config, session)

@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class ValidationHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ValidationHandler, self).__init__(config)
     self.events_controller = self.controller_factory(EventsController)
 
   @rest_method()

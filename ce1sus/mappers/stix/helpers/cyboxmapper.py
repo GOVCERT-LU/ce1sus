@@ -12,9 +12,10 @@ from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
+from ce1sus.db.classes.ccybox.common.time import CyboxTime
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.object import Object, RelatedObject
-from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.handlers.attributes.filehandler import FileHandler
 from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
 from ce1sus.mappers.stix.helpers.common import extract_uuid, make_dict_definitions, set_extended_logging, set_properties
@@ -23,6 +24,7 @@ from cybox.objects.address_object import Address
 from cybox.objects.artifact_object import Artifact
 from cybox.objects.disk_object import Disk
 from cybox.objects.domain_name_object import DomainName
+from cybox.objects.email_message_object import EmailMessage
 from cybox.objects.file_object import File
 from cybox.objects.hostname_object import Hostname
 from cybox.objects.network_connection_object import NetworkConnection
@@ -38,7 +40,6 @@ from cybox.objects.win_process_object import WinProcess
 from cybox.objects.win_registry_key_object import WinRegistryKey
 from cybox.objects.win_service_object import WinService
 from cybox.objects.win_volume_object import WinVolume
-from cybox.objects.email_message_object import EmailMessage
 
 
 __author__ = 'Weber Jean-Paul'
@@ -54,7 +55,7 @@ class CyboxMapperException(Exception):
 class CyboxMapper(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(CyboxMapper, self).__init__(config, session)
     # cache all definitions
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.fh = FileHandler()

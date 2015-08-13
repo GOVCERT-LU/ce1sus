@@ -23,7 +23,7 @@ __license__ = 'GPL v3+'
 class ReportHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ReportHandler, self).__init__(config)
     self.report_controller = self.controller_factory(ReportController)
 
   @rest_method(default=True)

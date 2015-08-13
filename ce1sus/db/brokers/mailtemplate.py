@@ -27,7 +27,7 @@ class MailTemplateBroker(BrokerBase):
   ACTIVATION = 'Activation'
   EVENT_PUBLICATION = 'Publication'
   EVENT_UPDATE = 'Update'
-  PROPOSAL = 'Proposal
+  PROPOSAL = 'Proposal'
 
   def get_broker_class(self):
     return MailTemplate

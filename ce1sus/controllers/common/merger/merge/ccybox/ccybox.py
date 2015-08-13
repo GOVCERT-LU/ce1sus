@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class CyboxMerger(BaseMerger):
 
   def __init__(self, config, session=None):
-    super(BaseMerger, self).__init__(config, session)
+    super(CyboxMerger, self).__init__(config, session)
     self.pseudo_cybox_merger = PseudoCyboxMerger(config, session)
 
   def merge_observables(self, new_instance, old_instance, cache_object):

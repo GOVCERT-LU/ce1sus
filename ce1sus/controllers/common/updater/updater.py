@@ -31,7 +31,7 @@ __license__ = 'GPL v3+'
 class Updater(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(Updater, self).__init__(config, session)
     self.stix_updater = StixUpdater(config, session)
     self.cybox_updater = CyboxUpdater(config, session)
     self.ce1sus_updater = Ce1susUpdater(config, session)

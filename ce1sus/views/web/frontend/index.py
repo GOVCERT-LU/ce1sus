@@ -24,7 +24,7 @@ __license__ = 'GPL v3+'
 class IndexView(BaseView):
 
   def __init__(self, config):
-    super(BaseView, self).__init__(config)
+    super(IndexView, self).__init__(config)
     self.login_controller = LoginController(config)
 
   @cherrypy.expose

@@ -63,7 +63,7 @@ class SqliteConnector(Connector):
   Connector for sqlite dbs
   """
   def __init__(self, config):
-    super(Connector, self).__init__(config)
+    super(SqliteConnector, self).__init__(config)
     db_file = self.config.get('db')
     self.engine = None
     if not isfile(db_file):

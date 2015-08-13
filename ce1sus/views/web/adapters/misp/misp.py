@@ -51,7 +51,7 @@ class MISPAdapterException500(Exception):
 class MISPAdapter(BaseView):
 
   def __init__(self, config, session=None):
-    super(BaseView, self).__init__(config)
+    super(MISPAdapter, self).__init__(config)
     self.event_controller = EventController(config, session)
     self.server_broker = self.event_controller.broker_factory(SyncServerBroker)
     self.ce1sus_to_misp = Ce1susMISP(config, session)

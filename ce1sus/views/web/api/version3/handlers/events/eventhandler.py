@@ -32,7 +32,7 @@ __license__ = 'GPL v3+'
 class EventHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(EventHandler, self).__init__(config)
     self.observable_controller = self.controller_factory(ObservableController)
     self.relation_controller = self.controller_factory(RelationController)
     self.report_controller = self.controller_factory(ReportController)

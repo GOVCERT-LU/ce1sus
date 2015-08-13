@@ -45,7 +45,7 @@ class Ce1susMISP(BaseController):
                              }
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(Ce1susMISP, self).__init__(config, session)
     self.event_controller = EventController(config, session)
     self.relations_controller = RelationController(config, session)
     self.events_controller = EventsController(config, session)

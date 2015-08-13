@@ -25,7 +25,7 @@ class MergerException(BaseChangerException):
 class BaseMerger(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(BaseMerger, self).__init__(config, session)
     self.changelogger = ChangeLogger(config)
 
   def __merge_properties(self, old_instance, new_instance, cache_object):

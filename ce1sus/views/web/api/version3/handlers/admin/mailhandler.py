@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class MailHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(MailHandler, self).__init__(config)
     self.mail_controller = self.controller_factory(MailController)
 
   @rest_method(default=True)

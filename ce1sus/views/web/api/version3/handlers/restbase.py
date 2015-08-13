@@ -94,7 +94,7 @@ class RestBaseHandler(BaseView):
   controllers = dict()
 
   def __init__(self, config):
-    super(BaseView, self).__init__(config)
+    super(RestBaseHandler, self).__init__(config)
     self.assembler = Assembler(config)
     self.updater = Updater(config)
 

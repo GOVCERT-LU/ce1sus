@@ -41,7 +41,7 @@ class LevelDecay(Exception):
 class Merger(BaseMerger):
   
   def __init__(self, config, session=None):
-    super(BaseMerger, self).__init__(config, session)
+    super(Merger, self).__init__(config, session)
     self.ce1sus_merger = Ce1susMerger(config, session)
     self.event_merger = EventMerger(config, session)
     self.cybox_merger = CyboxMerger(config, session)

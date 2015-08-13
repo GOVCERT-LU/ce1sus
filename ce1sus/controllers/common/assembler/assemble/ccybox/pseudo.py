@@ -30,7 +30,7 @@ __license__ = 'GPL v3+'
 class PseudoCyboxAssembler(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(PseudoCyboxAssembler, self).__init__(config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.value_type_broker = self.broker_factory(AttributeTypeBroker)

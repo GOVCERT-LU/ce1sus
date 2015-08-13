@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class LdapPlugin(BasePlugin):
 
   def __init__(self, config):
-    super(BasePlugin, self).__init__(config)
+    super(LdapPlugin, self).__init__(config)
     self.ldap_handler = LDAPHandler(config)
     self.user_controller = UserController(config)
 

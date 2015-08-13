@@ -22,7 +22,7 @@ class EventsController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(EventsController, self).__init__(config, session)
     self.event_broker = self.broker_factory(EventBroker)
     self.relation_controller = RelationController(config, session)
 

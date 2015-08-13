@@ -21,7 +21,7 @@ __license__ = 'GPL v3+'
 class ProcessHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ProcessHandler, self).__init__(config)
     self.process_controller = ProcessController(config)
 
   @rest_method(default=True)

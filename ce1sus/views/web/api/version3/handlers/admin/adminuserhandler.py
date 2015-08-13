@@ -28,7 +28,7 @@ class AdminUserHandler(RestBaseHandler):
   PASSWORD_MASK = '*******************'
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(AdminUserHandler, self).__init__(config)
     self.user_controller = self.controller_factory(UserController)
     self.mail_controller = self.controller_factory(MailController)
 

@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class AdminReferenceDefinitionHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(AdminReferenceDefinitionHandler, self).__init__(config)
     self.reference_controller = self.controller_factory(ReferencesController)
 
   @rest_method(default=True)

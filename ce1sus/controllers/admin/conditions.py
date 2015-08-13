@@ -21,7 +21,7 @@ class ConditionController(BaseController):
   """Controller handling all the requests for objects"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(ConditionController, self).__init__(config, session)
     self.condition_broker = self.broker_factory(ConditionBroker)
 
   def get_condition_by_id(self, identifier):

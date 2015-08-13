@@ -38,7 +38,7 @@ class VersionHandler(RestBaseHandler):
 class HandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(HandlerHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
     self.attribute_controller = self.controller_factory(AttributeController)
 
@@ -87,7 +87,7 @@ class HandlerHandler(RestBaseHandler):
 class ReferenceHandlerHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(ReferenceHandlerHandler, self).__init__(config)
     self.reference_controller = self.controller_factory(ReferencesController)
 
   @rest_method(default=True)
@@ -135,7 +135,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
 class TablesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(TablesHandler, self).__init__(config)
     self.attribute_definition_controller = self.controller_factory(AttributeDefinitionController)
 
   @rest_method(default=True)
@@ -165,7 +165,7 @@ class TLPHandler(RestBaseHandler):
 class SyncServerTypesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(SyncServerTypesHandler, self).__init__(config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
 
   @rest_method(default=True)

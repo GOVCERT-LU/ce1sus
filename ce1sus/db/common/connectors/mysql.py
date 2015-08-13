@@ -28,7 +28,7 @@ class MySqlSession(SessionObject):
   """
 
   def __init__(self, session=None):
-    super(SessionObject, self).__init__()
+    super(MySqlSession, self).__init__()
     self.__session = session
 
   def get_session(self):
@@ -50,7 +50,7 @@ class MySqlConnector(Connector):
   Connector for mysql dbs
   """
   def __init__(self, config):
-    super(Connector, self).__init__(config)
+    super(MySqlConnector, self).__init__(config)
     hostname = self.config.get('host')
     port = self.config.get('port')
     self.engine = None

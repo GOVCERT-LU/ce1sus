@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 class EventsHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(EventsHandler, self).__init__(config)
     self.events_controller = self.controller_factory(EventsController)
 
   @rest_method(default=True)

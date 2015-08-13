@@ -51,7 +51,7 @@ class UnkownMethodException(Ce1susAdapterException):
 class Ce1susAdapter(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(Ce1susAdapter, self).__init__(config, session)
     self.server_details = None
     self.proxies = {}
     self.verify_ssl = False

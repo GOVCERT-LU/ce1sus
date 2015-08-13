@@ -18,7 +18,7 @@ __license__ = 'GPL v3+'
 class AdminIndicatorTypesHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(AdminIndicatorTypesHandler, self).__init__(config)
     self.indicator_controller = self.controller_factory(IndicatorController)
 
   @rest_method(default=True)

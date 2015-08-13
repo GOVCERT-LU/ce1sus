@@ -30,7 +30,7 @@ class ReferencesController(BaseController):
   """Controller handling all the requests for groups"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(ReferencesController, self).__init__(config, session)
     self.reference_broker = self.broker_factory(ReferencesBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
 

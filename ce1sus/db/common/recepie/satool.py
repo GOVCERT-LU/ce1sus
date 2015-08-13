@@ -30,7 +30,7 @@ class SAEnginePlugin(plugins.SimplePlugin):
     Finally we create a new 'bind' channel that the SA tool
     will use to map a session to the SA engine at request time.
     """
-    super(plugins.SimplePlugin, self).__init__(bus)
+    super(SAEnginePlugin, self).__init__(bus)
     self.sa_engine = None
     self.bus.subscribe("bind", self.bind)
     self.connector = connector
@@ -69,7 +69,7 @@ class SATool(cherrypy.Tool):
     a requests starts and commits/rollbacks whenever
     the request terminates.
     """
-    super(cherrypy.Tool, self).__init__('on_start_resource',
+    super(SATool, self).__init__('on_start_resource',
                                         self.bind_session,
                                         priority=20)
     self.connector = connector

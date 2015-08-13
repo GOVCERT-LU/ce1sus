@@ -22,6 +22,6 @@ class UpdaterException(BaseChangerException):
 class BaseUpdater(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(BaseUpdater, self).__init__(config, session)
     self.assember = Assembler(config, session)
     self.merger = Merger(config, session)

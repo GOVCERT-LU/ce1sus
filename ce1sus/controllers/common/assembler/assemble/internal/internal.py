@@ -37,7 +37,7 @@ __license__ = 'GPL v3+'
 class Ce1susAssembler(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(Ce1susAssembler, self).__init__(config, session)
     self.salt = self.config.get('ce1sus', 'salt', None)
     self.references_broker = self.broker_factory(ReferencesBroker)
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)

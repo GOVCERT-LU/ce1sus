@@ -19,7 +19,7 @@ __license__ = 'GPL v3+'
 class CyboxAssembler(BaseChanger):
 
   def __init__(self, config, session=None):
-    super(BaseChanger, self).__init__(config, session)
+    super(CyboxAssembler, self).__init__(config, session)
     self.pseudo_assembler = PseudoCyboxAssembler(config, session)
     
   def assemble_observable(self, event, json, cache_object):

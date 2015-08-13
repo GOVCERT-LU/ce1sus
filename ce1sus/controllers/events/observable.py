@@ -25,7 +25,7 @@ class ObservableController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(ObservableController, self).__init__(config, session)
     self.observable_broker = self.broker_factory(ObservableBroker)
     self.composed_observable_broker = self.broker_factory(ComposedObservableBroker)
     self.object_broker = self.broker_factory(ObjectBroker)

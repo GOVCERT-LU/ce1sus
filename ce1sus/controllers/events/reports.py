@@ -21,7 +21,7 @@ class ReportController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(ReportController, self).__init__(config, session)
     self.report_broker = self.broker_factory(ReportBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)

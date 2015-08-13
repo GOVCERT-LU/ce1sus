@@ -24,7 +24,7 @@ class ObjectDefinitionBroker(DefinitionBrokerBase):
   """This is the interface between python an the database"""
 
   def __init__(self, session):
-    super(DefinitionBrokerBase, self).__init__(session)
+    super(ObjectDefinitionBroker, self).__init__(session)
     self.handler_broker = AttributeHandlerBroker(session)
     self.attribute_broker = AttributeDefinitionBroker(session)
 

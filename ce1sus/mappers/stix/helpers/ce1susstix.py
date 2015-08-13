@@ -55,7 +55,7 @@ class Ce1susStixMapperException(Exception):
 class Ce1susStixMapper(BaseController):
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(Ce1susStixMapper, self).__init__(config, session)
     self.cybox_mapper = CyboxMapper(config, session)
     self.indicator_controller = IndicatorController(config, session)
     self.event_controller = EventController(config, session)

@@ -24,7 +24,7 @@ class RelationController(BaseController):
   """event controller handling all actions in the event section"""
 
   def __init__(self, config, session=None):
-    super(BaseController, self).__init__(config, session)
+    super(RelationController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
 

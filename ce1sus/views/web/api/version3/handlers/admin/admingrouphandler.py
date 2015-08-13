@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 class AdminGroupHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(AdminGroupHandler, self).__init__(config)
     self.group_controller = self.controller_factory(GroupController)
 
   @rest_method(default=True)

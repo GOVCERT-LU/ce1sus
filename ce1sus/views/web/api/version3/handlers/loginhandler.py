@@ -27,7 +27,7 @@ __license__ = 'GPL v3+'
 class LoginHandler(RestBaseHandler):
 
   def __init__(self, config):
-    super(RestBaseHandler, self).__init__(config)
+    super(LoginHandler, self).__init__(config)
     self.login_controller = self.controller_factory(LoginController)
     self.user_controller = self.controller_factory(UserController)
 
