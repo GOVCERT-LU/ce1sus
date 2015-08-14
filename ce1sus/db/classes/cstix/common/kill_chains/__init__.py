@@ -30,13 +30,7 @@ class KillChainPhaseReference(Entity, Base):
   kill_chain_id = Column('kill_chain_id', UnicodeType(255))
   kill_chain_name = Column('kill_chain_name', UnicodeType(255))
 
-  @property
-  def parent(self):
-    if self.ttp:
-      return self.ttp
-    elif self.indicator:
-      return self.indicator
-    raise ValueError('Parent not found')
+  _PARENTS = ['ttp', 'indicator']
 
   def to_dict(self, cache_object):
     result = {

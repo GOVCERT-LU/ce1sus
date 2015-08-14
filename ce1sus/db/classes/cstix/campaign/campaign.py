@@ -153,13 +153,7 @@ class Campaign(BaseCoreComponent, Base):
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    if self.event:
-      return self.event
-    elif self.related_campaign:
-      return self.related_campaign
-    raise ValueError('Parent not found')
+  _PARENTS = ['event', 'related_campaign']
 
   def to_dict(self, cache_object):
     confidence = self.attribute_to_dict(self.confidence, cache_object)

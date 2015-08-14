@@ -49,9 +49,7 @@ class NonPublicDataCompromised(Entity, Base):
 
   propertyaffected_id = Column('propertyaffected_id', BigIntegerType, ForeignKey('propertyaffecteds.propertyaffected_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.property_affacted
+  _PARENTS = ['property_affacted']
 
 class PropertyAffected(Entity, Base):
   property_id = Column(Integer)
@@ -108,10 +106,7 @@ class PropertyAffected(Entity, Base):
 
   affectedasset_id = Column('affectedasset_id', BigIntegerType, ForeignKey('affectedassets.affectedasset_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-
-  @property
-  def parent(self):
-    return self.affected_asset
+  _PARENTS = ['affected_asset']
 
   def to_dict(self, cache_object):
 

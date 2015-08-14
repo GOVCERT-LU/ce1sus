@@ -26,6 +26,8 @@ class IndirectImpactSummary(Entity, Base):
   impact_assessment_id = Column('impactassessment_id', BigIntegerType, ForeignKey('impactassessments.impactassessment_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   __loss_of_competitive_advantage = None
 
+  _PARENTS = ['impact_assessment']
+
   @property
   def loss_of_competitive_advantage(self):
     if not self.__loss_of_competitive_advantage:
@@ -86,10 +88,6 @@ class IndirectImpactSummary(Entity, Base):
     if not self.legal_and_regulatory_costs:
       self.__legal_and_regulatory_costs = SecurityCompromise(self, 'legal_and_regulatory_costs_id')
     self.legal_and_regulatory_costs.name = value
-
-  @property
-  def parent(self):
-    return self.impact_assessment
 
   def to_dict(self, cache_object):
 

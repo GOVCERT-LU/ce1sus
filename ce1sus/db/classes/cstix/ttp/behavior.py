@@ -29,9 +29,7 @@ class Behavior(Entity, Base):
   attack_patterns = relationship(AttackPattern, backref='behaviour')
   exploits = relationship(Exploit, backref='behaviour')
 
-  @property
-  def parent(self):
-    return self.ttp
+  _PARENTS = ['ttp']
 
   def to_dict(self, cache_object):
 

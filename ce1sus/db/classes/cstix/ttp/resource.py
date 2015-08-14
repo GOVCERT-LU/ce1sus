@@ -64,9 +64,7 @@ class Resource(Entity, Base):
   infrastructure = relationship(Infrastructure, uselist=False, backref='resource')
   personas = relationship(Identity, secondary=_REL_RESOURCE_IDENTITIY, backref='resource')
 
-  @property
-  def parent(self):
-    return self.ttp
+  _PARENTS = ['ttp']
 
   # custom ones related to ce1sus internals
 

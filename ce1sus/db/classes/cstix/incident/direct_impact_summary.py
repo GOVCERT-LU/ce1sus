@@ -29,6 +29,8 @@ class DirectImpactSummary(Entity, Base):
   impact_assessment_id = Column('impactassessment_id', BigIntegerType, ForeignKey('impactassessments.impactassessment_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   __asset_losses = None
 
+  _PARENTS = ['impact_assessment']
+
   @property
   def asset_losses(self):
     if not self.__asset_losses:
@@ -77,10 +79,6 @@ class DirectImpactSummary(Entity, Base):
     if not self.response_and_recovery_costs:
       self.__response_and_recovery_costs = ImpactRating(self, 'response_and_recovery_costs_id')
     self.response_and_recovery_costs.name = value
-
-  @property
-  def parent(self):
-    return self.impact_assessment
 
   def to_dict(self, cache_object):
 

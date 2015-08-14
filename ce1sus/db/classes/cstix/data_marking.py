@@ -71,9 +71,7 @@ class MarkingStructure(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
-  @property
-  def parent(self):
-    return self.markingspecification
+  _PARENTS = ['markingspecification']
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
@@ -111,23 +109,13 @@ class MarkingSpecification(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.stix_header:
-      return self.stix_header
-    elif self.exploit_target:
-      return self.exploit_target
-    elif self.ttp:
-      return self.ttp
-    elif self.indicator:
-      return self.indicator
-    elif self.threat_actor:
-      return self.threat_actor
-    elif self.incident:
-      return self.incident
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign',
+              'stix_header',
+              'exploit_target',
+              'ttp',
+              'indicator',
+              'threat_actor',
+              'incident']
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)

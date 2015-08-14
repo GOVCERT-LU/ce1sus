@@ -29,9 +29,7 @@ class ValidTime(Entity, Base):
   end_time = Column('end_time', DateTime, nullable=False)
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.indicator
+  _PARENTS = ['indicator']
 
   def to_dict(self, cache_object):
 

@@ -71,6 +71,12 @@ _REL_RELATEDINDICATOR_CONFIDENCE = Table('rel_relatedindicator_confidence', geta
                                          Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
                                          )
 
+_REL_RELATEDINCIDENT_CONFIDENCE = Table('rel_relatedincident_confidence', getattr(Base, 'metadata'),
+                                         Column('rric_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                         Column('relatedincident_id', BigIntegerType, ForeignKey('relatedincidents.relatedincident_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
+                                         Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                         )
+
 _REL_RELATEDTHREATACTOR_CONFIDENCE = Table('rel_relatedthreatactor_confidence', getattr(Base, 'metadata'),
                                            Column('rrtac_id', BigIntegerType, primary_key=True, nullable=False, index=True),
                                            Column('relatedthreatactor_id', BigIntegerType, ForeignKey('relatedthreatactors.relatedthreatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
@@ -98,6 +104,12 @@ _REL_RELATEDPACKAGE_INFORMATIONSOURCE = Table('rel_relatedpackage_infromationsou
 _REL_RELATEDINDICATOR_INFORMATIONSOURCE = Table('rel_relatedindicator_infromationsource', getattr(Base, 'metadata'),
                                    Column('rriis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
                                    Column('relatedindicator_id', BigIntegerType, ForeignKey('relatedindicators.relatedindicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
+                                   Column('informationsource_id', BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                   )
+
+_REL_RELATEDINCIDENT_INFORMATIONSOURCE = Table('rel_relatedincident_infromationsource', getattr(Base, 'metadata'),
+                                   Column('rriis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                   Column('relatedincident_id', BigIntegerType, ForeignKey('relatedincidents.relatedincident_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
                                    Column('informationsource_id', BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
                                    )
 
@@ -147,13 +159,13 @@ class BaseRelated(Entity):
 
   @declared_attr
   def confidence(self):
-    return relationship(Confidence, secondary='rel_{0}_confidence'.format(self.get_classname().lower()), uselist=False, backref='related')
+    return relationship(Confidence, secondary='rel_{0}_confidence'.format(self.get_classname().lower()), uselist=False, backref='related_{0}'.format(self.get_classname().lower()))
 
   relationship = Column('relationship', UnicodeType(255))
 
   @declared_attr
   def information_source(self):
-    return relationship('InformationSource', secondary='rel_{0}_infromationsource'.format(self.get_classname().lower()), uselist=False, backref='related')
+    return relationship('InformationSource', secondary='rel_{0}_infromationsource'.format(self.get_classname().lower()), uselist=False, backref='related_{0}'.format(self.get_classname().lower()))
 
   @property
   def item(self):
@@ -185,12 +197,7 @@ class RelatedObservable(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Observable', primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False, backref='related_observable')
 
-  @property
-  def parent(self):
-    if self.sigthing:
-      return self.sighting
-    elif self.incident:
-      return self.incident
+  _PARENTS = ['sigthing', 'incident']
 
   def validate(self):
     # TODO: validate
@@ -201,33 +208,13 @@ class RelatedExploitTarget(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('exploittargets.exploittarget_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('ExploitTarget', uselist=False, primaryjoin='RelatedExploitTarget.child_id==ExploitTarget.identifier', backref='related_exploit_target')
 
-  @property
-  def parent(self):
-    if self.victim_targeting:
-      return self.victim_targeting
-    elif self.ttp:
-      return self.ttp
+  _PARENTS = ['victim_targeting', 'ttp']
 
 class RelatedPackageRef(BaseRelated, Base):
   idref = Column('idref', UnicodeType(255), nullable=False)
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.exploit_target:
-      return self.exploit_target
-    elif self.ttp:
-      return self.ttp
-    elif self.threat_actor:
-      return self.threat_actor
-    elif self.indicator:
-      return self.indicator
-    elif self.incident:
-      return self.incident
-    elif self.coa:
-      return self.coa
+  _PARENTS = ['campaign', 'exploit_target', 'ttp', 'threat_actor', 'indicator', 'incident', 'coa']
 
   def to_dict(self, cache_object):
     if cache_object.complete:
@@ -253,9 +240,7 @@ class RelatedPackage(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Event', primaryjoin='RelatedPackage.child_id==Event.identifier', uselist=False, backref='related_package')
 
-  @property
-  def parent(self):
-    return self.event
+  _PARENTS = ['event']
 
   def to_dict(self, cache_object):
     result = {
@@ -268,82 +253,44 @@ class RelatedCampaign(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('campaigns.campaign_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Campaign', uselist=False, primaryjoin='RelatedCampaign.child_id==Campaign.identifier', backref='related_campaign')
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.indicator:
-      return self.indicator
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign', 'indicator']
 
 class RelatedIdentity(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('identitys.identity_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Identity', uselist=False, primaryjoin='RelatedIdentity.child_id==Identity.identifier', backref='related_identity')
 
-  @property
-  def parent(self):
-    return self.identity
+  _PARENTS = ['identity']
 
 class RelatedIncident(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Incident', uselist=False, primaryjoin='RelatedIncident.child_id==Incident.identifier', backref='related_incident')
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
 class RelatedIndicator(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('Indicator', uselist=False, primaryjoin='RelatedIndicator.child_id==Indicator.identifier', backref='related_indicator')
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.indicator:
-      return self.indicator
-    elif self.incident:
-      return self.incident
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign', 'indicator', 'incident']
 
 class RelatedThreatActor(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('ThreatActor', uselist=False, primaryjoin='RelatedThreatActor.child_id==ThreatActor.identifier', backref='related_threat_actor')
 
-  @property
-  def parent(self):
-    if self.threat_actor:
-      return self.threat_actor
-    elif self.campaign:
-      return self.campaign
-    elif self.incident:
-      return self.incident
-    raise ValueError('Parent not found')
+  _PARENTS = ['threat_actor', 'campaign', 'incident']
 
 class RelatedTTP(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('ttps.ttp_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('TTP', uselist=False, primaryjoin='RelatedTTP.child_id==TTP.identifier', backref='related_ttp')
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.ttp:
-      return self.ttp
-    elif self.indicator:
-      return self.indicator
-    elif self.leveraged_ttp:
-      return self.leveraged_ttp
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign', 'ttp', 'indicator', 'leveraged_ttp']
 
 class RelatedCOA(BaseRelated, Base):
   child_id = Column('child_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child = relationship('CourseOfAction', uselist=False, primaryjoin='RelatedCOA.child_id==CourseOfAction.identifier', backref='related_coa')
   scope_id = Column('scope_id', Integer, default=None, nullable=False)
 
-  @property
-  def parent(self):
-    return self.coa
+  _PARENTS = ['coa']
 
   def to_dict(self, cache_object):
     result = {

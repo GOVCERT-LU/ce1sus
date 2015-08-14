@@ -100,9 +100,7 @@ class ThreatActorType(Entity, Base):
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __type_ = None
 
-  @property
-  def parent(self):
-    return self.threat_actor
+  _PARENTS = ['threat_actor']
 
   @property
   def type_(self):
@@ -123,9 +121,7 @@ class Motivation(Entity, Base):
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __motivation = None
 
-  @property
-  def parent(self):
-    return self.threat_actor
+  _PARENTS = ['threat_actor']
 
   @property
   def motivation(self):
@@ -154,9 +150,7 @@ class Sophistication(Entity, Base):
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __sophistication = None
 
-  @property
-  def parent(self):
-    return self.threat_actor
+  _PARENTS = ['threat_actor']
 
   @property
   def sophistication(self):
@@ -185,9 +179,7 @@ class PlanningAndOperationalSupport(Entity, Base):
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __paos = None
 
-  @property
-  def parent(self):
-    return self.threat_actor
+  _PARENTS = ['threat_actor']
 
   @property
   def paos(self):
@@ -231,13 +223,7 @@ class ThreatActor(BaseCoreComponent, Base):
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    if self.relate_threat_actor:
-      return self.related_threat_actor
-    elif self.event:
-      return self.event
-    raise ValueError('Parent not found')
+  _PARENTS = ['relate_threat_actor', 'event']
 
   def to_dict(self, cache_object):
 

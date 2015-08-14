@@ -88,22 +88,13 @@ class Statement(Entity, Base):
   source = relationship(InformationSource, uselist=False, secondary=_REL_STATEMENT_INFORMATIONSOURCE, backref='statement')
   confidence = relationship(Confidence, uselist=False, secondary=_REL_STATEMENT_CONFIDENCE, backref='statement')
     
-  @property
-  def parent(self):
-    if self.base_test_mechanism:
-      return self.base_test_mechanism
-    elif self.indicator:
-      return self.indicator
-    elif self.coa_impact:
-      return self.coa_impact
-    elif self.coa_cost:
-      return self.coa_cost
-    elif self.coa_efficacy:
-      return self.coa_efficacy
-    elif self.simple_marking_structure:
-      return self.simple_marking_structure
-    raise ValueError('Parent not found')
-
+  _PARENTS = ['base_test_mechanism',
+              'indicator',
+              'coa_impact',
+              'coa_cost',
+              'coa_efficacy',
+              'simple_marking_structure'
+              ]
 
   def to_dict(self, cache_object):
     if cache_object.complete:

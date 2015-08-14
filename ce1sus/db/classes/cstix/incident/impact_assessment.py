@@ -30,6 +30,8 @@ class Effect(Entity, Base):
   impactassessment_id = Column('impactassessment_id', BigIntegerType, ForeignKey('impactassessments.impactassessment_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   __value = None
 
+  _PARENTS = ['impact_assessment']
+
   @property
   def value(self):
     if not self.__value:
@@ -42,10 +44,6 @@ class Effect(Entity, Base):
     if not self.value:
       self.__value = IntendedEffect(self, 'eff_id')
     self.value.name = value
-
-  @property
-  def parent(self):
-    return self.impact_assessment
 
   def to_dict(self, cache_object):
 
@@ -61,6 +59,8 @@ class ImpactAssessment(Entity, Base):
   indirect_impact_summary = relationship(IndirectImpactSummary, uselist=False, backref='impact_assessment')
   total_loss_estimation = relationship(TotalLossEstimation, uselist=False, backref='impact_assessment')
   impact_qualification_id = Column('impact_qualification_id', Integer)
+
+  _PARENTS = ['incident']
 
   @property
   def impact_qualification(self):
@@ -79,10 +79,6 @@ class ImpactAssessment(Entity, Base):
 
   # ce1sus specific
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-
-  @property
-  def parent(self):
-    return self.incident
 
   def to_dict(self, cache_object):
 

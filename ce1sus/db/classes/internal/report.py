@@ -139,9 +139,7 @@ class Reference(BaseElement, Base):
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')
 
-  @property
-  def parent(self):
-    return self.report
+  _PARENTS = ['report']
 
   def to_dict(self, cache_object):
     value = self.convert_value(self.value)
@@ -187,7 +185,7 @@ class Report(BaseElement, Base):
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
   references = relationship('Reference', backref='report')
-  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic', backref='report')
+  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
 
   def references_count_for_permissions(self, event_permissions, user):
     return len(self.get_references_for_permissions(event_permissions, user))
@@ -209,13 +207,7 @@ class Report(BaseElement, Base):
         rel_reps.append(rel_rep)
     return rel_reps
 
-  @property
-  def parent(self):
-    if self.event:
-      return self.event
-    elif self.report:
-      return self.report
-    raise ValueError('No parent found')
+  _PARENTS = ['event', 'report']
 
   def to_dict(self, cache_object):
     if cache_object.complete:

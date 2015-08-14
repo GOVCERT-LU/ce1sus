@@ -81,9 +81,7 @@ class Objective(Entity, Base):
   applicability_confidence = relationship(Confidence, secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False, backref='objective')
   courseofaction_id = Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
-  @property
-  def parent(self):
-    return self.coa
+  _PARENTS = ['coa']
 
   def to_dict(self, cache_object):
     if cache_object.complete:

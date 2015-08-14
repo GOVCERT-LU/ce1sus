@@ -48,7 +48,6 @@ class Object(Entity, Base):
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
   observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-  observable = relationship('Observable', primaryjoin='Object.observable_id==Observable.identifier', uselist=False)
 
   @property
   def event(self):
@@ -68,12 +67,7 @@ class Object(Entity, Base):
   def validate(self):
     return True
   
-  @property
-  def parent(self):
-    if self.related_object_parent:
-      return self.related_object_parent
-    elif self.observable:
-      return self.observable
+  _PARENTS = ['related_object_parent', 'observable']
 
   def to_dict(self, cache_object):
     if self.observable:

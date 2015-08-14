@@ -90,6 +90,8 @@ class PackageIntent(BaseObject, Base):
   stix_header_id = Column('stix_header_id', BigIntegerType, ForeignKey('stixheaders.stixheader_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   __intent = None
 
+  _PARENTS = ['stix_header']
+
   @property
   def intent(self):
     if not self.__intent:
@@ -119,11 +121,10 @@ class STIXHeader(Entity, Base):
   information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, backref='stix_header')
   # TODO: profiles
 
-  @property
-  def parent(self):
-    return self.event
+  _PARENTS = ['event']
 
   def to_dict(self, cache_object):
+    print self.description.parent
     if cache_object.complete:
       result = {'package_intents': self.attributelist_to_dict(self.package_intents, cache_object),
                 'title': self.convert_value(self.title),

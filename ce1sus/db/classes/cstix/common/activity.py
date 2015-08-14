@@ -64,9 +64,7 @@ class Activity(Entity, Base):
   date_time = relationship(DateTimeWithPrecision, secondary=_REL_ACTIVITY_DATETIMEWITHPRECISION, uselist=False, backref='activity')
   campaign_id = Column('campaign_id', BigIntegerType, ForeignKey('campaigns.campaign_id', ondelete='cascade', onupdate='cascade'), index=True)
 
-  @property
-  def parent(self):
-    return self.campaign
+  _PARENTS = ['campaign']
 
   def to_dict(self, cache_object):
 

@@ -29,17 +29,10 @@ class IntendedEffect(Entity, Base):
   effect_id = Column('effect_id', Integer)
   __effect = None
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.ttp:
-      return self.ttp
-    elif self.threat_actor:
-      return self.threat_actor
-    elif self.incident:
-      return self.incident
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign',
+              'ttp',
+              'threat_actor',
+              'incident', ]
 
   @property
   def effect(self):

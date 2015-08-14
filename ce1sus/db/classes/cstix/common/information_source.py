@@ -101,9 +101,7 @@ class InformationSourceRole(Entity, Base):
   role_id = Column('role_id', Integer, default=None, nullable=False)
   informationsource_id = Column(BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
 
-  @property
-  def parent(self):
-    return self.information_source
+  _PARENTS = ['information_source']
 
   __role = None
   @property
@@ -142,33 +140,27 @@ class InformationSource(Entity, Base):
   roles = relationship(InformationSourceRole, backref='information_source')
   # TODO: references -> relation
 
-  @property
-  def parent(self):
-    if self.markingspecification:
-      return self.markingspecification
-    elif self.information_source:
-      return self.information_source
-    elif self.exploit_target:
-      return self.exploit_target
-    elif self.confidence:
-      return self.confidence
-    elif self.statement:
-      return self.statement
-    elif self.base_test_mechanism:
-      return self.base_test_mechanism
-    elif self.sighting:
-      return self.sighting
-    elif self.indicator:
-      return self.indicator
-    elif self.incident_reporter:
-      return self.incident_reporter
-    elif self.incident_responder:
-      return self.incident_responder
-    elif self.incident_coordinators:
-      return self.incident_coordinators
-    elif self.related:
-      return self.related
-    raise ValueError('Parent not found')
+  _PARENTS = ['information_source',
+              'exploit_target',
+              'confidence',
+              'statement',
+              'base_test_mechanism',
+              'sighting',
+              'indicator',
+              'incident_reporter',
+              'incident_responder',
+              'incident_coordinators',
+              'related_relatedcoa',
+              'related_relatedcampaign',
+              'related_relatedobservable',
+              'related_relatedexplottarget',
+              'related_relatedpackageref',
+              'related_relatedpackage',
+              'related_relatedidentity',
+              'related_relatedindicator',
+              'related_relatedthreatactor',
+              'related_relatedttp',
+              'related_relatedcoa', ]
 
   def to_dict(self, cache_object):
     copy = cache_object.make_copy()

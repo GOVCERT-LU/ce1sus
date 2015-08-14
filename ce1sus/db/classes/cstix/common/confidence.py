@@ -70,23 +70,25 @@ class Confidence(Entity, Base):
   # TODO: support confidence_assertion_chain
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    elif self.indicator:
-      return self.indicator
-    elif self.statement:
-      return self.statement
-    elif self.sighting:
-      return self.sighting
-    elif self.incident:
-      return self.incident
-    elif self.objective:
-      return self.objective
-    elif self.related:
-      return self.related
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign',
+              'indicator',
+              'statement',
+              'sighting',
+              'incident',
+              'objective',
+              'related_relatedcoa',
+              'related_relatedcampaign',
+              'related_relatedobservable',
+              'related_relatedexplottarget',
+              'related_relatedpackageref',
+              'related_relatedpackage',
+              'related_relatedidentity',
+              'related_relatedindicator',
+              'related_relatedthreatactor',
+              'related_relatedttp',
+              'related_relatedcoa',
+              ]
+
 
   @property
   def value(self):

@@ -24,13 +24,7 @@ class LossEstimation(Entity, Base):
   iso_currency_code = Column('iso_currency_code', UnicodeType(3))
   amount = Column('amount', Float)
 
-  @property
-  def parent(self):
-    if self.total_loss_estimation_ini:
-      return self.total_loss_estimation_ini
-    elif self.total_loss_estimation_act:
-      return self.total_loss_estimation_act
-    raise ValueError('Parent not found')
+  _PARENTS = ['total_loss_estimation_ini', 'total_loss_estimation_act']
 
   def to_dict(self, cache_object):
 

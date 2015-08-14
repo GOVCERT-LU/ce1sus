@@ -31,6 +31,19 @@ class Entity(BaseElement):
           return namespace, None
     return 'ce1sus', None
 
+  _PARENTS = list()
+
+  @property
+  def parent(self):
+    for parent in self._PARENTS:
+      if hasattr(self, parent):
+        item = getattr(self, parent)
+        if len(item) == 1:
+          return item[0]
+        else:
+          raise ValueError('Too many parents found')
+    raise ValueError('Parent not found')
+
   def set_id(self, id_):
     namespace, uuid = self.parse_id(id_)
     if namespace and not self.namespace:

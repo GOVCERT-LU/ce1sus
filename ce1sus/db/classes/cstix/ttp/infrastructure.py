@@ -68,9 +68,7 @@ class Infrastructure(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
-  @property
-  def parent(self):
-    return self.resource
+  _PARENTS = ['resource']
 
   title = Column('title', UnicodeType(255), index=True, nullable=True)
   description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False, backref='infrastructure_description')

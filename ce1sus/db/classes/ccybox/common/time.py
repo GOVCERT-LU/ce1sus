@@ -101,9 +101,7 @@ class CyboxTime(Entity, Base):
 
   informationsource_id = Column(BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
 
-  @property
-  def parent(self):
-    return self.information_source
+  _PARENTS = ['information_source']
 
   def to_dict(self, cache_object):
     result = {'start_time': self.attribute_to_dict(self.start_time, cache_object),

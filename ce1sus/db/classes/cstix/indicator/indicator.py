@@ -159,9 +159,7 @@ class IndicatorType(Entity, Base):
   indicator_id = Column(BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __type_ = None
 
-  @property
-  def parent(self):
-    return self.indicator
+  _PARENTS = ['indicator']
 
   @property
   def type_(self):
@@ -206,7 +204,7 @@ class Indicator(BaseCoreComponent, Base):
   related_campaigns = relationship(RelatedCampaign, secondary=_REL_INDICATOR_RELATED_CAMPAIGN, backref='indicator')
 
 
-
+  _PARENTS = ['event', 'related_indicator']
 
   @property
   def composite_indicator_expression(self):
@@ -237,14 +235,6 @@ class Indicator(BaseCoreComponent, Base):
   related_packages = relationship(RelatedPackageRef, secondary=_REL_INDICATOR_RELATED_PACKAGES, backref='indicator')
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-
-  @property
-  def parent(self):
-    if self.event:
-      return self.event
-    elif self.related_indicator:
-      return self.related_indicator
-    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
     observables = self.attributelist_to_dict(self.observables, cache_object)

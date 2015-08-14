@@ -136,12 +136,7 @@ class COATime(Entity, Base):
   start = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_START, uselist=False, backref='coa_time_start')
   end = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_ENDED, uselist=False, backref='coa_time_end')
 
-  @property
-  def parent(self):
-    if self.coa_taken:
-      return self.coa_taken
-    elif self.coa_requested:
-      return self.coa_requested
+  _PARENTS = ['coa_taken', 'coa_requested']
 
   def to_dict(self, cache_object):
 
@@ -159,12 +154,7 @@ class COATaken(Entity, Base):
   # TODO: Contributors
   # contributors = Contributors()
 
-  @property
-  def parent(self):
-    if self.incident:
-      return self.incident
-    elif self.history_item:
-      return self.history_item
+  _PARENTS = ['incident', 'history_item']
 
   def to_dict(self, cache_object):
 
@@ -200,9 +190,7 @@ class COARequested(Entity, Base):
       self.__priority = HighMediumLow(self, 'priority_id')
     self.priority.name = value
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   def to_dict(self, cache_object):
 

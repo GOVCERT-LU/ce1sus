@@ -112,9 +112,7 @@ class BaseTestMechanism(Entity, Base):
 
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.indicator
+  _PARENTS = ['indicator']
 
   type = Column(UnicodeType(20), nullable=False)
   __mapper_args__ = {

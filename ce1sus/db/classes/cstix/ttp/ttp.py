@@ -109,13 +109,7 @@ class TTP(BaseCoreComponent, Base):
   # custom ones related to ce1sus internals
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    if self.related_ttp:
-      return self.related_ttp
-    elif self.event:
-      return self.event
-    raise ValueError('Parent not found')
+  _PARENTS = ['related_ttp', 'event']
 
   def to_dict(self, cache_object):
 

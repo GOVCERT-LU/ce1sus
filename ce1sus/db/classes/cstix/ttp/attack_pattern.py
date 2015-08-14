@@ -67,9 +67,7 @@ class AttackPattern(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
-  @property
-  def parent(self):
-    return self.behaviour
+  _PARENTS = ['behaviour']
 
   title = Column('title', UnicodeType(255), index=True, nullable=True)
   description = relationship(StructuredText, secondary=_REL_ATTACKPATTERN_STRUCTUREDTEXT, uselist=False, backref='attack_pattern_description')

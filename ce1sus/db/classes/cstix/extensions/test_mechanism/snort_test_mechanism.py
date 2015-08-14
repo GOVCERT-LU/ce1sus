@@ -26,9 +26,7 @@ class SnortRule(Entity, Base):
   snorttestmechanism_id = Column('basetestmechanism_id', BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   rule = Column('rule', UnicodeTextType(), nullable=False)
 
-  @property
-  def parent(self):
-    return self.snort_test_mechanism
+  _PARENTS = ['snort_test_mechanism']
 
   def to_dict(self, cache_object):
 

@@ -121,6 +121,8 @@ class Event(Entity, Base):
   groups = relationship('EventGroupPermission')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
+  _PARENTS = ['related_package']
+
   @property
   def status(self):
     """
@@ -191,10 +193,6 @@ class Event(Entity, Base):
   def validate(self):
     # TODO validation of an event
     return True
-
-  @property
-  def parent(self):
-    return self.related_package
 
   def to_dict(self, cache_object):
     if is_event_owner(self, cache_object.user):

@@ -34,9 +34,7 @@ class TargetedInformation(BaseElement, Base):
   victimtargeting_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __targeted_information = None
 
-  @property
-  def parent(self):
-    return self.victim_targeting
+  _PARENTS = ['victim_targeting']
 
   @property
   def targeted_information(self):
@@ -67,9 +65,7 @@ class TargetedSystems(BaseElement, Base):
   victimtargeting_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __targeted_system = None
 
-  @property
-  def parent(self):
-    return self.victim_targeting
+  _PARENTS = ['victim_targeting']
 
   @property
   def targeted_system(self):
@@ -105,9 +101,7 @@ class VictimTargeting(BaseElement, Base):
 
   vulnerability_id = Column('vulnerability_id', BigIntegerType, ForeignKey('vulnerabilitys.vulnerability_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.ttp
+  _PARENTS = ['ttp']
 
   def to_dict(self, cache_object):
 

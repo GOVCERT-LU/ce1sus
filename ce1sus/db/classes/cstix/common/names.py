@@ -25,11 +25,7 @@ class Name(Entity, Base):
   # reference = anyuri
   reference = Column('reference', UnicodeType(255), default=None, nullable=False)
 
-  @property
-  def parent(self):
-    if self.campaign:
-      return self.campaign
-    raise ValueError('Parent not found')
+  _PARENTS = ['campaign']
 
   def to_dict(self, cache_object):
     result = {

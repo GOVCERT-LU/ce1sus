@@ -69,14 +69,8 @@ class ToolInformation(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
+  _PARENTS = ['information_source', 'resource']
 
-  @property
-  def parent(self):
-    if self.information_source:
-      return self.information_source
-    elif self.resource:
-      return self.resource
-    raise ValueError('Parent not found')
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 

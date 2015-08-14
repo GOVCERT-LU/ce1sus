@@ -239,9 +239,7 @@ class LeveragedTTP(Entity, Base):
   leveraged_ttp = relationship(RelatedTTP, secondary=_REL_LEVERAGEDTTP_RELATED_TTP, backref='leveraged_ttp')
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   def to_dict(self, cache_object):
 
@@ -272,9 +270,7 @@ class IncidentCategory(Entity, Base):
       self.__value = VocabIncidentCategory(self, 'category_id')
     self.value.name = value
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   def to_dict(self, cache_object):
 
@@ -290,9 +286,7 @@ class DiscoveryMethod(Entity, Base):
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   __value = None
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   @property
   def value(self):
@@ -354,6 +348,8 @@ class Incident(BaseCoreComponent, Base):
   handling = relationship(MarkingSpecification, secondary=_REL_INCIDENT_HANDLING, backref='incident')
   __security_compromise = None
 
+  _PARENTS = ['event', 'related_incident']
+
   @property
   def security_compromise(self):
     if not self.__security_compromise:
@@ -375,14 +371,6 @@ class Incident(BaseCoreComponent, Base):
 
   # ce1sus specific
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
-
-  @property
-  def parent(self):
-    if self.event:
-      return self.event
-    elif self.related_incident:
-      return self.related_incident
-    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
     if cache_object.complete:

@@ -105,15 +105,7 @@ class CourseOfAction(Entity, Base):
   related_coas = relationship(RelatedCOA, secondary=_REL_COA_RELCOA, backref='coa')
   related_packages = relationship(RelatedPackageRef, secondary=_REL_COA_RELATED_PACKAGESREF, backref='coa')
 
-  @property
-  def parent(self):
-    if self.coa_take:
-      return self.coa_taken
-    elif self.related_coa:
-      return self.related_coa
-    elif self.coa_requested:
-      return self.coa_requested
-    raise ValueError('Parent not found')
+  _PARENTS = ['coa_take', 'related_coa', 'coa_requested']
 
   def to_dict(self, cache_object):
     result = {

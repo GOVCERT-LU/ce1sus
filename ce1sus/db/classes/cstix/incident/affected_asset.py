@@ -68,6 +68,8 @@ class AssetType(Entity, Base):
 
   __value = None
 
+  _PARENTS = ['affected_asset']
+
   @property
   def value(self):
     if not self.__value:
@@ -80,11 +82,6 @@ class AssetType(Entity, Base):
     if not self.value:
       self.__value = VocabAssetType(self, 'type_id')
     self.value.name = value
-
-
-  @property
-  def parent(self):
-    return self.affected_asset
 
   def to_dict(self, cache_object):
 
@@ -167,9 +164,7 @@ class AffectedAsset(Entity, Base):
 
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   def to_dict(self, cache_object):
     if cache_object.complete:

@@ -61,9 +61,7 @@ class TotalLossEstimation(Entity, Base):
   actual_total_loss_estimation = relationship(LossEstimation, secondary=_REL_TLE_ACTU_LOSSESTIMATION, uselist=False, backref='total_loss_estimation_act')
   impact_assessment_id = Column('impactassessment_id', BigIntegerType, ForeignKey('impactassessments.impactassessment_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
-  @property
-  def parent(self):
-    return self.impact_assessment
+  _PARENTS = ['impact_assessment']
 
   def to_dict(self, cache_object):
 

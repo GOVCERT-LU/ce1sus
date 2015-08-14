@@ -179,9 +179,7 @@ class Time(Entity, Base):
 
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @property
-  def parent(self):
-    return self.incident
+  _PARENTS = ['incident']
 
   def to_dict(self, cache_object):
 
