@@ -110,7 +110,7 @@ class BaseController(object):
     else:
       raise ValueError('Not cacheobject')
 
-  def update_modified(self, instance, merge_cache, new_instance=None):
+  def update_modified(self, instance, merge_cache):
     if instance:
       if hasattr(instance, 'parent'):
         parent = instance.parent
@@ -118,14 +118,8 @@ class BaseController(object):
           if isinstance(parent, SimpleLogingInformations):
             self.merge_simple_logging_informations(parent, instance, merge_cache)
           if hasattr(parent, 'version'):
-            # python kung foo - also new_instance
-            params = getargspec(getattr(self, 'set_version'))
-            params_count = len(params.args)
-            if params_count == 3:
-              self.set_version(parent, merge_cache)
-            else:
-              self.set_version(parent, merge_cache, new_instance)
-          self.update_modified(parent, merge_cache, new_instance)
+            self.set_version(parent, merge_cache)
+          self.update_modified(parent, merge_cache)
 
   def broker_factory(self, clazz):
     """
