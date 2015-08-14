@@ -88,11 +88,21 @@ _REL_THREATACTOR_STRUCTUREDTEXT_SHORT = Table('rel_threatactor_structuredtext_sh
                                               index=True)
                                        )
 
+_REL_THREATACTOR_INTENDED_EFFECT = Table('rel_threatactor_intended_effect', getattr(Base, 'metadata'),
+                                      Column('rtaie_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                      Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
+                                      Column('intendedeffect_id', BigIntegerType, ForeignKey('intendedeffects.intendedeffect_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                      )
+
 class ThreatActorType(Entity, Base):
 
   type_id = Column('type_id', Integer, default=None, nullable=False)
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __type_ = None
+
+  @property
+  def parent(self):
+    return self.threat_actor
 
   @property
   def type_(self):
@@ -112,6 +122,10 @@ class Motivation(Entity, Base):
   mot_id = Column('mot_id', Integer, default=None, nullable=False)
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __motivation = None
+
+  @property
+  def parent(self):
+    return self.threat_actor
 
   @property
   def motivation(self):
@@ -141,6 +155,10 @@ class Sophistication(Entity, Base):
   __sophistication = None
 
   @property
+  def parent(self):
+    return self.threat_actor
+
+  @property
   def sophistication(self):
     if not self.sophistication:
       self.__sophistication = VocabMotivation(self, 'sop_id')
@@ -168,6 +186,10 @@ class PlanningAndOperationalSupport(Entity, Base):
   __paos = None
 
   @property
+  def parent(self):
+    return self.threat_actor
+
+  @property
   def paos(self):
     if not self.paos:
       if self.status_id:
@@ -191,24 +213,31 @@ class PlanningAndOperationalSupport(Entity, Base):
 
 class ThreatActor(BaseCoreComponent, Base):
 
-  identity = relationship(Identity, secondary=_REL_THREATACTOR_IDENTITY, uselist=False)
-  types = relationship(ThreatActorType)
-  motivations = relationship(Motivation)
-  sophistications = relationship(Sophistication)
-  intended_effects = relationship(IntendedEffect)
-  planning_and_operational_supports = relationship(PlanningAndOperationalSupport)
+  identity = relationship(Identity, secondary=_REL_THREATACTOR_IDENTITY, uselist=False, backref='threat_actor')
+  types = relationship(ThreatActorType, backref='threat_actor')
+  motivations = relationship(Motivation, backref='threat_actor')
+  sophistications = relationship(Sophistication, backref='threat_actor')
+  intended_effects = relationship(IntendedEffect, secondary=_REL_THREATACTOR_INTENDED_EFFECT, backref='threat_actor')
+  planning_and_operational_supports = relationship(PlanningAndOperationalSupport, backref='threat_actor')
   confidence = Column('confidence', UnicodeType(5), default=u'HIGH', nullable=False)
-  handling = relationship(MarkingSpecification, secondary=_REL_THREATACTOR_HANDLING)
+  handling = relationship(MarkingSpecification, secondary=_REL_THREATACTOR_HANDLING, backref='threat_actor')
   # TODO: observed_ttps is the same as related TTP
   # observed_ttps = None
   # TODO: associated_campaigns is the same as relate Campaign
   # associated_campaigns = None
   # associated_actors is the same as relatedThreatActor
-  associated_actors = relationship(RelatedThreatActor, secondary=_REL_THREATACTOR_RELATED_THREATACTOR)
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_THREATACTOR_RELATED_PACKAGES)
+  associated_actors = relationship(RelatedThreatActor, secondary=_REL_THREATACTOR_RELATED_THREATACTOR, backref='threat_actor')
+  related_packages = relationship(RelatedPackageRef, secondary=_REL_THREATACTOR_RELATED_PACKAGES, backref='threat_actor')
 
-  event = relationship('Event', uselist=False)
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    if self.relate_threat_actor:
+      return self.related_threat_actor
+    elif self.event:
+      return self.event
+    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
 

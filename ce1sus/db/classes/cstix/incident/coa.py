@@ -133,8 +133,15 @@ _REL_COAREQUESTED_COATIME = Table('rel_coarequested_coatime', getattr(Base, 'met
 
 
 class COATime(Entity, Base):
-  start = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_START, uselist=False)
-  end = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_ENDED, uselist=False)
+  start = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_START, uselist=False, backref='coa_time_start')
+  end = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_ENDED, uselist=False, backref='coa_time_end')
+
+  @property
+  def parent(self):
+    if self.coa_taken:
+      return self.coa_taken
+    elif self.coa_requested:
+      return self.coa_requested
 
   def to_dict(self, cache_object):
 
@@ -147,10 +154,18 @@ class COATime(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class COATaken(Entity, Base):
-  time = relationship(COATime, secondary=_REL_COATAKEN_COATIME)
-  course_of_action = relationship(CourseOfAction, secondary=_REL_COATAKEN_COA)
+  time = relationship(COATime, secondary=_REL_COATAKEN_COATIME, backref='coa_taken')
+  course_of_action = relationship(CourseOfAction, secondary=_REL_COATAKEN_COA, backref='coa_taken')
   # TODO: Contributors
   # contributors = Contributors()
+
+  @property
+  def parent(self):
+    if self.incident:
+      return self.incident
+    elif self.history_item:
+      return self.history_item
+
   def to_dict(self, cache_object):
 
     result = {
@@ -162,8 +177,9 @@ class COATaken(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class COARequested(Entity, Base):
-  time = relationship(COATime, secondary=_REL_COAREQUESTED_COATIME)
-  course_of_action = relationship(CourseOfAction, secondary=_REL_COAREQUESTED_COA)
+  time = relationship(COATime, secondary=_REL_COAREQUESTED_COATIME, backref='coa_requested')
+  course_of_action = relationship(CourseOfAction, secondary=_REL_COAREQUESTED_COA, backref='coa_requested')
+
   # TODO: Contributors
   # contributors = Contributors()
   priority_id = Column('priority_id', Integer)
@@ -183,6 +199,10 @@ class COARequested(Entity, Base):
     if not self.priority:
       self.__priority = HighMediumLow(self, 'priority_id')
     self.priority.name = value
+
+  @property
+  def parent(self):
+    return self.incident
 
   def to_dict(self, cache_object):
 

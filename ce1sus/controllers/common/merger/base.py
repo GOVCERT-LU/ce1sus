@@ -40,11 +40,12 @@ class BaseMerger(BaseChanger):
     return version
 
   def set_base(self, old_instance, new_instance, cache_object):
-    BaseChanger.set_base(self, old_instance, None, cache_object, None)
+    super(BaseMerger, self).set_base(old_instance, None, cache_object, None)
     version = Version('0.0.0')
     if isinstance(old_instance, BaseElement):
       # merge properties
-      version.add(self.__merge_properties(old_instance.properties, new_instance.properties, cache_object))
+      if new_instance:
+        version.add(self.__merge_properties(old_instance.properties, new_instance.properties, cache_object))
 
     return version
 

@@ -168,14 +168,20 @@ class Time(Entity, Base):
 
   __tablename__ = 'stixtimes'
 
-  first_malicious_action = relationship(DateTimeWithPrecision, secondary=_REL_FMA_DATETIMEWITHPRECISION, uselist=False)
-  initial_compromise = relationship(DateTimeWithPrecision, secondary=_REL_IC_DATETIMEWITHPRECISION, uselist=False)
-  first_data_exfiltration = relationship(DateTimeWithPrecision, secondary=_REL_FAE_DATETIMEWITHPRECISION, uselist=False)
-  incident_opened = relationship(DateTimeWithPrecision, secondary=_REL_IO_DATETIMEWITHPRECISION, uselist=False)
-  containment_achieved = relationship(DateTimeWithPrecision, secondary=_REL_CA_DATETIMEWITHPRECISION, uselist=False)
-  restoration_achieved = relationship(DateTimeWithPrecision, secondary=_REL_RA_DATETIMEWITHPRECISION, uselist=False)
-  incident_reported = relationship(DateTimeWithPrecision, secondary=_REL_IR_DATETIMEWITHPRECISION, uselist=False)
-  incident_closed = relationship(DateTimeWithPrecision, secondary=_REL_ICL_DATETIMEWITHPRECISION, uselist=False)
+  first_malicious_action = relationship(DateTimeWithPrecision, secondary=_REL_FMA_DATETIMEWITHPRECISION, uselist=False, backref='time_fma')
+  initial_compromise = relationship(DateTimeWithPrecision, secondary=_REL_IC_DATETIMEWITHPRECISION, uselist=False, backref='time_ic')
+  first_data_exfiltration = relationship(DateTimeWithPrecision, secondary=_REL_FAE_DATETIMEWITHPRECISION, uselist=False, backref='time_fae')
+  incident_opened = relationship(DateTimeWithPrecision, secondary=_REL_IO_DATETIMEWITHPRECISION, uselist=False, backref='time_io')
+  containment_achieved = relationship(DateTimeWithPrecision, secondary=_REL_CA_DATETIMEWITHPRECISION, uselist=False, backref='time_ca')
+  restoration_achieved = relationship(DateTimeWithPrecision, secondary=_REL_RA_DATETIMEWITHPRECISION, uselist=False, backref='time_ra')
+  incident_reported = relationship(DateTimeWithPrecision, secondary=_REL_IR_DATETIMEWITHPRECISION, uselist=False, backref='time_ir')
+  incident_closed = relationship(DateTimeWithPrecision, secondary=_REL_ICL_DATETIMEWITHPRECISION, uselist=False, backref='time_icl')
+
+  incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.incident
 
   def to_dict(self, cache_object):
 

@@ -57,9 +57,13 @@ _REL_TLE_ACTU_LOSSESTIMATION = Table('rel_tle_actu_lossestimation', getattr(Base
                                      )
 
 class TotalLossEstimation(Entity, Base):
-  initial_reported_total_loss_estimation = relationship(LossEstimation, secondary=_REL_TLE_INIT_LOSSESTIMATION, uselist=False)
-  actual_total_loss_estimation = relationship(LossEstimation, secondary=_REL_TLE_ACTU_LOSSESTIMATION, uselist=False)
+  initial_reported_total_loss_estimation = relationship(LossEstimation, secondary=_REL_TLE_INIT_LOSSESTIMATION, uselist=False, backref='total_loss_estimation_ini')
+  actual_total_loss_estimation = relationship(LossEstimation, secondary=_REL_TLE_ACTU_LOSSESTIMATION, uselist=False, backref='total_loss_estimation_act')
   impact_assessment_id = Column('impactassessment_id', BigIntegerType, ForeignKey('impactassessments.impactassessment_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+
+  @property
+  def parent(self):
+    return self.impact_assessment
 
   def to_dict(self, cache_object):
 

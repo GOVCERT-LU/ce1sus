@@ -26,6 +26,10 @@ class SnortRule(Entity, Base):
   snorttestmechanism_id = Column('basetestmechanism_id', BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   rule = Column('rule', UnicodeTextType(), nullable=False)
 
+  @property
+  def parent(self):
+    return self.snort_test_mechanism
+
   def to_dict(self, cache_object):
 
     result = {
@@ -42,7 +46,7 @@ class SnortTestMechanism(BaseTestMechanism):
 
   product_name = None
   version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)
-  rules = relationship(SnortRule)
+  rules = relationship(SnortRule, backref='snort_test_mechanism')
   # TODO: event_filters
   # TODO: rate_filters
   # TODO: event_suppressions

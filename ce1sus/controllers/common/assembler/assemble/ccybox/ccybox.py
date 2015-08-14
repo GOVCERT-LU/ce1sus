@@ -26,7 +26,7 @@ class CyboxAssembler(BaseChanger):
     observable = Observable()
     if json:
       self.set_base(observable, json, cache_object, event)
-      observable.event = event
+      observable.parent = event
       observable.id_ = json.get('id_', None)
       observable.idref = json.get('idref', None)
       if not observable.idref:

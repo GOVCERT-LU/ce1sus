@@ -67,9 +67,13 @@ class AttackPattern(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
+  @property
+  def parent(self):
+    return self.behaviour
+
   title = Column('title', UnicodeType(255), index=True, nullable=True)
-  description = relationship(StructuredText, secondary=_REL_ATTACKPATTERN_STRUCTUREDTEXT, uselist=False)
-  short_description = relationship(StructuredText, secondary=_REL_ATTACKPATTERN_STRUCTUREDTEXT_SHORT, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_ATTACKPATTERN_STRUCTUREDTEXT, uselist=False, backref='attack_pattern_description')
+  short_description = relationship(StructuredText, secondary=_REL_ATTACKPATTERN_STRUCTUREDTEXT_SHORT, uselist=False, backref='attack_pattern_short_description')
   behavior_id = Column('behavior_id', BigIntegerType, ForeignKey('behaviors.behavior_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   capec_id = Column('capec_id', UnicodeTextType())
 

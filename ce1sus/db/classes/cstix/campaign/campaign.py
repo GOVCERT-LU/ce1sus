@@ -119,13 +119,13 @@ _REL_CAMPAIGN_STRUCTUREDTEXT_SHORT = Table('rel_campaign_structuredtext_short', 
 
 class Campaign(BaseCoreComponent, Base):
 
-  names = relationship(Name, secondary=_REL_CAMPAIGN_NAME)
-  intended_effects_instances = relationship(IntendedEffect, secondary=_REL_CAMPAIGN_INTENDEDEFFECT)
+  names = relationship(Name, secondary=_REL_CAMPAIGN_NAME, backref='campaign')
+  intended_effects_instances = relationship(IntendedEffect, secondary=_REL_CAMPAIGN_INTENDEDEFFECT, backref='campaign')
   status_id = Column('status_id', Integer)
-  handling = relationship(MarkingSpecification, secondary=_REL_CAMPAIGN_HANDLING)
+  handling = relationship(MarkingSpecification, secondary=_REL_CAMPAIGN_HANDLING, backref='campaign')
 
   __status = None
-  
+
   @property
   def status(self):
     if not self.__status:
@@ -139,20 +139,27 @@ class Campaign(BaseCoreComponent, Base):
       self.__status = CampaignStatus(self, 'status_id')
     self.status.name = value
 
-  related_ttps = relationship(RelatedTTP, secondary=_REL_CAMPAIGN_RELATED_TTP)
+  related_ttps = relationship(RelatedTTP, secondary=_REL_CAMPAIGN_RELATED_TTP, backref='campaign')
   # TODO: related_incidents
   # related_incidents = RelatedIncidents()
-  related_indicators = relationship(RelatedIndicator, secondary=_REL_CAMPAIGN_RELATED_INDICATOR)
-  attribution = relationship(RelatedThreatActor, secondary=_REL_CAMPAIGN_RELATED_THREATACTOR)
+  related_indicators = relationship(RelatedIndicator, secondary=_REL_CAMPAIGN_RELATED_INDICATOR, backref='campaign')
+  attribution = relationship(RelatedThreatActor, secondary=_REL_CAMPAIGN_RELATED_THREATACTOR, backref='campaign')
   # TODO: associated_campaigns = relatedCampaign
-  associated_campaigns = relationship(RelatedCampaign, secondary=_REL_CAMPAIGN_RELATED_CAMPAIGN)
+  associated_campaigns = relationship(RelatedCampaign, secondary=_REL_CAMPAIGN_RELATED_CAMPAIGN, backref='campaign')
 
-  confidence = relationship(Confidence, secondary=_REL_CAMPAIGN_CONFIDENCE)
-  activity = relationship(Activity)
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_CAMPAIGN_RELATED_PACKAGES)
+  confidence = relationship(Confidence, secondary=_REL_CAMPAIGN_CONFIDENCE, backref='campaign')
+  activity = relationship(Activity, backref='campaign')
+  related_packages = relationship(RelatedPackageRef, secondary=_REL_CAMPAIGN_RELATED_PACKAGES, backref='campaign')
 
-  event = relationship('Event', uselist=False)
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    if self.event:
+      return self.event
+    elif self.related_campaign:
+      return self.related_campaign
+    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
     confidence = self.attribute_to_dict(self.confidence, cache_object)

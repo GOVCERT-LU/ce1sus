@@ -76,10 +76,14 @@ _REL_OBJECTIVE_CONFIDENCE = Table('rel_objective_confidence', getattr(Base, 'met
                                   )
 
 class Objective(Entity, Base):
-  description = relationship(StructuredText, secondary=_REL_OBJECTIVE_STRUCTUREDTEXT, uselist=False)
-  short_description = relationship(StructuredText, secondary=_REL_OBJECTIVE_SHORT_STRUCTUREDTEXT, uselist=False)
-  applicability_confidence = relationship(Confidence, secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False)
-  observable_id = Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  description = relationship(StructuredText, secondary=_REL_OBJECTIVE_STRUCTUREDTEXT, uselist=False, backref='objective_description')
+  short_description = relationship(StructuredText, secondary=_REL_OBJECTIVE_SHORT_STRUCTUREDTEXT, uselist=False, backref='objective_short_description')
+  applicability_confidence = relationship(Confidence, secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False, backref='objective')
+  courseofaction_id = Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+
+  @property
+  def parent(self):
+    return self.coa
 
   def to_dict(self, cache_object):
     if cache_object.complete:

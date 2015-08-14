@@ -90,7 +90,7 @@ class TestLogin(BaseTest):
       user.name = 'Root Disabled'
       user.sirname = 'Administrator Disabled'
       user.username = 'admindisabled'
-      user.password = hashSHA1('admin' + salt)
+      user.password = hashSHA1('admin2' + salt)
       user.last_login = None
       user.email = 'admin2@example.com'
       user.api_key = None
@@ -105,7 +105,7 @@ class TestLogin(BaseTest):
 
       self.apiKey = ''
 
-      text = self.post('/login', data={'usr':'admindisabled', 'pwd':'admin'})
+      text = self.post('/login', data={'usr':'admindisabled', 'pwd':'admin2'})
       if text:
         assert False
       else:

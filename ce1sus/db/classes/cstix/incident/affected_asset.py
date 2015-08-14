@@ -11,10 +11,11 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabs import AssetType as VocabAssetType
 from ce1sus.db.classes.cstix.common.vocabs import OwnerShipClass
 from ce1sus.db.classes.cstix.incident.property_affected import PropertyAffected
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeTextType
+from ce1sus.db.classes.internal.core import BigIntegerType
 from ce1sus.db.common.session import Base
 
 
@@ -23,28 +24,48 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_AFFECTEDASSET_ASSETTYPE = Table('rel_affectedasset_assettype', getattr(Base, 'metadata'),
-                          Column('raaat_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                          Column('affectedasset_id',
-                                 BigIntegerType,
-                                 ForeignKey('affectedassets.affectedasset_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 index=True,
-                                 nullable=False),
-                          Column('assettype_id',
-                                 BigIntegerType,
-                                 ForeignKey('assettypes.assettype_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 nullable=False,
-                                 index=True)
-                          )
+_REL_AFFECTEDASSET_STRUCTUREDTEXT = Table('rel_affectedasset_structuredtext', getattr(Base, 'metadata'),
+                                       Column('rtaffectedassetst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                       Column('affectedasset_id',
+                                              BigIntegerType,
+                                              ForeignKey('affectedassets.affectedasset_id',
+                                                         ondelete='cascade',
+                                                         onupdate='cascade'),
+                                              index=True,
+                                              nullable=False),
+                                       Column('structuredtext_id',
+                                             BigIntegerType,
+                                             ForeignKey('structuredtexts.structuredtext_id',
+                                                        ondelete='cascade',
+                                                        onupdate='cascade'),
+                                              nullable=False,
+                                              index=True)
+                                       )
 
+_REL_AFFECTEDASSET_BFR_STRUCTUREDTEXT = Table('rel_affectedasset_bfr_structuredtext', getattr(Base, 'metadata'),
+                                       Column('rtaffectedassetbfrst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                       Column('affectedasset_id',
+                                              BigIntegerType,
+                                              ForeignKey('affectedassets.affectedasset_id',
+                                                         ondelete='cascade',
+                                                         onupdate='cascade'),
+                                              index=True,
+                                              nullable=False),
+                                       Column('structuredtext_id',
+                                             BigIntegerType,
+                                             ForeignKey('structuredtexts.structuredtext_id',
+                                                        ondelete='cascade',
+                                                        onupdate='cascade'),
+                                              nullable=False,
+                                              index=True)
+                                       )
 
 class AssetType(Entity, Base):
   type_id = Column('type_id', Integer, default=None, nullable=False)
   count_affected = Column('count_affected', Integer, nullable=False, default=1)
+
+  affectedasset_id = Column(BigIntegerType, ForeignKey('affectedassets.affectedasset_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+
   __value = None
 
   @property
@@ -61,6 +82,10 @@ class AssetType(Entity, Base):
     self.value.name = value
 
 
+  @property
+  def parent(self):
+    return self.affected_asset
+
   def to_dict(self, cache_object):
 
     result = {
@@ -75,9 +100,10 @@ class AssetType(Entity, Base):
 
 class AffectedAsset(Entity, Base):
 
-  type_ = relationship(AssetType, uselist=False, secondary=_REL_AFFECTEDASSET_ASSETTYPE)
-  description = Column('description', UnicodeTextType())
-  business_function_or_role = Column('business_function_or_role', UnicodeTextType())
+  type_ = relationship(AssetType, uselist=False, backref='affected_asset')
+  description = relationship(StructuredText, secondary=_REL_AFFECTEDASSET_STRUCTUREDTEXT, uselist=False, backref='affected_asset_description')
+  business_function_or_role = relationship(StructuredText, secondary=_REL_AFFECTEDASSET_BFR_STRUCTUREDTEXT, uselist=False, backref='affected_asset_short_description')
+
   ownership_class_id = Column('ownership_class_id', Integer)
   __ownership_class = None
   
@@ -135,11 +161,15 @@ class AffectedAsset(Entity, Base):
   # WTF is this?
   # TODO: location
   # location = None
-  nature_of_security_effect = relationship(PropertyAffected, uselist=False)
+  nature_of_security_effect = relationship(PropertyAffected, uselist=False, backref='affected_asset')
   # TODO: structured_description
   # structured_description = None
 
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.incident
 
   def to_dict(self, cache_object):
     if cache_object.complete:

@@ -78,6 +78,10 @@ class DirectImpactSummary(Entity, Base):
       self.__response_and_recovery_costs = ImpactRating(self, 'response_and_recovery_costs_id')
     self.response_and_recovery_costs.name = value
 
+  @property
+  def parent(self):
+    return self.impact_assessment
+
   def to_dict(self, cache_object):
 
     result = {

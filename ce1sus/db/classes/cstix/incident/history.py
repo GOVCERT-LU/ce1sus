@@ -51,6 +51,10 @@ class JournalEntry(Entity, Base):
 
   historyitem_id = Column('historyitem_id', BigIntegerType, ForeignKey('historyitems.historyitem_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
+  @property
+  def parent(self):
+    return self.history_item
+
   def to_dict(self, cache_object):
 
     result = {
@@ -65,11 +69,14 @@ class JournalEntry(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class HistoryItem(Entity, Base):
-  action_entry = relationship(COATaken, uselist=False, secondary=_REL_HISTORYITEM_COATAKEN)
-  journal_entry = relationship(JournalEntry, uselist=False)
+  action_entry = relationship(COATaken, uselist=False, secondary=_REL_HISTORYITEM_COATAKEN, backref='history_item')
+  journal_entry = relationship(JournalEntry, uselist=False, backref='history_item')
 
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
+  @property
+  def parent(self):
+    return self.incident
 
   def to_dict(self, cache_object):
 

@@ -28,6 +28,10 @@ class VocabString(Entity, Base):
   vocab_name = Column('vocab_name', UnicodeType(255), index=True, nullable=False)
   vocab_reference = Column('vocab_reference', UnicodeTextType())
 
+  @property
+  def parent(self):
+    return self.generic_test_meachanism
+
   def to_dict(self, cache_object):
 
     result = {'value': self.convert_value(self.value),

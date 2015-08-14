@@ -31,8 +31,12 @@ _REL_VICTIMTARGETING_IDENTITY = Table('rel_victimtargeting_identity', getattr(Ba
 
 class TargetedInformation(BaseElement, Base):
   targeted_information_id = Column('targeted_information_id', Integer, default=None)
-  vt_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+  victimtargeting_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __targeted_information = None
+
+  @property
+  def parent(self):
+    return self.victim_targeting
 
   @property
   def targeted_information(self):
@@ -60,8 +64,12 @@ class TargetedInformation(BaseElement, Base):
 
 class TargetedSystems(BaseElement, Base):
   targeted_system_id = Column('targeted_system_id', Integer, default=None)
-  vt_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+  victimtargeting_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __targeted_system = None
+
+  @property
+  def parent(self):
+    return self.victim_targeting
 
   @property
   def targeted_system(self):
@@ -86,9 +94,9 @@ class TargetedSystems(BaseElement, Base):
     return merge_dictionaries(result, parent_dict)
 
 class VictimTargeting(BaseElement, Base):
-  identity = relationship(Identity, secondary='rel_victimtargeting_identity', uselist=False)
-  targeted_systems = relationship(TargetedSystems)
-  targeted_information = relationship(TargetedInformation)
+  identity = relationship(Identity, secondary='rel_victimtargeting_identity', uselist=False, backref='victim_targeting')
+  targeted_systems = relationship(TargetedSystems, backref='victim_targeting')
+  targeted_information = relationship(TargetedInformation, backref='victim_targeting')
   # TODO targeted_technical_details
   # targeted_technical_details = None
 
@@ -96,6 +104,10 @@ class VictimTargeting(BaseElement, Base):
   ttp_id = Column(BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
 
   vulnerability_id = Column('vulnerability_id', BigIntegerType, ForeignKey('vulnerabilitys.vulnerability_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.ttp
 
   def to_dict(self, cache_object):
 

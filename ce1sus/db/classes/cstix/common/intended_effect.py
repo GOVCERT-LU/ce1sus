@@ -26,9 +26,20 @@ class IntendedEffect(Entity, Base):
   campaign_id = Column('campaign_id', BigIntegerType, ForeignKey('campaigns.campaign_id', ondelete='cascade', onupdate='cascade'), index=True)
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), index=True)
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
-  ttp_id = Column(BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), index=True)
   effect_id = Column('effect_id', Integer)
   __effect = None
+
+  @property
+  def parent(self):
+    if self.campaign:
+      return self.campaign
+    elif self.ttp:
+      return self.ttp
+    elif self.threat_actor:
+      return self.threat_actor
+    elif self.incident:
+      return self.incident
+    raise ValueError('Parent not found')
 
   @property
   def effect(self):

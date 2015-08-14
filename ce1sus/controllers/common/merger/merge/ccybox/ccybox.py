@@ -41,12 +41,17 @@ class CyboxMerger(BaseMerger):
 
       version.add(self.merge_keywords(new_instance.keywords, old_instance.keywords, cache_object))
 
+
     elif result == 0:
       version.add(Version().increase_major()())
       old_instance = new_instance
 
     if self.is_change(version):
       self.set_base(old_instance, new_instance, cache_object)
+
+      # Update also event
+      self.set_base(old_instance.event, None, cache_object)
+
     return version
 
   def merge_observable_composition(self, new_instance, old_instance, cache_object):
@@ -62,6 +67,10 @@ class CyboxMerger(BaseMerger):
 
     if self.is_change(version):
       self.set_base(old_instance, new_instance, cache_object)
+
+      # Update also event
+      self.set_base(old_instance.event, None, cache_object)
+
     return version
 
   def merge_keywords(self, new_instance, old_instance, cache_object):
@@ -79,4 +88,7 @@ class CyboxMerger(BaseMerger):
 
     if self.is_change(version):
       self.set_base(old_instance, new_instance, cache_object)
+
+      # Update also event
+      self.set_base(old_instance.observable.event, None, cache_object)
     return version

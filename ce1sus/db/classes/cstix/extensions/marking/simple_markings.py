@@ -23,7 +23,7 @@ __license__ = 'GPL v3+'
 class SimpleMarkingStructure(MarkingStructure):
   # override identifier to keep the polymorphics
   identifier = Column(BigIntegerType, ForeignKey('markingstructures.markingstructure_id'), primary_key=True)
-  statement = relationship(Statement, secondary=_REL_MARKINGSTRUCTURE_STATEMENT)
+  statement = relationship(Statement, secondary=_REL_MARKINGSTRUCTURE_STATEMENT, backref='simple_marking_structure')
 
   __mapper_args__ = {'polymorphic_identity':'simplemarkingstructure'}
 

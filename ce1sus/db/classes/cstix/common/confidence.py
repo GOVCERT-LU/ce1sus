@@ -65,11 +65,29 @@ class Confidence(Entity, Base):
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'second')
   value_db = Column('confidence', Integer, default=3, nullable=False)
 
-  description = relationship(StructuredText, secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False, lazy='joined')
-  source = relationship(InformationSource, secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False, lazy='joined', backref='confidence_description')
+  source = relationship(InformationSource, secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False, backref='confidence')
   # TODO: support confidence_assertion_chain
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   
+  @property
+  def parent(self):
+    if self.campaign:
+      return self.campaign
+    elif self.indicator:
+      return self.indicator
+    elif self.statement:
+      return self.statement
+    elif self.sighting:
+      return self.sighting
+    elif self.incident:
+      return self.incident
+    elif self.objective:
+      return self.objective
+    elif self.related:
+      return self.related
+    raise ValueError('Parent not found')
+
   @property
   def value(self):
     return self.get_dictionary().get(self.value_db, None)

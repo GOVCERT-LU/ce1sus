@@ -107,8 +107,14 @@ class BaseTestMechanism(Entity, Base):
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
-  efficacy = relationship(Statement, secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
-  producer = relationship(InformationSource, secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
+  efficacy = relationship(Statement, secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False, backref='base_test_mechanism')
+  producer = relationship(InformationSource, secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False, backref='base_test_mechanism')
+
+  indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.indicator
 
   type = Column(UnicodeType(20), nullable=False)
   __mapper_args__ = {

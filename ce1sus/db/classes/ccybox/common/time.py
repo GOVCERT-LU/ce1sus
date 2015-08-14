@@ -94,10 +94,16 @@ _REL_RECEIVEDTIME_DATETIMEWITHPRECISION = Table('rel_receivedtime_datetimewithpr
 
 class CyboxTime(Entity, Base):
 
-  start_time = relationship(DateTimeWithPrecision, secondary=_REL_STARTTIME_DATETIMEWITHPRECISION, uselist=False)
-  end_time = relationship(DateTimeWithPrecision, secondary=_REL_ENDTIME_DATETIMEWITHPRECISION, uselist=False)
-  produced_time = relationship(DateTimeWithPrecision, secondary=_REL_PRODUCEDTIME_DATETIMEWITHPRECISION, uselist=False)
-  received_time = relationship(DateTimeWithPrecision, secondary=_REL_RECEIVEDTIME_DATETIMEWITHPRECISION, uselist=False)
+  start_time = relationship(DateTimeWithPrecision, secondary=_REL_STARTTIME_DATETIMEWITHPRECISION, uselist=False, backref='cyboxtime_start')
+  end_time = relationship(DateTimeWithPrecision, secondary=_REL_ENDTIME_DATETIMEWITHPRECISION, uselist=False, backref='cyboxtime_end')
+  produced_time = relationship(DateTimeWithPrecision, secondary=_REL_PRODUCEDTIME_DATETIMEWITHPRECISION, uselist=False, backref='cyboxtime_produced')
+  received_time = relationship(DateTimeWithPrecision, secondary=_REL_RECEIVEDTIME_DATETIMEWITHPRECISION, uselist=False, backref='cyboxtime_received')
+
+  informationsource_id = Column(BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+
+  @property
+  def parent(self):
+    return self.information_source
 
   def to_dict(self, cache_object):
     result = {'start_time': self.attribute_to_dict(self.start_time, cache_object),

@@ -25,9 +25,13 @@ __license__ = 'GPL v3+'
 
 class Behavior(Entity, Base):
   ttp_id = Column(BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
-  malware_instances = relationship(MalwareInstance)
-  attack_patterns = relationship(AttackPattern)
-  exploits = relationship(Exploit)
+  malware_instances = relationship(MalwareInstance, backref='behaviour')
+  attack_patterns = relationship(AttackPattern, backref='behaviour')
+  exploits = relationship(Exploit, backref='behaviour')
+
+  @property
+  def parent(self):
+    return self.ttp
 
   def to_dict(self, cache_object):
 

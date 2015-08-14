@@ -26,8 +26,8 @@ class GenericTestMechanism(BaseTestMechanism):
   # override identifier to keep the polymorphics
   identifier = Column(BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id'), primary_key=True)
   # TODO: reference_location
-  description = relationship(StructuredText, secondary=_REL_TESTMECHANISM_STRUCTUREDTEXT, uselist=False)
-  type_ = relationship(VocabString, secondary=_REL_TESTMECHANISM_VOCABSTRING)
+  description = relationship(StructuredText, secondary=_REL_TESTMECHANISM_STRUCTUREDTEXT, uselist=False, backref='generic_test_meachanism_description')
+  type_ = relationship(VocabString, secondary=_REL_TESTMECHANISM_VOCABSTRING, backref='generic_test_meachanism')
   specification = Column('specification', UnicodeTextType())
 
   __mapper_args__ = {'polymorphic_identity':'generictestmechanism'}

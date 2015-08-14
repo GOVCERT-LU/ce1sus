@@ -43,6 +43,10 @@ class Effect(Entity, Base):
       self.__value = IntendedEffect(self, 'eff_id')
     self.value.name = value
 
+  @property
+  def parent(self):
+    return self.impact_assessment
+
   def to_dict(self, cache_object):
 
     result = {
@@ -53,10 +57,10 @@ class Effect(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class ImpactAssessment(Entity, Base):
-  direct_impact_summary = relationship(DirectImpactSummary, uselist=False)
-  indirect_impact_summary = relationship(IndirectImpactSummary, uselist=False)
-  total_loss_estimation = relationship(TotalLossEstimation, uselist=False)
-  impact_qualification_id = Column(Integer)
+  direct_impact_summary = relationship(DirectImpactSummary, uselist=False, backref='impact_assessment')
+  indirect_impact_summary = relationship(IndirectImpactSummary, uselist=False, backref='impact_assessment')
+  total_loss_estimation = relationship(TotalLossEstimation, uselist=False, backref='impact_assessment')
+  impact_qualification_id = Column('impact_qualification_id', Integer)
 
   @property
   def impact_qualification(self):
@@ -71,10 +75,14 @@ class ImpactAssessment(Entity, Base):
       self.__impact_qualification = ImpactQualification(self, 'impact_qualification_id')
     self.impact_qualification.name = impact_qualification
 
-  effects = relationship(Effect)
+  effects = relationship(Effect, backref='impact_assessment')
 
   # ce1sus specific
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.incident
 
   def to_dict(self, cache_object):
 

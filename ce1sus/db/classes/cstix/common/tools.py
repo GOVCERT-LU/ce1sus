@@ -69,12 +69,21 @@ class ToolInformation(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
+
+  @property
+  def parent(self):
+    if self.information_source:
+      return self.information_source
+    elif self.resource:
+      return self.resource
+    raise ValueError('Parent not found')
+
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   name = Column('name', UnicodeType(255), index=True, nullable=False)
   # TODO: Tool type 0..n
-  description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False, backref='tool_information_description')
   # TODO: references ToolReference 0..n
   vendor = Column('vendor', UnicodeType(255), index=True, nullable=False)
   version_db = Column('version', UnicodeType(40), nullable=True)
@@ -87,7 +96,7 @@ class ToolInformation(Entity, Base):
   # TODO: metadata
   # TODO: compensation_model
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  short_description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT, uselist=False)
+  short_description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT, uselist=False, backref='tool_information_short_description')
 
   __version = None
   @property

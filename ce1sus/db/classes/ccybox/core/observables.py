@@ -53,6 +53,9 @@ class ObservableKeyword(Entity, Base):
   observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False)
   keyword = Column('keyword', UnicodeType(255), nullable=False, index=True)
 
+  @property
+  def parent(self):
+    return self.observable
 
   def to_dict(self, cache_object):
     result = {'keyword', self.convert_value(self.keyword)}
@@ -62,11 +65,15 @@ class ObservableKeyword(Entity, Base):
 class ObservableComposition(Entity, Base):
 
   operator = Column('operator', UnicodeType(3), default=u'OR')
-  observables = relationship('Observable', secondary='rel_observable_composition', backref='composed_parent')
+  observables = relationship('Observable', secondary='rel_observable_composition', backref='observable_composition')
 
   # ce1sus specific
-  parent_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  parent = relationship('Observable')
+  observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.observable
+
 
   def validate(self):
     return True
@@ -99,18 +106,25 @@ class Observable(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, backref='observable_description')
 
-  object = relationship(Object, back_populates='parent', uselist=False, primaryjoin='Object.parent_id==Observable.identifier')
+  object = relationship(Object, uselist=False, primaryjoin='Object.parent_id==Observable.identifier', backref='observable')
   # TODO: observable event (Note: different than the event used here)
-  observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
+  observable_composition = relationship('ObservableComposition', uselist=False, backref='observable')
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   sighting_count = Column(u'sighting_count', Integer, nullable=True, index=True)
   keywords = relationship('ObservableKeyword', backref='observable')
 
-  # ce1sus specific
-  event = relationship('Event', uselist=False, primaryjoin='Observable.event_id==Event.identifier')
-  event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True)
+  @property
+  def parent(self):
+    if self.event:
+      return self.event
+    elif self.indicator:
+      return self.indicator
+    elif self.observable_composition:
+      return self.observable_composition
+    elif self.related_observable:
+      return self.related_observable
 
   def validate(self):
     return True

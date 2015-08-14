@@ -42,10 +42,26 @@ class Identity(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
+  @property
+  def parent(self):
+    if self.information_source:
+      return self.information_source
+    elif self.resource:
+      return self.resource
+    elif self.victim_targeting:
+      return self.victim_targeting
+    elif self.threat_actor:
+      return self.threat_actor
+    elif self.incident:
+      return self.incident
+    elif self.related_identity:
+      return self.related_identity
+    raise ValueError('Parent not found')
+
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   idref = Column('idref', UnicodeType(45), nullable=True, index=True)
   name = Column('name', UnicodeType(255), index=True, nullable=True)
-  related_identities = relationship(RelatedIdentity, secondary=_REL_IDENTITY_RELATED_IDENTITY)
+  related_identities = relationship(RelatedIdentity, secondary=_REL_IDENTITY_RELATED_IDENTITY, backref='identity')
 
   def to_dict(self, cache_object):
 

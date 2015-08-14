@@ -93,17 +93,27 @@ class CourseOfAction(Entity, Base):
       self.__type = CourseOfActionType(self, 'type_id')
     self.type.name = value
 
-  objective = relationship(Objective)
+  objective = relationship(Objective, backref='coa')
   # TODO: parameter_observables
   # parameter_observables = -> relationship observables
   #TODO: structured_coa = None
   
-  impact = relationship(Statement, secondary=_REL_COA_IMPACT_STATEMENT)
-  cost = relationship(Statement, secondary=_REL_COA_COST_STATEMENT)
-  efficacy = relationship(Statement, secondary=_REL_EFFICACY_STATEMENT)
+  impact = relationship(Statement, secondary=_REL_COA_IMPACT_STATEMENT, backref='coa_impact')
+  cost = relationship(Statement, secondary=_REL_COA_COST_STATEMENT, backref='coa_cost')
+  efficacy = relationship(Statement, secondary=_REL_EFFICACY_STATEMENT, backref='coa_efficacy')
 
-  related_coas = relationship(RelatedCOA, secondary=_REL_COA_RELCOA)
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_COA_RELATED_PACKAGESREF)
+  related_coas = relationship(RelatedCOA, secondary=_REL_COA_RELCOA, backref='coa')
+  related_packages = relationship(RelatedPackageRef, secondary=_REL_COA_RELATED_PACKAGESREF, backref='coa')
+
+  @property
+  def parent(self):
+    if self.coa_take:
+      return self.coa_taken
+    elif self.related_coa:
+      return self.related_coa
+    elif self.coa_requested:
+      return self.coa_requested
+    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
     result = {

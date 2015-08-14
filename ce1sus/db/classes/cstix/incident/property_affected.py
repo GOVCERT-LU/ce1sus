@@ -49,6 +49,10 @@ class NonPublicDataCompromised(Entity, Base):
 
   propertyaffected_id = Column('propertyaffected_id', BigIntegerType, ForeignKey('propertyaffecteds.propertyaffected_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
+  @property
+  def parent(self):
+    return self.property_affacted
+
 class PropertyAffected(Entity, Base):
   property_id = Column(Integer)
   __property_ = None
@@ -65,7 +69,7 @@ class PropertyAffected(Entity, Base):
       self.__property_ = LossProperty(self, 'property_id')
     self.property_.name = property_
 
-  description_of_effect = relationship(StructuredText, secondary=_REL_PROPERTYAFFECTED_STRUCTUREDTEXT)
+  description_of_effect = relationship(StructuredText, secondary=_REL_PROPERTYAFFECTED_STRUCTUREDTEXT, backref='property_affacted_description')
 
   type_of_availability_loss_id = Column(Integer)
   __type_of_availability_loss = None
@@ -100,9 +104,14 @@ class PropertyAffected(Entity, Base):
       self.__duration_of_availability_loss = LossDuration(self, 'duration_of_availability_loss_id')
     self.duration_of_availability_loss.name = duration_of_availability_loss
 
-  non_public_data_compromised = relationship(NonPublicDataCompromised, uselist=False)
+  non_public_data_compromised = relationship(NonPublicDataCompromised, uselist=False, backref='property_affacted')
 
   affectedasset_id = Column('affectedasset_id', BigIntegerType, ForeignKey('affectedassets.affectedasset_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+
+  @property
+  def parent(self):
+    return self.affected_asset
 
   def to_dict(self, cache_object):
 

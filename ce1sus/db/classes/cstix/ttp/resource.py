@@ -60,13 +60,16 @@ _REL_RESOURCE_IDENTITIY = Table('rel_resource_identity', getattr(Base, 'metadata
 
 class Resource(Entity, Base):
 
-  tools = relationship(ToolInformation, secondary=_REL_RESOURCE_TOOLINFORMATION)
-  infrastructure = relationship(Infrastructure, uselist=False)
-  personas = relationship(Identity, secondary=_REL_RESOURCE_IDENTITIY)
+  tools = relationship(ToolInformation, secondary=_REL_RESOURCE_TOOLINFORMATION, backref='resource')
+  infrastructure = relationship(Infrastructure, uselist=False, backref='resource')
+  personas = relationship(Identity, secondary=_REL_RESOURCE_IDENTITIY, backref='resource')
+
+  @property
+  def parent(self):
+    return self.ttp
 
   # custom ones related to ce1sus internals
 
-  ttp = relationship('TTP', uselist=False)
   ttp_id = Column('ttp_id', BigIntegerType, ForeignKey('ttps.ttp_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   def to_dict(self, cache_object):

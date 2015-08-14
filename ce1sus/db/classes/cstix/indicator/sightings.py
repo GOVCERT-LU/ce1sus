@@ -76,14 +76,20 @@ _REL_SIGHTING_INFORMATIONSOURCE = Table('rel_sighting_informationsource', getatt
 class Sighting(Entity, Base):
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'seconds')
-  description = relationship(StructuredText, secondary=_REL_SIGHTING_STRUCTUREDTEXT, uselist=False)
-  confidence = relationship(Confidence, secondary=_REL_SIGHTING_CONFIDENCE, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_SIGHTING_STRUCTUREDTEXT, uselist=False, backref='sighting_description')
+  confidence = relationship(Confidence, secondary=_REL_SIGHTING_CONFIDENCE, uselist=False, backref='sighting')
   # type reference = anyURI
   reference = Column('reference', UnicodeType(255))
 
 
-  related_observables = relationship(RelatedObservable, secondary=_REL_SIGHTING_REL_OBSERVABLE)
-  source = relationship(InformationSource, secondary=_REL_SIGHTING_INFORMATIONSOURCE, uselist=False)
+  related_observables = relationship(RelatedObservable, secondary=_REL_SIGHTING_REL_OBSERVABLE, backref='sighting')
+  source = relationship(InformationSource, secondary=_REL_SIGHTING_INFORMATIONSOURCE, uselist=False, backref='sighting')
+
+  indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.indicator
 
   def to_dict(self, cache_object):
     if cache_object.complete:

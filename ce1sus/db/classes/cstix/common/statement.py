@@ -84,10 +84,27 @@ class Statement(Entity, Base):
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'seconds')
   value = Column('value', UnicodeType(255), nullable=False)
-  description = relationship(StructuredText, secondary=_REL_STATEMENT_STRUCTUREDTEXT, uselist=False)
-  source = relationship(InformationSource, uselist=False, secondary=_REL_STATEMENT_INFORMATIONSOURCE)
-  confidence = relationship(Confidence, uselist=False, secondary=_REL_STATEMENT_CONFIDENCE)
+  description = relationship(StructuredText, secondary=_REL_STATEMENT_STRUCTUREDTEXT, uselist=False, backref='statement_description')
+  source = relationship(InformationSource, uselist=False, secondary=_REL_STATEMENT_INFORMATIONSOURCE, backref='statement')
+  confidence = relationship(Confidence, uselist=False, secondary=_REL_STATEMENT_CONFIDENCE, backref='statement')
     
+  @property
+  def parent(self):
+    if self.base_test_mechanism:
+      return self.base_test_mechanism
+    elif self.indicator:
+      return self.indicator
+    elif self.coa_impact:
+      return self.coa_impact
+    elif self.coa_cost:
+      return self.coa_cost
+    elif self.coa_efficacy:
+      return self.coa_efficacy
+    elif self.simple_marking_structure:
+      return self.simple_marking_structure
+    raise ValueError('Parent not found')
+
+
   def to_dict(self, cache_object):
     if cache_object.complete:
       result = {

@@ -60,9 +60,13 @@ _REL_ACTIVITY_DATETIMEWITHPRECISION = Table('rel_activity_datetimewithprecision'
 
 class Activity(Entity, Base):
 
-  description = relationship(StructuredText, secondary=_REL_ACTIVITY_STRUCTUREDTEXT, uselist=False)
-  date_time = relationship(DateTimeWithPrecision, secondary=_REL_ACTIVITY_DATETIMEWITHPRECISION, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_ACTIVITY_STRUCTUREDTEXT, uselist=False, backref='activity_description')
+  date_time = relationship(DateTimeWithPrecision, secondary=_REL_ACTIVITY_DATETIMEWITHPRECISION, uselist=False, backref='activity')
   campaign_id = Column('campaign_id', BigIntegerType, ForeignKey('campaigns.campaign_id', ondelete='cascade', onupdate='cascade'), index=True)
+
+  @property
+  def parent(self):
+    return self.campaign
 
   def to_dict(self, cache_object):
 

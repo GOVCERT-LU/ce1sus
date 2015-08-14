@@ -129,7 +129,6 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
 
 class Reference(BaseElement, Base):
   # Similar approach as for attributes
-  report = relationship('Report', uselist=False, primaryjoin='Reference.report_id==Report.identifier')
   report_id = Column('report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('referencedefinitions.referencedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
@@ -139,6 +138,10 @@ class Reference(BaseElement, Base):
   parent_id = Column('parent_id', BigIntegerType, ForeignKey('references.reference_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
   children = relationship('Reference',
                           primaryjoin='Reference.identifier==Reference.parent_id')
+
+  @property
+  def parent(self):
+    return self.report
 
   def to_dict(self, cache_object):
     value = self.convert_value(self.value)
@@ -181,11 +184,10 @@ class Report(BaseElement, Base):
   short_description = Column('short_description', UnicodeType(255))
   parent_report_id = Column('parent_report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent_report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
-  event = relationship('Event', uselist=False, primaryjoin='Report.event_id==Event.identifier')
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
 
-  references = relationship('Reference')
-  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
+  references = relationship('Reference', backref='report')
+  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic', backref='report')
 
   def references_count_for_permissions(self, event_permissions, user):
     return len(self.get_references_for_permissions(event_permissions, user))
@@ -207,6 +209,14 @@ class Report(BaseElement, Base):
         rel_reps.append(rel_rep)
     return rel_reps
 
+  @property
+  def parent(self):
+    if self.event:
+      return self.event
+    elif self.report:
+      return self.report
+    raise ValueError('No parent found')
+
   def to_dict(self, cache_object):
     if cache_object.complete:
       result = {
@@ -225,7 +235,6 @@ class Report(BaseElement, Base):
 
     parent_dict = BaseElement.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
-
 
   def validate(self):
     # TODO create validation

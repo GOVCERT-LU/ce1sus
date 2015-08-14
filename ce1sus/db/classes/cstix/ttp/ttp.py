@@ -26,12 +26,6 @@ _REL_TTP_KILLCHAINPHASE = Table('rel_ttp_killchainphase', getattr(Base, 'metadat
                                       Column('killchainphasereference_id', BigIntegerType, ForeignKey('killchainphasereferences.killchainphasereference_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
                                       )
 
-_REL_TTP_KILLCHAIN = Table('rel_ttp_killchain', getattr(Base, 'metadata'),
-                                       Column('rtk_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('killchain_id', BigIntegerType, ForeignKey('killchains.killchain_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                       Column('ttp_id', BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                       )
-
 _REL_TTP_RELATED_PACKAGES = Table('rel_ttp_rel_package', getattr(Base, 'metadata'),
                                   Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
                                   Column('ttp_id', BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
@@ -86,28 +80,42 @@ _REL_TTP_STRUCTUREDTEXT_SHORT = Table('rel_ttp_structuredtext_short', getattr(Ba
                                               index=True)
                                        )
 
+_REL_TTP_INTENDED_EFFECT = Table('rel_ttp_intended_effect', getattr(Base, 'metadata'),
+                                      Column('rtie_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                      Column('ttp_id', BigIntegerType, ForeignKey('ttps.ttp_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
+                                      Column('intendedeffect_id', BigIntegerType, ForeignKey('intendedeffects.intendedeffect_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                      )
+
+
 class TTP(BaseCoreComponent, Base):
 
-  behavior = relationship(Behavior, uselist=False)
-  related_ttps = relationship(RelatedTTP, secondary=_REL_TTP_RELATED_TTP)
+  behavior = relationship(Behavior, uselist=False, backref='ttp')
+  related_ttps = relationship(RelatedTTP, secondary=_REL_TTP_RELATED_TTP, backref='ttp')
   
-  intended_effects = relationship(IntendedEffect)
-  resources = relationship(Resource, uselist=False)
-  victim_targeting = relationship(VictimTargeting, uselist=False)
-  exploit_targets = relationship(RelatedExploitTarget, secondary=_REL_TTP_RELATED_EXPLOITTARGET)
-  handling = relationship(MarkingSpecification, secondary=_REL_TTP_HANDLING)
+  intended_effects = relationship(IntendedEffect, secondary=_REL_TTP_INTENDED_EFFECT, backref='ttp')
+  resources = relationship(Resource, uselist=False, backref='ttp')
+  victim_targeting = relationship(VictimTargeting, uselist=False, backref='ttp')
+  exploit_targets = relationship(RelatedExploitTarget, secondary=_REL_TTP_RELATED_EXPLOITTARGET, backref='ttp')
+  handling = relationship(MarkingSpecification, secondary=_REL_TTP_HANDLING, backref='ttp')
 
 
-  kill_chain_phases = relationship(KillChainPhaseReference, secondary=_REL_TTP_KILLCHAINPHASE, uselist=False)
+  kill_chain_phases = relationship(KillChainPhaseReference, secondary=_REL_TTP_KILLCHAINPHASE, uselist=False, backref='ttp')
   # killchains = relationship('Killchain', secondary='rel_ttp_killchain')
 
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_TTP_RELATED_PACKAGES)
+  related_packages = relationship(RelatedPackageRef, secondary=_REL_TTP_RELATED_PACKAGES, backref='ttp')
 
 
 
   # custom ones related to ce1sus internals
-  event = relationship('Event', uselist=False)
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    if self.related_ttp:
+      return self.related_ttp
+    elif self.event:
+      return self.event
+    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
 

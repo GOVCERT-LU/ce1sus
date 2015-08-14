@@ -96,28 +96,14 @@ _REL_INFORMATIONSOURCE_STRUCTUREDTEXT = Table('rel_informationsource_structuredt
                                                      index=True)
                                               )
 
-_REL_INFORMATIONSOURCE_TIME = Table('rel_informationsource_cyboxtime', getattr(Base, 'metadata'),
-                                              Column('ras_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                              Column('informationsource_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('informationsources.informationsource_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     index=True,
-                                                     nullable=False),
-                                              Column('cyboxtime_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('cyboxtimes.cyboxtime_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     nullable=False,
-                                                     index=True)
-                                              )
-
 class InformationSourceRole(Entity, Base):
   
   role_id = Column('role_id', Integer, default=None, nullable=False)
   informationsource_id = Column(BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
+
+  @property
+  def parent(self):
+    return self.information_source
 
   __role = None
   @property
@@ -142,18 +128,47 @@ class InformationSourceRole(Entity, Base):
 class InformationSource(Entity, Base):
   """ An information source is a bit tricky as the groups contain half of the needed elements """
 
-  description = relationship(StructuredText, secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False)
-  identity = relationship('Identity', secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False, backref='information_source_description')
+  identity = relationship('Identity', secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False, backref='information_source')
 
   contributing_sources = relationship('InformationSource',
                                       secondary=_REL_INFORMATIONSOURCE_INFORMATIONSOURCE,
                                       primaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.parent_id',
-                                      secondaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id',)
+                                      secondaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id',
+                                      backref='information_source')
   
-  time = relationship(CyboxTime, secondary=_REL_INFORMATIONSOURCE_TIME, uselist=False)
-  tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL)
-  roles = relationship(InformationSourceRole)
+  time = relationship(CyboxTime, uselist=False, backref='information_source')
+  tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL, backref='information_source')
+  roles = relationship(InformationSourceRole, backref='information_source')
   # TODO: references -> relation
+
+  @property
+  def parent(self):
+    if self.markingspecification:
+      return self.markingspecification
+    elif self.information_source:
+      return self.information_source
+    elif self.exploit_target:
+      return self.exploit_target
+    elif self.confidence:
+      return self.confidence
+    elif self.statement:
+      return self.statement
+    elif self.base_test_mechanism:
+      return self.base_test_mechanism
+    elif self.sighting:
+      return self.sighting
+    elif self.indicator:
+      return self.indicator
+    elif self.incident_reporter:
+      return self.incident_reporter
+    elif self.incident_responder:
+      return self.incident_responder
+    elif self.incident_coordinators:
+      return self.incident_coordinators
+    elif self.related:
+      return self.related
+    raise ValueError('Parent not found')
 
   def to_dict(self, cache_object):
     copy = cache_object.make_copy()

@@ -25,6 +25,7 @@ from ce1sus.db.classes.cstix.threat_actor.threatactor import ThreatActor
 from ce1sus.db.classes.cstix.ttp.ttp import TTP
 from ce1sus.db.classes.internal.common import Status, Risk, Analysis
 from ce1sus.db.classes.internal.core import ExtendedLogingInformations, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.report import Report
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.version import Version
@@ -42,6 +43,11 @@ _REL_EVENT_RELATED_PACKAGES = Table('rel_event_relpackage', getattr(Base, 'metad
                                     Column('relatedpackage_id', BigIntegerType, ForeignKey('relatedpackages.relatedpackage_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
                                     )
 
+_REL_EVENT_OBSERVABLE = Table('rel_event_observable', getattr(Base, 'metadata'),
+                                    Column('reo_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+                                    Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
+                                    Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                    )
 
 class EventGroupPermission(ExtendedLogingInformations, Base):
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
@@ -87,26 +93,26 @@ class Event(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)
-  stix_header = relationship(STIXHeader, uselist=False)
-  campaigns = relationship(Campaign)
+  stix_header = relationship(STIXHeader, uselist=False, backref='event')
+  campaigns = relationship(Campaign, backref='event')
   # TODO: courses_of_action
   courses_of_action = None
-  exploit_targets = relationship(ExploitTarget)
-  observables = relationship(Observable, primaryjoin='Observable.event_id==Event.identifier')
-  indicators = relationship(Indicator)
-  incidents = relationship(Incident)
-  threat_actors = relationship(ThreatActor)
-  ttps = relationship(TTP)
-  related_packages = relationship(RelatedPackage, secondary=_REL_EVENT_RELATED_PACKAGES)
+  exploit_targets = relationship(ExploitTarget, backref='event')
+  observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE, backref='event')
+  indicators = relationship(Indicator, backref='event')
+  incidents = relationship(Incident, backref='event')
+  threat_actors = relationship(ThreatActor, backref='event')
+  ttps = relationship(TTP, backref='event')
+  related_packages = relationship(RelatedPackage, secondary=_REL_EVENT_RELATED_PACKAGES, backref='event')
 
   # reports are not in 1.1.5 -> custom one
-  reports = relationship('Report')
+  reports = relationship(Report, backref='event')
   
   # custom attributes
   status_id = Column('status_id', Integer, default=0, nullable=False)
   risk_id = Column('risk_id', Integer, nullable=False, default=0)
   analysis_id = Column('analysis_id', Integer, nullable=False, default=0)
-  comments = relationship('Comment')
+  comments = relationship('Comment', backref='event')
   last_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   first_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   last_publish_date = Column('last_publish_date', DateTime)
@@ -114,15 +120,6 @@ class Event(Entity, Base):
   #ce1sus specific
   groups = relationship('EventGroupPermission')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
-
-  @property
-  def modified_on(self):
-    super(Entity, self).modified_on
-
-  @modified_on.setter
-  def modified_on(self, value):
-    self.last_seen = value
-    super(Entity, self).modified_on = value
 
   @property
   def status(self):
@@ -195,6 +192,10 @@ class Event(Entity, Base):
     # TODO validation of an event
     return True
 
+  @property
+  def parent(self):
+    return self.related_package
+
   def to_dict(self, cache_object):
     if is_event_owner(self, cache_object.user):
       comments = self.attributelist_to_dict(self.comments, cache_object)
@@ -248,7 +249,6 @@ class Event(Entity, Base):
 
 class Comment(ExtendedLogingInformations, Base):
   event_id = Column(BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
-  event = relationship('Event')
   comment = Column('comment', UnicodeTextType(), nullable=False)
 
   def to_dict(self, cache_object):

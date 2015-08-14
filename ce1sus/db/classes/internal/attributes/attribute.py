@@ -8,7 +8,7 @@ Created on Oct 16, 2014
 from ce1sus.helpers.common.objects import get_class
 from ce1sus.helpers.common.validator.objectvalidator import FailedValidation, ObjectValidator
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
@@ -24,15 +24,14 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-_REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', getattr(Base, 'metadata'),
-                                  Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False, index=True),
-                                  Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False, index=True)
-                                  )
-
-
 class Condition(SimpleLogingInformations, Base):
   value = Column('value', UnicodeType(40), unique=True)
   description = Column('description', UnicodeTextType())
+  attribute_id = Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+
+  @property
+  def parent(self):
+    return self.attribute
 
   def to_dict(self, complete=True, inflated=False):
     return {'identifier': self.convert_value(self.uuid),
@@ -51,10 +50,12 @@ class Attribute(BaseElement, Base):
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship(AttributeDefinition,
-                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id', lazy='joined')
+                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id',
+                            lazy='joined')
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
-                        primaryjoin='Object.identifier==Attribute.object_id', lazy='joined')
+                        primaryjoin='Object.identifier==Attribute.object_id',
+                        lazy='joined')
   # valuerelations
   string_value = relationship(StringValue,
                               primaryjoin='Attribute.identifier==StringValue.attribute_id',
@@ -73,10 +74,9 @@ class Attribute(BaseElement, Base):
   condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
   condition = relationship(Condition, uselist=False, backref='attribute')
 
-  parent_id = Column('parent_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='SET NULL'), index=True, default=None)
-  children = relationship('Attribute',
-                          primaryjoin='Attribute.identifier==Attribute.parent_id')
-  parent = relationship('Attribute', uselist=False)
+  @property
+  def parent(self):
+    return self.object
 
   def __get_value_instance(self):
     """

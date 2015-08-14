@@ -111,13 +111,17 @@ class PackageIntent(BaseObject, Base):
 class STIXHeader(Entity, Base):
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  package_intents = relationship(PackageIntent)
+  package_intents = relationship(PackageIntent, backref='stix_header')
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False)
-  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False)
-  handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING)
-  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, backref='stix_header_description')
+  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, backref='stix_header_short_description')
+  handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING, backref='stix_header')
+  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, backref='stix_header')
   # TODO: profiles
+
+  @property
+  def parent(self):
+    return self.event
 
   def to_dict(self, cache_object):
     if cache_object.complete:
