@@ -7,10 +7,10 @@ Created on Aug 7, 2015
 """
 from difflib import SequenceMatcher
 
-from ce1sus.common.checks import can_user_update, is_instance_owner
-from ce1sus.controllers.common.basechanger import BaseChanger, BaseChangerException
+from ce1sus.common.checks import can_user_update, is_instance_owner, set_properties_according_to_permisssions
+from ce1sus.controllers.base import BaseController
+from ce1sus.db.classes.cstix.base import BaseCoreComponent
 from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseElement
-from ce1sus.helpers.changelogger import ChangeLogger
 from ce1sus.helpers.version import Version
 
 
@@ -19,51 +19,39 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-class MergerException(BaseChangerException):
+class MergerException(Exception):
   pass 
 
-class BaseMerger(BaseChanger):
+class BaseMerger(BaseController):
+  
+  def __merge_properties(self, old_instance, new_instance, merger_cache):
+    self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache)
+    self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache)
+    self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache)
+    self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache)
 
-  def __init__(self, config, session=None):
-    super(BaseMerger, self).__init__(config, session)
-    self.changelogger = ChangeLogger(config)
+    set_properties_according_to_permisssions(old_instance, merger_cache)
 
-  def __merge_properties(self, old_instance, new_instance, cache_object):
-    version = Version('0.0.0')
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_validated', cache_object))
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_shareable', cache_object))
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_proposal', cache_object))
-    version.add(self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', cache_object))
+  def set_base(self, old_instance, new_instance, merge_cache):
+    if isinstance(old_instance, SimpleLogingInformations):
+      self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
 
-    self.set_properties_according_to_permisssions(old_instance, cache_object)
-
-    return version
-
-  def __update_modified(self,old_instance, cache_object):
-    if old_instance:
-      if hasattr(old_instance, 'parent'):
-        parent = old_instance.parent
-        if parent:
-          super(BaseMerger, self).set_base(old_instance, None, cache_object, None, change_base_element=False)
-          if parent.parent:
-            self.__update_modified(parent, cache_object)
-
-  def set_base(self, old_instance, new_instance, cache_object):
-    super(BaseMerger, self).set_base(old_instance, None, cache_object, None, change_base_element=False)
-    version = Version('0.0.0')
     if isinstance(old_instance, BaseElement):
       # merge properties
       if new_instance:
         # on
-        # version.add(self.__merge_properties(old_instance.properties, new_instance.properties, cache_object))
-        pass
-    #update parent informations
-    self.__update_modified(old_instance, cache_object)
-      
-    
-    return version
+        self.__merge_properties(old_instance.properties, new_instance.properties, merge_cache)
+    if isinstance(old_instance, BaseCoreComponent):
+      self.set_version(old_instance, new_instance, merge_cache)
+    # update parent informations
+    self.update_modified(old_instance, merge_cache)
 
-
+  def set_version(self, old_instance, new_instance, merge_cache):
+    if old_instance.version.compare(new_instance.version) > 0:
+      self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
+      old_instance.version.version = new_instance.version.version
+    else:
+      super(BaseMerger, self).set_version(old_instance, merge_cache)
 
   def is_updatable(self, old_instance, new_instance):
     if old_instance.get_classname() != new_instance.get_classname():
@@ -84,26 +72,27 @@ class BaseMerger(BaseChanger):
         # always update if there are no logging informations
         return True
 
-  def update_instance_value(self, old_instance, new_instance, attr_name, cache_object):
-    version = Version('0.0.0')
-    if can_user_update(old_instance, cache_object.user, cache_object.event_permissions):
-      if self.is_updatable(old_instance, new_instance):
-        old_value = getattr(old_instance, attr_name)
-        new_value = getattr(new_instance, attr_name)
-        if new_value == '':
-          new_value = None
-        if old_value != new_value:
-          self.changelogger.info('{0} {1} property {2} will be be replaced "{3}" by "{4}"'.format(old_instance.get_classname(), old_instance.uuid, attr_name, old_value, new_value))
-          setattr(old_instance, attr_name, new_value)
-          version = self.__detect_change_version(old_value, new_value)
+  def update_instance_value(self, old_instance, new_instance, attr_name, merger_cache):
+    version = Version()
+    if old_instance and new_instance:
+      if can_user_update(old_instance, merger_cache):
+        if self.is_updatable(old_instance, new_instance):
+          old_value = getattr(old_instance, attr_name)
+          new_value = getattr(new_instance, attr_name)
+          if new_value == '':
+            new_value = None
+          if old_value != new_value:
+            self.changelogger.info('{0} {1} property {2} will be be replaced "{3}" by "{4}"'.format(old_instance.get_classname(), old_instance.uuid, attr_name, old_value, new_value))
+            setattr(old_instance, attr_name, new_value)
+            version = self.__detect_change_version(old_value, new_value)
+        else:
+          self.changelogger.info('{0} {1} property {2} will not be updated the existing one is newer'.format(old_instance.get_classname(), old_instance.uuid, attr_name))
       else:
-        self.changelogger.info('{0} {1} property {2} will not be updated the existing one is newer'.format(old_instance.get_classname(), old_instance.uuid, attr_name))
-    else:
-      self.changelogger.warning('User {0} tried to update {1} {2} but does not have the permissions for it'.format(cache_object.user.username, old_instance.get_classname(), old_instance.uuid))
+        self.changelogger.warning('User {0} tried to update {1} {2} but does not have the permissions for it'.format(merger_cache.user.username, old_instance.get_classname(), old_instance.uuid))
     return version
 
   def __detect_change_version(self, old_value, new_value):
-    version = Version('0.0.0')
+    version = Version()
     old_value = u'{0}'.format(old_value)
     new_value = u'{0}'.format(new_value)
     ratio = SequenceMatcher(None, old_value, new_value).ratio()
@@ -123,7 +112,7 @@ class BaseMerger(BaseChanger):
     else:
       return is_instance_owner(instance, user)
 
-  def is_mergeable(self, old_instance, new_instance, cache_object):
+  def is_mergeable(self, old_instance, new_instance, merge_cache):
     """
     Returns:
       1: can be merged
@@ -137,52 +126,54 @@ class BaseMerger(BaseChanger):
           return 1
       else:
         # delete
-        if not cache_object.owner:
-          self.mark_for_deletion(old_instance, cache_object)
+        if not merge_cache.owner:
+          self.mark_for_deletion(old_instance, merge_cache)
 
     else:
 
       if new_instance:
         #add
-        if not cache_object.owner:
-          self.mark_for_proposal(new_instance, cache_object)
+        if not merge_cache.owner:
+          self.mark_for_proposal(new_instance, merge_cache)
         return 0
 
     return -1
 
-  def merge_structured_text(self, old_instance, new_instance, cache_object):
+  def merge_structured_text(self, old_instance, new_instance, merge_cache):
     version = Version()
-    if new_instance and new_instance.value:
-      result = self.is_mergeable(old_instance, new_instance, cache_object)
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
       if result == 1:
-        version.add(self.update_instance_value(old_instance, new_instance, 'id_', cache_object))
-        version.add(self.update_instance_value(old_instance, new_instance, 'value', cache_object))
-        version.add(self.update_instance_value(old_instance, new_instance, 'structuring_format', cache_object))
-        version.add(self.update_instance_value(old_instance, new_instance, 'ordinality', cache_object))
-        self.set_base(old_instance, new_instance, cache_object)
+        version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'structuring_format', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'ordinality', merge_cache))
+        self.set_base(old_instance, new_instance, merge_cache)
 
       elif result == 0:
         version.add(Version().increase_major())
         old_instance = new_instance
 
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_information_source(self, old_instance, new_instance, cache_object):
+  def merge_information_source(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'id_', cache_object))
-      version.add(self.merge_structured_text(new_instance.description, old_instance.description, cache_object))
-      version.add(self.merge_identity(new_instance.identity, old_instance.identity, cache_object))
-      version.add(self.merge_cybox_time(new_instance.time, old_instance.time, cache_object))
-      version.add(self.merge_tools(new_instance.tools, old_instance.tools, cache_object))
-      version.add(self.merge_roles(new_instance.roles, old_instance.roles, cache_object))
-      self.set_base(old_instance, new_instance, cache_object)
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
+        version.add(self.merge_structured_text(new_instance.description, old_instance.description, merge_cache))
+        version.add(self.merge_identity(new_instance.identity, old_instance.identity, merge_cache))
+        version.add(self.merge_cybox_time(new_instance.time, old_instance.time, merge_cache))
+        version.add(self.merge_tools(new_instance.tools, old_instance.tools, merge_cache))
+        version.add(self.merge_roles(new_instance.roles, old_instance.roles, merge_cache))
+        self.set_base(old_instance, new_instance, merge_cache)
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
-
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
   def __make_dict(self, array):
@@ -201,7 +192,7 @@ class BaseMerger(BaseChanger):
     if not cache_object.owner:
       new_item.properties.is_proposal
 
-  def merge_gen_arrays(self, old_instance, new_instance, cache_object, merge_fct):
+  def merge_gen_arrays(self, old_instance, new_instance, merge_cache, merge_fct):
     version = Version()
     if len(new_instance) > 0 or len(old_instance) > 0:
       dict1 = self.__make_dict(old_instance)
@@ -216,22 +207,19 @@ class BaseMerger(BaseChanger):
           # it can only be one :P
           parent = old_item.parent
         if new_item:
-          version.add(merge_fct(new_item, old_item, cache_object))
+          version.add(merge_fct(new_item, old_item, merge_cache))
 
-          self.set_base(old_item, new_item, cache_object)
+          self.set_base(old_item, new_item, merge_cache)
 
           del(dict2[key])
         else:
           deleted_items = True
-          self.mark_for_deletion(old_item, cache_object)
-          # update parent
-          self.set_base(parent, None, cache_object)
-
+          self.mark_for_deletion(old_item, merge_cache)
 
       for item in dict2.itervalues():
         added_items = True
         old_instance.append(item)
-        self.set_base(parent, None, cache_object)
+        self.set_base(parent, None, merge_cache)
 
 
       # inc version as there are more changes
@@ -240,151 +228,137 @@ class BaseMerger(BaseChanger):
 
     return version
 
-  def merge_role(self, old_instance, new_instance, cache_object):
+  def merge_role(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'role_id', cache_object))
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'role_id', merge_cache))
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_roles(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_role)
+  def merge_roles(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_role)
 
-  def merge_tools(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_tool)
+  def merge_tools(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_tool)
 
-  def merge_tool(self, old_instance, new_instance, cache_object):
+  def merge_tool(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'id_', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'idref', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'name', cache_object))
-      version.add(self.merge_structured_text(new_instance.description, old_instance.description, cache_object))
-      version.add(self.merge_structured_text(new_instance.short_description, old_instance.short_description, cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'vendor', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'version_db', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'service_pack', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'title', cache_object))
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'idref', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'name', merge_cache))
+        version.add(self.merge_structured_text(new_instance.description, old_instance.description, merge_cache))
+        version.add(self.merge_structured_text(new_instance.short_description, old_instance.short_description, merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'vendor', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'version_db', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'service_pack', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'title', merge_cache))
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
-      
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_identity(self, old_instance, new_instance, cache_object):
+  def merge_identity(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'idref', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'name', cache_object))
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
-    # TODO: merge related identities
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'idref', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'name', merge_cache))
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
+      # TODO: merge related identities
 
-
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_cybox_time(self, old_instance, new_instance, cache_object):
+  def merge_cybox_time(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.merge_datetime_with_persision(new_instance.start_time, old_instance.start_time, cache_object))
-      version.add(self.merge_datetime_with_persision(new_instance.end_time, old_instance.end_time, cache_object))
-      version.add(self.merge_datetime_with_persision(new_instance.produced_time, old_instance.produced_time, cache_object))
-      version.add(self.merge_datetime_with_persision(new_instance.received_time, old_instance.received_time, cache_object))
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
-      
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.merge_datetime_with_persision(new_instance.start_time, old_instance.start_time, merge_cache))
+        version.add(self.merge_datetime_with_persision(new_instance.end_time, old_instance.end_time, merge_cache))
+        version.add(self.merge_datetime_with_persision(new_instance.produced_time, old_instance.produced_time, merge_cache))
+        version.add(self.merge_datetime_with_persision(new_instance.received_time, old_instance.received_time, merge_cache))
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+
+
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_datetime_with_persision(self, old_instance, new_instance, cache_object):
+  def merge_datetime_with_persision(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'value', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'precision', cache_object))
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
+        version.add(self.update_instance_value(old_instance, new_instance, 'precision', merge_cache))
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
-
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_package_intents(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_package_intent)
+  def merge_package_intents(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_package_intent)
 
-  def merge_package_intent(self, old_instance, new_instance, cache_object):
+  def merge_package_intent(self, old_instance, new_instance, merge_cache):
     version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'intent_id', cache_object))
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
-      
-    
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        version.add(self.update_instance_value(old_instance, new_instance, 'intent_id', merge_cache))
+      elif result == 0:
+        version.add(Version().increase_major()())
+        old_instance = new_instance
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
+      self.set_base(old_instance, new_instance, merge_cache)
     return version
 
-  def merge_handling(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_markingspecification)
+  def merge_handling(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_markingspecification)
 
-  def merge_markingspecification(self, old_instance, new_instance, cache_object):
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'id_', cache_object))
+  def merge_markingspecification(self, old_instance, new_instance, merge_cache):
+
+    if old_instance and new_instance:
+      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if result == 1:
+        merge_cache.versin.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
+
+        merge_cache.versin.add(self.update_instance_value(old_instance, new_instance, 'controlled_structure', merge_cache))
+        merge_cache.versin.add(self.merge_information_source(new_instance.information_source, old_instance.information_source, merge_cache))
+        merge_cache.versin.add(self.merge_markingstructures(new_instance.marking_structures, old_instance.marking_structures, merge_cache))
   
-      version.add(self.update_instance_value(old_instance, new_instance, 'controlled_structure', cache_object))
-      version.add(self.merge_information_source(new_instance.information_source, old_instance.information_source, cache_object))
-      version.add(self.merge_markingstructures(new_instance.marking_structures, old_instance.marking_structures, cache_object))
+      elif result == 0:
+        old_instance = new_instance
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
-      
+      self.set_version(old_instance, new_instance, merge_cache)
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.versin
 
+  def merge_markingstructures(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_markingspecification)
 
-    # set the new version
-    if result == 1:
-      old_instance.version.add(version)
-
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
-
-  def is_change(self, version):
-    if version.compare('0.0.0') < 0:
-      return True
-    return False
-
-  def merge_markingstructures(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_markingspecification)
-
-  def merge_markingstructure(self, old_instance, new_instance, cache_object):
+  def merge_markingstructure(self, old_instance, new_instance, merge_cache):
     # TODO: Marking Structures
     return Version()

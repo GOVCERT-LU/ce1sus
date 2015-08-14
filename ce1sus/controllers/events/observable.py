@@ -32,7 +32,7 @@ class ObservableController(BaseController):
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.related_object_broker = self.broker_factory(RelatedObjectBroker)
 
-  def insert_observable(self, observable, commit=True):
+  def insert_observable(self, observable, cache_object, commit=True):
     """
     inserts an event
 
@@ -44,6 +44,7 @@ class ObservableController(BaseController):
     :returns: Event, Boolean
     """
     try:
+      self.insert_set_base(observable, cache_object)
       self.observable_broker.insert(observable, False)
       # TODO: generate relations if needed!
 
@@ -205,8 +206,8 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def get_event_for_observable(self, observable):
-    if observable.event:
-      return observable.event
+    if len(observable.event) > 0:
+      return observable.event[0]
     else:
       raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
 

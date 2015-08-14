@@ -51,18 +51,15 @@ class Object(Entity, Base):
 
   @property
   def event(self):
-    if self.observable:
-      event = self.observable.event
+    if self.observable[0]:
+      event = self.observable[0].event[0]
       return event
     else:
       raise ValueError(u'Parent of object was not set.')
 
   @property
   def event_id(self):
-    if self.observable:
-      return self.observable.event_id
-    else:
-      raise ValueError(u'Parent of object was not set.')
+    return self.event.identifier
 
   def validate(self):
     return True
@@ -70,14 +67,12 @@ class Object(Entity, Base):
   _PARENTS = ['related_object_parent', 'observable']
 
   def to_dict(self, cache_object):
-    if self.observable:
-      uuid = self.convert_value(self.observable.uuid)
-    else:
-      uuid = self.convert_value(self.parent.uuid)
-
+    uuid = self.convert_value(self.observable[0].uuid)
+    cache_object_defs = cache_object.make_copy()
+    cache_object_defs.inflated = False
     result = {
             'definition_id': self.convert_value(self.definition.uuid),
-            'definition': self.attribute_to_dict(self.definition, cache_object),
+            'definition': self.attribute_to_dict(self.definition, cache_object_defs),
             'attributes': self.attributelist_to_dict(self.attributes, cache_object),
             'related_objects': self.attributelist_to_dict(self.related_objects, cache_object),
             'observable_id': uuid

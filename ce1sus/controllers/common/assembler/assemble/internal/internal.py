@@ -223,7 +223,7 @@ class Ce1susAssembler(BaseChanger):
       server_mode.is_push = json.get('is_push', False)
     return server_mode
 
-  def assemble_serversync(self, json, cache_object):
+  def assemble_sync_server(self, json, cache_object):
 
     if json:
 

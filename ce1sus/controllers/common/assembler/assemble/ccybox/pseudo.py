@@ -65,10 +65,10 @@ class PseudoCyboxAssembler(BaseChanger):
       # set definition
       definition = self.get_object_definition(json, cache_object)
       # obj.definition = definition
-      obj.definition_id = definition.identifier
+      obj.definition = definition
 
-      obj.observable = observable
-      obj.parent_id = observable.identifier
+      obj.observable = [observable]
+      obj.observable_id = observable.identifier
 
       rel_objs = json.get('related_objects', None)
       if rel_objs:

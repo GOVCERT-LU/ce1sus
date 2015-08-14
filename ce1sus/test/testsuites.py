@@ -7,14 +7,16 @@ import unittest
 
 from ce1sus.test.admin.adminattributes import TestAdminAttributes
 from ce1sus.test.admin.adminconditions import TestAdminCondition
+from ce1sus.test.admin.admingroups import TestAdminGroups
 from ce1sus.test.admin.adminmails import TestAdminMailTemplates
 from ce1sus.test.admin.adminobjects import TestAdminObjects
 from ce1sus.test.admin.adminreference import TestAdminReferences
-from ce1sus.test.admin.admintypes import TestAdminTypes
-from ce1sus.test.login import TestLogin
-from ce1sus.test.admin.admingroups import TestAdminGroups
 from ce1sus.test.admin.adminsyncserver import TestAdminSyncServers
+from ce1sus.test.admin.admintypes import TestAdminTypes
 from ce1sus.test.admin.adminuser import TestAdminUsers
+from ce1sus.test.event.event import TestEvent
+from ce1sus.test.event.observable import TestObservable
+from ce1sus.test.login import TestLogin
 
 
 def suite():
@@ -29,7 +31,8 @@ def suite():
   testSuite.addTest(TestAdminGroups())
   testSuite.addTest(TestAdminSyncServers())
   testSuite.addTest(TestAdminUsers())
-
+  testSuite.addTest(TestEvent())
+  testSuite.addTest(TestObservable())
   return testSuite
 
 

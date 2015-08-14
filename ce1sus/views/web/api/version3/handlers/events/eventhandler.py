@@ -188,7 +188,7 @@ class EventHandler(RestBaseHandler):
     if method == 'POST':
       self.check_if_user_can_add(event)
       observable = self.assembler.assemble(json, Observable, event, cache_object)
-      self.observable_controller.insert_observable(observable, True)
+      self.observable_controller.insert_observable(observable, cache_object, True)
       return observable.to_dict(cache_object)
     else:
       if method == 'GET':
@@ -214,7 +214,7 @@ class EventHandler(RestBaseHandler):
           self.check_if_event_is_deletable(event)
           if observable.observable_composition:
             self.observable_controller.remove_observable_composition(observable.observable_composition, cache_object.user, True)
-          self.observable_controller.remove_observable(observable, cache_object.user, True)
+          self.observable_controller.remove_observable(observable, True)
           return 'Deleted observable'
 
   def __process_observable_get(self, event, requested_object, cache_object):

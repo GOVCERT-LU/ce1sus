@@ -702,7 +702,12 @@ app.directive("object", function($compile) {
     controller: function($scope, $modal, Restangular, messages, $log, Pagination, $routeSegment){
 
       $scope.pagination = Pagination.getNew(5,'object.attributes');
-      $scope.pagination.numPages = Math.ceil($scope.object.attributes.length/$scope.pagination.perPage);
+      if ($scope.object.attributes){
+        items = $scope.object.attributes;
+      } else {
+        items = [];
+      }
+      $scope.pagination.numPages = Math.ceil(items.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
       
       $scope.showDetails = function(){
@@ -714,7 +719,12 @@ app.directive("object", function($compile) {
       $scope.removeObject = function(){
         if (confirm('Are you sure you want to delete this object?')) {
           var remove = false;
-          if ($scope.object.related_objects.length > 0) {
+          if ($scope.object.related_objects){
+            items = $scope.object.related_objects;
+          } else {
+            items = [];
+          }
+          if (items.length > 0) {
             remove = confirm('Are you sure you want also it\'s children?');
           } else {
             remove = true;

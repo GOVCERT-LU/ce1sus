@@ -5,6 +5,7 @@
 
 Created on Apr 8, 2015
 """
+from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.common.basecontroller import BaseChangeController, BaseChangeControllerException
 from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
 from ce1sus.controllers.common.merger.merge.internal.event import EventMerger
@@ -40,12 +41,14 @@ class Merger(BaseChangeController):
   def merge(self, old_instance, new_instance, cache_object):
     #check if both are the same class
     cache_object.insert = False
+    merger_cache = MergerCache(cache_object)
+
     classname = old_instance.get_classname()
     fctname = 'merge_{0}'.format(self.get_fct_name(classname))
     for merger in self.mergers:
       if hasattr(merger, fctname):
         fct = getattr(merger, fctname)
-        return fct(old_instance, new_instance, cache_object)
+        return fct(old_instance, new_instance, merger_cache)
     raise BaseChangeControllerException('Merging for class {0} is not defined function {1} is missing'.format(classname, fctname))
 
   def set_dbcode(self, local, remote):

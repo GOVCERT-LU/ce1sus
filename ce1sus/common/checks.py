@@ -132,16 +132,28 @@ def get_item_view_message(result, event_id, item_id, username, permission):
     return 'User "{1}" is not allowed perform action "{2}" on event "{0}" for item {3}'.format(event_id, username, permission, item_id)
 
 
-def can_user_update(instance, user, event_permissions, cache=None):
-  if is_instance_owner(instance, user):
+def can_user_update(instance, cache_object, cache=None):
+  if is_instance_owner(instance, cache_object.user):
     return True
-  elif is_user_priviledged(user):
+  elif is_user_priviledged(cache_object.user):
     return True
   else:
-    if event_permissions:
-      return event_permissions.can_modify
+    if cache_object.event_permissions:
+      return cache_object.event_permissions.can_modify
     else:
       return False
+
+def set_properties_according_to_permisssions(properties, cache_object):
+  if cache_object.owner:
+    properties.is_proposal = False
+    # owners are directly validated
+    # TODO:ADD auto validate feature
+    properties.is_validated = True
+  else:
+    properties.is_proposal = True
+
+  properties.is_rest_instert = cache_object.rest_insert
+  properties.is_web_insert = not cache_object.rest_insert
 
 def can_user_download(event, user, cache=None):
   """

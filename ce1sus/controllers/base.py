@@ -6,12 +6,15 @@ for controllers.
 Created: Jul, 2013
 """
 
+from ce1sus.common.classes.cacheobject import CacheObject, MergerCache
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
 from ce1sus.db.brokers.permissions.group import GroupBroker
 from ce1sus.db.brokers.permissions.user import UserBroker
+from ce1sus.db.classes.internal.core import SimpleLogingInformations
 from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
+from ce1sus.helpers.changelogger import ChangeLogger
 from ce1sus.helpers.common.debug import Log
 
 
@@ -61,11 +64,60 @@ class BaseController(object):
     self.config = config
     self.__logger = Log(self.config)
     self.session_manager = SessionManager(config, session)
+    self.changelogger = ChangeLogger(config)
 
     self.user_broker = self.broker_factory(UserBroker)
     self.group_broker = self.broker_factory(GroupBroker)
     self.obj_def_broker = self.broker_factory(ObjectDefinitionBroker)
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
+
+  def set_version(self, instance, merger_cache):
+    # If the newversion is newer take this one
+    if merger_cache.result == 0:
+      old_version = instance.version.version
+      instance.version.increase_major()
+      self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+
+    # If the newversion is newer take this one
+    if merger_cache.result == 2:
+      old_version = instance.version.version
+      instance.version.increase_minor()
+      self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+
+    elif merger_cache.result == 1:
+      # set the new version
+      old_version = instance.version.version
+      instance.version.add(merger_cache.version)
+      self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+
+  def merge_simple_logging_informations(self, old_instance, new_instance, merger_cache):
+    if old_instance:
+      # the modifier is always the user who inserted it into the DB
+      old_instance.modifier = merger_cache.user
+
+      if new_instance and new_instance.modified_on:
+        old_instance.modified_on = new_instance.modified_on
+      else:
+        old_instance.modified_on = merger_cache.modified_on
+
+  def insert_set_base(self, instance, cache_object):
+    if isinstance(cache_object, CacheObject):
+      merge_cache = MergerCache(cache_object)
+      merge_cache.result = 2
+      self.update_modified(instance, merge_cache)
+    else:
+      raise ValueError('Not cacheobject')
+
+  def update_modified(self, instance, merge_cache):
+    if instance:
+      if hasattr(instance, 'parent'):
+        parent = instance.parent
+        if parent:
+          if isinstance(parent, SimpleLogingInformations):
+            self.merge_simple_logging_informations(parent, instance, merge_cache)
+          if hasattr(parent, 'version'):
+            self.set_version(parent, merge_cache)
+          self.update_modified(parent, merge_cache)
 
   def broker_factory(self, clazz):
     """

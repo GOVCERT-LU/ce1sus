@@ -8,6 +8,8 @@ Created on Aug 7, 2015
 from copy import deepcopy
 from datetime import datetime
 
+from ce1sus.helpers.version import Version
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -57,4 +59,10 @@ class CacheObject(object):
   def make_copy(self):
     return deepcopy(self)
 
+class MergerCache(CacheObject):
 
+  def __init__(self, cache_object):
+    super(MergerCache, self).__init__(cache_object.user, cache_object.rest_insert, cache_object.owner, cache_object.insert, cache_object.event_permissions, cache_object.details, cache_object.inflated, cache_object.flat)
+    # result: -1: Do nothing 0: Add items (major update) 1: merge version inside 2:minor update
+    self.result = -1
+    self.version = Version()

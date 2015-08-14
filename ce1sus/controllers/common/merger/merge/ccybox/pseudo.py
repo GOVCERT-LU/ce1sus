@@ -6,7 +6,6 @@
 Created on Aug 12, 2015
 """
 from ce1sus.controllers.common.merger.base import BaseMerger
-from ce1sus.helpers.version import Version
 
 
 __author__ = 'Weber Jean-Paul'
@@ -16,37 +15,39 @@ __license__ = 'GPL v3+'
 
 class PseudoCyboxMerger(BaseMerger):
 
-  def merge_object(self, old_instance, new_instance, cache_object):
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'id_', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'idref', cache_object))
-      version.add(self.merge_attributes(old_instance.attribtues, new_instance.attribtues, cache_object))
+  def merge_object(self, old_instance, new_instance, merge_cache):
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'idref', merge_cache))
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
 
-  def merge_attributes(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_attribute)
+      elif merge_cache.result == 0:
+        merge_cache.version.add(merge_cache.version().increase_major()())
+        old_instance = new_instance
 
-  def merge_attribute(self, old_instance, new_instance, cache_object):
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'value', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'is_ioc', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'condition_id', cache_object))
+      merge_cache.version.add(self.merge_attributes(old_instance.attributes, new_instance.attributes, merge_cache))
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
+  def merge_attributes(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_attribute)
+
+  def merge_attribute(self, old_instance, new_instance, merge_cache):
+
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'is_ioc', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'condition_id', merge_cache))
+
+      elif merge_cache.result == 0:
+        merge_cache.version.add(merge_cache.version().increase_major()())
+        old_instance = new_instance
+
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version

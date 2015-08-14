@@ -8,7 +8,6 @@ Created on Aug 7, 2015
 from ce1sus.controllers.common.merger.base import BaseMerger
 from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
 from ce1sus.controllers.common.merger.merge.cstix import STIXMerger
-from ce1sus.helpers.version import Version
 
 
 __author__ = 'Weber Jean-Paul'
@@ -25,80 +24,68 @@ class EventMerger(BaseMerger):
     self.stix_merger = STIXMerger(config, session)
 
 
-  def merge_event(self, old_instance, new_instance, cache_object):
+  def merge_event(self, old_instance, new_instance, merge_cache):
 
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'idref', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'status_id', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'risk_id', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'analysis_id', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'last_seen', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'first_seen', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'last_publish_date', cache_object))
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'idref', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'status_id', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'risk_id', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'analysis_id', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'last_seen', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'first_seen', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'last_publish_date', merge_cache))
 
-      self.set_base(old_instance, new_instance, cache_object)
+        self.set_base(old_instance, new_instance, merge_cache)
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+      elif merge_cache.result == 0:
+        old_instance = new_instance
 
-    # check if sub elements were changed
-    version.add(self.cybox_merger.merge_observables(old_instance.observables, new_instance.observables, cache_object))
-    version.add(self.merge_reports(old_instance.reports, new_instance.reports, cache_object))
+      # check if sub elements were changed
+      merge_cache.version.add(self.cybox_merger.merge_observables(old_instance.observables, new_instance.observables, merge_cache))
+      merge_cache.version.add(self.merge_reports(old_instance.reports, new_instance.reports, merge_cache))
 
-    version.add(self.stix_merger.merge_stix_header(old_instance.stix_header, new_instance.stix_header, cache_object))
-    
-    #If the newversion is newer take this one
-    if old_instance.version.compare(new_instance.version) > 0:
-      self.update_instance_value(old_instance.version, new_instance.version, 'version', cache_object)
-    else:
-      # set the new version
-      old_instance.version.add(version)
+      merge_cache.version.add(self.stix_merger.merge_stix_header(old_instance.stix_header, new_instance.stix_header, merge_cache))
 
+      self.set_version(old_instance, new_instance, merge_cache)
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version
 
+  def merge_reports(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_report)
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
+  def merge_report(self, old_instance, new_instance, merge_cache):
 
-  def merge_reports(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_report)
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'title', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'description', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'short_description', merge_cache))
+        # TODO: related reports
+        merge_cache.version.add(self.merge_references(old_instance.references, new_instance.references, merge_cache))
 
-  def merge_report(self, old_instance, new_instance, cache_object):
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      version.add(self.update_instance_value(old_instance, new_instance, 'title', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'description', cache_object))
-      version.add(self.update_instance_value(old_instance, new_instance, 'short_description', cache_object))
-      # TODO: related reports
-      version.add(self.merge_references(old_instance.references, new_instance.references, cache_object))
+      elif merge_cache.result == 0:
+        old_instance = new_instance
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
+  def merge_references(self, old_instance, new_instance, merge_cache):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_reference)
 
-  def merge_references(self, old_instance, new_instance, cache_object):
-    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_reference)
+  def merge_reference(self, old_instance, new_instance, merge_cache):
 
-  def merge_reference(self, old_instance, new_instance, cache_object):
-    version = Version()
-    result = self.is_mergeable(old_instance, new_instance, cache_object)
-    if result == 1:
-      # Definition cannot be changed
-      version.add(self.update_instance_value(old_instance, new_instance, 'value', cache_object))
-      # TODO: reference children
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        # Definition cannot be changed
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
+        # TODO: reference children
 
-    elif result == 0:
-      version.add(Version().increase_major()())
-      old_instance = new_instance
+      elif merge_cache.result == 0:
+        old_instance = new_instance
 
-    if self.is_change(version):
-      self.set_base(old_instance, new_instance, cache_object)
-    return version
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version

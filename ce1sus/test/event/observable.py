@@ -15,7 +15,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class TestAdminAttributes(LoggedInBase):
+class TestObservable(LoggedInBase):
 
   def __add_event(self):
     try:
