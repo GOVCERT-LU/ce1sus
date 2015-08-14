@@ -44,7 +44,7 @@ class BaseMerger(BaseController):
     if isinstance(old_instance, BaseCoreComponent):
       self.set_version(old_instance, new_instance, merge_cache)
     # update parent informations
-    self.update_modified(old_instance, merge_cache)
+    self.update_modified(old_instance, merge_cache, new_instance)
 
   def set_version(self, old_instance, new_instance, merge_cache):
     if old_instance.version.compare(new_instance.version) > 0:

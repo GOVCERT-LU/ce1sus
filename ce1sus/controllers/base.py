@@ -6,6 +6,8 @@ for controllers.
 Created: Jul, 2013
 """
 
+from inspect import getargspec
+
 from ce1sus.common.classes.cacheobject import CacheObject, MergerCache
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
@@ -108,7 +110,7 @@ class BaseController(object):
     else:
       raise ValueError('Not cacheobject')
 
-  def update_modified(self, instance, merge_cache):
+  def update_modified(self, instance, merge_cache, new_instance=None):
     if instance:
       if hasattr(instance, 'parent'):
         parent = instance.parent
@@ -116,8 +118,14 @@ class BaseController(object):
           if isinstance(parent, SimpleLogingInformations):
             self.merge_simple_logging_informations(parent, instance, merge_cache)
           if hasattr(parent, 'version'):
-            self.set_version(parent, merge_cache)
-          self.update_modified(parent, merge_cache)
+            # python kung foo - also new_instance
+            params = getargspec(getattr(self, 'set_version'))
+            params_count = len(params.args)
+            if params_count == 3:
+              self.set_version(parent, merge_cache)
+            else:
+              self.set_version(parent, merge_cache, new_instance)
+          self.update_modified(parent, merge_cache, new_instance)
 
   def broker_factory(self, clazz):
     """
