@@ -90,7 +90,8 @@ class BaseObject(object):
         for item in attribute:
           if is_object_viewable(item, cache_object):
             result.append(self.attribute_to_dict(item, cache_object))
-    return result
+      return result
+    return None
 
 
 class SimpleLogingInformations(BaseObject):

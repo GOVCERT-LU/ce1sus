@@ -8,6 +8,7 @@ Created on Aug 10, 2015
 
 
 from __builtin__ import True
+from ce1sus.helpers.common import strings
 from datetime import datetime
 import json
 
@@ -62,6 +63,8 @@ def get_users(config):
   user.activation_sent = None
   user.activation_str = 'e96e0b6cfdb77c4e957508315bf7b7124aea9fa0'
   user.api_key = '4a5e3a7e8aa200cbde64432df11c4b459b154499'
+  user.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  user.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   group = Group()
   group.uuid = 'fa2924e9-67c0-4f13-a7d2-d66cb499677e'
   group.name = 'Administrators'
@@ -70,7 +73,8 @@ def get_users(config):
   group.dbcode = 31
   group.default_dbcode = 31
   group.email = 'admin@example.com'
-
+  group.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  group.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   user.group = group
   result.append(user)
   return result
@@ -89,6 +93,8 @@ def get_mail_templates(user):
   mail.subject = 'Event[${event_id}] ${event_uuid} Published - ${event_tlp} - ${event_risk} - ${event_title}'
   mail.creator = user
   mail.modifier = user
+  mail.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  mail.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   result.append(mail)
 
   mail = MailTemplate()
@@ -104,6 +110,8 @@ def get_mail_templates(user):
   mail.subject = 'Event[${event_id}] ${event_uuid} Updated - ${event_tlp} - ${event_risk} - ${event_title}'
   mail.creator = user
   mail.modifier = user
+  mail.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  mail.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   result.append(mail)
 
   mail = MailTemplate()
@@ -121,7 +129,8 @@ def get_mail_templates(user):
   mail.subject = 'User Registration'
   mail.creator = user
   mail.modifier = user
-
+  mail.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  mail.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   result.append(mail)
 
   return result
@@ -134,7 +143,8 @@ def get_attribute_type_definitions():
   attribute_type.uuid = 'a47fef10-298c-4731-8480-320cb34989c1'
   attribute_type.description = 'This type is used when no type has been specified'
   attribute_type.table_id = None
-
+  attribute_type.created_at = strings.stringToDateTime("2015-08-14T07:56:34")
+  attribute_type.modified_on = strings.stringToDateTime("2015-08-14T07:56:34")
   return {attribute_type.uuid: attribute_type}
 
 

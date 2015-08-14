@@ -11,5 +11,7 @@
  "attributehandler_id": "11406d00-8dec-11e3-baa8-0800200c9a66", 
  "table_id": 2, 
  "default_condition_id": "83a57780-e1fb-469b-bfa1-26e6bed888ff",
- "name": "NewOne"
+ "name": "NewOne",
+ "modified_on": "2015-08-14T07:56:35",
+ "created_at": "2015-08-14T07:56:35"
  }

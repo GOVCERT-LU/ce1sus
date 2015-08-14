@@ -43,7 +43,7 @@ class SnortTestMechanism(BaseTestMechanism):
   identifier = Column(BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id'), primary_key=True)
 
   product_name = None
-  version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)
+  version_db = Column('version', UnicodeType(40), nullable=True)
   rules = relationship(SnortRule, backref='snort_test_mechanism')
   # TODO: event_filters
   # TODO: rate_filters

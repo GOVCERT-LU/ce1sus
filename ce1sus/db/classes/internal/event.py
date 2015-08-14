@@ -92,7 +92,7 @@ class Event(Entity, Base):
     self.set_id(value)
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
-  version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)
+  version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
   stix_header = relationship(STIXHeader, uselist=False, backref='event')
   campaigns = relationship(Campaign, backref='event')
   # TODO: courses_of_action

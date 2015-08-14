@@ -64,7 +64,7 @@ class BaseChanger(BaseController):
         if created_at:
           instance.created_at = strings.stringToDateTime(created_at)
         else:
-          instance.created_at = datetime.utcnow()
+          instance.created_at = cache_object.created_at
 
       # the modifier is always the user who inserted it into the DB
       instance.modifier = cache_object.user
@@ -73,7 +73,7 @@ class BaseChanger(BaseController):
       if modified_on:
         instance.modified_on = strings.stringToDateTime(modified_on)
       else:
-        instance.modified_on = datetime.utcnow()
+        instance.modified_on = cache_object.modified_on
 
     else:
       if cache_object.insert:
@@ -121,10 +121,10 @@ class BaseChanger(BaseController):
     properties.is_rest_instert = cache_object.rest_insert
     properties.is_web_insert = not cache_object.rest_insert
 
-  def __set_baseelement(self, instance, json, cache_object, parent):
+  def __set_baseelement(self, instance, json, cache_object, parent, change_base_element=True):
     self.__set_extended_logging(instance, json, cache_object)
 
-    if json:
+    if json and change_base_element:
       # populate properties
       self.__set_properties(instance, json.get('properties', None), cache_object)
 
@@ -144,11 +144,11 @@ class BaseChanger(BaseController):
       else:
         instance.tlp = 'Amber'
 
-  def __set_entity(self, instance, json, cache_object, parent):
-    self.__set_baseelement(instance, json, cache_object, parent)
+  def __set_entity(self, instance, json, cache_object, parent, change_base_element=True):
+    self.__set_baseelement(instance, json, cache_object, parent, change_base_element)
 
-  def __set_basecomponent(self, instance, json, cache_object, parent):
-    self.__set_entity(instance, json, cache_object, parent)
+  def __set_basecomponent(self, instance, json, cache_object, parent, change_base_element=True):
+    self.__set_entity(instance, json, cache_object, parent, change_base_element)
 
     if json:
       instance.id_ = json.get('id_', None)
@@ -220,13 +220,13 @@ class BaseChanger(BaseController):
 
     return group
 
-  def set_base(self, instance, json, cache_object, parent):
+  def set_base(self, instance, json, cache_object, parent, change_base_element=True):
     if isinstance(instance, BaseCoreComponent):
-      self.__set_basecomponent(instance, json, cache_object, parent)
+      self.__set_basecomponent(instance, json, cache_object, parent, change_base_element)
     elif isinstance(instance, Entity):
-      self.__set_entity(instance, json, cache_object, parent)
+      self.__set_entity(instance, json, cache_object, parent, change_base_element)
     elif isinstance(instance, BaseElement):
-      self.__set_baseelement(instance, json, cache_object, parent)
+      self.__set_baseelement(instance, json, cache_object, parent, change_base_element)
     elif isinstance(instance, ExtendedLogingInformations):
       self.__set_extended_logging(instance, json, cache_object)
     elif isinstance(instance, SimpleLogingInformations):

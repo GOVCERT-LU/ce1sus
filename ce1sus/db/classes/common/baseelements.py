@@ -35,14 +35,19 @@ class Entity(BaseElement):
 
   @property
   def parent(self):
-    for parent in self._PARENTS:
-      if hasattr(self, parent):
-        item = getattr(self, parent)
-        if len(item) == 1:
-          return item[0]
+    for attr_name in self._PARENTS:
+      if hasattr(self, attr_name):
+        item = getattr(self, attr_name)
+        if isinstance(item, Entity):
+          return item
         else:
-          raise ValueError('Too many parents found')
-    raise ValueError('Parent not found')
+          if len(item) == 0:
+            return None
+          elif len(item) == 1:
+            return item[0]
+          else:
+            raise ValueError('Too many parents found')
+    return None
 
   def set_id(self, id_):
     namespace, uuid = self.parse_id(id_)

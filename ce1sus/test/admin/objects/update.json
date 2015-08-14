@@ -1,1 +1,2 @@
-{"default_share": false, "description": "The ArtifactObject is intended to encapsulate and convey the content of a Raw Artifact.", "cybox_std": true, "chksum": "aa778b50a158bc996419912e96c1852b2ba59623", "attributes": [], "name": "Artifact2"}
+{"modified_on": "2015-08-14T07:56:35",
+ "created_at": "2015-08-14T07:56:35","default_share": false, "description": "The ArtifactObject is intended to encapsulate and convey the content of a Raw Artifact.", "cybox_std": true, "chksum": "aa778b50a158bc996419912e96c1852b2ba59623", "attributes": [], "name": "Artifact2"}

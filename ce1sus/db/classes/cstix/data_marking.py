@@ -118,7 +118,7 @@ class MarkingSpecification(Entity, Base):
               'incident']
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
-  version_db = Column('version', UnicodeType(40), default=u'1.0.0', nullable=False)
+  version_db = Column('version', UnicodeType(40), nullable=True)
   controlled_structure = Column('controlled_structure', UnicodeType(255))
   marking_structures = relationship(MarkingStructure, backref='markingspecification')
   information_source = relationship(InformationSource, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE, uselist=False, backref='markingspecification')

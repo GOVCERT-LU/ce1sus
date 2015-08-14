@@ -52,7 +52,7 @@ class TestAdminCondition(LoggedInBase):
         if result:
           return_json = self.get('/condition/{0}?complete=true'.format(return_json.get('identifier')))
           return_json = json.loads(return_json)
-          assert return_json.get('name') == new_json_dict.get('name')
+          assert return_json.get('value') == new_json_dict.get('value')
         else:
           assert False
 

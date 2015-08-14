@@ -4,6 +4,7 @@ Created on Aug 10, 2015
 
 import json
 
+from ce1sus.helpers.version import Version
 from ce1sus.test.common.base import HTTPError
 from ce1sus.test.common.loggedinbase import LoggedInBase
 
@@ -54,7 +55,11 @@ class TestEvent(LoggedInBase):
         if result:
           return_json = self.get('/event/{0}?complete=true'.format(return_json.get('identifier')))
           return_json = json.loads(return_json)
-          assert return_json.get('name') == new_json_dict.get('name')
+          assert return_json.get('stix_header').get('title') == new_json_dict.get('stix_header').get('title')
+          version1 = Version(json_dict.get('version'))
+          version2 = Version(new_json_dict.get('version'))
+          assert version1.compare(version2) > 0
+
         else:
           assert False
 

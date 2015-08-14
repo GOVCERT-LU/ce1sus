@@ -252,7 +252,7 @@ class Ce1susAssembler(BaseChanger):
         server.user_id = user.identifier
       return server
 
-  def assemble_condition_definition(self, json, cache_object):
+  def assemble_condition(self, json, cache_object):
     if json:
 
       condition = Condition()

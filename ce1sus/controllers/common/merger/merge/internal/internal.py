@@ -16,7 +16,7 @@ __license__ = 'GPL v3+'
 
 class Ce1susMerger(BaseMerger):
 
-  def merge_attribtue_definition(self, new_instance, old_instance, cache_object):
+  def merge_attribute_definition(self, old_instance, new_instance, cache_object):
     version = Version()
     version.add(self.update_instance_value(old_instance, new_instance, 'name', cache_object))
     version.add(self.update_instance_value(old_instance, new_instance, 'description', cache_object))
@@ -33,7 +33,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_object_definition(self, new_instance, old_instance, cache_object):
+  def merge_object_definition(self, old_instance, new_instance, cache_object):
     version = Version()
 
     version.add(self.update_instance_value(old_instance, new_instance, 'name', cache_object))
@@ -48,7 +48,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_reference_definition(self, new_instance, old_instance, cache_object):
+  def merge_reference_definition(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -63,7 +63,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_condition(self, new_instance, old_instance, cache_object):
+  def merge_condition(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -73,7 +73,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_mail_template(self, new_instance, old_instance, cache_object):
+  def merge_mail_template(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -84,7 +84,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_group(self, new_instance, old_instance, cache_object):
+  def merge_group(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -103,7 +103,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_syncserver(self, new_instance, old_instance, cache_object):
+  def merge_syncserver(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -120,7 +120,7 @@ class Ce1susMerger(BaseMerger):
     self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_user(self, new_instance, old_instance, cache_object):
+  def merge_user(self, old_instance, new_instance, cache_object):
 
     version = Version()
 
@@ -141,7 +141,7 @@ class Ce1susMerger(BaseMerger):
     return version
 
 
-  def merge_attribute_type(self, new_instance, old_instance, cache_object):
+  def merge_attribute_type(self, old_instance, new_instance, cache_object):
 
     version = Version()
 

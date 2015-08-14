@@ -1,1 +1,2 @@
-{"regex": "^.+$", "name": "file_foo", "referencehandler_id": "4af84930-97e8-11e4-bd06-0800200c9a66", "share": false, "reference_handler": {"is_multi_line": false, "name": "GenericHandler", "view_type": "plain"}, "chksum": "08a5f928600d1899e0f22347e670999f8880688b", "description": "The file_name field specifies the name of the file."}
+{"modified_on": "2015-08-14T07:56:35",
+ "created_at": "2015-08-14T07:56:35","regex": "^.+$", "name": "file_foo", "referencehandler_id": "4af84930-97e8-11e4-bd06-0800200c9a66", "share": false, "reference_handler": {"is_multi_line": false, "name": "GenericHandler", "view_type": "plain"}, "chksum": "08a5f928600d1899e0f22347e670999f8880688b", "description": "The file_name field specifies the name of the file."}

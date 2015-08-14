@@ -7,9 +7,7 @@ Created on Aug 4, 2015
 """
 
 from ce1sus.controllers.common.basechanger import BaseChanger
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
-from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 
 
 __author__ = 'Weber Jean-Paul'
@@ -27,10 +25,11 @@ class StixAssembler(BaseChanger):
     instance = STIXHeader()
     self.set_base(instance, json, cache_object, event)
     if json:
-      package_intents = json.get('package_intents', list())
-      for package_intent in package_intents:
-        package_intent = self.assemble_package_intent(event, package_intent, cache_object)
-        instance.package_intents.append(package_intent)
+      package_intents = json.get('package_intents', None)
+      if package_intents:
+        for package_intent in package_intents:
+          package_intent = self.assemble_package_intent(event, package_intent, cache_object)
+          instance.package_intents.append(package_intent)
       instance.title = json.get('title', None)
       description = json.get('description', None)
       if description:

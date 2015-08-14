@@ -29,6 +29,15 @@ class Version(object):
     if self.__parent_object:
       setattr(parentObj, attr_name, self.__version)
 
+  def get_classname(self):
+    return self.__class__.__name__
+
+  @property
+  def uuid(self):
+    if self.__parent_object:
+      return self.__parent_object.uuid
+    return None
+
   @property
   def version(self):
     if self.__parent_object:

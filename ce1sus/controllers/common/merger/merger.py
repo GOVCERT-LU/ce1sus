@@ -5,20 +5,13 @@
 
 Created on Apr 8, 2015
 """
-from ce1sus.controllers.common.merger.base import BaseMerger
+from ce1sus.controllers.common.basecontroller import BaseChangeController, BaseChangeControllerException
+from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
 from ce1sus.controllers.common.merger.merge.internal.event import EventMerger
 from ce1sus.controllers.common.merger.merge.internal.internal import Ce1susMerger
 from ce1sus.db.classes.ccybox.core.observables import Observable
-from ce1sus.db.classes.internal.attributes.attribute import Condition
-from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
-from ce1sus.db.classes.internal.backend.servers import SyncServer
-from ce1sus.db.classes.internal.backend.types import AttributeType
-from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.classes.internal.event import Event
-from ce1sus.db.classes.internal.report import Report, ReferenceDefinition
-from ce1sus.db.classes.internal.usrmgt.group import Group
-from ce1sus.db.classes.internal.usrmgt.user import User
-from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
+from ce1sus.db.classes.internal.report import Report
 
 
 __author__ = 'Weber Jean-Paul'
@@ -38,47 +31,22 @@ class LevelDecay(Exception):
     self.obs_id = None
 
 
-class Merger(BaseMerger):
+class Merger(BaseChangeController):
   
   def __init__(self, config, session=None):
     super(Merger, self).__init__(config, session)
-    self.ce1sus_merger = Ce1susMerger(config, session)
-    self.event_merger = EventMerger(config, session)
-    self.cybox_merger = CyboxMerger(config, session)
+    self.mergers = [Ce1susMerger(config, session), EventMerger(config, session), CyboxMerger(config, session)]
   
-  def merge(self, new_instance, old_instance, cache_object):
+  def merge(self, old_instance, new_instance, cache_object):
     #check if both are the same class
     cache_object.insert = False
-    if self.is_updatable(old_instance, new_instance):
-      if isinstance(old_instance, AttributeDefinition):
-        return self.ce1sus_merger.merge_attribtue_definition(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, ObjectDefinition):
-        return self.ce1sus_merger.merge_object_definition(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, ReferenceDefinition):
-        return self.ce1sus_merger.merge_reference_definition(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, AttributeType):
-        return self.ce1sus_merger.merge_attribute_type(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, Condition):
-        return self.ce1sus_merger.merge_condition(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, MailTemplate):
-        return self.ce1sus_merger.merge_mail_template(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, User):
-        return self.ce1sus_merger.merge_user(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, SyncServer):
-        return self.ce1sus_merger.merge_syncserver(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, Group):
-        return self.ce1sus_merger.merge_group(new_instance, old_instance, cache_object)
-
-      if isinstance(old_instance, Event):
-        return self.event_merger.merge_event(new_instance, old_instance, cache_object)
-      if isinstance(old_instance, Observable):
-        return self.cybox_merger.merge_observable(new_instance, old_instance, cache_object)
-      else:
-        raise MergingException('Class {0} is not defined'.format(old_instance.get_classname()))
-    else:
-      self.logger.info('{0} {1} is up to date'.format(old_instance.get_classname(), old_instance.uuid))
-    
-
+    classname = old_instance.get_classname()
+    fctname = 'merge_{0}'.format(self.get_fct_name(classname))
+    for merger in self.mergers:
+      if hasattr(merger, fctname):
+        fct = getattr(merger, fctname)
+        return fct(old_instance, new_instance, cache_object)
+    raise BaseChangeControllerException('Merging for class {0} is not defined function {1} is missing'.format(classname, fctname))
 
   def set_dbcode(self, local, remote):
     self.logger.info('{0} {1} dbcode will be replaced "{2}" by "{3}"'.format(local.__class__.__name__, local.uuid, local.dbcode, local.dbcode))

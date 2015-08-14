@@ -1,1 +1,3 @@
-{"default_event_permissions": {"add": true, "modify": true, "validate": true, "set_groups": false, "delete": true}, "gpg_key": "", "tlp_lvl": 0, "name": "Administrators3", "description": "Administrators group", "email": "admin2@example.com", "notifications": false, "tlp": "Red", "identifier": "fa2924e9-67c0-4f13-a7d2-d66cb499677f", "children": [], "permissions": {"downloadfiles": true, "propagate_tlp": true}}
+{"modified_on": "2015-08-14T07:56:35",
+ "created_at": "2015-08-14T07:56:35",
+ "default_event_permissions": {"add": true, "modify": true, "validate": true, "set_groups": false, "delete": true}, "gpg_key": "", "tlp_lvl": 0, "name": "Administrators3", "description": "Administrators group", "email": "admin2@example.com", "notifications": false, "tlp": "Red", "identifier": "fa2924e9-67c0-4f13-a7d2-d66cb499677f", "children": [], "permissions": {"downloadfiles": true, "propagate_tlp": true}}

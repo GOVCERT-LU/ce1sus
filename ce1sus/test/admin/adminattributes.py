@@ -43,6 +43,7 @@ class TestAdminAttributes(LoggedInBase):
       else:
         assert False
 
+
   def testNewUpdate(self):
     try:
       json_dict = self.get_json('attribtues/new.json')
@@ -55,6 +56,8 @@ class TestAdminAttributes(LoggedInBase):
           return_json = self.get('/attributedefinition/{0}?complete=true'.format(return_json.get('identifier')))
           return_json = json.loads(return_json)
           assert return_json.get('default_condition_id') == new_json_dict.get('default_condition_id')
+
+          # TODO fix this assertion
         else:
           assert False
         

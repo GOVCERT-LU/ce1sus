@@ -50,9 +50,9 @@ class EventAssembler(BaseChanger):
 
       event.id_ = json.get('id_', None)
       event.idref = json.get('idref', None)
-      if event.idref:
-        version = json.get('version', None)
-        event.version = Version(version, event)
+
+      version = json.get('version', None)
+      event.version = Version(version, event)
 
 
 
@@ -88,60 +88,63 @@ class EventAssembler(BaseChanger):
 
       # TODO: create assembler for the new stix elements
       """
-      campaigns = json.get('campaigns', list())
+      campaigns = json.get('campaigns', None)
       for campaign in campaigns:
         campaign = self.stix_assembler.assemble_campaign(campaign, user, seen_groups, rest_insert, owner)
         if campaign:
           event.campaigns.append(campaign)
 
-      exploit_targets = json.get('exploit_targets', list())
+      exploit_targets = json.get('exploit_targets', None)
       for exploit_target in exploit_targets:
         exploit_target = self.stix_assembler.assemble_exploit_target(exploit_target, user, seen_groups, rest_insert, owner)
         if exploit_target:
           event.exploit_targets.append(exploit_target)
       """
 
-      observables = json.get('observables', list())
-      for observable in observables:
-        observable = self.cybox_assembler.assemble_observable(event, observable, cache_object)
-        if observable:
-          event.observables.append(observable)
+      observables = json.get('observables', None)
+      if observables:
+        for observable in observables:
+          observable = self.cybox_assembler.assemble_observable(event, observable, cache_object)
+          if observable:
+            event.observables.append(observable)
 
-      indicators = json.get('indicators', list())
-      for indicator in indicators:
-        indicator = self.stix_assembler.assemble_indicator(indicator, cache_object)
-        if indicator:
-          event.indicators.append(indicator)
+      indicators = json.get('indicators', None)
+      if indicators:
+        for indicator in indicators:
+          indicator = self.stix_assembler.assemble_indicator(indicator, cache_object)
+          if indicator:
+            event.indicators.append(indicator)
       """
-      incidents = json.get('incidents', list())
+      incidents = json.get('incidents', None)
       for incident in incidents:
         incident = self.stix_assembler.assemble_incident(incident, user, seen_groups, rest_insert, owner)
         if incident:
           event.incidents.append(incident)
 
-      threat_actors = json.get('threat_actors', list())
+      threat_actors = json.get('threat_actors', None)
       for threat_actor in threat_actors:
         threat_actor = self.stix_assembler.assemble_threat_actor(threat_actor, user, seen_groups, rest_insert, owner)
         if threat_actor:
           event.threat_actors.append(threat_actor)
 
-      ttps = json.get('ttps', list())
+      ttps = json.get('ttps', None)
       for ttp in ttps:
         ttp = self.stix_assembler.assemble_ttp(ttp, user, seen_groups, rest_insert, owner)
         if ttp:
           event.ttps.append(ttp)
 
-      related_packages = json.get('related_packages', list())
+      related_packages = json.get('related_packages', None)
       for related_package in related_packages:
         related_package = self.stix_assembler.assemble_related_package(related_package, user, seen_groups, rest_insert, owner)
         if related_package:
           event.related_packages.append(related_package)
       """
-      reports = json.get('reports', list())
-      for report in reports:
-        report = self.assemble_report(event, report, cache_object)
-        if report:
-          event.reports.append(report)
+      reports = json.get('reports', None)
+      if reports:
+        for report in reports:
+          report = self.assemble_report(event, report, cache_object)
+          if report:
+            event.reports.append(report)
 
       comments = json.get('comments', None)
       if comments:
@@ -169,13 +172,13 @@ class EventAssembler(BaseChanger):
     report.short_description = json.get('short_description', None)
     # link event
     report.event = event
-    references = json.get('references', list())
+    references = json.get('references', None)
     for reference in references:
       ref = self.assemble_reference(report, reference, cache_object)
       if ref:
         report.references.append(ref)
 
-    related_reports = json.get('related_reports', list())
+    related_reports = json.get('related_reports', None)
     for related_report in related_reports:
       related_report = self.assemble_report(related_report, json, cache_object)
       if related_report:

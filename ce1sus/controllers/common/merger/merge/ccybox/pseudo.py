@@ -16,7 +16,7 @@ __license__ = 'GPL v3+'
 
 class PseudoCyboxMerger(BaseMerger):
 
-  def merge_object(self, new_instance, old_instance, cache_object):
+  def merge_object(self, old_instance, new_instance, cache_object):
     version = Version()
     result = self.is_mergeable(old_instance, new_instance, cache_object)
     if result == 1:
@@ -32,10 +32,10 @@ class PseudoCyboxMerger(BaseMerger):
       self.set_base(old_instance, new_instance, cache_object)
     return version
 
-  def merge_attributes(self, new_instance, old_instance, cache_object):
-    return self.merge_gen_arrays(new_instance, old_instance, cache_object, self.merge_attribute)
+  def merge_attributes(self, old_instance, new_instance, cache_object):
+    return self.merge_gen_arrays(old_instance, new_instance, cache_object, self.merge_attribute)
 
-  def merge_attribute(self, new_instance, old_instance, cache_object):
+  def merge_attribute(self, old_instance, new_instance, cache_object):
     version = Version()
     result = self.is_mergeable(old_instance, new_instance, cache_object)
     if result == 1:

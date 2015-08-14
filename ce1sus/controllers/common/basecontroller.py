@@ -5,6 +5,8 @@
 
 Created on Aug 7, 2015
 """
+import re
+
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.ccybox.core.observables import Observable
@@ -50,3 +52,8 @@ class BaseChangeController(BaseController):
       return instance.report.event
     else:
       raise BaseChangeControllerException('Getting Event for {0} is not defined'.format(instance.get_classname()))
+
+  def get_fct_name(self, classname):
+    return re.sub('(?<!^)(?=[A-Z])', '_', classname).lower()
+
+
