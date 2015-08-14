@@ -16,6 +16,8 @@ __license__ = 'GPL v3+'
 
 
 class TestAdminAttributes(LoggedInBase):
+  
+
 
   def testExsiting(self):
     try:

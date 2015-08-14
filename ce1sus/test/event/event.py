@@ -19,10 +19,10 @@ class TestEvent(LoggedInBase):
 
   def testExsiting(self):
     try:
-      json_dict = self.get_json('events/existing.json')
-      return_json = self.post('/event', data=json_dict)
+      json_dict = self.get_json('events/new.json')
+      self.post('/event', data=json_dict)
       try:
-        return_json = self.post('/event', data=json_dict)
+        self.post('/event', data=json_dict)
       except HTTPError as error:
         if error.code == 400:
           assert True

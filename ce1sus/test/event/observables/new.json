@@ -1,0 +1,35 @@
+{
+  "id_":"ce1sus:Observable-2a9bb7eb-cfb5-4b8d-97b4-1db801651c34",
+  "tlp":"Amber",
+  "description":{
+    "id_":"ce1sus:StructuredText-8be95fec-fc8e-41d7-a340-e69bd0ea966d",
+    "tlp":"Red",
+    "structuring_format":"text",
+    "created_at":"2015-08-14T08:22:03",
+    "value":"asdf",
+    "ordinality":1,
+    "modified_on":"2015-08-14T08:22:03",
+    "identifier":"8be95fec-fc8e-41d7-a340-e69bd0ea966d",
+    "properties":{
+      "shared":false,
+      "proposal":false,
+      "validated":true,
+      "marked_for_deletion":false
+    }
+  },
+  "identifier":"2a9bb7eb-cfb5-4b8d-97b4-1db801651c34",
+  "title":"asdfdd",
+  "created_at":"2015-08-14T08:22:03",
+  "object":null,
+  "modified_on":"2015-08-14T08:36:22",
+  "sighting_count":"",
+  "observable_composition":null,
+  "keywords":null,
+  "idref":"",
+  "properties":{
+    "shared":false,
+    "proposal":false,
+    "validated":true,
+    "marked_for_deletion":false
+  }
+}

@@ -26,7 +26,7 @@ __license__ = 'GPL v3+'
 
 _REL_OBSERVABLE_COMPOSITION = Table('rel_observable_composition', getattr(Base, 'metadata'),
                                     Column('roc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('observablecomposition_id', BigIntegerType, ForeignKey('observablecompositions.observablecomposition_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                    Column('observablecomposition_id', BigIntegerType, ForeignKey('observablecompositions.observablecomposition_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
                                     Column('child_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
                                     )
 
@@ -44,13 +44,13 @@ _REL_OBSERVABLE_STRUCTUREDTEXT = Table('rel_observable_structuredtext', getattr(
                                              ForeignKey('structuredtexts.structuredtext_id',
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
-                                              primary_key=True,
+                                              nullable=False,
                                               index=True)
                                        )
 
 _REL_OBSERVABLE_OBJECT = Table('rel_observable_object', getattr(Base, 'metadata'),
                                     Column('roo_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), primary_key=True, index=True),
+                                    Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
                                     Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
                                     )
 

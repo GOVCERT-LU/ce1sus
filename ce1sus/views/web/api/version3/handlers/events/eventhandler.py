@@ -219,14 +219,13 @@ class EventHandler(RestBaseHandler):
 
   def __process_observable_get(self, event, requested_object, cache_object):
     try:
-      event_permission = self.get_event_user_permissions(event, cache_object.user)
       uuid = requested_object['object_uuid']
       if uuid:
         # return the given observable
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_uuid(uuid)
         self.check_item_is_viewable(event, observable)
-        if is_object_viewable(observable, event_permission, cache_object.user):
+        if is_object_viewable(observable, cache_object):
           return observable.to_dict(cache_object)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
