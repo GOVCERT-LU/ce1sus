@@ -37,26 +37,7 @@ class ForeignKeysListener(PoolListener):
 
 # pylint: disable=R0903
 class SqliteSession(SessionObject):
-  """
-  Session wrapper
-  """
-  def __init__(self, session=None):
-    super(SessionObject, self).__init__()
-    self.__session = session
-
-  def get_session(self):
-    """
-    Returns a session
-    """
-    if self.__session:
-      return self.__session
-    else:
-      return cherrypy.request.db
-
-  def close(self):
-    if self.__session:
-      self.__session.close()
-
+  pass
 
 class SqliteConnector(Connector):
   """
@@ -102,11 +83,7 @@ class SqliteConnector(Connector):
     """
     Returns the engine
     """
-    return create_engine(self.connetion_string,
-                         listeners=[ForeignKeysListener()],
-                         echo=self.debug,
-                         echo_pool=self.debug,
-                         strategy='plain')
+    return self.create_engine()
 
   def get_direct_session(self, instanciated=True):
     """
@@ -119,15 +96,6 @@ class SqliteConnector(Connector):
     if instanciated:
       session = session()
     return SqliteSession(session)
-
-  def close(self):
-    """
-    Closes the session
-    """
-    self.session = None
-    if self.engine:
-      self.engine.dispose()
-      self.engine = None
 
   def create_engine(self):
     """

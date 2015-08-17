@@ -6,12 +6,16 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 
+from datetime import datetime
+from uuid import uuid4
+
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 
 
@@ -225,9 +229,51 @@ class ObservableController(BaseController):
       self.object_broker.do_commit(commit)
     except IntegrityException as error:
       self.logger.debug(error)
-      raise ControllerException(u'An object with uuid "{0}" already exists'.format(obj.uuid))
     except BrokerException as error:
       raise ControllerException(error)
+
+  def __set_logging(self, instance1, instance2, user):
+    instance1.tlp_level_id = instance2.tlp_level_id
+    instance1.dbcode = instance2.dbcode
+
+    instance1.created_at = datetime.utcnow()
+    instance1.modified_on = datetime.utcnow()
+
+    instance1.creator = user
+    instance1.modifier = user
+
+    instance1.creator_group_id = user.group.identifier
+
+  def insert_composed_observable_object(self, obj, observable, cache_object, commit=True):
+
+    # remove relation from event and observable
+    event = observable.event[0]
+    event.observables.remove(observable)
+
+    # create containers
+    obs = Observable()
+    obs.uuid = uuid4()
+    obs.event = [event]
+    self.__set_logging(obs, observable, cache_object.user)
+
+    comp_obs = ObservableComposition()
+    self.__set_logging(comp_obs, observable, cache_object.user)
+    comp_obs.observable = obs
+
+    obs.observable_composition = comp_obs
+
+    child_obs = Observable()
+    child_obs.uuid = uuid4()
+    child_obs.event = [event]
+    self.__set_logging(child_obs, observable, cache_object.user)
+    child_obs.object = obj
+
+    comp_obs.observables.append(child_obs)
+    comp_obs.observables.append(observable)
+
+    self.insert_observable(obs, cache_object, commit)
+
+    return obs
 
   def update_object(self, obj, commit=True):
     try:

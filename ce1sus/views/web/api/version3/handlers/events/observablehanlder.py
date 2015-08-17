@@ -8,7 +8,7 @@ Created on Dec 22, 2014
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
@@ -109,50 +109,15 @@ class ObservableHandler(RestBaseHandler):
   def __process_object(self, method, event, observable, requested_object, json, cache_object):
     if method == 'POST':
       self.check_if_user_can_add(event)
-      # check if observable has already an object
       if observable.object:
-        # TODO: REVIEW THIS OBSERVABLE FOO -> idea is to create observable compositions out of objects if a second is added
-        obs = Observable()
-        obs.event = event
-        obs.tlp_level_id = observable.tlp_level_id
-        obs.parent = event
-        self.observable_controller.set_extended_logging(obs, cache_object.user, True)
-        self.__set_properties(obs, cache_object, observable)
-
-        comp_obs = ObservableComposition()
-        comp_obs.tlp = obs.tlp
-        comp_obs.properties = obs.properties
-        self.observable_controller.set_extended_logging(comp_obs, cache_object.user, True)
-
-        comp_obs.parent = obs
-        obs.observable_composition = comp_obs
-        comp_obs.tlp_level_id = observable.tlp_level_id
-        self.__set_properties(comp_obs, cache_object, observable)
-
-        child_obs = Observable()
-        child_obs.parent = event
-        child_obs.tlp_level_id = observable.tlp_level_id
-        comp_obs.observables.append(child_obs)
-        comp_obs.observables.append(observable)
-
-        self.__set_properties(child_obs, cache_object, observable)
-        self.observable_controller.set_extended_logging(child_obs, cache_object.user, True)
-
-        obj = self.assembler.assemble(json, Object, child_obs, cache_object)
-
-        child_obs.object = obj
-        self.observable_controller.insert_observable(obs, cache_object.user, True)
-        observable.event = None
-        observable.event_id = None
-
-        self.observable_controller.insert_object(obj, cache_object.user, False)
-        # update observable
-        self.observable_controller.update_observable(observable, cache_object.user, True)
+        # check if observable has already an object
+        obj = self.assembler.assemble(json, Object, observable, cache_object)
+        obs = self.observable_controller.insert_composed_observable_object(obj, observable, cache_object, commit=True)
         cache_object.inflated = True
         return obs.to_dict(cache_object)
       else:
         obj = self.assembler.assemble(json, Object, observable, cache_object)
-        self.observable_controller.insert_object(obj, True)
+        self.observable_controller.insert_object(obj, commit=True)
         return obj.to_dict(cache_object)
     else:
       uuid = requested_object['object_uuid']

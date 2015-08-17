@@ -233,7 +233,10 @@ class EventHandler(RestBaseHandler):
       else:
         # return all observables from the event
         result = event.attributelist_to_dict(event.observables, cache_object)
-        return result
+        if result is None:
+          return list()
+        else:
+          return result
     except ControllerException as error:
       raise RestHandlerException(error)
 

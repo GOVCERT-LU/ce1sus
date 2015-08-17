@@ -12,7 +12,8 @@ from sqlalchemy.pool import Pool
 
 from ce1sus.common import convert_value
 from ce1sus.db.common.broker import BrokerBase
-from ce1sus.db.common.common import SessionManagerException, BrokerInstantiationException, ORMException
+from ce1sus.db.common.common import BrokerInstantiationException, ORMException
+from ce1sus.db.common.connectors.generic import GenericConnector
 from ce1sus.db.common.connectors.mysql import MySqlConnector
 from ce1sus.db.common.connectors.sqlite import SqliteConnector
 
@@ -82,8 +83,7 @@ class SessionManager(object):
     elif ('mysql' in protocol):
       self.connector = MySqlConnector(self.__config_section)
     else:
-      raise SessionManagerException(('Protocol {0} '
-                                    + 'is undefined').format(protocol))
+      self.connector = GenericConnector(self.__config_section)
     self.__direct_session = session
     self.__brokers = dict()
 

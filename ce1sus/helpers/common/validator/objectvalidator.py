@@ -11,11 +11,12 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+from ce1sus.helpers.common.objects import get_fields
+from ce1sus.helpers.common.strings import stringToDateTime, InputException
+from datetime import datetime
 import re
 from sre_constants import error
-from ce1sus.helpers.common.strings import stringToDateTime, InputException
-import datetime
-from ce1sus.helpers.common.objects import get_fields
+
 
 ALNUM_BASE = r'^[\d\w{PlaceHolder}]{quantifier}$'
 ALPHA_BASE = r'^[\D{PlaceHolder}]{quantifier}$'
@@ -372,13 +373,34 @@ class ObjectValidator(object):
                 '"YYYY-mm-dd - H:M:S" where " - H:M:S" is optional')
 
     value = getattr(obj, attributeName)
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, datetime):
       return True
     try:
-      if ObjectValidator.validateIP(obj, attributeName, False):
-        return False
-      stringToDateTime(value)
-      return True
+      '2015-08-14 07:56:35'
+      try:
+        datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        return True
+      except ValueError:
+        pass
+      '2015-08-14T07:56:35'
+      try:
+        datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
+        return True
+      except ValueError:
+        pass
+      '2015-08-14'
+      try:
+        datetime.strptime(value, "%Y-%m-%d")
+        return True
+      except ValueError:
+        pass
+      '2002-12-25 00:00:00-06:39'
+      try:
+        datetime.strptime(value, "%Y-%m-%dT%H:%M:%S%z")
+        return True
+      except ValueError:
+        pass
+      return False
     except InputException:
       if changeAttribute:
         setattr(obj, attributeName, FailedValidation(value, errorMsg))
