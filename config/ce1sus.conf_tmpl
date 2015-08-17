@@ -22,6 +22,7 @@ maintenaceuseruuid=f49eb0ed-438d-49ef-aa19-1d615a3ba01d
 usebasicauth=no
 #salt used for passwords
 salt=SomeReallyIntrestingRandom
+revdir=revdir
 
 [Logger]
 log=Yes

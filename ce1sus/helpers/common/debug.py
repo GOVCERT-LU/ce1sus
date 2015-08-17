@@ -80,6 +80,10 @@ class Log(object):
     else:
       self.syslogger = None
 
+    if self.log_file:
+      if not exists(self.log_file):
+          makedirs(self.log_file)
+
     # create formatter
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     # datefmt = '%m/%d/%Y %I:%M:%S %p'
