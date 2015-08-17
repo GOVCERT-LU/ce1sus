@@ -5,6 +5,7 @@
 
 Created on Apr 8, 2015
 """
+
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.common.basecontroller import BaseChangeController, BaseChangeControllerException
 from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
@@ -42,7 +43,9 @@ class Merger(BaseChangeController):
     #check if both are the same class
     cache_object.insert = False
     merger_cache = MergerCache(cache_object)
-
+    
+    self.dumper.save_old_copy(old_instance)
+    
     classname = old_instance.get_classname()
     fctname = 'merge_{0}'.format(self.get_fct_name(classname))
     for merger in self.mergers:

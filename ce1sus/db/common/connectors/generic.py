@@ -6,7 +6,6 @@
 Created on Aug 17, 2015
 """
 import cherrypy
-import os
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.scoping import scoped_session
 from sqlalchemy.orm.session import sessionmaker

@@ -105,7 +105,8 @@ class BaseController(object):
   def insert_set_base(self, instance, cache_object):
     if isinstance(cache_object, CacheObject):
       merge_cache = MergerCache(cache_object)
-      merge_cache.result = 2
+      if not merge_cache.result:
+        merge_cache.result = 2
       self.update_modified(instance, merge_cache)
     else:
       raise ValueError('Not cacheobject')

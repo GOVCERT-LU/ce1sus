@@ -8,6 +8,7 @@ Created on Aug 7, 2015
 import re
 
 from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.common.revisiondumper import RevisionDumper
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
@@ -32,6 +33,7 @@ class BaseChangeController(BaseController):
   def __init__(self, config, session):
     super(BaseChangeController, self).__init__(config, session)
     self.event_controller = EventController(config, session)
+    self.dumper = RevisionDumper(config)
 
   def __get_event(self, instance):
     if isinstance(instance, Event):

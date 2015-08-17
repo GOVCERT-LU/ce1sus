@@ -99,7 +99,12 @@ def stringToDateTime(string):
   """
   try:
     if string:
-      if string.isdigit():
+      is_int = False
+      if isinstance(string,int):
+        is_int = True
+      elif string.isdigit():
+        is_int = True
+      if is_int:
         try:
           return datetime.fromtimestamp(int(string) / 1000.0)
         except ValueError:
