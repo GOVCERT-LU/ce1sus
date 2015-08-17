@@ -38,27 +38,20 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_report(self, report, user, commit=True):
+  def insert_report(self, report, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(report, user, True)
+      self.insert_set_base(report, cache_object)
       self.report_broker.insert(report)
-    except IntegrityException as error:
-      self.logger.debug(error)
-      self.logger.info(u'User {0} tried to insert a report with uuid "{1}" but the uuid already exists'.format(user.username, report.uuid))
-      raise ControllerException(u'An report with uuid "{0}" already exists'.format(report.uuid))
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_report(self, report, user, commit=True):
+  def update_report(self, report, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(report, user, False)
       self.report_broker.update(report, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_report(self, report, user, commit=True):
+  def remove_report(self, report, cache_object, commit=True):
     try:
       self.report_broker.remove_by_id(report.identifier)
     except BrokerException as error:

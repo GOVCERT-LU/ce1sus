@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 
 from ce1sus.db.common.common import SessionObject, Connector
+from ce1sus.db.common.connectors.generic import GenericSession
 from ce1sus.db.common.recepie.satool import SAEnginePlugin, SATool
 
 
@@ -36,7 +37,7 @@ class ForeignKeysListener(PoolListener):
 
 
 # pylint: disable=R0903
-class SqliteSession(SessionObject):
+class SqliteSession(GenericSession):
   pass
 
 class SqliteConnector(Connector):

@@ -6,6 +6,8 @@
 Created on Jul 28, 2015
 """
 
+from types import NoneType
+
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.core import BaseElement
 
@@ -42,12 +44,22 @@ class Entity(BaseElement):
           return item
         else:
           if len(item) == 0:
-            return None
+            continue
           elif len(item) == 1:
             return item[0]
           else:
             raise ValueError('Too many parents found')
-    return None
+    raise ValueError('Parent cannot be found')
+
+  @parent.setter
+  def parent(self, instance):
+    for attr_name in self._PARENTS:
+      if hasattr(self, attr_name):
+        item = getattr(self, attr_name)
+        if isinstance(item, Entity) or isinstance(item, NoneType):
+          setattr(self, attr_name, instance)
+        else:
+          item.append(instance)
 
   def set_id(self, id_):
     namespace, uuid = self.parse_id(id_)

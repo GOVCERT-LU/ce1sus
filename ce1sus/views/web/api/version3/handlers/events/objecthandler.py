@@ -118,14 +118,14 @@ class ObjectHandler(RestBaseHandler):
                             # unbind the earlier relation
               related_object.parent_id = parent_id
               related_object.relation = json.get('relation', None)
-              self.observable_controller.update_related_object(related_object, cache_object.user, False)
-          obj = self.updater.update(obj, json, cache_object)
-          self.observable_controller.update_object(obj, cache_object.user, True)
+              self.observable_controller.update_related_object(related_object, cache_object, False)
+          self.updater.update(obj, json, cache_object)
+          self.observable_controller.update_object(obj, cache_object, True)
           return obj.to_dict(cache_object)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           self.check_item_is_viewable(event, obj)
-          self.observable_controller.remove_object(obj, cache_object.user, True)
+          self.observable_controller.remove_object(obj, cache_object, True)
           return 'Deleted object'
     except ValueException as error:
       raise RestHandlerException(error)
@@ -137,7 +137,7 @@ class ObjectHandler(RestBaseHandler):
       # TODO find out why the parent gets deleted
       self.check_if_user_can_add(event)
       related_object = self.assembler.assemble(json, RelatedObject, obj, cache_object)
-      self.observable_controller.update_object(obj, cache_object.user, True)
+      self.observable_controller.update_object(obj, cache_object, True)
       return related_object.to_dict(cache_object)
     else:
       raise RestHandlerException('Please use object/{uuid}/ instead')
@@ -289,7 +289,7 @@ class ObjectHandler(RestBaseHandler):
               new_obs.observable_composition = composed_observable
 
               new_obs.observable_composition.observables.append(observable)
-              self.observable_controller.insert_observable(new_obs, cache_object.user, commit=False)
+              self.observable_controller.insert_observable(new_obs, cache_object, commit=False)
               first_obs = param_1.pop(0)
               first_object = first_obs.object
               for attr in first_object.attributes:
@@ -317,9 +317,9 @@ class ObjectHandler(RestBaseHandler):
             composed_observable.observables.append(obs)
 
           if test_composition:
-            self.observable_controller.update_observable_compositon(composed_observable, cache_object.user, commit=False)
+            self.observable_controller.update_observable_compositon(composed_observable, cache_object, commit=False)
           else:
-            self.observable_controller.update_observable(observable, cache_object.user, commit=False)
+            self.observable_controller.update_observable(observable, cache_object, commit=False)
           param_1 = composed_observable.parent
 
         else:
@@ -332,8 +332,8 @@ class ObjectHandler(RestBaseHandler):
           # TODO also check if there are no children attached
           if True:
             if param_1:
-              self.attribute_controller.insert_attributes(param_1, cache_object.user, False, cache_object.owner)
-              self.observable_controller.insert_handler_related_objects(related_objects, cache_object.user, False, cache_object.owner)
+              self.attribute_controller.insert_attributes(param_1, cache_object, False)
+              self.observable_controller.insert_handler_related_objects(related_objects, cache_object, False)
             else:
               # attach the related object to the parent object if there is any
               if obj.related_object_parent:
@@ -348,7 +348,7 @@ class ObjectHandler(RestBaseHandler):
                   modified_obj = True
                 for related_object in related_objects:
                   parent_obj.related_objects.append(related_object)
-                self.observable_controller.update_object(parent_obj, cache_object.user, False)
+                self.observable_controller.update_object(parent_obj, cache_object, False)
                 # self.observable_controller.insert_handler_related_objects(related_objects, user, False, self.is_event_owner(event, user))
 
               else:
@@ -409,13 +409,13 @@ class ObjectHandler(RestBaseHandler):
             self.logger.info(u'User {0} changed attribute {1} from {2} to {3}'.format(cache_object.user.username, attribute.identifier, old_attr.value, attribute.value))
 
             # TODO: check if there are no children attached
-            self.attribute_controller.update_attribute(attribute, cache_object.user, True)
+            self.attribute_controller.update_attribute(attribute, cache_object, True)
 
             return attribute.to_dict(cache_object)
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)
             self.check_item_is_viewable(event, attribute)
-            self.attribute_controller.remove_attribute(attribute, cache_object.user, True)
+            self.attribute_controller.remove_attribute(attribute, cache_object, True)
             return 'Deleted object'
 
     except ValueException as error:

@@ -56,8 +56,7 @@ class PseudoCyboxAssembler(BaseChanger):
         return definition
     raise AssemblerException('Could not find a definition in the object')
 
-  def assemble_object(self, observable, json, cache_object):
-
+  def assemble_object(self, observable, json, cache_object, set_observable=True):
     if json:
       obj = Object()
       self.set_base(obj, json, cache_object, observable)
@@ -67,8 +66,8 @@ class PseudoCyboxAssembler(BaseChanger):
       # obj.definition = definition
       obj.definition = definition
 
-      obj.observable = [observable]
-      obj.observable_id = observable.identifier
+      if set_observable:
+        obj.observable = [observable]
 
       rel_objs = json.get('related_objects', None)
       if rel_objs:
@@ -88,17 +87,17 @@ class PseudoCyboxAssembler(BaseChanger):
   def assemble_related_object(self, obj, json, cache_object):
     if json:
       child_obj_json = json.get('object')
-      child_obj = self.assemble_object(obj.observable, child_obj_json, cache_object)
+      # TODO: findout why observable is unset afterwards
+      # observable = obj.observable[0]
+      child_obj = self.assemble_object(obj.parent, child_obj_json, cache_object, set_observable=False)
 
-
-      # dereference object from observable
-      child_obj.parent = None
       # update parent
       related_object = RelatedObject()
-      self.set_base(related_object, json, cache_object)
+      # the properties of the child are the same as for the related object as this is in general only a container
+      self.set_base(related_object, child_obj_json, cache_object, obj)
 
       # Properties should be the same as the one from the related object
-      child_obj.properties = related_object.properties
+      child_obj.dbcode = related_object.dbcode
       child_obj.tlp_level_id = related_object.tlp_level_id
 
       related_object.parent = obj

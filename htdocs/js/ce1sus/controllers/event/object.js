@@ -72,51 +72,57 @@ app.controller("objectChildAddController", function($scope, Restangular, message
     handleError(response, messages);
     $scope.$hide();
   });
-  var original_childObject = {'properties' : {'shared': false}, 'object': {'definition_id': null}};
-  $scope.childObject=angular.copy(original_childObject);
   
+  
+  
+  var original_relatedObject = {'object': {'definition_id': null, 'properties' : {'shared': false}}};
+  $scope.relatedObject=angular.copy(original_relatedObject);
+
   $scope.$watch(function() {
-    return $scope.childObject.definition_id;
+    return $scope.relatedObject.object.definition_id;
     }, function(newVal, oldVal) {
       angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.childObject.definition_id){
-          $scope.childObject.properties.shared = entry.default_share;
+        if (entry.identifier === $scope.relatedObject.object.definition_id){
+          $scope.relatedObject.object.properties.shared = entry.default_share;
         }
       }, $log);
     });
   
   $scope.closeModal = function(){
-    $scope.childObject = angular.copy(original_childObject);
+    $scope.relatedObject = angular.copy(original_relatedObject);
     $scope.$hide();
   };
   
   //Scope functions
-  $scope.resetChildObject = function ()
+  $scope.resetrelatedObject = function ()
   {
-    $scope.childObject = angular.copy(original_childObject);
+    $scope.relatedObject = angular.copy(original_relatedObject);
 
   };
   
 
   
-  $scope.childObjectChanged = function ()
+  $scope.relatedObjectChanged = function ()
   {
-    return !angular.equals($scope.childObject, original_childObject);
+    return !angular.equals($scope.relatedObject, original_relatedObject);
   };
   
-  $scope.submitChildObject = function(){
+  $scope.submitrelatedObject = function(){
     angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.childObject.definition_id){
-        $scope.childObject.definition=entry;
+      if (entry.identifier == $scope.relatedObject.definition_id){
+        $scope.relatedObject.definition=entry;
       }
     }, $log);
     var eventID = $routeSegment.$routeParams.id;
     if ($scope.$parent.$parent.object){
       //This is a child object
-      $scope.childObject.parent_id=$scope.$parent.$parent.object.identifier;
+      $scope.relatedObject.parent_id=$scope.$parent.$parent.object.identifier;
     }
     var objectID = $scope.$parent.$parent.object.identifier;
-    Restangular.one('object', objectID).post('object', $scope.childObject, {'complete':true, 'infated':true}).then(function (data) {
+    Restangular.one('object', objectID).post('object', $scope.relatedObject, {'complete':true, 'infated':true}).then(function (data) {
+      if (!$scope.$parent.$parent.object.related_objects){
+        $scope.$parent.$parent.object.related_objects = [];
+      }
       $scope.$parent.$parent.object.related_objects.push(data);
     }, function (response) {
       handleError(response, messages);

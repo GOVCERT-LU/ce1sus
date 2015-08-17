@@ -16,6 +16,7 @@ from ce1sus.db.classes.ccybox.common.vocabs import ObjectRelationship
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.internal.core import BaseElement, BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
+from billiard import Event
 
 
 __author__ = 'Weber Jean-Paul'
@@ -37,9 +38,7 @@ class Object(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   # properties
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
-
-
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined', backref='parent_object')
   # ce1sus specific
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   attributes = relationship('Attribute', lazy='joined')
@@ -47,15 +46,14 @@ class Object(Entity, Base):
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
-  observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+
 
   @property
   def event(self):
-    if self.observable[0]:
-      event = self.observable[0].event[0]
-      return event
+    if self.observable:
+      return self.observable[0].event[0]
     else:
-      raise ValueError(u'Parent of object was not set.')
+      return self.parent.parent.event
 
   @property
   def event_id(self):
@@ -66,8 +64,8 @@ class Object(Entity, Base):
   
   _PARENTS = ['related_object_parent', 'observable']
 
+
   def to_dict(self, cache_object):
-    uuid = self.convert_value(self.observable[0].uuid)
     cache_object_defs = cache_object.make_copy()
     cache_object_defs.inflated = False
     result = {
@@ -75,13 +73,12 @@ class Object(Entity, Base):
             'definition': self.attribute_to_dict(self.definition, cache_object_defs),
             'attributes': self.attributelist_to_dict(self.attributes, cache_object),
             'related_objects': self.attributelist_to_dict(self.related_objects, cache_object),
-            'observable_id': uuid
             }
 
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 
-class RelatedObject(BaseElement, Base):
+class RelatedObject(Entity, Base):
   parent_id = Column('parent_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   child_id = Column('child_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   relationship_id = Column('relationship_id', Integer, nullable=True)
@@ -90,6 +87,8 @@ class RelatedObject(BaseElement, Base):
   object = relationship(Object, primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, backref='related_object_parent')
 
   __relationship = None
+
+  _PARENTS = ['parent_object']
 
   @property
   def relationship(self):

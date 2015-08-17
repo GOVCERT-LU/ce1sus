@@ -48,8 +48,6 @@ class ObservableHandler(RestBaseHandler):
           return self.__process_observable(method, event, observable, json, cache_object)
         elif requested_object['object_type'] == 'object':
           return self.__process_object(method, event, observable, requested_object, json, cache_object)
-        elif requested_object['object_type'] == 'observable':
-          return self.__process_observable_child(method, event, observable, requested_object, json, cache_object)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -59,22 +57,6 @@ class ObservableHandler(RestBaseHandler):
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
-
-  def __process_observable_child(self, method, event, observable, requested_object, json, cache_object):
-    if method == 'POST':
-      self.check_if_user_can_add(event)
-      child_obs = self.assembler.assemble(json, Observable, event, cache_object)
-      child_obs.event = None
-      child_obs.event_id = None
-      if observable.observable_composition:
-        observable.observable_composition.observables.append(child_obs)
-        self.observable_controller.update_observable(observable, cache_object.user, True)
-      else:
-        # then it is a related observable
-        pass
-      return child_obs.to_dict(cache_object)
-    else:
-      raise RestHandlerException('use observable/{uuid} instead')
 
   def __process_observable(self, method, event, observable, json, cache_object):
     if method == 'POST':
@@ -87,12 +69,12 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, observable, cache_object.user, json)
-        observable = self.updater.update(observable, json, cache_object)
-        self.observable_controller.update_observable(observable, cache_object.user, True)
+        self.updater.update(observable, json, cache_object)
+        self.observable_controller.update_observable(observable, cache_object, True)
         return observable.to_dict(cache_object)
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
-        self.observable_controller.remove_observable(observable, cache_object.user, True)
+        self.observable_controller.remove_observable(observable, cache_object, True)
         return 'Deleted observable'
 
   def __set_properties(self, obj, cache_object, parent):
@@ -117,7 +99,7 @@ class ObservableHandler(RestBaseHandler):
         return obs.to_dict(cache_object)
       else:
         obj = self.assembler.assemble(json, Object, observable, cache_object)
-        self.observable_controller.insert_object(obj, commit=True)
+        self.observable_controller.insert_object(obj, cache_object, commit=True)
         return obj.to_dict(cache_object)
     else:
       uuid = requested_object['object_uuid']
@@ -139,10 +121,10 @@ class ObservableHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, obj, cache_object.user, json)
-        obj = self.updater.update(obj, json, cache_object)
-        self.observable_controller.update_object(obj, cache_object.user, True)
+        self.updater.update(obj, json, cache_object)
+        self.observable_controller.update_object(obj, cache_object, True)
         return obj.to_dict(cache_object)
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
-        self.observable_controller.remove_object(obj, cache_object.user, True)
+        self.observable_controller.remove_object(obj, cache_object, True)
         return 'Deleted observable'

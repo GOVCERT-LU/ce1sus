@@ -6,8 +6,6 @@ for controllers.
 Created: Jul, 2013
 """
 
-from inspect import getargspec
-
 from ce1sus.common.classes.cacheobject import CacheObject, MergerCache
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.objectdefinitionbroker import ObjectDefinitionBroker
@@ -105,8 +103,7 @@ class BaseController(object):
   def insert_set_base(self, instance, cache_object):
     if isinstance(cache_object, CacheObject):
       merge_cache = MergerCache(cache_object)
-      if not merge_cache.result:
-        merge_cache.result = 2
+      merge_cache.result = 2
       self.update_modified(instance, merge_cache)
     else:
       raise ValueError('Not cacheobject')

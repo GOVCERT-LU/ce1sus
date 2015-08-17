@@ -21,6 +21,9 @@ class CyboxMerger(BaseMerger):
     super(CyboxMerger, self).__init__(config, session)
     self.pseudo_cybox_merger = PseudoCyboxMerger(config, session)
 
+  def merge_object(self, old_instance, new_instance, merge_cache):
+    return self.pseudo_cybox_merger.merge_object(old_instance, new_instance, merge_cache)
+
   def merge_observables(self, old_instance, new_instance, merge_cache):
     return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_observable)
 

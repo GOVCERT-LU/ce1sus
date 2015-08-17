@@ -6,12 +6,12 @@
         <h4 class="modal-title">Add Child Object</h4>
       </div>
       <div class="modal-body">
-        <related-object-form observableobject="childObject" child="true" definitions="definitions" permissions="permissions" type="'add'"></related-object-form>
+        <related-object-form observableobject="relatedObject" child="true" definitions="definitions" permissions="permissions" type="'add'"></related-object-form>
       </div>
       <div class="modal-footer">
           <div class="btn-group">
-            <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!childObjectChanged() || editChildObjectForm.$invalid" ng-click="submitChildObject()">Save</button>
-            <button name="reset" type="button" class="btn btn-default" ng-click="resetChildObject()">Reset</button>
+            <button name="submit" type="submit" class="btn btn-primary" ng-disabled="!relatedObjectChanged() || editrelatedObjectForm.$invalid" ng-click="submitrelatedObject()">Save</button>
+            <button name="reset" type="button" class="btn btn-default" ng-click="resetrelatedObject()">Reset</button>
             <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
           </div>
       </div>

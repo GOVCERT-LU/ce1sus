@@ -16,7 +16,7 @@ from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
-from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
+from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -79,9 +79,9 @@ class ObservableController(BaseController):
         self.insert_related_object(related_object, False)
     self.object_broker.do_commit(commit)
 
-  def insert_composed_observable(self, observable, commit=True):
+  def insert_composed_observable(self, observable, cache_object, commit=True):
     try:
-
+      self.insert_set_base(observable, cache_object)
       self.observable_broker.insert(observable, False)
       # TODO: generate relations if needed!
 
@@ -178,20 +178,23 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_observable(self, observable, commit=True):
+  def update_observable(self, observable, cache_object, commit=True):
     try:
+      self.insert_set_base(observable, cache_object)
       self.observable_broker.update(observable, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_observable_compositon(self, observable, commit=True):
+  def update_observable_compositon(self, observable, cache_object, commit=True):
     try:
+      self.insert_set_base(observable, cache_object)
       self.observable_broker.update(observable, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable(self, observable, commit=True):
+  def remove_observable(self, observable, cache_object, commit=True):
     try:
+      self.insert_set_base(observable, cache_object)
       self.observable_broker.remove_by_id(observable.identifier)
       self.observable_broker.do_commit(commit)
     except NothingFoundException as error:
@@ -199,7 +202,7 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable_composition(self, compoed_observable, commit=True):
+  def remove_observable_composition(self, compoed_observable, cache_object, commit=True):
     try:
       for observable in compoed_observable.observables:
         self.observable_broker.remove_by_id(observable.identifier)
@@ -223,12 +226,11 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_object(self, obj, commit=True):
+  def insert_object(self, obj, cache_object, commit=True):
     try:
+      self.insert_set_base(obj, cache_object)
       self.object_broker.insert(obj, False)
       self.object_broker.do_commit(commit)
-    except IntegrityException as error:
-      self.logger.debug(error)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -275,14 +277,16 @@ class ObservableController(BaseController):
 
     return obs
 
-  def update_object(self, obj, commit=True):
+  def update_object(self, obj, cache_object, commit=True):
     try:
+      self.insert_set_base(obj, cache_object)
       self.object_broker.update(obj, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_object(self, obj, commit=True):
+  def remove_object(self, obj, cache_object, commit=True):
     try:
+      self.insert_set_base(obj, cache_object)
       self.object_broker.remove_by_id(obj.identifier)
     except BrokerException as error:
       raise ControllerException(error)
@@ -299,8 +303,9 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_related_object(self, related_object, commit=True):
+  def update_related_object(self, related_object, cache_object, commit=True):
     try:
+      self.insert_set_base(related_object, cache_object)
       self.related_object_broker.update(related_object, commit)
     except BrokerException as error:
       raise ControllerException(error)

@@ -208,13 +208,13 @@ class EventHandler(RestBaseHandler):
           self.check_if_user_can_set_validate_or_shared(event, old_observable, cache_object.user, json)
 
           self.updater.update(observable, json, cache_object)
-          self.observable_controller.update_observable(observable, True)
+          self.observable_controller.update_observable(observable, cache_object, True)
           return observable.to_dict(cache_object)
         elif method == 'DELETE':
           self.check_if_event_is_deletable(event)
           if observable.observable_composition:
-            self.observable_controller.remove_observable_composition(observable.observable_composition, cache_object.user, True)
-          self.observable_controller.remove_observable(observable, True)
+            self.observable_controller.remove_observable_composition(observable.observable_composition, cache_object, True)
+          self.observable_controller.remove_observable(observable, cache_object, True)
           return 'Deleted observable'
 
   def __process_observable_get(self, event, requested_object, cache_object):
@@ -384,12 +384,14 @@ class EventHandler(RestBaseHandler):
           return report.to_dict(cache_object)
         else:
           raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
-
       else:
         # return all observables from the event
         cache_object.inflated = True
         result = event.attributelist_to_dict(event.reports, cache_object)
-        return result
+        if result is None:
+          return list()
+        else:
+          return result
     if method == 'POST':
 
       self.check_if_user_can_add(event)
