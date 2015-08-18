@@ -255,7 +255,7 @@ class ObservableController(BaseController):
 
     # create containers
     obs = Observable()
-    obs.uuid = uuid4()
+    obs.uuid = u'{0}'.format(uuid4())
     obs.event = [event]
     self.__set_logging(obs, observable, cache_object.user)
 
@@ -266,7 +266,7 @@ class ObservableController(BaseController):
     obs.observable_composition = comp_obs
 
     child_obs = Observable()
-    child_obs.uuid = uuid4()
+    child_obs.uuid = u'{0}'.format(uuid4())
     child_obs.event = [event]
     self.__set_logging(child_obs, observable, cache_object.user)
     child_obs.object = obj

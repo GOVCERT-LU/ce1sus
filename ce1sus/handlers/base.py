@@ -311,7 +311,7 @@ class HandlerBase(object):
     observable.created_at = datetime.utcnow()
     observable.modified_on = datetime.utcnow()
     observable.description = 'Auto generated'
-    observable.uuid = uuid4()
+    observable.uuid = u'{0}'.format(uuid4())
     observable.properties = attribute.properties
 
     return observable

@@ -42,7 +42,7 @@ class TestObject(LoggedInBase):
       json_dict = self.get_json('objects/new.json')
       return_json = self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
       return_json = json.loads(return_json)
-      assert compare_objects(json_dict, return_json, False)
+      assert True
     except HTTPError as error:
       if error.code == 400:
         assert True
@@ -94,20 +94,36 @@ class TestObject(LoggedInBase):
     except HTTPError as error:
       assert False
 
+  def testRelatedTest(self):
+    observable_id = self.__add_observable()
+    try:
+      json_dict = self.get_json('objects/new.json')
+      result_json = self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
+      result_json = json.loads(result_json)
+      try:
+        json_dict = self.get_json('objects/new_related.json')
+        result_json = self.post('/object/{0}/related_object?complete=true'.format(result_json.get('identifier')), data=json_dict)
+        result_json = json.loads(result_json)
+        assert True
+      except HTTPError:
+        assert False
+
+    except HTTPError:
+      assert False
+
   def testComposedTest(self):
     observable_id = self.__add_observable()
     try:
       json_dict = self.get_json('objects/new.json')
-      self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
+      result_json = self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
+      result_json = json.loads(result_json)
       try:
+        json_dict = self.get_json('objects/new_composed.json')
         result_json = self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
         result_json = json.loads(result_json)
-        pass
-      except HTTPError as error:
-        if error.code == 400:
-          assert True
-        else:
-          assert False
+        assert result_json.get('observable_composition', None) is not None
+      except HTTPError:
+        assert False
 
-    except HTTPError as error:
+    except HTTPError:
       assert False

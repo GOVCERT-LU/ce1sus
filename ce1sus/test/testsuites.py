@@ -19,6 +19,7 @@ from ce1sus.test.admin.adminuser import TestAdminUsers
 from ce1sus.test.event.event import TestEvent
 from ce1sus.test.event.observable import TestObservable
 from ce1sus.test.login import TestLogin
+from ce1sus.test.event.object import TestObject
 
 
 def suite():
@@ -35,6 +36,7 @@ def suite():
   testSuite.addTest(TestAdminUsers())
   testSuite.addTest(TestEvent())
   testSuite.addTest(TestObservable())
+  testSuite.addTest(TestObject())
   return testSuite
 
 

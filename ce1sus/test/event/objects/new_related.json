@@ -1,0 +1,40 @@
+{
+  "tlp":"Red",
+  "relationship":"",
+  "created_at":"2015-08-17T16:01:22",
+  "object":{
+    "definition":{
+      "default_share":true,
+      "description":"The AddressObject is intended to characterize cyber addresses.",
+      "cybox_std":true,
+      "created_at":"2015-08-14T07:56:35",
+      "chksum":"d70f93df5e8f9b55be44fbeee9d203972e3383d4",
+      "modified_on":"2015-08-14T07:56:35",
+      "attributes":null,
+      "identifier":"12f2df30-11dc-4fa2-827d-db170746a1fa",
+      "name":"Address"
+    },
+    "tlp":"Amber",
+    "created_at":"2015-08-14T13:36:48",
+    "definition_id":"12f2df30-11dc-4fa2-827d-db170746a1fa",
+    "related_objects":null,
+    "modified_on":"2015-08-14T13:36:48",
+    "attributes":null,
+    "identifier":"1c636ce3-a679-4006-ac2f-ba7f41676edf",
+    "properties":{
+      "shared":true,
+      "proposal":false,
+      "validated":true,
+      "marked_for_deletion":false
+    }
+  },
+  "modified_on":"2015-08-17T16:01:29",
+  "attributes":null,
+  "identifier":"828ee66b-daa6-4f00-8d79-7ef19ba5e2ae",
+  "properties":{
+    "shared":true,
+    "proposal":false,
+    "validated":true,
+    "marked_for_deletion":false
+  }
+}

@@ -127,7 +127,7 @@ class BaseChanger(BaseController):
     else:
       instance.properties = Properties('0', instance)
 
-      self.set_properties_according_to_permisssions(instance.properties, cache_object)
+      set_properties_according_to_permisssions(instance.properties, cache_object)
 
       if parent:
         instance.tlp = parent.tlp

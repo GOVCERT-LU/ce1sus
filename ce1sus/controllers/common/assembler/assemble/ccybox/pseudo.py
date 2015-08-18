@@ -48,8 +48,6 @@ class PseudoCyboxAssembler(BaseChanger):
       else:
         try:
           definition = self.obj_def_broker.get_by_uuid(uuid)
-        except NothingFoundException as error:
-          raise AssemblerException(error)
         except BrokerException as error:
           raise AssemblerException(error)
         cache_object.seen_obj_defs[uuid] = definition
@@ -94,11 +92,19 @@ class PseudoCyboxAssembler(BaseChanger):
       # update parent
       related_object = RelatedObject()
       # the properties of the child are the same as for the related object as this is in general only a container
-      self.set_base(related_object, child_obj_json, cache_object, obj)
+      self.set_base(related_object, json, cache_object, obj)
 
-      # Properties should be the same as the one from the related object
-      child_obj.dbcode = related_object.dbcode
-      child_obj.tlp_level_id = related_object.tlp_level_id
+      # Properties should be the same as the one from the related object except they are not in the json
+      if child_obj_json.get('properties', None) is None:
+        child_obj.dbcode = related_object.dbcode
+      if child_obj_json.get('tlp', None) is None:
+        child_obj.tlp_level_id = related_object.tlp_level_id
+
+      # also check the other way round
+      if json.get('properties', None) is None:
+        related_object.dbcode = child_obj.dbcode
+      if json.get('tlp', None) is None:
+        related_object.tlp_level_id = child_obj.tlp_level_id
 
       related_object.parent = obj
       related_object.object = child_obj

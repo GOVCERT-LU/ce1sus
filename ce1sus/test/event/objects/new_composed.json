@@ -18,9 +18,9 @@
   "related_objects":null,
   "modified_on":"2015-08-14T13:36:48",
   "attributes":null,
-  "identifier":"f1bf5878-3c0b-4cf2-aa40-ad0a893e425f",
+  "identifier":"f1bf5878-3c1b-4cf2-aa40-ad0a893e425f",
   "properties":{
-    "shared":false,
+    "shared":true,
     "proposal":false,
     "validated":true,
     "marked_for_deletion":false
