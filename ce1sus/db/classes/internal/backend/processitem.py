@@ -11,7 +11,8 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.common import StaticBase
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType
 from ce1sus.db.common.session import Base
 
 

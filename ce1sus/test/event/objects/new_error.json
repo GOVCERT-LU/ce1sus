@@ -1,0 +1,28 @@
+{
+  "definition":{
+    "default_share":true,
+    "description":"The AddressObject is intended to characterize cyber addresses.",
+    "cybox_std":true,
+    "created_at":"2015-08-14T07:56:35",
+    "chksum":"d70f93df5e8f9b55be44fbeee9d203972e3383d5",
+    "modified_on":"2015-08-14T07:56:35",
+    "attributes":[
+
+    ],
+    "identifier":"12f2df30-11dc-4fa2-827d-db170746a1fb",
+    "name":"Address"
+  },
+  "tlp":"Amber",
+  "created_at":"2015-08-14T13:36:48",
+  "definition_id":"12f2df30-11dc-4fa2-827d-db170746a1fb",
+  "related_objects":null,
+  "modified_on":"2015-08-14T13:36:48",
+  "attributes":null,
+  "identifier":"f1bf5878-3c0b-4cf2-aa40-ad0a893e425f",
+  "properties":{
+    "shared":true,
+    "proposal":false,
+    "validated":true,
+    "marked_for_deletion":false
+  }
+}

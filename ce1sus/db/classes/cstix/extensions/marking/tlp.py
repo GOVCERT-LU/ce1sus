@@ -9,7 +9,7 @@ from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.data_marking import MarkingStructure
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 
 
 __author__ = 'Weber Jean-Paul'

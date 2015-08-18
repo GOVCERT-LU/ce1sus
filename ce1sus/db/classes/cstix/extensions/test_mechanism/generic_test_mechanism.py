@@ -12,7 +12,7 @@ from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabstring import VocabString
 from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism, _REL_TESTMECHANISM_STRUCTUREDTEXT, _REL_TESTMECHANISM_VOCABSTRING
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeTextType
 
 
 __author__ = 'Weber Jean-Paul'

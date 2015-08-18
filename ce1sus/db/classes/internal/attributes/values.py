@@ -11,7 +11,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Numeric, Date, DateTime
 
-from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.common.session import Base
 
 
@@ -38,7 +39,7 @@ class ValueBase(BaseObject):
 
   @declared_attr
   def event(self):
-    return relationship("Event", uselist=False)
+    return relationship(Event, uselist=False)
 
   @declared_attr
   def value_type_id(self):

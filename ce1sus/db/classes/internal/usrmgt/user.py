@@ -13,7 +13,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import DateTime, Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.session import Base
 

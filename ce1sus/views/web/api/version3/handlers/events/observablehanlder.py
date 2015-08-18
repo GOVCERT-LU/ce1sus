@@ -98,8 +98,10 @@ class ObservableHandler(RestBaseHandler):
         return obs.to_dict(cache_object)
       else:
         obj = self.assembler.assemble(json, Object, observable, cache_object)
-        self.observable_controller.insert_object(obj, cache_object, commit=True)
-        return obj.to_dict(cache_object)
+        if obj:
+          self.observable_controller.insert_object(obj, cache_object, commit=True)
+          return obj.to_dict(cache_object)
+        raise RestHandlerException('Error occured during insert see error log')
     else:
       uuid = requested_object['object_uuid']
       if uuid:

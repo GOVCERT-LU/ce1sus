@@ -15,7 +15,7 @@ from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabs import AssetType as VocabAssetType
 from ce1sus.db.classes.cstix.common.vocabs import OwnerShipClass
 from ce1sus.db.classes.cstix.incident.property_affected import PropertyAffected
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

@@ -14,9 +14,9 @@ from sqlalchemy.types import Integer
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.ccybox.common.vocabs import ObjectRelationship
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.internal.core import BaseElement, BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.core import BaseElement
+from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType
 from ce1sus.db.common.session import Base
-from billiard import Event
 
 
 __author__ = 'Weber Jean-Paul'

@@ -13,7 +13,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.ttp.attack_pattern import AttackPattern
 from ce1sus.db.classes.cstix.ttp.exploit import Exploit
 from ce1sus.db.classes.cstix.ttp.malware_instance import MalwareInstance
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

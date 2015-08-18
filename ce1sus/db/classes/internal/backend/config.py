@@ -8,7 +8,8 @@ Created on Oct 20, 2014
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, UnicodeType, UnicodeTextType, BaseObject
+from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
 

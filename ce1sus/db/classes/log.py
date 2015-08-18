@@ -9,7 +9,7 @@ Created on Apr 7, 2015
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean
 
-from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType, UnicodeTextType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeTextType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

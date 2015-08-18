@@ -8,6 +8,7 @@ Created on Oct 16, 2014
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.util import with_polymorphic
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
 from sqlalchemy.types import Integer, DateTime
 
@@ -16,7 +17,6 @@ from ce1sus.common.checks import is_event_owner
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.campaign.campaign import Campaign
-from ce1sus.db.classes.cstix.common.related import RelatedPackage
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 from ce1sus.db.classes.cstix.exploit_target.exploittarget import ExploitTarget
 from ce1sus.db.classes.cstix.incident.incident import Incident
@@ -24,7 +24,9 @@ from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.cstix.threat_actor.threatactor import ThreatActor
 from ce1sus.db.classes.cstix.ttp.ttp import TTP
 from ce1sus.db.classes.internal.common import Status, Risk, Analysis
-from ce1sus.db.classes.internal.core import ExtendedLogingInformations, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.core import ExtendedLogingInformations
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.errors.errorbase import ErrorBase
 from ce1sus.db.classes.internal.report import Report
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.session import Base
@@ -103,7 +105,7 @@ class Event(Entity, Base):
   incidents = relationship(Incident, backref='event')
   threat_actors = relationship(ThreatActor, backref='event')
   ttps = relationship(TTP, backref='event')
-  related_packages = relationship(RelatedPackage, secondary=_REL_EVENT_RELATED_PACKAGES, backref='event')
+  related_packages = relationship('RelatedPackage', secondary=_REL_EVENT_RELATED_PACKAGES, backref='event')
 
   # reports are not in 1.1.5 -> custom one
   reports = relationship(Report, backref='event')
@@ -120,6 +122,7 @@ class Event(Entity, Base):
   #ce1sus specific
   groups = relationship('EventGroupPermission')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
+  errors = relationship(ErrorBase, backref='event')
 
   _PARENTS = ['related_package']
 
@@ -224,7 +227,8 @@ class Event(Entity, Base):
                 'published': self.convert_value(self.properties.is_shareable),
                 'threat_actors':self.attributelist_to_dict(self.threat_actors, cache_object),
                 'ttps':self.attributelist_to_dict(self.ttps, cache_object),
-                'version':self.convert_value(self.version_db)
+                'version':self.convert_value(self.version_db),
+                'errors':self.attributelist_to_dict(self.errors, cache_object)
                 }
     else:
       result = {'id_':self.convert_value(self.id_),
@@ -239,7 +243,8 @@ class Event(Entity, Base):
                 'status': self.convert_value(self.status),
                 'stix_header': self.attribute_to_dict(self.stix_header, cache_object),
                 'published': self.convert_value(self.properties.is_shareable),
-                'version':self.convert_value(self.version_db)
+                'version':self.convert_value(self.version_db),
+                'errors':self.attributelist_to_dict(self.errors, cache_object)
                 }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

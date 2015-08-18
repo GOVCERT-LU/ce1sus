@@ -12,7 +12,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeTextType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeTextType, UnicodeType
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.version import Version
 

@@ -15,7 +15,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.confidence import Confidence
 from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

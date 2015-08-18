@@ -127,3 +127,22 @@ class TestObject(LoggedInBase):
 
     except HTTPError:
       assert False
+
+  def testNewError(self):
+    observable_id = self.__add_observable()
+    try:
+      json_dict = self.get_json('objects/new_error.json')
+      self.post('/observable/{0}/object?complete=true'.format(observable_id), data=json_dict)
+      assert False
+    except HTTPError as error:
+      if error.code == 400:
+        json_dict = self.get_json('events/new.json')
+        event_id = json_dict['identifier']
+        return_json = self.get('/event/{0}?complete=true&inflated=true'.format(event_id))
+        return_json = json.loads(return_json)
+        if len(return_json) == 1:
+          assert True
+        else:
+          assert False
+      else:
+        assert False

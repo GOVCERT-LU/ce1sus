@@ -10,7 +10,7 @@ from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
 from ce1sus.db.classes.cstix.ttp.behavior import Behavior
 from ce1sus.db.classes.cstix.ttp.resource import Resource
 from ce1sus.db.classes.cstix.ttp.victim_targeting import VictimTargeting
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

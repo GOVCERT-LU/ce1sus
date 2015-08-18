@@ -14,7 +14,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.coa.coa import CourseOfAction
 from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
 from ce1sus.db.classes.cstix.common.vocabs import HighMediumLow
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

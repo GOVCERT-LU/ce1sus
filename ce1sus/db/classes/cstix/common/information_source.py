@@ -15,7 +15,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.common.vocabs import InformationSourceRole as VocabInformationSourceRole
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

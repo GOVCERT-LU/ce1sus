@@ -83,6 +83,8 @@ class EventHandler(RestBaseHandler):
           return self.__process_event_relations(method, event, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'report':
           return self.__process_event_report(method, event, requested_object, json, cache_object)
+        elif requested_object['object_type'] == 'errors':
+          return self.__process_event_errors(method, event, requested_object, json, cache_object)
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -105,6 +107,26 @@ class EventHandler(RestBaseHandler):
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
+
+  def __process_event_errors(self, method, event, requested_object, json, cache_object):
+    self.check_if_owner(event)
+    if method == 'POST':
+      pass
+    else:
+      uuid = requested_object['object_uuid']
+      if uuid:
+        error = self.event_controller.get_error_by_uuid(uuid)
+        if is_object_viewable(error, cache_object):
+          return error.to_dict(cache_object)
+        else:
+          raise ControllerNothingFoundException(u'Cannot find error with uuid {0}'.format(uuid))
+      else:
+        #list all
+        result = event.attributelist_to_dict(event.errors, cache_object)
+        if result is None:
+          return list()
+        else:
+          return result
 
   def __change_event_group(self, method, event, json, cache_object):
     if method == 'PUT':
@@ -224,7 +246,6 @@ class EventHandler(RestBaseHandler):
         # return the given observable
         # TODO: Check if observable belongs to event
         observable = self.observable_controller.get_observable_by_uuid(uuid)
-        self.check_item_is_viewable(event, observable)
         if is_object_viewable(observable, cache_object):
           return observable.to_dict(cache_object)
         else:
@@ -379,11 +400,10 @@ class EventHandler(RestBaseHandler):
         # return the given observable
         # TODO: Check if observable belongs to event
         report = self.report_controller.get_report_by_uuid(uuid)
-        self.check_item_is_viewable(event, report)
         if is_object_viewable(report, cache_object.event_permissions):
           return report.to_dict(cache_object)
         else:
-          raise ControllerNothingFoundException(u'Cannot find observable with uuid {0}'.format(uuid))
+          raise ControllerNothingFoundException(u'Cannot find report with uuid {0}'.format(uuid))
       else:
         # return all observables from the event
         cache_object.inflated = True

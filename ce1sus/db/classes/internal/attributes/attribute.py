@@ -14,8 +14,8 @@ from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue
-from ce1sus.db.classes.internal.core import BaseElement, SimpleLogingInformations, BigIntegerType, UnicodeType, UnicodeTextType
-from ce1sus.db.classes.internal.definitions import AttributeDefinition
+from ce1sus.db.classes.internal.core import BaseElement, SimpleLogingInformations
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
 
@@ -51,7 +51,7 @@ class Attribute(BaseElement, Base):
 
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship(AttributeDefinition,
+  definition = relationship('AttributeDefinition',
                             primaryjoin='AttributeDefinition.identifier==Attribute.definition_id',
                             lazy='joined')
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

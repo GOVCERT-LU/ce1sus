@@ -18,7 +18,7 @@ from ce1sus.db.classes.cstix.common.names import Name
 from ce1sus.db.classes.cstix.common.related import RelatedIndicator, RelatedPackageRef, RelatedThreatActor, RelatedTTP, RelatedCampaign
 from ce1sus.db.classes.cstix.common.vocabs import CampaignStatus
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

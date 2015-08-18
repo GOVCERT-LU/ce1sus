@@ -15,7 +15,7 @@ from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabs import PackageIntent as VocabPackageIntent
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
-from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

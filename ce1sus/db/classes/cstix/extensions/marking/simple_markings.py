@@ -11,7 +11,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.data_marking import MarkingStructure, _REL_MARKINGSTRUCTURE_STATEMENT
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 
 
 __author__ = 'Weber Jean-Paul'

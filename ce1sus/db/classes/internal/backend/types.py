@@ -10,7 +10,7 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.common import ValueTable
-from ce1sus.db.classes.internal.core import BaseObject, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
 

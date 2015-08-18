@@ -8,6 +8,7 @@ Created on Aug 4, 2015
 
 import base64
 from datetime import datetime
+from json import dumps
 from os.path import dirname
 from shutil import move, rmtree
 
@@ -16,6 +17,7 @@ from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.errors.errorbase import ErrorObject
 from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
 from ce1sus.handlers.attributes.filehandler import FileHandler
@@ -35,7 +37,7 @@ class PseudoCyboxAssembler(BaseChanger):
     self.handler_broker = self.broker_factory(AttributeHandlerBroker)
     self.value_type_broker = self.broker_factory(AttributeTypeBroker)
 
-  def get_object_definition(self, json, cache_object):
+  def get_object_definition(self, parent, json, cache_object):
     uuid = json.get('definition_id', None)
     if not uuid:
       definition = json.get('definition', None)
@@ -49,10 +51,21 @@ class PseudoCyboxAssembler(BaseChanger):
         try:
           definition = self.obj_def_broker.get_by_uuid(uuid)
         except BrokerException as error:
-          raise AssemblerException(error)
+          self.log_error(parent, json, error.message)
+          return None
         cache_object.seen_obj_defs[uuid] = definition
         return definition
-    raise AssemblerException('Could not find a definition in the object')
+    self.log_error(parent, json, error.message)
+    return None
+
+  def log_error(self, parent, json, error_message):
+    error_entry = ErrorObject()
+    error_entry.message = error_message
+    error_entry.dump = dumps(json)
+    error_entry.observable = parent
+    error_entry.event = parent.event[0]
+    self.obj_def_broker.session.add(error_entry)
+    self.obj_def_broker.do_commit(True)
 
   def assemble_object(self, observable, json, cache_object, set_observable=True):
     if json:
@@ -60,27 +73,28 @@ class PseudoCyboxAssembler(BaseChanger):
       self.set_base(obj, json, cache_object, observable)
 
       # set definition
-      definition = self.get_object_definition(json, cache_object)
-      # obj.definition = definition
-      obj.definition = definition
+      definition = self.get_object_definition(observable, json, cache_object)
+      if definition:
+        # obj.definition = definition
+        obj.definition = definition
 
-      if set_observable:
-        obj.observable = [observable]
+        if set_observable:
+          obj.observable = [observable]
 
-      rel_objs = json.get('related_objects', None)
-      if rel_objs:
-        for rel_obj in rel_objs:
-          rel_obj_inst = self.assemble_related_object(obj, rel_obj, cache_object)
-          obj.related_objects.append(rel_obj_inst)
+        rel_objs = json.get('related_objects', None)
+        if rel_objs:
+          for rel_obj in rel_objs:
+            rel_obj_inst = self.assemble_related_object(obj, rel_obj, cache_object)
+            obj.related_objects.append(rel_obj_inst)
 
-      attributes = json.get('attributes')
-      if attributes:
-        for attribute in attributes:
-          attr = self.assemble_attribute(obj, attribute, cache_object)
-          if attr:
-            obj.attributes.append(attr)
+        attributes = json.get('attributes')
+        if attributes:
+          for attribute in attributes:
+            attr = self.assemble_attribute(obj, attribute, cache_object)
+            if attr:
+              obj.attributes.append(attr)
 
-      return obj
+        return obj
 
   def assemble_related_object(self, obj, json, cache_object):
     if json:

@@ -13,7 +13,8 @@ from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.vocabs import TargetedInformation as VocabTargetedInformation
 from ce1sus.db.classes.cstix.common.vocabs import TargetedSystems as VocabTargetedSystems
-from ce1sus.db.classes.internal.core import BaseElement, BigIntegerType
+from ce1sus.db.classes.internal.core import BaseElement
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

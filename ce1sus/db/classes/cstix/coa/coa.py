@@ -15,7 +15,7 @@ from ce1sus.db.classes.cstix.coa.objective import Objective
 from ce1sus.db.classes.cstix.common.related import RelatedPackageRef, RelatedCOA
 from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.common.vocabs import COAStage, CourseOfActionType
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

@@ -11,7 +11,7 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.internal.core import UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
 

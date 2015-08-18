@@ -15,7 +15,7 @@ from ce1sus.db.classes.cstix.common.vocabs import ImpactQualification, IntendedE
 from ce1sus.db.classes.cstix.incident.direct_impact_summary import DirectImpactSummary
 from ce1sus.db.classes.cstix.incident.indirect_impact_summary import IndirectImpactSummary
 from ce1sus.db.classes.cstix.incident.total_loss_estimation import TotalLossEstimation
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

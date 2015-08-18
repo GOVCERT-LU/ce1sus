@@ -13,7 +13,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.ttp.infrastructure import Infrastructure
-from ce1sus.db.classes.internal.core import BigIntegerType
+from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
 

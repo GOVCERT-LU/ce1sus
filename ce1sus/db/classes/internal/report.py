@@ -14,7 +14,8 @@ from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.common.checks import is_object_viewable
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseElement, BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseElement
+from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType, BigIntegerType
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.hash import fileHashSHA1

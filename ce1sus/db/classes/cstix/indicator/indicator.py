@@ -24,7 +24,7 @@ from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
 from ce1sus.db.classes.cstix.indicator.sightings import Sighting
 from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism
 from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

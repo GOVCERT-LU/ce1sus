@@ -27,7 +27,7 @@ from ce1sus.db.classes.cstix.incident.external_id import ExternalID
 from ce1sus.db.classes.cstix.incident.history import HistoryItem
 from ce1sus.db.classes.cstix.incident.impact_assessment import ImpactAssessment
 from ce1sus.db.classes.cstix.incident.time import Time
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

@@ -12,7 +12,8 @@ from sqlalchemy.types import Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.common import ServerType
-from ce1sus.db.classes.internal.core import ExtendedLogingInformations, BigIntegerType, UnicodeType, UnicodeTextType, BaseObject
+from ce1sus.db.classes.internal.core import ExtendedLogingInformations
+from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType, UnicodeTextType, BaseObject
 from ce1sus.db.common.session import Base
 
 

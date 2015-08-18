@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import BaseObject, BigIntegerType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType
 from ce1sus.db.common.session import Base
 
 

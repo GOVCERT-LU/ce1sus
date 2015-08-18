@@ -9,7 +9,8 @@ from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
 

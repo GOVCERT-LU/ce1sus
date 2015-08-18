@@ -12,7 +12,7 @@ from sqlalchemy.types import DateTime
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.incident.coa import COATaken
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeTextType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeTextType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

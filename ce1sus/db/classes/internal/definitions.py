@@ -13,9 +13,11 @@ from sqlalchemy.schema import Table, Column, ForeignKey
 from sqlalchemy.types import Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
+from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.classes.internal.backend.types import AttributeType
 from ce1sus.db.classes.internal.common import ValueTable
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
+from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType, BaseObject
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 
@@ -117,7 +119,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name')
   default_condition_id = Column('default_condition_id', BigIntegerType, ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
-  default_condition = relationship('Condition', uselist=False)
+  default_condition = relationship(Condition, uselist=False)
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
 

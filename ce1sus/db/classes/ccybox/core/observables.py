@@ -13,7 +13,7 @@ from sqlalchemy.types import Integer
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.common.session import Base
 

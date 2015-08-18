@@ -19,7 +19,7 @@ from ce1sus.db.classes.cstix.common.vocabs import Motivation as VocabMotivation
 from ce1sus.db.classes.cstix.common.vocabs import ThreatActorSophistication as VocabPlanningAndOperationalSupport
 from ce1sus.db.classes.cstix.common.vocabs import ThreatActorType as VocabThreatActorType
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
-from ce1sus.db.classes.internal.core import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 

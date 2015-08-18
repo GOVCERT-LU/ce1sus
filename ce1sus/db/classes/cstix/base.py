@@ -16,7 +16,8 @@ from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
-from ce1sus.db.classes.internal.core import BaseElement, UnicodeType
+from ce1sus.db.classes.internal.core import BaseElement
+from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.helpers.version import Version
 
 
