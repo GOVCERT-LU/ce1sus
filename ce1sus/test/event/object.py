@@ -2,7 +2,6 @@
 Created on Aug 10, 2015
 '''
 
-from ce1sus.helpers.common.objects import compare_objects
 import json
 
 from ce1sus.test.common.base import HTTPError
@@ -140,9 +139,10 @@ class TestObject(LoggedInBase):
         event_id = json_dict['identifier']
         return_json = self.get('/event/{0}?complete=true&inflated=true'.format(event_id))
         return_json = json.loads(return_json)
-        if len(return_json) == 1:
+        if len(return_json.get('errors')) == 1:
           assert True
         else:
           assert False
       else:
         assert False
+

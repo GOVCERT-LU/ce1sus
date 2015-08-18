@@ -7,6 +7,7 @@ Created on Aug 4, 2015
 """
 
 import base64
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from datetime import datetime
 from json import dumps
 from os.path import dirname
@@ -17,7 +18,7 @@ from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
-from ce1sus.db.classes.internal.errors.errorbase import ErrorObject
+from ce1sus.db.classes.internal.errors.errorbase import ErrorObject, ErrorAttribute
 from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
 from ce1sus.handlers.attributes.filehandler import FileHandler
@@ -51,19 +52,30 @@ class PseudoCyboxAssembler(BaseChanger):
         try:
           definition = self.obj_def_broker.get_by_uuid(uuid)
         except BrokerException as error:
-          self.log_error(parent, json, error.message)
+          self.log_object_error(parent, json, error.message)
           return None
         cache_object.seen_obj_defs[uuid] = definition
         return definition
-    self.log_error(parent, json, error.message)
+    self.log_object_error(parent, json, error.message)
     return None
 
-  def log_error(self, parent, json, error_message):
-    error_entry = ErrorObject()
+  def __log_error(self, parent, json, error_message, clazz):
+    error_entry = clazz()
     error_entry.message = error_message
     error_entry.dump = dumps(json)
-    error_entry.observable = parent
     error_entry.event = parent.event[0]
+    return error_entry
+
+
+  def log_object_error(self, observable, json, error_message):
+    error_entry = self.__log_error(observable, json, error_message, ErrorObject)
+    error_entry.observable = observable
+    self.obj_def_broker.session.add(error_entry)
+    self.obj_def_broker.do_commit(True)
+
+  def log_attribute_error(self, obj, json, error_message):
+    error_entry = self.__log_error(obj, json, error_message, ErrorAttribute)
+    error_entry.object = obj
     self.obj_def_broker.session.add(error_entry)
     self.obj_def_broker.do_commit(True)
 
@@ -158,53 +170,59 @@ class PseudoCyboxAssembler(BaseChanger):
       self.set_base(attribute, json, cache_object, obj)
 
       definition = self.get_attribute_definition(json, cache_object)
+      if definition:
+        attribute.definition = definition
 
-      attribute.definition = definition
+        attribute.object = obj
 
-      attribute.object = obj
+        # attention to raw_artefacts!!!
+        value = json.get('value', None)
+        handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
+        if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
 
-      # attention to raw_artefacts!!!
-      value = json.get('value', None)
-      handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
-      if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
+          fh = FileHandler()
 
-        fh = FileHandler()
+          tmp_filename = hashMD5(datetime.utcnow())
 
-        tmp_filename = hashMD5(datetime.utcnow())
+          binary_data = base64.b64decode(value)
+          tmp_folder = fh.get_tmp_folder()
+          tmp_path = tmp_folder + '/' + tmp_filename
 
-        binary_data = base64.b64decode(value)
-        tmp_folder = fh.get_tmp_folder()
-        tmp_path = tmp_folder + '/' + tmp_filename
+          file_obj = open(tmp_path, "w")
+          file_obj.write(binary_data)
+          file_obj.close()
 
-        file_obj = open(tmp_path, "w")
-        file_obj.write(binary_data)
-        file_obj.close()
+          sha1 = fileHashSHA1(tmp_path)
+          rel_folder = fh.get_rel_folder()
+          dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
 
-        sha1 = fileHashSHA1(tmp_path)
-        rel_folder = fh.get_rel_folder()
-        dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
+          # move it to the correct place
+          move(tmp_path, dest_path)
+          # remove temp folder
+          rmtree(dirname(tmp_path))
 
-        # move it to the correct place
-        move(tmp_path, dest_path)
-        # remove temp folder
-        rmtree(dirname(tmp_path))
+          attribute.value = rel_folder + '/' + sha1
+        else:
+          attribute.value = value
 
-        attribute.value = rel_folder + '/' + sha1
-      else:
-        attribute.value = value
+        condition_uuid = json.get('condition_id', None)
+        if not condition_uuid:
+          condition = json.get('condition', None)
+          if condition:
+            condition_uuid = condition.get('identifier', None)
+        if condition_uuid:
+          condition = self.get_condition(condition_uuid, cache_object)
+          attribute.condition_id = condition.identifier
 
-      condition_uuid = json.get('condition_id', None)
-      if not condition_uuid:
-        condition = json.get('condition', None)
-        if condition:
-          condition_uuid = condition.get('identifier', None)
-      if condition_uuid:
-        condition = self.get_condition(condition_uuid, cache_object)
-        attribute.condition_id = condition.identifier
+        attribute.is_ioc = json.get('ioc', 0)
 
-      attribute.is_ioc = json.get('ioc', 0)
-
-      return attribute
+        # validate if
+        if attribute.validate():
+          return attribute
+        else:
+          error_message = ObjectValidator.getFirstValidationError(attribute)
+          self.log_attribute_error(obj, json, error_message)
+          return None
 
   def get_condition(self, uuid, cache_object):
     definition = cache_object.seen_conditions.get(uuid, None)

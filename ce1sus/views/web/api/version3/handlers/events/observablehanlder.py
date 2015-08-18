@@ -6,6 +6,7 @@
 Created on Dec 22, 2014
 """
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.internal.object import Object
@@ -118,7 +119,14 @@ class ObservableHandler(RestBaseHandler):
             result.append(flat_object.to_dict(cache_object))
           return result
         else:
-          return self.__process_object_get(requested_object, cache_object)
+          if uuid is None:
+            obj = observable.object
+            
+          if is_object_viewable(obj, cache_object):
+            return obj.to_dict(cache_object)
+          else:
+            raise ControllerNothingFoundException(u'Cannot find object with uuid {0}'.format(uuid)) 
+
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         self.check_if_user_can_set_validate_or_shared(event, obj, cache_object.user, json)

@@ -64,19 +64,20 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_related_object(self, related_object, commit=True):
+  def insert_related_object(self, related_object, cache_object, commit=True):
     try:
+      self.insert_set_base(related_object, cache_object)
       self.object_broker.insert(related_object, False)
       self.object_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_handler_related_objects(self, related_objects, commit=True):
+  def insert_handler_related_objects(self, related_objects, cache_object, commit=True):
     # Validate children
     validated = False
     if validated:
       for related_object in related_objects:
-        self.insert_related_object(related_object, False)
+        self.insert_related_object(related_object, cache_object, False)
     self.object_broker.do_commit(commit)
 
   def insert_composed_observable(self, observable, cache_object, commit=True):
