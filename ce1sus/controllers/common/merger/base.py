@@ -25,17 +25,13 @@ class MergerException(Exception):
 class BaseMerger(BaseController):
   
   def __merge_properties(self, old_instance, new_instance, merger_cache):
-    version = Version()
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache, set_changes=False))
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache, set_changes=False))
-    version.add(self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache, set_changes=False))
-    version.add(self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache, set_changes=False))
+
+    self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache, set_changes=False)
+    self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache, set_changes=False)
+    self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache, set_changes=False)
+    self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache, set_changes=False)
 
     set_properties_according_to_permisssions(old_instance, merger_cache)
-
-    if Version().compare(version) > 0:
-      if not merger_cache.properties_changes:
-        merger_cache.properties_changes = True
 
   def set_base(self, old_instance, new_instance, merge_cache):
     if isinstance(old_instance, SimpleLogingInformations):

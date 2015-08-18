@@ -8,7 +8,6 @@ Created on Dec 22, 2014
 
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
-from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 

@@ -35,6 +35,7 @@ class CacheObject(object):
     self.seen_conditions = dict()
     self.__created_at = None
     self.__modified_on = None
+    self.object_changes = False
 
   @property
   def created_at(self):
@@ -66,5 +67,5 @@ class MergerCache(CacheObject):
     # result: -1: Do nothing 0: Add items (major update) 1: merge version inside 2:minor update
     self.result = -1
     self.version = Version()
-    self.object_changes = False
-    self.properties_changes = False
+    self.object_changes = cache_object.object_changes
+

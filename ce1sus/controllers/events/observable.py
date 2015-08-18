@@ -180,21 +180,21 @@ class ObservableController(BaseController):
 
   def update_observable(self, observable, cache_object, commit=True):
     try:
-      self.insert_set_base(observable, cache_object)
+      self.update_set_base(observable, cache_object)
       self.observable_broker.update(observable, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
   def update_observable_compositon(self, observable, cache_object, commit=True):
     try:
-      self.insert_set_base(observable, cache_object)
+      self.update_set_base(observable, cache_object)
       self.observable_broker.update(observable, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
   def remove_observable(self, observable, cache_object, commit=True):
     try:
-      self.insert_set_base(observable, cache_object)
+      self.remove_set_base(observable, cache_object)
       self.observable_broker.remove_by_id(observable.identifier)
       self.observable_broker.do_commit(commit)
     except NothingFoundException as error:
@@ -204,6 +204,7 @@ class ObservableController(BaseController):
 
   def remove_observable_composition(self, compoed_observable, cache_object, commit=True):
     try:
+      self.remove_set_base(compoed_observable, cache_object)
       for observable in compoed_observable.observables:
         self.observable_broker.remove_by_id(observable.identifier)
       self.composed_observable_broker.remove_by_id(compoed_observable.identifier)
@@ -279,14 +280,14 @@ class ObservableController(BaseController):
 
   def update_object(self, obj, cache_object, commit=True):
     try:
-      self.insert_set_base(obj, cache_object)
+      self.update_set_base(obj, cache_object)
       self.object_broker.update(obj, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
   def remove_object(self, obj, cache_object, commit=True):
     try:
-      self.insert_set_base(obj, cache_object)
+      self.remove_set_base(obj, cache_object)
       self.object_broker.remove_by_id(obj.identifier)
     except BrokerException as error:
       raise ControllerException(error)
@@ -305,7 +306,7 @@ class ObservableController(BaseController):
 
   def update_related_object(self, related_object, cache_object, commit=True):
     try:
-      self.insert_set_base(related_object, cache_object)
+      self.update_set_base(related_object, cache_object)
       self.related_object_broker.update(related_object, commit)
     except BrokerException as error:
       raise ControllerException(error)

@@ -106,9 +106,16 @@ class BaseController(object):
     if isinstance(cache_object, CacheObject):
       merge_cache = MergerCache(cache_object)
       merge_cache.result = 2
+      merge_cache.object_changes = True
       self.update_modified(instance, merge_cache)
     else:
       raise ValueError('Not cacheobject')
+
+  def remove_set_base(self, instance, cache_object):
+    self.insert_set_base(instance, cache_object)
+
+  def update_set_base(self, instance, cache_object):
+    self.insert_set_base(instance, cache_object)
 
   def update_modified(self, instance, merge_cache):
     if instance:

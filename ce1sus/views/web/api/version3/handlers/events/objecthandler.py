@@ -80,8 +80,8 @@ class ObjectHandler(RestBaseHandler):
 
           return self.__process_object(method, event, obj, json, cache_object)
 
-        elif requested_object['object_type'] == 'object':
-          return self.__process_child_object(method, event, obj, requested_object, json, cache_object)
+        elif requested_object['object_type'] == 'related_object':
+          return self.__process_related_object(method, event, obj, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'attribute':
           return self.__process_attribute(method, event, obj, requested_object, json, cache_object)
         else:
@@ -130,7 +130,7 @@ class ObjectHandler(RestBaseHandler):
     except ValueException as error:
       raise RestHandlerException(error)
 
-  def __process_child_object(self, method, event, obj, requested_object, json, cache_object):
+  def __process_related_object(self, method, event, obj, requested_object, json, cache_object):
     if method == 'POST':
 
       # workaround
