@@ -37,15 +37,12 @@ class EventMerger(BaseMerger):
         merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'first_seen', merge_cache))
         merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'last_publish_date', merge_cache))
 
-        self.set_base(old_instance, new_instance, merge_cache)
-
       elif merge_cache.result == 0:
         old_instance = new_instance
-
+        merge_cache.object_changes = True
       # check if sub elements were changed
       merge_cache.version.add(self.cybox_merger.merge_observables(old_instance.observables, new_instance.observables, merge_cache))
       merge_cache.version.add(self.merge_reports(old_instance.reports, new_instance.reports, merge_cache))
-
       merge_cache.version.add(self.stix_merger.merge_stix_header(old_instance.stix_header, new_instance.stix_header, merge_cache))
 
       self.set_version(old_instance, new_instance, merge_cache)
@@ -68,6 +65,7 @@ class EventMerger(BaseMerger):
 
       elif merge_cache.result == 0:
         old_instance = new_instance
+        merge_cache.object_changes = True
 
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
@@ -86,6 +84,7 @@ class EventMerger(BaseMerger):
 
       elif merge_cache.result == 0:
         old_instance = new_instance
+        merge_cache.object_changes = True
 
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version

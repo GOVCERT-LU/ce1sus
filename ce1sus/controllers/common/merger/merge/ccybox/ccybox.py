@@ -40,6 +40,7 @@ class CyboxMerger(BaseMerger):
       elif merge_cache.result == 0:
         merge_cache.version.add(merge_cache.version().increase_major()())
         old_instance = new_instance
+        merge_cache.object_changes = True
 
       merge_cache.version.add(self.merge_keywords(old_instance.keywords, new_instance.keywords, merge_cache))
       merge_cache.version.add(self.merge_structured_text(old_instance.description, new_instance.description, merge_cache))
@@ -59,6 +60,7 @@ class CyboxMerger(BaseMerger):
 
       elif merge_cache.result == 0:
         merge_cache.version.add(merge_cache.version().increase_major()())
+        merge_cache.object_changes = True
         old_instance = new_instance
 
       merge_cache.version.add(self.merge_observables(old_instance.observables, new_instance.observables, merge_cache))
@@ -78,6 +80,7 @@ class CyboxMerger(BaseMerger):
 
       elif merge_cache.result == 0:
         merge_cache.version.add(merge_cache.version().increase_major()())
+        merge_cache.object_changes = True
         old_instance = new_instance
 
       self.set_base(old_instance, new_instance, merge_cache)

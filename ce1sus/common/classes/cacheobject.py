@@ -66,3 +66,5 @@ class MergerCache(CacheObject):
     # result: -1: Do nothing 0: Add items (major update) 1: merge version inside 2:minor update
     self.result = -1
     self.version = Version()
+    self.object_changes = False
+    self.properties_changes = False

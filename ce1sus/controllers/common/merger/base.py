@@ -25,16 +25,22 @@ class MergerException(Exception):
 class BaseMerger(BaseController):
   
   def __merge_properties(self, old_instance, new_instance, merger_cache):
-    self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache)
-    self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache)
-    self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache)
-    self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache)
+    version = Version()
+    version.add(self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache, set_changes=False))
+    version.add(self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache, set_changes=False))
+    version.add(self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache, set_changes=False))
+    version.add(self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache, set_changes=False))
 
     set_properties_according_to_permisssions(old_instance, merger_cache)
 
+    if Version().compare(version) > 0:
+      if not merger_cache.properties_changes:
+        merger_cache.properties_changes = True
+
   def set_base(self, old_instance, new_instance, merge_cache):
     if isinstance(old_instance, SimpleLogingInformations):
-      self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
+      if merge_cache.object_changes:
+        self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
 
     if isinstance(old_instance, BaseElement):
       # merge properties
@@ -56,7 +62,8 @@ class BaseMerger(BaseController):
           if hasattr(parent, 'version') and hasattr(new_instance, 'version'):
             self.set_version(parent, new_instance, merge_cache)
           if hasattr(parent, 'version') and not hasattr(new_instance, 'version'):
-            super(BaseMerger, self).set_version(parent, merge_cache)
+            if merge_cache.object_changes:
+              super(BaseMerger, self).set_version(parent, merge_cache)
           self.update_modified(parent, new_instance, merge_cache)
 
   def set_version(self, old_instance, new_instance, merge_cache):
@@ -64,7 +71,8 @@ class BaseMerger(BaseController):
       self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
       old_instance.version.version = new_instance.version.version
     else:
-      super(BaseMerger, self).set_version(old_instance, merge_cache)
+      if merge_cache.object_changes:
+        super(BaseMerger, self).set_version(old_instance, merge_cache)
 
   def is_updatable(self, old_instance, new_instance):
     if old_instance.get_classname() != new_instance.get_classname():
@@ -85,7 +93,7 @@ class BaseMerger(BaseController):
         # always update if there are no logging informations
         return True
 
-  def update_instance_value(self, old_instance, new_instance, attr_name, merger_cache):
+  def update_instance_value(self, old_instance, new_instance, attr_name, merger_cache, set_changes=True):
 
     if old_instance and new_instance:
       if can_user_update(old_instance, merger_cache):
@@ -98,6 +106,8 @@ class BaseMerger(BaseController):
             self.changelogger.info('{0} {1} property {2} will be be replaced "{3}" by "{4}"'.format(old_instance.get_classname(), old_instance.uuid, attr_name, old_value, new_value))
             setattr(old_instance, attr_name, new_value)
             merger_cache.version = self.__detect_change_version(old_value, new_value)
+            if set_changes:
+              merger_cache.object_changes = True
         else:
           self.changelogger.info('{0} {1} property {2} will not be updated the existing one is newer'.format(old_instance.get_classname(), old_instance.uuid, attr_name))
       else:

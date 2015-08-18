@@ -23,9 +23,9 @@ class PseudoCyboxMerger(BaseMerger):
         merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
         merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'idref', merge_cache))
 
-
       elif merge_cache.result == 0:
         merge_cache.version.add(merge_cache.version().increase_major()())
+        merge_cache.object_changes = True
         old_instance = new_instance
 
       merge_cache.version.add(self.merge_attributes(old_instance.attributes, new_instance.attributes, merge_cache))
@@ -47,6 +47,7 @@ class PseudoCyboxMerger(BaseMerger):
 
       elif merge_cache.result == 0:
         merge_cache.version.add(merge_cache.version().increase_major()())
+        merge_cache.object_changes = True
         old_instance = new_instance
 
       self.set_base(old_instance, new_instance, merge_cache)
