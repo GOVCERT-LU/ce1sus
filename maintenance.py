@@ -153,7 +153,7 @@ class Maintenance(object):
     except (ControllerException, BrokerException) as error:
       raise MaintenanceException(error)
 
-  def register_handler(self, modulename, type_='attributes', classname=None):
+  def register_handler(self, modulename, type_='attributes', classname=None, ignore_checks=False):
     if not classname:
       classname = modulename.title().replace('handler', 'Handler')
 
@@ -170,9 +170,9 @@ class Maintenance(object):
       uuid = instance.get_uuid()
       description = instance.get_description()
       if type_ == 'attributes':
-        self.attribute_definition_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+        self.attribute_definition_controller.register_handler(uuid, modulename, classname, description, ignore_checks)
       elif type_ == 'references':
-        self.reference_controller.register_handler(uuid, u'{0}.{1}'.format(modulename, classname), description)
+        self.reference_controller.register_handler(uuid, modulename, classname, description, ignore_checks)
       else:
         raise MaintenanceException('Type {0} for handlers is unknown'.format(type_))
 

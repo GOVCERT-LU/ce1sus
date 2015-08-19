@@ -27,7 +27,7 @@ class GenericHandler(AttributeHandlerBase):
     return u'Generic Handler, usable for a single line entry'
 
   @staticmethod
-  def get_additional_object_chksums():
+  def get_additional_object_uuids():
     return list()
 
   @staticmethod
@@ -38,7 +38,7 @@ class GenericHandler(AttributeHandlerBase):
             ]
 
   @staticmethod
-  def get_additinal_attribute_chksums():
+  def get_additinal_attribute_uuids():
     return list()
 
   def assemble(self, obj, json):

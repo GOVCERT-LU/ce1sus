@@ -11,6 +11,7 @@ from datetime import datetime
 from os.path import dirname
 from shutil import move, rmtree
 
+from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.common.assembler.assemble.ccybox.ccybox import CyboxAssembler
 from ce1sus.controllers.common.assembler.assemble.cstix import StixAssembler
 from ce1sus.controllers.common.assembler.assemble.internal.internal import Ce1susAssembler
@@ -213,8 +214,17 @@ class EventAssembler(BaseChanger):
     raise AssemblerException('Could not find "{0}" definition in the reference'.format(definition_json))
 
   def assemble_reference(self, report, json, cache_object):
-
+    """This function will never return an object just the information which element changed"""
+    # -1: nothing
+    # 0: Reference
+    # 1: Report
+    changed_on = -1
     if json:
+      int_cache_object = CacheObject()
+      int_cache_object.set_default()
+
+      definition = self.get_reference_definition(json, seen_ref_defs)
+
       value = json.get('value', None)
       if value:
         definition = self.get_reference_definition(json, cache_object.seen_ref_defs)

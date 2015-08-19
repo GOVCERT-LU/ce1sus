@@ -188,11 +188,11 @@ class HandlerBase(object):
   def get_classname(self):
     return self.__class__.__name__
 
-  def _get_main_definition(self, chksums, definitions):
+  def _get_main_definition(self, uuids, definitions):
     """
     Returns the definition using this handler
     """
-    diff = list(set(definitions.keys()) - set(chksums))
+    diff = list(set(definitions.keys()) - set(uuids))
     if len(diff) == 1:
       main_definition = definitions.get(diff[0], None)
       if main_definition:
@@ -209,21 +209,18 @@ class HandlerBase(object):
       if definition:
         uuid = definition.get('identifier', None)
     if uuid:
-      return_definition = None
-      for definition in definitions.itervalues():
-        if definition.uuid == uuid:
-          return_definition = definition
+      return_definition = definitions.get(uuid)
       if return_definition:
         return return_definition
       raise HandlerException('Could not find a {2} definition with uuid {0} in handler {1}'.format(uuid, self.get_classname(), type_))
     raise HandlerException('Could not find a {2} definition uuid for  generation in handler {1}'.format(uuid, self.get_classname(), type_))
 
-  def _set_definition(self, json, chksum, definitions, type_):
-    definition = definitions.get(chksum, None)
+  def _set_definition(self, json, identifier, definitions, type_):
+    definition = self._get_definition(json, definitions, type_)
     if definition:
       json['definition_id'] = definition.uuid
     else:
-      raise HandlerException('Could not find a {2} definition for chksum {0} generation in handler {1}'.format(chksum, self.get_classname(), type_))
+      raise HandlerException('Could not find a {2} definition for uuid {0} generation in handler {1}'.format(identifier, self.get_classname(), type_))
 
 class AttributeHandlerBase(HandlerBase):
 
@@ -237,7 +234,7 @@ class AttributeHandlerBase(HandlerBase):
 
   @staticmethod
   @abstractmethod
-  def get_additinal_attribute_chksums():
+  def get_additinal_attribute_uuids():
     """
     Returns a list of additional attributes checksums required for the handling
     """
@@ -245,7 +242,7 @@ class AttributeHandlerBase(HandlerBase):
 
   @staticmethod
   @abstractmethod
-  def get_additional_object_chksums(self):
+  def get_additional_object_uuids(self):
     return list()
 
   def get_attribute_definition(self, json):
@@ -254,11 +251,11 @@ class AttributeHandlerBase(HandlerBase):
   def get_object_definition(self, json):
     return self._get_definition(json, self.object_definitions, 'object')
 
-  def set_attribute_definition(self, json, chksum):
-    self._set_definition(json, chksum, self.attribute_definitions, 'attribute')
+  def set_attribute_definition(self, json, identifier):
+    self._set_definition(json, identifier, self.attribute_definitions, 'attribute')
 
-  def set_object_definition(self, json, chksum):
-    self._set_definition(json, chksum, self.object_definitions, 'object')
+  def set_object_definition(self, json, identifier):
+    self._set_definition(json, identifier, self.object_definitions, 'object')
 
   def get_condition_by_uuid(self, uuid):
     for condition in self.conditions:
@@ -267,7 +264,7 @@ class AttributeHandlerBase(HandlerBase):
     raise HandlerException(u'Condition with uuid {0} cannot be found'.format(uuid))
 
   def get_main_definition(self):
-    return self._get_main_definition(self.get_additinal_attribute_chksums(), self.attribute_definitions)
+    return self._get_main_definition(self.get_additinal_attribute_uuids(), self.attribute_definitions)
 
 
   def create_attribute(self, obj, json, change_base_element=True):
@@ -349,14 +346,14 @@ class ReferenceHandlerBase(HandlerBase):
 
   @staticmethod
   @abstractmethod
-  def get_additinal_reference_chksums():
+  def get_additinal_reference_uuids():
     return list()
 
   def get_reference_definition(self, json):
     return self._get_definition(json, self.reference_definitions, 'reference')
 
-  def set_reference_definition(self, json, chksum):
-    self._set_definition(json, chksum, self.reference_definitions, 'reference')
+  def set_reference_definition(self, json, identifier):
+    self._set_definition(json, identifier, self.reference_definitions, 'reference')
 
   def create_reference(self, report, json, change_base_element=True):
     reference = get_class('ce1sus.db.classes.internal.report', 'Reference')()
@@ -374,4 +371,4 @@ class ReferenceHandlerBase(HandlerBase):
     return reference
 
   def get_main_definition(self):
-    return self._get_main_definition(self.get_additinal_reference_chksums(), self.reference_definitions)
+    return self._get_main_definition(self.get_additinal_reference_uuids(), self.reference_definitions)

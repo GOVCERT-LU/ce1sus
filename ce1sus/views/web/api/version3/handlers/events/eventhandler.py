@@ -416,7 +416,7 @@ class EventHandler(RestBaseHandler):
 
       self.check_if_user_can_add(event)
       report = self.assembler.assemble(json, Report, event, cache_object)
-      self.report_controller.insert_report(report, cache_object.user)
+      self.report_controller.insert_report(report, cache_object)
       return report.to_dict(cache_object)
     else:
       raise RestHandlerException('Operation not supported')

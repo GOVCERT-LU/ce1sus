@@ -9,7 +9,7 @@ Created on Jan 9, 2015
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.internal.common import ValueException
-from ce1sus.db.classes.internal.report import Report
+from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
@@ -124,38 +124,18 @@ class ReportHandler(RestBaseHandler):
       user = self.get_user()
       if method == 'POST':
         self.check_if_user_can_add(event)
-        # Get needed handler
-        definition = self.report_controller.get_reference_definitions_by_uuid(json.get('definition_id', None))
-        handler_instance = self.__get_handler(definition)
-        handler_instance.is_rest_insert = cache_object.rest_insert
-        handler_instance.is_owner = cache_object.owner
 
-        # Ask handler to process the json for the new attributes
-        reference, additional_references, related_reports = handler_instance.insert(report, user, json)
-        # Check if not elements were attached to the object
-        # TODO: find a way to check if the object has been changed
-        # TODO also check if there are no children attached
-        if True:
-          self.report_controller.insert_reference(reference, additional_references, user, False, self.is_event_owner(event, user))
-          if related_reports:
-            raise NotImplementedException('Related reports returned for handler {0} but the processing is not'.format(definition.attribute_handler.classname))
-          self.report_controller.insert_handler_reports(related_reports, user, True, self.is_event_owner(event, user))
-        else:
-          raise RestHandlerException('The object has been modified by the handler {0} this cannot be'.format(definition.attribute_handler.classname))
+        cache_object_copy = cache_object.make_copy()
+        cache_object_copy.complete = True
+        cache_object_copy.inflated = True
 
-        # Return the generated references as json
-        result_references = list()
-        result_references.append(reference.to_dict(cache_object))
-        if additional_references:
-          for additional_reference in additional_references:
-            result_references.append(additional_reference.to_dict(cache_object))
-
-        result_reports = list()
-        if related_reports:
-          for related_object in related_reports:
-            result_reports.append(related_object.to_dict(cache_object))
-
-        return {'references': result_references, 'related_reports': result_reports}
+        # NOTE: the assembler for references assembler returns a number as the object are directly attached to the object
+        return_type = self.assembler.assemble(json, Reference, report, cache_object)
+        self.report_controller.update_report(report, cache_object, True)
+        if return_type < 0:
+          raise RestHandlerException('Error occurred generating references, see the errors on the event')
+        elif return_type <= 1:
+          return report.to_dict(cache_object_copy)
 
       else:
         uuid = requested_object['object_uuid']

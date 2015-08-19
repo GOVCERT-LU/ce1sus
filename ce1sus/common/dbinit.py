@@ -176,20 +176,20 @@ def dbinit(config, json_location=''):
   # Register handlers
   print "Registering handlers"
 
-  maintenance.register_handler('generichandler', 'attributes', 'GenericHandler')
+  maintenance.register_handler('generichandler', 'attributes', 'GenericHandler', True)
   maintenance.register_handler('texthandler', 'attributes', 'TextHandler')
-  maintenance.register_handler('multiplegenerichandler', 'attributes', 'MultipleGenericHandler')
-  maintenance.register_handler('filehandler', 'attributes', 'FileHandler')
-  maintenance.register_handler('datehandler', 'attributes', 'DateHandler')
-  maintenance.register_handler('cbvaluehandler', 'attributes', 'CBValueHandler')
-  maintenance.register_handler('emailhandler', 'attributes', 'EmailHandler')
-  maintenance.register_handler('filehandler', 'attributes', 'FileWithHashesHandler')
+  maintenance.register_handler('multiplegenerichandler', 'attributes', 'MultipleGenericHandler', True)
+  maintenance.register_handler('filehandler', 'attributes', 'FileHandler', True)
+  maintenance.register_handler('datehandler', 'attributes', 'DateHandler', True)
+  maintenance.register_handler('cbvaluehandler', 'attributes', 'CBValueHandler', True)
+  maintenance.register_handler('emailhandler', 'attributes', 'EmailHandler', True)
+  maintenance.register_handler('filehandler', 'attributes', 'FileWithHashesHandler', True)
 
-  maintenance.register_handler('filehandler', 'references', 'FileReferenceHandler')
-  maintenance.register_handler('generichandler', 'references', 'GenericHandler')
-  maintenance.register_handler('linkhandler', 'references', 'LinkHandler')
-  maintenance.register_handler('rthandler', 'references', 'RTHandler')
-  maintenance.register_handler('texthandler', 'references', 'TextHandler')
+  maintenance.register_handler('filehandler', 'references', 'FileReferenceHandler', True)
+  maintenance.register_handler('generichandler', 'references', 'GenericHandler', True)
+  maintenance.register_handler('linkhandler', 'references', 'LinkHandler', True)
+  maintenance.register_handler('rthandler', 'references', 'RTHandler', True)
+  maintenance.register_handler('texthandler', 'references', 'TextHandler', True)
 
 
   mail_templates = get_mail_templates(users[0])

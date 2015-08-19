@@ -5,12 +5,15 @@
 
 Created on Feb 23, 2014
 """
+from ce1sus.helpers.common.objects import get_class
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker, ReferenceDefintionsBroker
 from ce1sus.db.classes.internal.report import ReferenceHandler
 from ce1sus.db.common.broker import BrokerException, ValidationException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
-from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.handlers.base import ReferenceHandlerBase
 
 
 __author__ = 'Weber Jean-Paul'
@@ -131,12 +134,24 @@ class ReferencesController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def register_handler(self, uuid, module, description):
+  def register_handler(self, uuid, modulename, classname, description, ignore_checks=False):
     try:
       reference_handler = ReferenceHandler()
       reference_handler.uuid = uuid
       reference_handler.description = description
-      reference_handler.module_classname = module
-      self.reference_definition_broker.insert(reference_handler, True)
+      reference_handler.module_classname = u'{0}.{1}'.format(modulename, classname)
+
+      clazz = get_class(u'ce1sus.handlers.references.{0}'.format(modulename), classname)
+      instance = clazz()
+      if isinstance(instance, ReferenceHandlerBase):
+        if not ignore_checks:
+          # check if all reference definitions exists
+          uuids = instance.get_additinal_attribute_uuids()
+          for uuid in uuids:
+            self.attr_def_broker.get_by_uuid(uuid)
+
+        self.reference_definition_broker.insert(reference_handler, True)
+      else:
+        raise ControllerException('Class {0} does not implement ReferenceHandlerBase'.format(classname))
     except BrokerException as error:
       raise ControllerException(error)

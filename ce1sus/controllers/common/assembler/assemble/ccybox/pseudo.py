@@ -53,7 +53,7 @@ class PseudoCyboxAssembler(BaseChanger):
           return None
         cache_object.seen_obj_defs[uuid] = definition
         return definition
-    self.log_object_error(parent, json, error.message)
+    self.log_object_error(parent, json, 'Object does not contain an object definition')
     return None
 
   def __log_error(self, parent, json, error_message, clazz):
@@ -144,7 +144,7 @@ class PseudoCyboxAssembler(BaseChanger):
 
       return related_object
 
-  def get_attribute_definition(self, json, cache_object):
+  def get_attribute_definition(self, parent, json, cache_object):
     uuid = json.get('definition_id', None)
     if not uuid:
       definition = json.get('definition', None)
@@ -157,33 +157,36 @@ class PseudoCyboxAssembler(BaseChanger):
       else:
         try:
           definition = self.attr_def_broker.get_by_uuid(uuid)
-        except NothingFoundException as error:
-          raise AssemblerException(error)
         except BrokerException as error:
-          raise AssemblerException(error)
+          self.log_attribute_error(parent, json, error.message)
+          return None
         cache_object.seen_attr_defs[uuid] = definition
         return definition
-    raise AssemblerException('Could not find a definition in the attribute')
+    self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
 
-  def __get_handler(self, definition, cache_object):
+  def __get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
     handler_instance.attribute_definitions[definition.chksum] = definition
 
     # Check if the handler requires additional attribute definitions
-    additional_attr_defs_chksums = handler_instance.get_additinal_attribute_chksums()
+    additional_attr_defs_uuids = handler_instance.get_additinal_attribute_uuids()
 
-    if additional_attr_defs_chksums:
-      additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
-      for additional_attr_definition in additional_attr_definitions:
-        handler_instance.attribute_definitions[additional_attr_definition.chksum] = additional_attr_definition
+    if additional_attr_defs_uuids:
+
+      for attribute_definition_uuid in additional_attr_defs_uuids:
+        json = {'definition_id': attribute_definition_uuid}
+        attribute_definition = self.get_attribute_definition(parent, json, cache_object)
+        if attribute_definition:
+          handler_instance.attribute_definitions[attribute_definition.uuid] = attribute_definition
 
     # Check if the handler requires additional object definitions
-    additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
-
-    if additional_obj_defs_chksums:
-      additional_obj_definitions = self.object_definition_controller.get_object_definition_by_chksums(additional_obj_defs_chksums)
-      for additional_obj_definition in additional_obj_definitions:
-        handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
+    additional_obj_defs_uuids = handler_instance.get_additional_object_uuids()
+    if additional_obj_defs_uuids:
+      for additional_obj_defs_uuid in additional_obj_defs_uuids:
+        json = {'definition_id': additional_obj_defs_uuid}
+        object_definition = self.get_object_definition(parent, json, cache_object)
+        if object_definition:
+          handler_instance.attribute_definitions[object_definition.uuid] = object_definition
 
     handler_instance.cache_object = cache_object
     # set conditions
@@ -200,8 +203,6 @@ class PseudoCyboxAssembler(BaseChanger):
     # 2: observable
     changed_on = -1
     if json:
-      attribute = Attribute()
-      self.set_base(attribute, json, cache_object, obj)
       int_cache_object = CacheObject()
       int_cache_object.set_default()
 

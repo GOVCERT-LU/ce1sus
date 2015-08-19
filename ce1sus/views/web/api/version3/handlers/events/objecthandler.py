@@ -6,9 +6,6 @@
 Created on Dec 22, 2014
 """
 
-from types import ListType
-from uuid import uuid4
-
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
 from ce1sus.controllers.admin.conditions import ConditionController
 from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionController
@@ -18,8 +15,7 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.common import ValueException
-from ce1sus.db.classes.internal.object import Object, RelatedObject
-from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
+from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
@@ -198,12 +194,13 @@ class ObjectHandler(RestBaseHandler):
         cache_object_copy = cache_object.make_copy()
         cache_object_copy.complete = True
         cache_object_copy.inflated = True
-        # Get needed handler
-        return_object = self.assembler.assemble_attribute(obj, json, cache_object)
+
+        # NOTE: the assembler for attribute assembler returns a number as the object are directly attached to the object
+        return_type = self.assembler.assemble(json, Attribute, obj, cache_object)
         self.observable_controller.update_object(obj, cache_object, True)
-        if return_object < 0:
+        if return_type < 0:
           raise RestHandlerException('Error occurred generating attributes, see the errors on the event')
-        elif return_object <= 1:
+        elif return_type <= 1:
           return obj.to_dict(cache_object_copy)
         else:
           return obj.get_observable().to_dict(cache_object_copy)

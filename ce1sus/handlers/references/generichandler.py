@@ -40,5 +40,5 @@ class GenericHandler(ReferenceHandlerBase):
     return False
 
   @staticmethod
-  def get_additinal_reference_chksums():
+  def get_additinal_reference_uuids():
     return list()

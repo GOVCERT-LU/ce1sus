@@ -100,23 +100,6 @@ class AttributeDefinitionBroker(DefinitionBrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def findallchksums(self, obj):
-    """
-    Returns all the checksums of the attributes required by an object definition
-    """
-    result = dict()
-    for attribute in obj.attributes:
-      chksums = attribute.handler.get_additinal_attribute_chksums()
-      if chksums:
-        if isinstance(chksums, list):
-          for chksum in chksums:
-            ref_attribute = self.get_defintion_by_chksum(chksum)
-            result[chksum] = (attribute.name, ref_attribute.name)
-        else:
-          attribute = self.get_defintion_by_chksum(chksums)
-          result[chksums] = (attribute.name, ref_attribute.name)
-    return result
-
   def remove_object_from_attribute(self, attr_id, obj_id, commit=True):
     """
     Removes an attribute from an object

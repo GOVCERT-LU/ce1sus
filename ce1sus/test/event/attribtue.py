@@ -2,7 +2,6 @@
 Created on Aug 10, 2015
 '''
 
-from ce1sus.helpers.common.objects import compare_objects
 import json
 
 from ce1sus.test.common.base import HTTPError
@@ -15,55 +14,62 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class TestAdminAttributes(LoggedInBase):
+class TestAttribute(LoggedInBase):
 
-  def testExsiting(self):
+  def __add_event(self):
     try:
-      json_dict = self.get_json('attribtues/existing.json')
-      return_json = self.request('attributedefinition', 'POST', None, json_dict)
+      json_dict = self.get_json('events/new.json')
+      return_json = self.post('/event', data=json_dict)
       return_json = json.loads(return_json)
-      assert compare_objects(json_dict, return_json, False)
-    except HTTPError as error:
-      if error.code == 400:
-        assert True
-      else:
-        assert False
-
-  def testNew(self):
-    try:
-      json_dict = self.get_json('attribtues/new.json')
-      return_json = self.request('attributedefinition', 'POST', None, json_dict)
-      return_json = json.loads(return_json)
-      if return_json.get('cybox_std'):
-        assert False
-      else:
-        assert True
-    except HTTPError as error:
-      if error.code == 400:
-        assert True
-      else:
-        assert False
-
-  """
-  requests send post instead of delete
-  def testRemoveNonCybox(self):
-    try:
-      json_dict = self.get_json('attribtues/new.json')
-      return_json = self.request('attributedefinition', 'POST', None, json_dict)
-
-      self.request('attributedefinition/{0}'.format(return_json.get('identifier')), 'DELETE', None, None)
-
-      assert True
+      return return_json['identifier']
     except HTTPError:
       assert False
 
-  def testRemoveCybox(self):
+  def __add_observable(self):
+    event_id = self.__add_event()
     try:
-      self.request('attributedefinition/dfa5b0ed-9048-40cc-9e8f-e5000db655b3', 'DELETE', None, None)
+      json_dict = self.get_json('observables/new.json')
+      return_json = self.post('/event/{0}/observable'.format(event_id), data=json_dict)
+      return_json = json.loads(return_json)
+      return return_json['identifier']
+    except HTTPError:
       assert False
-    except HTTPError  as error:
+
+  def __add_object(self):
+    observable_id = self.__add_observable()
+    try:
+      json_dict = self.get_json('objects/new.json')
+      return_json = self.post('/observable/{0}/object'.format(observable_id), data=json_dict)
+      return_json = json.loads(return_json)
+      return return_json['identifier']
+    except HTTPError:
+      assert False
+
+  def testNewGenericHandler(self):
+    object_id = self.__add_object()
+    try:
+      json_dict = self.get_json('attributes/new.json')
+      return_json = self.post('attributes{0}/attribute?complete=true'.format(object_id), data=json_dict)
+      return_json = json.loads(return_json)
+      assert True
+    except HTTPError as error:
       if error.code == 400:
         assert True
       else:
         assert False
-  """
+
+  def testNewMultiHandler(self):
+    pass
+
+  def testNewFileHandler(self):
+    pass
+
+  def testNewEmailHandler(self):
+    pass
+
+  def testUpdate(self):
+    pass
+
+  def testExisting(self):
+    pass
+

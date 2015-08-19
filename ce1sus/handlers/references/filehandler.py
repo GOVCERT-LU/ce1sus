@@ -6,6 +6,7 @@ module handing the filehandler
 Created: Aug 22, 2013
 """
 import base64
+from ce1sus.helpers.common.config import ConfigException
 import cherrypy
 from cherrypy.lib.static import serve_file
 from datetime import datetime
@@ -19,8 +20,7 @@ import zipfile
 from ce1sus.common.checks import can_user_download
 from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.handlers.base import HandlerException
-from ce1sus.handlers.attributes.generichandler import GenericHandler
-from ce1sus.helpers.common.config import ConfigException
+from ce1sus.handlers.references.generichandler import GenericHandler
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
 

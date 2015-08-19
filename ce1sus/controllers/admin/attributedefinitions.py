@@ -5,6 +5,9 @@ module handing the attributes pages
 
 Created: Aug, 2013
 """
+from ce1sus.helpers.common.objects import get_class
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+
 from ce1sus.controllers.base import BaseController, SpecialControllerException, ControllerException, ControllerNothingFoundException
 from ce1sus.db.brokers.definitions.attributedefinitionbroker import AttributeDefinitionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
@@ -13,7 +16,7 @@ from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.db.classes.internal.definitions import AttributeDefinition, AttributeHandler
 from ce1sus.db.common.broker import BrokerException, ValidationException, IntegrityException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
-from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+from ce1sus.handlers.base import AttributeHandlerBase
 
 
 __author__ = 'Weber Jean-Paul'
@@ -203,13 +206,30 @@ class AttributeDefinitionController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def register_handler(self, uuid, module, description):
+  def register_handler(self, uuid, modulename, classname, description, ignore_checks=False):
     try:
       attribute_handler = AttributeHandler()
       attribute_handler.uuid = uuid
       attribute_handler.description = description
-      attribute_handler.module_classname = module
-      self.handler_broker.insert(attribute_handler, True)
+      attribute_handler.module_classname = u'{0}.{1}'.format(modulename, classname)
+      # verify if the definitions all exist
+      clazz = get_class(u'ce1sus.handlers.attributes.{0}'.format(modulename), classname)
+      instance = clazz()
+      if isinstance(instance, AttributeHandlerBase):
+        if not ignore_checks:
+          # check if all attribute definitions exists
+          uuids = instance.get_additinal_attribute_uuids()
+          for uuid in uuids:
+            self.attr_def_broker.get_by_uuid(uuid)
+
+          # check if all object definitions exist
+          uuids = instance.get_additional_object_uuids()
+          for uuid in uuids:
+            self.obj_def_broker.get_by_uuid(uuid)
+
+        self.handler_broker.insert(attribute_handler, True)
+      else:
+        raise ControllerException('Class {0} does not implement ReferenceHandlerBase'.format(classname))
     except BrokerException as error:
       raise ControllerException(error)
 

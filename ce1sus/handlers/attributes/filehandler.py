@@ -32,17 +32,17 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-CHK_SUM_FILE_NAME = '6582915e9e791da6785cd51232129824640ec967'
-CHK_SUM_HASH_SHA1 = '43493cca725be2c4e868cc79d9528eda89d22a3d'
-CHK_SUM_HASH_SHA256 = 'fb1f51c9d83919ecec54cfc2dc9bd04214f83155'
-CHK_SUM_HASH_SHA384 = 'f0c1d67d19aa775a37aff0b10c714ab9314a13a3'
-CHK_SUM_HASH_SHA512 = '78bc5b3d0e7075f86fc461eb3806ecc82fd5e0c0'
-CHK_SUM_SIZE_IN_BYTES = 'f0533be2aab3335119f224cccab31e75854fe2cf'
-CHK_SUM_MAGIC_NUMBER = 'c40aa7731fbced249920f5737d811c7f4cf570b6'
-CHK_SUM_MIME_TYPE = '0bc1a4b87f2df56c0e400883a71d5dfcb331f291'
-CHK_SUM_FILE_ID = 'e81cdce63d1c4fd020c929b2ff91da92f5ce14c3'
-CHK_SUM_HASH_MD5 = 'a6922165d23112a361f76cd4a5e076cae1e9226f'
-CHK_SUM_ARTEFACT = 'aa778b50a158bc996419912e96c1852b2ba59623'
+UUID_FILE_NAME = '31346184-deba-4aa3-9560-210b56479830'
+UUID_HASH_SHA1 = '93c7279b-d495-4773-bd73-cb79f88fa338'
+UUID_HASH_SHA256 = '778c3f3d-a3bf-4813-b244-a99fe7f39425'
+UUID_HASH_SHA384 = '55f2fccc-a3b5-4365-9c94-1e9596b7a038'
+UUID_HASH_SHA512 = '3344991a-3bb9-4485-a481-f397879bd971'
+UUID_SIZE_IN_BYTES = '96efbf59-2558-4bfc-9abf-1bdedc868d73'
+UUID_MAGIC_NUMBER = '08862fef-6984-4035-8607-57ca13d94596'
+UUID_MIME_TYPE = 'c8794d22-5ad5-4951-a4d4-4d4bcfaa21f8'
+UUID_FILE_ID = 'b1adc377-52a1-4145-b416-cbe52d5118ed'
+UUID_HASH_MD5 = '1f1d2bd9-2c58-47ac-8076-c6100cc407ab'
+UUID_ARTEFACT = '24aeb5b0-a8fc-4d54-8c78-d33d8b442da1'
 
 
 class FileHandler(GenericHandler):
@@ -59,12 +59,12 @@ class FileHandler(GenericHandler):
     return [ValueTable.STRING_VALUE]
 
   @staticmethod
-  def get_additinal_attribute_chksums():
-    return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
+  def get_additinal_attribute_uuids():
+    return [UUID_FILE_NAME, UUID_HASH_SHA1]
 
   @staticmethod
-  def get_additional_object_chksums():
-    return [CHK_SUM_ARTEFACT]
+  def get_additional_object_uuids():
+    return [UUID_ARTEFACT]
 
   @staticmethod
   def get_description():
@@ -157,12 +157,12 @@ class FileHandler(GenericHandler):
 
       # secondary
 
-      filename_definition = self.get_attriute_definition(CHK_SUM_FILE_NAME)
+      filename_definition = self.get_attriute_definition(UUID_FILE_NAME)
       internal_json['value'] = filename
       attribute = self.create_attribute(obj, filename_definition, user, internal_json)
       attributes.append(attribute)
 
-      sha1_definition = self.get_attriute_definition(CHK_SUM_HASH_SHA1)
+      sha1_definition = self.get_attriute_definition(UUID_HASH_SHA1)
       internal_json['value'] = sha1
       attribute = self.create_attribute(obj, sha1_definition, user, internal_json)
       attributes.append(attribute)
@@ -171,7 +171,7 @@ class FileHandler(GenericHandler):
       for attribtue in attributes:
         attribtue.parent = main_attribute
 
-      obj_def = self.get_object_definition(CHK_SUM_ARTEFACT)
+      obj_def = self.get_object_definition(UUID_ARTEFACT)
       childobj = self.create_object(obj.observable, obj_def, user, {}, False)
 
       rel_obj = RelatedObject()
@@ -264,7 +264,7 @@ class FileHandler(GenericHandler):
     """
     if attribtue.children:
       for child in attribtue.children:
-        if child.definition.chksum == CHK_SUM_FILE_NAME:
+        if child.definition.chksum == UUID_FILE_NAME:
           return child.plain_value
       # ok no filename has been found using the one from the attribute value
       return basename(attribtue.value)
@@ -272,7 +272,7 @@ class FileHandler(GenericHandler):
       # get parent object
       if attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent:
         for attribtue in attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent.attributes:
-          if attribtue.definition.chksum == CHK_SUM_FILE_NAME:
+          if attribtue.definition.chksum == UUID_FILE_NAME:
             return attribtue.value
 
       return None
@@ -287,17 +287,17 @@ class FileWithHashesHandler(FileHandler):
     return 'e8b47b60-8deb-11e3-baa8-0800200c9a66'
 
   @staticmethod
-  def get_additinal_attribute_chksums():
-    return [CHK_SUM_FILE_NAME,
-            CHK_SUM_HASH_SHA1,
-            CHK_SUM_HASH_SHA256,
-            CHK_SUM_HASH_SHA384,
-            CHK_SUM_HASH_SHA512,
-            CHK_SUM_SIZE_IN_BYTES,
-            CHK_SUM_MAGIC_NUMBER,
-            CHK_SUM_MIME_TYPE,
-            CHK_SUM_FILE_ID,
-            CHK_SUM_HASH_MD5]
+  def get_additinal_attribute_uuids():
+    return [UUID_FILE_NAME,
+            UUID_HASH_SHA1,
+            UUID_HASH_SHA256,
+            UUID_HASH_SHA384,
+            UUID_HASH_SHA512,
+            UUID_SIZE_IN_BYTES,
+            UUID_MAGIC_NUMBER,
+            UUID_MIME_TYPE,
+            UUID_FILE_ID,
+            UUID_HASH_MD5]
 
   def insert(self, obj, user, json):
     attributes, sub_objects = super(FileWithHashesHandler, self).insert(obj, user, json)
@@ -309,31 +309,31 @@ class FileWithHashesHandler(FileHandler):
 
     # create the remaining attributes
     internal_json['value'] = hasher.fileHashMD5(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_MD5), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_MD5), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = hasher.fileHashSHA256(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA256), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA256), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = hasher.fileHashSHA384(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA384), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA384), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = hasher.fileHashSHA512(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_HASH_SHA512), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA512), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = getsize(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_SIZE_IN_BYTES), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_SIZE_IN_BYTES), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = magic.from_file(filepath, mime=True)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_MIME_TYPE), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_MIME_TYPE), user, internal_json)
     attributes.append(attribute)
 
     internal_json['value'] = magic.from_file(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(CHK_SUM_FILE_ID), user, internal_json)
+    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_FILE_ID), user, internal_json)
     attributes.append(attribute)
 
     # set parent

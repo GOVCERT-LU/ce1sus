@@ -885,7 +885,9 @@ app.directive("report", function($compile) {
       permissions: "=permissions"
     },
     controller: function($scope, $modal, Restangular, messages, $log, Pagination){
-
+      if (!$scope.report.references) {
+        $scope.report.references = [];
+      }
       $scope.pagination = Pagination.getNew(5,'report.references');
       $scope.pagination.numPages = Math.ceil($scope.report.references.length/$scope.pagination.perPage);
       $scope.pagination.setPages();
