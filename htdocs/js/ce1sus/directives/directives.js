@@ -768,6 +768,7 @@ app.directive("object", function($compile) {
             if (data) {
               var index = $scope.object.attributes.indexOf(attribute);
               $scope.object.attributes.splice(index, 1);
+              
               messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
             }
           }, function (response) {
@@ -786,30 +787,17 @@ app.directive("object", function($compile) {
       };
       
       $scope.appendData = function(data){
+        
+
         //check what kind of data it is
-        if (typeof(data.attributes) !== 'undefined'){
-          // simple attribute w/o related objects
-          attributes = data.attributes;
-          angular.forEach(attributes, function(element) {
-            $scope.object.attributes.push(element);
-          }, $log);
-
-          related_objects = data.related_objects;
-          if (related_objects.length > 0 && attributes.length > 0) {
-            angular.forEach(related_objects, function(element) {
-              $scope.object.related_objects.push(element);
-            }, $log);
-          } else {
-            //append them to the parent object
-            angular.forEach(related_objects, function(element) {
-              $scope.$parent.$parent.$parent.object.related_objects.push(element);
-            }, $log);
-          }
-
+        if (typeof(data.id_) == 'undefined'){
+          //this is an object
+          $scope.object = data;
           
         } else {
-          // observables
-          observable = data.observable;
+          // observable
+          observable = data;
+          
           allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.observables;
           if (!allObservables){
             allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.observables;

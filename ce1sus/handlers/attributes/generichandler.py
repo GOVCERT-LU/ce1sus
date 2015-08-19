@@ -8,8 +8,7 @@ Created: Aug 22, 2013
 
 
 from ce1sus.db.classes.internal.common import ValueTable
-from ce1sus.handlers.base import HandlerBase, HandlerException
-
+from ce1sus.handlers.base import AttributeHandlerBase
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -17,9 +16,8 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class GenericHandler(HandlerBase):
+class GenericHandler(AttributeHandlerBase):
   """The generic handler for handling known atomic values"""
-
   @staticmethod
   def get_uuid():
     return 'dea62bf0-8deb-11e3-baa8-0800200c9a66'
@@ -28,7 +26,8 @@ class GenericHandler(HandlerBase):
   def get_description():
     return u'Generic Handler, usable for a single line entry'
 
-  def get_additional_object_chksums(self):
+  @staticmethod
+  def get_additional_object_chksums():
     return list()
 
   @staticmethod
@@ -38,30 +37,18 @@ class GenericHandler(HandlerBase):
             ValueTable.NUMBER_VALUE
             ]
 
-  def get_additinal_attribute_chksums(self):
+  @staticmethod
+  def get_additinal_attribute_chksums():
     return list()
 
-  def insert(self, obj, user, json):
-    definition = self.get_main_definition()
-    attribute = self.create_attribute(obj, definition, user, json)
-    return [attribute], None
+  def assemble(self, obj, json):
+    attribute = self.create_attribute(obj, json)
+    return [attribute]
 
-  def get_data(self, attribute, definition, parameters):
-    return list()
-
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'plain'
 
-  def update(self, attribute, user, json):
-    attribute.populate(json)
-    return attribute
-
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return False
-
-  def get_main_attribute(self, attributes):
-    main_def = self.get_main_definition()
-    for attr in attributes:
-      if attr.definition.uuid == main_def.uuid:
-        return attr
-    raise HandlerException('Main attribute cannot be found')

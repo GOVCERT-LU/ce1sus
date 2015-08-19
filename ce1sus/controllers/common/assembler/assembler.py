@@ -24,7 +24,8 @@ class Assembler(BaseChangeController):
 
   def __init__(self, config, session=None):
     super(Assembler, self).__init__(config, session)
-    self.mergers = [StixAssembler(config, session), CyboxAssembler(config, session), Ce1susAssembler(config, session), EventAssembler(config, session)]
+    self.cybox_assembler = CyboxAssembler(config, session)
+    self.mergers = [StixAssembler(config, session), self.cybox_assembler, Ce1susAssembler(config, session), EventAssembler(config, session)]
 
   def assemble(self, json, clazz, parent, cache_object):
 
@@ -46,4 +47,9 @@ class Assembler(BaseChangeController):
           return fct(parent, json, cache_object)
     raise BaseChangeControllerException('Assembling for class {0} is not defined function {1} is missing'.format(classname, fctname))
 
+  def assemble_attribute(self, obj, json, cache_object):
+
+    cache_object.insert = True
+    """ returns an object """
+    return self.cybox_assembler.assemble_attribute(obj, json, cache_object)
 

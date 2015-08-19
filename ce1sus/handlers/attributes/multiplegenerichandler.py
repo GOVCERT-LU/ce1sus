@@ -10,6 +10,7 @@ import types
 from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.attributes.generichandler import GenericHandler
 from ce1sus.handlers.base import HandlerException
+from ce1sus.common.classes.cacheobject import CacheObject
 
 
 __author__ = 'Weber Jean-Paul'
@@ -32,10 +33,11 @@ class MultipleGenericHandler(GenericHandler):
   def get_description():
     return u'Multiple Generic Handler, usable for a multi-line entries'
 
-  def insert(self, obj, user, json):
+  def assemble(self, obj, json):
+    self.object_definitions[obj.definition.chksum] = obj.definition
+    attr_def_chksum = self.get_main_definition().chksum
     value = json.get('value', None)
     if value:
-      definition = self.get_main_definition()
       if isinstance(value, types.StringTypes):
         values = self.__get_string_attribtues(value)
       else:
@@ -44,7 +46,7 @@ class MultipleGenericHandler(GenericHandler):
       if len(values) == 1:
         value = values[0].strip('\n\r')
         json['value'] = value
-        attribute = self.create_attribute(obj, definition, user, json)
+        attribute = self.create_attribute(obj, json)
         return [attribute], None
       else:
         observables = list()
@@ -52,25 +54,34 @@ class MultipleGenericHandler(GenericHandler):
         # check if create related objects or observables
         create_observables = not obj.related_object_parent
 
+        # the first value belongs always to the existing object
+        value = values.pop(0).strip('\n\r')
+        json['value'] = value
+        attribute = self.create_attribute(obj, json)
+        obj.attributes.append(attribute)
+
         for value in values:
           value = value.strip('\n\r')
           json['value'] = value
-          attribute = self.create_attribute(obj, definition, user, json, False)
+
+          cache_object = CacheObject()
+          cache_object.set_default()
 
           if create_observables:
-            observable = self.create_observable(attribute)
-            sub_obj = self.create_object(observable, obj.definition, user, obj.to_dict(), True)
-            attribute.object_id = sub_obj.identifier
-            attribute.object = sub_obj
+            observable = self.create_observable(obj, json)
+            self.set_object_definition(json, obj.definition.chksum)
+            sub_obj = self.create_object(observable, json)
+            observable.object = sub_obj
+            self.set_attribute_definition(json, attr_def_chksum)
+            attribute = self.create_attribute(sub_obj, json)
             sub_obj.attributes.append(attribute)
             observables.append(observable)
           else:
             # create related objects
-            sub_obj = self.create_object(obj.observable, obj.definition, user, obj.to_dict(), False)
-            sub_obj.parent = None
-            sub_obj.parent_id = None
-            attribute.object_id = sub_obj.identifier
-            attribute.object = sub_obj
+            self.set_object_definition(json, obj.definition.chksum)
+            sub_obj = self.create_object(observable, json)
+            self.set_attribute_definition(json, attr_def_chksum)
+            attribute = self.create_attribute(sub_obj, json)
             sub_obj.attributes.append(attribute)
             rel_obj = RelatedObject()
             rel_obj.parent_id = obj.related_object_parent[0].parent.identifier
@@ -78,15 +89,15 @@ class MultipleGenericHandler(GenericHandler):
             related_objects.append(rel_obj)
 
         if observables:
-          return observables, None
+          return observables
         else:
-          return None, related_objects
-
+          return related_objects
     else:
       raise HandlerException('No value found for handler {0}'.format(self.__class__.__name__))
 
   def __get_string_attribtues(self, value):
     return value.split('\n')
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'multiline'

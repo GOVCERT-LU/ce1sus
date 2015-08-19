@@ -24,8 +24,10 @@ class LinkHandler(GenericHandler):
   def get_description():
     return u'Handler for Links'
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'link'
 
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return False

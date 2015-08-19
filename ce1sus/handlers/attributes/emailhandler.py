@@ -50,7 +50,8 @@ class EmailHandler(FileWithHashesHandler):
   def get_description():
     return u'File handler with only one hash, used for the average file'
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'file'
 
   def attach_attribute(self, obj, user, definition_chksum, value, json, attributes):
@@ -114,12 +115,12 @@ class EmailHandler(FileWithHashesHandler):
         related_objects.append(rel_obj)
       return attributes, related_objects
 
+  @staticmethod
+  def get_additional_object_chksums():
+    return [CHK_SUM_URI] + FileWithHashesHandler.get_additional_object_chksums()
 
-
-  def get_additional_object_chksums(self):
-    return [CHK_SUM_URI] + FileWithHashesHandler.get_additional_object_chksums(self)
-
-  def get_additinal_attribute_chksums(self):
+  @staticmethod
+  def get_additinal_attribute_chksums():
     return [CHK_SUM_EMAIL_CC,
             CHK_SUM_EMAIL_FROM,
             CHK_SUM_EMAIL_MESSAGE_ID,
@@ -129,4 +130,4 @@ class EmailHandler(FileWithHashesHandler):
             CHK_SUM_EMAIL_SENDER,
             CHK_SUM_EMAIL_SUBJECT,
             CHK_SUM_IN_REPLY_TO,
-            CHK_SUM_URL] + FileWithHashesHandler.get_additinal_attribute_chksums(self)
+            CHK_SUM_URL] + FileWithHashesHandler.get_additinal_attribute_chksums()

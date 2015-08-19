@@ -58,18 +58,25 @@ class FileHandler(GenericHandler):
   def get_allowed_types():
     return [ValueTable.STRING_VALUE]
 
-  def get_additinal_attribute_chksums(self):
+  @staticmethod
+  def get_additinal_attribute_chksums():
     return [CHK_SUM_FILE_NAME, CHK_SUM_HASH_SHA1]
 
-  def get_additional_object_chksums(self):
+  @staticmethod
+  def get_additional_object_chksums():
     return [CHK_SUM_ARTEFACT]
 
   @staticmethod
   def get_description():
     return u'File handler with only one hash, used for the average file'
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'file'
+
+  @staticmethod
+  def require_js():
+    return False
 
   def get_base_path(self):
     """
@@ -186,7 +193,7 @@ class FileHandler(GenericHandler):
   def update(self, attribute, user, json):
     raise HandlerException('FileHandler does not support updates')
 
-  def get_data(self, attribute, definition, parameters):
+  def get_data(self, attribute, parameters):
     if attribute:
       rel_path = attribute.value
       event = attribute.object.event
@@ -241,7 +248,8 @@ class FileHandler(GenericHandler):
                              hashed_file_name)
     return hasher.hashSHA256(key)
 
-  def get_rel_folder(self):
+  @staticmethod
+  def get_rel_folder():
     """
     Returns the string of the relative folder position
     """
@@ -278,7 +286,8 @@ class FileWithHashesHandler(FileHandler):
   def get_uuid():
     return 'e8b47b60-8deb-11e3-baa8-0800200c9a66'
 
-  def get_additinal_attribute_chksums(self):
+  @staticmethod
+  def get_additinal_attribute_chksums():
     return [CHK_SUM_FILE_NAME,
             CHK_SUM_HASH_SHA1,
             CHK_SUM_HASH_SHA256,
@@ -333,5 +342,6 @@ class FileWithHashesHandler(FileHandler):
 
     return attributes, sub_objects
 
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return False

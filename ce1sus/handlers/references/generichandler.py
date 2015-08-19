@@ -7,7 +7,7 @@ Created: Aug 22, 2013
 """
 
 
-from ce1sus.handlers.base import HandlerBase
+from ce1sus.handlers.base import ReferenceHandlerBase
 
 
 __author__ = 'Weber Jean-Paul'
@@ -16,7 +16,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class GenericHandler(HandlerBase):
+class GenericHandler(ReferenceHandlerBase):
   """The generic handler for handling known atomic values"""
 
   @staticmethod
@@ -27,28 +27,18 @@ class GenericHandler(HandlerBase):
   def get_description():
     return u'Generic Handler, usable for a single line entry'
 
-  def insert(self, report, user, json):
-    definition = self.get_main_definition()
-    reference = self.create_reference(report, definition, user, json)
-    value = json.get('value', None)
-    reference.value = value
-    return reference, None, None
+  def assemble(self, report, json):
+    reference = self.create_reference(report, json)
+    return [reference]
 
-  def get_data(self, reference, parameters):
-    return list()
-
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'plain'
 
-  def update(self, reference, user, json):
-    reference.populate(json)
-    return reference
-
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return False
 
-  def get_additinal_reference_chksums(self):
+  @staticmethod
+  def get_additinal_reference_chksums():
     return list()
-
-  def get_additinal_attribute_chksums(self):
-    return self.get_additinal_reference_chksums()

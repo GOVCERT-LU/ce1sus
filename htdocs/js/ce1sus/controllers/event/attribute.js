@@ -5,7 +5,19 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   $scope.definitions =[];
 
   Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
-    $scope.definitions = attributes;
+    
+    angular.forEach(attributes, function(definition) {
+      found = false;
+      angular.forEach($scope.object.attributes, function(attribute) {
+        if (definition.identifier == attribute.definition.identifier) {
+          found = true;
+        }
+      }, $log);
+      if (!found){
+        $scope.definitions.push(definition);
+      }
+    }, $log);
+    
   }, function(response) {
     handleError(response, messages);
     $scope.$hide();
@@ -42,8 +54,6 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
 
   };
   
-
-  
   $scope.attributeChanged = function ()
   {
     return !angular.equals($scope.attribute, original_attribute);
@@ -58,6 +68,7 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
     var objectID = $scope.$parent.$parent.object.identifier;
     Restangular.one('object', objectID).post('attribute', $scope.attribute, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.appendData(data);
+      
     }, function (response) {
       $scope.attribute = angular.copy(original_attribute);
       handleError(response, messages);

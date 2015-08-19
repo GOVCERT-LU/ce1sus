@@ -41,7 +41,7 @@ class RTHandler(GenericHandler):
             'url': ticket.url
             }
 
-  def get_data(self, reference, definition, parameters):
+  def get_data(self, reference, parameters):
     type_ = parameters.get('type', 'view')
     if type_ == 'view':
       return [self.rt_system.get_base_ticket_url()]
@@ -53,8 +53,10 @@ class RTHandler(GenericHandler):
         result.append(self.__convert_ticket_to_dict(ticket))
       return result
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'rtticket'
 
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return True

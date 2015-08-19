@@ -47,14 +47,12 @@ class FileReferenceHandler(GenericHandler):
   def get_allowed_types():
     return [ValueTable.STRING_VALUE]
 
-  def get_additinal_reference_chksums(self):
-    return list()
-
   @staticmethod
   def get_description():
     return u'File handler with only one hash, used for the average file'
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'file'
 
   def get_base_path(self):
@@ -142,9 +140,6 @@ class FileReferenceHandler(GenericHandler):
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
 
-  def update(self, attribute, user, json):
-    raise HandlerException('FileHandler does not support updates')
-
   def get_data(self, reference, definition, parameters):
     if reference:
       splitted = reference.value.split('|')
@@ -201,7 +196,8 @@ class FileReferenceHandler(GenericHandler):
                              hashed_file_name)
     return hasher.hashSHA256(key)
 
-  def get_rel_folder(self):
+  @staticmethod
+  def get_rel_folder():
     """
     Returns the string of the relative folder position
     """
@@ -210,5 +206,6 @@ class FileReferenceHandler(GenericHandler):
                                      datetime.utcnow().day)
     return dest_path
 
-  def require_js(self):
+  @staticmethod
+  def require_js():
     return False

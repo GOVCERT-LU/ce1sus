@@ -31,5 +31,6 @@ class DateHandler(GenericHandler):
   def get_allowed_types():
     return [ValueTable.DATE_VALUE]
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'date'

@@ -8,6 +8,7 @@ Created on Aug 7, 2015
 from copy import deepcopy
 from datetime import datetime
 
+from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.helpers.version import Version
 
 
@@ -58,7 +59,25 @@ class CacheObject(object):
     self.details = value
 
   def make_copy(self):
-    return deepcopy(self)
+    cache_object = CacheObject()
+    cache_object.event_permissions = self.event_permissions
+    cache_object.flat = self.flat
+    cache_object.details = self.details
+    cache_object.inflated = self.inflated
+    cache_object.insert = self.insert
+    cache_object.owner = self.owner
+    cache_object.user = self.user
+    cache_object.rest_insert = self.rest_insert
+    cache_object.seen_groups = self.seen_groups
+    cache_object.object_changes = self.object_changes
+    return cache_object
+
+  def set_default(self):
+    self.owner = True
+    self.inflated = True
+    self.complete = True
+    self.event_permissions = EventPermissions('0')
+    self.event_permissions.set_all()
 
 class MergerCache(CacheObject):
 
@@ -69,3 +88,9 @@ class MergerCache(CacheObject):
     self.version = Version()
     self.object_changes = cache_object.object_changes
 
+  def make_copy(self):
+    cache_object = super(MergerCache, self).make_copy()
+    merger_cache = MergerCache(cache_object)
+    merger_cache.result = self.result
+    merger_cache.version = self.version
+    return merger_cache

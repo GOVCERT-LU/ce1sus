@@ -26,7 +26,6 @@ APP_REL = '0.11.1'
 DB_REL = '0.11.0'
 REST_REL = '0.3.0'
 
-
 # pylint: disable=W0613
 def sytem_version(context):
   """

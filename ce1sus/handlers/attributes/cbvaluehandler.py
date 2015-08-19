@@ -61,7 +61,8 @@ class CBValueHandler(GenericHandler):
       result.append(temp)
     return result
 
-  def get_data(self, attribute, definition, parameters):
+  def get_data(self, instance, parameters):
+    definition = self.get_main_definition()
     regex = definition.regex
     if regex:
       cb_values = CBValueHandler.__get_cb_values(regex)
@@ -72,5 +73,6 @@ class CBValueHandler(GenericHandler):
     else:
       raise HandlerException(u'Troubles getting regex')
 
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'combobox'

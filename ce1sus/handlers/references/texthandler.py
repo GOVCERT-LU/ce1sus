@@ -25,15 +25,10 @@ class TextHandler(GenericHandler):
   def get_description():
     return u'Text Handler, usable for a textlines'
 
-  def get_additional_object_chksums(self):
-    return list()
-
   @staticmethod
   def get_allowed_types():
     return [ValueTable.TEXT_VALUE]
 
-  def get_additinal_attribute_chksums(self):
-    return list()
-
-  def get_view_type(self):
+  @staticmethod
+  def get_view_type():
     return 'text'

@@ -6,23 +6,20 @@
 Created on Aug 4, 2015
 """
 
-import base64
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from datetime import datetime
 from json import dumps
-from os.path import dirname
-from shutil import move, rmtree
+from uuid import uuid4
 
+from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.errors.errorbase import ErrorObject, ErrorAttribute
 from ce1sus.db.classes.internal.object import Object, RelatedObject
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
-from ce1sus.handlers.attributes.filehandler import FileHandler
-from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
 
 
 __author__ = 'Weber Jean-Paul'
@@ -68,13 +65,21 @@ class PseudoCyboxAssembler(BaseChanger):
 
 
   def log_object_error(self, observable, json, error_message):
-    error_entry = self.__log_error(observable, json, error_message, ErrorObject)
+    error_entry = ErrorObject()
+    error_entry.uuid = u'{0}'.format(uuid4())
+    error_entry.message = error_message
+    error_entry.dump = dumps(json)
+    error_entry.event = observable.event[0]
     error_entry.observable = observable
     self.obj_def_broker.session.add(error_entry)
     self.obj_def_broker.do_commit(True)
 
   def log_attribute_error(self, obj, json, error_message):
-    error_entry = self.__log_error(obj, json, error_message, ErrorAttribute)
+    error_entry = ErrorAttribute()
+    error_entry.uuid = u'{0}'.format(uuid4())
+    error_entry.message = error_message
+    error_entry.dump = dumps(json)
+    error_entry.event = obj.event
     error_entry.object = obj
     self.obj_def_broker.session.add(error_entry)
     self.obj_def_broker.do_commit(True)
@@ -102,9 +107,7 @@ class PseudoCyboxAssembler(BaseChanger):
         attributes = json.get('attributes')
         if attributes:
           for attribute in attributes:
-            attr = self.assemble_attribute(obj, attribute, cache_object)
-            if attr:
-              obj.attributes.append(attr)
+            self.assemble_attribute(obj, attribute, cache_object)
 
         return obj
 
@@ -162,67 +165,100 @@ class PseudoCyboxAssembler(BaseChanger):
         return definition
     raise AssemblerException('Could not find a definition in the attribute')
 
+  def __get_handler(self, definition, cache_object):
+    handler_instance = definition.handler
+    handler_instance.attribute_definitions[definition.chksum] = definition
+
+    # Check if the handler requires additional attribute definitions
+    additional_attr_defs_chksums = handler_instance.get_additinal_attribute_chksums()
+
+    if additional_attr_defs_chksums:
+      additional_attr_definitions = self.attribute_definition_controller.get_defintion_by_chksums(additional_attr_defs_chksums)
+      for additional_attr_definition in additional_attr_definitions:
+        handler_instance.attribute_definitions[additional_attr_definition.chksum] = additional_attr_definition
+
+    # Check if the handler requires additional object definitions
+    additional_obj_defs_chksums = handler_instance.get_additional_object_chksums()
+
+    if additional_obj_defs_chksums:
+      additional_obj_definitions = self.object_definition_controller.get_object_definition_by_chksums(additional_obj_defs_chksums)
+      for additional_obj_definition in additional_obj_definitions:
+        handler_instance.object_definitions[additional_obj_definition.chksum] = additional_obj_definition
+
+    handler_instance.cache_object = cache_object
+    # set conditions
+    conditions = self.condition_broker.get_all()
+    handler_instance.conditions = conditions
+
+    return handler_instance
 
   def assemble_attribute(self, obj, json, cache_object):
-
+    """This function will never return an object just the information which element changed"""
+    # -1: nothing
+    # 0: Attribute
+    # 1: Object
+    # 2: observable
+    changed_on = -1
     if json:
       attribute = Attribute()
       self.set_base(attribute, json, cache_object, obj)
+      int_cache_object = CacheObject()
+      int_cache_object.set_default()
 
       definition = self.get_attribute_definition(json, cache_object)
       if definition:
-        attribute.definition = definition
+        handler_instance = self.__get_handler(definition, cache_object)
+        returnvalues = handler_instance.assemble(obj, json)
+        observable = obj.get_observable()
+        for returnvalue in returnvalues:
+          if isinstance(returnvalue, Observable):
+            # make the observable composed and append the observables
 
-        attribute.object = obj
+            changed_on = max(changed_on, 2)
+            if observable.observable_composition:
+              observable.observable_composition.observables.append(returnvalue)
+            else:
+              # create new one
+              comp_obs = ObservableComposition()
+              self.set_base(comp_obs, json, cache_object, observable)
+              comp_obs.observable = observable
+              observable.observable_composition = comp_obs
 
-        # attention to raw_artefacts!!!
-        value = json.get('value', None)
-        handler_uuid = '{0}'.format(definition.attribute_handler.uuid)
-        if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
+              comp_obs.observables.append(returnvalue)
 
-          fh = FileHandler()
+              obs = Observable()
+              self.set_base(obs, json, cache_object, comp_obs)
+              obs.uuid = u'{0}'.format(uuid4())
 
-          tmp_filename = hashMD5(datetime.utcnow())
+              obs.object = observable.object
 
-          binary_data = base64.b64decode(value)
-          tmp_folder = fh.get_tmp_folder()
-          tmp_path = tmp_folder + '/' + tmp_filename
+              observable.object = None
 
-          file_obj = open(tmp_path, "w")
-          file_obj.write(binary_data)
-          file_obj.close()
+              comp_obs.observables.append(obs)
 
-          sha1 = fileHashSHA1(tmp_path)
-          rel_folder = fh.get_rel_folder()
-          dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
-
-          # move it to the correct place
-          move(tmp_path, dest_path)
-          # remove temp folder
-          rmtree(dirname(tmp_path))
-
-          attribute.value = rel_folder + '/' + sha1
-        else:
-          attribute.value = value
-
-        condition_uuid = json.get('condition_id', None)
-        if not condition_uuid:
-          condition = json.get('condition', None)
-          if condition:
-            condition_uuid = condition.get('identifier', None)
-        if condition_uuid:
-          condition = self.get_condition(condition_uuid, cache_object)
-          attribute.condition_id = condition.identifier
-
-        attribute.is_ioc = json.get('ioc', 0)
-
-        # validate if
-        if attribute.validate():
-          return attribute
-        else:
-          error_message = ObjectValidator.getFirstValidationError(attribute)
-          self.log_attribute_error(obj, json, error_message)
-          return None
+          elif isinstance(returnvalue, RelatedObject):
+            changed_on = max(changed_on, 1)
+            # append them to the object
+            # TODO find out if they are not already present
+            obj.related_objects.append(returnvalue)
+          elif isinstance(returnvalue, Attribute):
+            changed_on = max(changed_on, 0)
+            if returnvalue.validate():
+              # append if not already present in object
+              found = False
+              for attribute in obj.attributes:
+                if (returnvalue.value == attribute.value) and (returnvalue.definition.identifier == attribute.definition.identifier):
+                  # log the elemsent
+                  self.log_attribute_error(obj, attribute.to_dict(int_cache_object), 'Duplicate value')
+                  found = True
+              if not found:
+                obj.attributes.append(returnvalue)
+            else:
+              error_message = ObjectValidator.getFirstValidationError(attribute)
+              self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
+          else:
+            raise ValueError('Return value of attribute handler {0} is not an instance of Observable, ObservableComposition, RelatedObject or Attribute')
+    return changed_on
 
   def get_condition(self, uuid, cache_object):
     definition = cache_object.seen_conditions.get(uuid, None)

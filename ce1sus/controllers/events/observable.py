@@ -250,34 +250,38 @@ class ObservableController(BaseController):
 
   def insert_composed_observable_object(self, obj, observable, cache_object, commit=True):
 
-    # remove relation from event and observable
-    event = observable.event[0]
-    event.observables.remove(observable)
+    comp_obs = ObservableComposition()
+    self.__set_logging(comp_obs, observable, cache_object.user)
+    comp_obs.observable = observable
+    observable.observable_composition = comp_obs
 
     # create containers
     obs = Observable()
     obs.uuid = u'{0}'.format(uuid4())
-    obs.event = [event]
+    if observable.event:
+      obs.event = [observable.event[0]]
+    if observable.indicator:
+      obs.indicator = [observable.indicator[0]]
     self.__set_logging(obs, observable, cache_object.user)
-
-    comp_obs = ObservableComposition()
-    self.__set_logging(comp_obs, observable, cache_object.user)
-    comp_obs.observable = obs
-
-    obs.observable_composition = comp_obs
+    obs.object = observable.object
+    # detach object from observable
+    observable.object = None
 
     child_obs = Observable()
     child_obs.uuid = u'{0}'.format(uuid4())
-    child_obs.event = [event]
+    if observable.event:
+      child_obs.event = [observable.event[0]]
+    if observable.indicator:
+      child_obs.indicator = [observable.indicator[0]]
     self.__set_logging(child_obs, observable, cache_object.user)
     child_obs.object = obj
 
     comp_obs.observables.append(child_obs)
-    comp_obs.observables.append(observable)
+    comp_obs.observables.append(obs)
 
-    self.insert_observable(obs, cache_object, commit)
+    self.insert_observable(comp_obs, cache_object, commit)
 
-    return obs
+    return observable
 
   def update_object(self, obj, cache_object, commit=True):
     try:

@@ -11,6 +11,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.sql.schema import Table
 from sqlalchemy.types import Boolean
+from uuid import uuid4
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue
@@ -129,11 +130,13 @@ class Attribute(BaseElement, Base):
       else:
         value_instance = get_class('ce1sus.db.classes.internal.attributes.values', classname)
         value_instance = value_instance()
+        value_instance.uuid = u'{0}'.format(uuid4())
         value_instance.attribute_id = self.identifier
         value_instance.attribute = self
         value_instance.value = new_value
         value_instance.value_type_id = self.definition.value_type_id
 
+      """
       if self.object:
         if self.object.event or self.object.event_id:
           event_id = self.object.event_id
@@ -149,6 +152,7 @@ class Attribute(BaseElement, Base):
           raise ValueError(u'Parent of object was not set.')
       else:
         raise ValueError(u'Cannot set the attribute value as the parent object is not yet set.')
+      """
 
       setattr(self, attribute, value_instance)
 

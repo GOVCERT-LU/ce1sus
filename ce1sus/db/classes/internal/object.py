@@ -47,6 +47,11 @@ class Object(Entity, Base):
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
 
+  def get_observable(self):
+    if self.observable:
+      return self.observable[0]
+    else:
+      return self.parent.parent.get_observable()
 
   @property
   def event(self):
