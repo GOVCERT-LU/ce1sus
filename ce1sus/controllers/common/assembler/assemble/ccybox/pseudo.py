@@ -11,7 +11,7 @@ from json import dumps
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
+from ce1sus.controllers.common.basechanger import BaseChanger
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
@@ -19,7 +19,7 @@ from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComp
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.errors.errorbase import ErrorObject, ErrorAttribute
 from ce1sus.db.classes.internal.object import Object, RelatedObject
-from ce1sus.db.common.broker import NothingFoundException, BrokerException
+from ce1sus.db.common.broker import BrokerException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -166,7 +166,7 @@ class PseudoCyboxAssembler(BaseChanger):
 
   def __get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
-    handler_instance.attribute_definitions[definition.chksum] = definition
+    handler_instance.attribute_definitions[definition.uuid] = definition
 
     # Check if the handler requires additional attribute definitions
     additional_attr_defs_uuids = handler_instance.get_additinal_attribute_uuids()
@@ -206,9 +206,9 @@ class PseudoCyboxAssembler(BaseChanger):
       int_cache_object = CacheObject()
       int_cache_object.set_default()
 
-      definition = self.get_attribute_definition(json, cache_object)
+      definition = self.get_attribute_definition(obj, json, cache_object)
       if definition:
-        handler_instance = self.__get_handler(definition, cache_object)
+        handler_instance = self.__get_handler(obj, definition, cache_object)
         returnvalues = handler_instance.assemble(obj, json)
         observable = obj.get_observable()
         for returnvalue in returnvalues:
@@ -217,6 +217,10 @@ class PseudoCyboxAssembler(BaseChanger):
 
             changed_on = max(changed_on, 2)
             if observable.observable_composition:
+              # delink observable
+              returnvalue.delink_parent()
+
+
               observable.observable_composition.observables.append(returnvalue)
             else:
               # create new one
@@ -224,6 +228,9 @@ class PseudoCyboxAssembler(BaseChanger):
               self.set_base(comp_obs, json, cache_object, observable)
               comp_obs.observable = observable
               observable.observable_composition = comp_obs
+
+              # delink observable
+              returnvalue.delink_parent()
 
               comp_obs.observables.append(returnvalue)
 

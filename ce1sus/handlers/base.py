@@ -216,10 +216,9 @@ class HandlerBase(object):
     raise HandlerException('Could not find a {2} definition uuid for  generation in handler {1}'.format(uuid, self.get_classname(), type_))
 
   def _set_definition(self, json, identifier, definitions, type_):
+    json['definition_id'] = identifier
     definition = self._get_definition(json, definitions, type_)
-    if definition:
-      json['definition_id'] = definition.uuid
-    else:
+    if not definition:
       raise HandlerException('Could not find a {2} definition for uuid {0} generation in handler {1}'.format(identifier, self.get_classname(), type_))
 
 class AttributeHandlerBase(HandlerBase):
@@ -327,7 +326,11 @@ class AttributeHandlerBase(HandlerBase):
     self.set_base(observable, json, obj, change_base_element)
 
     # set parent
-    observable.parent = obj.observable[0].parent
+    parent = obj.observable[0]
+    if parent.event:
+      observable.event = parent.event
+    elif parent.indicator:
+      observable.indicator = parent.indicator
 
     observable.description = StructuredText()
     self.set_base(observable.description, json, observable, change_base_element)

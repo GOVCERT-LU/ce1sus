@@ -55,7 +55,8 @@ class Entity(BaseElement):
   def parent(self, instance):
     # TODO: verify if this is feasible for long term (note as there can be more parents)
     parent_set = False
-    for attr_name in self._PARENTS:
+    if len(self._PARENTS) == 1:
+      attr_name = self._PARENTS[0]
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
         if isinstance(item, Entity) or isinstance(item, NoneType):
@@ -64,9 +65,20 @@ class Entity(BaseElement):
         else:
           item.append(instance)
           parent_set = True
-    if not parent_set:
-      if self.get_classname() != 'Event':
-        raise ValueError('Cannot find parent')
+      if not parent_set:
+        if self.get_classname() != 'Event':
+          raise ValueError('Cannot find parent')
+    else:
+      raise ValueError('There are too many or no possible parent(s)')
+
+  def delink_parent(self):
+    for attr_name in self._PARENTS:
+      if hasattr(self, attr_name):
+        item = getattr(self, attr_name)
+        if isinstance(item, Entity) or isinstance(item, NoneType):
+          setattr(self, attr_name, None)
+        else:
+          setattr(self, attr_name, list())
 
   @property
   def root(self):
@@ -74,7 +86,10 @@ class Entity(BaseElement):
     if parent:
       if hasattr(parent, 'event'):
         if isinstance(parent.event, list):
-          return parent.event[0]
+          if parent.event:
+            return parent.event[0]
+          else:
+            return parent.root
         else:
           return parent.event
       else:

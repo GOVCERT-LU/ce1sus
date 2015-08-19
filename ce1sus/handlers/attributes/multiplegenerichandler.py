@@ -34,8 +34,8 @@ class MultipleGenericHandler(GenericHandler):
     return u'Multiple Generic Handler, usable for a multi-line entries'
 
   def assemble(self, obj, json):
-    self.object_definitions[obj.definition.chksum] = obj.definition
-    attr_def_chksum = self.get_main_definition().chksum
+    self.object_definitions[obj.definition.uuid] = obj.definition
+    attr_def_uuid = self.get_main_definition().uuid
     value = json.get('value', None)
     if value:
       if isinstance(value, types.StringTypes):
@@ -69,18 +69,18 @@ class MultipleGenericHandler(GenericHandler):
 
           if create_observables:
             observable = self.create_observable(obj, json)
-            self.set_object_definition(json, obj.definition.chksum)
+            self.set_object_definition(json, obj.definition.uuid)
             sub_obj = self.create_object(observable, json)
             observable.object = sub_obj
-            self.set_attribute_definition(json, attr_def_chksum)
+            self.set_attribute_definition(json, attr_def_uuid)
             attribute = self.create_attribute(sub_obj, json)
             sub_obj.attributes.append(attribute)
             observables.append(observable)
           else:
             # create related objects
-            self.set_object_definition(json, obj.definition.chksum)
+            self.set_object_definition(json, obj.definition.uuid)
             sub_obj = self.create_object(observable, json)
-            self.set_attribute_definition(json, attr_def_chksum)
+            self.set_attribute_definition(json, attr_def_uuid)
             attribute = self.create_attribute(sub_obj, json)
             sub_obj.attributes.append(attribute)
             rel_obj = RelatedObject()
