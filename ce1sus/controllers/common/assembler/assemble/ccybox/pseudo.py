@@ -257,7 +257,7 @@ class PseudoCyboxAssembler(BaseChanger):
               error_message = ObjectValidator.getFirstValidationError(attribute)
               self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
           else:
-            raise ValueError('Return value of attribute handler {0} is not an instance of Observable, ObservableComposition, RelatedObject or Attribute')
+            raise ValueError('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
     return changed_on
 
   def get_condition(self, uuid, cache_object):

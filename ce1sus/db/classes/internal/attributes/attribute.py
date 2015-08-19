@@ -136,7 +136,6 @@ class Attribute(BaseElement, Base):
         value_instance.value = new_value
         value_instance.value_type_id = self.definition.value_type_id
 
-      """
       if self.object:
         if self.object.event or self.object.event_id:
           event_id = self.object.event_id
@@ -152,7 +151,6 @@ class Attribute(BaseElement, Base):
           raise ValueError(u'Parent of object was not set.')
       else:
         raise ValueError(u'Cannot set the attribute value as the parent object is not yet set.')
-      """
 
       setattr(self, attribute, value_instance)
 

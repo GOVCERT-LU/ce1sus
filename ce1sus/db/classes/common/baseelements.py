@@ -53,13 +53,34 @@ class Entity(BaseElement):
 
   @parent.setter
   def parent(self, instance):
+    # TODO: verify if this is feasible for long term (note as there can be more parents)
+    parent_set = False
     for attr_name in self._PARENTS:
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
         if isinstance(item, Entity) or isinstance(item, NoneType):
           setattr(self, attr_name, instance)
+          parent_set = True
         else:
           item.append(instance)
+          parent_set = True
+    if not parent_set:
+      if self.get_classname() != 'Event':
+        raise ValueError('Cannot find parent')
+
+  @property
+  def root(self):
+    parent = self.parent
+    if parent:
+      if hasattr(parent, 'event'):
+        if isinstance(parent.event, list):
+          return parent.event[0]
+        else:
+          return parent.event
+      else:
+        return parent.root
+    else:
+      return self
 
   def set_id(self, id_):
     namespace, uuid = self.parse_id(id_)

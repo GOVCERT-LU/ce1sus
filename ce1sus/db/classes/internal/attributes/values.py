@@ -33,7 +33,6 @@ class ValueBase(BaseObject):
   def attribute(self):
     return relationship('Attribute', uselist=False, lazy='joined')
 
-  """
   @declared_attr
   def event_id(self):
     return Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
@@ -41,7 +40,6 @@ class ValueBase(BaseObject):
   @declared_attr
   def event(self):
     return relationship(Event, uselist=False)
-  """
 
   @declared_attr
   def value_type_id(self):

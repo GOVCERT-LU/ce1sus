@@ -55,10 +55,7 @@ class Object(Entity, Base):
 
   @property
   def event(self):
-    if self.observable:
-      return self.observable[0].event[0]
-    else:
-      return self.parent.parent.event
+    return self.root
 
   @property
   def event_id(self):

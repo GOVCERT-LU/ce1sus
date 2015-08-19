@@ -320,7 +320,7 @@ class AttributeHandlerBase(HandlerBase):
     definition = self.get_object_definition(json)
     obj.definition = definition
 
-    # obj.observable = [obsevable]
+    obj.observable = [observable]
     return obj
 
 
@@ -328,6 +328,9 @@ class AttributeHandlerBase(HandlerBase):
   def create_observable(self, obj, json, change_base_element=True):
     observable = Observable()
     self.set_base(observable, json, obj, change_base_element)
+
+    # set parent
+    observable.parent = obj.observable[0].parent
 
     observable.description = StructuredText()
     self.set_base(observable.description, json, observable, change_base_element)

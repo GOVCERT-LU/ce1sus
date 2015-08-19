@@ -47,7 +47,7 @@ class MultipleGenericHandler(GenericHandler):
         value = values[0].strip('\n\r')
         json['value'] = value
         attribute = self.create_attribute(obj, json)
-        return [attribute], None
+        return [attribute]
       else:
         observables = list()
         related_objects = list()
