@@ -64,54 +64,36 @@ app.controller("groupDetailController", function($scope, Restangular, messages, 
   original_group = angular.copy($group);
   $scope.group = $group;
 
+  if (!$scope.group.children){
+    $scope.group.children = [];
+  }
+  
   $scope.group.getList("children").then(function (group_response) {
     $scope.group.children = group_response;
   });
-  var remaining = [];
-  var found = false;
-  angular.forEach($scope.groups, function(available_group) {
-    angular.forEach($scope.group.children, function(child_group) {
-      if (available_group.identifier === child_group.identifier){
-        found = true;
-      }
-    }, $log);
-    if (!found){
-      remaining.push(available_group);
-    }
-
-  }, $log);
-  $scope.remaining = remaining;
-
   
   //Scope functions
   $scope.removeGroup = function(){
     //remove group from group list
     $scope.group.remove().then(function (data) {
       if (data) {
-        var index = 0;
-        angular.forEach($scope.groups, function(entry) {
-          
-          if (entry.identifier == $scope.group.identifier) {
-            $scope.groups.splice(index, 1);
+        
+        for (var i = 0; i < $scope.groups.length; i++) {
+          if ($scope.groups[i].identifier == $scope.group.identifier) {
+            $scope.groups.splice(i, 1);
             if ($scope.groups.length > 0) {
               $location.path("/admin/group/"+ $scope.groups[0].identifier);
             } else {
               $location.path("/admin/group");
             }
+            break;
           }
-          index++;
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'Group sucessfully removed'});
       }
     }, function (response) {
       handleError(response, messages);
     });
-    $scope.$hide();
-  };
-  
-  //TODO: Write actions for add and remove groups from group
-  $scope.foo = function(input){
-    console.log('aaaa');
   };
   
   $scope.$routeSegment = $routeSegment;
@@ -149,12 +131,12 @@ app.controller("groupEditController", function($scope, Restangular, messages, $r
       if (data) {
         $scope.group = data;
         //update name in menu
-        angular.forEach($scope.groups, function(entry) {
-          if (entry.identifier == data.identifier) {
-            entry.name = data.name;
+        for (var i = 0; i < $scope.groups.length; i++) {
+          if ($scope.groups[i].identifier == data.identifier) {
+            $scope.groups[i].name = data.name;
+            break;
           }
-          $scope.group = entry;
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
       }
     }, function (response) {
