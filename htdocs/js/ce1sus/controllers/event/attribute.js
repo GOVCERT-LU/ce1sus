@@ -5,16 +5,18 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   $scope.definitions =[];
 
   Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
-    for (var j = 0; j < $scope.definitions.length; j++) {
+    for (var j = 0; j < attributes.length; j++) {
       found = false;
-      for (var i = 0; i < $scope.object.attributes.length; i++) {
-        if ($scope.definitions[j].identifier == $scope.object.attributes[i].definition.identifier) {
-          found = true;
-          break;
+      if ($scope.object.attributes){
+        for (var i = 0; i < $scope.object.attributes.length; i++) {
+          if (attributes[j].identifier == $scope.object.attributes[i].definition.identifier) {
+            found = true;
+            break;
+          }
         }
       }
       if (!found){
-        $scope.definitions.push($scope.definitions[j]);
+        $scope.definitions.push(attributes[j]);
       }
     }
     

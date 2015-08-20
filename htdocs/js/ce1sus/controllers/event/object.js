@@ -112,7 +112,7 @@ app.controller("objectChildAddController", function($scope, Restangular, message
   
   $scope.submitrelatedObject = function(){
     for (var i = 0; i < $scope.definitions.length; i++) {
-      if (entry.identifier == $scope.relatedObject.definition_id){
+      if ($scope.definitions[i].identifier == $scope.relatedObject.definition_id){
         $scope.relatedObject.definition=$scope.definitions[i];
         break;
       }
