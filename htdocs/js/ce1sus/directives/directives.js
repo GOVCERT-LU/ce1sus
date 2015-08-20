@@ -796,21 +796,22 @@ app.directive("object", function($compile) {
           
         } else {
           // observable
-          observable = data;
           
-          allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.observables;
+          var allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.observables;
           if (!allObservables){
             allObservables = $scope.$parent.$parent.$parent.$parent.$parent.$parent.observables;
           }
           counter = -1;
           index = -1;
-          angular.forEach(allObservables, function(element) {
-            counter++;
-            if (element.identifier == observable.identifier) {
-              index = counter;
+          for (i= allObservables.length -1; i >= 0; i--) {
+            if (allObservables[i].identifier == data.identifier) {
+              index = i;
+              break;
             }
-          }, $log);
-          allObservables[index] = observable;
+          }
+          allObservables[index] = data;
+          
+          //$scope.$parent.$parent.$parent.$parent.$parent.$parent.observables.push(data);
         }
         
         

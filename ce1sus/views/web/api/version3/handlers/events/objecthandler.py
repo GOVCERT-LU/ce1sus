@@ -203,7 +203,8 @@ class ObjectHandler(RestBaseHandler):
         elif return_type <= 1:
           return obj.to_dict(cache_object_copy)
         else:
-          return obj.get_observable().to_dict(cache_object_copy)
+          # if an observable is returned then return the top parent obeservable
+          return obj.parent.parent.parent.to_dict(cache_object_copy)
       else:
         uuid = requested_object['object_uuid']
         if method == 'GET':
