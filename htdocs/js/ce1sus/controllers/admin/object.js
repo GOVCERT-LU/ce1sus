@@ -24,19 +24,17 @@ app.controller("objectDetailController", function($scope, $injector, Restangular
     $scope.object.remove().then(function (data) {
       if (data) {
         //remove the selected user and then go to the first one in case it exists
-        var index = 0;
-        angular.forEach($scope.objects, function(entry) {
-          if (entry.identifier === $scope.object.identifier){
-            $scope.objects.splice(index, 1);
+        for (var i = 0; i < $scope.objects.length; i++) {
+          if ($scope.objects[i].identifier === $scope.object.identifier){
+            $scope.objects.splice(i, 1);
             if ($scope.objects.length > 0) {
               $location.path("/admin/object/"+ $scope.objects[0].identifier);
             } else {
               $location.path("/admin/object");
             }
+            break;
           }
-          
-          index++;
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'Object sucessfully removed'});
       }
     }, function (response) {
@@ -116,12 +114,11 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
     $scope.object.modified_on = new Date().getTime();
     $scope.object.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
-        //update username in case
-        angular.forEach($scope.objects, function(entry) {
-          if (entry.identifier === data.identifier){
-            entry.name = data.name;
+        for (var i = 0; i < $scope.objects.length; i++) {
+          if ($scope.objects[i].identifier === data.identifier){
+            $scope.objects[i].name = data.name;
           }
-        }, $log);
+        }
         $scope.$parent.setObject(data);
       }
       messages.setMessage({'type':'success','message':'Object sucessfully edited'});

@@ -27,19 +27,18 @@ app.controller('conditionDetailController', function($scope, $routeSegment,$cond
     $scope.condition.remove().then(function (data) {
       if (data) {
         //remove the selected user and then go to the first one in case it exists
-        var index = 0;
-        angular.forEach($scope.conditions, function(entry) {
-          if (entry.identifier === $scope.condition.identifier){
-            $scope.conditions.splice(index, 1);
+        for (var i = 0; i < $scope.conditions.length; i++) {
+          if ($scope.conditions[i].identifier === $scope.condition.identifier){
+            $scope.conditions.splice(i, 1);
             if ($scope.conditions.length > 0) {
               $location.path("/admin/condition/"+ $scope.conditions[0].identifier);
             } else {
               $location.path("/admin/condition");
             }
+            break;
           }
           messages.setMessage({'type':'success','message':'Condition sucessfully removed'});
-          index++;
-        }, $log);
+        }
         
       }
     }, function (response) {
@@ -76,6 +75,12 @@ app.controller("conditionEditController", function($scope, Restangular, messages
     $scope.condition.put().then(function (conditiondata) {
       if (conditiondata) {
         $scope.condition = conditiondata;
+        for (var i = 0; i < $scope.conditions.length; i++) {
+          if ($scope.conditions[i].identifier == conditiondata.identifier) {
+            $scope.conditions[i].value = conditiondata.value;
+            break;
+          }
+        }
       }
       messages.setMessage({'type':'success','message':'Condition sucessfully edited'});
     }, function (response) {

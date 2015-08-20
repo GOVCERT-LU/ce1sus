@@ -31,18 +31,18 @@ app.controller('typeDetailController', function($scope, $routeSegment,$type, $lo
       if (data) {
         //remove the selected user and then go to the first one in case it exists
         var index = 0;
-        angular.forEach($scope.types, function(entry) {
-          if (entry.identifier === $scope.type.identifier){
-            $scope.types.splice(index, 1);
+        for (var i = 0; i < $scope.types.length; i++) {
+          if ($scope.types[i].identifier === $scope.type.identifier){
+            $scope.types.splice(i, 1);
             if ($scope.type.length > 0) {
               $location.path("/admin/type/"+ $scope.types[0].identifier);
             } else {
               $location.path("/admin/type");
             }
+            break;
           }
           messages.setMessage({'type':'success','message':'Type sucessfully removed'});
-          index++;
-        }, $log);
+        }
         
       }
     }, function (response) {

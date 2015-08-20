@@ -77,11 +77,13 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
     }, function(newVal, oldVal) {
       //keep the group name shown instead the uuid, but only if there are groups
       if ($scope.groups.length > 0) {
-        angular.forEach($scope.groups, function(entry) {
-          if (entry.identifier === $scope.user.group_id){
-            $scope.user.group_name = entry.name;
+        for (var i = 0; i < $scope.groups.length; i++) {
+          if ($scope.groups[i].identifier === $scope.user.group_id){
+            $scope.user.group_name = $scope.groups[i].name;
+            break;
           }
-        }, $log);
+          
+        }
       }
     });
   
@@ -93,19 +95,17 @@ app.controller("userDetailController", function($scope, $routeSegment,$user, $lo
     $scope.user.remove().then(function (data) {
       if (data) {
         //remove the selected user and then go to the first one in case it exists
-        var index = 0;
-        angular.forEach($scope.users, function(entry) {
-          if (entry.identifier === $scope.user.identifier){
-            $scope.users.splice(index, 1);
+        for (var i = 0; i < $scope.users.length; i++) {
+          if ($scope.users[i].identifier === $scope.user.identifier){
+            $scope.users.splice(i, 1);
             if ($scope.users.length > 0) {
               $location.path("/admin/user/"+ $scope.users[0].identifier);
             } else {
               $location.path("/admin/user");
             }
+            break;
           }
-          
-          index++;
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'User sucessfully removed'});
       }
     }, function (response) {
@@ -171,11 +171,12 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
     $scope.user.put().then(function (data) {
       if (data) {
         //update username in case
-        angular.forEach($scope.users, function(entry) {
-          if (entry.identifier === data.identifier){
-            entry.username = data.username;
+        for (var i = 0; i < $scope.users.length; i++) {
+          if ($scope.users[i].identifier === data.identifier){
+            $scope.users[i].username = data.username;
+            break;
           }
-        }, $log);
+        }
         $scope.user = data;
       }
       messages.setMessage({'type':'success','message':'User sucessfully edited'});

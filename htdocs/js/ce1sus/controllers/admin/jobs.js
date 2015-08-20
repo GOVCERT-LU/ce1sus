@@ -36,13 +36,12 @@ app.controller("MainJobscontroller", function($scope, Restangular, messages, $lo
 
 app.controller("Jobscontroller", function($scope, Restangular, messages, $log, $routeSegment, $location,$modal) {
   function findAndReplace(item){
-    var index=0;
-    angular.forEach($scope.jobs, function(entry) {
-      if (entry.identifier === item.identifier){
-        $scope.jobs[index] = data;
+    for (var i = 0; i < $scope.jobs.length; i++) {
+      if ($scope.jobs[i].identifier === item.identifier){
+        $scope.jobs[i] = data;
+        break;
       }
-      index++;
-    }, $log);
+    }
     $scope.jobsTable.reload();
   }
   
@@ -80,15 +79,15 @@ app.controller("Jobscontroller", function($scope, Restangular, messages, $log, $
       message = {"type":"success","message":"Job removed "+item.identifier};
       messages.setMessage(message);
       // find and reset item in jobs list
-      var index=0;
-      var r_index=-1;
-      angular.forEach($scope.jobs, function(entry) {
-        if (entry.identifier === item.identifier){
-          r_index = index;
+      var index=-1;
+      for (var i = 0; i < $scope.jobs.length; i++) {
+        if ($scope.jobs[i].identifier === item.identifier){
+          index = i;
+          break;
         }
-        index++;
-      }, $log);
-      $scope.jobs.splice(r_index, 1);
+        
+      }
+      $scope.jobs.splice(index, 1);
       $scope.jobsTable.reload();
     }, function (response) {
       handleError(response, messages);

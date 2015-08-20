@@ -33,11 +33,12 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
     }, function(newVal, oldVal) {
       //keep the condition name shown instead the uuid, but only if there are conditions
       if ($scope.conditions.length > 0) {
-        angular.forEach($scope.conditions, function(entry) {
-          if (entry.identifier === $scope.attribute.default_condition_id){
-            $scope.attribute.condition_value = entry.value;
+        for (var i = 0; i < $scope.conditions.length; i++) {
+          if ($scope.conditions[i].identifier === $scope.attribute.default_condition_id){
+            $scope.attribute.condition_value = $scope.conditions[i].value;
+            break;
           }
-        }, $log);
+        }
       }
     });
   
@@ -47,19 +48,17 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
     $scope.attribute.remove().then(function (data) {
       if (data) {
         //remove the selected user and then go to the first one in case it exists
-        var index = 0;
-        angular.forEach($scope.attributes, function(entry) {
-          if (entry.identifier === $scope.attribute.identifier){
-            $scope.attributes.splice(index, 1);
+        for (var i = 0; i < $scope.attributes.length; i++) {
+          if ($scope.attributes[i].identifier === $scope.attribute.identifier){
+            $scope.attributes.splice(i, 1);
             if ($scope.attributes.length > 0) {
               $location.path("/admin/attribute/"+ $scope.attributes[0].identifier);
             } else {
               $location.path("/admin/attribute");
             }
+            break;
           }
-          index++;
-        }, $log);
-        
+        }
       }
       messages.setMessage({'type':'success','message':'Attribute sucessfully removed'});
     }, function (response) {
@@ -78,11 +77,12 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
     }, function(newVal, oldVal) {
       //keep the group name shown instead the uuid, but only if there are groups
       if ($scope.tables.length > 0) {
-        angular.forEach($scope.tables, function(entry) {
-          if (entry.identifier === $scope.attribute.table_id){
-            $scope.attribute.table_name = entry.name;
+        for (var i = 0; i < $scope.tables.length; i++) {
+          if ($scope.tables[i].identifier === $scope.attribute.table_id){
+            $scope.attribute.table_name = $scope.tables[i].name;
+            break;
           }
-        }, $log);
+        }
       }
     });
   
@@ -91,11 +91,12 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
     }, function(newVal, oldVal) {
       //keep the group name shown instead the uuid, but only if there are groups
       if ($scope.handlers.length > 0) {
-        angular.forEach($scope.handlers, function(entry) {
-          if (entry.identifier === $scope.attribute.attributehandler_id){
-            $scope.attribute.attributehandler_name = entry.name;
+        for (var i = 0; i < $scope.handlers.length; i++) {
+          if ($scope.handlers[i].identifier === $scope.attribute.attributehandler_id){
+            $scope.attribute.attributehandler_name = $scope.handlers[i].name;
+            break;
           }
-        }, $log);
+        }
       }
     });
   
@@ -104,11 +105,12 @@ app.controller("attributeDetailController", function($scope, Restangular, messag
     }, function(newVal, oldVal) {
       //keep the group name shown instead the uuid, but only if there are groups
       if ($scope.types.length > 0) {
-        angular.forEach($scope.types, function(entry) {
-          if (entry.identifier === $scope.attribute.type_id){
-            $scope.attribute.type_name = entry.name;
+        for (var i = 0; i < $scope.types.length; i++) {
+          if ($scope.types[i].identifier === $scope.attribute.type_id){
+            $scope.attribute.type_name = $scope.types[i].name;
+            break;
           }
-        }, $log);
+        }
       }
     });
   
@@ -194,11 +196,12 @@ app.controller("attributeEditController", function($scope, Restangular, messages
       if (data) {
         $scope.attribute = data;
         //update name in menu
-        angular.forEach($scope.attributes, function(entry) {
-          if (entry.identifier == data.identifier) {
-            entry.name = data.name;
+        for (var i = 0; i < $scope.attributes.length; i++) {
+          if ($scope.attributes[i].identifier == data.identifier) {
+            $scope.attributes[i].name = data.name;
+            break;
           }
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'Attribute sucessfully edited'});
       }
       

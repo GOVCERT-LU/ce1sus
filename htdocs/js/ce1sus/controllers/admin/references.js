@@ -29,11 +29,12 @@ app.controller('referenceDetailController', function($scope, $routeSegment,$refe
     }, function(newVal, oldVal) {
       //keep the group name shown instead the uuid, but only if there are groups
       if ($scope.handlers.length > 0) {
-        angular.forEach($scope.handlers, function(entry) {
-          if (entry.identifier === $scope.reference.referencehandler_id){
-            $scope.reference.referencehandler_name = entry.name;
+        for (var i = 0; i < $scope.handlers.length; i++) {
+          if ($scope.handlers[i].identifier === $scope.reference.referencehandler_id){
+            $scope.reference.referencehandler_name = $scope.handlers[i].name;
+            break;
           }
-        }, $log);
+        }
       }
     });
   
@@ -42,19 +43,16 @@ app.controller('referenceDetailController', function($scope, $routeSegment,$refe
     $scope.reference.remove().then(function (data) {
       if (data) {
         //remove the selected user and then go to the first one in case it exists
-        var index = 0;
-        angular.forEach($scope.references, function(entry) {
-          if (entry.identifier === $scope.reference.identifier){
-            $scope.references.splice(index, 1);
+        for (var i = 0; i < $scope.references.length; i++) {
+          if ($scope.references[i].identifier === $scope.reference.identifier){
+            $scope.references.splice(i, 1);
             if ($scope.references.length > 0) {
               $location.path("/admin/reference/"+ $scope.references[0].identifier);
             } else {
               $location.path("/admin/reference");
             }
           }
-          
-          index++;
-        }, $log);
+        }
         messages.setMessage({'type':'success','message':'Reference sucessfully removed'});
       }
     }, function (response) {
@@ -130,12 +128,12 @@ app.controller("referenceEditController", function($scope, Restangular, messages
     $scope.reference.put().then(function (reference) {
       
       if (reference) {
-        
-        angular.forEach($scope.references, function(entry) {
-          if (entry.identifier == reference.identifier) {
-            entry.name = reference.name;
+        for (var i = 0; i < $scope.references.length; i++) {
+          if ($scope.references[i].identifier == reference.identifier) {
+            $scope.references[i].name = reference.name;
+            break;
           }
-        }, $log);
+        }
         $scope.reference = reference;
       }
       messages.setMessage({'type':'success','message':'Reference sucessfully added'});

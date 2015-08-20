@@ -16,11 +16,12 @@ app.controller("adminValidationController", function($scope, Restangular,message
 
   $scope.pushItem = function(event, guiOpen) {
     found = false;
-    angular.forEach($scope.openedEvents, function(value, index) {
-      if (value.identifier == event.identifier){
+    for (var i = 0; i < $scope.openedEvents.length; i++) {
+      if ($scope.openedEvents[i].identifier == event.identifier){
         found = true;
+        break;
       }
-    }, $log);
+    }
     if (!found) {
       var url = '/admin/validation/event/'+event.identifier;
       $scope.openedEvents.push({
@@ -39,17 +40,14 @@ app.controller("adminValidationController", function($scope, Restangular,message
   };
 
   $scope.removeItem = function(element_id) {
-    gotoRoot = false;
-    angular.forEach($scope.openedEvents, function(value, index) {
-      if (value.identifier) {
+    for (var i = 0; i < $scope.openedEvents.length; i++) {
+      if ($scope.openedEvents[i].identifier) {
         if (value.identifier == element_id) {
-          $scope.openedEvents.splice(index, 1);
-          gotoRoot = true;
+          $scope.openedEvents.splice(i, 1);
+          $location.path("/admin/validation/all");
+          break;
         }
       }
-    }, $log);
-    if (gotoRoot){
-      $location.path("/admin/validation/all");
     }
   };
   
