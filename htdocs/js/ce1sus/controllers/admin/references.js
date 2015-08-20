@@ -51,6 +51,7 @@ app.controller('referenceDetailController', function($scope, $routeSegment,$refe
             } else {
               $location.path("/admin/reference");
             }
+            break;
           }
         }
         messages.setMessage({'type':'success','message':'Reference sucessfully removed'});

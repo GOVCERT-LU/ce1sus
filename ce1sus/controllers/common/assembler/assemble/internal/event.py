@@ -158,7 +158,7 @@ class EventAssembler(BaseChanger):
       event_permissions = json.get('groups', None)
       if event_permissions:
         for event_permission in event_permissions:
-          ev_perm = self.assemble_group_permision(event, event_permission, cache_object)
+          ev_perm = self.assemble_event_group_permission(event, event_permission, cache_object)
           if ev_perm and not ev_perm.group.equals(event.creator_group):
             event.groups.append(ev_perm)
 
@@ -280,14 +280,11 @@ class EventAssembler(BaseChanger):
         comment.event = event
         return comment
 
-  def assemble_group_permision(self, event, json, cache_object):
-
+  def assemble_event_group_permission(self, event, json, cache_object):
     if json:
       event_permission = EventGroupPermission()
       self.set_base(event_permission, json, cache_object, event)
-      permissions = json.get('permissions', None)
-      if permissions:
-        event_permission.permissions = self.ce1sus_assembler.assemble_permissions(permissions, cache_object)
+      event_permission.event = event
 
       group_json = json.get('group', None)
       if group_json:
@@ -295,5 +292,12 @@ class EventAssembler(BaseChanger):
         if not group:
           group = self.ce1sus_assembler.assemble_group(group_json, cache_object)
         event_permission.group = group
+
+      permissions = json.get('permissions', None)
+      if permissions:
+        event_permission.permissions = self.ce1sus_assembler.assemble_permissions(permissions, event, cache_object)
+      else:
+        event_permission.dbcode = group.default_dbcode
+
       if event_permission.group:
         return event_permission

@@ -5,15 +5,16 @@ module handing the event pages
 
 Created: Aug 28, 2013
 """
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
+
 from ce1sus.common.checks import is_event_owner
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
+from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.event.comments import CommentBroker
-from ce1sus.db.brokers.event.eventbroker import EventBroker
+from ce1sus.db.brokers.event.eventbroker import EventBroker, EventPermissionBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
-from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from ce1sus.controllers.events.relations import RelationController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -31,6 +32,13 @@ class EventController(BaseController):
     self.comment_broker = self.broker_factory(CommentBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.relations_controller = RelationController(config, session)
+    self.event_permission_broker = self.broker_factory(EventPermissionBroker)
+  
+  def get_event_permission_by_uuid(self, uuid):
+    try:
+      return self.event_permission_broker.get_by_uuid(uuid)
+    except BrokerException as error:
+      raise ControllerException(error)
 
   def get_all_misp_events(self):
     try:
@@ -383,10 +391,8 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_event_group_permission(self, user, event_group_permission, commit=True):
+  def insert_event_group_permission(self, event_group_permission, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event_group_permission, user, True)
       self.event_broker.insert_group_permission(event_group_permission, commit)
     except BrokerException as error:
       raise ControllerException(error)

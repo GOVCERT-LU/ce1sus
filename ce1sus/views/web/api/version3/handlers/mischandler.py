@@ -13,6 +13,7 @@ from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.db.classes.internal.common import TLP
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.controllers.admin.group import GroupController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -176,4 +177,21 @@ class SyncServerTypesHandler(RestBaseHandler):
     result = list()
     for key, value in values.iteritems():
       result.append({'identifier': key, 'name': value})
+    return result
+
+class UserGroupsHandler(RestBaseHandler):
+
+  def __init__(self, config):
+    super(UserGroupsHandler, self).__init__(config)
+    self.group_controller = self.controller_factory(GroupController)
+
+  @rest_method(default=True)
+  @methods(allowed=['GET'])
+  @require(privileged())
+  def usergroups(self, **args):
+    groups = self.group_controller.get_all_groups()
+    result = list()
+    cache_object = self.get_cache_object(args)
+    if groups:
+      result = groups[0].attributelist_to_dict(groups, cache_object)
     return result

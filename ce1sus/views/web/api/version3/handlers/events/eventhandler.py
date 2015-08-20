@@ -299,50 +299,32 @@ class EventHandler(RestBaseHandler):
     return 'Event validated'
 
   def __process_event_group(self, method, event, requested_object, json, cache_object):
-    if method == 'POST':
+    if method == 'GET':
+        uuid = requested_object['object_uuid']
+        if uuid:
+          event_permission = self.event_controller.get_event_permission_by_uuid(uuid)
+          self.check_item_is_viewable(event, event_permission)
+          return event_permission.to_dict(cache_object)
+        else:
+          result = event.attributelist_to_dict(event.groups, cache_object)
+          if result:
+            return result
+          else:
+            return list()
+    elif method == 'POST':
       self.check_if_event_group_can_change(event)
       # get group
-      group = json.get('group', None)
-      if group:
-        uuid = group.get('identifier')
-        if uuid:
-          # get group
-          group = self.event_controller.get_group_by_uuid(uuid)
-          # append
-          event_group_permission = EventGroupPermission()
-          event_group_permission.event_id = event.identifier
-          event_group_permission.group = group
-          permissions = json.get('permissions', None)
-          if permissions:
-            event_group_permission.permissions.populate(permissions)
-          else:
-            # use defaults
-            event_group_permission.dbcode = group.default_dbcode
-
-          self.event_controller.insert_event_group_permission(cache_object.user, event_group_permission, True)
-          return event_group_permission.to_dict()
-        else:
-          raise RestHandlerException(u'Cannot add group as no group was provided')
-      else:
-        raise RestHandlerException(u'Cannot add group as no group was provided')
-
+      event_group_permission = self.assembler.assemble(json, EventGroupPermission, event, cache_object)
+      self.event_controller.insert_event_group_permission(event_group_permission, cache_object, True)
+      return event_group_permission.to_dict(cache_object)
     elif method == 'PUT':
       self.check_if_event_is_modifiable(event)
       uuid = requested_object.get('object_uuid', None)
       if uuid:
-        # get permissions
-
-        json_permissions = json.get('permissions', None)
-        if json_permissions:
-          event_group = self.event_controller.get_event_group_by_uuid(uuid)
-          event_group.permissions.populate(json_permissions)
-          self.event_controller.update_event_group_permissions(cache_object.user, event_group, True)
-          return event_group.to_dict()
-        else:
-          raise RestHandlerException(u'Cannot update group permissions for group {1} on event {0} as uuid was specified'.format(event.identifer, uuid))
-
-      else:
-        raise RestHandlerException(u'Cannot update group permissions for event {0} as uuid was specified'.format(event.identifer))
+        event_group_permission = self.event_controller.get_event_permission_by_uuid(uuid)
+        self.updater.update(event_group_permission, json, cache_object)
+        self.observable_controller.update_observable(event_group_permission, cache_object, True)
+        return event_group_permission.to_dict(cache_object)
 
     elif method == 'DELETE':
       self.check_if_event_group_can_change(event)

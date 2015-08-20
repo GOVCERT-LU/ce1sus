@@ -117,6 +117,7 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
         for (var i = 0; i < $scope.objects.length; i++) {
           if ($scope.objects[i].identifier === data.identifier){
             $scope.objects[i].name = data.name;
+            break;
           }
         }
         $scope.$parent.setObject(data);

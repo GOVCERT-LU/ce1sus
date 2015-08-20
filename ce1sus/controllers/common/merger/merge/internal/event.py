@@ -23,6 +23,18 @@ class EventMerger(BaseMerger):
     self.cybox_merger = CyboxMerger(config, session)
     self.stix_merger = STIXMerger(config, session)
 
+  def merge_event_group_permission(self, old_instance, new_instance, merge_cache):
+    if old_instance and new_instance:
+      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if merge_cache.result == 1:
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'dbcode', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'dbcode', merge_cache))
+      elif merge_cache.result == 0:
+        old_instance = new_instance
+        merge_cache.object_changes = True
+
+      self.set_base(old_instance, new_instance, merge_cache)
+    return merge_cache.version
 
   def merge_event(self, old_instance, new_instance, merge_cache):
 

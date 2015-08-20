@@ -21,6 +21,15 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
+class EventPermissionBroker(BrokerBase):
+
+  def get_broker_class(self):
+    """
+    overrides BrokerBase.get_broker_class
+    """
+    return EventGroupPermission
+
+
 # pylint: disable=R0904
 class EventBroker(BrokerBase):
 

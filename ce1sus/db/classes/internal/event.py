@@ -77,10 +77,10 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
     # TODO: validate
     return True
 
-  def to_dict(self, complete=True, inflated=False):
+  def to_dict(self, cache_object):
     return {'identifier': self.convert_value(self.uuid),
-            'permissions': self.permissions.to_dict(),
-            'group': self.group.to_dict(complete, inflated)}
+            'permissions': self.attribute_to_dict(self.permissions, cache_object),
+            'group': self.group.to_dict(cache_object)}
 
 
 class Event(Entity, Base):
@@ -120,7 +120,7 @@ class Event(Entity, Base):
   last_publish_date = Column('last_publish_date', DateTime)
 
   #ce1sus specific
-  groups = relationship('EventGroupPermission')
+  groups = relationship('EventGroupPermission', backref='event')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   errors = relationship(ErrorBase, backref='event')
 

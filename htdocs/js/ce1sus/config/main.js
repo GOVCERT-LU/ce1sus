@@ -400,6 +400,23 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                             templateUrl: "pages/events/event/groups.html",
                             dependencies: ["id"],
                             controller: 'eventGroupController',
+                            resolve: {
+                              groups: function(Restangular,$routeSegment) {
+                                return Restangular.all("usergroups").getList({"complete": true,"inflated":true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              },
+                              eventpermissions: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all("group").getList({"complete": true, "inflated":true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                    throw generateErrorMessage(response);
+                                });
+                              }
+                            },
+                            
                             untilResolved: {
                               templateUrl: 'pages/common/loading.html',
                               controller: 'loadingController'

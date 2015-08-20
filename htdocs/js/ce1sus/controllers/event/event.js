@@ -30,11 +30,13 @@ app.controller("eventController", function($scope, Restangular,messages,
   
   $scope.pushItem = function(event, guiOpen) {
     found = false;
-    angular.forEach($scope.openedEvents, function(value, index) {
-      if (value.identifier == event.identifier){
+    for (var i = 0; i < $scope.openedEvents.length; i++) {
+      if ($scope.openedEvents[i].identifier == event.identifier){
         found = true;
+        break;
       }
-    }, $log);
+    }
+    
     var url = '/events/event/'+event.identifier;
     if (!found) {
       $scope.openedEvents.push({
@@ -55,17 +57,14 @@ app.controller("eventController", function($scope, Restangular,messages,
   };
 
   $scope.removeItem = function(element_id) {
-    gotoRoot = false;
-    angular.forEach($scope.openedEvents, function(value, index) {
-      if (value.identifier) {
-        if (value.identifier == element_id) {
-          $scope.openedEvents.splice(index, 1);
-          gotoRoot = true;
+    for (var i = 0; i < $scope.openedEvents.length; i++) {
+      if ($scope.openedEvents[i].identifier) {
+        if ($scope.openedEvents[i].identifier == element_id) {
+          $scope.openedEvents.splice(i, 1);
+          $location.path("/events/all");
+          break;
         }
       }
-    }, $log);
-    if (gotoRoot){
-      $location.path("/events/all");
     }
   };
   
@@ -88,11 +87,9 @@ app.controller("viewEventController", function($scope, Restangular, messages,
   
   $scope.getRolesName = function(roles){
     var rolesStr = '[';
-    angular.forEach(roles, function(role) {
-      rolesStr = rolesStr + role.name + ', '; 
-    });
-    
-    
+    for (var i = 0; i < roles.length; i++) {
+      rolesStr = rolesStr + roles[i].name + ', '; 
+    }
     return rolesStr + ']';
   };
 });
@@ -103,17 +100,18 @@ app.controller("eventObservableController", function($scope, Restangular, messag
   $scope.getAttributes=function(){
     var attributes = [];
     function generateItems(object, observable, composed){
+      var item = {};
       if (object.attributes.length > 0) {
-        angular.forEach(object.attributes, function(attribute, index) {
-          var item = {};
-          item.value = attribute.value;
-          item.definition = attribute.definition;
-          item.ioc = attribute.ioc;
-          item.shared = attribute.shared;
+        for (var i = 0; i < object.attributes.length; i++) {
+          item = {};
+          item.value = object.attributes[i].value;
+          item.definition = object.attributes[i].definition;
+          item.ioc = object.attributes[i].ioc;
+          item.shared = object.attributes[i].shared;
           item.object = object.definition.name;
           item.observable = observable.title;
-          if (attribute){
-            item.properties = attribute.properties;
+          if (object.attributes[i]){
+            item.properties = object.attributes[i].properties;
           } else {
             if (object) {
               item.properties = object.properties;
@@ -128,25 +126,25 @@ app.controller("eventObservableController", function($scope, Restangular, messag
             item.composedlength = composed.observables.length;
           }
           attributes.push(item);
-        }, $log);
+        }
       } else {
-        var item = {};
+        item = {};
         item.observable = observable.title;
         item.object = object.definition.name;
         item.value = 'No attributes were definied';
         attributes.push(item);
       }
       // continue with the related objects
-      angular.forEach(object.related_objects, function(relObject) {
-        generateItems(relObject.object, observable);
-      }, $log);
+      for (var j = 0; j < object.related_objects.length; j++) {
+        generateItems(object.related_objects[j].object, observable);
+      }
     }
     
     function processObservavle(observable, composed){
       if (observable.observable_composition){
-        angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
-          processObservavle(compobservable, observable.observable_composition);
-        },$log);
+        for (var i = 0; i < observable.observable_composition.observables.length; i++) {
+          processObservavle(observable.observable_composition.observables[i], observable.observable_composition);
+        }
       } else {
         if (observable.object) {
           generateItems(observable.object, observable, composed);
@@ -158,10 +156,9 @@ app.controller("eventObservableController", function($scope, Restangular, messag
         }
       }
     }
-    
-    angular.forEach($scope.observables, function(observable) {
-      processObservavle(observable, null);
-    }, $log);
+    for (var i = 0; i < $scope.observables.length; i++) {
+      processObservavle($scope.observables[i], null);
+    }
     return attributes;
   };
   
@@ -265,17 +262,18 @@ app.controller("eventIndicatorController", function($scope, Restangular, message
   $scope.getAttributes=function(){
     var attributes = [];
     function generateItems(object, observable, composed){
+      var item = {};
       if (object.attributes.length > 0) {
-        angular.forEach(object.attributes, function(attribute, index) {
-          var item = {};
-          item.value = attribute.value;
-          item.definition = attribute.definition;
-          item.ioc = attribute.ioc;
-          item.shared = attribute.shared;
+        for (var i = 0; i < object.attributes.length; i++) {
+          item = {};
+          item.value = object.attributes[i].value;
+          item.definition = object.attributes[i].definition;
+          item.ioc = object.attributes[i].ioc;
+          item.shared = object.attributes[i].shared;
           item.object = object.definition.name;
           item.observable = observable.title;
-          if (attribute){
-            item.properties = attribute.properties;
+          if (object.attributes[i]){
+            item.properties = object.attributes[i].properties;
           } else {
             if (object) {
               item.properties = object.properties;
@@ -290,25 +288,25 @@ app.controller("eventIndicatorController", function($scope, Restangular, message
             item.composedlength = composed.observables.length;
           }
           attributes.push(item);
-        }, $log);
+        }
       } else {
-        var item = {};
+        item = {};
         item.observable = observable.title;
         item.object = object.definition.name;
         item.value = 'No attributes were definied';
         attributes.push(item);
       }
       // continue with the related objects
-      angular.forEach(object.related_objects, function(relObject) {
-        generateItems(relObject.object, observable);
-      }, $log);
+      for (var j = 0; j < object.related_objects.length; j++) {
+        generateItems(object.related_objects[j].object, observable);
+      }
     }
     
     function processObservavle(observable, composed){
       if (observable.observable_composition){
-        angular.forEach(observable.observable_composition.observables, function(compobservable, index) {
-          processObservavle(compobservable, observable.observable_composition);
-        },$log);
+        for (var i = 0; i < observable.observable_composition.observables.length; i++) {
+          processObservavle(observable.observable_composition.observables[i], observable.observable_composition);
+        }
       } else {
         if (observable.object) {
           generateItems(observable.object, observable, composed);
@@ -320,12 +318,11 @@ app.controller("eventIndicatorController", function($scope, Restangular, message
         }
       }
     }
-    
-    angular.forEach($scope.indicators, function(indicator) {
-      angular.forEach(indicator.observables, function(observable) {
-        processObservavle(observable, null);
-      }, $log);
-    }, $log);
+    for (var i = 0; i < $scope.indicators.length; i++) {
+      for (var j = 0; j < $scope.indicators[i].observables.length; j++) {
+        processObservavle($scope.indicators[i].observables[j], null);
+      }
+    }
     return attributes;
   };
   
@@ -532,12 +529,11 @@ app.controller("editEventController", function($scope, Restangular, messages,
       if (data) {
         $scope.event = data;
         //update username in case
-        angular.forEach($scope.openedEvents, function(entry) {
-          if (entry.identifier === data.identifier){
-            entry.title = data.title;
+        for (var i = 0; i < $scope.openedEvents.length; i++) {
+          if ($scope.openedEvents[i].identifier === data.identifier){
+            $scope.openedEvents[i].title = data.title;
           }
-        }, $log);
-        
+        }
       }
       
       messages.setMessage({'type':'success','message':'Event sucessfully edited'});
@@ -586,13 +582,13 @@ app.controller("eventOverviewController", function($scope, Restangular, messages
         if (data) {
           //remove the selected user and then go to the first one in case it exists
           var index = 0;
-          angular.forEach($scope.openedEvents, function(entry) {
-            if (entry.identifier === $scope.event.identifier){
-              $scope.openedEvents.splice(index, 1);
+          for (var i = 0; i < $scope.openedEvents.length; i++) {
+            if ($scope.openedEvents[i].identifier === $scope.event.identifier){
+              $scope.openedEvents.splice(i, 1);
               $location.path("/events/all");
+              break;
             }
-            index++;
-          }, $log);
+          }
           messages.setMessage({'type':'success','message':'Event sucessfully removed'});
         }
       }, function (response) {
@@ -660,11 +656,12 @@ app.controller("changeOwnerController", function($scope, Restangular, messages,
   
   $scope.submitGroup = function(){
     var group = null;
-    angular.forEach($scope.groups, function(entry) {
-      if (entry.identifier === $scope.ownergroup){
-        group = entry;
+    for (var i = 0; i < $scope.groups.length; i++) {
+      if ($scope.groups[i].identifier === $scope.ownergroup){
+        group = $scope.groups[i];
+        break;
       }
-    }, $log);
+    }
     
     $http.put("/REST/0.3.0/event/"+$scope.event.identifier+'/changegroup', {'identifier': $scope.ownergroup}).success(function(data, status, headers, config) {
       if (data == 'OK') {
@@ -767,59 +764,33 @@ app.controller("editEventCommentController", function($scope, Restangular, messa
   };
 });
 
-app.controller("eventGroupController", function($scope, Restangular, messages,
-    $log, $routeSegment) {
+app.controller("eventGroupController", function($scope, Restangular, messages, $log, $routeSegment, groups, eventpermissions) {
   $scope.multiple = false;
-  $scope.permissions = {};
   
-  $scope.remaining = angular.copy($scope.groups);
-  if (!$scope.event.groups){
-    $scope.associated =[];
-  } else {
-     $scope.associated = angular.copy($scope.event.groups);
-  }
-  $scope.setRemaining = function() {
-    var index = 0;
-    var items_to_remove = [];
-    angular.forEach($scope.remaining, function(item) {
-      // remove selected from the group
-      if (item.identifier == $scope.event.creator_group.identifier) {
-        items_to_remove.push(index);
-      } else {
-        if ($scope.associated.length > 0) {
-          angular.forEach($scope.associated, function(associatedEntry) {
-            var id1 = associatedEntry.group.identifier;
-            var id2 = item.identifier;
-            if (id1.toLowerCase() == id2.toLowerCase()){
-              items_to_remove.push(index);
-              
-            }
-            
-          }, $log);
-        }
-      }
-      index++;
-    }, $log);
-    //sort array from big to log
-    items_to_remove = items_to_remove.reverse();
-    angular.forEach(items_to_remove, function(index){
-      $scope.remaining.splice(index, 1);
-    });
-  };
-  $scope.setRemaining();
+  $scope.allItems = groups;
   var original_values = {};
+  
+  $scope.associated = eventpermissions;
+  
+  $scope.remaining = angular.copy($scope.allItems);
+  
+  if (!$scope.associated){
+    $scope.associated =[];
+  }
+
   $scope.setPropeties = function(){
     $scope.showBtn = true;
     $scope.selected_remaining = [];
     if ($scope.selected_accociated.length == 1){
       //Get Permissions from selected
-      angular.forEach($scope.associated, function(associatedEntry) {
+      for (var i = 0; i < $scope.associated.length; i++) {
         $scope.multiple = false;
-        if (associatedEntry.group.identifier == $scope.selected_accociated[0]) {
-          $scope.permissions = angular.copy(associatedEntry.permissions);
-          original_values = angular.copy(associatedEntry.permissions);
+        if ($scope.associated[i].group.identifier == $scope.selected_accociated[0]) {
+          $scope.permissions = angular.copy($scope.associated[i].permissions);
+          original_values = angular.copy($scope.associated[i].permissions);
+          break;
         }
-      }, $log);
+      }
       
     } else {
       $scope.multiple = true;
@@ -831,19 +802,35 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
     $scope.showBtn = false;
     if ($scope.selected_remaining.length == 1){
       //Get Permissions from selected
-      angular.forEach($scope.remaining, function(entry) {
+      for (var i = 0; i < $scope.remaining.length; i++) {
         $scope.multiple = false;
-        if (entry.identifier == $scope.selected_remaining[0]) {
-          $scope.permissions = angular.copy(entry.default_event_permissions);
-          original_values = angular.copy(entry.default_event_permissions);
+        if ($scope.remaining[i].identifier == $scope.selected_remaining[0]) {
+          $scope.permissions = angular.copy($scope.remaining[i].default_event_permissions);
+          original_values = angular.copy($scope.remaining[i].default_event_permissions);
+          break;
         }
-      }, $log);
+      }
       
     } else {
       $scope.multiple = true;
     }
   };
   
+  $scope.resetPermissions = function() {
+    $scope.permissions = angular.copy(original_values);
+  };
+  
+  $scope.permissionsChanged = function ()
+  {
+    return !angular.equals($scope.permissions, original_values);
+  };
+  
+  $scope.$watch(function() {
+    return $scope.associated;
+  }, function(newVal, oldVal) {
+    setRemaining();
+  });
+
   $scope.setDefaults = function(){
     var uuid = null;
     if ($scope.selected_accociated.length == 1) {
@@ -854,47 +841,29 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
       }
     }
     if (uuid) {
-      angular.forEach($scope.groups, function(item) {
-        if (item.identifier == uuid) {
-          $scope.permissions = angular.copy(item.default_event_permissions);
+      for (var i = 0; i < $scope.groups.length; i++) {
+        if ($scope.groups[i].identifier == uuid) {
+          $scope.permissions = angular.copy($scope.groups[i].default_event_permissions);
         }
-      }, $log);
+      }
     } else {
       $scope.permissions = {};
     }
   };
   
-  $scope.resetPermissions = function() {
-    if ($scope.selected_accociated.length == 1) {
-      $scope.permissions = angular.copy(original_values);
-    }
-  };
-  
-  $scope.permissionsChanged = function ()
-  {
-    return !angular.equals($scope.permissions, original_values);
-  };
-  
-  $scope.submitPermissionChanges = function(){
-    var eventPermission = null;
-    angular.forEach($scope.associated, function(associatedEntry) {
-      $scope.multiple = false;
-      if (associatedEntry.group.identifier == $scope.selected_accociated[0]) {
-        eventPermission = associatedEntry;
-      }
-    }, $log);
-    eventPermission.permissions = $scope.permissions;
+  function sumbit_changes(eventPermission){
     restangularPermission = Restangular.restangularizeElement($scope.event, eventPermission, 'group');
     restangularPermission.put().then(function (data) {
       if (data){
         messages.setMessage({'type':'success','message':'Group sucessfully edited'});
         //update group in browser
-        angular.forEach($scope.associated, function(associatedEntry) {
+        for (var i = 0; i < $scope.associated.length; i++) {
           $scope.multiple = false;
-          if (associatedEntry.group.identifier == $scope.selected_accociated[0]) {
-            associatedEntry = data;
+          if ($scope.associated[i].group.identifier == $scope.selected_accociated[0]) {
+            $scope.associated[i] = data;
+            break;
           }
-        }, $log);
+        }
       } else {
         messages.setMessage({'type':'danger','message':'An unexpected error occured'});
       }
@@ -903,85 +872,140 @@ app.controller("eventGroupController", function($scope, Restangular, messages,
       $scope.comment = angular.copy(original_comment);
       handleError(response, messages);
     });
-  };
+  }
   
-  $scope.groupAdd = function(){
-    var original_associated = angular.copy($scope.associated);
-    angular.forEach($scope.selected_remaining, function(addedItemID) {
+  $scope.submitPermissionChanges = function(){
+    var eventPermission = null;
+    for (var i = 0; i < $scope.associated.length; i++) {
+      $scope.multiple = false;
+      if ($scope.associated[i].group.identifier == $scope.selected_accociated[0]) {
+        eventPermission = $scope.associated[i];
+        eventPermission.permissions = $scope.permissions;
+        sumbit_changes(eventPermission);
+        break;
+      }
+    }
+  };
+
+  
+  function setRemaining() {
+    var items_to_remove = [];
+    for (var i = 0; i < $scope.remaining.length; i++) {
       // remove selected from the group
-      var index = 0;
-      angular.forEach($scope.remaining, function(remEntry) {
-        if (addedItemID == remEntry.identifier){
-          $scope.remaining.splice(index, 1);
+      if ($scope.associated) {
+        for (var j = 0; j < $scope.associated.length; j++) {
+          if ($scope.associated[j].group.identifier === $scope.remaining[i].identifier){
+            items_to_remove.push(i);
+            break;
+          }
         }
-        index++;
-      }, $log);
-      //get the original details
-      angular.forEach($scope.groups, function(itemEntry) {
-        if (itemEntry.identifier == addedItemID){
-          //check if only one is selected then append the set permissions else take the default ones
-          var permissions = itemEntry.default_event_permissions;
+      } else {
+        //restangularize object
+        $scope.associated =  [];
+      }
+    }
+    //sort array that the values are from big to low as the $scope.remaining array is shrinking
+    items_to_remove = items_to_remove.reverse();
+    for (var k = 0; k < items_to_remove.length; k++) {
+      var index = items_to_remove[k];
+      $scope.remaining.splice(index, 1);
+    }
+  }
+  
+  $scope.selected_accociated = [];
+  $scope.selected_remaining = [];
+  var original_associated = angular.copy($scope.associated);
+  
+  function add_item(added_group, permissions) {
+    Restangular.one('event', $scope.event.identifier).all('group').post({'group': {'identifier':added_group.identifier,'name':added_group.name}, 'permissions': permissions}).then(function (item) {
+      if (item) {
+        messages.setMessage({'type':'success','message':'Item sucessfully associated'});
+      } else {
+        
+        messages.setMessage({'type':'danger','message':'Unkown error occured'});
+      }
+      $scope.associated.push(item);
+      
+      $scope.selected_accociated = [];
+      $scope.selected_remaining = [];
+    }, function (response) {
+      $scope.remaining = angular.copy($scope.allItems);
+      $scope.associated = original_associated;
+      
+      handleError(response, messages);
+    });
+  }
+  
+  $scope.groupAdd = function() {
+    var original_associated = angular.copy($scope.associated);
+    for (var i = 0; i < $scope.selected_remaining.length; i++) {
+      // remove selected from the group
+      for (var j = 0; j < $scope.remaining.length; j++) {
+        if ($scope.selected_remaining[i] == $scope.remaining[j].identifier){
+          $scope.remaining.splice(j, 1);
+        }
+      }
+      
+      //append the selected to the remaining groups
+      //check if there are children
+      //search for the group details
+      for (var k = 0; k < $scope.allItems.length; k++) {
+        if ($scope.allItems[k].identifier == $scope.selected_remaining[i]){
+          
+          
+          //derestangularize the element
+          var permissions = $scope.allItems[k].default_event_permissions;
           if ($scope.selected_remaining.length == 1) {
             permissions = $scope.permissions;
           }
-          
-          Restangular.one('event', $scope.event.identifier).all('group').post({'group': {'identifier':itemEntry.identifier,'name':itemEntry.name}, 'permissions': permissions}).then(function (item) {
-            if (item) {
-              messages.setMessage({'type':'success','message':'Item sucessfully associated'});
-              $scope.associated.push(item);
-              
-            } else {
-              
-              messages.setMessage({'type':'danger','message':'Unkown error occured'});
-            }
-
-          }, function (response) {
-            $scope.associated = original_associated;
-            handleError(response, messages);
-          });
+          add_item($scope.allItems[k], permissions);
         }
-      }, $log);
-      
-    }, $log);
+      }
+    }
     $scope.permissions = {};
     $scope.selected_accociated = [];
     $scope.selected_remaining = [];
   };
-  $scope.groupRemove = function(){
-    var original_associated = angular.copy($scope.associated);
-    angular.forEach($scope.selected_accociated, function(addedItemID) {
+  
+  function remove_item(restangularPermission){
+    restangularPermission.remove().then(function (item) {
+      if (item) {
+        messages.setMessage({'type':'success','message':'Item sucessfully removed'});
+      } else {
+        messages.setMessage({'type':'danger','message':'Unkown error occured'});
+      }
+      $scope.selected_accociated = [];
+      $scope.selected_remaining = [];
+    }, function (response) {
+      $scope.remaining = angular.copy($scope.allItems);
+      $scope.associated = original_associated;
+      
+      handleError(response, messages);
+    });
+  }
+  
+  
+  $scope.groupRemove = function() {
+    for (var i = 0; i < $scope.selected_accociated.length; i++) {
       // remove selected from the group
-      var index = 0;
-      angular.forEach($scope.associated, function(item) {
-        if (addedItemID == item.group.identifier){
-          $scope.associated.splice(index, 1);
-          restangularPermission = Restangular.restangularizeElement($scope.event, item, 'group');
-          restangularPermission.remove().then(function (item) {
-            if (item) {
-              messages.setMessage({'type':'success','message':'Item sucessfully removed'});
-            } else {
-              
-              messages.setMessage({'type':'danger','message':'Unkown error occured'});
-            }
-
-          }, function (response) {
-            $scope.remaining = angular.copy($scope.groups);
-            $scope.associated = original_associated;
-            $scope.setRemaining();
-            handleError(response, messages);
-          });
-          
+      for (var j = 0; j < $scope.associated.length; j++) {
+        if ($scope.selected_accociated[i] == $scope.associated[j].group.identifier){
+          restangularPermission = Restangular.restangularizeElement($scope.event, $scope.associated[j], 'group');
+          $scope.associated.splice(j, 1);
+          remove_item(restangularPermission);
+          break;
         }
-      index++;
-      }, $log);
+      }
       
-    }, $log);
-    $scope.remaining = angular.copy($scope.groups);
-    $scope.setRemaining();
-    $scope.permissions = {};
-    $scope.selected_accociated = [];
-    $scope.selected_remaining = [];
+      //search for the group details
+      for (var k = 0; k < $scope.allItems.length; k++) {
+        if ($scope.allItems[k].identifier == $scope.selected_accociated[i]){
+          $scope.remaining.push($scope.allItems[k]);
+        }
+      }
+    }
   };
+  
 });
 
 app.controller("eventRelationsController", function($scope, Restangular, messages,

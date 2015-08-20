@@ -33,7 +33,8 @@ from ce1sus.views.web.api.version3.handlers.events.observablehanlder import Obse
 from ce1sus.views.web.api.version3.handlers.events.reporthandler import ReportHandler
 from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHandler
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
-from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, SyncServerTypesHandler
+from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, SyncServerTypesHandler, \
+  UserGroupsHandler
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
@@ -85,6 +86,7 @@ class RestController(BaseView):
     self.instances['servertypes'] = SyncServerTypesHandler(config)
     self.instances['tlps'] = TLPHanlder(config)
     self.instances['processes'] = ProcessHandler(config)
+    self.instances['usergroups'] = UserGroupsHandler(config)
 
   @staticmethod
   def find_default_method_name(instance, probable_name=None):
