@@ -37,7 +37,8 @@ class Merger(BaseChangeController):
   
   def __init__(self, config, session=None):
     super(Merger, self).__init__(config, session)
-    self.mergers = [Ce1susMerger(config, session), EventMerger(config, session), CyboxMerger(config, session)]
+    self.cybox_merger = CyboxMerger(config, session)
+    self.mergers = [Ce1susMerger(config, session), EventMerger(config, session), self.cybox_merger]
   
   def merge(self, old_instance, new_instance, cache_object):
     #check if both are the same class

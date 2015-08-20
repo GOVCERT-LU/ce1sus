@@ -18,6 +18,7 @@ from ce1sus.db.classes.internal.common import ValueException
 from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
+from ce1sus.controllers.common.merger.merger import Merger
 
 
 __author__ = 'Weber Jean-Paul'
@@ -50,7 +51,7 @@ class ObjectHandler(RestBaseHandler):
     self.object_definition_controller = self.controller_factory(ObjectDefinitionController)
     self.relations_controller = self.controller_factory(RelationController)
     self.conditions_controller = self.controller_factory(ConditionController)
-
+    self.merger = self.controller_factory(Merger)
   @rest_method(default=True)
   @methods(allowed=['GET', 'PUT', 'POST', 'DELETE'])
   @require()
@@ -196,15 +197,14 @@ class ObjectHandler(RestBaseHandler):
         cache_object_copy.inflated = True
 
         # NOTE: the assembler for attribute assembler returns a number as the object are directly attached to the object
-        return_type = self.assembler.assemble(json, Attribute, obj, cache_object)
-        self.observable_controller.update_object(obj, cache_object, True)
-        if return_type < 0:
-          raise RestHandlerException('Error occurred generating attributes, see the errors on the event')
-        elif return_type <= 1:
-          return obj.to_dict(cache_object_copy)
+        attributes, related_objects, observables = self.assembler.assemble(json, Attribute, obj, cache_object)
+        object_ = self.merger.merge_object_attributes(obj, attributes, related_objects, observables, cache_object)
+        if isinstance(object_, list):
+          self.attribute_controller.insert_attributes(object_, cache_object, True)
+          return object_[0].object.to_dict(cache_object_copy)
         else:
-          # if an observable is returned then return the top parent obeservable
-          return obj.parent.parent.parent.to_dict(cache_object_copy)
+          self.observable_controller.update_object(object_, cache_object, True)
+          return object_.to_dict(cache_object_copy)
       else:
         uuid = requested_object['object_uuid']
         if method == 'GET':

@@ -5,8 +5,11 @@
 
 Created on Aug 12, 2015
 """
+from uuid import uuid4
+
 from ce1sus.controllers.common.merger.base import BaseMerger
 from ce1sus.controllers.common.merger.merge.ccybox.pseudo import PseudoCyboxMerger
+from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -85,3 +88,20 @@ class CyboxMerger(BaseMerger):
 
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
+
+  def merge_object_attributes(self, parent, attributes, related_objects, composed_observable, merge_cache):
+    if related_objects:
+      self.merge_gen_arrays(parent.related_objects, related_objects, merge_cache, self.merge_related_object)
+
+    if attributes:
+      self.merge_gen_arrays(parent.attributes, attributes, merge_cache, self.pseudo_cybox_merger.merge_attribute)
+
+    if composed_observable:
+      observable = parent.get_observable()
+      composed_observable.delink_parent()
+      observable.observable_composition = composed_observable
+      if not parent.attributes:
+        observable.object = None
+      return observable
+    else:
+      return parent
