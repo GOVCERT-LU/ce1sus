@@ -150,17 +150,16 @@ app.controller("composedObservableEditController", function($scope, Restangular,
     restangularObservable = Restangular.restangularizeElement(null, $scope.working_copy, 'event/'+eventID+'/observable');
     restangularObservable.put({'complete':true, 'inflated':true}).then(function (data) {
       //find the observable in context and replace it
-      var index = -1;
-      var counter = 0;
       if ($scope.$parent.$parent.$parent.$parent.$parent.observables) {
-        angular.forEach($scope.$parent.$parent.$parent.$parent.$parent.observables, function(item) {
-          if (item.identifier == restangularObservable.identifier){
-            index = counter;
+        for (var i = 0; i < $scope.$parent.$parent.$parent.$parent.$parent.observables.length; i++) {
+          if ($scope.$parent.$parent.$parent.$parent.$parent.observables[i].identifier == restangularObservable.identifier){
+            $scope.$parent.$parent.$parent.$parent.$parent.observables[i] = restangularObservable;
+            break;
           }
           counter++;
-        },$log);
+        }
       }
-      $scope.$parent.$parent.$parent.$parent.$parent.observables[index] = restangularObservable;
+      
       
 
       

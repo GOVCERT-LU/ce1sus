@@ -14,18 +14,18 @@ app.controller('layoutController', function($scope, $routeSegment, version, menu
   $scope.menus = menus;
   $scope.createSubmenus = function(submenus) {
     var subMenuArray = [];
-    angular.forEach(submenus, function(entry) {
-      if (entry.divider) {
+    for (var i = 0; i < submenus.length; i++) {
+      if (submenus[i].divider) {
         subMenuArray.push({
           "divider" : true
         });
       } else {
         subMenuArray.push({
-          "text" : entry.title,
-          "href" : "#" + entry.section
+          "text" : submenus[i].title,
+          "href" : "#" + submenus[i].section
         });
       }
-    }, $log);
+    }
     return subMenuArray;
   };
   

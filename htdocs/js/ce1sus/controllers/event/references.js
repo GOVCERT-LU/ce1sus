@@ -15,11 +15,12 @@ app.controller("reportReferenceAddController", function($scope, Restangular, mes
   $scope.$watch(function() {
     return $scope.reference.definition_id;
     }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.reference.definition_id){
-          $scope.reference.properties.shared = entry.default_share;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.reference.definition_id){
+          $scope.reference.properties.shared = $scope.definitions[i].default_share;
+          break;
         }
-      }, $log);
+      }
     });
   
   var original_reference = {'properties' : {'shared': false},
@@ -29,11 +30,12 @@ app.controller("reportReferenceAddController", function($scope, Restangular, mes
   $scope.$watch(function() {
     return $scope.reference.definition_id;
     }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.reference.definition_id){
-          $scope.reference.properties.shared = entry.share;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.reference.definition_id){
+          $scope.reference.properties.shared = $scope.definitions[i].share;
+          break;
         }
-      }, $log);
+      }
     });
   
   $scope.closeModal = function(){
@@ -56,11 +58,12 @@ app.controller("reportReferenceAddController", function($scope, Restangular, mes
   };
   
   $scope.submitReference = function(){
-    angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.reference.definition_id){
-        $scope.reference.definition=entry;
+    for (var i = 0; i < $scope.definitions.length; i++) {
+      if ($scope.definitions[i].identifier == $scope.reference.definition_id){
+        $scope.reference.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var objectID = $scope.$parent.$parent.report.identifier;
     Restangular.one('report', objectID).post('reference', $scope.reference, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.appendChildren(data);
@@ -90,11 +93,12 @@ app.controller("reportReferenceEditController", function($scope, Restangular, me
   $scope.$watch(function() {
     return $scope.reference.definition_id;
     }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.reference.definition_id){
-          $scope.reference.properties.shared = entry.share;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.reference.definition_id){
+          $scope.reference.properties.shared = $scope.definitions[i].share;
+          break;
         }
-      }, $log);
+      }
     });
   
   $scope.closeModal = function(){
@@ -117,11 +121,12 @@ app.controller("reportReferenceEditController", function($scope, Restangular, me
   };
   
   $scope.submitReference = function(){
-    angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.reference.definition_id){
-        $scope.reference.definition=entry;
+    for (var i = 0; i < $scope.definitions.length; i++) {
+      if ($scope.definitions[i].identifier == $scope.reference.definition_id){
+        $scope.reference.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var reportID = $scope.$parent.$parent.report.identifier;
     var restangularReference = Restangular.restangularizeElement(null, $scope.reference, 'report/'+reportID+'/reference');
     restangularReference.put({'complete':true, 'infated':true}).then(function (data) {

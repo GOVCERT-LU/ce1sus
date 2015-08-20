@@ -5,18 +5,18 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   $scope.definitions =[];
 
   Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (attributes) {
-    
-    angular.forEach(attributes, function(definition) {
+    for (var j = 0; j < $scope.definitions.length; j++) {
       found = false;
-      angular.forEach($scope.object.attributes, function(attribute) {
-        if (definition.identifier == attribute.definition.identifier) {
+      for (var i = 0; i < $scope.object.attributes.length; i++) {
+        if ($scope.definitions[j].identifier == $scope.object.attributes[i].definition.identifier) {
           found = true;
+          break;
         }
-      }, $log);
-      if (!found){
-        $scope.definitions.push(definition);
       }
-    }, $log);
+      if (!found){
+        $scope.definitions.push($scope.definitions[j]);
+      }
+    }
     
   }, function(response) {
     handleError(response, messages);
@@ -30,12 +30,13 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   });
   
   $scope.$watch('attribute.definition_id', function() {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = entry.share;
-          $scope.attribute.condition_id = entry.default_condition_id;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.attribute.definition_id){
+          $scope.attribute.properties.shared = $scope.definitions[i].share;
+          $scope.attribute.condition_id = $scope.definitions[i].default_condition_id;
+          break;
         }
-      }, $log);
+      }
     });
   
   var original_attribute = {'properties' : {'shared': false},
@@ -60,11 +61,12 @@ app.controller("objectAttributeAddController", function($scope, Restangular, mes
   };
   
   $scope.submitAttribute = function(){
-    angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.attribute.definition_id){
-        $scope.attribute.definition=entry;
+    for (var i = 0; i < $scope.definitions.length; i++) {
+      if ($scope.definitions[i].identifier == $scope.attribute.definition_id){
+        $scope.attribute.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var objectID = $scope.$parent.$parent.object.identifier;
     Restangular.one('object', objectID).post('attribute', $scope.attribute, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.appendData(data);
@@ -120,11 +122,12 @@ app.controller("objectAttributeEditController", function($scope, Restangular, me
 
   
   $scope.submitAttribute = function(){
-    angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.attribute.definition_id){
-        $scope.attribute.definition=entry;
+    for (var i = 0; i < $scope.definitions.length; i++) {
+      if ($scope.definitions[i].identifier == $scope.attribute.definition_id){
+        $scope.attribute.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var objectID = $scope.$parent.$parent.object.identifier;
     var restangularAttribute = Restangular.restangularizeElement(null, $scope.attribute, 'object/'+objectID+'/attribute');
     restangularAttribute.put({'complete':true, 'infated':true}).then(function (data) {

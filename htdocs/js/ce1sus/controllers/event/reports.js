@@ -124,12 +124,12 @@ app.controller("reportEditController", function($scope, Restangular, messages,
     restangularizedElement.put({'complete':true, 'infated':true}).then(function (data) {
 
       $scope.report = data;
-      
-      angular.forEach($scope.reports, function(entry) {
-        if (entry.identifier == data.identifier) {
-          entry.title = data.title;
+      for (var i = 0; i < $scope.reports.length; i++) {
+        if ($scope.reports[i].identifier == data.identifier) {
+          $scope.reports[i].title = data.title;
+          break;
         }
-      }, $log);
+      }
       
     }, function (response) {
       $scope.report = angular.copy(original_report);

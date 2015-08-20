@@ -15,10 +15,9 @@ app.directive("plainText", function() {
     controller: function($scope, $log){
       var tempArray = $scope.celsusText.split('\n');
       var textArray = [];
-      angular.forEach(tempArray, function(item) {
-        textArray.push({"line": item});
-      }, $log);
-
+      for (var i = 0; i < tempArray.length; i++) {
+        textArray.push({"line": tempArray[i]});
+      }
       $scope.preparedCelsusText = textArray;
     }
   };
@@ -246,19 +245,21 @@ app.directive("attributeDefinitionForm", function() {
 
         var handler_id = $scope.attribute.attributehandler_id;
         //keep only the ones usable in the table list
-        angular.forEach($scope.handlers, function(itemEntry) {
-          if (itemEntry.identifier == handler_id) {
-            $scope.available_tables = itemEntry.allowed_tables;
+        for (var i = 0; i < $scope.handlers.length; i++) {
+          if ($scope.handlers[i].identifier == handler_id) {
+            $scope.available_tables = $scope.handlers[i].allowed_tables;
+            break;
           }
-        }, $log);
+        }
         // Check if the there was previously an item selected and when check if it sill matches
         if ($scope.attribute.table_id) {
           var found = false;
-          angular.forEach($scope.available_tables, function(itemEntry) {
-            if (itemEntry.identifier == $scope.attribute.table_id) {
+          for (var j = 0; j < $scope.available_tables.length; j++) {
+            if ($scope.available_tables[j].identifier == $scope.attribute.table_id) {
               found = true;
+              break;
             }
-          }, $log);
+          }
           if (!found) {
             delete $scope.attribute.table_id;
           }
@@ -268,24 +269,25 @@ app.directive("attributeDefinitionForm", function() {
         var table_id = $scope.attribute.table_id;
         newAvailableHandlers = [];
         //keep only the ones usable in the types list
-        angular.forEach($scope.handlers, function(itemEntry) {
-          angular.forEach(itemEntry.allowed_tables, function(allowed_table) {
-            if (allowed_table.identifier == table_id) {
-              newAvailableHandlers.push(itemEntry);
+        for (var i = 0; i < $scope.handlers.length; i++) {
+          for (var j = 0; j < $scope.handlers[j].allowed_tables.length; j++) {
+            if ($scope.handlers[i].allowed_tables[j].identifier == table_id) {
+              newAvailableHandlers.push($scope.handlers[i]);
             }
-          }, $log);
-        }, $log);
+          }
+        }
         $scope.available_handlers = newAvailableHandlers;
         
         //remove the items which do not match
         var found = false;
         if ($scope.attribute.attributehandler_id) {
           found = false;
-          angular.forEach($scope.available_handlers, function(itemEntry) {
-            if (itemEntry.identifier == $scope.attribute.attributehandler_id) {
+          for (var k = 0; k < $scope.available_handlers.length; k++) {
+            if ($scope.available_handlers[k].identifier == $scope.attribute.attributehandler_id) {
               found = true;
+              break;
             }
-          }, $log);
+          }
           if (!found) {
             delete $scope.attribute.attributehandler_id;
           }
@@ -293,25 +295,26 @@ app.directive("attributeDefinitionForm", function() {
         
         newTypes = [];
         //keep only the ones usable in handlers list
-        angular.forEach($scope.types, function(itemEntry) {
-          if (itemEntry.allowed_table.identifier == table_id) {
-            newTypes.push(itemEntry);
+        for (var l = 0; l < $scope.types.length;l++) {
+          if ($scope.types[i].allowed_table.identifier == table_id) {
+            newTypes.push($scope.types[l]);
           } else {
             if (itemEntry.allowed_table.name == 'Any') {
-              newTypes.push(itemEntry);
+              newTypes.push($scope.types[l]);
             }
           }
-        }, $log);
+        }
         $scope.available_types = newTypes;
         
         //remove the items which do not match
         if ($scope.attribute.type_id) {
           found = false;
-          angular.forEach($scope.available_types, function(itemEntry) {
-            if (itemEntry.identifier == $scope.attribute.type_id) {
+          for (var m = 0; m < $scope.available_types.length; m++) {
+            if ($scope.available_types[m].identifier == $scope.attribute.type_id) {
               found = true;
+              break;
             }
-          }, $log);
+          }
           if (!found) {
             delete $scope.attribute.type_id;
           }
@@ -567,12 +570,12 @@ app.directive("observable", function($compile) {
         } else {
           //belongs to root
           index = 0;
-          angular.forEach($scope.$parent.$parent.$parent.$parent.observables, function(itemEntry) {
-            if (itemEntry.identifier == observable.identifier) {
-              $scope.$parent.$parent.$parent.$parent.observables[index] = observable;
+          for (var i = 0; i < $scope.$parent.$parent.$parent.$parent.observables.length; i++) {
+            if ($scope.$parent.$parent.$parent.$parent.observables[i].identifier == observable.identifier) {
+              $scope.$parent.$parent.$parent.$parent.observables[i] = observable;
+              break;
             }
-            index++;
-          }, $log);
+          }
         }
       };
       
@@ -734,19 +737,19 @@ app.directive("object", function($compile) {
               if ($scope.$parent.observable) {
                 $scope.$parent.$parent.$parent.observable.object = null;
               } else {
-                counter = 0;
-                index = -1;
-                angular.forEach($scope.$parent.object.related_objects, function(element) {
+                var index = -1;
+                for (var i = 0; i < $scope.$parent.object.related_objects.length; i++) {
                   
-                  if (element.identifier == $scope.object.identifier) {
-                    index = counter;
+                  if ($scope.$parent.object.related_objects[i].identifier == $scope.object.identifier) {
+                    index = i;
+                    break;
                   }
                   counter++;
-                }, $log);
+                }
                 if (index >= 0) {
                   $scope.$parent.object.related_objects.splice(index, 1);
                 } else {
-                  var index = $routeSegment.chain.length;
+                  index = $routeSegment.chain.length;
                   
                   $routeSegment.chain[index-1].reload();
                 }
@@ -834,13 +837,12 @@ app.directive("object", function($compile) {
       };
       
       $scope.updateAttribute = function(attribute){
-        var counter = 0;
-        angular.forEach($scope.object.attributes, function(item) {
-          if (item.identifier == attribute.identifier){
-            $scope.object.attributes[counter] = attribute;
+        for (var i = 0; i < $scope.object.attributes.length; i++) {
+          if ($scope.object.attributes[i].identifier == attribute.identifier){
+            $scope.object.attributes[i] = attribute;
+            break;
           }
-          counter++;
-        }, $log);
+        }
       };
       
       $scope.getStyle = function(properties) {
@@ -954,14 +956,14 @@ app.directive("report", function($compile) {
       $scope.appendChildren = function(data){
         //Note several references can be added
         references = data.references;
-        angular.forEach(references, function(element) {
-          $scope.report.references.push(element);
-        }, $log);
+        for (var i = 0; i < references.length; i++) {
+          $scope.report.references.push(references[i]);
+        }
 
         related_reports = data.related_reports;
-        angular.forEach(related_reports, function(element) {
-          $scope.report.related_reports.push(element);
-        }, $log);
+        for (var j = 0; j < related_reports.length; j++) {
+          $scope.report.related_reports.push(related_reports[j]);
+        }
       };
       
       $scope.addReference = function(){
@@ -981,13 +983,11 @@ app.directive("report", function($compile) {
       };
       
       $scope.updateReference = function(reference){
-        var counter = 0;
-        angular.forEach($scope.report.references, function(item) {
-          if (item.identifier == reference.identifier){
-            $scope.report.references[counter] = reference;
+        for (var i = 0; i < $scope.report.references.length; i++) {
+          if ($scope.report.references[i].identifier == reference.identifier){
+            $scope.report.references[i] = reference;
           }
-          counter++;
-        }, $log);
+        }
       };
       
       $scope.getReportTitle = function(report){
@@ -1205,11 +1205,12 @@ app.directive("objectAttributeForm", function() {
         if ($scope.type == 'edit'){
           return $scope.objectattribute.definition;
         } else {
-          angular.forEach($scope.definitions, function(definition) {
-            if (definition.identifier == identifier){
+          for (var i = 0; i < $scope.definitions.length; i++) {
+            if ($scope.definitions[i].identifier == identifier){
               result = definition;
+              break;
             }
-          }, $log);
+          }
           return result;
         }
 
@@ -1239,11 +1240,12 @@ app.directive("reportReferenceForm", function() {
         if ($scope.type == 'edit'){
           return $scope.reportreference.definition;
         } else {
-          angular.forEach($scope.definitions, function(definition) {
-            if (definition.identifier == identifier){
+          for (var i = 0; i < $scope.definitions.length; i++) {
+            if ($scope.definitions[i].identifier == identifier){
               result = definition;
+              break;
             }
-          }, $log);
+          }
           return result;
         }
       };

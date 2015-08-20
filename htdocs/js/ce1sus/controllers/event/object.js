@@ -18,11 +18,12 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
   $scope.$watch(function() {
     return $scope.observableObject.definition_id;
     }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.observableObject.definition_id){
-          $scope.observableObject.properties.shared = entry.default_share;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.observableObject.definition_id){
+          $scope.observableObject.properties.shared = $scope.definitions[i].default_share;
+          break;
         }
-      }, $log);
+      }
     });
   
   $scope.closeModal = function(){
@@ -45,11 +46,12 @@ app.controller("observableObjectAddController", function($scope, Restangular, me
   };
   
   $scope.submitObservableObject = function(){
-    angular.forEach($scope.definitions, function(entry) {
-      if (entry.identifier == $scope.observableObject.definition_id){
-        $scope.observableObject.definition=entry;
+    for (var i = 0; i < $scope.definitions.length; i++) {
+      if ($scope.definitions[i].identifier == $scope.observableObject.definition_id){
+        $scope.observableObject.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var observableID = $scope.$parent.$parent.observable.identifier;
     Restangular.one('observable', observableID).post('object', $scope.observableObject, {'complete':true, 'infated':true}).then(function (data) {
       $scope.$parent.appendObservableObject(data);
@@ -81,11 +83,12 @@ app.controller("objectChildAddController", function($scope, Restangular, message
   $scope.$watch(function() {
     return $scope.relatedObject.object.definition_id;
     }, function(newVal, oldVal) {
-      angular.forEach($scope.definitions, function(entry) {
-        if (entry.identifier === $scope.relatedObject.object.definition_id){
-          $scope.relatedObject.object.properties.shared = entry.default_share;
+      for (var i = 0; i < $scope.definitions.length; i++) {
+        if ($scope.definitions[i].identifier === $scope.relatedObject.object.definition_id){
+          $scope.relatedObject.object.properties.shared = $scope.definitions[i].default_share;
+          break;
         }
-      }, $log);
+      }
     });
   
   $scope.closeModal = function(){
@@ -108,11 +111,12 @@ app.controller("objectChildAddController", function($scope, Restangular, message
   };
   
   $scope.submitrelatedObject = function(){
-    angular.forEach($scope.definitions, function(entry) {
+    for (var i = 0; i < $scope.definitions.length; i++) {
       if (entry.identifier == $scope.relatedObject.definition_id){
-        $scope.relatedObject.definition=entry;
+        $scope.relatedObject.definition=$scope.definitions[i];
+        break;
       }
-    }, $log);
+    }
     var eventID = $routeSegment.$routeParams.id;
     if ($scope.$parent.$parent.object){
       //This is a child object
@@ -142,14 +146,12 @@ app.controller("observableObjectPropertiesController", function($scope, Restangu
     Restangular.one("observable", $scope.object.observable_id).one("object").getList(null, {"complete": false, "flat": true}).then(function (objects) {
       $scope.objects = objects;
       //remove the object it self
-      var index = 0;
-      angular.forEach($scope.objects, function(entry) {
-        if (entry.identifier == $scope.object.identifier){
-          $scope.objects.splice(index,1);
+      for (var i = 0; i < $scope.objects.length; i++) {
+        if ($scope.objects[i].identifier == $scope.object.identifier){
+          $scope.objects.splice(i,1);
+          break;
         }
-
-        index++;
-      }, $log);
+      }
       index = 0;
       /*
       //remove the parent object

@@ -69,10 +69,9 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
     
     Restangular.all("search").post($scope.search).then(function (data) {
       if (data) {
-        angular.forEach(data, function(entry) {
-          results.push(makeFlat(entry));
-         
-        }, $log);
+        for (var i = 0; i < data.length; i++) {
+          results.push(makeFlat(data[i]));
+        }
         $scope.results = results.length;
         $scope.resultItems = results;
         $scope.resultTable.reload();
