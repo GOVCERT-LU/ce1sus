@@ -113,6 +113,8 @@ app.controller("reportReferenceEditController", function($scope, Restangular, me
 
   };
   
+
+  
   $scope.referenceChanged = function ()
   {
     return !angular.equals($scope.reference, original_reference);
