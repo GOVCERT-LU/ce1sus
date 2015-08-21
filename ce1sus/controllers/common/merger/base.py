@@ -197,7 +197,7 @@ class BaseMerger(BaseController):
   def __make_dict(self, array):
     result = dict()
     for item in array:
-      result[item.identifier] = item
+      result[item.uuid] = item
     return result
 
   def mark_for_deletion(self, old_item, cache_object):
@@ -225,9 +225,11 @@ class BaseMerger(BaseController):
           # it can only be one :P
           parent = old_item.parent
         if new_item:
-          merge_cache.version.add(merge_fct(new_item, old_item, merge_cache))
+          merge_cache.version.add(merge_fct(old_item, new_item, merge_cache))
 
           self.set_base(old_item, new_item, merge_cache)
+
+          # expunge from session
 
           del(dict2[key])
         else:

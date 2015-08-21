@@ -7,13 +7,14 @@ Created on Feb 5, 2014
 """
 
 import re
+from sqlalchemy.orm.session import make_transient
 
+from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.controllers.common.updater.updater import Updater
 from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.common.base import BaseView
-from ce1sus.common.classes.cacheobject import CacheObject
 
 
 __author__ = 'Weber Jean-Paul'
@@ -107,6 +108,10 @@ class RestBaseHandler(BaseView):
                                flat=self.get_flat_value(args),
                                )
     return cache_object
+
+  def make_copy(self, instance):
+    make_transient(instance)
+    return instance
 
   def set_event_properties_cache_object(self, cache_object, event):
     cache_object.event_permissions = self.get_event_user_permissions(event, cache_object.user)

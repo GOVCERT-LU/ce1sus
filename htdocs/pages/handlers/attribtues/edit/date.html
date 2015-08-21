@@ -2,7 +2,7 @@
   <label class="col-xs-3"><b>Value:</b></label>
   <div class="col-xs-9">
     <div class="form-group" ng-class="{'has-error': form.value.$invalid}">
-      <input class="form-control" ng-model="attribute.value" name="value" bs-datepicker type="text">
+      <input class="form-control" ng-model="attribute.value" name="value" bs-datepicker type="text" ng-change="setModified(attribute)">
     </div>
   </div>
 </div>

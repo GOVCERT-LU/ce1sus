@@ -5,7 +5,7 @@
   <div class="col-xs-9">
         <select name="value" class="form-control"
           ng-options="item.identifier as item.name for item in handlerdata"
-          ng-model="attribute.value">
+          ng-model="attribute.value" ng-change="setModified(attribute)">
           <option style="display: none" value="">Select a value</option>
         </select>
   </div>

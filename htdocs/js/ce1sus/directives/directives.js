@@ -1287,6 +1287,7 @@ app.directive("attributeHandler", function() {
           viewType = scope.definition.attributehandler.view_type;
         }
         
+        
         var baseUrl = 'pages/handlers';
         
         var templateUrl = baseUrl + '/attribtues/'+ contentType + '/'+viewType+'.html';
@@ -1297,7 +1298,8 @@ app.directive("attributeHandler", function() {
     },
     controller: function($scope, $log, $templateCache, Restangular, messages ){
       //Resolve additional data
-
+      $scope.setModified = setModified;
+      
       $scope.getData = function() {
         if (scope.type == 'edit') {
           Restangular.one('attributehandlers', $scope.attribute.definition.identifier).one('get').getList(null, {'type': $scope.type}).then(function(handlerdata) {

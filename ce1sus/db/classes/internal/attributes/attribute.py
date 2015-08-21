@@ -80,6 +80,15 @@ class Attribute(BaseElement, Base):
   _PARENTS = ['object']
   object = relationship('Object', uselist=False)
 
+  @property
+  def parent(self):
+    return self.object
+
+  def delink_parent(self):
+    self.object = None
+    self.__get_value_instance().event = None
+    self.__get_value_instance().attribute = None
+
   def __get_value_instance(self):
     """
     Returns the value object of an attibute

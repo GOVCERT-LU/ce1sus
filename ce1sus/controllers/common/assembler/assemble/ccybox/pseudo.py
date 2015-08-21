@@ -246,16 +246,9 @@ class PseudoCyboxAssembler(BaseChanger):
             changed_on = max(changed_on, 0)
             if returnvalue.validate():
               # append if not already present in object
-              found = False
-              for attribute in obj.attributes:
-                if (returnvalue.value == attribute.value) and (returnvalue.definition.identifier == attribute.definition.identifier):
-                  # log the elemsent
-                  self.log_attribute_error(obj, attribute.to_dict(int_cache_object), 'Duplicate value')
-                  found = True
-              if not found:
-                obj.attributes.append(returnvalue)
+              obj.attributes.append(returnvalue)
             else:
-              error_message = ObjectValidator.getFirstValidationError(attribute)
+              error_message = ObjectValidator.getFirstValidationError(returnvalue)
               self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
           else:
             raise ValueError('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
