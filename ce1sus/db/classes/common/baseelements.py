@@ -40,7 +40,8 @@ class Entity(BaseElement):
     for attr_name in self._PARENTS:
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
-        return item
+        if item:
+          return item
     raise ValueError('Parent cannot be found')
 
   @parent.setter
@@ -76,8 +77,8 @@ class Entity(BaseElement):
   def root(self):
     parent = self.parent
     if parent:
-      if hasattr(parent, 'event'):
-        return parent.event
+      if parent.get_classname() == 'Event':
+        return parent
       else:
         return parent.root
     else:

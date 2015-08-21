@@ -203,6 +203,16 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def remove_related_object(self, related_object, cache_object, commit=True):
+    try:
+      self.remove_set_base(related_object, cache_object)
+      self.related_object_broker.remove_by_id(related_object.identifier)
+      self.related_object_broker.do_commit(commit)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def remove_observable_composition(self, compoed_observable, cache_object, commit=True):
     try:
       self.remove_set_base(compoed_observable, cache_object)
@@ -297,6 +307,14 @@ class ObservableController(BaseController):
   def get_related_object_by_child(self, obj):
     try:
       return self.related_object_broker.get_related_object_by_child_object_id(obj.identifier)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def get_related_object_by_uuid(self, uuid):
+    try:
+      return self.related_object_broker.get_by_uuid(uuid)
+    except NothingFoundException as error:
+      raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 

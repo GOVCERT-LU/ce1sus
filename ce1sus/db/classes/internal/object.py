@@ -48,6 +48,8 @@ class Object(Entity, Base):
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
   observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
+
+  related_object = relationship('RelatedObject', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
   @property
   def event(self):
     return self.root
@@ -59,7 +61,7 @@ class Object(Entity, Base):
   def validate(self):
     return True
   
-  _PARENTS = ['related_object_parent', 'observable']
+  _PARENTS = ['related_object', 'observable']
 
   def get_observable(self):
     if self.observable:
@@ -92,7 +94,7 @@ class RelatedObject(Entity, Base):
 
   __relationship = None
 
-  _PARENTS = ['parent_object']
+  _PARENTS = ['parent']
 
   @property
   def relationship(self):

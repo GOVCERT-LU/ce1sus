@@ -699,7 +699,8 @@ app.directive("object", function($compile) {
     scope: {
       object: "=object",
       indent: "=indent",
-      permissions: "=permissions"
+      permissions: "=permissions",
+      related: "=related"
     },
     controller: function($scope, $modal, Restangular, messages, $log, Pagination, $routeSegment){
 
@@ -732,7 +733,12 @@ app.directive("object", function($compile) {
             remove = true;
           }
           if (remove){
-            restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
+            if ($scope.related){
+              //TODO: create one a new view for related objects
+              restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object/'+$scope.object.identifier+'/related_object');
+            } else {
+              restangularObject = Restangular.restangularizeElement(null, $scope.object, 'object');
+            }
             restangularObject.remove().then(function (data) {
               if ($scope.$parent.observable) {
                 $scope.$parent.$parent.$parent.observable.object = null;
@@ -740,11 +746,10 @@ app.directive("object", function($compile) {
                 var index = -1;
                 for (var i = 0; i < $scope.$parent.object.related_objects.length; i++) {
                   
-                  if ($scope.$parent.object.related_objects[i].identifier == $scope.object.identifier) {
+                  if ($scope.$parent.object.related_objects[i].object.identifier == $scope.object.identifier) {
                     index = i;
                     break;
                   }
-                  counter++;
                 }
                 if (index >= 0) {
                   $scope.$parent.object.related_objects.splice(index, 1);

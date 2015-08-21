@@ -114,14 +114,14 @@ class PseudoCyboxAssembler(BaseChanger):
   def assemble_related_object(self, obj, json, cache_object):
     if json:
       child_obj_json = json.get('object')
-      # TODO: findout why observable is unset afterwards
-      # observable = obj.observable[0]
-      child_obj = self.assemble_object(obj.parent, child_obj_json, cache_object, set_observable=False)
 
       # update parent
       related_object = RelatedObject()
       # the properties of the child are the same as for the related object as this is in general only a container
       self.set_base(related_object, json, cache_object, obj)
+      related_object.parent = obj
+
+      child_obj = self.assemble_object(related_object, child_obj_json, cache_object, set_observable=False)
 
       # Properties should be the same as the one from the related object except they are not in the json
       if child_obj_json.get('properties', None) is None:
@@ -135,7 +135,7 @@ class PseudoCyboxAssembler(BaseChanger):
       if json.get('tlp', None) is None:
         related_object.tlp_level_id = child_obj.tlp_level_id
 
-      related_object.parent = obj
+
       related_object.object = child_obj
       related_object.relationship = json.get('relationship', None)
       if related_object.relationship == 'None':

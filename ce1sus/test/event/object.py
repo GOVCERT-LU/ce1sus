@@ -126,7 +126,7 @@ class TestObject(LoggedInBase):
 
     except HTTPError:
       assert False
-  
+
 
   def testNewError(self):
     observable_id = self.__add_observable()

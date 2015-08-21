@@ -136,8 +136,23 @@ class ObjectHandler(RestBaseHandler):
       related_object = self.assembler.assemble(json, RelatedObject, obj, cache_object)
       self.observable_controller.update_object(obj, cache_object, True)
       return related_object.to_dict(cache_object)
+    elif method == 'DELETE':
+      self.check_if_event_is_modifiable(event)
+      self.check_item_is_viewable(event, obj)
+      uuid = requested_object['object_uuid']
+      if uuid:
+        try:
+          related_object = self.observable_controller.get_related_object_by_uuid(uuid)
+        except ControllerNothingFoundException:
+          related_object = self.observable_controller.get_related_object_by_child(obj)
+
+        self.observable_controller.remove_related_object(related_object, cache_object)
+        return 'OK'
+      else:
+        raise RestHandlerException('No uuid given')
+      
     else:
-      raise RestHandlerException('Please use object/{uuid}/ instead')
+      raise RestHandlerException('Method {0} is not available'.format(method))
 
   def __make_attribute_insert_return(self, param_1, related_objects, is_observable, cache_object):
     result_objects = list()

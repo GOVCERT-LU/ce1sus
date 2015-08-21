@@ -92,7 +92,7 @@
         </ul>
         <div ng-if="object.related_objects" style="height:5px"></div>
         <span ng-if="object.related_objects" ng-repeat="childObject in object.related_objects">
-          <object object="childObject.object" indent="1" permissions="permissions"></object>
+          <object object="childObject.object" indent="1" permissions="permissions" related="true"></object>
         </span>
       </div>
     </div>
