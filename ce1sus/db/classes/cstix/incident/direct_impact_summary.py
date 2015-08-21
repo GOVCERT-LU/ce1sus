@@ -5,6 +5,7 @@
 
 Created on Jul 27, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
@@ -30,6 +31,8 @@ class DirectImpactSummary(Entity, Base):
   __asset_losses = None
 
   _PARENTS = ['impact_assessment']
+  impact_assessment = relationship('ImpactAssessment', uselist=False)
+
 
   @property
   def asset_losses(self):

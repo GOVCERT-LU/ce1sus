@@ -8,12 +8,13 @@ Created on Jul 27, 2015
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, Table, ForeignKey
+from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
-from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
+from ce1sus.db.classes.cstix.common.relations import _REL_INFORMATIONSOURCE_TOOL, _REL_TOOLINFORMATION_STRUCTUREDTEXT, \
+  _REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT
+from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.version import Version
 
@@ -23,39 +24,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_TOOLINFORMATION_STRUCTUREDTEXT = Table('rel_toolinformation_structuredtext', getattr(Base, 'metadata'),
-                                              Column('ras_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                              Column('toolinformation_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('toolinformations.toolinformation_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     index=True,
-                                                     nullable=False),
-                                              Column('structuredtext_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('structuredtexts.structuredtext_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     nullable=False,
-                                                     index=True))
-
-_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT = Table('rel_toolinformation_structuredtextshort', getattr(Base, 'metadata'),
-                                              Column('ras_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                              Column('toolinformation_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('toolinformations.toolinformation_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     index=True,
-                                                     nullable=False),
-                                              Column('structuredtext_id',
-                                                     BigIntegerType,
-                                                     ForeignKey('structuredtexts.structuredtext_id',
-                                                                ondelete='cascade',
-                                                                onupdate='cascade'),
-                                                     nullable=False,
-                                                     index=True))
 
 class ToolInformation(Entity, Base):
   
@@ -70,6 +38,7 @@ class ToolInformation(Entity, Base):
     self.set_id(value)
 
   _PARENTS = ['information_source', 'resource']
+  information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_TOOL)
 
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
@@ -77,7 +46,7 @@ class ToolInformation(Entity, Base):
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   name = Column('name', UnicodeType(255), index=True, nullable=False)
   # TODO: Tool type 0..n
-  description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False, backref='tool_information_description')
+  description = relationship('StructuredText', secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False)
   # TODO: references ToolReference 0..n
   vendor = Column('vendor', UnicodeType(255), index=True, nullable=False)
   version_db = Column('version', UnicodeType(40), nullable=True)
@@ -90,7 +59,7 @@ class ToolInformation(Entity, Base):
   # TODO: metadata
   # TODO: compensation_model
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  short_description = relationship(StructuredText, secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT, uselist=False, backref='tool_information_short_description')
+  short_description = relationship('StructuredText', secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT, uselist=False)
 
   __version = None
   @property

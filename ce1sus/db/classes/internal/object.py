@@ -17,6 +17,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.ccybox.core.relations import _REL_OBSERVABLE_OBJECT
 
 
 __author__ = 'Weber Jean-Paul'
@@ -38,7 +39,7 @@ class Object(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   # properties
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined', backref='parent_object')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
   # ce1sus specific
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   attributes = relationship('Attribute', lazy='joined')
@@ -46,7 +47,7 @@ class Object(Entity, Base):
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition', lazy='joined')
-
+  observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
   @property
   def event(self):
     return self.root
@@ -86,7 +87,8 @@ class RelatedObject(Entity, Base):
   relationship_id = Column('relationship_id', Integer, nullable=True)
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
 
-  object = relationship(Object, primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False, backref='related_object_parent')
+  parent = relationship(Object, primaryjoin='RelatedObject.parent_id==Object.identifier', uselist=False)
+  object = relationship(Object, primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
 
   __relationship = None
 

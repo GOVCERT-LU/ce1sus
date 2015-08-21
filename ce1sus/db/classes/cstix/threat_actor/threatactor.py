@@ -6,7 +6,7 @@
 Created on Jul 1, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Table, Column, ForeignKey
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
@@ -19,6 +19,8 @@ from ce1sus.db.classes.cstix.common.vocabs import Motivation as VocabMotivation
 from ce1sus.db.classes.cstix.common.vocabs import ThreatActorSophistication as VocabPlanningAndOperationalSupport
 from ce1sus.db.classes.cstix.common.vocabs import ThreatActorType as VocabThreatActorType
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
+from ce1sus.db.classes.cstix.threat_actor.relations import _REL_THREATACTOR_IDENTITY, _REL_THREATACTOR_INTENDED_EFFECT, _REL_THREATACTOR_HANDLING, \
+  _REL_THREATACTOR_RELATED_THREATACTOR, _REL_THREATACTOR_RELATED_PACKAGES
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -28,72 +30,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_THREATACTOR_IDENTITY = Table('rel_threatactor_identity', getattr(Base, 'metadata'),
-                                  Column('rti_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                  Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                  Column('identity_id', BigIntegerType, ForeignKey('identitys.identity_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                  )
-
-_REL_THREATACTOR_RELATED_PACKAGES = Table('rel_threatactor_rel_package', getattr(Base, 'metadata'),
-                                          Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                          Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                          Column('relatedpackageref_id', BigIntegerType, ForeignKey('relatedpackagerefs.relatedpackageref_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                          )
-
-_REL_THREATACTOR_RELATED_THREATACTOR = Table('rel_threatactor_rel_threatactor', getattr(Base, 'metadata'),
-                                          Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                          Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                          Column('relatedthreatactor_id', BigIntegerType, ForeignKey('relatedthreatactors.relatedthreatactor_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                          )
-
-_REL_THREATACTOR_HANDLING = Table('rel_threatactor_handling', getattr(Base, 'metadata'),
-                                Column('rth_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                )
-
-_REL_THREATACTOR_STRUCTUREDTEXT = Table('rel_threatactor_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rtast_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('threatactor_id',
-                                              BigIntegerType,
-                                              ForeignKey('threatactors.threatactor_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_THREATACTOR_STRUCTUREDTEXT_SHORT = Table('rel_threatactor_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rtast_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('threatactor_id',
-                                              BigIntegerType,
-                                              ForeignKey('threatactors.threatactor_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_THREATACTOR_INTENDED_EFFECT = Table('rel_threatactor_intended_effect', getattr(Base, 'metadata'),
-                                      Column('rtaie_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                      Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                      Column('intendedeffect_id', BigIntegerType, ForeignKey('intendedeffects.intendedeffect_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                      )
-
 class ThreatActorType(Entity, Base):
 
   type_id = Column('type_id', Integer, default=None, nullable=False)
@@ -101,6 +37,7 @@ class ThreatActorType(Entity, Base):
   __type_ = None
 
   _PARENTS = ['threat_actor']
+  threat_actor = relationship('ThreatActor', uselist=False)
 
   @property
   def type_(self):
@@ -122,6 +59,7 @@ class Motivation(Entity, Base):
   __motivation = None
 
   _PARENTS = ['threat_actor']
+  threat_actor = relationship('ThreatActor', uselist=False)
 
   @property
   def motivation(self):
@@ -151,6 +89,7 @@ class Sophistication(Entity, Base):
   __sophistication = None
 
   _PARENTS = ['threat_actor']
+  threat_actor = relationship('ThreatActor', uselist=False)
 
   @property
   def sophistication(self):
@@ -180,6 +119,7 @@ class PlanningAndOperationalSupport(Entity, Base):
   __paos = None
 
   _PARENTS = ['threat_actor']
+  threat_actor = relationship('ThreatActor', uselist=False)
 
   @property
   def paos(self):
@@ -205,25 +145,27 @@ class PlanningAndOperationalSupport(Entity, Base):
 
 class ThreatActor(BaseCoreComponent, Base):
 
-  identity = relationship(Identity, secondary=_REL_THREATACTOR_IDENTITY, uselist=False, backref='threat_actor')
-  types = relationship(ThreatActorType, backref='threat_actor')
-  motivations = relationship(Motivation, backref='threat_actor')
-  sophistications = relationship(Sophistication, backref='threat_actor')
-  intended_effects = relationship(IntendedEffect, secondary=_REL_THREATACTOR_INTENDED_EFFECT, backref='threat_actor')
-  planning_and_operational_supports = relationship(PlanningAndOperationalSupport, backref='threat_actor')
+  identity = relationship(Identity, secondary=_REL_THREATACTOR_IDENTITY, uselist=False)
+  types = relationship(ThreatActorType)
+  motivations = relationship(Motivation)
+  sophistications = relationship(Sophistication)
+  intended_effects = relationship(IntendedEffect, secondary=_REL_THREATACTOR_INTENDED_EFFECT)
+  planning_and_operational_supports = relationship(PlanningAndOperationalSupport)
   confidence = Column('confidence', UnicodeType(5), default=u'HIGH', nullable=False)
-  handling = relationship(MarkingSpecification, secondary=_REL_THREATACTOR_HANDLING, backref='threat_actor')
+  handling = relationship(MarkingSpecification, secondary=_REL_THREATACTOR_HANDLING)
   # TODO: observed_ttps is the same as related TTP
   # observed_ttps = None
   # TODO: associated_campaigns is the same as relate Campaign
   # associated_campaigns = None
   # associated_actors is the same as relatedThreatActor
-  associated_actors = relationship(RelatedThreatActor, secondary=_REL_THREATACTOR_RELATED_THREATACTOR, backref='threat_actor')
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_THREATACTOR_RELATED_PACKAGES, backref='threat_actor')
+  associated_actors = relationship(RelatedThreatActor, secondary=_REL_THREATACTOR_RELATED_THREATACTOR)
+  related_packages = relationship(RelatedPackageRef, secondary=_REL_THREATACTOR_RELATED_PACKAGES)
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['relate_threat_actor', 'event']
+  relate_threat_actor = relationship('RelatedThreatActor', uselist=False, primaryjoin='RelatedThreatActor.child_id==ThreatActor.identifier')
+  event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
 

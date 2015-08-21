@@ -5,10 +5,12 @@
 
 Created on Aug 3, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.indicator.relations import _REL_TESTMECHANISM_VOCABSTRING
 from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
@@ -29,6 +31,7 @@ class VocabString(Entity, Base):
   vocab_reference = Column('vocab_reference', UnicodeTextType())
 
   _PARENTS = ['generic_test_meachanism']
+  generic_test_meachanism = relationship('GenericTestMechanism', uselist=False, secondary=_REL_TESTMECHANISM_VOCABSTRING)
 
   def to_dict(self, cache_object):
 

@@ -7,14 +7,18 @@ Created on Nov 11, 2014
 """
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
+from ce1sus.db.classes.ccybox.core.relations import _REL_OBSERVABLE_STRUCTUREDTEXT, _REL_OBSERVABLE_OBJECT, _REL_OBSERVABLE_COMPOSITION
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.common.related import RelatedObservable
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICATOR_OBSERVABLE
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.internal.relations import _REL_EVENT_OBSERVABLE
 from ce1sus.db.common.session import Base
 
 
@@ -23,39 +27,9 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
-_REL_OBSERVABLE_COMPOSITION = Table('rel_observable_composition', getattr(Base, 'metadata'),
-                                    Column('roc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('observablecomposition_id', BigIntegerType, ForeignKey('observablecompositions.observablecomposition_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('child_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-                                    )
-
-_REL_OBSERVABLE_STRUCTUREDTEXT = Table('rel_observable_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rtobservablest_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('observable_id',
-                                              BigIntegerType,
-                                              ForeignKey('observables.observable_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_OBSERVABLE_OBJECT = Table('rel_observable_object', getattr(Base, 'metadata'),
-                                    Column('roo_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-                                    )
-
 class ObservableKeyword(Entity, Base):
   observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False)
+  observable = relationship('Observable', uselist=False)
   keyword = Column('keyword', UnicodeType(255), nullable=False, index=True)
 
   _PARENTS = ['observable']
@@ -68,11 +42,12 @@ class ObservableKeyword(Entity, Base):
 class ObservableComposition(Entity, Base):
 
   operator = Column('operator', UnicodeType(3), default=u'OR')
-  observables = relationship('Observable', secondary='rel_observable_composition', backref='composedobservable')
+  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION)
 
   # ce1sus specific
   observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
+  observable = relationship('Observable', uselist=False)
   _PARENTS = ['observable']
 
   def validate(self):
@@ -106,16 +81,19 @@ class Observable(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, backref='observable_description')
+  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
 
-  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, backref='observable')
+  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT)
   # TODO: observable event (Note: different than the event used here)
-  observable_composition = relationship('ObservableComposition', uselist=False, backref='observable')
+  observable_composition = relationship('ObservableComposition', uselist=False)
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   sighting_count = Column(u'sighting_count', Integer, nullable=True, index=True)
-  keywords = relationship('ObservableKeyword', backref='observable')
-
+  keywords = relationship('ObservableKeyword')
+  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False)
+  related_observable = relationship(RelatedObservable, primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_OBSERVABLE)
   _PARENTS = ['event', 'indicator', 'composedobservable', 'related_observable']
+  event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE)
 
   def validate(self):
     return True

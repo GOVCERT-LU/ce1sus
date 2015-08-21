@@ -7,12 +7,12 @@ Created on Jul 27, 2015
 """
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, Table, ForeignKey
+from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.statement import Statement
+from ce1sus.db.classes.cstix.indicator.relations import _REL_TESTMECHANISM_STATEMENT, _REL_TESTMECHANISM_INFORMATIONSOURCE
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -22,77 +22,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_TESTMECHANISM_INFORMATIONSOURCE = Table('rel_basetestmechanism_informationsource', getattr(Base, 'metadata'),
-                                       Column('rbtmis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('basetestmechanism_id',
-                                              BigIntegerType,
-                                              ForeignKey('basetestmechanisms.basetestmechanism_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('informationsource_id',
-                                             BigIntegerType,
-                                             ForeignKey('informationsources.informationsource_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_TESTMECHANISM_STATEMENT = Table('rel_basetestmechanism_statement', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('basetestmechanism_id',
-                                              BigIntegerType,
-                                              ForeignKey('basetestmechanisms.basetestmechanism_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('statement_id',
-                                             BigIntegerType,
-                                             ForeignKey('statements.statement_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_TESTMECHANISM_STRUCTUREDTEXT = Table('rel_testmechanism_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('basetestmechanism_id',
-                                              BigIntegerType,
-                                              ForeignKey('basetestmechanisms.basetestmechanism_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_TESTMECHANISM_VOCABSTRING = Table('rel_testmechanism_statement', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('basetestmechanism_id',
-                                              BigIntegerType,
-                                              ForeignKey('basetestmechanisms.basetestmechanism_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('vocabstring_id',
-                                             BigIntegerType,
-                                             ForeignKey('vocabstrings.vocabstring_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
 
 class BaseTestMechanism(Entity, Base):
 
@@ -107,11 +36,11 @@ class BaseTestMechanism(Entity, Base):
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
-  efficacy = relationship(Statement, secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False, backref='base_test_mechanism')
-  producer = relationship(InformationSource, secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False, backref='base_test_mechanism')
+  efficacy = relationship(Statement, secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
+  producer = relationship('InformationSource', secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
 
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-
+  indicator = relationship('Indicator', uselist=False)
   _PARENTS = ['indicator']
 
   type = Column(UnicodeType(20), nullable=False)

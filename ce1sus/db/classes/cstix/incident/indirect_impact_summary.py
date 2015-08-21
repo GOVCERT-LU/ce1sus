@@ -5,6 +5,7 @@
 
 Created on Jul 27, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
@@ -27,6 +28,7 @@ class IndirectImpactSummary(Entity, Base):
   __loss_of_competitive_advantage = None
 
   _PARENTS = ['impact_assessment']
+  impact_assessment = relationship('ImpactAssessment', uselist=False)
 
   @property
   def loss_of_competitive_advantage(self):

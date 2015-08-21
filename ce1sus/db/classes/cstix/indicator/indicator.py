@@ -7,24 +7,24 @@ Created on Nov 11, 2014
 """
 
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, Boolean
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.base import BaseCoreComponent
 from ce1sus.db.classes.cstix.common.confidence import Confidence
-from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.kill_chains import KillChainPhaseReference
-from ce1sus.db.classes.cstix.common.related import RelatedPackageRef, RelatedCampaign, RelatedIndicator, RelatedTTP
 from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
-from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
+from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICAOTR_INFORMATIONSOURCE, _REL_INDICATOR_OBSERVABLE, _REL_INDICATOR_CONFIDENCE, \
+  _REL_INDICATOR_RELATED_TTPS, _REL_INDICATOR_HANDLING, _REL_INDICATOR_KILLCHAINPHASEREF, _REL_INDICATOR_RELATED_INDICATOR, _REL_INDICATOR_RELATED_CAMPAIGN, \
+  _REL_INDICATOR_STATEMENT, _REL_INDICATOR_RELATED_PACKAGES
 from ce1sus.db.classes.cstix.indicator.sightings import Sighting
 from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism
 from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.relations import _REL_EVENT_INDICATOR
 from ce1sus.db.common.session import Base
 
 
@@ -33,126 +33,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_INDICATOR_KILLCHAINPHASEREF = Table('rel_indicator_killchainphase_ref', getattr(Base, 'metadata'),
-                                      Column('rik_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                      Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                      Column('killchainphasereference_id', BigIntegerType, ForeignKey('killchainphasereferences.killchainphasereference_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                      )
-
-_REL_INDICATOR_OBSERVABLE = Table('rel_indicator_observable', getattr(Base, 'metadata'),
-                                  Column('rio_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                  Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                  Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                  )
-
-_REL_INDICATOR_RELATED_TTPS = Table('rel_indicator_related_ttps', getattr(Base, 'metadata'),
-                                    Column('rirt_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('relatedttp_id', BigIntegerType, ForeignKey('relatedttps.relatedttp_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                    )
-
-_REL_INDICATOR_RELATED_PACKAGES = Table('rel_indicator_relpackage_ref', getattr(Base, 'metadata'),
-                                        Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                        Column('relatedpackageref_id', BigIntegerType, ForeignKey('relatedpackagerefs.relatedpackageref_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                        )
-
-_REL_INDICATOR_RELATED_INDICATOR = Table('rel_indicator_related_indicators', getattr(Base, 'metadata'),
-                                         Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                         Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                         Column('relatedindicator_id', BigIntegerType, ForeignKey('relatedindicators.relatedindicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                         )
-
-_REL_INDICATOR_RELATED_CAMPAIGN = Table('rel_indicator_rel_indicator', getattr(Base, 'metadata'),
-                                        Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('relatedcampaign_id', BigIntegerType, ForeignKey('relatedcampaigns.relatedcampaign_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                        )
-
-_REL_INDICATOR_HANDLING = Table('rel_indicator_handling', getattr(Base, 'metadata'),
-                                        Column('rih_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                        )
-
-_REL_INDICATOR_CONFIDENCE = Table('rel_indicator_confidence', getattr(Base, 'metadata'),
-                                        Column('ric_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                        )
-
-_REL_INDICATOR_STRUCTUREDTEXT = Table('rel_indicator_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('indicator_id',
-                                              BigIntegerType,
-                                              ForeignKey('indicators.indicator_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_INDICATOR_STRUCTUREDTEXT_SHORT = Table('rel_indicator_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('indicator_id',
-                                              BigIntegerType,
-                                              ForeignKey('indicators.indicator_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_INDICAOTR_INFORMATIONSOURCE = Table('rel_indicator_informationsource', getattr(Base, 'metadata'),
-                                       Column('riis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('indicator_id',
-                                              BigIntegerType,
-                                              ForeignKey('indicators.indicator_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('informationsource_id',
-                                             BigIntegerType,
-                                             ForeignKey('informationsources.informationsource_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_INDICATOR_STATEMENT = Table('rel_indicator_statement', getattr(Base, 'metadata'),
-                                       Column('ris_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('indicator_id',
-                                              BigIntegerType,
-                                              ForeignKey('indicators.indicator_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('statement_id',
-                                             BigIntegerType,
-                                             ForeignKey('statements.statement_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
 class IndicatorType(Entity, Base):
 
   type_id = Column('type', Integer, default=None, nullable=False)
@@ -160,6 +40,7 @@ class IndicatorType(Entity, Base):
   __type_ = None
 
   _PARENTS = ['indicator']
+  indicator = relationship('Indicator', uselist=False)
 
   @property
   def type_(self):
@@ -186,25 +67,27 @@ class IndicatorType(Entity, Base):
 
 class Indicator(BaseCoreComponent, Base):
 
-  producer = relationship(InformationSource, secondary=_REL_INDICAOTR_INFORMATIONSOURCE, uselist=False, backref='indicator')
-  observables = relationship(Observable, secondary=_REL_INDICATOR_OBSERVABLE, backref='indicator')
-  types = relationship(IndicatorType, backref='indicator')
-  confidence = relationship(Confidence, secondary=_REL_INDICATOR_CONFIDENCE, uselist=False, backref='indicator')
-  indicated_ttps = relationship(RelatedTTP, secondary=_REL_INDICATOR_RELATED_TTPS, backref='indicator')
-  test_mechanisms = relationship(BaseTestMechanism, backref='indicator')
+  producer = relationship('InformationSource', secondary=_REL_INDICAOTR_INFORMATIONSOURCE, uselist=False)
+  observables = relationship('Observable', secondary=_REL_INDICATOR_OBSERVABLE)
+  types = relationship(IndicatorType)
+  confidence = relationship(Confidence, secondary=_REL_INDICATOR_CONFIDENCE, uselist=False)
+  indicated_ttps = relationship('RelatedTTP', secondary=_REL_INDICATOR_RELATED_TTPS)
+  test_mechanisms = relationship(BaseTestMechanism)
   alternative_id = Column('alternative_id', UnicodeType(255))
   # TODO: suggested_coas
   # suggested_coas = relationship('RelatedCOA', secondary='rel_indicator_related_coas')
-  sightings = relationship(Sighting, backref='indicator')
+  sightings = relationship(Sighting)
   operator = Column('operator', UnicodeType(3))
-  handling = relationship(MarkingSpecification, secondary=_REL_INDICATOR_HANDLING, backref='indicator')
-  kill_chain_phases = relationship(KillChainPhaseReference, secondary=_REL_INDICATOR_KILLCHAINPHASEREF, backref='indicator')
-  valid_time_positions = relationship(ValidTime, backref='indicator')
-  related_indicators = relationship(RelatedIndicator, secondary=_REL_INDICATOR_RELATED_INDICATOR, backref='indicator')
-  related_campaigns = relationship(RelatedCampaign, secondary=_REL_INDICATOR_RELATED_CAMPAIGN, backref='indicator')
+  handling = relationship('MarkingSpecification', secondary=_REL_INDICATOR_HANDLING)
+  kill_chain_phases = relationship(KillChainPhaseReference, secondary=_REL_INDICATOR_KILLCHAINPHASEREF)
+  valid_time_positions = relationship(ValidTime)
+  related_indicators = relationship('RelatedIndicator', secondary=_REL_INDICATOR_RELATED_INDICATOR)
+  related_campaigns = relationship('RelatedCampaign', secondary=_REL_INDICATOR_RELATED_CAMPAIGN)
 
 
   _PARENTS = ['event', 'related_indicator']
+  event = relationship('Event', secondary=_REL_EVENT_INDICATOR, uselist=False)
+  related_indicator = relationship('RelatedIndicator', uselist=False, primaryjoin='RelatedIndicator.child_id==Indicator.identifier')
 
   @property
   def composite_indicator_expression(self):
@@ -230,9 +113,9 @@ class Indicator(BaseCoreComponent, Base):
   def observable_composition_operator(self, value):
     self.operator = value
 
-  likely_impact = relationship(Statement, secondary=_REL_INDICATOR_STATEMENT, uselist=False, backref='indicator')
+  likely_impact = relationship(Statement, secondary=_REL_INDICATOR_STATEMENT, uselist=False)
   negate = Column('negate', Boolean, default=None)
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_INDICATOR_RELATED_PACKAGES, backref='indicator')
+  related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 

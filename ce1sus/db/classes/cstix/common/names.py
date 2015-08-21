@@ -5,10 +5,12 @@
 
 Created on Jul 3, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.campaign.relations import _REL_CAMPAIGN_NAME
 from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -24,6 +26,8 @@ class Name(Entity, Base):
   name = Column('name', UnicodeType(255), default=None, nullable=False)
   # reference = anyuri
   reference = Column('reference', UnicodeType(255), default=None, nullable=False)
+
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_NAME, uselist=False)
 
   _PARENTS = ['campaign']
 

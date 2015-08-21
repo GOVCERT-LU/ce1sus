@@ -7,16 +7,23 @@ Created on Jul 3, 2015
 """
 from datetime import datetime
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, Table, ForeignKey
+from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.information_source import InformationSource
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.campaign.relations import _REL_CAMPAIGN_CONFIDENCE
+from ce1sus.db.classes.cstix.coa.relations import _REL_OBJECTIVE_CONFIDENCE
+from ce1sus.db.classes.cstix.common.relations import _REL_CONFIDENCE_STRUCTUREDTEXT, _REL_CONFIDENCE_INFORMATIONSOURCE, _REL_STATEMENT_CONFIDENCE, \
+  _REL_RELATEDINCIDENT_CONFIDENCE
 from ce1sus.db.classes.cstix.common.vocabs import HighMediumLow
-from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.cstix.common.relations import _REL_RELATEDCOA_CONFIDENCE, _REL_RELATEDCAMPAIGN_CONFIDENCE, _REL_RELATEDOBSERVABLE_CONFIDENCE, \
+  _REL_RELATEDEXPLOITTARGET_CONFIDENCE, _REL_RELATEDPACKAGEREF_CONFIDENCE, _REL_RELATEDPACKAGE_CONFIDENCE, _REL_RELATEDIDENTITY_CONFIDENCE, \
+  _REL_RELATEDINDICATOR_CONFIDENCE, _REL_RELATEDTHREATACTOR_CONFIDENCE, _REL_RELATEDTTP_CONFIDENCE
+from ce1sus.db.classes.cstix.incident.relations import _REL_INCIDENT_CONFIDENCE
+from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICATOR_CONFIDENCE, _REL_SIGHTING_CONFIDENCE
 
 
 __author__ = 'Weber Jean-Paul'
@@ -24,52 +31,37 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_CONFIDENCE_STRUCTUREDTEXT = Table('rel_confidence_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rcst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('confidence_id',
-                                              BigIntegerType,
-                                              ForeignKey('confidences.confidence_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_CONFIDENCE_INFORMATIONSOURCE = Table('rel_confidence_informationsource', getattr(Base, 'metadata'),
-                                       Column('rcst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('confidence_id',
-                                              BigIntegerType,
-                                              ForeignKey('confidences.confidence_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('informationsource_id',
-                                             BigIntegerType,
-                                             ForeignKey('informationsources.informationsource_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
 
 class Confidence(Entity, Base):
 
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'second')
   value_db = Column('confidence', Integer, default=3, nullable=False)
 
-  description = relationship(StructuredText, secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False, lazy='joined', backref='confidence_description')
-  source = relationship(InformationSource, secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False, backref='confidence')
+  description = relationship('StructuredText', secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False, lazy='joined')
+  source = relationship('InformationSource', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
   # TODO: support confidence_assertion_chain
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_CONFIDENCE, uselist=False)
+  objective = relationship('Objective', secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False)
+  
+  related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_CONFIDENCE)
+  related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_CONFIDENCE)
+  related_relatedobservable = relationship('RelatedObservable', uselist=False, secondary=_REL_RELATEDOBSERVABLE_CONFIDENCE)
+  related_relatedexplottarget = relationship('RelatedExploitTarget', uselist=False, secondary=_REL_RELATEDEXPLOITTARGET_CONFIDENCE)
+  related_relatedpackageref = relationship('RelatedPackageRef', uselist=False, secondary=_REL_RELATEDPACKAGEREF_CONFIDENCE)
+  related_relatedpackage = relationship('RelatedPackage', uselist=False, secondary=_REL_RELATEDPACKAGE_CONFIDENCE)
+  related_relatedidentity = relationship('RelatedIdentity', uselist=False, secondary=_REL_RELATEDIDENTITY_CONFIDENCE)
+  related_relatedincident = relationship('RelatedIncident', uselist=False, secondary=_REL_RELATEDINCIDENT_CONFIDENCE)
+  related_relatedindicator = relationship('RelatedIndicator', uselist=False, secondary=_REL_RELATEDINDICATOR_CONFIDENCE)
+  related_relatedthreatactor = relationship('RelatedThreatActor', uselist=False, secondary=_REL_RELATEDTHREATACTOR_CONFIDENCE)
+  related_relatedttp = relationship('RelatedTTP', uselist=False, secondary=_REL_RELATEDTTP_CONFIDENCE)
+  statement_description = relationship('Statement', secondary=_REL_STATEMENT_CONFIDENCE, uselist=False)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_CONFIDENCE)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_CONFIDENCE)
+  sighting = relationship('Sighting', uselist=False, secondary=_REL_SIGHTING_CONFIDENCE)
+
+
   _PARENTS = ['campaign',
               'indicator',
               'statement',
@@ -86,7 +78,7 @@ class Confidence(Entity, Base):
               'related_relatedindicator',
               'related_relatedthreatactor',
               'related_relatedttp',
-              'related_relatedcoa',
+              'related_relatedincident',
               ]
 
 

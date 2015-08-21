@@ -185,7 +185,6 @@ class Group(BaseObject, Base):
                           secondary=_REL_MAINGROUP_GROUPS,
                           primaryjoin='Group.identifier == group_has_groups.c.group_id',
                           secondaryjoin='Group.identifier == group_has_groups.c.rel_group_id',
-                          backref='parents',
                           order_by='Group.name',
                           lazy='joined'
                           )

@@ -5,11 +5,13 @@
 
 Created on Jul 27, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Float
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.incident.relations import _REL_TLE_INIT_LOSSESTIMATION, _REL_TLE_ACTU_LOSSESTIMATION
 from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -25,6 +27,8 @@ class LossEstimation(Entity, Base):
   amount = Column('amount', Float)
 
   _PARENTS = ['total_loss_estimation_ini', 'total_loss_estimation_act']
+  total_loss_estimation_ini = relationship('TotalLossEstimation', secondary=_REL_TLE_INIT_LOSSESTIMATION, uselist=False)
+  total_loss_estimation_act = relationship('TotalLossEstimation', secondary=_REL_TLE_ACTU_LOSSESTIMATION, uselist=False)
 
   def to_dict(self, cache_object):
 

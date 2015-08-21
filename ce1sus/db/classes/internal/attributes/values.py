@@ -31,7 +31,7 @@ class ValueBase(BaseObject):
 
   @declared_attr
   def attribute(self):
-    return relationship('Attribute', uselist=False, lazy='joined')
+    return relationship('Attribute', uselist=False)
 
   @declared_attr
   def event_id(self):

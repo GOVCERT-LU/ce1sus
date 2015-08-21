@@ -11,7 +11,8 @@ from sqlalchemy.schema import Column, ForeignKey
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabstring import VocabString
-from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism, _REL_TESTMECHANISM_STRUCTUREDTEXT, _REL_TESTMECHANISM_VOCABSTRING
+from ce1sus.db.classes.cstix.indicator.relations import _REL_TESTMECHANISM_STRUCTUREDTEXT, _REL_TESTMECHANISM_VOCABSTRING
+from ce1sus.db.classes.cstix.indicator.test_mechanism import BaseTestMechanism
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeTextType
 
 
@@ -26,8 +27,8 @@ class GenericTestMechanism(BaseTestMechanism):
   # override identifier to keep the polymorphics
   identifier = Column(BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id'), primary_key=True)
   # TODO: reference_location
-  description = relationship(StructuredText, secondary=_REL_TESTMECHANISM_STRUCTUREDTEXT, uselist=False, backref='generic_test_meachanism_description')
-  type_ = relationship(VocabString, secondary=_REL_TESTMECHANISM_VOCABSTRING, backref='generic_test_meachanism')
+  description = relationship(StructuredText, secondary=_REL_TESTMECHANISM_STRUCTUREDTEXT, uselist=False)
+  type_ = relationship(VocabString, secondary=_REL_TESTMECHANISM_VOCABSTRING)
   specification = Column('specification', UnicodeTextType())
 
   __mapper_args__ = {'polymorphic_identity':'generictestmechanism'}

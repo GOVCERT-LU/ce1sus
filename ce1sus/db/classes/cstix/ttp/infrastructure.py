@@ -7,11 +7,12 @@ Created on Jul 28, 2015
 """
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.ttp.relations import _REL_INFRASTRUCTURE_STRUCTUREDTEXT, _REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -20,42 +21,6 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-_REL_INFRASTRUCTURE_STRUCTUREDTEXT = Table('rel_infrastructure_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('infrastructure_id',
-                                              BigIntegerType,
-                                              ForeignKey('infrastructures.infrastructure_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT = Table('rel_infrastructure_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('infrastructure_id',
-                                              BigIntegerType,
-                                              ForeignKey('infrastructures.infrastructure_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
 
 
 class Infrastructure(Entity, Base):
@@ -71,8 +36,8 @@ class Infrastructure(Entity, Base):
   _PARENTS = ['resource']
 
   title = Column('title', UnicodeType(255), index=True, nullable=True)
-  description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False, backref='infrastructure_description')
-  short_description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, uselist=False, backref='infrastructure_short_description')
+  description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False)
+  short_description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, uselist=False)
 
   # custom ones related to ce1sus internals
   ttpresource_id = Column('ttpresource_id', BigIntegerType, ForeignKey('resources.resource_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

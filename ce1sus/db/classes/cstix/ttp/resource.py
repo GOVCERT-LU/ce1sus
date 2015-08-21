@@ -65,6 +65,7 @@ class Resource(Entity, Base):
   personas = relationship(Identity, secondary=_REL_RESOURCE_IDENTITIY, backref='resource')
 
   _PARENTS = ['ttp']
+  ttp = relationship('TTP', uselist=False)
 
   # custom ones related to ce1sus internals
 

@@ -96,7 +96,7 @@ class PseudoCyboxAssembler(BaseChanger):
         obj.definition = definition
 
         if set_observable:
-          obj.observable = [observable]
+          obj.observable = observable
 
         rel_objs = json.get('related_objects', None)
         if rel_objs:

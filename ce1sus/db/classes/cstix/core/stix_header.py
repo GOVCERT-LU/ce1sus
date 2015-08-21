@@ -6,7 +6,7 @@
 Created on Jul 29, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
@@ -14,6 +14,8 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabs import PackageIntent as VocabPackageIntent
+from ce1sus.db.classes.cstix.core.relations import _REL_STIXHEADER_STRUCTUREDTEXT, _REL_STIXHEADER_STRUCTUREDTEXT_SHORT, _REL_STIXHEADER_HANDLING, \
+  _REL_STIXHEADER_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
@@ -24,66 +26,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_STIXHEADER_STRUCTUREDTEXT = Table('rel_stixheader_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rtstixheaderst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('stixheader_id',
-                                              BigIntegerType,
-                                              ForeignKey('stixheaders.stixheader_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_STIXHEADER_STRUCTUREDTEXT_SHORT = Table('rel_stixheader_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rtstixheaderst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('stixheader_id',
-                                              BigIntegerType,
-                                              ForeignKey('stixheaders.stixheader_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('structuredtext_id',
-                                             BigIntegerType,
-                                             ForeignKey('structuredtexts.structuredtext_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_STIXHEADER_INFORMATIONSOURCE = Table('rel_stixheader_informationsource', getattr(Base, 'metadata'),
-                                       Column('rstixheaderis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('stixheader_id',
-                                              BigIntegerType,
-                                              ForeignKey('stixheaders.stixheader_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('informationsource_id',
-                                             BigIntegerType,
-                                             ForeignKey('informationsources.informationsource_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-_REL_STIXHEADER_HANDLING = Table('rel_stixheader_handling', getattr(Base, 'metadata'),
-                            Column('eih_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                            Column('stixheader_id', BigIntegerType, ForeignKey('stixheaders.stixheader_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                            Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                            )
-
 class PackageIntent(BaseObject, Base):
 
   intent_id = Column('intent_id', Integer, default=None, nullable=False)
@@ -91,6 +33,7 @@ class PackageIntent(BaseObject, Base):
   __intent = None
 
   _PARENTS = ['stix_header']
+  stix_header = relationship('STIXHeader', uselist=False)
 
   @property
   def intent(self):
@@ -113,15 +56,16 @@ class PackageIntent(BaseObject, Base):
 class STIXHeader(Entity, Base):
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  package_intents = relationship(PackageIntent, backref='stix_header')
+  package_intents = relationship(PackageIntent)
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, backref='stix_header_description')
-  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, backref='stix_header_short_description')
-  handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING, backref='stix_header')
-  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, backref='stix_header')
+  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False)
+  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False)
+  handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING)
+  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False)
   # TODO: profiles
 
   _PARENTS = ['event']
+  event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
     print self.description.parent

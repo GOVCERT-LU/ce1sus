@@ -17,6 +17,7 @@ from ce1sus.common.checks import is_event_owner
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.campaign.campaign import Campaign
+from ce1sus.db.classes.cstix.common.related import RelatedPackage
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 from ce1sus.db.classes.cstix.exploit_target.exploittarget import ExploitTarget
 from ce1sus.db.classes.cstix.incident.incident import Incident
@@ -27,6 +28,7 @@ from ce1sus.db.classes.internal.common import Status, Risk, Analysis
 from ce1sus.db.classes.internal.core import ExtendedLogingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.classes.internal.errors.errorbase import ErrorBase
+from ce1sus.db.classes.internal.relations import _REL_EVENT_OBSERVABLE, _REL_EVENT_RELATED_PACKAGES
 from ce1sus.db.classes.internal.report import Report
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.session import Base
@@ -39,18 +41,6 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-_REL_EVENT_RELATED_PACKAGES = Table('rel_event_relpackage', getattr(Base, 'metadata'),
-                                    Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('relatedpackage_id', BigIntegerType, ForeignKey('relatedpackages.relatedpackage_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                    )
-
-_REL_EVENT_OBSERVABLE = Table('rel_event_observable', getattr(Base, 'metadata'),
-                                    Column('reo_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                    )
-
 class EventGroupPermission(ExtendedLogingInformations, Base):
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
   group_id = Column('group_id', BigIntegerType, ForeignKey('groups.group_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
@@ -58,6 +48,8 @@ class EventGroupPermission(ExtendedLogingInformations, Base):
   __bit_code = None
   group = relationship('Group', primaryjoin='EventGroupPermission.group_id==Group.identifier')
   UniqueConstraint('event_id', 'group_id')
+
+  event = relationship('Event', uselist=False)
 
   @property
   def permissions(self):
@@ -95,36 +87,37 @@ class Event(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
-  stix_header = relationship(STIXHeader, uselist=False, backref='event')
-  campaigns = relationship(Campaign, backref='event')
+  stix_header = relationship(STIXHeader, uselist=False)
+  campaigns = relationship(Campaign)
   # TODO: courses_of_action
   courses_of_action = None
-  exploit_targets = relationship(ExploitTarget, backref='event')
-  observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE, backref='event')
-  indicators = relationship(Indicator, backref='event')
-  incidents = relationship(Incident, backref='event')
-  threat_actors = relationship(ThreatActor, backref='event')
-  ttps = relationship(TTP, backref='event')
-  related_packages = relationship('RelatedPackage', secondary=_REL_EVENT_RELATED_PACKAGES, backref='event')
+  exploit_targets = relationship(ExploitTarget)
+  observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE)
+  indicators = relationship(Indicator)
+  incidents = relationship(Incident)
+  threat_actors = relationship(ThreatActor)
+  ttps = relationship(TTP)
+  related_packages = relationship('RelatedPackage', secondary=_REL_EVENT_RELATED_PACKAGES)
 
   # reports are not in 1.1.5 -> custom one
-  reports = relationship(Report, backref='event')
+  reports = relationship(Report)
   
   # custom attributes
   status_id = Column('status_id', Integer, default=0, nullable=False)
   risk_id = Column('risk_id', Integer, nullable=False, default=0)
   analysis_id = Column('analysis_id', Integer, nullable=False, default=0)
-  comments = relationship('Comment', backref='event')
+  comments = relationship('Comment')
   last_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   first_seen = Column(DateTime, default=datetime.utcnow(), nullable=False)
   last_publish_date = Column('last_publish_date', DateTime)
 
   #ce1sus specific
-  groups = relationship('EventGroupPermission', backref='event')
+  groups = relationship('EventGroupPermission')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
-  errors = relationship(ErrorBase, backref='event')
+  errors = relationship(ErrorBase)
 
   _PARENTS = ['related_package']
+  related_package = relationship(RelatedPackage, primaryjoin='RelatedPackage.child_id==Event.identifier', uselist=False)
 
   @property
   def status(self):
@@ -253,6 +246,7 @@ class Event(Entity, Base):
 class Comment(ExtendedLogingInformations, Base):
   event_id = Column(BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   comment = Column('comment', UnicodeTextType(), nullable=False)
+  event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
     result = {

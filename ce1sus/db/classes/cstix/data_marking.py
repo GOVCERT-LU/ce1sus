@@ -8,14 +8,22 @@ Created on Aug 3, 2015
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.campaign.relations import _REL_CAMPAIGN_HANDLING
 from ce1sus.db.classes.cstix.common.information_source import InformationSource
+from ce1sus.db.classes.cstix.core.relations import _REL_STIXHEADER_HANDLING
+from ce1sus.db.classes.cstix.exploit_target.relations import _REL_EXPLOITTARGET_HANDLING
+from ce1sus.db.classes.cstix.incident.relations import _REL_INCIDENT_HANDLING
+from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICATOR_HANDLING
+from ce1sus.db.classes.cstix.relations import _REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 from ce1sus.helpers.version import Version
+from ce1sus.db.classes.cstix.threat_actor.relations import _REL_THREATACTOR_HANDLING
+from ce1sus.db.classes.cstix.ttp.relations import _REL_TTP_HANDLING
 
 
 __author__ = 'Weber Jean-Paul'
@@ -23,43 +31,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
-_REL_MARKINGSTRUCTURE_STATEMENT = Table('rel_markingstructure_statement', getattr(Base, 'metadata'),
-                                       Column('rtous_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('markingstructure_id',
-                                              BigIntegerType,
-                                              ForeignKey('markingstructures.markingstructure_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('statement_id',
-                                             BigIntegerType,
-                                             ForeignKey('statements.statement_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
-
-
-_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE = Table('rel_markingspecification_informationsource', getattr(Base, 'metadata'),
-                                       Column('rmsis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('markingspecification_id',
-                                              BigIntegerType,
-                                              ForeignKey('markingspecifications.markingspecification_id',
-                                                         ondelete='cascade',
-                                                         onupdate='cascade'),
-                                              index=True,
-                                              nullable=False),
-                                       Column('informationsource_id',
-                                             BigIntegerType,
-                                             ForeignKey('informationsources.informationsource_id',
-                                                        ondelete='cascade',
-                                                        onupdate='cascade'),
-                                              nullable=False,
-                                              index=True)
-                                       )
 
 class MarkingStructure(Entity, Base):
 
@@ -72,6 +43,7 @@ class MarkingStructure(Entity, Base):
     self.set_id(value)
 
   _PARENTS = ['markingspecification']
+  markingspecification = relationship('MarkingSpecification', uselist=False)
 
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
@@ -109,6 +81,12 @@ class MarkingSpecification(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_HANDLING, uselist=False)
+  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_HANDLING)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_HANDLING)
+  threat_actor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_HANDLING)
+  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_HANDLING)
+
   _PARENTS = ['campaign',
               'stix_header',
               'exploit_target',
@@ -120,8 +98,10 @@ class MarkingSpecification(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   version_db = Column('version', UnicodeType(40), nullable=True)
   controlled_structure = Column('controlled_structure', UnicodeType(255))
-  marking_structures = relationship(MarkingStructure, backref='markingspecification')
-  information_source = relationship(InformationSource, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE, uselist=False, backref='markingspecification')
+  marking_structures = relationship(MarkingStructure)
+  information_source = relationship(InformationSource, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE, uselist=False)
+  stix_header = relationship('STIXHeader', secondary=_REL_STIXHEADER_HANDLING, uselist=False)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_HANDLING)
 
   __version = None
   @property

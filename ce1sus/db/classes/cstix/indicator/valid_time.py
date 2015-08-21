@@ -5,6 +5,7 @@
 
 Created on Jul 27, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import DateTime
 
@@ -30,6 +31,7 @@ class ValidTime(Entity, Base):
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['indicator']
+  indicator = relationship('Indicator', uselist=False)
 
   def to_dict(self, cache_object):
 

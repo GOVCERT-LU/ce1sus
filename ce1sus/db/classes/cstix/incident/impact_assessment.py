@@ -31,6 +31,7 @@ class Effect(Entity, Base):
   __value = None
 
   _PARENTS = ['impact_assessment']
+  impact_assessment = relationship('ImpactAssessment', uselist=False)
 
   @property
   def value(self):
@@ -55,12 +56,13 @@ class Effect(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class ImpactAssessment(Entity, Base):
-  direct_impact_summary = relationship(DirectImpactSummary, uselist=False, backref='impact_assessment')
-  indirect_impact_summary = relationship(IndirectImpactSummary, uselist=False, backref='impact_assessment')
-  total_loss_estimation = relationship(TotalLossEstimation, uselist=False, backref='impact_assessment')
+  direct_impact_summary = relationship(DirectImpactSummary, uselist=False)
+  indirect_impact_summary = relationship(IndirectImpactSummary, uselist=False)
+  total_loss_estimation = relationship(TotalLossEstimation, uselist=False)
   impact_qualification_id = Column('impact_qualification_id', Integer)
 
   _PARENTS = ['incident']
+  incident = relationship('Incident', uselist=False)
 
   @property
   def impact_qualification(self):
@@ -75,7 +77,7 @@ class ImpactAssessment(Entity, Base):
       self.__impact_qualification = ImpactQualification(self, 'impact_qualification_id')
     self.impact_qualification.name = impact_qualification
 
-  effects = relationship(Effect, backref='impact_assessment')
+  effects = relationship(Effect)
 
   # ce1sus specific
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

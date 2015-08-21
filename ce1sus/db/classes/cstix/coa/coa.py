@@ -6,16 +6,17 @@
 Created on Jul 27, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, Table, ForeignKey
+from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.coa.objective import Objective
-from ce1sus.db.classes.cstix.common.related import RelatedPackageRef, RelatedCOA
+from ce1sus.db.classes.cstix.coa.relations import _REL_COA_IMPACT_STATEMENT, _REL_COA_COST_STATEMENT, _REL_EFFICACY_STATEMENT, _REL_COA_RELCOA, \
+  _REL_COA_RELATED_PACKAGESREF
 from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.common.vocabs import COAStage, CourseOfActionType
-from ce1sus.db.classes.internal.corebase import BigIntegerType
+from ce1sus.db.classes.cstix.incident.relations import _REL_COATAKEN_COA, _REL_COAREQUESTED_COA
 from ce1sus.db.common.session import Base
 
 
@@ -24,36 +25,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
-_REL_COA_RELATED_PACKAGESREF = Table('rel_coa_relpackage', getattr(Base, 'metadata'),
-                                     Column('rcrp_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                     Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                     Column('relatedpackageref_id', BigIntegerType, ForeignKey('relatedpackagerefs.relatedpackageref_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                     )
-
-_REL_COA_IMPACT_STATEMENT = Table('rel_coa_impact_statement', getattr(Base, 'metadata'),
-                                  Column('rcrp_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                  Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                  Column('statement_id', BigIntegerType, ForeignKey('statements.statement_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                  )
-
-_REL_COA_COST_STATEMENT = Table('rel_coa_cost_statement', getattr(Base, 'metadata'),
-                                Column('rcis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                Column('statement_id', BigIntegerType, ForeignKey('statements.statement_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                )
-
-_REL_EFFICACY_STATEMENT = Table('rel_coa_efficacy_statement', getattr(Base, 'metadata'),
-                                Column('rces_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                Column('statement_id', BigIntegerType, ForeignKey('statements.statement_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                )
-
-_REL_COA_RELCOA = Table('rel_coa_relcoa', getattr(Base, 'metadata'),
-                        Column('rcrc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                        Column('courseofaction_id', BigIntegerType, ForeignKey('courseofactions.courseofaction_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                        Column('relatedcoa_id', BigIntegerType, ForeignKey('relatedcoas.relatedcoa_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                        )
 
 class CourseOfAction(Entity, Base):
   stage_id = Column('stage_id', Integer)
@@ -93,19 +64,22 @@ class CourseOfAction(Entity, Base):
       self.__type = CourseOfActionType(self, 'type_id')
     self.type.name = value
 
-  objective = relationship(Objective, backref='coa')
+  objective = relationship(Objective)
   # TODO: parameter_observables
   # parameter_observables = -> relationship observables
   #TODO: structured_coa = None
   
-  impact = relationship(Statement, secondary=_REL_COA_IMPACT_STATEMENT, backref='coa_impact')
-  cost = relationship(Statement, secondary=_REL_COA_COST_STATEMENT, backref='coa_cost')
-  efficacy = relationship(Statement, secondary=_REL_EFFICACY_STATEMENT, backref='coa_efficacy')
+  impact = relationship(Statement, secondary=_REL_COA_IMPACT_STATEMENT)
+  cost = relationship(Statement, secondary=_REL_COA_COST_STATEMENT)
+  efficacy = relationship(Statement, secondary=_REL_EFFICACY_STATEMENT)
 
-  related_coas = relationship(RelatedCOA, secondary=_REL_COA_RELCOA, backref='coa')
-  related_packages = relationship(RelatedPackageRef, secondary=_REL_COA_RELATED_PACKAGESREF, backref='coa')
+  related_coas = relationship('RelatedCOA', secondary=_REL_COA_RELCOA)
+  related_packages = relationship('RelatedPackageRef', secondary=_REL_COA_RELATED_PACKAGESREF)
 
-  _PARENTS = ['coa_take', 'related_coa', 'coa_requested']
+  _PARENTS = ['coa_taken', 'related_coa', 'coa_requested']
+  related_coa = relationship('RelatedCOA', uselist=False, primaryjoin='RelatedCOA.child_id==CourseOfAction.identifier')
+  coa_taken = relationship('COATaken', uselist=False, secondary=_REL_COATAKEN_COA)
+  coa_requested = relationship('COARequested', uselist=False, secondary=_REL_COAREQUESTED_COA)
 
   def to_dict(self, cache_object):
     result = {

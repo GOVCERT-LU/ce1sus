@@ -25,7 +25,7 @@ __license__ = 'GPL v3+'
 class SnortRule(Entity, Base):
   snorttestmechanism_id = Column('basetestmechanism_id', BigIntegerType, ForeignKey('basetestmechanisms.basetestmechanism_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   rule = Column('rule', UnicodeTextType(), nullable=False)
-
+  snort_test_mechanism = relationship('SnortTestMechanism', uselist=False)
   _PARENTS = ['snort_test_mechanism']
 
   def to_dict(self, cache_object):
@@ -44,7 +44,7 @@ class SnortTestMechanism(BaseTestMechanism):
 
   product_name = None
   version_db = Column('version', UnicodeType(40), nullable=True)
-  rules = relationship(SnortRule, backref='snort_test_mechanism')
+  rules = relationship(SnortRule)
   # TODO: event_filters
   # TODO: rate_filters
   # TODO: event_suppressions

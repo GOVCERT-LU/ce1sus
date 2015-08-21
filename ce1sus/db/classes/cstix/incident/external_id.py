@@ -5,6 +5,7 @@
 
 Created on Jul 27, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
@@ -26,6 +27,7 @@ class ExternalID(Entity, Base):
   incident_id = Column('incident_id', BigIntegerType, ForeignKey('incidents.incident_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['incident']
+  incident = relationship('Incident', uselist=False)
 
   def to_dict(self, cache_object):
 

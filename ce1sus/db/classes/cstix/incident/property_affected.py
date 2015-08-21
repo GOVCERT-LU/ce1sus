@@ -6,13 +6,14 @@
 Created on Jul 27, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean, Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.vocabs import LossProperty, AvailabilityLoss, LossDuration
+from ce1sus.db.classes.cstix.incident.relations import _REL_PROPERTYAFFECTED_STRUCTUREDTEXT
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -21,24 +22,6 @@ __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
-
-_REL_PROPERTYAFFECTED_STRUCTUREDTEXT = Table('rel_propertyaffected_structuredtext', getattr(Base, 'metadata'),
-                                             Column('rps_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                             Column('propertyaffected_id',
-                                                    BigIntegerType,
-                                                    ForeignKey('propertyaffecteds.propertyaffected_id',
-                                                               ondelete='cascade',
-                                                               onupdate='cascade'),
-                                                    index=True,
-                                                    nullable=False),
-                                             Column('structuredtext_id',
-                                                    BigIntegerType,
-                                                    ForeignKey('structuredtexts.structuredtext_id',
-                                                               ondelete='cascade',
-                                                               onupdate='cascade'),
-                                                    nullable=False,
-                                                    index=True)
-                                             )
 
 
 class NonPublicDataCompromised(Entity, Base):
@@ -50,6 +33,7 @@ class NonPublicDataCompromised(Entity, Base):
   propertyaffected_id = Column('propertyaffected_id', BigIntegerType, ForeignKey('propertyaffecteds.propertyaffected_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['property_affacted']
+  property_affacted = relationship('PropertyAffected', uselist=False)
 
 class PropertyAffected(Entity, Base):
   property_id = Column(Integer)
@@ -67,7 +51,7 @@ class PropertyAffected(Entity, Base):
       self.__property_ = LossProperty(self, 'property_id')
     self.property_.name = property_
 
-  description_of_effect = relationship(StructuredText, secondary=_REL_PROPERTYAFFECTED_STRUCTUREDTEXT, backref='property_affacted_description')
+  description_of_effect = relationship(StructuredText, secondary=_REL_PROPERTYAFFECTED_STRUCTUREDTEXT)
 
   type_of_availability_loss_id = Column(Integer)
   __type_of_availability_loss = None
@@ -102,11 +86,12 @@ class PropertyAffected(Entity, Base):
       self.__duration_of_availability_loss = LossDuration(self, 'duration_of_availability_loss_id')
     self.duration_of_availability_loss.name = duration_of_availability_loss
 
-  non_public_data_compromised = relationship(NonPublicDataCompromised, uselist=False, backref='property_affacted')
+  non_public_data_compromised = relationship(NonPublicDataCompromised, uselist=False)
 
   affectedasset_id = Column('affectedasset_id', BigIntegerType, ForeignKey('affectedassets.affectedasset_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['affected_asset']
+  affected_asset = relationship('AffectedAsset', uselist=False)
 
   def to_dict(self, cache_object):
 

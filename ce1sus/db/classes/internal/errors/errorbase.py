@@ -25,7 +25,7 @@ __license__ = 'GPL v3+'
 class ErrorBase(BaseObject, Base):
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-
+  event = relationship('Event', uselist=False)
 
   message = Column(UnicodeTextType, nullable=False)
   dump = Column(UnicodeTextType, nullable=False)

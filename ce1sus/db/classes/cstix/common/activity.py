@@ -11,7 +11,7 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.common.relations import _REL_ACTIVITY_STRUCTUREDTEXT, _REL_ACTIVITY_DATETIMEWITHPRECISION
 from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
 
@@ -21,48 +21,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_ACTIVITY_STRUCTUREDTEXT = Table('rel_activity_structuredtext', getattr(Base, 'metadata'),
-                                     Column('ras_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                     Column('activity_id',
-                                            BigIntegerType,
-                                            ForeignKey('activitys.activity_id',
-                                                       ondelete='cascade',
-                                                       onupdate='cascade'),
-                                            index=True,
-                                            nullable=False),
-                                     Column('structuredtext_id',
-                                            BigIntegerType,
-                                            ForeignKey('structuredtexts.structuredtext_id',
-                                                       ondelete='cascade',
-                                                       onupdate='cascade'),
-                                            nullable=False,
-                                            index=True)
-                                     )
-
-_REL_ACTIVITY_DATETIMEWITHPRECISION = Table('rel_activity_datetimewithprecision', getattr(Base, 'metadata'),
-                                            Column('rad_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                            Column('activity_id',
-                                                   BigIntegerType,
-                                                   ForeignKey('activitys.activity_id',
-                                                              ondelete='cascade',
-                                                              onupdate='cascade'),
-                                                   index=True,
-                                                   nullable=False),
-                                            Column('datetimewithprecision_id',
-                                                   BigIntegerType,
-                                                   ForeignKey('datetimewithprecisions.datetimewithprecision_id',
-                                                              ondelete='cascade',
-                                                              onupdate='cascade'),
-                                                   nullable=False,
-                                                   index=True)
-                                            )
-
-
 class Activity(Entity, Base):
 
-  description = relationship(StructuredText, secondary=_REL_ACTIVITY_STRUCTUREDTEXT, uselist=False, backref='activity_description')
-  date_time = relationship(DateTimeWithPrecision, secondary=_REL_ACTIVITY_DATETIMEWITHPRECISION, uselist=False, backref='activity')
+  description = relationship('StructuredText', secondary=_REL_ACTIVITY_STRUCTUREDTEXT, uselist=False)
+  date_time = relationship(DateTimeWithPrecision, secondary=_REL_ACTIVITY_DATETIMEWITHPRECISION, uselist=False)
   campaign_id = Column('campaign_id', BigIntegerType, ForeignKey('campaigns.campaign_id', ondelete='cascade', onupdate='cascade'), index=True)
+
+  campaign = relationship('Campaign', uselist=False)
 
   _PARENTS = ['campaign']
 

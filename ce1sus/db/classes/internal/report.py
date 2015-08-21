@@ -141,6 +141,7 @@ class Reference(BaseElement, Base):
                           primaryjoin='Reference.identifier==Reference.parent_id')
 
   _PARENTS = ['report']
+  report = relationship('Report', uselist=False)
 
   def to_dict(self, cache_object):
     value = self.convert_value(self.value)
@@ -184,8 +185,9 @@ class Report(BaseElement, Base):
   parent_report_id = Column('parent_report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   parent_report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
+  event = relationship('Event', uselist=False)
 
-  references = relationship('Reference', backref='report')
+  references = relationship('Reference')
   related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
 
   def references_count_for_permissions(self, event_permissions, user):

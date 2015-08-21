@@ -5,14 +5,19 @@
 
 Created on Jul 28, 2015
 """
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.campaign.relations import _REL_CAMPAIGN_INTENDEDEFFECT
 from ce1sus.db.classes.cstix.common.vocabs import IntendedEffect as VocabIntendedEffect
 from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.cstix.incident.relations import _REL_INCIDENT_INTENDED_EFFECT
+from ce1sus.db.classes.cstix.threat_actor.relations import _REL_THREATACTOR_INTENDED_EFFECT
+from ce1sus.db.classes.cstix.ttp.relations import _REL_TTP_INTENDED_EFFECT
 
 
 __author__ = 'Weber Jean-Paul'
@@ -28,6 +33,11 @@ class IntendedEffect(Entity, Base):
   threatactor_id = Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   effect_id = Column('effect_id', Integer)
   __effect = None
+
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_INTENDEDEFFECT, uselist=False)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INTENDED_EFFECT)
+  threat_actor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_INTENDED_EFFECT)
+  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_INTENDED_EFFECT)
 
   _PARENTS = ['campaign',
               'ttp',

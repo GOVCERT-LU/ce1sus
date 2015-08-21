@@ -33,7 +33,7 @@ _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', getattr(Base, 'met
 class Condition(SimpleLogingInformations, Base):
   value = Column('value', UnicodeType(40), unique=True)
   description = Column('description', UnicodeTextType())
-
+  attribute = relationship('Attribute', secondary=_REL_ATTRIBUTE_CONDITIONS, uselist=False)
   _PARENTS = ['attribute']
 
   def to_dict(self, complete=True, inflated=False):
@@ -75,9 +75,10 @@ class Attribute(BaseElement, Base):
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
   condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
-  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS, backref='attribute')
+  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS)
 
   _PARENTS = ['object']
+  object = relationship('Object', uselist=False)
 
   def __get_value_instance(self):
     """

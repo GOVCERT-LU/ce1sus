@@ -6,7 +6,7 @@
 Created on Jun 25, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey, Table
+from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
@@ -16,6 +16,7 @@ from ce1sus.db.classes.cstix.common.vocabs import TargetedSystems as VocabTarget
 from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.corebase import BigIntegerType
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.cstix.ttp.relations import _REL_VICTIMTARGETING_IDENTITY
 
 
 __author__ = 'Weber Jean-Paul'
@@ -23,19 +24,13 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_VICTIMTARGETING_IDENTITY = Table('rel_victimtargeting_identity', getattr(Base, 'metadata'),
-                                       Column('rti_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                       Column('victimtargeting_id', BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                       Column('identity_id', BigIntegerType, ForeignKey('identitys.identity_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
-                                       )
-
-
 class TargetedInformation(BaseElement, Base):
   targeted_information_id = Column('targeted_information_id', Integer, default=None)
   victimtargeting_id = Column(BigIntegerType, ForeignKey('victimtargetings.victimtargeting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   __targeted_information = None
 
   _PARENTS = ['victim_targeting']
+  victim_targeting = relationship('VictimTargeting', uselist=False)
 
   @property
   def targeted_information(self):
@@ -67,6 +62,7 @@ class TargetedSystems(BaseElement, Base):
   __targeted_system = None
 
   _PARENTS = ['victim_targeting']
+  victim_targeting = relationship('VictimTargeting', uselist=False)
 
   @property
   def targeted_system(self):
@@ -91,9 +87,9 @@ class TargetedSystems(BaseElement, Base):
     return merge_dictionaries(result, parent_dict)
 
 class VictimTargeting(BaseElement, Base):
-  identity = relationship(Identity, secondary='rel_victimtargeting_identity', uselist=False, backref='victim_targeting')
-  targeted_systems = relationship(TargetedSystems, backref='victim_targeting')
-  targeted_information = relationship(TargetedInformation, backref='victim_targeting')
+  identity = relationship(Identity, secondary=_REL_VICTIMTARGETING_IDENTITY, uselist=False)
+  targeted_systems = relationship(TargetedSystems)
+  targeted_information = relationship(TargetedInformation)
   # TODO targeted_technical_details
   # targeted_technical_details = None
 
@@ -103,6 +99,7 @@ class VictimTargeting(BaseElement, Base):
   vulnerability_id = Column('vulnerability_id', BigIntegerType, ForeignKey('vulnerabilitys.vulnerability_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   _PARENTS = ['ttp']
+  ttp = relationship('TTP', uselist=False)
 
   def to_dict(self, cache_object):
 

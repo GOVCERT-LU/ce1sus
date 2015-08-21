@@ -6,7 +6,7 @@
 Created on Jul 27, 2015
 """
 from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Table, Column, ForeignKey
+from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
@@ -14,7 +14,8 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.coa.coa import CourseOfAction
 from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
 from ce1sus.db.classes.cstix.common.vocabs import HighMediumLow
-from ce1sus.db.classes.internal.corebase import BigIntegerType
+from ce1sus.db.classes.cstix.incident.relations import _REL_COATIME_DATETIME_START, _REL_COATIME_DATETIME_ENDED, _REL_COATAKEN_COATIME, _REL_COATAKEN_COA, \
+  _REL_COAREQUESTED_COATIME, _REL_COAREQUESTED_COA, _REL_HISTORYITEM_COATAKEN, _REL_INCIDENT_COATAKEN, _REL_INCIDENT_COAREQUESTED
 from ce1sus.db.common.session import Base
 
 
@@ -23,120 +24,14 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-_REL_COATAKEN_COA = Table('rel_coataken_courseofaction', getattr(Base, 'metadata'),
-                          Column('rctc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                          Column('coataken_id',
-                                 BigIntegerType,
-                                 ForeignKey('coatakens.coataken_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 index=True,
-                                 nullable=False),
-                          Column('structuredtext_id',
-                                 BigIntegerType,
-                                 ForeignKey('courseofactions.courseofaction_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 nullable=False,
-                                 index=True)
-                          )
-
-_REL_COAREQUESTED_COA = Table('rel_coarequested_courseofaction', getattr(Base, 'metadata'),
-                          Column('rcrc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                          Column('coarequested_id',
-                                 BigIntegerType,
-                                 ForeignKey('coarequesteds.coarequested_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 index=True,
-                                 nullable=False),
-                          Column('structuredtext_id',
-                                 BigIntegerType,
-                                 ForeignKey('courseofactions.courseofaction_id',
-                                            ondelete='cascade',
-                                            onupdate='cascade'),
-                                 nullable=False,
-                                 index=True)
-                          )
-
-_REL_COATIME_DATETIME_START = Table('rel_coatime_datetime_start', getattr(Base, 'metadata'),
-                                    Column('rcsd_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('coatime_id',
-                                           BigIntegerType,
-                                           ForeignKey('coatimes.coatime_id',
-                                                      ondelete='cascade',
-                                                      onupdate='cascade'),
-                                           index=True,
-                                           nullable=False),
-                                    Column('datetimewithprecision_id',
-                                           BigIntegerType,
-                                           ForeignKey('datetimewithprecisions.datetimewithprecision_id',
-                                                      ondelete='cascade',
-                                                onupdate='cascade'),
-                                           nullable=False,
-                                           index=True)
-                                    )
-
-_REL_COATIME_DATETIME_ENDED = Table('rel_coatime_datetime_end', getattr(Base, 'metadata'),
-                                    Column('rced_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('coatime_id',
-                                           BigIntegerType,
-                                           ForeignKey('coatimes.coatime_id',
-                                                      ondelete='cascade',
-                                                      onupdate='cascade'),
-                                           index=True,
-                                           nullable=False),
-                                    Column('datetimewithprecision_id',
-                                           BigIntegerType,
-                                           ForeignKey('datetimewithprecisions.datetimewithprecision_id',
-                                                      ondelete='cascade',
-                                                onupdate='cascade'),
-                                           nullable=False,
-                                           index=True)
-                                    )
-
-_REL_COATAKEN_COATIME = Table('rel_coataken_coatime', getattr(Base, 'metadata'),
-                                    Column('rctct_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('coataken_id',
-                                           BigIntegerType,
-                                           ForeignKey('coatakens.coataken_id',
-                                                      ondelete='cascade',
-                                                      onupdate='cascade'),
-                                           index=True,
-                                           nullable=False),
-                                    Column('coatime_id',
-                                           BigIntegerType,
-                                           ForeignKey('coatimes.coatime_id',
-                                                      ondelete='cascade',
-                                                onupdate='cascade'),
-                                           nullable=False,
-                                           index=True)
-                                    )
-
-_REL_COAREQUESTED_COATIME = Table('rel_coarequested_coatime', getattr(Base, 'metadata'),
-                                    Column('rctct_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('coarequested_id',
-                                           BigIntegerType,
-                                           ForeignKey('coarequesteds.coarequested_id',
-                                                      ondelete='cascade',
-                                                      onupdate='cascade'),
-                                           index=True,
-                                           nullable=False),
-                                    Column('coatime_id',
-                                           BigIntegerType,
-                                           ForeignKey('coatimes.coatime_id',
-                                                      ondelete='cascade',
-                                                onupdate='cascade'),
-                                           nullable=False,
-                                           index=True)
-                                    )
-
 
 class COATime(Entity, Base):
-  start = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_START, uselist=False, backref='coa_time_start')
-  end = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_ENDED, uselist=False, backref='coa_time_end')
-
+  start = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_START, uselist=False)
+  end = relationship(DateTimeWithPrecision, secondary=_REL_COATIME_DATETIME_ENDED, uselist=False)
+  coa_taken = relationship('COATaken', uselist=False, secondary=_REL_COATAKEN_COATIME)
   _PARENTS = ['coa_taken', 'coa_requested']
+  coa_requested = relationship('COARequested', uselist=False, secondary=_REL_COAREQUESTED_COATIME)
+
 
   def to_dict(self, cache_object):
 
@@ -149,12 +44,15 @@ class COATime(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class COATaken(Entity, Base):
-  time = relationship(COATime, secondary=_REL_COATAKEN_COATIME, backref='coa_taken')
-  course_of_action = relationship(CourseOfAction, secondary=_REL_COATAKEN_COA, backref='coa_taken')
+  time = relationship(COATime, secondary=_REL_COATAKEN_COATIME)
+  course_of_action = relationship(CourseOfAction, secondary=_REL_COATAKEN_COA)
   # TODO: Contributors
   # contributors = Contributors()
 
   _PARENTS = ['incident', 'history_item']
+  history_item = relationship('HistoryItem', uselist=False, secondary=_REL_HISTORYITEM_COATAKEN)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_COATAKEN)
+
 
   def to_dict(self, cache_object):
 
@@ -167,8 +65,8 @@ class COATaken(Entity, Base):
     return merge_dictionaries(result, parent_dict)
 
 class COARequested(Entity, Base):
-  time = relationship(COATime, secondary=_REL_COAREQUESTED_COATIME, backref='coa_requested')
-  course_of_action = relationship(CourseOfAction, secondary=_REL_COAREQUESTED_COA, backref='coa_requested')
+  time = relationship(COATime, secondary=_REL_COAREQUESTED_COATIME)
+  course_of_action = relationship(CourseOfAction, secondary=_REL_COAREQUESTED_COA)
 
   # TODO: Contributors
   # contributors = Contributors()
@@ -191,7 +89,7 @@ class COARequested(Entity, Base):
     self.priority.name = value
 
   _PARENTS = ['incident']
-
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_COAREQUESTED)
   def to_dict(self, cache_object):
 
     result = {

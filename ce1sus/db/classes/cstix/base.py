@@ -14,8 +14,6 @@ from sqlalchemy.types import DateTime
 from ce1sus.common import merge_dictionaries
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.information_source import InformationSource
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.helpers.version import Version
@@ -47,17 +45,17 @@ class BaseCoreComponent(Entity):
 
   @declared_attr
   def description(self):
-    return relationship(StructuredText, secondary='rel_{0}_structuredtext'.format(self.get_classname().lower()), uselist=False)
+    return relationship('StructuredText', secondary='rel_{0}_structuredtext'.format(self.get_classname().lower()), uselist=False)
 
   @declared_attr
   def short_description(self):
-    return relationship(StructuredText, secondary='rel_{0}_structuredtext_short'.format(self.get_classname().lower()), uselist=False)
+    return relationship('StructuredText', secondary='rel_{0}_structuredtext_short'.format(self.get_classname().lower()), uselist=False)
 
   version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
 
   @property
   def information_source(self):
-    return relationship(InformationSource, secondary='rel_{0}_informationssource'.format(self.get_classname().lower()), uselist=False)
+    return relationship('InformationSource', secondary='rel_{0}_informationssource'.format(self.get_classname().lower()), uselist=False)
 
   timestamp = Column(DateTime)
 
