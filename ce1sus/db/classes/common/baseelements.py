@@ -40,15 +40,7 @@ class Entity(BaseElement):
     for attr_name in self._PARENTS:
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
-        if isinstance(item, Entity):
-          return item
-        else:
-          if len(item) == 0:
-            continue
-          elif len(item) == 1:
-            return item[0]
-          else:
-            raise ValueError('Too many parents found')
+        return item
     raise ValueError('Parent cannot be found')
 
   @parent.setter
@@ -85,13 +77,7 @@ class Entity(BaseElement):
     parent = self.parent
     if parent:
       if hasattr(parent, 'event'):
-        if isinstance(parent.event, list):
-          if parent.event:
-            return parent.event[0]
-          else:
-            return parent.root
-        else:
-          return parent.event
+        return parent.event
       else:
         return parent.root
     else:

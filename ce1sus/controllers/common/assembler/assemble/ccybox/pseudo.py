@@ -69,7 +69,7 @@ class PseudoCyboxAssembler(BaseChanger):
     error_entry.uuid = u'{0}'.format(uuid4())
     error_entry.message = error_message
     error_entry.dump = dumps(json)
-    error_entry.event = observable.event[0]
+    error_entry.event = observable.event
     error_entry.observable = observable
     self.obj_def_broker.session.add(error_entry)
     self.obj_def_broker.do_commit(True)

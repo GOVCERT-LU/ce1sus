@@ -215,10 +215,7 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def get_event_for_observable(self, observable):
-    if len(observable.event) > 0:
-      return observable.event[0]
-    else:
-      raise ControllerNothingFoundException('Parent for observable {0} cannot be found'.format(observable.identifier))
+    return observable.root
 
   def get_event_for_obj(self, obj):
     try:
@@ -258,10 +255,7 @@ class ObservableController(BaseController):
     # create containers
     obs = Observable()
     obs.uuid = u'{0}'.format(uuid4())
-    if observable.event:
-      obs.event = [observable.event[0]]
-    if observable.indicator:
-      obs.indicator = [observable.indicator[0]]
+
     self.__set_logging(obs, observable, cache_object.user)
     obs.object = observable.object
     # detach object from observable
@@ -269,10 +263,7 @@ class ObservableController(BaseController):
 
     child_obs = Observable()
     child_obs.uuid = u'{0}'.format(uuid4())
-    if observable.event:
-      child_obs.event = [observable.event[0]]
-    if observable.indicator:
-      child_obs.indicator = [observable.indicator[0]]
+
     self.__set_logging(child_obs, observable, cache_object.user)
     child_obs.object = obj
 
