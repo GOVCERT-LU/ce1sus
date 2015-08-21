@@ -1212,7 +1212,7 @@ app.directive("objectAttributeForm", function() {
         } else {
           for (var i = 0; i < $scope.definitions.length; i++) {
             if ($scope.definitions[i].identifier == identifier){
-              result = definition;
+              result = $scope.definitions[i];
               break;
             }
           }

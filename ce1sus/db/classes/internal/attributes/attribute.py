@@ -138,16 +138,9 @@ class Attribute(BaseElement, Base):
         value_instance.value_type_id = self.definition.value_type_id
 
       if self.object:
-        if self.object.event or self.object.event_id:
-          event_id = self.object.event_id
-          if event_id:
-            value_instance.event_id = event_id
-          else:
-            event = self.object.event
-            if event:
-              value_instance.event = event
-            else:
-              raise ValueError(u'Cannot set the attribute value as the event for of the parent object is not yet set.')
+        event = self.object.event
+        if event:
+          value_instance.event = event
         else:
           raise ValueError(u'Parent of object was not set.')
       else:

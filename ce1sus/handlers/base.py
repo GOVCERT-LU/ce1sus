@@ -316,7 +316,7 @@ class AttributeHandlerBase(HandlerBase):
     definition = self.get_object_definition(json)
     obj.definition = definition
 
-    obj.observable = [observable]
+    obj.observable = observable
     return obj
 
 
@@ -326,7 +326,7 @@ class AttributeHandlerBase(HandlerBase):
     self.set_base(observable, json, obj, change_base_element)
 
     # set parent
-    parent = obj.observable[0]
+    parent = obj.observable
     if parent.event:
       observable.event = parent.event
     elif parent.indicator:

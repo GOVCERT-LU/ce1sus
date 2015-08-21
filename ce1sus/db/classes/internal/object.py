@@ -65,7 +65,7 @@ class Object(Entity, Base):
 
   def get_observable(self):
     if self.observable:
-      return self.observable[0]
+      return self.observable
     else:
       return self.parent.parent.get_observable()
 

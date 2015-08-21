@@ -51,13 +51,8 @@ class Entity(BaseElement):
     if len(self._PARENTS) == 1:
       attr_name = self._PARENTS[0]
       if hasattr(self, attr_name):
-        item = getattr(self, attr_name)
-        if isinstance(item, Entity) or isinstance(item, NoneType):
-          setattr(self, attr_name, instance)
-          parent_set = True
-        else:
-          item.append(instance)
-          parent_set = True
+        setattr(self, attr_name, instance)
+        parent_set = True
       if not parent_set:
         if self.get_classname() != 'Event':
           raise ValueError('Cannot find parent')

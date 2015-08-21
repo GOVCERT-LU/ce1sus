@@ -199,12 +199,77 @@ class PseudoCyboxAssembler(BaseChanger):
     if json:
       int_cache_object = CacheObject()
       int_cache_object.set_default()
-
+      changed_on = -1
       definition = self.get_attribute_definition(obj, json, cache_object)
       if definition:
         handler_instance = self.__get_handler(obj, definition, cache_object)
-        attributes, related_objects, observables = handler_instance.assemble(obj, json)
-    return attributes, related_objects, observables
+        returnvalues = handler_instance.assemble(obj, json)
+        observable = obj.get_observable()
+        for returnvalue in returnvalues:
+          if isinstance(returnvalue, Observable):
+            # make the observable composed and append the observables
+            changed_on = max(changed_on, 2)
+            if not hasattr(returnvalue, 'dontchange'):
+              if observable.observable_composition:
+                # delink observable
+                returnvalue.delink_parent()
+                observable.observable_composition.observables.append(returnvalue)
+              else:
+                # create new one
+                comp_obs = ObservableComposition()
+                self.set_base(comp_obs, json, cache_object, observable)
+                comp_obs.observable = observable
+                observable.observable_composition = comp_obs
+  
+                # delink observable
+                returnvalue.delink_parent()
+  
+                comp_obs.observables.append(returnvalue)
+  
+                obs = Observable()
+                self.set_base(obs, json, cache_object, comp_obs)
+                obs.uuid = u'{0}'.format(uuid4())
+  
+                obs.object = observable.object
+  
+                observable.object = None
+  
+                comp_obs.observables.append(obs)
+              
+
+          elif isinstance(returnvalue, RelatedObject):
+            changed_on = max(changed_on, 1)
+            # append them to the object
+            # TODO find out if they are not already present
+            obj.related_objects.append(returnvalue)
+          elif isinstance(returnvalue, Attribute):
+            changed_on = max(changed_on, 0)
+            if returnvalue.validate():
+              # append if not already present in object
+              found = False
+              for attribute in obj.attributes:
+                if (returnvalue.value == attribute.value) and (returnvalue.definition.identifier == attribute.definition.identifier):
+                  # log the elemsent
+                  self.log_attribute_error(obj, attribute.to_dict(int_cache_object), 'Duplicate value')
+                  found = True
+              if not found:
+                obj.attributes.append(returnvalue)
+            else:
+              error_message = ObjectValidator.getFirstValidationError(attribute)
+              self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
+          else:
+            raise ValueError('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
+    if changed_on == 0:
+      # return attributes
+      return returnvalues
+    elif changed_on == 1:
+      # return object as there are related object
+      return obj
+    elif changed_on == 2:
+      return observable
+    else:
+      raise ValueError('Nothing was generated')
+
 
   def get_condition(self, uuid, cache_object):
     definition = cache_object.seen_conditions.get(uuid, None)

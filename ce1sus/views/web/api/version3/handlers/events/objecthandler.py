@@ -212,14 +212,13 @@ class ObjectHandler(RestBaseHandler):
         cache_object_copy.inflated = True
 
         # NOTE: the assembler for attribute assembler returns a number as the object are directly attached to the object
-        attributes, related_objects, observables = self.assembler.assemble(json, Attribute, obj, cache_object)
-        object_ = self.merger.merge_object_attributes(obj, attributes, related_objects, observables, cache_object)
-        if isinstance(object_, list):
-          self.attribute_controller.insert_attributes(object_, cache_object, True)
-          return object_[0].object.to_dict(cache_object_copy)
+        returnvalues = self.assembler.assemble(json, Attribute, obj, cache_object)
+        if isinstance(returnvalues, list):
+          self.attribute_controller.insert_attributes(returnvalues, cache_object, True)
+          return returnvalues[0].object.to_dict(cache_object_copy)
         else:
-          self.observable_controller.update_object(object_, cache_object, True)
-          return object_.to_dict(cache_object_copy)
+          self.observable_controller.update_object(returnvalues, cache_object, True)
+          return returnvalues.to_dict(cache_object_copy)
       else:
         uuid = requested_object['object_uuid']
         if method == 'GET':
