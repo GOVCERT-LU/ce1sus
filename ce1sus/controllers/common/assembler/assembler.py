@@ -28,7 +28,6 @@ class Assembler(BaseChangeController):
     self.mergers = [StixAssembler(config, session), self.cybox_assembler, Ce1susAssembler(config, session), EventAssembler(config, session)]
 
   def assemble(self, json, clazz, parent, cache_object):
-
     cache_object.insert = True
 
     classname = clazz.get_classname()

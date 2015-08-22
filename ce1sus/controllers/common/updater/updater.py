@@ -5,6 +5,8 @@
 
 Created on Aug 4, 2015
 """
+from sqlalchemy.orm.session import make_transient
+
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.controllers.common.merger.merger import Merger
@@ -26,7 +28,9 @@ class Updater(BaseController):
     cache_object.insert = False
     classname = instance.get_classname()
     self.logger.debug('Updating {0}'.format(classname))
-
-    new_instance = self.assembler.assemble(json, instance.__class__, None, cache_object)
+    parent = instance.parent
+    if parent:
+      make_transient(parent)
+    new_instance = self.assembler.assemble(json, instance.__class__, parent, cache_object)
     version = self.merger.merge(instance, new_instance, cache_object)
     return version

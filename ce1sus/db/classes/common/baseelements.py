@@ -41,8 +41,9 @@ class Entity(BaseElement):
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
         if item:
+          item.uuid
           return item
-    raise ValueError('Parent cannot be found')
+    raise ValueError('Parent for {0} {1} cannot be found'.format(self.get_classname(), self.uuid))
 
   @parent.setter
   def parent(self, instance):

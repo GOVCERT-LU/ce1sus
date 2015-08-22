@@ -155,7 +155,7 @@ class BaseMerger(BaseController):
         if not merge_cache.owner:
           self.mark_for_proposal(new_instance, merge_cache)
         return 0
-
+    self.logger.debug('{0} is uptodate. old modified on is {1} and new one is {2}'.format(old_instance.get_classname(), old_instance.modified_on, new_instance.modified_on))
     return -1
 
   def merge_structured_text(self, old_instance, new_instance, merge_cache):
@@ -228,8 +228,6 @@ class BaseMerger(BaseController):
           merge_cache.version.add(merge_fct(old_item, new_item, merge_cache))
 
           self.set_base(old_item, new_item, merge_cache)
-
-          # expunge from session
 
           del(dict2[key])
         else:

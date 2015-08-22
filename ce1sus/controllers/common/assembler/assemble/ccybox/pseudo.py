@@ -72,7 +72,7 @@ class PseudoCyboxAssembler(BaseChanger):
     error_entry.event = observable.event
     error_entry.observable = observable
     self.obj_def_broker.session.add(error_entry)
-    self.obj_def_broker.do_commit(True)
+    # self.obj_def_broker.do_commit(True)
 
   def log_attribute_error(self, obj, json, error_message):
     error_entry = ErrorAttribute()

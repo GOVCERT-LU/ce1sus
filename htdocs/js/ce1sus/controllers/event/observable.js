@@ -156,7 +156,6 @@ app.controller("composedObservableEditController", function($scope, Restangular,
             $scope.$parent.$parent.$parent.$parent.$parent.observables[i] = restangularObservable;
             break;
           }
-          counter++;
         }
       }
       
