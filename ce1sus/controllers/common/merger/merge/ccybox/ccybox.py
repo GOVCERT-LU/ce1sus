@@ -46,7 +46,7 @@ class CyboxMerger(BaseMerger):
         merge_cache.object_changes = True
 
       merge_cache.version.add(self.merge_keywords(old_instance.keywords, new_instance.keywords, merge_cache))
-      merge_cache.version.add(self.merge_structured_text(old_instance.description, new_instance.description, merge_cache))
+      merge_cache.version.add(self.merge_structured_text(old_instance, new_instance, 'description', merge_cache))
 
       merge_cache.version.add(self.pseudo_cybox_merger.merge_object(old_instance.object, new_instance.object, merge_cache))
       merge_cache.version.add(self.merge_observable_composition(old_instance.observable_composition, new_instance.observable_composition, merge_cache))

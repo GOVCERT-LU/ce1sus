@@ -50,6 +50,14 @@ class ObservableComposition(Entity, Base):
   observable = relationship('Observable', uselist=False)
   _PARENTS = ['observable']
 
+  @property
+  def parent(self):
+    return self.observable
+
+  @parent.setter
+  def parent(self, instance):
+    self.observable = instance
+
   def validate(self):
     return True
 

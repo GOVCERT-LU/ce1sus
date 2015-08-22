@@ -9,6 +9,7 @@ Created on Dec 22, 2014
 from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
 
@@ -48,6 +49,9 @@ class ObservableHandler(RestBaseHandler):
           return self.__process_observable(method, event, observable, json, cache_object)
         elif requested_object['object_type'] == 'object':
           return self.__process_object(method, event, observable, requested_object, json, cache_object)
+        elif requested_object['object_type'] == 'observable':
+          return self.__process_observablecomposition(method, event, observable, requested_object, json, cache_object)
+
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
 
@@ -57,6 +61,17 @@ class ObservableHandler(RestBaseHandler):
       raise RestHandlerNotFoundException(error)
     except ControllerException as error:
       raise RestHandlerException(error)
+
+  def __process_observablecomposition(self, method, event, observable, requested_object, json, cache_object):
+    if method == 'POST':
+      # TODO make an observable composition handler this is only temporary
+      child_observable = self.assembler.assemble(json, Observable, observable.observable_composition, cache_object)
+      observable.observable_composition.observables.append(child_observable)
+      self.observable_controller.update_observable(observable, cache_object, True)
+      cache_object.inflated = True
+      return child_observable.to_dict(cache_object)
+    else:
+      raise RestHandlerException('Method {0} is not available'.format(method))
 
   def __process_observable(self, method, event, observable, json, cache_object):
     if method == 'POST':

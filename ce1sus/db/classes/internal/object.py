@@ -63,12 +63,6 @@ class Object(Entity, Base):
   
   _PARENTS = ['related_object', 'observable']
 
-  def get_observable(self):
-    if self.observable:
-      return self.observable
-    else:
-      return self.parent.parent.get_observable()
-
 
   def to_dict(self, cache_object):
     cache_object_defs = cache_object.make_copy()

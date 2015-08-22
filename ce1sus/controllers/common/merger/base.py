@@ -158,21 +158,24 @@ class BaseMerger(BaseController):
     self.logger.debug('{0} is uptodate. old modified on is {1} and new one is {2}'.format(old_instance.get_classname(), old_instance.modified_on, new_instance.modified_on))
     return -1
 
-  def merge_structured_text(self, old_instance, new_instance, merge_cache):
-
-    if old_instance and new_instance:
+  def merge_structured_text(self, old_instance, new_instance, attr_name, merge_cache):
+    old_value = getattr(old_instance, attr_name)
+    new_value = getattr(new_instance, attr_name)
+    if old_value and new_value:
       result = self.is_mergeable(old_instance, new_instance, merge_cache)
       if result == 1:
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'id_', merge_cache))
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'structuring_format', merge_cache))
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'ordinality', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_value, new_value, 'id_', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_value, new_value, 'value', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_value, new_value, 'structuring_format', merge_cache))
+        merge_cache.version.add(self.update_instance_value(old_value, new_value, 'ordinality', merge_cache))
 
-      elif result == 0:
+    elif new_value:
+      self.logger.info('Adding structured text with value {0}'.format(new_value.value))
+      new_value.parent = old_instance
+      setattr(old_instance, attr_name, new_value)
 
-        old_instance = new_instance
 
-      self.set_base(old_instance, new_instance, merge_cache)
+    self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
   def merge_information_source(self, old_instance, new_instance, merge_cache):

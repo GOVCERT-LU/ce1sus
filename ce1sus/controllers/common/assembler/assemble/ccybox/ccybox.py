@@ -5,9 +5,13 @@
 
 Created on Aug 4, 2015
 """
+from libxml2mod import parent
+
 from ce1sus.controllers.common.assembler.assemble.ccybox.pseudo import PseudoCyboxAssembler
-from ce1sus.controllers.common.basechanger import BaseChanger
+from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition, ObservableKeyword
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
+from ce1sus.db.classes.internal.event import Event
 
 
 __author__ = 'Weber Jean-Paul'
@@ -22,11 +26,12 @@ class CyboxAssembler(BaseChanger):
     super(CyboxAssembler, self).__init__(config, session)
     self.pseudo_assembler = PseudoCyboxAssembler(config, session)
     
-  def assemble_observable(self, event, json, cache_object):
+  def assemble_observable(self, parent, json, cache_object):
     observable = Observable()
     if json:
-      self.set_base(observable, json, cache_object, event)
-      observable.event = event
+      self.set_base(observable, json, cache_object, parent)
+      observable.parent = parent
+
       observable.id_ = json.get('id_', None)
       observable.idref = json.get('idref', None)
       if not observable.idref:
@@ -40,12 +45,12 @@ class CyboxAssembler(BaseChanger):
         if obj:
           obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
           if obj:
-            observable.object
+            observable.object = obj
 
         if not observable.object:
           observable_composition = json.get('observable_composition', None)
           if observable_composition:
-            observable_composition = self.assemble_observable_composition(event, observable_composition, cache_object)
+            observable_composition = self.assemble_observable_composition(parent, observable_composition, cache_object)
 
         observable.sighting_count = json.get('sighting_count', None)
 
@@ -60,15 +65,16 @@ class CyboxAssembler(BaseChanger):
 
       return observable
 
-  def assemble_observable_composition(self, event, json, cache_object):
+  def assemble_observable_composition(self, parent, json, cache_object):
     if json:
       composed = ObservableComposition()
-      self.set_base(composed, json, cache_object, event)
+      composed.parent = parent
+      self.set_base(composed, json, cache_object, parent)
       composed.operator = json.get('operator', 'OR')
       observables = json.get('observables', None)
       if observables:
         for observable in observables:
-          obs = self.assemble_observable(event, observable, cache_object)
+          obs = self.assemble_observable(parent, observable, cache_object)
           if obs:
             composed.observables.append(obs)
 

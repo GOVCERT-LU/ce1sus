@@ -87,6 +87,7 @@ class PseudoCyboxAssembler(BaseChanger):
   def assemble_object(self, observable, json, cache_object, set_observable=True):
     if json:
       obj = Object()
+      obj.observable = observable
       self.set_base(obj, json, cache_object, observable)
 
       # set definition
@@ -94,9 +95,6 @@ class PseudoCyboxAssembler(BaseChanger):
       if definition:
         # obj.definition = definition
         obj.definition = definition
-
-        if set_observable:
-          obj.observable = observable
 
         rel_objs = json.get('related_objects', None)
         if rel_objs:
@@ -204,7 +202,7 @@ class PseudoCyboxAssembler(BaseChanger):
       if definition:
         handler_instance = self.__get_handler(obj, definition, cache_object)
         returnvalues = handler_instance.assemble(obj, json)
-        observable = obj.get_observable()
+        observable = obj.observable
         for returnvalue in returnvalues:
           if isinstance(returnvalue, Observable):
             # make the observable composed and append the observables

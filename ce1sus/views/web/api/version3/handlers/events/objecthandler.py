@@ -237,7 +237,11 @@ class ObjectHandler(RestBaseHandler):
         else:
           attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
           if method == 'PUT':
+            self.check_if_event_is_modifiable(event)
+            self.check_if_user_can_set_validate_or_shared(event, attribute, cache_object.user, json)
+
             self.updater.update(attribute, json, cache_object)
+
             make_transient(obj)
             returnobject = self.assembler.assemble(json, Attribute, obj, cache_object)
 
@@ -251,6 +255,7 @@ class ObjectHandler(RestBaseHandler):
               self.merger.merge(old_object, new_object, cache_object)
               self.observable_controller.update_object(old_object, cache_object, True)
               return old_object.to_dict(cache_object_copy)
+
             elif isinstance(returnobject, Object):
                 self.merger.merge(old_object, returnobject, cache_object)
                 self.observable_controller.update_object(old_object, cache_object, True)

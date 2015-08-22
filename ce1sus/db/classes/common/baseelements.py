@@ -41,24 +41,23 @@ class Entity(BaseElement):
       if hasattr(self, attr_name):
         item = getattr(self, attr_name)
         if item:
-          item.uuid
           return item
     raise ValueError('Parent for {0} {1} cannot be found'.format(self.get_classname(), self.uuid))
 
   @parent.setter
   def parent(self, instance):
     # TODO: verify if this is feasible for long term (note as there can be more parents)
+    instance_classname = instance.get_classname()
     parent_set = False
-    if len(self._PARENTS) == 1:
-      attr_name = self._PARENTS[0]
+    for attr_name in self._PARENTS:
       if hasattr(self, attr_name):
-        setattr(self, attr_name, instance)
-        parent_set = True
-      if not parent_set:
-        if self.get_classname() != 'Event':
-          raise ValueError('Cannot find parent')
-    else:
-      raise ValueError('There are too many or no possible parent(s)')
+        attribute_class_name = getattr(self.__class__, attr_name).mapper.class_.get_classname()
+        if instance_classname == attribute_class_name:
+          setattr(self, attr_name, instance)
+          parent_set = True
+          break
+    if not parent_set:
+      raise ValueError('Cannot set instance of class {0} as parent as nothing is mapped for it in class {1}'.format(instance_classname, self.get_classname()))
 
   def delink_parent(self):
     for attr_name in self._PARENTS:

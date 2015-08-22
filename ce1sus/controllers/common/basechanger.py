@@ -226,6 +226,7 @@ class BaseChanger(BaseController):
 
   def assemble_structured_text(self, parent, json, cache_object):
     instance = StructuredText()
+    instance.parent = parent
     self.set_base(instance, json, cache_object, parent)
     if json:
       instance.id_ = json.get('id_', None)

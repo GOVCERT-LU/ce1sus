@@ -321,16 +321,12 @@ class AttributeHandlerBase(HandlerBase):
 
 
 
-  def create_observable(self, obj, json, change_base_element=True):
+  def create_observable(self, parent, json, change_base_element=True):
     observable = Observable()
-    self.set_base(observable, json, obj, change_base_element)
+    self.set_base(observable, json, parent, change_base_element)
 
     # set parent
-    parent = obj.observable
-    if parent.event:
-      observable.event = parent.event
-    elif parent.indicator:
-      observable.indicator = parent.indicator
+    observable.parent = parent
 
     observable.description = StructuredText()
     self.set_base(observable.description, json, observable, change_base_element)

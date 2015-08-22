@@ -148,3 +148,6 @@ class Ce1susMerger(BaseMerger):
 
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
+
+  def merge_attribute(self, old_instance, new_instance, merge_cache):
+    pass

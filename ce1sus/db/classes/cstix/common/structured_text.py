@@ -78,6 +78,7 @@ class StructuredText(Entity, Base):
               'activity_description',
               'affected_asset_description',
               'affected_asset_short_description',
+              'observable_description',
               'property_affacted_description',
               'objective_description',
               'objective_short_description',

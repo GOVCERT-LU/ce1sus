@@ -48,6 +48,10 @@ class BaseObject(object):
   def get_classname(cls):
     return cls.__name__
 
+  @classmethod
+  def get_class(cls):
+    return cls
+
   @declared_attr
   def identifier(self):
     return Column(u'{0}_id'.format(self.get_classname().lower()),

@@ -224,11 +224,8 @@ class EventHandler(RestBaseHandler):
         else:
           raise PathParsingException(u'observale cannot be called without an ID')
         if method == 'PUT':
-          old_observable = observable
           self.check_if_event_is_modifiable(event)
-
-          self.check_if_user_can_set_validate_or_shared(event, old_observable, cache_object.user, json)
-
+          self.check_if_user_can_set_validate_or_shared(event, observable, cache_object.user, json)
           self.updater.update(observable, json, cache_object)
           self.observable_controller.update_observable(observable, cache_object, True)
           return observable.to_dict(cache_object)
