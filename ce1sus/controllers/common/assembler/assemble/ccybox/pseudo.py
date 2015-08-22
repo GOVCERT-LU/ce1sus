@@ -184,7 +184,7 @@ class PseudoCyboxAssembler(BaseChanger):
         json = {'definition_id': additional_obj_defs_uuid}
         object_definition = self.get_object_definition(parent, json, cache_object)
         if object_definition:
-          handler_instance.attribute_definitions[object_definition.uuid] = object_definition
+          handler_instance.object_definitions[object_definition.uuid] = object_definition
 
     handler_instance.cache_object = cache_object
     # set conditions

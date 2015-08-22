@@ -5,11 +5,9 @@
 
 Created on Aug 12, 2015
 """
-from uuid import uuid4
 
 from ce1sus.controllers.common.merger.base import BaseMerger
 from ce1sus.controllers.common.merger.merge.ccybox.pseudo import PseudoCyboxMerger
-from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
 
 
 __author__ = 'Weber Jean-Paul'

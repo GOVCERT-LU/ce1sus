@@ -115,14 +115,14 @@ class FileHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
-  def insert(self, obj, user, json):
+  def assemble(self, obj, json):
     value = json.get('value', None)
     filename = value.get('name', None)
     data = value.get('data', None)
     if isinstance(data, types.DictionaryType):
       # Workaround for the webfront end
       data = data.get('data', None)
-
+    result = list()
     if filename and data:
       # save file to tmp folder
       tmp_filename = hashMD5(datetime.utcnow())
@@ -147,51 +147,45 @@ class FileHandler(GenericHandler):
       # create attribtues
       internal_json = json
       # main
-      main_definition = self.get_main_definition()
 
       internal_json['value'] = rel_folder + '/' + sha1
 
       attributes = list()
 
-      main_attribute = self.create_attribute(obj, main_definition, user, internal_json)
-
+      main_attribute = self.create_attribute(obj, internal_json)
       # secondary
 
-      filename_definition = self.get_attriute_definition(UUID_FILE_NAME)
+
       internal_json['value'] = filename
-      attribute = self.create_attribute(obj, filename_definition, user, internal_json)
+      self.set_attribute_definition(internal_json, UUID_FILE_NAME)
+      attribute = self.create_attribute(obj, internal_json)
       attributes.append(attribute)
 
-      sha1_definition = self.get_attriute_definition(UUID_HASH_SHA1)
       internal_json['value'] = sha1
-      attribute = self.create_attribute(obj, sha1_definition, user, internal_json)
+      self.set_attribute_definition(internal_json, UUID_HASH_SHA1)
+      attribute = self.create_attribute(obj, internal_json)
       attributes.append(attribute)
 
-      # set parent
-      for attribtue in attributes:
-        attribtue.parent = main_attribute
 
-      obj_def = self.get_object_definition(UUID_ARTEFACT)
-      childobj = self.create_object(obj.observable, obj_def, user, {}, False)
+      self.set_object_definition(internal_json, UUID_ARTEFACT)
+      childobj = self.create_object(obj.observable, internal_json)
 
       rel_obj = RelatedObject()
       rel_obj.parent = obj
       rel_obj.parent_id = obj.identifier
       rel_obj.object = childobj
-
+      self.set_base(rel_obj, internal_json, childobj)
+      
+      main_attribute.object = childobj
       childobj.attributes.append(main_attribute)
       # attributes.append(main_attribute)
 
-      childobjs = list()
-      childobjs.append(rel_obj)
+      result.append(rel_obj)
 
-      return attributes, childobjs
+      return result
 
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
-
-  def update(self, attribute, user, json):
-    raise HandlerException('FileHandler does not support updates')
 
   def get_data(self, attribute, parameters):
     if attribute:
@@ -299,48 +293,57 @@ class FileWithHashesHandler(FileHandler):
             UUID_FILE_ID,
             UUID_HASH_MD5]
 
-  def insert(self, obj, user, json):
-    attributes, sub_objects = super(FileWithHashesHandler, self).insert(obj, user, json)
+  def assemble(self, obj, json):
+    result = super(FileWithHashesHandler, self).assemble(obj, json)
 
     internal_json = json
-    main_attribute = sub_objects[0].object.attributes[0]
+    for item in result:
+      main_attribute = item.object.attributes[0]
 
     filepath = self.get_base_path() + '/' + main_attribute.value
 
     # create the remaining attributes
     internal_json['value'] = hasher.fileHashMD5(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_MD5), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_HASH_MD5)
+    attribute = self.create_attribute(obj, internal_json)
+    attribute.is_ioc = True
+    result.append(attribute)
 
     internal_json['value'] = hasher.fileHashSHA256(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA256), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_HASH_SHA256)
+    attribute = self.create_attribute(obj, internal_json)
+    attribute.is_ioc = True
+    result.append(attribute)
 
     internal_json['value'] = hasher.fileHashSHA384(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA384), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_HASH_SHA384)
+    attribute = self.create_attribute(obj, internal_json)
+    attribute.is_ioc = True
+    result.append(attribute)
+
 
     internal_json['value'] = hasher.fileHashSHA512(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_HASH_SHA512), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_HASH_SHA512)
+    attribute = self.create_attribute(obj, internal_json)
+    attribute.is_ioc = True
+    result.append(attribute)
 
     internal_json['value'] = getsize(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_SIZE_IN_BYTES), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_SIZE_IN_BYTES)
+    attribute = self.create_attribute(obj, internal_json)
+    result.append(attribute)
 
     internal_json['value'] = magic.from_file(filepath, mime=True)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_MIME_TYPE), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_MIME_TYPE)
+    attribute = self.create_attribute(obj, internal_json)
+    result.append(attribute)
 
     internal_json['value'] = magic.from_file(filepath)
-    attribute = self.create_attribute(obj, self.get_attriute_definition(UUID_FILE_ID), user, internal_json)
-    attributes.append(attribute)
+    self.set_attribute_definition(internal_json, UUID_FILE_ID)
+    attribute = self.create_attribute(obj, internal_json)
+    result.append(attribute)
 
-    # set parent
-    for attribtue in attributes:
-      attribtue.parent = main_attribute
-
-    return attributes, sub_objects
+    return result
 
   @staticmethod
   def require_js():
