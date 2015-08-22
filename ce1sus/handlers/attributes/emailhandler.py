@@ -54,15 +54,15 @@ class EmailHandler(FileWithHashesHandler):
   def get_view_type():
     return 'file'
 
-  def attach_attribute(self, obj, user, definition_chksum, value, json, attributes):
+  def attach_attribute(self, obj, definition_uuid, value, json, result):
     if value:
-      definition = self.get_attriute_definition(definition_chksum)
       json['value'] = value
-      attribute = self.create_attribute(obj, definition, user, json)
-      attributes.append(attribute)
+      self.set_attribute_definition(json, definition_uuid)
+      attribute = self.create_attribute(obj, json)
+      attribute.is_ioc = True
+      result.append(attribute)
 
-
-  def insert(self, obj, user, json):
+  def assemble(self, obj, json):
     value = json.get('value', None)
     filename = value.get('name', None)
     data = value.get('data', None)
@@ -71,7 +71,7 @@ class EmailHandler(FileWithHashesHandler):
       data = data.get('data', None)
 
     if filename and data:
-      attributes = list()
+      result = list()
       related_objects = list()
       binary_data = base64.b64decode(data)
       # The eml file will not be saved
@@ -84,23 +84,26 @@ class EmailHandler(FileWithHashesHandler):
       raw_body = mail.get('raw_body', None)
       if raw_body:
         raw_body = raw_body[0][1]
-        self.attach_attribute(obj, user, UUID_EMAIL_RAW_BODY, raw_body, json, attributes)
+        self.attach_attribute(obj, UUID_EMAIL_RAW_BODY, raw_body, json, result)
 
       header = mail.get('header', None)
       send_date = header.get('date', None)
-      self.attach_attribute(obj, user, UUID_EMAIL_SEND_DATE, send_date, json, attributes)
+      self.attach_attribute(obj, UUID_EMAIL_SEND_DATE, send_date, json, result)
 
       from_ = header.get('from', None)
-      self.attach_attribute(obj, user, UUID_EMAIL_FROM, from_, json, attributes)
+      self.attach_attribute(obj, UUID_EMAIL_FROM, from_, json, result)
 
       in_reply_to = header.get('in-reply-to', None)
-      self.attach_attribute(obj, user, UUID_IN_REPLY_TO, in_reply_to[1:-1], json, attributes)
+      self.attach_attribute(obj, UUID_IN_REPLY_TO, in_reply_to[1:-1], json, result)
 
       message_id = header.get('message-id', None)
-      self.attach_attribute(obj, user, UUID_EMAIL_MESSAGE_ID, message_id, json, attributes)
+      self.attach_attribute(obj, UUID_EMAIL_MESSAGE_ID, message_id, json, result)
 
       subject = header.get('subject', None)
-      self.attach_attribute(obj, user, UUID_EMAIL_SUBJECT, subject, json, attributes)
+      self.attach_attribute(obj, UUID_EMAIL_SUBJECT, subject, json, result)
+
+
+
 
       # list
       urls = mail.get('urls')
@@ -108,12 +111,16 @@ class EmailHandler(FileWithHashesHandler):
         rel_obj = RelatedObject()
         rel_obj.parent = obj
         rel_obj.parent_id = obj.identifier
-        childobj = self.create_object(obj.observable, self.get_object_definition(UUID_URI), user, {}, False)
+        self.set_base(rel_obj, json, obj)
+
+        self.set_object_definition(json, UUID_URI)
+        childobj = self.create_object(obj.observable, json)
+
         rel_obj.object = childobj
 
-        self.attach_attribute(childobj, user, UUID_URL, url, json, childobj.attributes)
+        self.attach_attribute(childobj, UUID_URL, url, json, childobj.attributes)
         related_objects.append(rel_obj)
-      return attributes, related_objects
+      return result
 
   @staticmethod
   def get_additional_object_uuids():
