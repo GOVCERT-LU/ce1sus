@@ -28,9 +28,12 @@ class Updater(BaseController):
     cache_object.insert = False
     classname = instance.get_classname()
     self.logger.debug('Updating {0}'.format(classname))
-    parent = instance.parent
-    if parent:
-      make_transient(parent)
+    if hasattr(instance, 'parent'):
+      parent = instance.parent
+      if parent:
+        make_transient(parent)
+    else:
+      parent = None
     new_instance = self.assembler.assemble(json, instance.__class__, parent, cache_object)
     version = self.merger.merge(instance, new_instance, cache_object)
     return version

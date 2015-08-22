@@ -72,7 +72,7 @@ class PseudoCyboxAssembler(BaseChanger):
     error_entry.event = observable.event
     error_entry.observable = observable
     self.obj_def_broker.session.add(error_entry)
-    # self.obj_def_broker.do_commit(True)
+    self.obj_def_broker.do_commit(True)
 
   def log_attribute_error(self, obj, json, error_message):
     error_entry = ErrorAttribute()
@@ -84,14 +84,14 @@ class PseudoCyboxAssembler(BaseChanger):
     self.obj_def_broker.session.add(error_entry)
     self.obj_def_broker.do_commit(True)
 
-  def assemble_object(self, observable, json, cache_object, set_observable=True):
+  def assemble_object(self, parent, json, cache_object, set_observable=True):
     if json:
       obj = Object()
-      obj.observable = observable
-      self.set_base(obj, json, cache_object, observable)
+      obj.parent = parent
+      self.set_base(obj, json, cache_object, parent)
 
       # set definition
-      definition = self.get_object_definition(observable, json, cache_object)
+      definition = self.get_object_definition(parent, json, cache_object)
       if definition:
         # obj.definition = definition
         obj.definition = definition

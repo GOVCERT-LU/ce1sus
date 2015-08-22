@@ -5,13 +5,9 @@
 
 Created on Aug 4, 2015
 """
-from libxml2mod import parent
-
 from ce1sus.controllers.common.assembler.assemble.ccybox.pseudo import PseudoCyboxAssembler
-from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
+from ce1sus.controllers.common.basechanger import BaseChanger
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition, ObservableKeyword
-from ce1sus.db.classes.cstix.indicator.indicator import Indicator
-from ce1sus.db.classes.internal.event import Event
 
 
 __author__ = 'Weber Jean-Paul'
