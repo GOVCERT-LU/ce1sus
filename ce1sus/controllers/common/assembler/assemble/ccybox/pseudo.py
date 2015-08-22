@@ -11,7 +11,7 @@ from json import dumps
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.controllers.common.basechanger import BaseChanger
+from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
@@ -203,53 +203,55 @@ class PseudoCyboxAssembler(BaseChanger):
         handler_instance = self.__get_handler(obj, definition, cache_object)
         returnvalues = handler_instance.assemble(obj, json)
         observable = obj.observable
-        for returnvalue in returnvalues:
-          if isinstance(returnvalue, Observable):
-            # make the observable composed and append the observables
-            changed_on = max(changed_on, 2)
-            if not hasattr(returnvalue, 'dontchange'):
-              if observable.observable_composition:
-                # delink observable
-                returnvalue.delink_parent()
-                observable.observable_composition.observables.append(returnvalue)
-              else:
-                # create new one
-                comp_obs = ObservableComposition()
-                self.set_base(comp_obs, json, cache_object, observable)
-                comp_obs.observable = observable
-                observable.observable_composition = comp_obs
-  
-                # delink observable
-                returnvalue.delink_parent()
-  
-                comp_obs.observables.append(returnvalue)
-  
-                obs = Observable()
-                self.set_base(obs, json, cache_object, comp_obs)
-                obs.uuid = u'{0}'.format(uuid4())
-  
-                obs.object = observable.object
-  
-                observable.object = None
-  
-                comp_obs.observables.append(obs)
-              
+        if returnvalues:
+          for returnvalue in returnvalues:
+            if isinstance(returnvalue, Observable):
+              # make the observable composed and append the observables
+              changed_on = max(changed_on, 2)
+              if not hasattr(returnvalue, 'dontchange'):
+                if observable.observable_composition:
+                  # delink observable
+                  returnvalue.delink_parent()
+                  observable.observable_composition.observables.append(returnvalue)
+                else:
+                  # create new one
+                  comp_obs = ObservableComposition()
+                  self.set_base(comp_obs, json, cache_object, observable)
+                  comp_obs.observable = observable
+                  observable.observable_composition = comp_obs
+    
+                  # delink observable
+                  returnvalue.delink_parent()
+    
+                  comp_obs.observables.append(returnvalue)
+    
+                  obs = Observable()
+                  self.set_base(obs, json, cache_object, comp_obs)
+                  obs.uuid = u'{0}'.format(uuid4())
+    
+                  obs.object = observable.object
+    
+                  observable.object = None
+    
+                  comp_obs.observables.append(obs)
 
-          elif isinstance(returnvalue, RelatedObject):
-            changed_on = max(changed_on, 1)
-            # append them to the object
-            # TODO find out if they are not already present
-            obj.related_objects.append(returnvalue)
-          elif isinstance(returnvalue, Attribute):
-            changed_on = max(changed_on, 0)
-            if returnvalue.validate():
-              # append if not already present in object
-              obj.attributes.append(returnvalue)
+            elif isinstance(returnvalue, RelatedObject):
+              changed_on = max(changed_on, 1)
+              # append them to the object
+              # TODO find out if they are not already present
+              obj.related_objects.append(returnvalue)
+            elif isinstance(returnvalue, Attribute):
+              changed_on = max(changed_on, 0)
+              if returnvalue.validate():
+                # append if not already present in object
+                obj.attributes.append(returnvalue)
+              else:
+                error_message = ObjectValidator.getFirstValidationError(returnvalue)
+                self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
             else:
-              error_message = ObjectValidator.getFirstValidationError(returnvalue)
-              self.log_attribute_error(obj, returnvalue.to_dict(cache_object), error_message)
-          else:
-            raise ValueError('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
+              raise AssemblerException('Return value of attribute handler {0} is not a list of Observable, RelatedObject or Attribute'.format(returnvalue))
+        else:
+          raise AssemblerException('No values were returned by handler')
     if changed_on == 0:
       # return attributes
       return returnvalues

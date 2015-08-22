@@ -3,8 +3,7 @@
  */
 
 app.controller("observableAddController", function($scope, Restangular, messages, $routeSegment,$location) {
-  var original_observable = {'properties' : {'shared': true}
-                            };
+  var original_observable = {'properties' : {'shared': true}, 'object':{'attributes':[], 'properties' : {'shared': true}}};
   $scope.observable=angular.copy(original_observable);
   
   $scope.closeModal = function(){

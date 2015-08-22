@@ -209,9 +209,11 @@ class EventHandler(RestBaseHandler):
   def __process_observable(self, method, event, requested_object, json, cache_object):
     if method == 'POST':
       self.check_if_user_can_add(event)
+      cache_object_copy = cache_object.make_copy()
       observable = self.assembler.assemble(json, Observable, event, cache_object)
       self.observable_controller.insert_observable(observable, cache_object, True)
-      return observable.to_dict(cache_object)
+      cache_object_copy.inflated = True
+      return observable.to_dict(cache_object_copy)
     else:
       if method == 'GET':
         self.check_if_event_is_viewable(event)

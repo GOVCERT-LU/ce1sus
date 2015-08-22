@@ -2,45 +2,7 @@
  * 
  */
 app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log, $upload) {
-  $scope.definitions =[];
 
-  Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
-    for (var j = 0; j < definitions.length; j++) {
-      found = false;
-      //remove the ones already present
-      if ($scope.object.attributes) {
-        for (var i = 0; i < $scope.object.attributes.length; i++) {
-          if (definitions[j].identifier == $scope.object.attributes[i].definition.identifier) {
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found){
-        $scope.definitions.push(definitions[j]);
-      }
-    }
-    
-  }, function(response) {
-    handleError(response, messages);
-    $scope.$hide();
-  });
-  Restangular.one("condition").getList(null, {"complete": false}).then(function (conditions) {
-    $scope.conditions = conditions;
-  }, function(response) {
-    handleError(response, messages);
-    $scope.$hide();
-  });
-  
-  $scope.$watch('attribute.definition_id', function() {
-      for (var i = 0; i < $scope.definitions.length; i++) {
-        if ($scope.definitions[i].identifier === $scope.attribute.definition_id){
-          $scope.attribute.properties.shared = $scope.definitions[i].share;
-          $scope.attribute.condition_id = $scope.definitions[i].default_condition_id;
-          break;
-        }
-      }
-    });
   
   var original_attribute = {'properties' : {'shared': false},
                             'definition_id': null};

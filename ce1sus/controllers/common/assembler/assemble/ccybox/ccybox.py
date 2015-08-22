@@ -35,12 +35,16 @@ class CyboxAssembler(BaseChanger):
         description = json.get('description', None)
         if description:
           description = self.assemble_structured_text(observable, description, cache_object)
+          # must be done to prevent multiple entries in the relations table
+          description.observable_description = None
           observable.description = description
 
         obj = json.get('object', None)
         if obj:
           obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
           if obj:
+            # must be done to prevent multiple entries in the relations table
+            obj.observable = None
             observable.object = obj
 
         if not observable.object:

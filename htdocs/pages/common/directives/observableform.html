@@ -44,4 +44,9 @@
     </div>
   </div>
   <object-properties-form object="observable" type="type" permissions="permissions"></object-properties-form>
+  <legend>Object</legend>
+  
+  <div ng-if="!showoperator" ng-controller="observableObjectAddController">
+  <observable-object-form observableobject="observable.object" definitions="definitions" permissions="permissions" type="'add'"></observable-object-form>
+  </div>
 </form>

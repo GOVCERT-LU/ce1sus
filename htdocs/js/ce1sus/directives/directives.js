@@ -1118,6 +1118,7 @@ app.directive("observableObjectForm", function() {
       type: "=type"
     },
     controller: function($scope, Restangular, messages){
+      
       if ($scope.child) {
         //get the possible relations and add None
         Restangular.one('relations').getList().then(function(relations) {
@@ -1128,6 +1129,23 @@ app.directive("observableObjectForm", function() {
       } 
 
       $scope.setModified = setModified;
+      $scope.showattribute = false;
+      $scope.showattribtues = function(){
+        $scope.showattribute = true;
+      };
+      
+      $scope.$watch('observableobject.definition.identifier', function() {
+        
+        for (var i = 0; i < $scope.definitions.length; i++) {
+          if ($scope.definitions[i].identifier === $scope.observableobject.definition.identifier){
+            if (!$scope.observableobject.properties){
+              $scope.observableobject.properties = {'shared': true};
+            }
+            $scope.observableobject.properties.shared = $scope.definitions[i].default_share;
+            break;
+          }
+        }
+      });
 
     },
     templateUrl: "pages/common/directives/observableobjectform.html"
@@ -1200,11 +1218,10 @@ app.directive("objectAttributeForm", function() {
     scope: {
       objectattribute: "=objectattribute",
       type: "=type",
-      definitions: '=',
       permissions: "=permissions",
-      conditions: "=conditions"
+      object: "=object"
     },
-    controller: function($scope, $log){
+    controller: function($scope, $log, Restangular){
       $scope.getDefinition = function(identifier){
         var result = {};
         if ($scope.type == 'edit'){
@@ -1218,10 +1235,68 @@ app.directive("objectAttributeForm", function() {
           }
           return result;
         }
-
         
       };
+      $scope.definitions =[];
 
+      Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
+        $scope.allDefinitions = definitions;
+      }, function(response) {
+        handleError(response, messages);
+        $scope.$hide();
+      });
+      Restangular.one("condition").getList(null, {"complete": false}).then(function (conditions) {
+        $scope.conditions = conditions;
+      }, function(response) {
+        handleError(response, messages);
+        $scope.$hide();
+      });
+      
+      $scope.setDefinitions = function(){
+        for (var j = 0; j < $scope.allDefinitions.length; j++) {
+          found = false;
+          //remove the ones already present
+          if ($scope.object.attributes) {
+            for (var i = 0; i < $scope.object.attributes.length; i++) {
+              if ($scope.allDefinitions[j].identifier == $scope.object.attributes[i].definition.identifier) {
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found){
+            $scope.definitions.push($scope.allDefinitions[j]);
+          }
+        }
+      };
+      
+      $scope.$watch('object.definition.identifier', function() {
+        
+        $scope.definitions =[];
+        Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
+          $scope.allDefinitions = definitions;
+          $scope.setDefinitions();
+        }, function(response) {
+          handleError(response, messages);
+          $scope.$hide();
+        });
+      });
+      
+      $scope.$watch('objectattribute.definition_id', function() {
+          for (var i = 0; i < $scope.definitions.length; i++) {
+            if ($scope.definitions[i].identifier === $scope.objectattribute.definition_id){
+              if (!$scope.objectattribute.properties){
+                $scope.objectattribute.properties = {'shared': true};
+              }
+              
+              
+              $scope.objectattribute.properties.shared = $scope.definitions[i].share;
+              $scope.objectattribute.condition_id = $scope.definitions[i].default_condition_id;
+              break;
+            }
+          }
+        });
+      
       $scope.setModified = setModified;
     },
     templateUrl: "pages/common/directives/objectattributeform.html"

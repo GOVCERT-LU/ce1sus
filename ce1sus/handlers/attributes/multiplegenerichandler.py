@@ -81,20 +81,22 @@ class MultipleGenericHandler(GenericHandler):
           json['value'] = value
 
           child_obs = self.create_observable(comp_obs, json)
+          child_obs.title = 'second'
 
           self.set_base(child_obs, json, observable)
 
           # create object
           self.set_object_definition(json, object_definition_uuid)
           new_obj = self.create_object(child_obs, json)
-          new_obj.parent = child_obs
+          # new_obj.parent = child_obs
           self.set_attribute_definition(json, attribute_definition_uuid)
+
+          # append object to observable
+          child_obs.object = new_obj
 
           # create attributes
           attribute = self.create_attribute(new_obj, json)
           new_obj.attributes.append(attribute)
-
-          child_obs.object = new_obj
 
           comp_obs.observables.append(child_obs)
 

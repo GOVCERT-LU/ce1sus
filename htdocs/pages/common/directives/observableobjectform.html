@@ -1,15 +1,18 @@
-
-
 <form name="addObservableObjectForm" class="form-horizontal" role="form" novalidate>
   <div class="row">
     <label class="col-lg-3"><b>Definition *</b></label>
     <div class="col-lg-9">
       <select name="definition_id" class="form-control"
         ng-options="definition.identifier as definition.name for definition in definitions"
-        ng-model="observableobject.definition_id">
+        ng-model="observableobject.definition.identifier" ng-change="showattribtues()">
         <option style="display: none" value="">Select a definition</option>
       </select>
     </div>
   </div>
-  <object-properties-form object="observableobject" type="type" permissions="permissions" ng-if="observableobject.definition_id"></object-properties-form>
+  <div>
+  <object-properties-form object="observableobject" type="type" permissions="permissions" ng-if="observableobject.definition.identifier"></object-properties-form>
+  <div ng-if="showattribute">
+    <legend>Attribute</legend>
+    <object-attribute-form objectattribute="observableobject.attributes[0]" type="'add'" permissions="permissions" object="observableobject"></object-attribute-form>
+  </div>
 </form>
