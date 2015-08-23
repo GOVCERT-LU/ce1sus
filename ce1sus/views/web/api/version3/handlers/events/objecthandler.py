@@ -16,10 +16,8 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.common import ValueException
-from ce1sus.db.classes.internal.object import RelatedObject, Object
-from ce1sus.handlers.base import HandlerException
+from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, PathParsingException, RestHandlerException, RestHandlerNotFoundException, require
-from sqlalchemy.orm.session import make_transient
 
 
 __author__ = 'Weber Jean-Paul'

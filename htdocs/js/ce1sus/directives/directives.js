@@ -962,16 +962,7 @@ app.directive("report", function($compile) {
       };
       
       $scope.appendChildren = function(data){
-        //Note several references can be added
-        references = data.references;
-        for (var i = 0; i < references.length; i++) {
-          $scope.report.references.push(references[i]);
-        }
-
-        related_reports = data.related_reports;
-        for (var j = 0; j < related_reports.length; j++) {
-          $scope.report.related_reports.push(related_reports[j]);
-        }
+        $scope.report = data;
       };
       
       $scope.addReference = function(){
@@ -1313,7 +1304,7 @@ app.directive("reportReferenceForm", function() {
     scope: {
       reportreference: "=reportreference",
       type: "=type",
-      definitions: '=',
+      definitions: "=definitions",
       permissions: "=permissions"
     },
     controller: function($scope, $log){
@@ -1334,9 +1325,7 @@ app.directive("reportReferenceForm", function() {
           return result;
         }
       };
-      
-      $scope.setModified = setModified;
-      
+
     },
     templateUrl: "pages/common/directives/reportreferenceform.html"
   };
