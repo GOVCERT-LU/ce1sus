@@ -6,13 +6,9 @@ module handing the generic handler
 Created: Sep 19, 2013
 """
 import types
-from uuid import uuid4
 
-from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
-from ce1sus.db.classes.internal.object import RelatedObject
+from ce1sus.db.classes.ccybox.core.observables import ObservableComposition
 from ce1sus.handlers.attributes.generichandler import GenericHandler
-from ce1sus.handlers.base import HandlerException
 
 
 __author__ = 'Weber Jean-Paul'

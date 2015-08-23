@@ -13,7 +13,6 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseElement
 from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType, BigIntegerType
 from ce1sus.db.common.session import Base

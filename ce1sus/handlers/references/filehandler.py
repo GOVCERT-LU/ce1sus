@@ -92,7 +92,7 @@ class FileReferenceHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
-  def insert(self, report, user, json):
+  def assemble(self, report, json):
     value = json.get('value', None)
     filename = value.get('name', None)
     data = value.get('data', None)
@@ -123,19 +123,11 @@ class FileReferenceHandler(GenericHandler):
 
       # create attribtues
       internal_json = json
-      # mainNone
-      main_definition = self.get_main_definition()
 
       internal_json['value'] = rel_folder + '/' + sha1 + '|' + filename
-      main_attribute = self.create_reference(report, main_definition, user, internal_json)
-      # secondary
-      attributes = list()
-      # filename_definition = self.get_reference_definition(CHK_SUM_FILE_NAME)
-      # internal_json['value'] = filename
-      # attribute = self.create_reference(report, filename_definition, user, internal_json)
-      # attributes.append(attribute)
+      main_attribute = self.create_reference(report, internal_json)
 
-      return main_attribute, attributes, None
+      return [main_attribute]
 
     else:
       raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')

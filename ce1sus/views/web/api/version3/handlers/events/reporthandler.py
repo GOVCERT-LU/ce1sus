@@ -6,7 +6,7 @@
 Created on Jan 9, 2015
 """
 
-from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException, NotImplementedException
+from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.internal.common import ValueException
 from ce1sus.db.classes.internal.report import Report, Reference
