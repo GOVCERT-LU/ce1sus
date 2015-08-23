@@ -97,6 +97,8 @@ class ReportHandler(RestBaseHandler):
     if method == 'POST':
       self.check_if_user_can_add(event)
       child_obj = self.assembler.assemble(json, Report, event, cache_object)
+      # TODO place this in a controller or so
+      child_obj.parent_report_id = report.identifier
 
       self.report_controller.insert_report(child_obj, cache_object, False)
       return child_obj.to_dict(cache_object)

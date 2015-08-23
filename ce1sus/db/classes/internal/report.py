@@ -183,7 +183,7 @@ class Report(Entity, Base):
   description = Column('description', UnicodeTextType())
   short_description = Column('short_description', UnicodeType(255))
   parent_report_id = Column('parent_report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
-  parent_report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
+  report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   event = relationship('Event', uselist=False)
 
