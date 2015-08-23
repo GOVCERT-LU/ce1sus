@@ -45,6 +45,23 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
+  def insert_references(self, references, cache_object, commit=True):
+    # handle handler attributes
+    try:
+      # update parent
+      if len(references) > 0:
+        attribute = references[0]
+        self.insert_set_base(attribute, cache_object)
+
+      # set owner
+      for attribute in references:
+        self.report_broker.insert(attribute, commit=False)
+
+      self.report_broker.do_commit(commit)
+      return references
+    except BrokerException as error:
+      raise ControllerException(error)
+
   def update_report(self, report, cache_object, commit=True):
     try:
       self.report_broker.update(report, commit)

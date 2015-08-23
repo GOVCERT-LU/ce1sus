@@ -94,12 +94,11 @@ class ReportHandler(RestBaseHandler):
       raise RestHandlerException(error)
 
   def __process_child_report(self, method, event, report, requested_object, json, cache_object):
-    user = self.get_user()
     if method == 'POST':
       self.check_if_user_can_add(event)
       child_obj = self.assembler.assemble(json, Report, event, cache_object)
 
-      self.report_controller.insert_report(child_obj, user, False)
+      self.report_controller.insert_report(child_obj, cache_object, False)
       return child_obj.to_dict(cache_object)
     else:
       raise RestHandlerException('Please use report/{uuid}/ instead')
@@ -130,12 +129,15 @@ class ReportHandler(RestBaseHandler):
         cache_object_copy.inflated = True
 
         # NOTE: the assembler for references assembler returns a number as the object are directly attached to the object
-        return_type = self.assembler.assemble(json, Reference, report, cache_object)
-        self.report_controller.update_report(report, cache_object, True)
-        if return_type < 0:
-          raise RestHandlerException('Error occurred generating references, see the errors on the event')
-        elif return_type <= 1:
-          return report.to_dict(cache_object_copy)
+        returnvalues = self.assembler.assemble(json, Reference, report, cache_object)
+
+        if isinstance(returnvalues, list):
+          self.report_controller.insert_references(returnvalues, cache_object, True)
+          # returns the whole report
+          return returnvalues[0].report.to_dict(cache_object_copy)
+        else:
+          self.report_controller.update_report(returnvalues, cache_object, True)
+          return returnvalues.to_dict(cache_object_copy)
 
       else:
         uuid = requested_object['object_uuid']

@@ -7,9 +7,12 @@ Created on Jul 31, 2015
 """
 import base64
 from ce1sus.helpers.common.converters import ValueConverter
+from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from datetime import datetime
+from json import dumps
 from os.path import dirname
 from shutil import move, rmtree
+from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.common.assembler.assemble.ccybox.ccybox import CyboxAssembler
@@ -17,6 +20,7 @@ from ce1sus.controllers.common.assembler.assemble.cstix import StixAssembler
 from ce1sus.controllers.common.assembler.assemble.internal.internal import Ce1susAssembler
 from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
+from ce1sus.db.classes.internal.errors.errorbase import ErrorReference
 from ce1sus.db.classes.internal.event import Event, Comment, EventGroupPermission
 from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.common.broker import NothingFoundException, BrokerException
@@ -191,27 +195,55 @@ class EventAssembler(BaseChanger):
 
     return report
 
-  def get_reference_definition(self, json, seen_ref_defs):
+  def get_reference_definition(self, parent, json, cache_object):
     uuid = json.get('definition_id', None)
     if not uuid:
       definition_json = json.get('definition', None)
       if definition_json:
         uuid = definition_json.get('identifier', None)
     if uuid:
-      rd = seen_ref_defs.get(uuid, None)
+      rd = cache_object.seen_ref_defs.get(uuid, None)
       if rd:
         return rd
       else:
         try:
           definition = self.reference_definiton_broker.get_by_uuid(uuid)
-          seen_ref_defs[uuid] = definition
-        except NothingFoundException as error:
-          raise AssemblerException(error)
+          cache_object.seen_ref_defs[uuid] = definition
+          return definition
         except BrokerException as error:
-          raise AssemblerException(error)
+          self.log_reference_error(parent, json, error.message)
+          return None
+    self.log_reference_error(parent, json, 'Reference does not contain an reference definition')
 
-        return definition
-    raise AssemblerException('Could not find "{0}" definition in the reference'.format(definition_json))
+  def log_reference_error(self, report, json, error_message):
+    error_entry = ErrorReference()
+    error_entry.uuid = u'{0}'.format(uuid4())
+    error_entry.message = error_message
+    error_entry.dump = dumps(json)
+    error_entry.event = report.event
+    error_entry.object = report
+    self.obj_def_broker.session.add(error_entry)
+    self.obj_def_broker.do_commit(True)
+
+  def __get_handler(self, parent, definition, cache_object):
+    handler_instance = definition.handler
+    handler_instance.reference_definitions[definition.uuid] = definition
+
+    # Check if the handler requires additional attribute definitions
+    additional_refs_defs_uuids = handler_instance.get_additinal_reference_uuids()
+
+    if additional_refs_defs_uuids:
+
+      for additional_refs_defs_uuid in additional_refs_defs_uuids:
+        json = {'definition_id': additional_refs_defs_uuid}
+        reference_definition = self.get_reference_definition(parent, json, cache_object)
+        if reference_definition:
+          handler_instance.attribute_definitions[reference_definition.uuid] = reference_definition
+
+    handler_instance.cache_object = cache_object
+
+    return handler_instance
+
 
   def assemble_reference(self, report, json, cache_object):
     """This function will never return an object just the information which element changed"""
@@ -223,52 +255,36 @@ class EventAssembler(BaseChanger):
       int_cache_object = CacheObject()
       int_cache_object.set_default()
 
-      definition = self.get_reference_definition(json, seen_ref_defs)
-
-      value = json.get('value', None)
-      if value:
-        definition = self.get_reference_definition(json, cache_object.seen_ref_defs)
-        if definition:
-          ref = Reference()
-          self.set_base(ref, json, cache_object, report)
-          ref.definition_id = definition.identifier
-          # TODO: find a better way to embed the handlers
-          handler_uuid = '{0}'.format(definition.reference_handler.uuid)
-          if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66']:
-
-            fh = FileReferenceHandler()
-            filename = value.get('filename', None)
-            data = value.get('data', None)
-            if filename and data:
-              tmp_filename = hashMD5(datetime.utcnow())
-              binary_data = base64.b64decode(data)
-              tmp_folder = fh.get_tmp_folder()
-              tmp_path = tmp_folder + '/' + tmp_filename
-
-              file_obj = open(tmp_path, "w")
-              file_obj.write(binary_data)
-              file_obj.close()
-
-              sha1 = fileHashSHA1(tmp_path)
-              rel_folder = fh.get_rel_folder()
-              dest_path = fh.get_dest_folder(rel_folder) + '/' + sha1
-
-              # move it to the correct place
-              move(tmp_path, dest_path)
-              # remove temp folder
-              rmtree(dirname(tmp_path))
-
-              ref.value = rel_folder + '/' + sha1 + '|' + filename
+      definition = self.get_reference_definition(report, json, cache_object)
+      if definition:
+        handler_instance = self.__get_handler(report, definition, cache_object)
+        returnvalues = handler_instance.assemble(report, json)
+        if returnvalues:
+          for returnvalue in returnvalues:
+            if isinstance(returnvalue, Reference):
+              changed_on = max(changed_on, 0)
+              if returnvalue.validate():
+                # append if not already present in object
+                report.references.append(returnvalue)
+              else:
+                error_message = ObjectValidator.getFirstValidationError(returnvalue)
+                self.log_attribute_error(report, returnvalue.to_dict(cache_object), error_message)
+            elif isinstance(returnvalue, Report):
+              changed_on = max(changed_on, 1)
+              report.related_reports.append(returnvalue)
             else:
-              raise AssemblerException('Reference file is malformated')
-          else:
-            ref.value = value
+              raise AssemblerException('Return value of reference handler {0} is not a list of Reference or Report'.format(returnvalue))
+    if changed_on == 0:
+      # return attributes
+      return returnvalues
+    elif changed_on == 1:
+      # return object as there are related object
+      return report
+    else:
+      raise ValueError('Nothing was generated')
 
-          return ref
-        else:
-          return None
-      else:
-        return None
+
+
 
   def assemble_comment(self, event, json, cache_object):
 

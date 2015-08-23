@@ -19,6 +19,7 @@ from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, Unicode
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.hash import fileHashSHA1
+from ce1sus.db.classes.common.baseelements import Entity
 
 
 __author__ = 'Weber Jean-Paul'
@@ -128,7 +129,7 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
     return merge_dictionaries(result, parent_dict)
 
 
-class Reference(BaseElement, Base):
+class Reference(Entity, Base):
   # Similar approach as for attributes
   report_id = Column('report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   definition_id = Column('definition_id', BigIntegerType,
@@ -177,7 +178,7 @@ class Reference(BaseElement, Base):
     return True
 
 
-class Report(BaseElement, Base):
+class Report(Entity, Base):
 
   title = Column('title', UnicodeType(255), index=True)
   description = Column('description', UnicodeTextType())
@@ -189,26 +190,6 @@ class Report(BaseElement, Base):
 
   references = relationship('Reference')
   related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
-
-  def references_count_for_permissions(self, event_permissions, user):
-    return len(self.get_references_for_permissions(event_permissions, user))
-
-  def related_reports_count_for_permissions(self, event_permissions, user):
-    return len(self.get_related_reports_for_permissions(event_permissions, user))
-
-  def get_references_for_permissions(self, event_permissions, user):
-    references = list()
-    for ref in self.references:
-      if is_object_viewable(ref, event_permissions, user):
-        references.append(ref)
-    return references
-
-  def get_related_reports_for_permissions(self, event_permissions, user):
-    rel_reps = list()
-    for rel_rep in self.related_reports:
-      if is_object_viewable(rel_rep, event_permissions, user):
-        rel_reps.append(rel_rep)
-    return rel_reps
 
   _PARENTS = ['event', 'report']
 

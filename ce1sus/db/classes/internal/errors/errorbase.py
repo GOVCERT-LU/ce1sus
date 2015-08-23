@@ -14,6 +14,7 @@ from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.internal.report import Report
 from ce1sus.db.common.session import Base
 
 
@@ -96,6 +97,24 @@ class ErrorAttribute(ErrorBase, Base):
   def to_dict(self, cache_object):
     if is_event_owner(self, cache_object.user):
       result = {'object_id': self.convert_value(self.object_id)
+                }
+      parent_dict = ErrorBase.to_dict(self, cache_object)
+      return merge_dictionaries(result, parent_dict)
+    else:
+      return dict()
+
+class ErrorReference(ErrorBase, Base):
+
+  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id'), primary_key=True)
+
+  report_id = Column('report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  report = relationship(Report, uselist=False)
+
+  __mapper_args__ = {'polymorphic_identity':'errorattribute'}
+
+  def to_dict(self, cache_object):
+    if is_event_owner(self, cache_object.user):
+      result = {'report_id': self.convert_value(self.report_id)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
       return merge_dictionaries(result, parent_dict)

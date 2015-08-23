@@ -217,6 +217,7 @@ class ObjectHandler(RestBaseHandler):
         returnvalues = self.assembler.assemble(json, Attribute, obj, cache_object)
         if isinstance(returnvalues, list):
           self.attribute_controller.insert_attributes(returnvalues, cache_object, True)
+          # returns the whole object
           return returnvalues[0].object.to_dict(cache_object_copy)
         else:
           self.observable_controller.update_object(returnvalues, cache_object, True)
