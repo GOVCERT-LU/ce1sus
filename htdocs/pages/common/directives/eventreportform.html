@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addEventReportForm.title.$invalid && !addEventReportForm.title.$pristine }">
         <input class="form-control" name="title" ng-model="report.title"
-          type="text" ng-minlength=3 ng-maxlength=255>
+          type="text" ng-minlength=3 ng-maxlength=255 ng-change="setModified(report)">
         <p ng-show="addEventReportForm.title.$error.minlength"
           class="help-block">Title is too short.</p>
         <p ng-show="addEventReportForm.title.$error.maxlength"
@@ -26,7 +26,7 @@
       <div
         ng-class="{ 'has-error' : addEventReportForm.short_description.$invalid && !addEventReportForm.short_description.$pristine }">
         <textarea name="short_description" ng-model="report.short_description"
-          cols=48 rows=10 ng-minlength=3></textarea>
+          cols=48 rows=10 ng-minlength=3 ng-change="setModified(report)"></textarea>
         <p ng-show="addEventReportForm.short_description.$error.minlength"
           class="help-block">Short Description is too short.</p>
       </div>
@@ -38,7 +38,7 @@
       <div
         ng-class="{ 'has-error' : addEventReportForm.description.$invalid && !addEventReportForm.description.$pristine }">
         <textarea name="description" ng-model="report.description"
-          cols=48 rows=20 ng-minlength=3></textarea>
+          cols=48 rows=20 ng-minlength=3 ng-change="setModified(report)"></textarea>
         <p ng-show="addEventReportForm.description.$error.minlength"
           class="help-block">Description is too short.</p>
       </div>

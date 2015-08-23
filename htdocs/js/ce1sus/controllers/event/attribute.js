@@ -3,6 +3,13 @@
  */
 app.controller("objectAttributeAddController", function($scope, Restangular, messages, $routeSegment,$log, $upload) {
 
+  $scope.definitions =[];
+  Restangular.one("objectdefinition", $scope.object.definition.identifier).getList("attributes",{"complete": true}).then(function (definitions) {
+    $scope.definitions = definitions;
+  }, function(response) {
+    handleError(response, messages);
+    $scope.$hide();
+  });
   
   var original_attribute = {'properties' : {'shared': false},
                             'definition_id': null};

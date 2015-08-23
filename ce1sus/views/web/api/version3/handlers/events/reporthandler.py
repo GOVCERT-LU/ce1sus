@@ -69,21 +69,9 @@ class ReportHandler(RestBaseHandler):
           self.check_item_is_viewable(event, report)
           return report.to_dict(cache_object)
         elif method == 'PUT':
-          old_report = report
           self.check_if_event_is_modifiable(event)
-          self.check_if_user_can_set_validate_or_shared(event, old_report, cache_object.user, json)
-          # check if there was not a parent set
-          parent_id = json.get('parent_report_id', None)
-          # TODO Review the relations as they have to be removed at some point if they were existing
-          if parent_id:
-                        # get related object
-            related_report = self.observable_controller.get_related_report_by_child(report)
-            # check if parent has changed
-            if related_report.parent_report_id != parent_id:
-                            # unbind the earlier relation
-              related_report.parent_report_id = parent_id
-              self.report_controller.update_related_report(related_report, cache_object.user, False)
-          report = self.updater.update(report, json, cache_object)
+          self.check_if_user_can_set_validate_or_shared(event, report, cache_object.user, json)
+          self.updater.update(report, json, cache_object)
           self.report_controller.update_report(report, cache_object.user, True)
           return report.to_dict(cache_object)
         elif method == 'DELETE':
@@ -104,21 +92,6 @@ class ReportHandler(RestBaseHandler):
       return child_obj.to_dict(cache_object)
     else:
       raise RestHandlerException('Please use report/{uuid}/ instead')
-
-  def __get_handler(self, definition):
-    handler_instance = definition.handler
-    handler_instance.reference_definitions[definition.chksum] = definition
-
-    # Check if the handler requires additional attribute definitions
-    additional_ref_defs_chksums = handler_instance.get_additinal_reference_chksums()
-
-    if additional_ref_defs_chksums:
-      additional_ref_defs_chksums = self.report_controller.get_defintion_by_chksums(additional_ref_defs_chksums)
-      for additional_ref_definition in additional_ref_defs_chksums:
-        handler_instance.reference_definitions[additional_ref_definition.chksum] = additional_ref_definition
-
-    handler_instance.user = self.get_user()
-    return handler_instance
 
   def __process_reference(self, method, event, report, requested_object, json, cache_object):
     try:
@@ -157,29 +130,10 @@ class ReportHandler(RestBaseHandler):
         else:
           reference = self.report_controller.get_reference_by_uuid(uuid)
           if method == 'PUT':
-            old_ref = reference
             self.check_if_event_is_modifiable(event)
-            self.check_item_is_viewable(event, reference)
-            definition_uuid = json.get('definition_id', None)
-            if definition_uuid:
-              # check if it still is the same
-              if not reference.definition.uuid == definition_uuid:
-                raise HandlerException('It is not possible to change the definition of references')
-
-            handler_instance = self.__get_handler(reference.definition)
-            handler_instance.is_rest_insert = cache_object.rest_insert
-            handler_instance.is_owner = cache_object.owner
-
-            self.check_if_user_can_set_validate_or_shared(event, old_ref, user, json)
-
-            # Ask handler to process the json for the new attributes
-            reference = handler_instance.update(reference, user, json)
-
-            self.logger.info(u'User {0} changed reference {1} from {2} to {3}'.format(user.username, old_ref.identifier, old_ref.value, reference.value))
-
-            # TODO: check if there are no children attached
-            self.report_controller.update_reference(reference, user, True)
-
+            self.check_if_user_can_set_validate_or_shared(event, reference, cache_object.user, json)
+            self.updater.update(reference, json, cache_object)
+            self.report_controller.update_reference(reference, cache_object)
             return reference.to_dict(cache_object)
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)

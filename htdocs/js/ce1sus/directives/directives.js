@@ -905,6 +905,9 @@ app.directive("report", function($compile) {
       $scope.showProperties = function(){
         $modal({scope: $scope, template: 'pages/events/event/report/edit.html', show: true});
       };
+      
+      $scope.setModified = setModified;
+      
       $scope.removeReport = function(){
         if (confirm('Are you sure you want to delete this report?')) {
           var remove = false;
@@ -1314,7 +1317,9 @@ app.directive("reportReferenceForm", function() {
       permissions: "=permissions"
     },
     controller: function($scope, $log){
-
+      
+      $scope.setModified = setModified;
+      
       $scope.getDefinition = function(identifier){
         var result = {};
         if ($scope.type == 'edit'){
@@ -1475,6 +1480,7 @@ app.directive("referenceHandler", function() {
         var templateUrl = baseUrl + '/references/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();
         return templateUrl;
+        
       };
 
     },

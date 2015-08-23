@@ -240,30 +240,9 @@ class ObjectHandler(RestBaseHandler):
           if method == 'PUT':
             self.check_if_event_is_modifiable(event)
             self.check_if_user_can_set_validate_or_shared(event, attribute, cache_object.user, json)
-
             self.updater.update(attribute, json, cache_object)
-
-            make_transient(obj)
-            returnobject = self.assembler.assemble(json, Attribute, obj, cache_object)
-
-            old_object = self.observable_controller.get_object_by_id(obj.identifier)
-            cache_object_copy = cache_object.make_copy()
-            cache_object_copy.inflated = True
-            cache_object_copy.complete = True
-            if isinstance(returnobject, list):
-              new_object = returnobject[0].object
-
-              self.merger.merge(old_object, new_object, cache_object)
-              self.observable_controller.update_object(old_object, cache_object, True)
-              return old_object.to_dict(cache_object_copy)
-
-            elif isinstance(returnobject, Object):
-                self.merger.merge(old_object, returnobject, cache_object)
-                self.observable_controller.update_object(old_object, cache_object, True)
-                return old_object.to_dict(cache_object_copy)
-            else:
-              raise HandlerException('The input generated more elements than expected')
-
+            self.attribute_controller.update_attribute(attribute, cache_object)
+            return attribute.to_dict(cache_object)
 
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)

@@ -106,11 +106,9 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_reference(self, reference, user, commit=True):
+  def update_reference(self, reference, cache_object, commit=True):
     # TODO: include handler
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(reference, user, False)
       # TODO integrate handlersd
       self.reference_broker.update(reference, commit)
     except BrokerException as error:

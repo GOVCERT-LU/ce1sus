@@ -126,6 +126,8 @@ app.controller("attributeAddController", function($scope, Restangular, messages,
     $log, $routeSegment, $location) {
   var original_attribute = {};
 
+
+  
   $scope.attribute={};
   
   $scope.reset = false;

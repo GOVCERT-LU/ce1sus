@@ -68,7 +68,7 @@ class IndicatorController(BaseController):
     indicator.tlp_level_id = event.tlp_level_id
     indicator.title = 'Indicators for "{0}"'.format(indicator_type)
     indicator.operator = 'OR'
-    self.set_extended_logging(indicator, user, True)
+    # self.set_extended_logging(indicator, user, True)
 
     if indicator_type and indicator_type != 'Others':
       indicator.types.append(self.get_indicator_type(indicator_type))
@@ -85,7 +85,7 @@ class IndicatorController(BaseController):
         obj.definition.identifier = attribute.object.definition.identifier
         obj.definition_id = attribute.object.definition.identifier
         obj.attributes.append(attribute)
-        self.set_extended_logging(obj, user, True)
+        # self.set_extended_logging(obj, user, True)
         # create observable
         obs = Observable()
         obs.uuid = uuid4()
@@ -99,7 +99,7 @@ class IndicatorController(BaseController):
           obs.tlp_level_id = attribute.object.tlp_level_id
         obs.object = obj
         obs.event = event
-        self.set_extended_logging(obs, user, True)
+        # self.set_extended_logging(obs, user, True)
 
         indicator.observables.append(obs)
 

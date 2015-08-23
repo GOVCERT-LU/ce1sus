@@ -94,7 +94,7 @@ class FileReferenceHandler(GenericHandler):
 
   def assemble(self, report, json):
     value = json.get('value', None)
-    filename = value.get('name', None)
+    filename = value.get('filename', None)
     data = value.get('data', None)
     if isinstance(data, types.DictionaryType):
       # Workaround for the webfront end
@@ -130,7 +130,7 @@ class FileReferenceHandler(GenericHandler):
       return [main_attribute]
 
     else:
-      raise HandlerException('Value is invalid format has to be {"name": <name>,"data": <base 64 encoded data> }')
+      raise HandlerException('Value is invalid format has to be {"filename": <filename>,"data": <base 64 encoded data> } but was ' + '{0}'.format(value))
 
   def get_data(self, reference, definition, parameters):
     if reference:

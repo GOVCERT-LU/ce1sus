@@ -5,7 +5,7 @@
 
 Created on Aug 7, 2015
 """
-from ce1sus.controllers.common.merger.base import BaseMerger
+from ce1sus.controllers.common.merger.base import BaseMerger, MergerException
 from ce1sus.controllers.common.merger.merge.ccybox.ccybox import CyboxMerger
 from ce1sus.controllers.common.merger.merge.cstix import STIXMerger
 
@@ -88,15 +88,13 @@ class EventMerger(BaseMerger):
   def merge_reference(self, old_instance, new_instance, merge_cache):
 
     if old_instance and new_instance:
-      merge_cache.result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      if len(new_instance) > 1:
+        raise MergerException('Multiple reference mergeing is not supported')
+
+      merge_cache.result = self.is_mergeable(old_instance, new_instance[0], merge_cache)
       if merge_cache.result == 1:
         # Definition cannot be changed
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'value', merge_cache))
-        # TODO: reference children
+        merge_cache.version.add(self.update_instance_value(old_instance, new_instance[0], 'value', merge_cache))
 
-      elif merge_cache.result == 0:
-        old_instance = new_instance
-        merge_cache.object_changes = True
-
-      self.set_base(old_instance, new_instance, merge_cache)
+      self.set_base(old_instance, new_instance[0], merge_cache)
     return merge_cache.version

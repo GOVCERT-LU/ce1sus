@@ -180,16 +180,18 @@ class EventAssembler(BaseChanger):
     references = json.get('references', None)
     if references:
       for reference in references:
-        ref = self.assemble_reference(report, reference, cache_object)
+        self.assemble_reference(report, reference, cache_object)
+        """
         if ref:
           report.references.append(ref)
+        """
 
     related_reports = json.get('related_reports', None)
     if related_reports:
       for related_report in related_reports:
-        related_report = self.assemble_report(related_report, json, cache_object)
+        related_report = self.assemble_report(event, related_report, cache_object)
         if related_report:
-          related_report.parent_report = report
+          related_report.report = report
           related_report.event = None
           report.related_reports.append(related_report)
 
