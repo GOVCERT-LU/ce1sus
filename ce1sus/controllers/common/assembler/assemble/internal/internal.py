@@ -10,12 +10,13 @@ import re
 from ce1sus.controllers.admin.attributedefinitions import gen_attr_chksum
 from ce1sus.controllers.admin.objectdefinitions import gen_obj_chksum
 from ce1sus.controllers.admin.references import gen_reference_chksum
-from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
+from ce1sus.controllers.common.assembler.base import BaseAssembler, AssemblerException
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.referencesbroker import ReferencesBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
 from ce1sus.db.classes.internal.attributes.attribute import Condition
+from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
 from ce1sus.db.classes.internal.backend.servers import SyncServer, ServerMode
 from ce1sus.db.classes.internal.backend.types import AttributeType
 from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
@@ -25,7 +26,6 @@ from ce1sus.db.classes.internal.usrmgt.user import User, UserRights
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.common.hash import hashSHA1
 from ce1sus.helpers.pluginfunctions import is_plugin_available, get_plugin_function
-from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
 
 
 __author__ = 'Weber Jean-Paul'
@@ -34,7 +34,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class Ce1susAssembler(BaseChanger):
+class Ce1susAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(Ce1susAssembler, self).__init__(config, session)

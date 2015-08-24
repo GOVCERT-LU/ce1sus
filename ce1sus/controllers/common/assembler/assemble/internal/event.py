@@ -5,27 +5,22 @@
 
 Created on Jul 31, 2015
 """
-import base64
 from ce1sus.helpers.common.converters import ValueConverter
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from datetime import datetime
 from json import dumps
-from os.path import dirname
-from shutil import move, rmtree
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.common.assembler.assemble.ccybox.ccybox import CyboxAssembler
 from ce1sus.controllers.common.assembler.assemble.cstix import StixAssembler
 from ce1sus.controllers.common.assembler.assemble.internal.internal import Ce1susAssembler
-from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
+from ce1sus.controllers.common.assembler.base import BaseAssembler, AssemblerException
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.classes.internal.errors.errorbase import ErrorReference
 from ce1sus.db.classes.internal.event import Event, Comment, EventGroupPermission
 from ce1sus.db.classes.internal.report import Report, Reference
-from ce1sus.db.common.broker import NothingFoundException, BrokerException
-from ce1sus.handlers.references.filehandler import FileReferenceHandler
-from ce1sus.helpers.common.hash import hashMD5, fileHashSHA1
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.helpers.version import Version
 
 
@@ -35,7 +30,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class EventAssembler(BaseChanger):
+class EventAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(EventAssembler, self).__init__(config, session)

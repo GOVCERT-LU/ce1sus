@@ -11,7 +11,7 @@ from json import dumps
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.controllers.common.basechanger import BaseChanger, AssemblerException
+from ce1sus.controllers.common.assembler.base import BaseAssembler, AssemblerException
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
 from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
 from ce1sus.db.brokers.definitions.typebrokers import AttributeTypeBroker
@@ -27,7 +27,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-class PseudoCyboxAssembler(BaseChanger):
+class PseudoCyboxAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(PseudoCyboxAssembler, self).__init__(config, session)

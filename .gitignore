@@ -34,3 +34,7 @@ gpg/
 /__init__.py
 /ce1sus_v10
 /revdir/
+/mysql_backup_local.sh
+/reindent.py
+/test.py
+/test2.py

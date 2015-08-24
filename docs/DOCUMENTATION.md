@@ -36,7 +36,7 @@ Ce1sus need the following packages:
 Debian based systems can execute the following command:
 
 ``` shell
-sudo apt-get install python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
+sudo apt-get install python-requests python-cherrypy3 python-dateutil python-gnupg python-ldap python-memcache python-mysqldb python-sqlalchemy mysql-server python-mako git memcached
 ```
 
 ##1.2. Clone the repository

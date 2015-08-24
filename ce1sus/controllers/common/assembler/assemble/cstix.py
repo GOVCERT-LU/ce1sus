@@ -6,7 +6,7 @@
 Created on Aug 4, 2015
 """
 
-from ce1sus.controllers.common.basechanger import BaseChanger
+from ce1sus.controllers.common.assembler.base import BaseAssembler
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
 
 
@@ -16,7 +16,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class StixAssembler(BaseChanger):
+class StixAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(StixAssembler, self).__init__(config, session)

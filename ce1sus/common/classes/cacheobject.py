@@ -5,7 +5,6 @@
 
 Created on Aug 7, 2015
 """
-from copy import deepcopy
 from datetime import datetime
 
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
