@@ -10,7 +10,6 @@ from ce1sus.controllers.base import ControllerNothingFoundException, ControllerE
 from ce1sus.controllers.events.reports import ReportController
 from ce1sus.db.classes.internal.common import ValueException
 from ce1sus.db.classes.internal.report import Report, Reference
-from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, PathParsingException, require
 
 

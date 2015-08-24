@@ -13,6 +13,7 @@ from ce1sus.db.classes.internal.common import Analysis, Status, TLP
 from ce1sus.db.classes.internal.event import Event, EventGroupPermission
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
+from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 
 
 __author__ = 'Weber Jean-Paul'
@@ -87,7 +88,7 @@ class EventBroker(BrokerBase):
         result = result.filter(Event.created_at.like('%{0}%'.format(anal)))
       anal = parameters.get('filter[title]', None)
       if anal:
-        result = result.filter(Event.title.like('%{0}%'.format(anal)))
+        result = result.filter(STIXHeader.title.like('%{0}%'.format(anal)))
       anal = parameters.get('filter[status]', None)
       if anal:
         matching_ids = self.__find_id(Status.get_dictionary(), anal)
@@ -122,9 +123,9 @@ class EventBroker(BrokerBase):
       anal = parameters.get('sorting[title]', None)
       if anal:
         if anal == 'desc':
-          result = result.order_by(Event.title.desc())
+          result = result.order_by(STIXHeader.title.desc())
         else:
-          result = result.order_by(Event.title.asc())
+          result = result.order_by(STIXHeader.title.asc())
 
       anal = parameters.get('sorting[status]', None)
       if anal:
@@ -153,7 +154,7 @@ class EventBroker(BrokerBase):
     try:
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).distinct().filter(Event.dbcode.op('&')(4) == 4)
+      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) == 4)
       result = self.__set_parameters(result, parameters)
       result = result.limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
@@ -186,7 +187,7 @@ class EventBroker(BrokerBase):
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
       # , Event.tlp_level_id >= tlp
-      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids), Event.owner_group_id == user.group_id)))
+      result = self.session.query(Event).join(STIXHeader).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
       result = self.__set_parameters(result, parameters)
 
       result = result.limit(limit).offset(offset).all()
@@ -227,7 +228,7 @@ class EventBroker(BrokerBase):
   def get_total_events(self, parameters=None):
     try:
       # TODO add validation and published checks
-      result = self.session.query(Event)
+      result = self.session.query(Event).join(STIXHeader)
       result = self.__set_parameters(result, parameters)
 
       result = result.count()
@@ -243,7 +244,7 @@ class EventBroker(BrokerBase):
       tlp = get_max_tlp(user.group)
       # TODO add validation and published checks
       # TODO: total events for user
-      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
+      result = self.session.query(Event).join(STIXHeader).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
       result = self.__set_parameters(result, parameters)
 
       result = result.count()
@@ -254,7 +255,7 @@ class EventBroker(BrokerBase):
 
   def get_all_unvalidated_total(self, parameters=None):
     try:
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4)
+      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) != 4)
       result = self.__set_parameters(result, parameters)
       result = result.count()
     except sqlalchemy.orm.exc.NoResultFound:
@@ -269,7 +270,7 @@ class EventBroker(BrokerBase):
     Returns all unvalidated events
     """
     try:
-      result = self.session.query(Event).filter(Event.dbcode.op('&')(4) != 4)
+      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) != 4)
       result = self.__set_parameters(result, parameters)
       result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:
