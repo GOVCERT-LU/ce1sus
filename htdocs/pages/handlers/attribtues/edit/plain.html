@@ -24,7 +24,7 @@
     <b>IOC</b>
   </div>
   <div class="col-md-9">
-    <input class="form-control" type="checkbox" name="ioc" value="ioc"  ng-model="attribute.ioc" />
+    <input class="form-control" type="checkbox" name="ioc" value="ioc"  ng-model="attribute.ioc" ng-change="setModified(attribute)"/>
   </div>
 </div>
 <object-properties-form object="attribute" type="type" permissions="permissions"></object-properties-form>

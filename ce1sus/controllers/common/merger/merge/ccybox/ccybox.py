@@ -80,3 +80,6 @@ class CyboxMerger(BaseMerger):
 
       self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
+
+  def merge_attribute(self, old_instance, new_instance, merge_cache, attr_name=None):
+    return self.pseudo_cybox_merger.merge_attribute(old_instance, new_instance, merge_cache, attr_name)

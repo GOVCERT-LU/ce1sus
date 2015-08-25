@@ -30,21 +30,29 @@ class PseudoCyboxMerger(BaseMerger):
 
       self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
+  
+  def merge_attributes(self, old_instance, new_instance, merge_cache, attr_name=None):
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_attribute, attr_name)
+
+  def __get_attr_value(self, instance):
+    if isinstance(instance, list):
+      if len(instance) > 1:
+        raise MergerException('Multiple attribute mergeing is not supported')
+      return instance[0]
+    return instance
 
   def merge_attribute(self, old_instance, new_instance, merge_cache, attr_name=None):
-    old_value, new_value = self.get_values(old_instance, new_instance, attr_name)
+    old_value, new_value = self.get_values(self.__get_attr_value(old_instance), self.__get_attr_value(new_instance), attr_name)
     if old_value or new_value:
-      if len(new_value) > 1:
-        raise MergerException('Multiple attribute mergeing is not supported')
 
       merge_cache.result = self.is_mergeable(old_value, new_value, merge_cache)
       if merge_cache.result == 1:
-        self.update_instance_value(old_value, new_value[0], 'value', merge_cache)
-        self.update_instance_value(old_value, new_value[0], 'is_ioc', merge_cache)
-        self.update_instance_value(old_value, new_value[0], 'condition_id', merge_cache)
+        self.update_instance_value(old_value, new_value, 'value', merge_cache)
+        self.update_instance_value(old_value, new_value, 'is_ioc', merge_cache)
+        self.update_instance_value(old_value, new_value, 'condition_id', merge_cache)
 
       elif merge_cache.result == 0:
-        self.set_value(old_instance, new_value[0], attr_name, merge_cache)
+        self.set_value(old_instance, new_value, attr_name, merge_cache)
 
-      self.set_base(old_value, new_value[0], merge_cache)
+      self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
