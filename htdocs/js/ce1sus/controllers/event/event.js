@@ -531,7 +531,7 @@ app.controller("editEventController", function($scope, Restangular, messages,
         //update username in case
         for (var i = 0; i < $scope.openedEvents.length; i++) {
           if ($scope.openedEvents[i].identifier === data.identifier){
-            $scope.openedEvents[i].title = data.title;
+            $scope.openedEvents[i].stix_header.title = data.stix_header.title;
           }
         }
       }

@@ -5,6 +5,7 @@
 
 Created on Aug 7, 2015
 """
+from datetime import datetime
 from difflib import SequenceMatcher
 
 from ce1sus.common.checks import can_user_update, is_instance_owner, set_properties_according_to_permisssions
@@ -35,14 +36,14 @@ class BaseMerger(BaseController):
 
   def set_base(self, old_instance, new_instance, merge_cache):
     if isinstance(old_instance, SimpleLogingInformations):
-      if merge_cache.object_changes:
-        self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
+      self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
 
     if isinstance(old_instance, BaseElement):
       # merge properties
       if new_instance:
         # on
         self.__merge_properties(old_instance.properties, new_instance.properties, merge_cache)
+
     if isinstance(old_instance, BaseCoreComponent):
       self.set_version(old_instance, new_instance, merge_cache)
     # update parent informations
@@ -54,21 +55,23 @@ class BaseMerger(BaseController):
         parent = old_instance.parent
         if parent:
           if isinstance(parent, SimpleLogingInformations):
-            self.merge_simple_logging_informations(parent, old_instance, merge_cache)
+            self.merge_simple_logging_informations(parent, new_instance, merge_cache, True)
           if hasattr(parent, 'version') and hasattr(new_instance, 'version'):
             self.set_version(parent, new_instance, merge_cache)
-          if hasattr(parent, 'version') and not hasattr(new_instance, 'version'):
-            if merge_cache.object_changes:
-              super(BaseMerger, self).set_version(parent, merge_cache)
           self.update_modified(parent, new_instance, merge_cache)
 
   def set_version(self, old_instance, new_instance, merge_cache):
-    if old_instance.version.compare(new_instance.version) > 0:
-      self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
-      old_instance.version.version = new_instance.version.version
+    if merge_cache.is_changed_version(old_instance):
+      self.changelogger.debug('Version already changed')
     else:
-      if merge_cache.object_changes:
-        super(BaseMerger, self).set_version(old_instance, merge_cache)
+      merge_cache.set_changed_version(old_instance)
+      if old_instance.version.compare(new_instance.version) > 0:
+        self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
+        old_instance.version.version = new_instance.version.version
+      else:
+        old_version = old_instance.version.version
+        old_instance.version.add(merge_cache.version)
+        self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(old_instance.get_classname(), old_instance.uuid, old_version, old_instance.version.version))
 
   def is_updatable(self, old_instance, new_instance):
     if old_instance.get_classname() != new_instance.get_classname():
@@ -138,14 +141,14 @@ class BaseMerger(BaseController):
 
       if new_instance:
         if old_instance.modified_on < new_instance.modified_on:
-          return 1
-        else:
           self.logger.debug('{0} {1} will be updated.'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
+          return 1
       else:
         # mark it for deletion if it is not the owner if it is not present anymore
         if not merge_cache.owner:
           self.mark_for_deletion(old_instance, merge_cache)
-        self.logger.debug('{0} {1} is marked for deletion.'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
+          self.logger.debug('{0} {1} is marked for deletion.'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
+
     else:
 
       if new_instance:
@@ -160,18 +163,19 @@ class BaseMerger(BaseController):
   def merge_structured_text(self, old_instance, new_instance, merge_cache, attr_name=None):
     old_value, new_value = self.get_values(old_instance, new_instance, attr_name)
     if old_value or new_value:
-      result = self.is_mergeable(old_instance, new_instance, merge_cache)
+      result = self.is_mergeable(old_value, new_value, merge_cache)
       if result == 1:
         self.update_instance_value(old_value, new_value, 'id_', merge_cache)
         self.update_instance_value(old_value, new_value, 'value', merge_cache)
         self.update_instance_value(old_value, new_value, 'structuring_format', merge_cache)
         self.update_instance_value(old_value, new_value, 'ordinality', merge_cache)
-      
+
       elif result == 0:
         self.logger.info('Adding structured text with value {0}'.format(new_value.value))
         self.set_value(old_instance, new_value, attr_name, merge_cache)
 
     self.set_base(old_value, new_value, merge_cache)
+
     return merge_cache.version
 
   def merge_information_source(self, old_instance, new_instance, merge_cache, attr_name=None):
@@ -186,7 +190,7 @@ class BaseMerger(BaseController):
         self.set_value(old_instance, new_value, attr_name, merge_cache)
 
       self.merge_structured_text(old_value, new_value, merge_cache, 'description')
-      self.merge_identity(old_value, new_value, merge_cache, 'identity')
+      # self.merge_identity(old_value, new_value, merge_cache, 'identity')
       self.merge_cybox_time(old_value, new_value, merge_cache, 'time')
       self.merge_tools(old_value, new_value, merge_cache, 'tools')
       self.merge_roles(old_value, new_value, merge_cache, 'roles')
@@ -261,10 +265,10 @@ class BaseMerger(BaseController):
     return merge_cache.version
 
   def merge_roles(self, old_instance, new_instance, merge_cache, attr_name=None):
-    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_role)
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_role, attr_name)
 
   def merge_tools(self, old_instance, new_instance, merge_cache, attr_name=None):
-    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_tool)
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_tool, attr_name)
 
   def merge_tool(self, old_instance, new_instance, merge_cache, attr_name=None):
     old_value, new_value = self.get_values(old_instance, new_instance, attr_name)
@@ -370,7 +374,7 @@ class BaseMerger(BaseController):
     return merge_cache.version
 
   def merge_markingstructures(self, old_instance, new_instance, merge_cache, attr_name=None):
-    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_markingspecification)
+    return self.merge_gen_arrays(old_instance, new_instance, merge_cache, self.merge_markingspecification, attr_name)
 
   def merge_markingstructure(self, old_instance, new_instance, merge_cache, attr_name=None):
     # TODO: Marking Structures

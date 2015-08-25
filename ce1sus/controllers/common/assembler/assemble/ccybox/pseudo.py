@@ -100,7 +100,8 @@ class PseudoCyboxAssembler(BaseAssembler):
         if rel_objs:
           for rel_obj in rel_objs:
             rel_obj_inst = self.assemble_related_object(obj, rel_obj, cache_object)
-            obj.related_objects.append(rel_obj_inst)
+            if rel_obj_inst:
+              obj.related_objects.append(rel_obj_inst)
 
         attributes = json.get('attributes')
         if attributes:

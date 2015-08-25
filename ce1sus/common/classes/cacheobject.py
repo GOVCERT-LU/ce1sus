@@ -35,7 +35,7 @@ class CacheObject(object):
     self.seen_conditions = dict()
     self.__created_at = None
     self.__modified_on = None
-    self.object_changes = False
+    self.modified_set = False
 
   @property
   def created_at(self):
@@ -48,6 +48,11 @@ class CacheObject(object):
     if self.__modified_on is None:
       self.__modified_on = datetime.utcnow()
     return self.__modified_on
+
+  @modified_on.setter
+  def modified_on(self, value):
+    self.__modified_on = value
+    self.modified_set = True
 
   @property
   def complete(self):
@@ -68,7 +73,6 @@ class CacheObject(object):
     cache_object.user = self.user
     cache_object.rest_insert = self.rest_insert
     cache_object.seen_groups = self.seen_groups
-    cache_object.object_changes = self.object_changes
     return cache_object
 
   def set_default(self):
@@ -78,6 +82,11 @@ class CacheObject(object):
     self.event_permissions = EventPermissions('0')
     self.event_permissions.set_all()
 
+
+  def reset(self):
+    self.__created_at = None
+    self.__modified_on = None
+
 class MergerCache(CacheObject):
 
   def __init__(self, cache_object):
@@ -85,14 +94,15 @@ class MergerCache(CacheObject):
     # result: -1: Do nothing 0: Add items (major update) 1: merge version inside 2:minor update
     self.result = -1
     self.version = Version()
-    self.object_changes = cache_object.object_changes
     self.__inc_lvl = 0
+    self.changed_versions = dict()
 
   def make_copy(self):
     cache_object = super(MergerCache, self).make_copy()
     merger_cache = MergerCache(cache_object)
     merger_cache.result = self.result
     merger_cache.version = self.version
+    merger_cache.changed_versions = self.changed_versions
     return merger_cache
 
   def inc_version_major(self):
@@ -109,3 +119,21 @@ class MergerCache(CacheObject):
     if self.__inc_lvl < 1:
       self.__inc_lvl = 1
       self.version.increase_patch()
+      
+  def __inst_id(self, instance):
+    return '{0}{1}'.format(instance.get_classname(),instance.uuid)
+    
+  def is_changed_version(self, instance):
+    id_ = self.__inst_id(instance)
+    return self.changed_versions.get(id_, False)
+
+  def set_changed_version(self, instance):
+    id_ = self.__inst_id(instance)
+    self.changed_versions[id_] = True
+    
+  def reset(self):
+    super(MergerCache, self).reset()
+    self.result = -1
+    self.version = Version()
+    self.__inc_lvl = 0
+    self.changed_versions = dict()

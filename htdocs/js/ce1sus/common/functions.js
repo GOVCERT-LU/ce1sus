@@ -176,7 +176,9 @@ function disableButton(item) {
 function setModified(item) {
   if (item) {
     if (typeof(item.modified_set) == 'undefined') {
-      item.modified_on = new Date().getTime();
+      var d1 = new Date();
+      
+      item.modified_on = d1.toUTCString();
       item.modified_set = true;
     }
   }

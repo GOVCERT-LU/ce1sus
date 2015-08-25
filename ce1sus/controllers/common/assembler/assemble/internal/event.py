@@ -176,10 +176,6 @@ class EventAssembler(BaseAssembler):
     if references:
       for reference in references:
         self.assemble_reference(report, reference, cache_object)
-        """
-        if ref:
-          report.references.append(ref)
-        """
 
     related_reports = json.get('related_reports', None)
     if related_reports:

@@ -74,10 +74,10 @@ class BaseChanger(BaseController):
       if cache_object.insert:
         # the creator is always the user who inserted it into the DB
         instance.creator = cache_object.user
-        instance.created_at = datetime.utcnow()
+        instance.created_at = cache_object.created_at
 
       instance.modifier = cache_object.user
-      instance.modified_on = datetime.utcnow()
+      instance.modified_on = cache_object.modified_on
 
   def __set_extended_logging(self, instance, json, cache_object):
     self.__set_simple_logging(instance, json, cache_object)

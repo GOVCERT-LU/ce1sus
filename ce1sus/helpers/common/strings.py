@@ -106,11 +106,11 @@ def stringToDateTime(string):
         is_int = True
       if is_int:
         try:
-          return datetime.fromtimestamp(int(string) / 1000.0)
+          return datetime.fromtimestamp(int(string) / 1000.0).replace(tzinfo=None)
         except ValueError:
           return None
       else:
-        return dateutil.parser.parse(string)
+        return dateutil.parser.parse(string).replace(tzinfo=None)
     return None
   except ValueError:
     raise InputException(u'Format of Date "{0}" is unknown'.format(string))

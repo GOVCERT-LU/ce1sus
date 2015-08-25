@@ -63,13 +63,16 @@ class BaseAssembler(BaseChanger):
       if tools:
         for tool in tools:
           tool = self.assemble_toolinformation(instance, tool, cache_object)
-          instance.tools.append(tool)
+          if tool:
+            instance.tools.append(tool)
 
       roles = json.get('roles', None)
       if roles:
         for role in roles:
           role = self.assemble_information_source_role(instance, role, cache_object)
-          instance.roles.append(role)
+          if role:
+            instance.roles.append(role)
+      return instance
 
   def assemble_identity(self, parent, json, cache_object):
     instance = Identity()
@@ -83,7 +86,9 @@ class BaseAssembler(BaseChanger):
       if related_identities:
         for related_identity in related_identities:
           related_identity = self.assemble_related_identity(instance, related_identity, cache_object)
-          instance.related_identities.append(related_identity)
+          if related_identity:
+            instance.related_identities.append(related_identity)
+      return instance
 
   def assemble_related_identity(self, parent, json, cache_object):
     instance = RelatedIdentity()
@@ -105,6 +110,7 @@ class BaseAssembler(BaseChanger):
         value = strings.stringToDateTime(value)
         instance.value = value
       instance.precision = json.get('precision', 'seconds')
+      return instance
 
   def assemble_cybox_time(self, parent, json, cache_object):
     instance = CyboxTime()
@@ -126,6 +132,7 @@ class BaseAssembler(BaseChanger):
       if received_time:
         received_time = self.assemble_datetimewithprecision(instance, json, cache_object)
         instance.start_time = received_time
+      return instance
 
   def assemble_handling(self, parent, json, cache_object):
     result = list()

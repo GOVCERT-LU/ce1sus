@@ -16,6 +16,7 @@ from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.changelogger import ChangeLogger
 from ce1sus.helpers.common.debug import Log
+from ce1sus.helpers.version import Version
 
 
 __author__ = 'Weber Jean-Paul'
@@ -72,7 +73,10 @@ class BaseController(object):
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
 
   def set_version(self, instance, merger_cache):
-    if merger_cache.object_changes:
+    if merger_cache.is_changed_version(instance):
+      self.changelogger.debug('Version already changed')
+    else:
+      merger_cache.set_changed_version(instance)
       # If the newversion is newer take this one
       if merger_cache.result == 0:
         old_version = instance.version.version
@@ -91,16 +95,25 @@ class BaseController(object):
         instance.version.add(merger_cache.version)
         self.changelogger.info('{0} {1} property version will be be replaced "{2}" by "{3}"'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
 
-  def merge_simple_logging_informations(self, old_instance, new_instance, merger_cache):
-    if old_instance:
-      if merger_cache.object_changes:
-        # the modifier is always the user who inserted it into the DB
-        old_instance.modifier = merger_cache.user
-
-        if new_instance and new_instance.modified_on:
-          old_instance.modified_on = new_instance.modified_on
-        else:
+  def merge_simple_logging_informations(self, old_instance, new_instance, merger_cache, force_new=False):
+    if Version().compare(merger_cache.version):
+      if old_instance:
+        self.changelogger.debug('Changing time stamp on {0}{1} - {2}'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
+        if force_new:
+          if not merger_cache.modified_set:
+            merger_cache.modified_on = new_instance.modified_on
           old_instance.modified_on = merger_cache.modified_on
+          self.changelogger.debug('Set Fored to {0}'.format(old_instance.modified_on))
+        else:
+          if new_instance and new_instance.modified_on:
+            if old_instance.modified_on < new_instance.modified_on:
+              old_instance.modifier = merger_cache.user
+              old_instance.modified_on = new_instance.modified_on
+              self.changelogger.debug('using the one from new instance {1} - {0}'.format(new_instance.modified_on, new_instance.get_classname()))
+            else:
+              self.changelogger.debug('TS is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
+          else:
+            self.changelogger.debug('Cannot make changes on  is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
 
   def insert_set_base(self, instance, cache_object):
     if isinstance(cache_object, CacheObject):
