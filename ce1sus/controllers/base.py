@@ -116,10 +116,11 @@ class BaseController(object):
             self.changelogger.debug('Cannot make changes on  is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
 
   def insert_set_base(self, instance, cache_object):
+
     if isinstance(cache_object, CacheObject):
       merge_cache = MergerCache(cache_object)
       merge_cache.result = 2
-      merge_cache.object_changes = True
+      merge_cache.version = Version('999.999.999')
       self.update_modified(instance, merge_cache)
     else:
       raise ValueError('Not cacheobject')
@@ -130,13 +131,13 @@ class BaseController(object):
   def update_set_base(self, instance, cache_object):
     self.insert_set_base(instance, cache_object)
 
-  def update_modified(self, instance, merge_cache):
-    if instance:
-      if hasattr(instance, 'parent'):
-        parent = instance.parent
+  def update_modified(self, old_instance, merge_cache):
+    if old_instance:
+      if hasattr(old_instance, 'parent'):
+        parent = old_instance.parent
         if parent:
           if isinstance(parent, SimpleLogingInformations):
-            self.merge_simple_logging_informations(parent, instance, merge_cache)
+            self.merge_simple_logging_informations(parent, old_instance, merge_cache, True)
           if hasattr(parent, 'version'):
             self.set_version(parent, merge_cache)
           self.update_modified(parent, merge_cache)
