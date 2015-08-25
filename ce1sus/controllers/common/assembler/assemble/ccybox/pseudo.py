@@ -56,7 +56,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     # if there are no attributes then do not log this
     attributes = json.get('attributes', None)
     if attributes:
-      self.log_object_error(parent, json, 'Object does not contain an object definition')
+      self.log_object_error(parent, json, 'Object does not contain a known object definition')
     return None
 
   def __log_error(self, parent, json, error_message, clazz):
