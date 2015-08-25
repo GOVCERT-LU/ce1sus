@@ -15,7 +15,7 @@ __license__ = 'GPL v3+'
 
 class Ce1susMerger(BaseMerger):
 
-  def merge_attribute_definition(self, old_instance, new_instance, merge_cache):
+  def merge_attribute_definition(self, old_instance, new_instance, merge_cache, attr_name=None):
 
     if old_instance and new_instance:
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'name', merge_cache))
@@ -33,7 +33,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_object_definition(self, old_instance, new_instance, merge_cache):
+  def merge_object_definition(self, old_instance, new_instance, merge_cache, attr_name=None):
 
     if old_instance and new_instance:
       merge_cache.version.add(self.update_instance_value(old_instance, new_instance, 'name', merge_cache))
@@ -46,7 +46,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_reference_definition(self, old_instance, new_instance, merge_cache):
+  def merge_reference_definition(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -71,7 +71,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_mail_template(self, old_instance, new_instance, merge_cache):
+  def merge_mail_template(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -82,7 +82,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_group(self, old_instance, new_instance, merge_cache):
+  def merge_group(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -100,7 +100,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_sync_server(self, old_instance, new_instance, merge_cache):
+  def merge_sync_server(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -117,7 +117,7 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_user(self, old_instance, new_instance, merge_cache):
+  def merge_user(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -138,7 +138,7 @@ class Ce1susMerger(BaseMerger):
     return merge_cache.version
 
 
-  def merge_attribute_type(self, old_instance, new_instance, merge_cache):
+  def merge_attribute_type(self, old_instance, new_instance, merge_cache, attr_name=None):
 
 
     if old_instance and new_instance:
@@ -149,12 +149,4 @@ class Ce1susMerger(BaseMerger):
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version
 
-  def merge_attribute(self, old_instance, new_instance, merge_cache):
-    if old_instance and new_instance:
-      if len(new_instance) > 1:
-        raise MergerException('Multiple attribute mergeing is not supported')
-      merge_cache.result = self.is_mergeable(old_instance, new_instance[0], merge_cache)
-      if merge_cache.result == 1:
-        merge_cache.version.add(self.update_instance_value(old_instance, new_instance[0], 'value', merge_cache))
-      self.set_base(old_instance, new_instance[0], merge_cache)
-    return merge_cache.version
+

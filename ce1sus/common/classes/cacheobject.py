@@ -86,6 +86,7 @@ class MergerCache(CacheObject):
     self.result = -1
     self.version = Version()
     self.object_changes = cache_object.object_changes
+    self.__inc_lvl = 0
 
   def make_copy(self):
     cache_object = super(MergerCache, self).make_copy()
@@ -93,3 +94,18 @@ class MergerCache(CacheObject):
     merger_cache.result = self.result
     merger_cache.version = self.version
     return merger_cache
+
+  def inc_version_major(self):
+    if self.__inc_lvl < 3:
+      self.__inc_lvl = 3
+      self.version.increase_major()
+
+  def inc_version_minior(self):
+    if self.__inc_lvl < 2:
+      self.__inc_lvl = 2
+      self.version.increase_minor()
+
+  def inc_version_patch(self):
+    if self.__inc_lvl < 1:
+      self.__inc_lvl = 1
+      self.version.increase_patch()
