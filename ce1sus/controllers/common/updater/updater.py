@@ -10,6 +10,7 @@ from sqlalchemy.orm.session import make_transient
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.controllers.common.merger.merger import Merger
+from ce1sus.common.classes.cacheobject import MergerCache
 
 
 __author__ = 'Weber Jean-Paul'
@@ -38,14 +39,14 @@ class Updater(BaseController):
     new_instance = self.assembler.assemble(json, instance.__class__, parent, cache_object)
     # Reset cache object
     cache_object.reset()
+    merger_cache = MergerCache(cache_object)
     if isinstance(new_instance, list):
       new_instance = new_instance[0]
-    version = self.merger.merge(instance, new_instance, cache_object)
+    version = self.merger.merge(instance, new_instance, merger_cache)
     if parent:
       # This is done so that the transient object will also be updated
       obj = self.attr_def_broker.session.query(parent.__class__).filter(parent.__class__.identifier == parent.identifier).one()
-      obj.modified_on = parent.modified_on
-      obj.modifier = parent.modifier
-      self.attr_def_broker.session.merge(obj)
-      self.attr_def_broker.do_commit(True)
+      self.merger.cybox_merger.set_base(obj, parent, merger_cache, True)
+      # self.attr_def_broker.session.merge(obj)
+      # self.attr_def_broker.do_commit(True)
     return version

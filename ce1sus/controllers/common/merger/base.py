@@ -35,7 +35,9 @@ class BaseMerger(BaseController):
 
     merger_cache.version.version = old_version
 
-  def set_base(self, old_instance, new_instance, merge_cache):
+  def set_base(self, old_instance, new_instance, merge_cache, set_version_recursive=False):
+    # Note the merger itself wont update versions !?! these are done on the end of an update
+    # TODO: find a better way do do this
     if isinstance(old_instance, SimpleLoggingInformations):
       self.merge_simple_logging_informations(old_instance, new_instance, merge_cache)
 
@@ -48,9 +50,9 @@ class BaseMerger(BaseController):
     if isinstance(old_instance, BaseCoreComponent):
       self.set_version(old_instance, new_instance, merge_cache)
     # update parent informations
-    self.update_modified(old_instance, new_instance, merge_cache)
+    self.update_modified(old_instance, new_instance, merge_cache, set_version=set_version_recursive)
 
-  def update_modified(self, old_instance, new_instance, merge_cache):
+  def update_modified(self, old_instance, new_instance, merge_cache, set_version=False):
     if old_instance:
       if hasattr(old_instance, 'parent'):
         parent = old_instance.parent
@@ -59,7 +61,7 @@ class BaseMerger(BaseController):
             self.merge_simple_logging_informations(parent, new_instance, merge_cache, True)
           if hasattr(parent, 'version') and hasattr(new_instance, 'version'):
             self.set_version(parent, new_instance, merge_cache)
-          elif hasattr(parent, 'version'):
+          elif hasattr(parent, 'version') and set_version:
             self.logger.debug('Setting {0}{1} adding {2} to version {3}'.format(parent.get_classname(), parent.uuid, merge_cache.version.version, parent.version.version))
             parent.version.add(merge_cache.version)
           self.update_modified(parent, new_instance, merge_cache)
