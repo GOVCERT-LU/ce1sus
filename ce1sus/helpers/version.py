@@ -89,12 +89,13 @@ class Version(object):
   def increase_minor(self):
     major, minor, patch = self.parse()
     minor = minor + 1
-    self.version = '{0}.{1}.{2}'.format(major, minor, patch)
+    del patch
+    self.version = '{0}.{1}.{2}'.format(major, minor, 0)
 
   def increase_major(self):
-    major, minor, patch = self.parse()
+    major = self.parse()[0]
     major = major + 1
-    self.version = '{0}.{1}.{2}'.format(major, minor, patch)
+    self.version = '{0}.{1}.{2}'.format(major, 0, 0)
 
   def increase_patch(self):
     major, minor, patch = self.parse()
@@ -109,7 +110,19 @@ class Version(object):
       version_str = version
     major, minor, patch = self.parse()
     major2, minor2, patch2 = self.parse(version_str)
-    self.version = '{0}.{1}.{2}'.format(major + major2, minor + minor2, patch + patch2)
+    res_patch = patch + patch2
+    if minor < minor2:
+      res_patch = 0
+      res_minor = minor + minor2
+    else:
+      res_minor = minor
+    if major < major2:
+      res_patch = 0
+      res_minor = 0
+      res_major = major + major2
+    else:
+      res_major = major
+    self.version = '{0}.{1}.{2}'.format(res_major, res_minor, res_patch)
 
   def __str__(self):
     return self.__version

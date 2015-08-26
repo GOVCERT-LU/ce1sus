@@ -72,27 +72,25 @@ class BaseController(object):
     self.attr_def_broker = self.broker_factory(AttributeDefinitionBroker)
 
   def set_version(self, instance, merger_cache):
-    if merger_cache.is_changed_version(instance):
-      self.logger.debug('Version already changed')
-    else:
-      merger_cache.set_changed_version(instance)
-      # If the newversion is newer take this one
-      if merger_cache.result == 0:
-        old_version = instance.version.version
-        instance.version.increase_major()
-        self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 0'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
 
-      # If the newversion is newer take this one
-      if merger_cache.result == 2:
-        old_version = instance.version.version
-        instance.version.increase_minor()
-        self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 2'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+    # If the newversion is newer take this one
+    if merger_cache.result == 0:
+      old_version = instance.version.version
+      instance.version.increase_major()
+      self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 0'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
 
-      elif merger_cache.result == 1:
-        # set the new version
-        old_version = instance.version.version
-        instance.version.add(merger_cache.version)
-        self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 1'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+    # If the newversion is newer take this one
+    if merger_cache.result == 2:
+      old_version = instance.version.version
+      instance.version.increase_minor()
+      self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 2'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+
+    elif merger_cache.result == 1:
+      # set the new version
+      old_version = instance.version.version
+      instance.version.add(merger_cache.version)
+      self.logger.info('{0} {1} property version will be be replaced "{2}" by "{3}" result = 1'.format(instance.get_classname(), instance.uuid, old_version, instance.version.version))
+
 
   def merge_simple_logging_informations(self, old_instance, new_instance, merger_cache, force_new=False):
     if old_instance:

@@ -113,14 +113,6 @@ class MergerCache(CacheObject):
   def __inst_id(self, instance):
     return '{0}{1}'.format(instance.get_classname(),instance.uuid)
     
-  def is_changed_version(self, instance):
-    id_ = self.__inst_id(instance)
-    return self.changed_versions.get(id_, False)
-
-  def set_changed_version(self, instance):
-    id_ = self.__inst_id(instance)
-    self.changed_versions[id_] = True
-    
   def reset(self):
     super(MergerCache, self).reset()
     self.result = -1

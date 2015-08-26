@@ -43,10 +43,11 @@ class Updater(BaseController):
     if isinstance(new_instance, list):
       new_instance = new_instance[0]
     version = self.merger.merge(instance, new_instance, merger_cache)
+    merger_cache.version.version = version.version
     if parent:
       # This is done so that the transient object will also be updated
       obj = self.attr_def_broker.session.query(parent.__class__).filter(parent.__class__.identifier == parent.identifier).one()
-      self.merger.cybox_merger.set_base(obj, parent, merger_cache, True)
+      self.merger.cybox_merger.set_base(obj, parent, merger_cache)
       # self.attr_def_broker.session.merge(obj)
       # self.attr_def_broker.do_commit(True)
     return version

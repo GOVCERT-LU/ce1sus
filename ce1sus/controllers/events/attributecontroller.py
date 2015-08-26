@@ -42,7 +42,7 @@ class AttributeController(BaseController):
   def update_attribute(self, attribute, cache_object, commit=True):
     # TODO: include handler
     try:
-      self.insert_set_base(attribute, cache_object)
+      self.update_set_base(attribute, cache_object)
       # TODO integrate handlersd
       self.attribute_broker.update(attribute)
     except BrokerException as error:
