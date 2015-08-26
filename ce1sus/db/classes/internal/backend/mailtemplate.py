@@ -9,7 +9,7 @@ from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
@@ -20,7 +20,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class MailTemplate(SimpleLogingInformations, Base):
+class MailTemplate(SimpleLoggingInformations, Base):
   """This is a container class for the Mails table."""
   name = Column('name', UnicodeType(255), nullable=False)
   body = Column('body', UnicodeTextType(), nullable=False)
@@ -36,7 +36,7 @@ class MailTemplate(SimpleLogingInformations, Base):
     else:
       result = {'name': self.convert_value(self.name)}
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 
   def validate(self):

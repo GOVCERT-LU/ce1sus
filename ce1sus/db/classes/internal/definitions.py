@@ -16,7 +16,7 @@ from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.classes.internal.backend.types import AttributeType
 from ce1sus.db.classes.internal.common import ValueTable
-from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType, BaseObject
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
@@ -44,7 +44,7 @@ class AttributeDefinitionException(DefinitionException):
   pass
 
 
-class ObjectDefinition(SimpleLogingInformations, Base):
+class ObjectDefinition(SimpleLoggingInformations, Base):
 
   name = Column('name', UnicodeType(255), nullable=False, unique=True, index=True)
   description = Column('description', UnicodeTextType())
@@ -94,12 +94,12 @@ class ObjectDefinition(SimpleLogingInformations, Base):
               'cybox_std': self.convert_value(self.cybox_std)
               }
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 
 
 
-class AttributeDefinition(SimpleLogingInformations, Base):
+class AttributeDefinition(SimpleLoggingInformations, Base):
 
   name = Column('name', UnicodeType(45), unique=True, nullable=False, index=True)
   description = Column('description', UnicodeTextType())
@@ -204,7 +204,7 @@ class AttributeDefinition(SimpleLogingInformations, Base):
               'cybox_std': self.convert_value(self.cybox_std)
               }
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 
 

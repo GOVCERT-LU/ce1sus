@@ -15,7 +15,7 @@
         ng-class="{ 'has-error' : addAttributeDefinitionForm.name.$invalid && !addAttributeDefinitionForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="attribute.name"
           type="text" required ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^[\d\w]+$/">
+          ng-pattern="/^[\d\w]+$/" ng-change="setModified(attribute)">
         <p
           ng-show="addAttributeDefinitionForm.name.$invalid && !addAttributeDefinitionForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -34,7 +34,7 @@
       <div
         ng-class="{ 'has-error' : addAttributeDefinitionForm.description.$invalid && !addAttributeDefinitionForm.description.$pristine }">
         <textarea name="description" ng-model="attribute.description"
-          cols=48 rows=20 ng-minlength=3 required></textarea>
+          cols=48 rows=20 ng-minlength=3 required ng-change="setModified(attribute)"></textarea>
         <p
           ng-show="addAttributeDefinitionForm.description.$invalid && !addAttributeDefinitionForm.name.$pristine"
           class="help-block">Description is required.</p>
@@ -50,7 +50,7 @@
       <div
         ng-class="{ 'has-error' : addAttributeDefinitionForm.regex.$invalid && !addAttributeDefinitionForm.regex.$pristine }">
         <input class="form-control" name="regex" ng-model="attribute.regex"
-          type="text" required ng-minlength=3 ng-maxlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(attribute)">
         <p
           ng-show="addAttributeDefinitionForm.regex.$invalid && !addAttributeDefinitionForm.regex.$pristine"
           class="help-block">Regex is required.</p>
@@ -100,7 +100,7 @@
     <div class="col-lg-9">
       <select name="attributehandler_id" class="form-control"
         ng-options="condition.identifier as condition.value for condition in conditions"
-        ng-model="attribute.default_condition_id">
+        ng-model="attribute.default_condition_id" ng-change="setModified(attribute)">
         <option style="display: none" value="">Select a condition</option>
       </select>
     </div>
@@ -114,7 +114,7 @@
           <div class="col-lg-9">
             <input class="form-control" type="checkbox"
               name="selectedOptions[]" value="relationable"
-              ng-model="attribute.relation" />
+              ng-model="attribute.relation" ng-change="setModified(attribute)"/>
           </div>
         </div>
         <div class="row">
@@ -122,7 +122,7 @@
           <div class="col-lg-9">
             <input class="form-control" type="checkbox"
               name="selectedOptions[]" value="shareable"
-              ng-model="attribute.share" />
+              ng-model="attribute.share" ng-change="setModified(attribute)"/>
           </div>
         </div>
       </div>

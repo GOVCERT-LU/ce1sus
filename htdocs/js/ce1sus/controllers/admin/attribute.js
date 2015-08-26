@@ -193,7 +193,6 @@ app.controller("attributeEditController", function($scope, Restangular, messages
   };
   
   $scope.submitAttribute = function(){
-    $scope.attribute.modified_on = new Date().getTime();
     $scope.attribute.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
         $scope.attribute = data;

@@ -8,7 +8,7 @@ Created on Oct 20, 2014
 from sqlalchemy.schema import Column
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
@@ -37,5 +37,5 @@ class Ce1susConfig(BaseObject, Base):
               'value': self.convert_value(self.value),
               }
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

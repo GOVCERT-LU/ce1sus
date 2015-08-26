@@ -37,5 +37,7 @@ class Updater(BaseController):
     new_instance = self.assembler.assemble(json, instance.__class__, parent, cache_object)
     # Reset cache object
     cache_object.reset()
+    if isinstance(new_instance, list):
+      new_instance = new_instance[0]
     version = self.merger.merge(instance, new_instance, cache_object)
     return version

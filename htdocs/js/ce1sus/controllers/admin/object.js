@@ -111,7 +111,6 @@ app.controller("objectEditController", function($scope, Restangular, messages, $
   };
   
   $scope.submitObject = function(){
-    $scope.object.modified_on = new Date().getTime();
     $scope.object.put({'complete':true, 'infated':true}).then(function (data) {
       if (data) {
         for (var i = 0; i < $scope.objects.length; i++) {

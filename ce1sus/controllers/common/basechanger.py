@@ -16,7 +16,7 @@ from ce1sus.db.classes.cstix.base import BaseCoreComponent
 from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
 from ce1sus.db.classes.internal.common import Properties
-from ce1sus.db.classes.internal.core import BaseElement, ExtendedLogingInformations, SimpleLogingInformations, BaseObject
+from ce1sus.db.classes.internal.core import BaseElement, ExtendedLogingInformations, SimpleLoggingInformations, BaseObject
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import NothingFoundException
 from ce1sus.helpers.version import Version
@@ -68,7 +68,7 @@ class BaseChanger(BaseController):
       if modified_on:
         instance.modified_on = strings.stringToDateTime(modified_on)
       else:
-        instance.modified_on = cache_object.modified_on
+        instance.modified_on = instance.created_at
 
     else:
       if cache_object.insert:
@@ -77,7 +77,7 @@ class BaseChanger(BaseController):
         instance.created_at = cache_object.created_at
 
       instance.modifier = cache_object.user
-      instance.modified_on = cache_object.modified_on
+      instance.modified_on = instance.created_at
 
   def __set_extended_logging(self, instance, json, cache_object):
     self.__set_simple_logging(instance, json, cache_object)
@@ -210,7 +210,7 @@ class BaseChanger(BaseController):
       self.__set_baseelement(instance, json, cache_object, parent, change_base_element)
     elif isinstance(instance, ExtendedLogingInformations):
       self.__set_extended_logging(instance, json, cache_object)
-    elif isinstance(instance, SimpleLogingInformations):
+    elif isinstance(instance, SimpleLoggingInformations):
       self.__set_simple_logging(instance, json, cache_object)
     elif isinstance(instance, BaseObject):
       self.__set_baseobject(instance, json)

@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addUserForm.name.$invalid && !addUserForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="user.name"
-          type="text" required ng-minlength=3 ng-maxlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(user)">
         <p
           ng-show="addUserForm.name.$invalid && !addUserForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -30,7 +30,7 @@
         ng-class="{ 'has-error' : addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine }">
         <input class="form-control" name="sirname"
           ng-model="user.sirname" type="text" required ng-minlength=3
-          ng-maxlength=255>
+          ng-maxlength=255 ng-change="setModified(user)">
         <p
           ng-show="addUserForm.sirname.$invalid && !addUserForm.sirname.$pristine"
           class="help-block">Sirname is required.</p>
@@ -47,10 +47,10 @@
       <div
         ng-class="{ 'has-error' : addUserForm.username.$invalid && !addUserForm.username.$pristine }">
         <input class="form-control" name="username"
-          ng-model="user.username" type="text" disabled ng-if="type=='edit'">
+          ng-model="user.username" type="text" disabled ng-if="type=='edit'" ng-change="setModified(user)">
         <input class="form-control" name="username"
           ng-model="user.username" type="text" required ng-minlength=3
-          ng-maxlength=255 ng-pattern="/^[\d\w]+$/" ng-if="type=='add'">
+          ng-maxlength=255 ng-pattern="/^[\d\w]+$/" ng-if="type=='add'" ng-change="setModified(user)">
         <p
           ng-show="addUserForm.username.$invalid && !addUserForm.username.$pristine"
           class="help-block">Username is required.</p>
@@ -70,7 +70,7 @@
         ng-class="{ 'has-error' : addUserForm.password.$invalid && !addUserForm.password.$pristine }">
         <input class="form-control" name="password"
           ng-model="user.password" type="text" ng-minlength=8
-          ng-maxlength=255>
+          ng-maxlength=255 ng-change="setModified(user)">
         <p ng-show="addUserForm.password.$error.minlength"
           class="help-block">Password is too short.</p>
         <p ng-show="addUserForm.password.$error.maxlength"
@@ -85,7 +85,7 @@
         ng-class="{ 'has-error' : addUserForm.email.$invalid && !addUserForm.email.$pristine }">
         <input class="form-control" name="email" ng-model="user.email"
           type="email" required ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^.+@.+\..{2,3}$/">
+          ng-pattern="/^.+@.+\..{2,3}$/" ng-change="setModified(user)">
         <p
           ng-show="addUserForm.email.$invalid && !addUserForm.email.$pristine"
           class="help-block">Email is required.</p>
@@ -105,7 +105,7 @@
   <div class="row">
     <label class="col-lg-3 control-label text-right">GPG Key</label>
     <div class="col-lg-9">
-      <textarea name="gpg_key" ng-model="user.gpg_key" cols=48 rows=20></textarea>
+      <textarea name="gpg_key" ng-model="user.gpg_key" cols=48 rows=20 ng-change="setModified(user)"></textarea>
     </div>
   </div>
   <div class="row">
@@ -117,7 +117,7 @@
             ng-class="{ 'has-error' : addUserForm.api_key.$invalid && !addUserForm.api_key.$pristine }">
             <input class="form-control" name="api_key"
               ng-model="user.api_key" type="text" ng-minlength=20
-              ng-maxlength=255>
+              ng-maxlength=255 ng-change="setModified(user)">
             <p ng-show="addUserForm.api_key.$error.minlength"
               class="help-block">API Key is too short.</p>
             <p ng-show="addUserForm.api_key.$error.maxlength"
@@ -141,7 +141,7 @@
         <div class="col-lg-9">
           <input class="form-control" type="checkbox"
             name="disabled" value="disabled"
-            ng-model="user.permissions.disabled" />
+            ng-model="user.permissions.disabled" ng-change="setModified(user)"/>
         </div>
       </div>
       <div class="row">
@@ -149,7 +149,7 @@
         <div class="col-lg-9">
           <input class="form-control" type="checkbox"
             name="validate" value="validate"
-            ng-model="user.permissions.validate" />
+            ng-model="user.permissions.validate" ng-change="setModified(user)"/>
         </div>
       </div>
       <div class="row">
@@ -157,7 +157,7 @@
         <div class="col-lg-9">
           <input class="form-control" type="checkbox"
             name="priviledged" value="priviledged"
-            ng-model="user.permissions.priviledged" />
+            ng-model="user.permissions.priviledged" ng-change="setModified(user)"/>
         </div>
       </div>
       <div class="row">
@@ -166,7 +166,7 @@
         <div class="col-lg-9">
           <input class="form-control" type="checkbox"
             name="set_group" value="set_group"
-            ng-model="user.permissions.set_group" />
+            ng-model="user.permissions.set_group" ng-change="setModified(user)"/>
         </div>
       </div>
     </div>
@@ -176,7 +176,7 @@
     <div class="col-lg-9">
       <select name="group_id" class="form-control"
         ng-options="group.identifier as group.name for group in groups"
-        ng-model="user.group_id">
+        ng-model="user.group_id" ng-change="setModified(user)">
         <option style="display: none" value="">Select a Group</option>
       </select>
     </div>

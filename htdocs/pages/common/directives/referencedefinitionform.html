@@ -15,7 +15,7 @@
         ng-class="{ 'has-error' : addReferenceDefinitionForm.name.$invalid && !addReferenceDefinitionForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="reference.name"
           type="text" required ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^[\d\w]+$/">
+          ng-pattern="/^[\d\w]+$/" ng-change="setModified(reference)">
         <p
           ng-show="addReferenceDefinitionForm.name.$invalid && !addReferenceDefinitionForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -34,7 +34,7 @@
       <div
         ng-class="{ 'has-error' : addReferenceDefinitionForm.description.$invalid && !addReferenceDefinitionForm.description.$pristine }">
         <textarea name="description" ng-model="reference.description"
-          cols=48 rows=20 ng-minlength=3 required></textarea>
+          cols=48 rows=20 ng-minlength=3 required ng-change="setModified(reference)"></textarea>
         <p
           ng-show="addReferenceDefinitionForm.description.$invalid && !addReferenceDefinitionForm.name.$pristine"
           class="help-block">Description is required.</p>
@@ -50,7 +50,7 @@
       <div
         ng-class="{ 'has-error' : addReferenceDefinitionForm.regex.$invalid && !addReferenceDefinitionForm.regex.$pristine }">
         <input class="form-control" name="regex" ng-model="reference.regex"
-          type="text" required ng-minlength=3 ng-maxlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(reference)">
         <p
           ng-show="addReferenceDefinitionForm.regex.$invalid && !addReferenceDefinitionForm.regex.$pristine"
           class="help-block">Regex is required.</p>
@@ -67,7 +67,7 @@
     <div class="col-lg-9">
       <select name="referencehandler_id" class="form-control"
         ng-options="handler.identifier as handler.name for handler in handlers"
-        ng-model="reference.referencehandler_id">
+        ng-model="reference.referencehandler_id" ng-change="setModified(reference)">
         <option style="display: none" value="">Select a Handler</option>
       </select>
     </div>
@@ -78,7 +78,7 @@
     <div class="col-lg-9">
       <input class="form-control" type="checkbox"
         name="selectedOptions[]" value="shareable"
-        ng-model="reference.share" />
+        ng-model="reference.share" ng-change="setModified(reference)"/>
     </div>
   </div>
 

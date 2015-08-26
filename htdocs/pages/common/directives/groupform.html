@@ -12,7 +12,7 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.name.$invalid && !addGroupForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="group.name"
-          type="text" required ng-minlength=3 ng-maxlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(group)">
         <p
           ng-show="addGroupForm.name.$invalid && !addGroupForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -29,7 +29,7 @@
       <div
         ng-class="{ 'has-error' : addGroupForm.description.$invalid && !addGroupForm.description.$pristine }">
         <textarea name="description" ng-model="group.description"
-          cols=48 rows=20 ng-minlength=3 required></textarea>
+          cols=48 rows=20 ng-minlength=3 required ng-change="setModified(group)"></textarea>
         <p
           ng-show="addGroupForm.description.$invalid && !addGroupForm.description.$pristine"
           class="help-block">Description is required.</p>
@@ -45,7 +45,7 @@
         ng-class="{ 'has-error' : addGroupForm.email.$invalid && !addGroupForm.email.$pristine }">
         <input class="form-control" name="email" ng-model="group.email"
           type="email" ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^.+@.+\..{2,3}$/">
+          ng-pattern="/^.+@.+\..{2,3}$/" ng-change="setModified(group)">
         <p ng-show="addGroupForm.email.$error.pattern" class="help-block">Email
           is not valid email.</p>
       </div>
@@ -60,7 +60,7 @@
   <div class="row">
     <label class="col-lg-3 control-label text-right">GPG Key</label>
     <div class="col-lg-9">
-      <textarea name="gpg_key" ng-model="group.gpg_key" cols=48 rows=20></textarea>
+      <textarea name="gpg_key" ng-model="group.gpg_key" cols=48 rows=20 ng-change="setModified(group)"></textarea>
     </div>
   </div>
   <div class="row">
@@ -68,7 +68,7 @@
       <div class="col-lg-9">
         <select name="tlp_lvl" class="form-control"
           ng-options="tlp.identifier as tlp.name for tlp in tlps"
-          ng-model="group.tlp_lvl">
+          ng-model="group.tlp_lvl" ng-change="setModified(group)">
           <option style="display: none" value="">Select a TLP</option>
         </select>
       </div>
@@ -84,7 +84,7 @@
         <div class="col-lg-7">
           <input type="checkbox" name="downloadfiles"
             value="downloadfiles"
-            ng-model="group.permissions.downloadfiles" />
+            ng-model="group.permissions.downloadfiles" ng-change="setModified(group)"/>
         </div>
       </div>
       <div class="row">
@@ -93,7 +93,7 @@
         <div class="col-lg-7">
           <input type="checkbox" name="propagate_tlp"
             value="propagate_tlp"
-            ng-model="group.permissions.propagate_tlp" />
+            ng-model="group.permissions.propagate_tlp" ng-change="setModified(group)"/>
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
         <label class="col-lg-3 control-label text-right">Add</label>
         <div class="col-lg-9">
           <input type="checkbox" name="add"
-            value="add" ng-model="group.default_event_permissions.add" />
+            value="add" ng-model="group.default_event_permissions.add" ng-change="setModified(group)"/>
         </div>
       </div>
 
@@ -117,7 +117,7 @@
         <div class="col-lg-9">
           <input type="checkbox" name="modify"
             value="modify"
-            ng-model="group.default_event_permissions.modify" />
+            ng-model="group.default_event_permissions.modify" ng-change="setModified(group)"/>
         </div>
       </div>
 
@@ -126,7 +126,7 @@
         <div class="col-lg-9">
           <input type="checkbox" name="delete"
             value="delete"
-            ng-model="group.default_event_permissions.delete" />
+            ng-model="group.default_event_permissions.delete" ng-change="setModified(group)"/>
         </div>
       </div>
 
@@ -135,7 +135,7 @@
         <div class="col-lg-9">
           <input type="checkbox" name="validate"
             value="validate"
-            ng-model="group.default_event_permissions.validate" />
+            ng-model="group.default_event_permissions.validate" ng-change="setModified(group)"/>
         </div>
       </div>
 
@@ -146,7 +146,7 @@
         <div class="col-lg-9">
           <input type="checkbox" name="set_groups"
             value="set_groups"
-            ng-model="group.default_event_permissions.set_groups" />
+            ng-model="group.default_event_permissions.set_groups" ng-change="setModified(group)"/>
         </div>
       </div>
     </div>

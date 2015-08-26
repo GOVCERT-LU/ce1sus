@@ -169,7 +169,7 @@ class HandlerBase(object):
       if modified_on:
         instance.modified_on = strings.stringToDateTime(modified_on)
       else:
-        instance.modified_on = self.cache_object.modified_on
+        instance.modified_on = self.cache_object.created_at
 
     if instance.uuid is None:
       instance.uuid = '{0}'.format(uuid.uuid4())

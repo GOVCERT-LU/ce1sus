@@ -28,7 +28,7 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class SimpleLogingInformations(BaseObject):
+class SimpleLoggingInformations(BaseObject):
 
   created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
   modified_on = Column(DateTime, default=datetime.utcnow(), nullable=False)
@@ -69,7 +69,7 @@ class SimpleLogingInformations(BaseObject):
     return merge_dictionaries(parent_dict, result)
 
 
-class ExtendedLogingInformations(SimpleLogingInformations):
+class ExtendedLogingInformations(SimpleLoggingInformations):
 
   @declared_attr
   def creator_group_id(self):
@@ -80,7 +80,7 @@ class ExtendedLogingInformations(SimpleLogingInformations):
     return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()))
 
   def to_dict(self, cache_object):
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     if is_user_priviledged(cache_object.user):
       child_dict = {'creator_group_id': self.convert_value(self.creator_group.uuid),
                     'creator_group': self.creator_group.to_dict(cache_object),

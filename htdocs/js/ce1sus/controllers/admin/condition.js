@@ -71,7 +71,6 @@ app.controller("conditionEditController", function($scope, Restangular, messages
   };
   
   $scope.submitCondition = function(){
-    $scope.condition.modified_on = new Date().getTime();
     $scope.condition.put().then(function (conditiondata) {
       if (conditiondata) {
         $scope.condition = conditiondata;

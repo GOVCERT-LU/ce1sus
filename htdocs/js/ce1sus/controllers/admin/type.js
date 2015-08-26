@@ -76,7 +76,6 @@ app.controller("typeEditController", function($scope, Restangular, messages, $ro
   };
   
   $scope.submitType = function(){
-    $scope.type.modified_on = new Date().getTime();
     $scope.type.put().then(function (typedata) {
       if (typedata) {
         $scope.type = typedata;

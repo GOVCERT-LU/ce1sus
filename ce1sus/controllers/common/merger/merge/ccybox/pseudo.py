@@ -22,13 +22,13 @@ class PseudoCyboxMerger(BaseMerger):
       if merge_cache.result == 1:
         self.update_instance_value(old_value, new_value, 'id_', merge_cache)
         self.update_instance_value(old_value, new_value, 'idref', merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_instance, new_value, attr_name, merge_cache)
 
       self.merge_attributes(old_value, new_value, merge_cache, 'attributes')
 
-      self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
   
   def merge_attributes(self, old_instance, new_instance, merge_cache, attr_name=None):
@@ -42,7 +42,9 @@ class PseudoCyboxMerger(BaseMerger):
     return instance
 
   def merge_attribute(self, old_instance, new_instance, merge_cache, attr_name=None):
-    old_value, new_value = self.get_values(self.__get_attr_value(old_instance), self.__get_attr_value(new_instance), attr_name)
+    old_value, new_value = self.get_values(old_instance, new_instance, attr_name)
+    old_value = self.__get_attr_value(old_value)
+    new_value = self.__get_attr_value(new_value)
     if old_value or new_value:
 
       merge_cache.result = self.is_mergeable(old_value, new_value, merge_cache)
@@ -50,9 +52,9 @@ class PseudoCyboxMerger(BaseMerger):
         self.update_instance_value(old_value, new_value, 'value', merge_cache)
         self.update_instance_value(old_value, new_value, 'is_ioc', merge_cache)
         self.update_instance_value(old_value, new_value, 'condition_id', merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_instance, new_value, attr_name, merge_cache)
 
-      self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version

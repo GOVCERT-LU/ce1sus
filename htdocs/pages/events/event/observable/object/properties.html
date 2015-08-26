@@ -6,40 +6,7 @@
         <h4 class="modal-title">Object - {{object.definition.name}}</h4>
       </div>
       <div class="modal-body">
-        <form name="editObjectPropertiesForm" class="form-horizontal" role="form" novalidate>
-          <div class="row">
-            <div class="col-md-3">
-              <b>Identifier</b>
-            </div>
-            <div class="col-md-9">
-              {{object.identifier}}
-            </div>
-          </div>
-          <div class="row" ng-if="object.parent_object_id != null">
-            <div class="col-md-3">
-              <b>Parent *</b>
-            </div>
-            <div class="col-md-9">
-              <select name="relation" class="form-control"
-                ng-options="obsObject.identifier as get_name(obsObject)  for obsObject in objects"
-                ng-model="object.parent_object_id">
-                <option style="display: none" value="">Select a new parent object</option>
-              </select>
-            </div>
-          </div>
-          <div class="row" ng-if="object.parent_object_id != null">
-            <label class="col-lg-3"><b>Relation</b></label>
-            <div class="col-lg-9">
-              {{relation}}
-              <select name="relation" class="form-control"
-                ng-options="relation.name as relation.name for relation in relations"
-                ng-model="object.relation">
-                <option style="display: none" value="">Select a relation</option>
-              </select>
-            </div>
-          </div>
-          <object-properties-form object="object" type="'edit'" permissions="permissions"></object-properties-form>
-        </form>
+        <observable-object-form observableobject="object" definitions="definitions" permissions="permissions" type="'edit'"></observable-object-form>
       </div>
       <div class="modal-footer">
         <div class="btn-group">

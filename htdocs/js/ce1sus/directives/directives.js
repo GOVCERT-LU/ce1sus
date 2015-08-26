@@ -264,6 +264,7 @@ app.directive("attributeDefinitionForm", function() {
             delete $scope.attribute.table_id;
           }
         }
+        $scope.setModified($scope.attribute);
       };
       $scope.tableChange = function (){
         var table_id = $scope.attribute.table_id;
@@ -276,6 +277,7 @@ app.directive("attributeDefinitionForm", function() {
             }
           }
         }
+        $scope.setModified($scope.attribute);
         $scope.available_handlers = newAvailableHandlers;
         
         //remove the items which do not match
@@ -323,7 +325,7 @@ app.directive("attributeDefinitionForm", function() {
       };
       
       $scope.typeChange = function (){
-        
+        $scope.setModified($scope.attribute);
 
         
       };
@@ -1125,7 +1127,10 @@ app.directive("observableObjectForm", function() {
       $scope.setModified = setModified;
       $scope.showattribute = false;
       $scope.showattribtues = function(){
-        $scope.showattribute = true;
+        if ($scope.type == 'add') {
+          $scope.showattribute = true;
+        }
+        
       };
       
       $scope.$watch('observableobject.definition.identifier', function() {

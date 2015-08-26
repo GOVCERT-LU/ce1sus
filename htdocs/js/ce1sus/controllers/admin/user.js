@@ -167,7 +167,6 @@ app.controller("userEditController", function($scope, Restangular, messages, $ro
   };
   
   $scope.submitUser = function(){
-    $scope.user.modified_on = new Date().getTime();
     $scope.user.put().then(function (data) {
       if (data) {
         //update username in case

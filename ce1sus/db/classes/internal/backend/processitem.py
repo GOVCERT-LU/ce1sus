@@ -11,7 +11,7 @@ from sqlalchemy.types import Integer
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.common import StaticBase
-from ce1sus.db.classes.internal.core import SimpleLogingInformations
+from ce1sus.db.classes.internal.core import SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import UnicodeType, BigIntegerType
 from ce1sus.db.common.session import Base
 
@@ -67,7 +67,7 @@ class ProcessType(StaticBase):
             }
 
 
-class ProcessItem(SimpleLogingInformations, Base):
+class ProcessItem(SimpleLoggingInformations, Base):
 
   db_status = Column('status', Integer, nullable=False, index=True, default=0)
   db_type = Column('type', Integer, nullable=False)
@@ -117,6 +117,6 @@ class ProcessItem(SimpleLogingInformations, Base):
             'server_details': self.attribute_to_dict(self.server_details, cache_object)
             }
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 

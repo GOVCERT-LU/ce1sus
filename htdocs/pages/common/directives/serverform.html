@@ -12,7 +12,7 @@
     <div class="col-lg-9">
       <select name="type_id" class="form-control"
         ng-options="type_.identifier as type_.name for type_ in types"
-        ng-model="server.type_id">
+        ng-model="server.type_id" ng-change="setModified(server)">
         <option style="display: none" value="">Select a Server
           Type</option>
       </select>
@@ -26,7 +26,7 @@
         ng-class="{ 'has-error' : addServerForm.name.$invalid && !addServerForm.name.$pristine }">
         <input class="form-control" name="name" ng-model="server.name"
           type="text" required ng-minlength=3 ng-maxlength=255
-          ng-pattern="/^[\d\w]+$/">
+          ng-pattern="/^[\d\w]+$/" ng-change="setModified(server)"> 
         <p
           ng-show="addServerForm.name.$invalid && !addServerForm.name.$pristine"
           class="help-block">Name is required.</p>
@@ -46,7 +46,7 @@
       <div
         ng-class="{ 'has-error' : addServerForm.description.$invalid && !addServerForm.description.$pristine }">
         <textarea name="description" ng-model="server.description"
-          cols=48 rows=20 ng-minlength=3 required></textarea>
+          cols=48 rows=20 ng-minlength=3 required ng-change="setModified(server)"></textarea>
         <p
           ng-show="addServerForm.description.$invalid && !addServerForm.description.$pristine"
           class="help-block">Description is required.</p>
@@ -60,7 +60,7 @@
     <div class="col-lg-9">
       <select name="user_id" class="form-control"
         ng-options="entry.identifier as entry.username for entry in users"
-        ng-model="server.user_id">
+        ng-model="server.user_id" ng-change="setModified(server)">
         <option style="display: none" value="">Select a Value</option>
       </select>
     </div>
@@ -71,7 +71,7 @@
       <div
         ng-class="{ 'has-error' : addServerForm.baseurl.$invalid && !addServerForm.baseurl.$pristine }">
         <input class="form-control" name="baseurl" ng-model="server.baseurl"
-          type="text" required ng-minlength=3 ng-maxlength=255>
+          type="text" required ng-minlength=3 ng-maxlength=255 ng-change="setModified(server)">
         <p
           ng-show="addServerForm.baseurl.$invalid && !addServerForm.baseurl.$pristine"
           class="help-block">Base url is required.</p>
@@ -91,7 +91,7 @@
         <div class="col-lg-9">
           <input class="form-control" type="checkbox"
             name="is_push" value="is_push"
-            ng-model="server.mode.is_push" />
+            ng-model="server.mode.is_push" ng-change="setModified(server)"/>
         </div>
       </div>
       <div class="row">
@@ -108,7 +108,7 @@
     <label class="col-lg-3 control-label text-right">Certificate</label>
     <div class="col-lg-9">
       <textarea name="description" ng-model="server.certificate" cols=48
-        rows=20 ng-minlength=3></textarea>
+        rows=20 ng-minlength=3 ng-change="setModified(server)"></textarea>
     </div>
   </div>
   <div class="row">
@@ -116,14 +116,14 @@
       Certificate</label>
     <div class="col-lg-9">
       <textarea name="description" ng-model="server.ca_certificate"
-        cols=48 rows=20 ng-minlength=3></textarea>
+        cols=48 rows=20 ng-minlength=3 ng-change="setModified(server)"></textarea>
     </div>
   </div>
   <div class="row">
     <label class="col-lg-3 control-label text-right">Verify SSL</label>
     <div class="col-lg-9">
       <input class="form-control" type="checkbox" name="validate_ssl"
-        value="validate_ssl" ng-model="server.validate_ssl" />
+        value="validate_ssl" ng-model="server.validate_ssl" ng-change="setModified(server)"/>
     </div>
   </div>
 

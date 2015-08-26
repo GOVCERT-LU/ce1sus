@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue
-from ce1sus.db.classes.internal.core import BaseElement, SimpleLogingInformations
+from ce1sus.db.classes.internal.core import BaseElement, SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
 
@@ -30,7 +30,7 @@ _REL_ATTRIBUTE_CONDITIONS = Table('rel_attribute_conditions', getattr(Base, 'met
                                   Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False, index=True)
                                   )
 
-class Condition(SimpleLogingInformations, Base):
+class Condition(SimpleLoggingInformations, Base):
   value = Column('value', UnicodeType(40), unique=True)
   description = Column('description', UnicodeTextType())
   attribute = relationship('Attribute', secondary=_REL_ATTRIBUTE_CONDITIONS, uselist=False)

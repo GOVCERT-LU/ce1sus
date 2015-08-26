@@ -13,7 +13,7 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.core import SimpleLogingInformations, BaseElement
+from ce1sus.db.classes.internal.core import SimpleLoggingInformations, BaseElement
 from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType, BigIntegerType
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
@@ -79,7 +79,7 @@ class ReferenceHandler(BaseObject, Base):
     return merge_dictionaries(result, parent_dict)
 
 
-class ReferenceDefinition(SimpleLogingInformations, Base):
+class ReferenceDefinition(SimpleLoggingInformations, Base):
 
   name = Column('name', UnicodeType(45), unique=True, nullable=False, index=True)
   description = Column('description', UnicodeTextType())
@@ -124,7 +124,7 @@ class ReferenceDefinition(SimpleLogingInformations, Base):
               'name': self.name
               }
 
-    parent_dict = SimpleLogingInformations.to_dict(self, cache_object)
+    parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
 
 

@@ -43,16 +43,6 @@ class CacheObject(object):
       self.__created_at = datetime.utcnow()
     return self.__created_at
 
-  @property
-  def modified_on(self):
-    if self.__modified_on is None:
-      self.__modified_on = datetime.utcnow()
-    return self.__modified_on
-
-  @modified_on.setter
-  def modified_on(self, value):
-    self.__modified_on = value
-    self.modified_set = True
 
   @property
   def complete(self):

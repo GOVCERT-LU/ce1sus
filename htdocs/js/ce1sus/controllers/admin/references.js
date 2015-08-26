@@ -125,7 +125,6 @@ app.controller("referenceEditController", function($scope, Restangular, messages
   };
   
   $scope.submitReference = function(){
-    $scope.reference.modified_on = new Date().getTime();
     $scope.reference.put().then(function (reference) {
       
       if (reference) {

@@ -37,6 +37,7 @@ class CyboxMerger(BaseMerger):
         self.update_instance_value(old_value, new_value, 'title', merge_cache)
         self.update_instance_value(old_value, new_value, 'idref', merge_cache)
         self.update_instance_value(old_value, new_value, 'sighting_count', merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_instance, new_value, attr_name, merge_cache)
@@ -47,7 +48,6 @@ class CyboxMerger(BaseMerger):
       self.pseudo_cybox_merger.merge_object(old_value, new_value, merge_cache, 'object')
       self.merge_observable_composition(old_value, new_value, merge_cache, 'observable_composition')
 
-      self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
 
   def merge_observable_composition(self, old_instance, new_instance, merge_cache, attr_name=None):
@@ -56,13 +56,14 @@ class CyboxMerger(BaseMerger):
       merge_cache.result = self.is_mergeable(old_value, new_value, merge_cache)
       if merge_cache.result == 1:
         self.update_instance_value(old_value, new_value, 'operator', merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_value, new_value, attr_name, merge_cache)
 
       self.merge_observables(old_value, new_value, merge_cache, 'observables')
 
-      self.set_base(old_value, new_value, merge_cache)
+
     return merge_cache.version
 
   def merge_keywords(self, old_instance, new_instance, merge_cache, attr_name=None):
@@ -74,11 +75,11 @@ class CyboxMerger(BaseMerger):
       merge_cache.result = self.is_mergeable(old_value, new_value, merge_cache)
       if merge_cache.result == 1:
         self.update_instance_value(old_value, new_value, 'keyword', merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
 
       elif merge_cache.result == 0:
         self.set_value(old_value, new_value, attr_name, merge_cache)
 
-      self.set_base(old_value, new_value, merge_cache)
     return merge_cache.version
 
   def merge_attribute(self, old_instance, new_instance, merge_cache, attr_name=None):

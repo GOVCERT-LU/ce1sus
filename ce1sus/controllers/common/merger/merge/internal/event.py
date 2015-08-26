@@ -49,6 +49,9 @@ class EventMerger(BaseMerger):
         self.update_instance_value(old_value, new_value, 'first_seen', merge_cache)
         self.update_instance_value(old_value, new_value, 'last_publish_date', merge_cache)
 
+        self.set_version(old_value, new_value, merge_cache)
+        self.set_base(old_value, new_value, merge_cache)
+
       elif merge_cache.result == 0:
         raise MergerException('The event wanted to be merge does not exist')
       # check if sub elements were changed
@@ -56,8 +59,8 @@ class EventMerger(BaseMerger):
       self.merge_reports(old_value, new_value, merge_cache, 'reports')
       self.stix_merger.merge_stix_header(old_value, new_value, merge_cache, 'stix_header')
 
-      self.set_version(old_value, new_value, merge_cache)
-      self.set_base(old_value, new_value, merge_cache)
+
+
     return merge_cache.version
 
   def merge_reports(self, old_instance, new_instance, merge_cache, attr_name=None):
