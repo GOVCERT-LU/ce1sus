@@ -16,7 +16,6 @@ from ce1sus.db.common.broker import BrokerBase
 from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.changelogger import ChangeLogger
 from ce1sus.helpers.common.debug import Log
-from ce1sus.helpers.version import Version
 
 
 __author__ = 'Weber Jean-Paul'
@@ -104,9 +103,6 @@ class BaseController(object):
           old_instance.modifier = merger_cache.user
           old_instance.modified_on = new_instance.modified_on
           self.logger.debug('using the one from new instance {1} - {0}'.format(new_instance.modified_on, new_instance.get_classname()))
-          # TODO: find out why I have to do this?
-          self.attr_def_broker.session.merge(old_instance)
-          self.attr_def_broker.do_commit(False)
         else:
           self.logger.debug('TS is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
       else:

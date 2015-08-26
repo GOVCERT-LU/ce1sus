@@ -6,7 +6,6 @@
 Created on Aug 5, 2015
 """
 from ce1sus.helpers.common import strings
-from datetime import datetime
 import uuid
 
 from ce1sus.common.checks import set_properties_according_to_permisssions

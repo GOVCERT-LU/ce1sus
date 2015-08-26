@@ -25,13 +25,15 @@ class MergerException(Exception):
 class BaseMerger(BaseController):
   
   def __merge_properties(self, old_instance, new_instance, merger_cache):
-
+    old_version = merger_cache.version.version
     self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache)
     self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache)
     self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache)
     self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache)
 
     set_properties_according_to_permisssions(old_instance, merger_cache)
+
+    merger_cache.version.version = old_version
 
   def set_base(self, old_instance, new_instance, merge_cache):
     if isinstance(old_instance, SimpleLoggingInformations):
@@ -60,8 +62,6 @@ class BaseMerger(BaseController):
           elif hasattr(parent, 'version'):
             self.logger.debug('Setting {0}{1} adding {2} to version {3}'.format(parent.get_classname(), parent.uuid, merge_cache.version.version, parent.version.version))
             parent.version.add(merge_cache.version)
-            self.attr_def_broker.session.merge(parent)
-            self.attr_def_broker.do_commit(False)
           self.update_modified(parent, new_instance, merge_cache)
       else:
         self.logger.debug('Has no parent')
@@ -78,9 +78,6 @@ class BaseMerger(BaseController):
         old_version = old_instance.version.version
         old_instance.version.add(merge_cache.version)
         self.logger.info('M {0} {1} property version will be be replaced "{2}" by "{3}" from cache'.format(old_instance.get_classname(), old_instance.uuid, old_version, old_instance.version.version))
-        # TODO: find out why this have to be done
-        self.attr_def_broker.session.merge(old_instance)
-        self.attr_def_broker.do_commit(False)
 
   def is_updatable(self, old_instance, new_instance):
     if old_instance.get_classname() != new_instance.get_classname():
