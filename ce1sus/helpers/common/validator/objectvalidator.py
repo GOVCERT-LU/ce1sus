@@ -12,7 +12,7 @@ __copyright__ = 'Copyright 2013, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 from ce1sus.helpers.common.objects import get_fields
-from ce1sus.helpers.common.strings import stringToDateTime, InputException
+from ce1sus.helpers.common.strings import InputException
 from datetime import datetime
 import re
 from sre_constants import error
