@@ -48,6 +48,4 @@ class Updater(BaseController):
       # This is done so that the transient object will also be updated
       obj = self.attr_def_broker.session.query(parent.__class__).filter(parent.__class__.identifier == parent.identifier).one()
       self.merger.cybox_merger.set_base(obj, parent, merger_cache)
-      # self.attr_def_broker.session.merge(obj)
-      # self.attr_def_broker.do_commit(True)
     return version
