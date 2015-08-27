@@ -6,6 +6,7 @@
 Created on Aug 5, 2015
 """
 from ce1sus.helpers.common import strings
+from uuid import uuid4
 import uuid
 
 from ce1sus.common.checks import set_properties_according_to_permisssions
@@ -173,7 +174,10 @@ class BaseChanger(BaseController):
             group = self.group_broker.get_by_name(name)
           except NothingFoundException:
             group = Group()
-            group.populate(json)
+            group.name = json['name']
+            group.tlp_lvl = 3
+            group.default_dbcode = 0
+            group.dbcode = 0
             self.group_broker.insert(group, False)
           cache_object.seen_groups[group.uuid] = group
       else:
@@ -217,13 +221,16 @@ class BaseChanger(BaseController):
   def create_information_source(self, parent, json, cache_object, role='Initial Author'):
     information_source = InformationSource()
     self.set_base(information_source, json, cache_object, parent)
+    information_source.uuid = uuid4()
     isrole = InformationSourceRole()
     isrole.role = role
     self.set_base(isrole, json, cache_object, information_source)
+    isrole.uuid = uuid4()
     # TODO: use variable instead
     information_source.roles.append(isrole)
     information_source.identity = Identity()
     self.set_base(information_source.identity, json, cache_object, information_source)
+    information_source.identity.uuid = uuid4()
     if not information_source.identity.name:
       information_source.identity.name = cache_object.user.group.name
     return information_source

@@ -5,16 +5,18 @@
 
 Created on Jan 23, 2015
 """
+from datetime import datetime
 from uuid import uuid4
 
+from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
-from ce1sus.db.classes.internal.definitions import ObjectDefinition
-from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType
 from ce1sus.db.classes.cstix.indicator.indicator import Indicator
+from ce1sus.db.classes.internal.definitions import ObjectDefinition
+from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.common.broker import BrokerException
 
 
@@ -46,24 +48,39 @@ class IndicatorController(BaseController):
       result.append(it)
     return result
 
-  def get_indicator_type(self, indicator_type):
+  def get_indicator_type(self, indicator_type, instance, attr_name, merger_cache):
 
-    try:
-      type_ = self.indicator_type_broker.get_type_by_name(indicator_type)
-      return type_
-    except BrokerException as error:
-      self.logger.error(error)
-      message = u'Indicator type {0} is not defined'.format(indicator_type)
-      self.logger.error(message)
-      raise ControllerException(message)
 
-  def map_indicator(self, attributes, indicator_type, event, user):
+
+    type_ = IndicatorType(instance, attr_name)
+    type_.name = type_.name
+
+    type_.creator = merger_cache.user
+    type_.modifier = merger_cache.user
+    type_.creator_group = merger_cache.user.group
+    type_.crated_on = datetime.utcnow()
+    type_.modified_on = datetime.utcnow()
+
+    return type_
+
+
+  def map_indicator(self, attributes, indicator_type, event, cache_object):
     indicator = Indicator()
+    indicator.uuid = uuid4()
+    merger_cache = MergerCache(cache_object)
+    merger_cache.insert = True
+
+    indicator.creator = merger_cache.user
+    indicator.modifier = merger_cache.user
+    indicator.creator_group = merger_cache.user.group
+    indicator.crated_on = datetime.utcnow()
+    indicator.modified_on = datetime.utcnow()
+    indicator.tlp = 'Amber'
 
     # indicator.event = event
     indicator.event_id = event.identifier
     indicator.event = event
-    indicator.description = 'Auto-generated indicators'
+    indicator.description = None
     indicator.dbcode = event.dbcode
     indicator.tlp_level_id = event.tlp_level_id
     indicator.title = 'Indicators for "{0}"'.format(indicator_type)
@@ -71,12 +88,28 @@ class IndicatorController(BaseController):
     # self.set_extended_logging(indicator, user, True)
 
     if indicator_type and indicator_type != 'Others':
-      indicator.types.append(self.get_indicator_type(indicator_type))
+      # ndicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
+      pass
 
     for attribute in attributes:
       if attribute.is_ioc:
+        attribute.uuid = uuid4()
+        attribute.creator = merger_cache.user
+        attribute.modifier = merger_cache.user
+        attribute.creator_group = merger_cache.user.group
+        attribute.crated_on = datetime.utcnow()
+        attribute.modified_on = datetime.utcnow()
+        attribute.tlp = 'Amber'
                 # create object
         obj = Object()
+
+        obj.creator = merger_cache.user
+        obj.modifier = merger_cache.user
+        obj.creator_group = merger_cache.user.group
+        obj.crated_on = datetime.utcnow()
+        obj.modified_on = datetime.utcnow()
+        obj.tlp = 'Amber'
+
         obj.uuid = uuid4()
         obj.dbcode = attribute.object.dbcode
         obj.tlp_level_id = attribute.object.tlp_level_id
@@ -85,10 +118,21 @@ class IndicatorController(BaseController):
         obj.definition.identifier = attribute.object.definition.identifier
         obj.definition_id = attribute.object.definition.identifier
         obj.attributes.append(attribute)
+        obj.definition.creator = merger_cache.user
+        obj.definition.modifier = merger_cache.user
+
         # self.set_extended_logging(obj, user, True)
         # create observable
         obs = Observable()
+
         obs.uuid = uuid4()
+        obs.creator = merger_cache.user
+        obs.modifier = merger_cache.user
+        obs.creator_group = merger_cache.user.group
+        obs.crated_on = datetime.utcnow()
+        obs.modified_on = datetime.utcnow()
+        obs.tlp = 'Amber'
+
         if attribute.object.parent:
           obs.dbcode = attribute.object.parent.dbcode
           obs.tile = attribute.object.parent.title
@@ -108,9 +152,8 @@ class IndicatorController(BaseController):
     else:
       return None
 
-  def get_generic_indicators(self, event, user):
+  def get_generic_indicators(self, event, cache_object):
     try:
-      user = self.user_broker.getUserByUserName(user.username)
       indicators = list()
       flat_attribtues = self.relation_controller.get_flat_attributes_for_event(event)
       mal_email = list()
@@ -141,35 +184,35 @@ class IndicatorController(BaseController):
         else:
           others.append(attribute)
 
-      ind = self.map_indicator(artifacts, 'Malware Artifacts', event, user)
+      ind = self.map_indicator(artifacts, 'Malware Artifacts', event, cache_object)
 
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)
-      ind = self.map_indicator(c2s, 'C2', event, user)
+      ind = self.map_indicator(c2s, 'C2', event, cache_object)
       if ind:
         indicators.append(ind)
-      ind = self.map_indicator(ips, 'IP Watchlist', event, user)
-      if ind:
-        ind.uuid = uuid4()
-        indicators.append(ind)
-      ind = self.map_indicator(mal_email, 'Malicious E-mail', event, user)
+      ind = self.map_indicator(ips, 'IP Watchlist', event, cache_object)
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)
-      ind = self.map_indicator(domains, 'Domain Watchlist', event, user)
+      ind = self.map_indicator(mal_email, 'Malicious E-mail', event, cache_object)
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)
-      ind = self.map_indicator(urls, 'URL Watchlist', event, user)
+      ind = self.map_indicator(domains, 'Domain Watchlist', event, cache_object)
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)
-      ind = self.map_indicator(others, 'Others', event, user)
+      ind = self.map_indicator(urls, 'URL Watchlist', event, cache_object)
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)
-      ind = self.map_indicator(file_hashes, 'File Hash Watchlist', event, user)
+      ind = self.map_indicator(others, 'Others', event, cache_object)
+      if ind:
+        ind.uuid = uuid4()
+        indicators.append(ind)
+      ind = self.map_indicator(file_hashes, 'File Hash Watchlist', event, cache_object)
       if ind:
         ind.uuid = uuid4()
         indicators.append(ind)

@@ -68,17 +68,20 @@ class BaseMerger(BaseController):
         self.logger.debug('Has no parent')
 
   def set_version(self, old_instance, new_instance, merge_cache):
+    """
     if merge_cache.is_changed_version(old_instance):
       self.logger.debug('Version already changed')
     else:
       merge_cache.set_changed_version(old_instance)
-      if old_instance.version.compare(new_instance.version) > 0:
-        self.logger.info('M {0} {1} property version will be be replaced "{2}" by "{3}" from instance'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
-        old_instance.version.version = new_instance.version.version
-      else:
-        old_version = old_instance.version.version
-        old_instance.version.add(merge_cache.version)
-        self.logger.info('M {0} {1} property version will be be replaced "{2}" by "{3}" from cache'.format(old_instance.get_classname(), old_instance.uuid, old_version, old_instance.version.version))
+    """
+
+    if isinstance(new_instance, BaseCoreComponent) and old_instance.version.compare(new_instance.version) > 0:
+      self.logger.info('M {0} {1} property version will be be replaced "{2}" by "{3}" from instance'.format(old_instance.get_classname(), old_instance.uuid, old_instance.version.version, new_instance.version.version))
+      old_instance.version.version = new_instance.version.version
+    else:
+      old_version = old_instance.version.version
+      old_instance.version.add(merge_cache.version)
+      self.logger.info('M {0} {1} property version will be be replaced "{2}" by "{3}" from cache'.format(old_instance.get_classname(), old_instance.uuid, old_version, old_instance.version.version))
 
   def is_updatable(self, old_instance, new_instance):
     if old_instance.get_classname() != new_instance.get_classname():

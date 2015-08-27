@@ -8,8 +8,7 @@ Created on Oct 16, 2014
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm.util import with_polymorphic
-from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint, Table
+from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, DateTime
 
 from ce1sus.common import merge_dictionaries
@@ -92,7 +91,7 @@ class Event(Entity, Base):
   # TODO: courses_of_action
   courses_of_action = None
   exploit_targets = relationship(ExploitTarget)
-  observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE)
+  observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE, back_populates='event')
   indicators = relationship(Indicator)
   incidents = relationship(Incident)
   threat_actors = relationship(ThreatActor)

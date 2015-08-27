@@ -182,7 +182,7 @@ class EventHandler(RestBaseHandler):
       return self.__return_event(event, cache_object)
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
-      self.event_controller.remove_event(cache_object.user, event)
+      self.event_controller.remove_event(event, cache_object)
       return 'Deleted event'
 
   def __process_indicator(self, method, event, requested_object, json, cache_object):
@@ -197,7 +197,7 @@ class EventHandler(RestBaseHandler):
           return result
         else:
           # generate indicators
-          indicators = self.indicator_controller.get_generic_indicators(event, cache_object.user)
+          indicators = self.indicator_controller.get_generic_indicators(event, cache_object)
           result = list()
           for indicator in indicators:
             if self.is_item_viewable(event, indicator):

@@ -110,7 +110,6 @@ class PseudoCyboxAssembler(BaseAssembler):
         if attributes:
           for attribute in attributes:
             self.assemble_attribute(obj, attribute, cache_object)
-
         return obj
 
   def assemble_related_object(self, obj, json, cache_object):
@@ -166,7 +165,7 @@ class PseudoCyboxAssembler(BaseAssembler):
         return definition
     self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
 
-  def __get_handler(self, parent, definition, cache_object):
+  def get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
     handler_instance.attribute_definitions[definition.uuid] = definition
 
@@ -204,7 +203,7 @@ class PseudoCyboxAssembler(BaseAssembler):
       changed_on = -1
       definition = self.get_attribute_definition(obj, json, cache_object)
       if definition:
-        handler_instance = self.__get_handler(obj, definition, cache_object)
+        handler_instance = self.get_handler(obj, definition, cache_object)
         returnvalues = handler_instance.assemble(obj, json)
         observable = obj.observable
         if returnvalues:
@@ -273,6 +272,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     if definition:
       return definition
     else:
+      # TODO: catch exceptions
       definition = self.condition_broker.get_by_uuid(uuid)
       cache_object.seen_conditions[uuid] = definition
       return definition

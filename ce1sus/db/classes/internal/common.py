@@ -38,12 +38,13 @@ class StaticBase(object):
     if hasattr(identifier, 'error'):
       return identifier
     else:
-      identifier = int(identifier)
-      if identifier in cls.get_dictionary().keys():
-        value = cls.get_dictionary().get(identifier, None)
-        if value:
-          return value
-      raise StaticMappingException(u'Invalid input "{0}" for class {1}'.format(identifier, cls.__name___))
+      if identifier is not None:
+        identifier = int(identifier)
+        if identifier in cls.get_dictionary().keys():
+          value = cls.get_dictionary().get(identifier, None)
+          if value:
+            return value
+      raise StaticMappingException(u'Invalid input "{0}" for class {1}'.format(identifier, cls.__name__))
 
   @classmethod
   def get_by_value(cls, value):

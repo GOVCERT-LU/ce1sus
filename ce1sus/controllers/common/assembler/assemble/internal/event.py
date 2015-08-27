@@ -73,18 +73,20 @@ class EventAssembler(BaseAssembler):
       else:
         last_seen = datetime.utcnow()
       event.last_seen = last_seen
-      # TODO: decide if to set last publish date?!
-      """
+
       last_publish_date = json.get('last_publish_date', None)
       if last_publish_date:
         last_publish_date = ValueConverter.set_date(last_publish_date)
-      event.last_publish_date = last_publish_date
-      """
+      else:
+        # If there is no publish date then the event is not yet shared
+        last_publish_date = None
+        event.properties.is_shareable = False
 
       event.risk = json.get('risk', 'Undefined').title()
       event.status = json.get('status', 'Draft').title()
       event.tlp = json.get('tlp', 'Amber').title()
       event.analysis = json.get('analysis', 'Unknown').title()
+      event.last_publish_date = last_publish_date
 
       # TODO: create assembler for the new stix elements
       """

@@ -252,6 +252,7 @@ class Group(BaseObject, Base):
     # TODO: validate
     return ObjectValidator.isObjectValid(self)
 
+
   def to_dict(self, cache_object):
     if cache_object.complete:
       result = {

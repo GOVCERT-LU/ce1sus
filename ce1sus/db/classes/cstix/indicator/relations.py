@@ -16,13 +16,13 @@ __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 _REL_SIGHTING_REL_OBSERVABLE = Table('rel_sigthing_rel_observable', getattr(Base, 'metadata'),
-                                        Column('rsro_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('sighting_id', BigIntegerType, ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                        Column('relatedobservable_id', BigIntegerType, ForeignKey('relatedobservables.relatedobservable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                                        Column('sighting_id', BigIntegerType, ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                        Column('relatedobservable_id', BigIntegerType, ForeignKey('relatedobservables.relatedobservable_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_SIGHTING_STRUCTUREDTEXT = Table('rel_sighting_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rsst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('sighting_id',
                                               BigIntegerType,
                                               ForeignKey('sightings.sighting_id',
@@ -36,17 +36,17 @@ _REL_SIGHTING_STRUCTUREDTEXT = Table('rel_sighting_structuredtext', getattr(Base
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_SIGHTING_CONFIDENCE = Table('rel_sighting_confidence', getattr(Base, 'metadata'),
-                                        Column('rsc_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                         Column('sighting_id', BigIntegerType, ForeignKey('sightings.sighting_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                        Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_SIGHTING_INFORMATIONSOURCE = Table('rel_sighting_informationsource', getattr(Base, 'metadata'),
-                                       Column('rsis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('sighting_id',
                                               BigIntegerType,
                                               ForeignKey('sightings.sighting_id',
@@ -60,59 +60,59 @@ _REL_SIGHTING_INFORMATIONSOURCE = Table('rel_sighting_informationsource', getatt
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_INDICATOR_KILLCHAINPHASEREF = Table('rel_indicator_killchainphase_ref', getattr(Base, 'metadata'),
-                                      Column('rik_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                      Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                      Column('killchainphasereference_id', BigIntegerType, ForeignKey('killchainphasereferences.killchainphasereference_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                                      Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                      Column('killchainphasereference_id', BigIntegerType, ForeignKey('killchainphasereferences.killchainphasereference_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                       )
 
 _REL_INDICATOR_OBSERVABLE = Table('rel_indicator_observable', getattr(Base, 'metadata'),
-                                  Column('rio_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                  Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                  Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                                  Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                  Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                   )
 
 _REL_INDICATOR_RELATED_TTPS = Table('rel_indicator_related_ttps', getattr(Base, 'metadata'),
-                                    Column('rirt_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                    Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                    Column('relatedttp_id', BigIntegerType, ForeignKey('relatedttps.relatedttp_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                                    Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                    Column('relatedttp_id', BigIntegerType, ForeignKey('relatedttps.relatedttp_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                     )
 
 _REL_INDICATOR_RELATED_PACKAGES = Table('rel_indicator_relpackage_ref', getattr(Base, 'metadata'),
-                                        Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                                        Column('relatedpackageref_id', BigIntegerType, ForeignKey('relatedpackagerefs.relatedpackageref_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                                        Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                                        Column('relatedpackageref_id', BigIntegerType, ForeignKey('relatedpackagerefs.relatedpackageref_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_INDICATOR_RELATED_INDICATOR = Table('rel_indicator_related_indicators', getattr(Base, 'metadata'),
-                                         Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                          Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                         Column('relatedindicator_id', BigIntegerType, ForeignKey('relatedindicators.relatedindicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                         Column('relatedindicator_id', BigIntegerType, ForeignKey('relatedindicators.relatedindicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                          )
 
 _REL_INDICATOR_RELATED_CAMPAIGN = Table('rel_indicator_rel_indicator', getattr(Base, 'metadata'),
-                                        Column('rir_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                         Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('relatedcampaign_id', BigIntegerType, ForeignKey('relatedcampaigns.relatedcampaign_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                        Column('relatedcampaign_id', BigIntegerType, ForeignKey('relatedcampaigns.relatedcampaign_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_INDICATOR_HANDLING = Table('rel_indicator_handling', getattr(Base, 'metadata'),
-                                        Column('rih_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                         Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                        Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_INDICATOR_CONFIDENCE = Table('rel_indicator_confidence', getattr(Base, 'metadata'),
-                                        Column('ric_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                         Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
-                                        Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+                                        Column('confidence_id', BigIntegerType, ForeignKey('confidences.confidence_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                         )
 
 _REL_INDICATOR_STRUCTUREDTEXT = Table('rel_indicator_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('indicator_id',
                                               BigIntegerType,
                                               ForeignKey('indicators.indicator_id',
@@ -126,11 +126,11 @@ _REL_INDICATOR_STRUCTUREDTEXT = Table('rel_indicator_structuredtext', getattr(Ba
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_INDICATOR_STRUCTUREDTEXT_SHORT = Table('rel_indicator_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rist_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('indicator_id',
                                               BigIntegerType,
                                               ForeignKey('indicators.indicator_id',
@@ -144,11 +144,11 @@ _REL_INDICATOR_STRUCTUREDTEXT_SHORT = Table('rel_indicator_structuredtext_short'
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_INDICAOTR_INFORMATIONSOURCE = Table('rel_indicator_informationsource', getattr(Base, 'metadata'),
-                                       Column('riis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('indicator_id',
                                               BigIntegerType,
                                               ForeignKey('indicators.indicator_id',
@@ -162,11 +162,11 @@ _REL_INDICAOTR_INFORMATIONSOURCE = Table('rel_indicator_informationsource', geta
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_INDICATOR_STATEMENT = Table('rel_indicator_statement', getattr(Base, 'metadata'),
-                                       Column('ris_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('indicator_id',
                                               BigIntegerType,
                                               ForeignKey('indicators.indicator_id',
@@ -180,11 +180,11 @@ _REL_INDICATOR_STATEMENT = Table('rel_indicator_statement', getattr(Base, 'metad
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_TESTMECHANISM_INFORMATIONSOURCE = Table('rel_basetestmechanism_informationsource', getattr(Base, 'metadata'),
-                                       Column('rbtmis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('basetestmechanism_id',
                                               BigIntegerType,
                                               ForeignKey('basetestmechanisms.basetestmechanism_id',
@@ -198,11 +198,11 @@ _REL_TESTMECHANISM_INFORMATIONSOURCE = Table('rel_basetestmechanism_informations
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_TESTMECHANISM_STATEMENT = Table('rel_basetestmechanism_statement', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('basetestmechanism_id',
                                               BigIntegerType,
                                               ForeignKey('basetestmechanisms.basetestmechanism_id',
@@ -216,11 +216,11 @@ _REL_TESTMECHANISM_STATEMENT = Table('rel_basetestmechanism_statement', getattr(
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_TESTMECHANISM_STRUCTUREDTEXT = Table('rel_testmechanism_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('basetestmechanism_id',
                                               BigIntegerType,
                                               ForeignKey('basetestmechanisms.basetestmechanism_id',
@@ -234,11 +234,11 @@ _REL_TESTMECHANISM_STRUCTUREDTEXT = Table('rel_testmechanism_structuredtext', ge
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_TESTMECHANISM_VOCABSTRING = Table('rel_testmechanism_statement', getattr(Base, 'metadata'),
-                                       Column('rsmss_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('basetestmechanism_id',
                                               BigIntegerType,
                                               ForeignKey('basetestmechanisms.basetestmechanism_id',
@@ -252,5 +252,5 @@ _REL_TESTMECHANISM_VOCABSTRING = Table('rel_testmechanism_statement', getattr(Ba
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )

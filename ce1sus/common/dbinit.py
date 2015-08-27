@@ -168,9 +168,8 @@ def dbinit(config, json_location=''):
   users = list()
   for user in all_users:
     user_ctrl.insert_user(user, False, False, False)
-    user_ctrl.update_user(user)
     users.append(user)
-  user_ctrl.user_broker.do_commit(False)
+  user_ctrl.user_broker.do_commit(True)
 
   # Add handlers
   maintenance = Maintenance(config)

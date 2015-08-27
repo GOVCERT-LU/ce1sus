@@ -15,6 +15,8 @@ from ce1sus.db.brokers.event.eventbroker import EventBroker, EventPermissionBrok
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
+from ce1sus.db.brokers.event.observablebroker import ObservableBroker
+from ce1sus.controllers.events.observable import ObservableController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -33,6 +35,7 @@ class EventController(BaseController):
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.relations_controller = RelationController(config, session)
     self.event_permission_broker = self.broker_factory(EventPermissionBroker)
+    self.observable_controller = ObservableController(config, session)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -113,10 +116,15 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_event(self, user, event):
-    self.logger.debug('User {0} deleted a event {1}'.format(user.username, event.identifier))
+  def remove_event(self, event, cache_object):
+    self.logger.debug('User {0} deleted a event {1}'.format(cache_object.user.username, event.identifier))
     try:
-      self.event_broker.remove_by_id(event.identifier)
+
+      for obs in event.observables:
+        self.observable_controller.remove_observable(obs, cache_object, False)
+
+      self.event_broker.remove_by_id(event.identifier, False)
+      self.event_broker.do_commit(True)
     except BrokerException as error:
       raise ControllerException(error)
 

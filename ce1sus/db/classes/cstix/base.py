@@ -72,24 +72,17 @@ class BaseCoreComponent(Entity):
       self.__version = Version(self.version_db, self)
     self.__version.version = value
 
-  # ce1sus specific
-  def get_description_for_permissions(self, event_permissions, user):
-    return self.description
-
-  def get_short_description_for_permissions(self, event_permissions, user):
-    return self.short_description
-
   def to_dict(self, cache_object):
     description = None
     short_description = None
     information_source = None
     if cache_object.inflated:
       if is_object_viewable(self.description, cache_object):
-        description = self.description.to_dict(cache_object)
+        description = self.attribute_to_dict(self.description, cache_object)
       if is_object_viewable(self.short_description, cache_object):
-        short_description = self.short_description.to_dict(cache_object)
+        short_description = self.attribute_to_dict(self.short_description, cache_object)
       if is_object_viewable(self.information_source, cache_object):
-        information_source = self.information_source.to_dict(cache_object)
+        information_source = self.attribute_to_dict(self.information_source, cache_object)
     if cache_object.complete:
       result = {'id_':self.convert_value(self.id_),
                 'idref':self.convert_value(self.idref),

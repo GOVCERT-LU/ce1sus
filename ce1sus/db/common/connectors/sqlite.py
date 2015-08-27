@@ -12,7 +12,7 @@ from sqlalchemy.interfaces import PoolListener
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 
-from ce1sus.db.common.common import SessionObject, Connector
+from ce1sus.db.common.common import Connector
 from ce1sus.db.common.connectors.generic import GenericSession
 from ce1sus.db.common.recepie.satool import SAEnginePlugin, SATool
 

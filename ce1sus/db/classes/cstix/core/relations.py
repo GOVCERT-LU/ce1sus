@@ -17,7 +17,7 @@ __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 _REL_STIXHEADER_STRUCTUREDTEXT = Table('rel_stixheader_structuredtext', getattr(Base, 'metadata'),
-                                       Column('rtstixheaderst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('stixheader_id',
                                               BigIntegerType,
                                               ForeignKey('stixheaders.stixheader_id',
@@ -31,11 +31,11 @@ _REL_STIXHEADER_STRUCTUREDTEXT = Table('rel_stixheader_structuredtext', getattr(
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_STIXHEADER_STRUCTUREDTEXT_SHORT = Table('rel_stixheader_structuredtext_short', getattr(Base, 'metadata'),
-                                       Column('rtstixheaderst_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('stixheader_id',
                                               BigIntegerType,
                                               ForeignKey('stixheaders.stixheader_id',
@@ -49,11 +49,11 @@ _REL_STIXHEADER_STRUCTUREDTEXT_SHORT = Table('rel_stixheader_structuredtext_shor
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_STIXHEADER_INFORMATIONSOURCE = Table('rel_stixheader_informationsource', getattr(Base, 'metadata'),
-                                       Column('rstixheaderis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('stixheader_id',
                                               BigIntegerType,
                                               ForeignKey('stixheaders.stixheader_id',
@@ -67,11 +67,11 @@ _REL_STIXHEADER_INFORMATIONSOURCE = Table('rel_stixheader_informationsource', ge
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 _REL_STIXHEADER_HANDLING = Table('rel_stixheader_handling', getattr(Base, 'metadata'),
-                            Column('eih_id', BigIntegerType, primary_key=True, nullable=False, index=True),
-                            Column('stixheader_id', BigIntegerType, ForeignKey('stixheaders.stixheader_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True),
-                            Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, index=True)
+
+                            Column('stixheader_id', BigIntegerType, ForeignKey('stixheaders.stixheader_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
+                            Column('markingspecification_id', BigIntegerType, ForeignKey('markingspecifications.markingspecification_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                             )

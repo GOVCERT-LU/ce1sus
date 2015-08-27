@@ -3,6 +3,7 @@ Created on Aug 10, 2015
 '''
 
 import json
+from inspect import getfile
 
 from ce1sus.test.common.base import HTTPError
 from ce1sus.test.common.loggedinbase import LoggedInBase

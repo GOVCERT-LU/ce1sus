@@ -28,7 +28,7 @@ class StixAssembler(BaseAssembler):
       package_intents = json.get('package_intents', None)
       if package_intents:
         for package_intent in package_intents:
-          package_intent = self.assemble_package_intent(event, package_intent, cache_object)
+          package_intent = self.assemble_package_intent(instance, package_intent, cache_object)
           instance.package_intents.append(package_intent)
       instance.title = json.get('title', None)
       description = json.get('description', None)
@@ -53,13 +53,15 @@ class StixAssembler(BaseAssembler):
         instance.information_source = self.create_information_source(instance, json, cache_object, role='Initial Author')
       return instance
 
-  def assemble_package_intent(self, event, json, cache_object):
+  def assemble_package_intent(self, parent, json, cache_object):
     instance = PackageIntent()
-    self.set_base(instance, json, cache_object, event)
+    self.set_base(instance, json, cache_object, parent)
+    instance.parent = parent
     if json:
       intent = json.get('intent', None)
       if intent:
         instance.intent = intent
+    return instance
 
   def assemble_indicator(self, event, json, cache_object):
     raise

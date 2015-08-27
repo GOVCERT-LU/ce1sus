@@ -97,12 +97,16 @@ class BaseController(object):
       self.logger.debug('Changing time stamp on {0}{1} - {2}'.format(old_instance.get_classname(), old_instance.uuid, old_instance.modified_on))
 
       if new_instance and new_instance.modified_on:
-        if old_instance.modified_on < new_instance.modified_on:
+        if old_instance.modified_on:
+          if old_instance.modified_on < new_instance.modified_on:
+            old_instance.modifier = merger_cache.user
+            old_instance.modified_on = new_instance.modified_on
+            self.logger.debug('using the one from new instance {1} - {0}'.format(new_instance.modified_on, new_instance.get_classname()))
+          else:
+            self.logger.debug('TS is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
+        else:
           old_instance.modifier = merger_cache.user
           old_instance.modified_on = new_instance.modified_on
-          self.logger.debug('using the one from new instance {1} - {0}'.format(new_instance.modified_on, new_instance.get_classname()))
-        else:
-          self.logger.debug('TS is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
       else:
         self.logger.debug('Cannot make changes on  is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
 

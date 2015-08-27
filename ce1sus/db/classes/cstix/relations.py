@@ -17,7 +17,7 @@ __license__ = 'GPL v3+'
 
 
 _REL_MARKINGSTRUCTURE_STATEMENT = Table('rel_markingstructure_statement', getattr(Base, 'metadata'),
-                                       Column('rtous_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('markingstructure_id',
                                               BigIntegerType,
                                               ForeignKey('markingstructures.markingstructure_id',
@@ -31,12 +31,12 @@ _REL_MARKINGSTRUCTURE_STATEMENT = Table('rel_markingstructure_statement', getatt
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )
 
 
 _REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE = Table('rel_markingspecification_informationsource', getattr(Base, 'metadata'),
-                                       Column('rmsis_id', BigIntegerType, primary_key=True, nullable=False, index=True),
+
                                        Column('markingspecification_id',
                                               BigIntegerType,
                                               ForeignKey('markingspecifications.markingspecification_id',
@@ -50,5 +50,5 @@ _REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE = Table('rel_markingspecification_i
                                                         ondelete='cascade',
                                                         onupdate='cascade'),
                                               nullable=False,
-                                              index=True)
+                                              primary_key=True, index=True)
                                        )

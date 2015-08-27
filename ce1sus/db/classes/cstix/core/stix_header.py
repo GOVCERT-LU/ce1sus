@@ -17,7 +17,7 @@ from ce1sus.db.classes.cstix.common.vocabs import PackageIntent as VocabPackageI
 from ce1sus.db.classes.cstix.core.relations import _REL_STIXHEADER_STRUCTUREDTEXT, _REL_STIXHEADER_STRUCTUREDTEXT_SHORT, _REL_STIXHEADER_HANDLING, \
   _REL_STIXHEADER_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
-from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
 
 
@@ -26,7 +26,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-class PackageIntent(BaseObject, Base):
+class PackageIntent(Entity, Base):
 
   intent_id = Column('intent_id', Integer, default=None, nullable=False)
   stix_header_id = Column('stix_header_id', BigIntegerType, ForeignKey('stixheaders.stixheader_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
@@ -48,10 +48,10 @@ class PackageIntent(BaseObject, Base):
       self.__intent = VocabPackageIntent(self, 'intent_id')
     self.__intent.name = intent
 
-  def to_dict(self, complete=True, inflated=False):
-    return {'identifier': self.convert_value(self.uuid),
-            'intent': self.convert_value(self.intent)}
-
+  def to_dict(self, cache_object):
+    result = {'intent': self.convert_value(self.intent.name)}
+    parent_dict = Entity.to_dict(self, cache_object)
+    return merge_dictionaries(result, parent_dict)
 
 class STIXHeader(Entity, Base):
 
@@ -68,7 +68,6 @@ class STIXHeader(Entity, Base):
   event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
-    print self.description.parent
     if cache_object.complete:
       result = {'package_intents': self.attributelist_to_dict(self.package_intents, cache_object),
                 'title': self.convert_value(self.title),

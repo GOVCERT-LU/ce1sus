@@ -130,7 +130,7 @@ class Indicator(BaseCoreComponent, Base):
                 'indicated_ttps': self.attributelist_to_dict(self.indicated_ttps, cache_object),
                 'alternative_id': self.convert_value(self.alternative_id),
                 'sightings': self.attributelist_to_dict(self.sightings, cache_object),
-                'killchains': self.attributelist_to_dict(self.killchains, cache_object),
+                'killchains': self.attributelist_to_dict(self.kill_chain_phases, cache_object),
                 'valid_time_positions': self.attributelist_to_dict(self.valid_time_positions, cache_object),
                 'related_indicators': self.attributelist_to_dict(self.related_indicators, cache_object),
                 'related_campaigns': self.attributelist_to_dict(self.related_campaigns, cache_object),

@@ -7,6 +7,7 @@ Created on Aug 18, 2015
 """
 from sqlalchemy.dialects import postgresql, mysql, sqlite
 from sqlalchemy.ext.declarative.api import declared_attr
+from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.sql.schema import Column
 from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 import uuid
@@ -79,7 +80,7 @@ class BaseObject(object):
     return {'identifier': self.convert_value(self.uuid)}
 
   def attribute_to_dict(self, attribute, cache_object):
-    if attribute:
+    if attribute and not isinstance(attribute, RelationshipProperty):
       # TODO: Check attribute type
       if is_object_viewable(attribute, cache_object):
         return attribute.to_dict(cache_object)

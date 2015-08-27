@@ -7,21 +7,22 @@ Created on Aug 10, 2015
 """
 
 
+from ce1sus.helpers.common.config import ConfigException
 import cherrypy
-import os
 import logging
+import os
 
+from ce1sus.views.web.adapters.ce1susadapter import Ce1susViewAdapter
+from ce1sus.views.web.adapters.openiocadapter import OpenIOCAdapter
+from ce1sus.views.web.adapters.stixadapter import STIXAdapter
 from ce1sus.views.web.api.version2.depricated import DepricatedView
-from ce1sus.views.web.api.version3.restcontroller import RestController
+from ce1sus.views.web.api.version3.maincontroller import MainController
+from ce1sus.views.web.api.version3.mispcontroller import MISPController
 from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
-from ce1sus.views.web.adapters.misp.misp import MISPAdapter
-from ce1sus.views.web.adapters.stixadapter import STIXAdapter
-from ce1sus.views.web.adapters.openiocadapter import OpenIOCAdapter
-from ce1sus.helpers.common.config import ConfigException
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susViewAdapter
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -48,12 +49,12 @@ def bootstrap(config, cherrypy_cfg='/../../config/cherrypy.conf'):
     raise ConfigException(error)
 
   cherrypy.tree.mount(IndexView(config), '/')
-  cherrypy.tree.mount(RestController(config), '/REST/0.3.0/')
+  cherrypy.tree.mount(MainController(config), '/REST/0.3.0/')
   cherrypy.tree.mount(DepricatedView(config), '/REST/0.2.0/')
   cherrypy.tree.mount(GuiMenus(config), '/menus')
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
-  cherrypy.tree.mount(MISPAdapter(config), '/MISP/0.1')
+  cherrypy.tree.mount(MISPController(config), '/MISP')
   cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
   cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
   cherrypy.tree.mount(Ce1susViewAdapter(config), '/ce1sus/0.1')

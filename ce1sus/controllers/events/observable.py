@@ -196,7 +196,13 @@ class ObservableController(BaseController):
   def remove_observable(self, observable, cache_object, commit=True):
     try:
       self.remove_set_base(observable, cache_object)
-      self.observable_broker.remove_by_id(observable.identifier)
+
+      if observable.object:
+        self.object_broker.remove_by_id(observable.object.identifier, False)
+      if observable.observable_composition:
+        self.remove_observable_composition(observable.observable_composition, cache_object, False)
+
+      self.observable_broker.remove_by_id(observable.identifier, False)
       self.observable_broker.do_commit(commit)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
@@ -216,9 +222,13 @@ class ObservableController(BaseController):
   def remove_observable_composition(self, compoed_observable, cache_object, commit=True):
     try:
       self.remove_set_base(compoed_observable, cache_object)
+
       for observable in compoed_observable.observables:
-        self.observable_broker.remove_by_id(observable.identifier)
-      self.composed_observable_broker.remove_by_id(compoed_observable.identifier)
+        self.remove_observable(observable, cache_object, False)
+
+      self.composed_observable_broker.remove_by_id(compoed_observable.identifier, False)
+
+      self.composed_observable_broker.do_commit(commit)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
