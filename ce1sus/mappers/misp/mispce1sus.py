@@ -16,11 +16,15 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
+from ce1sus.db.classes.cstix.common.identity import Identity
+from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
 from ce1sus.db.classes.cstix.common.names import Name
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
 from ce1sus.db.classes.cstix.exploit_target.exploittarget import ExploitTarget
 from ce1sus.db.classes.cstix.exploit_target.vulnerability import Vulnerability
+from ce1sus.db.classes.cstix.extensions.test_mechanism.snort_test_mechanism import SnortTestMechanism, SnortRule
+from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
 from ce1sus.db.classes.cstix.ttp.behavior import Behavior
 from ce1sus.db.classes.cstix.ttp.malware_instance import MalwareInstance
 from ce1sus.db.classes.cstix.ttp.ttp import TTP
@@ -102,7 +106,13 @@ class MispConverter(BaseController):
     instance.modifier = cache_object.user
     instance.properties = Properties('0', instance)
     instance.properties.is_shareable = True
+    instance.properties.is_validated = True
 
+    if hasattr(instance, 'version_db'):
+      instance.version_db = '0.0.0'
+
+    if hasattr(instance, 'namespace'):
+      instance.namespace = MispConverter.NAMESPACE
 
 
   def __parse_attributes(self, xml_event, event, cache_object):
@@ -127,10 +137,7 @@ class MispConverter(BaseController):
 
     container, obj_def_name, attr_def_name = get_container_object_attribute(category, type_)
     if container and obj_def_name and attr_def_name:
-      if container == 'Indicator':
-        indicator = self.__assemble_indicator(obj_def_name, attr_def_name, xml_attribute, event, cache_object)
-        event.indicators.append(indicator)
-      elif container == 'Observable':
+      if container == 'Observable':
         obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, event, cache_object)
         event.observables.append(obs)
       elif container == 'Report':
@@ -150,12 +157,43 @@ class MispConverter(BaseController):
       elif container == 'TTP':
         ttp = self.__assemble_ttp(type_, xml_attribute, event, cache_object)
         event.ttps.append(ttp)
+      elif container == 'Indicator':
+        indicator = self.__assemble_test_mechanism_indicator(obj_def_name, xml_attribute, event, cache_object)
+        event.indicators.append(indicator)
       else:
         raise ControllerException('Container {0} cannot be found for special cases'.format(container))
 
     else:
       # log this as error
       self.__assemble_errornous_observable(xml_attribute, event, cache_object)
+
+  def __assemble_test_mechanism_indicator(self, obj_def_name, xml_attribute, event, cache_object):
+    value = MispConverter.__get_value(xml_attribute, 'value')
+    
+    if obj_def_name == 'SnortTestMechanism':
+      snort = SnortTestMechanism()
+      self.set_base(xml_attribute, snort, cache_object)
+
+      snort.producer = self.get_information_source(xml_attribute, cache_object)
+      
+      
+      snort_rule = SnortRule()
+      self.set_base(xml_attribute, snort_rule, cache_object)
+      snort_rule.uuid = uuid4()
+
+      snort_rule.rule = value 
+      snort.rules.append(snort_rule)
+      
+    elif obj_def_name == 'YaraTestMechanism':
+      yara = YaraTestMechanism()
+      self.set_base(xml_attribute, yara, cache_object)
+
+      yara.producer = self.get_information_source(xml_attribute, cache_object)
+
+      yara.rule = value
+
+    else:
+      raise ControllerException('Undefined Test Mechanism')
 
   def __assemble_ttp(self, type_, xml_attribute, event, cache_object):
     timestamp = MispConverter.__get_value(xml_attribute, 'timestamp')
@@ -164,17 +202,28 @@ class MispConverter(BaseController):
     ttp = TTP()
     self.set_base(xml_attribute, ttp, cache_object)
     ttp.timestamp = timestamp
-    if type == 'vulnerability':
+    if type_ == 'vulnerability':
       vulnerability = Vulnerability()
       self.set_base(xml_attribute, vulnerability, cache_object)
       vulnerability.uuid = uuid4()
+
+      # add the vulnerability to the root
 
       exploit_target = ExploitTarget()
       self.set_base(xml_attribute, exploit_target, cache_object)
       exploit_target.uuid = uuid4()
       exploit_target.timestamp = timestamp
-      exploit_target.add_vulnerability(vulnerability)
-      ttp.exploit_targets.append(exploit_target)
+      exploit_target.vulnerabilities.append(vulnerability)
+
+      event.exploit_targets.append(exploit_target)
+
+      ttp_exploit_target = ExploitTarget()
+      self.set_base(xml_attribute, ttp_exploit_target, cache_object)
+      ttp_exploit_target.uuid = uuid4()
+      ttp_exploit_target.idref = exploit_target.id_
+
+      ttp.exploit_targets.append(ttp_exploit_target)
+
     else:
       value = MispConverter.__get_value(xml_attribute, 'value')
 
@@ -327,7 +376,6 @@ class MispConverter(BaseController):
   def __assemble_structured_text(self, xml_element, value, cache_object):
     st = StructuredText()
     self.set_base(xml_element, st, cache_object)
-    st.namespace = MispConverter.NAMESPACE
     st.value = value
     return None
   
@@ -341,7 +389,6 @@ class MispConverter(BaseController):
     observable = Observable()
     self.set_base(xml_attribute, observable, cache_object)
     observable.uuid = uuid4()
-    observable.namespace = MispConverter.NAMESPACE
     observable.parent = parent
     if comment:
       observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object)
@@ -384,7 +431,6 @@ class MispConverter(BaseController):
     observable = Observable()
     self.set_base(xml_attribute, observable, cache_object)
     observable.uuid = uuid4()
-    observable.namespace = MispConverter.NAMESPACE
     observable.parent = parent
     if comment:
       observable.description = self.__assemble_structured_text(xml_attribute, comment, cache_object)
@@ -430,11 +476,52 @@ class MispConverter(BaseController):
     attribute.is_ioc = ioc == '1'
     return attribute
 
+  def __assemble_information_source(self, name, role_name, xml_element, cache_object):
+    identity = Identity()
+    self.set_base(xml_element, identity, cache_object)
+    identity.uuid = uuid4()
+    identity.name = name
+    information_source = InformationSource()
+    self.set_base(xml_element, information_source, cache_object)
+    information_source.uuid = uuid4()
+    information_source.identity = identity
+    if role_name:
+      role = self.__assemble_role(role_name, xml_element, cache_object)
+      information_source.roles.append(role)
+    
+  def __assemble_role(self, role_name, xml_element, cache_object):
+    role = InformationSourceRole()
+    self.set_base(xml_element, role, cache_object)
+    role.uuid = uuid4()
+    role.role = role_name
+    return role
+  
+  def get_information_source(self, xml_element, cache_object):
+    infromation_source = cache_object.infromation_source
+    
+    isref = self.__assemble_information_source(infromation_source.identity.name, None, xml_element, cache_object)
+    isref.identity.name = None
+    isref.identity.uuid = uuid4()
+    isref.identity.idref = infromation_source.identity.id_
+
+    for role in infromation_source.roles:
+      isrefrole = self.__assemble_role(role.role, xml_element, cache_object)
+      isref.roles.append(isrefrole)
+
+    for contributing_source in infromation_source.contributing_sources:
+      csref = self.__assemble_information_source(contributing_source.identity.name, None, xml_element, cache_object)
+      csref.identity.name = None
+      csref.identity.idref = infromation_source.identity.id_
+      for role in contributing_source.roles:
+        csrefrole = self.__assemble_role(role.role, xml_element, cache_object)
+        csref.roles.append(csrefrole)
+
+    return isref
+
   def __set_event(self, xml_event, cache_object):
     self.logger.debug('Mapping Event properties')
     misp_id = MispConverter.__get_value(xml_event, 'id')
     org = MispConverter.__get_value(xml_event, 'org')
-    setattr(cache_object, 'org', org)
 
 
     risk = MispConverter.__get_value(xml_event, 'risk')
@@ -447,9 +534,9 @@ class MispConverter(BaseController):
     orgc = MispConverter.__get_value(xml_event, 'orgc')
     publish_timestamp = MispConverter.__get_value(xml_event, 'publish_timestamp')
     date = MispConverter.__get_value(xml_event, 'date')
-    # org = provenance, this group will also get an entry in the event permissions with all the rights
-    # cache_object.owner = cache_object.user.group.name == org
+
     
+
 
     event = Event()
     self.set_base(xml_event, event, cache_object)
@@ -459,9 +546,23 @@ class MispConverter(BaseController):
     event.stix_header = STIXHeader()
     self.set_base(xml_event, event.stix_header, cache_object)
 
-    event.stix_header.title = u'{0} MISP Event {1} - {2}'.format('FOO', misp_id, info)
+    event.stix_header.title = u'{0} Event {1} - {2}'.format(MispConverter.NAMESPACE, misp_id, info)
     event.stix_header.description = self.__assemble_structured_text(xml_event, info, cache_object)
     event.stix_header.short_description = self.__assemble_structured_text(xml_event, info, cache_object)
+
+    # org = provenance, this group will also get an entry in the event permissions with all the rights
+
+    if orgc:
+      information_source = self.__assemble_information_source(orgc, 'Initial Author', xml_event, cache_object)
+      information_source.contributing_sources.append(self.__assemble_information_source(org, None, xml_event, cache_object))
+    else:
+      information_source = self.__assemble_information_source(org, 'Initial Author', xml_event, cache_object)
+    # add the owner due to the transformations
+    information_source.contributing_sources.append(self.__assemble_information_source('owner', 'Transformer/Translator', xml_event, cache_object))
+    
+    setattr(cache_object, 'information_source', information_source)
+
+    event.stix_header.information_source = information_source
 
     # Set package intent to "Threat Report"
     package_intent = PackageIntent()

@@ -34,10 +34,12 @@ class Infrastructure(Entity, Base):
     self.set_id(value)
 
   _PARENTS = ['resource']
+  resource = relationship('Resource')
 
   title = Column('title', UnicodeType(255), index=True, nullable=True)
   description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT, uselist=False)
   short_description = relationship(StructuredText, secondary=_REL_INFRASTRUCTURE_STRUCTUREDTEXT_SHORT, uselist=False)
+
 
   # custom ones related to ce1sus internals
   ttpresource_id = Column('ttpresource_id', BigIntegerType, ForeignKey('resources.resource_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

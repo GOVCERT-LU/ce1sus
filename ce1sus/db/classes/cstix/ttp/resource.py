@@ -60,7 +60,7 @@ _REL_RESOURCE_IDENTITIY = Table('rel_resource_identity', getattr(Base, 'metadata
 class Resource(Entity, Base):
 
   tools = relationship(ToolInformation, secondary=_REL_RESOURCE_TOOLINFORMATION)
-  infrastructure = relationship(Infrastructure, uselist=False, backref='resource')
+  infrastructure = relationship(Infrastructure)
   personas = relationship('Identity', secondary=_REL_RESOURCE_IDENTITIY)
 
   _PARENTS = ['ttp']
