@@ -135,7 +135,7 @@ class PseudoCyboxAssembler(BaseAssembler):
 
       return related_object
 
-  def get_attribute_definition(self, parent, json, cache_object):
+  def get_attribute_definition(self, parent, json, cache_object, bypass_object_check=False):
     uuid = json.get('definition_id', None)
     if not uuid:
       definition = json.get('definition', None)
@@ -152,8 +152,15 @@ class PseudoCyboxAssembler(BaseAssembler):
           self.log_attribute_error(parent, json, error.message)
           return None
         cache_object.seen_attr_defs[uuid] = definition
-        return definition
-    self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
+
+        # check if attribute definition in object definition
+        if not bypass_object_check:
+          for attr_def in parent.definition.attribtues:
+            if attr_def.uuid == uuid:
+              return definition
+          self.log_attribute_error(parent, json, 'Attribute definition is not contained in object definition {0}'.format(parent.definition.name))
+    else:
+      self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
 
   def get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
@@ -166,7 +173,7 @@ class PseudoCyboxAssembler(BaseAssembler):
 
       for attribute_definition_uuid in additional_attr_defs_uuids:
         json = {'definition_id': attribute_definition_uuid}
-        attribute_definition = self.get_attribute_definition(parent, json, cache_object)
+        attribute_definition = self.get_attribute_definition(parent, json, cache_object, True)
         if attribute_definition:
           handler_instance.attribute_definitions[attribute_definition.uuid] = attribute_definition
 
