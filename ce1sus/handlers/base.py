@@ -14,6 +14,7 @@ from os.path import dirname, abspath
 import uuid
 
 from ce1sus.common.checks import set_properties_according_to_permisssions
+from ce1sus.common.system import get_set_group
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.common import Properties
@@ -54,7 +55,10 @@ class HandlerBase(object):
     self.__config = config
     self.is_multi_line = False
     self.cache_object = None
+    self.group_broker = None
 
+  def get_set_group(self, json, cache_object, return_none=False):
+    return get_set_group(self.group_broker, json, cache_object, return_none)
 
   def get_config_value(self, key, default_value=None):
     return self.__config.get(self.__class__.__name__, key.lower(), default_value)

@@ -60,11 +60,10 @@ class SimpleLoggingInformations(BaseObject):
                  'modified_on': self.convert_value(self.modified_on),
                 }
     else:
-      pass
-    result = {
-              'created_at': self.convert_value(self.created_at),
-              'modified_on': self.convert_value(self.modified_on)
-              }
+      result = {
+                'created_at': self.convert_value(self.created_at),
+                'modified_on': self.convert_value(self.modified_on)
+                }
     parent_dict = BaseObject.to_dict(self, cache_object)
     return merge_dictionaries(parent_dict, result)
 
@@ -86,8 +85,7 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
                     'creator_group': self.creator_group.to_dict(cache_object),
                     }
     else:
-      pass
-    child_dict = {}
+      child_dict = {}
     
     return merge_dictionaries(parent_dict, child_dict)
 

@@ -449,12 +449,24 @@ class MispConverter(BaseController):
     #check if pipe in type_
     if '|' in type_:
       # create 2 attributes
-      raise ControllerException('Pipe!')
+      type1 = type_.split('|')[0]
+      
+      if type1 == 'filename':
+        additional_attr_def_name = 'File_Name'
+      elif type1 == 'regkey':
+        additional_attr_def_name = 'WindowsRegistryKey_Key'
+      else:
+        raise ControllerException('Fist element {0} in piped definition is unkown'.format(type1))
+      
+      attribute1 = self.__assemble_attribute(obj, xml_attribute, additional_attr_def_name, cache_object)
+      obj.attributes.append(attribute1)
+      attribute2 = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object)
+      obj.attributes.append(attribute2)
+
     else:
       # get_attribute definition
       attribute = self.__assemble_attribute(obj, xml_attribute, attr_def_name, cache_object)
       obj.attributes.append(attribute)
-      pass
     return observable
 
 
@@ -636,6 +648,7 @@ class MispConverter(BaseController):
     # remove last newlines
 
     cache_object.insert = True
+    cache_object.owner = True
     xml = MispConverter.get_xml_root(xml_string)
     self.logger.debug('Loaded xml')
     # remove the response around the event

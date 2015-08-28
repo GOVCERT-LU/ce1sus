@@ -130,6 +130,7 @@ class ObservableHandler(RestBaseHandler):
         if cache_object.flat:
           result = list()
           flat_objects = self.observable_controller.get_flat_observable_objects(observable)
+
           for flat_object in flat_objects:
             result.append(flat_object.to_dict(cache_object))
           return result

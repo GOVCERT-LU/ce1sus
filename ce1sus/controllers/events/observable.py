@@ -313,12 +313,28 @@ class ObservableController(BaseController):
       self.object_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
+    
+  def get_flat_object(self, obj):
+    result = list()
+    result.append(obj)
+    for rel_obj in obj.related_objects:
+      rel_res = self.get_flat_object(rel_obj)
+      if rel_res:
+        result = result + rel_res
+    return result
 
   def get_flat_observable_objects(self, observable):
-    try:
-      return self.object_broker.get_all_by_observable_id(observable.identifier)
-    except BrokerException as error:
-      raise ControllerException(error)
+    result = list()
+    if observable.object:
+      res = self.get_flat_object(observable.object)
+      if res:
+        result = result + res
+    elif observable.observable_composition:
+      for obs in observable.observable_composition.observables:
+        res = self.get_flat_observable_objects(obs)
+        if res:
+          result = result + res
+    return result
 
   def get_related_object_by_child(self, obj):
     try:

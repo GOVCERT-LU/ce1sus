@@ -18,6 +18,7 @@ from ce1sus.db.brokers.event.eventbroker import EventBroker, EventPermissionBrok
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -39,6 +40,7 @@ class EventController(BaseController):
     self.observable_controller = ObservableController(config, session)
     self.common_controller = CommonController(config, session)
     self.stix_header_broker = self.broker_factory(STIXHeaderBroker)
+    self.indicator_controller = IndicatorController(config, session)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -127,6 +129,8 @@ class EventController(BaseController):
       for obs in event.observables:
         self.observable_controller.remove_observable(obs, cache_object, False)
       # TODO: the remaining removals
+      for indicator in event.indicators:
+        self.indicator_controller.remove_indicator(indicator, cache_object, False)
 
       self.event_broker.remove_by_id(event.identifier, False)
       self.event_broker.do_commit(True)

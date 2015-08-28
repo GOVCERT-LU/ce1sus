@@ -6,15 +6,19 @@
 Created on Jan 23, 2015
 """
 from datetime import datetime
+from sqlalchemy.orm.relationships import RelationshipProperty
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import BaseController, ControllerException
+from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
+from ce1sus.db.brokers.event.indicatorbroker import IndicatorBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
-from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
 from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.classes.internal.object import Object
@@ -34,6 +38,9 @@ class IndicatorController(BaseController):
     super(IndicatorController, self).__init__(config, session)
     self.indicator_type_broker = self.broker_factory(IndicatorTypeBroker)
     self.relation_controller = RelationController(config, session)
+    self.indicator_broker = self.broker_factory(IndicatorBroker)
+    self.observable_controller = ObservableController(config, session)
+    self.common_controller = CommonController(config, session)
 
   def get_all(self):
     try:
@@ -48,6 +55,31 @@ class IndicatorController(BaseController):
       it.type = key
       result.append(it)
     return result
+  
+  def remove_indicator(self, indicator, cache_object, commit=True):
+    try:
+      self.remove_set_base(indicator, cache_object)
+      if indicator.information_source and not isinstance(indicator.information_source, RelationshipProperty):
+        self.common_controller.remove_information_source(indicator.information_source, cache_object, False)
+      if indicator.description and not isinstance(indicator.description, RelationshipProperty):
+        self.common_controller.remove_structured_text(indicator.description, cache_object, False)
+      if indicator.short_description and not isinstance(indicator.short_description, RelationshipProperty):
+        self.common_controller.remove_structured_text(indicator.short_description, cache_object, False)
+
+      for observable in indicator.observables:
+        self.observable_controller.remove_observable(observable, cache_object, False)
+      self.common_controller.remove_handling(indicator.handling, cache_object, False)
+      # killchain pahses
+      # valid time positions
+      # related_indicators
+      # related campaigns
+
+
+      self.indicator_broker.remove_by_id(indicator.identifier, False)
+      self.indicator_broker.do_commit(commit)
+      
+    except BrokerException as error:
+      raise ControllerException(error)
 
   def get_indicator_type(self, indicator_type_name, merger_cache):
 

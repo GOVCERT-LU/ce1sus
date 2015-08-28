@@ -20,7 +20,8 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBr
 from ce1sus.db.classes.internal.errors.errorbase import ErrorReference
 from ce1sus.db.classes.internal.event import Event, Comment, EventGroupPermission
 from ce1sus.db.classes.internal.report import Report, Reference
-from ce1sus.db.common.broker import BrokerException
+from ce1sus.db.classes.internal.usrmgt.group import Group
+from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.helpers.version import Version
 
 
@@ -60,6 +61,28 @@ class EventAssembler(BaseAssembler):
       if stix_header:
         event.stix_header = self.stix_assembler.assemble_stix_header(event, stix_header, cache_object)
 
+      # set permissions when the initial author is not the creator
+      init_author_name = event.stix_header.information_source.identity
+      if init_author_name.name != event.creator_group.name:
+        try:
+          group = self.group_broker.get_by_name(init_author_name.name)
+        except NothingFoundException:
+          group = Group()
+          group.name = init_author_name.name
+          group.tlp_lvl = 3
+          group.default_dbcode = 0
+          group.dbcode = 0
+          group.uuid = init_author_name.uuid
+          self.group_broker.insert(group, False)
+        
+        # add the group to the event permissions
+        event_permissions = EventGroupPermission()
+        self.set_base(event_permissions, json, cache_object, event)
+        event_permissions.permissions.set_all()
+        event_permissions.event = event
+        event_permissions.group = group
+        event.groups.append(event_permissions)
+        
 
       first_seen = json.get('first_seen', None)
       if first_seen:
@@ -223,6 +246,7 @@ class EventAssembler(BaseAssembler):
   def __get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
     handler_instance.reference_definitions[definition.uuid] = definition
+    handler_instance.group_broker = self.group_broker
 
     # Check if the handler requires additional attribute definitions
     additional_refs_defs_uuids = handler_instance.get_additinal_reference_uuids()

@@ -155,7 +155,7 @@ class PseudoCyboxAssembler(BaseAssembler):
 
         # check if attribute definition in object definition
         if not bypass_object_check:
-          for attr_def in parent.definition.attribtues:
+          for attr_def in parent.definition.attributes:
             if attr_def.uuid == uuid:
               return definition
           self.log_attribute_error(parent, json, 'Attribute definition is not contained in object definition {0}'.format(parent.definition.name))
@@ -165,6 +165,7 @@ class PseudoCyboxAssembler(BaseAssembler):
   def get_handler(self, parent, definition, cache_object):
     handler_instance = definition.handler
     handler_instance.attribute_definitions[definition.uuid] = definition
+    handler_instance.group_broker = self.group_broker
 
     # Check if the handler requires additional attribute definitions
     additional_attr_defs_uuids = handler_instance.get_additinal_attribute_uuids()

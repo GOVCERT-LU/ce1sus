@@ -6,9 +6,11 @@
 Created on Feb 6, 2014
 """
 import json
+from uuid import uuid4
 
 from ce1sus.db.brokers.config import Ce1susConfigBroker
-from ce1sus.db.common.broker import BrokerException
+from ce1sus.db.classes.internal.usrmgt.group import Group
+from ce1sus.db.common.broker import BrokerException, NothingFoundException
 from ce1sus.db.common.session import SessionManager
 
 
@@ -25,6 +27,63 @@ __license__ = 'GPL v3+'
 APP_REL = '0.11.1'
 DB_REL = '0.11.0'
 REST_REL = '0.3.0'
+
+def get_set_group(group_broker, json, cache_object, return_none=False):
+  # If the group does not exist or cannot be created return the users group
+  group = None
+  found = False
+  if json:
+    name = json.get('name', None)
+    if name:
+      grp = None
+      for value in cache_object.seen_groups.itervalues():
+        if value.name == name:
+          grp = value
+          break
+      if grp:
+        group = grp
+        found = True
+      else:
+        try:
+          group = group_broker.get_by_name(name)
+          found = True
+        except NothingFoundException:
+          found = False
+    else:
+      # check if group exists
+      uuid = json.get('identifier', None)
+      if uuid:
+        grp = cache_object.seen_groups.get(uuid, None)
+        if grp:
+          group = grp
+          found = True
+        else:
+          try:
+            group = group_broker.get_by_uuid(uuid)
+            found = True
+          except NothingFoundException:
+            found = False
+    if found:
+      cache_object.seen_groups[group.uuid] = group
+    else:
+      uuid = json.get('identifier', None)
+      # Create the group automatically
+      group = Group()
+      group.name = json['name']
+      group.tlp_lvl = 3
+      group.default_dbcode = 0
+      group.dbcode = 0
+      if uuid:
+        group.uuid = uuid
+      else:
+        group.uuid = uuid4()
+      group_broker.insert(group, False)
+      cache_object.seen_groups[group.uuid] = group
+
+  if not group and not return_none:
+    group = cache_object.user.group
+
+  return group
 
 # pylint: disable=W0613
 def sytem_version(context):

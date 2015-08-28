@@ -10,6 +10,7 @@ from uuid import uuid4
 import uuid
 
 from ce1sus.common.checks import set_properties_according_to_permisssions
+from ce1sus.common.system import get_set_group
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.base import BaseCoreComponent
@@ -17,8 +18,6 @@ from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.core import BaseElement, ExtendedLogingInformations, SimpleLoggingInformations, BaseObject
-from ce1sus.db.classes.internal.usrmgt.group import Group
-from ce1sus.db.common.broker import NothingFoundException
 from ce1sus.helpers.version import Version
 
 
@@ -157,52 +156,7 @@ class BaseChanger(BaseController):
       instance.version = Version(version, instance)
 
   def get_set_group(self, json, cache_object, return_none=False):
-    # If the group does not exist or cannot be created return the users group
-    group = None
-    if json:
-      name = json.get('name', None)
-      if name:
-        grp = None
-        for value in cache_object.seen_groups.itervalues():
-          if value.name == name:
-            grp = value
-            break
-        if grp:
-          group = grp
-        else:
-          try:
-            group = self.group_broker.get_by_name(name)
-          except NothingFoundException:
-            group = Group()
-            group.name = json['name']
-            group.tlp_lvl = 3
-            group.default_dbcode = 0
-            group.dbcode = 0
-            self.group_broker.insert(group, False)
-          cache_object.seen_groups[group.uuid] = group
-      else:
-        # check if group exists
-        uuid = json.get('identifier', None)
-        if uuid:
-          grp = cache_object.seen_groups.get(uuid, None)
-          if grp:
-            group = grp
-          else:
-            try:
-              group = self.group_broker.get_by_uuid(uuid)
-            except NothingFoundException:
-              # Create the group automatically
-              group = Group()
-              group.populate(json)
-              group.uuid = uuid
-              self.group_broker.insert(group, False)
-
-            cache_object.seen_groups[group.uuid] = group
-
-    if not group and not return_none:
-      group = cache_object.user.group
-
-    return group
+    return get_set_group(self.group_broker, json, cache_object, return_none)
 
   def set_base(self, instance, json, cache_object, parent, change_base_element=True):
     if isinstance(instance, BaseCoreComponent):
