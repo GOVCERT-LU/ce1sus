@@ -158,8 +158,6 @@ class FileHandler(GenericHandler):
 
       internal_json['value'] = rel_folder + '/' + sha1
 
-      attributes = list()
-
       main_attribute = self.create_attribute(obj, internal_json, True)
       # secondary
 
@@ -167,12 +165,12 @@ class FileHandler(GenericHandler):
       internal_json['value'] = filename
       self.set_attribute_definition(internal_json, UUID_FILE_NAME)
       attribute = self.create_attribute(obj, internal_json)
-      attributes.append(attribute)
+      result.append(attribute)
 
       internal_json['value'] = sha1
       self.set_attribute_definition(internal_json, UUID_HASH_SHA1)
       attribute = self.create_attribute(obj, internal_json)
-      attributes.append(attribute)
+      result.append(attribute)
 
 
       self.set_object_definition(internal_json, UUID_ARTEFACT)
@@ -267,7 +265,7 @@ class FileHandler(GenericHandler):
     # get parent object
     if attribtue.object.parent.parent:
       for attribtue in  attribtue.object.parent.parent.attributes:
-        if attribtue.definition.chksum == UUID_FILE_NAME:
+        if attribtue.definition.uuid == UUID_FILE_NAME:
           return attribtue.value
 
       return None
@@ -299,7 +297,9 @@ class FileWithHashesHandler(FileHandler):
 
     internal_json = json
     for item in result:
-      main_attribute = item.object.attributes[0]
+      if isinstance(item, RelatedObject):
+        main_attribute = item.object.attributes[0]
+        break
 
     filepath = self.get_base_path() + '/' + main_attribute.value
 
