@@ -113,7 +113,7 @@ class EventAssembler(BaseAssembler):
       indicators = json.get('indicators', None)
       if indicators:
         for indicator in indicators:
-          indicator = self.stix_assembler.assemble_indicator(indicator, cache_object)
+          indicator = self.stix_assembler.assemble_indicator(event, indicator, cache_object)
           if indicator:
             event.indicators.append(indicator)
       """

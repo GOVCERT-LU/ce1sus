@@ -8,6 +8,8 @@ Created on Aug 4, 2015
 
 from ce1sus.controllers.common.assembler.base import BaseAssembler
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
+from ce1sus.controllers.common.assembler.assemble.ccybox.ccybox import CyboxAssembler
 
 
 __author__ = 'Weber Jean-Paul'
@@ -20,6 +22,7 @@ class StixAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(StixAssembler, self).__init__(config, session)
+    self.cybox_assembler = CyboxAssembler(config, session)
 
   def assemble_stix_header(self, event, json, cache_object):
     instance = STIXHeader()
@@ -64,5 +67,46 @@ class StixAssembler(BaseAssembler):
         instance.intent = intent
     return instance
 
-  def assemble_indicator(self, event, json, cache_object):
-    raise
+  def assemble_indicator(self, parent, json, cache_object):
+    indicator = Indicator()
+    indicator.parent = parent
+    self.set_base(indicator, json, cache_object, parent)
+    if json:
+      indicator.alternative_id = json.get('alternative_id', None)
+      confidence = json.get('confidence', None)
+      if confidence:
+        # TODO: assemble
+        indicator.confidence = self.assemble_confidence()
+      indicator.id_ = json.get('id_', None)
+      indicator.idref = json.get('idref', None)
+      if not indicator.idref:
+        # indicated_ttps
+        information_source = json.get('information_source')
+        if information_source:
+          indicator.information_source = self.assemble_information_source(indicator, information_source, cache_object)
+        # killchains
+        # likely_impact
+        negate = json.get('negate', '')
+        if negate != '':
+          indicator.negate = negate
+        indicator.observable_composition_operator = json.get('observable_composition_operator', 'OR')
+        observables = json.get('observables', None)
+        if observables:
+          for observable in observables:
+            observable = self.cybox_assembler.assemble_observable(indicator, observable, cache_object)
+            observable.indicator = indicator
+            if observable:
+              indicator.observables.append(observable)
+        producer = json.get('producer', None)
+        if producer:
+          indicator.producer = self.assemble_information_source(indicator, producer, cache_object)
+        # related_campaigns
+        # related_indicators
+        # sightings
+        # TODO: types
+        # valid_time_positions
+        # version
+
+
+
+      return indicator

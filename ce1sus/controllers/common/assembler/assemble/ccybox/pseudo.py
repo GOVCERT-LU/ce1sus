@@ -59,14 +59,6 @@ class PseudoCyboxAssembler(BaseAssembler):
       self.log_object_error(parent, json, 'Object does not contain a known object definition')
     return None
 
-  def __log_error(self, parent, json, error_message, clazz):
-    error_entry = clazz()
-    error_entry.message = error_message
-    error_entry.dump = dumps(json)
-    error_entry.event = parent.event[0]
-    return error_entry
-
-
   def log_object_error(self, observable, json, error_message):
     error_entry = ErrorObject()
     error_entry.uuid = u'{0}'.format(uuid4())
@@ -74,8 +66,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     error_entry.dump = dumps(json)
     error_entry.event = observable.event
     error_entry.observable = observable
-    self.obj_def_broker.session.add(error_entry)
-    self.obj_def_broker.do_commit(True)
+    observable.root.errors.append(error_entry)
 
   def log_attribute_error(self, obj, json, error_message):
     error_entry = ErrorAttribute()
@@ -84,8 +75,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     error_entry.dump = dumps(json)
     error_entry.event = obj.event
     error_entry.object = obj
-    self.obj_def_broker.session.add(error_entry)
-    self.obj_def_broker.do_commit(True)
+    obj.event.errors.append(error_entry)
 
   def assemble_object(self, parent, json, cache_object, set_observable=True):
     if json:

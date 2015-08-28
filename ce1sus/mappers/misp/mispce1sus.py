@@ -37,6 +37,7 @@ from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.misp.common import get_container_object_attribute, get_tlp, ANALYSIS_MAP, RISK_MAP
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -53,6 +54,7 @@ class MispConverter(BaseController):
     super(MispConverter, self).__init__(config, session)
     self.assembler = Assembler(config, session=session)
     self.refernce_defintion_broker = self.broker_factory(ReferenceDefintionsBroker)
+    self.indicator_controller = IndicatorController(config, session)
 
   @staticmethod
   def get_xml_parser(encoding=None):
@@ -498,7 +500,7 @@ class MispConverter(BaseController):
     return role
   
   def get_information_source(self, xml_element, cache_object):
-    infromation_source = cache_object.infromation_source
+    infromation_source = cache_object.information_source
     
     isref = self.__assemble_information_source(infromation_source.identity.name, None, xml_element, cache_object)
     isref.identity.name = None
@@ -601,6 +603,16 @@ class MispConverter(BaseController):
     cache_object_copy = cache_object.make_copy()
     cache_object_copy.complete = True
     cache_object_copy.inflated = True
+
+    # generate generic indicators
+    indicators = self.indicator_controller.get_generic_indicators(event, cache_object)
+    for indicator in indicators:
+      self.set_base(xml_event, indicator, cache_object)
+      # indicator.information_source = self.get_information_source(xml_event, cache_object)
+      indicator.producer = self.get_information_source(xml_event, cache_object)
+
+    event.indicators = indicators
+
     pump = json.dumps(event.to_dict(cache_object_copy), sort_keys=True, indent=4, separators=(',', ': '))
     f = open('/home/jhemp/dump.json', 'w+')
     f.write(pump)

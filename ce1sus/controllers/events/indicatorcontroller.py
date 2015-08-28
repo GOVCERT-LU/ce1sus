@@ -13,8 +13,9 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
-from ce1sus.db.classes.cstix.common.vocabs import IndicatorType
-from ce1sus.db.classes.cstix.indicator.indicator import Indicator
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
+from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
+from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.common.broker import BrokerException
@@ -42,18 +43,25 @@ class IndicatorController(BaseController):
 
   def get_all_types(self):
     result = list()
-    for key in IndicatorType.get_dictionary().iterkeys():
+    for key in VocabIndicatorType.get_dictionary().iterkeys():
       it = IndicatorType()
       it.type = key
       result.append(it)
     return result
 
-  def get_indicator_type(self, indicator_type, instance, attr_name, merger_cache):
+  def get_indicator_type(self, indicator_type_name, merger_cache):
 
 
 
-    type_ = IndicatorType(instance, attr_name)
-    type_.name = type_.name
+    type_ = IndicatorType()
+    type_.type_ = indicator_type_name
+    type_.uuid = uuid4()
+    type_.creator = merger_cache.user
+    type_.modifier = merger_cache.user
+    type_.creator_group = merger_cache.user.group
+    type_.crated_on = datetime.utcnow()
+    type_.modified_on = datetime.utcnow()
+    type_.tlp = 'Amber'
 
     type_.creator = merger_cache.user
     type_.modifier = merger_cache.user
@@ -65,6 +73,7 @@ class IndicatorController(BaseController):
 
 
   def map_indicator(self, attributes, indicator_type, event, cache_object):
+    # TODO review This
     indicator = Indicator()
     indicator.uuid = uuid4()
     merger_cache = MergerCache(cache_object)
@@ -85,11 +94,12 @@ class IndicatorController(BaseController):
     indicator.tlp_level_id = event.tlp_level_id
     indicator.title = 'Indicators for "{0}"'.format(indicator_type)
     indicator.operator = 'OR'
+    valid_time_position = ValidTime()
+    valid_time_position.start_time = datetime.utcnow()
     # self.set_extended_logging(indicator, user, True)
 
     if indicator_type and indicator_type != 'Others':
-      # ndicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
-      pass
+      indicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
 
     for attribute in attributes:
       if attribute.is_ioc:
@@ -142,6 +152,7 @@ class IndicatorController(BaseController):
           obs.dbcode = attribute.object.dbcode
           obs.tlp_level_id = attribute.object.tlp_level_id
         obs.object = obj
+
         obs.event = event
         # self.set_extended_logging(obs, user, True)
 

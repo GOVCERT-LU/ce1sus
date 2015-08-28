@@ -57,7 +57,7 @@ class IndicatorType(Entity, Base):
   def to_dict(self, cache_object):
 
     result = {
-              'type_': self.convert_value(self.type_)
+              'type_': self.convert_value(self.type_.name)
               }
 
     parent_dict = Entity.to_dict(self, cache_object)
@@ -67,7 +67,7 @@ class IndicatorType(Entity, Base):
 class Indicator(BaseCoreComponent, Base):
 
   producer = relationship('InformationSource', secondary=_REL_INDICAOTR_INFORMATIONSOURCE, uselist=False)
-  observables = relationship('Observable', secondary=_REL_INDICATOR_OBSERVABLE)
+  observables = relationship('Observable', secondary=_REL_INDICATOR_OBSERVABLE, back_populates='indicator')
   types = relationship(IndicatorType)
   confidence = relationship(Confidence, secondary=_REL_INDICATOR_CONFIDENCE, uselist=False)
   indicated_ttps = relationship('RelatedTTP', secondary=_REL_INDICATOR_RELATED_TTPS)
@@ -115,8 +115,6 @@ class Indicator(BaseCoreComponent, Base):
   likely_impact = relationship('Statement', secondary=_REL_INDICATOR_STATEMENT, uselist=False)
   negate = Column('negate', Boolean, default=None)
   related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
-
-  event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
   def to_dict(self, cache_object):
     observables = self.attributelist_to_dict(self.observables, cache_object)

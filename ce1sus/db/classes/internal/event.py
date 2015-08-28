@@ -27,7 +27,7 @@ from ce1sus.db.classes.internal.common import Status, Risk, Analysis
 from ce1sus.db.classes.internal.core import ExtendedLogingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.classes.internal.errors.errorbase import ErrorBase
-from ce1sus.db.classes.internal.relations import _REL_EVENT_OBSERVABLE, _REL_EVENT_RELATED_PACKAGES
+from ce1sus.db.classes.internal.relations import _REL_EVENT_OBSERVABLE, _REL_EVENT_RELATED_PACKAGES, _REL_EVENT_INDICATOR
 from ce1sus.db.classes.internal.report import Report
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.session import Base
@@ -92,7 +92,7 @@ class Event(Entity, Base):
   courses_of_action = None
   exploit_targets = relationship(ExploitTarget)
   observables = relationship(Observable, secondary=_REL_EVENT_OBSERVABLE, back_populates='event')
-  indicators = relationship(Indicator)
+  indicators = relationship(Indicator, secondary=_REL_EVENT_INDICATOR, back_populates='event')
   incidents = relationship(Incident)
   threat_actors = relationship(ThreatActor)
   ttps = relationship(TTP)
