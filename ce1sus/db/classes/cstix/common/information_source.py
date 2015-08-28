@@ -87,39 +87,14 @@ class InformationSource(Entity, Base):
   # TODO: references -> relation
 
   confidence = relationship('Confidence', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
+
+
   information_source = relationship('InformationSource',
                                     uselist=False,
                                     secondary=_REL_INFORMATIONSOURCE_INFORMATIONSOURCE,
                                     secondaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.parent_id',
                                     primaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id'
                                     )
-
-  related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_INFORMATIONSOURCE)
-  related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_INFORMATIONSOURCE)
-  related_relatedobservable = relationship('RelatedObservable', uselist=False, secondary=_REL_RELATEDOBSERVABLE_INFORMATIONSOURCE)
-  related_relatedexplottarget = relationship('RelatedExploitTarget', uselist=False, secondary=_REL_RELATEDEXPLOITTARGET_INFORMATIONSOURCE)
-  related_relatedpackageref = relationship('RelatedPackageRef', uselist=False, secondary=_REL_RELATEDPACKAGEREF_INFORMATIONSOURCE)
-  related_relatedpackage = relationship('RelatedPackage', uselist=False, secondary=_REL_RELATEDPACKAGE_INFORMATIONSOURCE)
-  related_relatedidentity = relationship('RelatedIdentity', uselist=False, secondary=_REL_RELATEDIDENTITY_INFORMATIONSOURCE)
-  related_relatedincident = relationship('RelatedIncident', uselist=False, secondary=_REL_RELATEDINCIDENT_INFORMATIONSOURCE)
-  related_relatedindicator = relationship('RelatedIndicator', uselist=False, secondary=_REL_RELATEDINDICATOR_INFORMATIONSOURCE)
-  related_relatedthreatactor = relationship('RelatedThreatActor', uselist=False, secondary=_REL_RELATEDTHREATACTOR_INFORMATIONSOURCE)
-  related_relatedttp = relationship('RelatedTTP', uselist=False, secondary=_REL_RELATEDTTP_INFORMATIONSOURCE)
-  statement_description = relationship('Statement', secondary=_REL_STATEMENT_INFORMATIONSOURCE, uselist=False)
-  stix_header = relationship('STIXHeader', secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False)
-  incident_reporter = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_REP)
-  incident_responder = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_RES)
-  incident_coordinators = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_COO)
-  indicator_producer = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
-  sighting = relationship('Sighting', uselist=False, secondary=_REL_SIGHTING_INFORMATIONSOURCE)
-  base_test_mechanism = relationship('BaseTestMechanism', secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
-  markingspecification = relationship('MarkingSpecification', uselist=False, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE)
-  campaign = relationship('Campaign', uselist=False, secondary=_REL_CAMPAIGN_INFORMATIONSOURCE)
-  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_INFORMATIONSOURCE)
-  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE)
-  threatactor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_INFORMATIONSOURCE)
-  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_INFORMATIONSOURCE)
-  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   _PARENTS = ['information_source',
               'exploit_target',
@@ -147,6 +122,33 @@ class InformationSource(Entity, Base):
               'related_relatedthreatactor',
               'related_relatedttp',
               'related_relatedindicator', ]
+
+  related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_INFORMATIONSOURCE)
+  related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_INFORMATIONSOURCE)
+  related_relatedobservable = relationship('RelatedObservable', uselist=False, secondary=_REL_RELATEDOBSERVABLE_INFORMATIONSOURCE)
+  related_relatedexplottarget = relationship('RelatedExploitTarget', uselist=False, secondary=_REL_RELATEDEXPLOITTARGET_INFORMATIONSOURCE)
+  related_relatedpackageref = relationship('RelatedPackageRef', uselist=False, secondary=_REL_RELATEDPACKAGEREF_INFORMATIONSOURCE)
+  related_relatedpackage = relationship('RelatedPackage', uselist=False, secondary=_REL_RELATEDPACKAGE_INFORMATIONSOURCE)
+  related_relatedidentity = relationship('RelatedIdentity', uselist=False, secondary=_REL_RELATEDIDENTITY_INFORMATIONSOURCE)
+  related_relatedincident = relationship('RelatedIncident', uselist=False, secondary=_REL_RELATEDINCIDENT_INFORMATIONSOURCE)
+  related_relatedindicator = relationship('RelatedIndicator', uselist=False, secondary=_REL_RELATEDINDICATOR_INFORMATIONSOURCE)
+  related_relatedthreatactor = relationship('RelatedThreatActor', uselist=False, secondary=_REL_RELATEDTHREATACTOR_INFORMATIONSOURCE)
+  related_relatedttp = relationship('RelatedTTP', uselist=False, secondary=_REL_RELATEDTTP_INFORMATIONSOURCE)
+  statement_description = relationship('Statement', secondary=_REL_STATEMENT_INFORMATIONSOURCE, uselist=False)
+  stix_header = relationship('STIXHeader', secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False)
+  incident_reporter = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_REP)
+  incident_responder = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_RES)
+  incident_coordinators = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE_COO)
+  indicator_producer = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
+  sighting = relationship('Sighting', uselist=False, secondary=_REL_SIGHTING_INFORMATIONSOURCE)
+  base_test_mechanism = relationship('BaseTestMechanism', secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
+  markingspecification = relationship('MarkingSpecification', uselist=False, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE)
+  campaign = relationship('Campaign', uselist=False, secondary=_REL_CAMPAIGN_INFORMATIONSOURCE)
+  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_INFORMATIONSOURCE)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_INFORMATIONSOURCE)
+  threatactor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_INFORMATIONSOURCE)
+  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_INFORMATIONSOURCE)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   def to_dict(self, cache_object):
     copy = cache_object.make_copy()

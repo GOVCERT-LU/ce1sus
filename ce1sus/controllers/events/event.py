@@ -9,14 +9,15 @@ from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
 from ce1sus.common.checks import is_event_owner
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
+from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.db.brokers.common.common import STIXHeaderBroker
 from ce1sus.db.brokers.event.comments import CommentBroker
 from ce1sus.db.brokers.event.eventbroker import EventBroker, EventPermissionBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
-from ce1sus.db.brokers.event.observablebroker import ObservableBroker
-from ce1sus.controllers.events.observable import ObservableController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -36,6 +37,8 @@ class EventController(BaseController):
     self.relations_controller = RelationController(config, session)
     self.event_permission_broker = self.broker_factory(EventPermissionBroker)
     self.observable_controller = ObservableController(config, session)
+    self.common_controller = CommonController(config, session)
+    self.stix_header_broker = self.broker_factory(STIXHeaderBroker)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -119,12 +122,28 @@ class EventController(BaseController):
   def remove_event(self, event, cache_object):
     self.logger.debug('User {0} deleted a event {1}'.format(cache_object.user.username, event.identifier))
     try:
+      self.remove_stix_header(event.stix_header, cache_object, False)
 
       for obs in event.observables:
         self.observable_controller.remove_observable(obs, cache_object, False)
+      # TODO: the remaining removals
 
       self.event_broker.remove_by_id(event.identifier, False)
       self.event_broker.do_commit(True)
+    except BrokerException as error:
+      raise ControllerException(error)
+
+  def remove_stix_header(self, stix_header, cache_object, commit=True):
+    try:
+      if stix_header.description:
+        self.common_controller.remove_structured_text(stix_header.description, cache_object, False)
+      if stix_header.short_description:
+        self.common_controller.remove_structured_text(stix_header.short_description, cache_object, False)
+      self.common_controller.remove_handling(stix_header.handling, cache_object, False)
+      if stix_header.information_source:
+        self.common_controller.remove_information_source(stix_header.information_source, cache_object, False)
+      self.stix_header_broker.remove_by_id(stix_header.identifier, False)
+      self.stix_header_broker.do_commit(commit)
     except BrokerException as error:
       raise ControllerException(error)
 

@@ -42,24 +42,6 @@ class Confidence(Entity, Base):
   # TODO: support confidence_assertion_chain
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   
-  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_CONFIDENCE, uselist=False)
-  objective = relationship('Objective', secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False)
-  
-  related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_CONFIDENCE)
-  related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_CONFIDENCE)
-  related_relatedobservable = relationship('RelatedObservable', uselist=False, secondary=_REL_RELATEDOBSERVABLE_CONFIDENCE)
-  related_relatedexplottarget = relationship('RelatedExploitTarget', uselist=False, secondary=_REL_RELATEDEXPLOITTARGET_CONFIDENCE)
-  related_relatedpackageref = relationship('RelatedPackageRef', uselist=False, secondary=_REL_RELATEDPACKAGEREF_CONFIDENCE)
-  related_relatedpackage = relationship('RelatedPackage', uselist=False, secondary=_REL_RELATEDPACKAGE_CONFIDENCE)
-  related_relatedidentity = relationship('RelatedIdentity', uselist=False, secondary=_REL_RELATEDIDENTITY_CONFIDENCE)
-  related_relatedincident = relationship('RelatedIncident', uselist=False, secondary=_REL_RELATEDINCIDENT_CONFIDENCE)
-  related_relatedindicator = relationship('RelatedIndicator', uselist=False, secondary=_REL_RELATEDINDICATOR_CONFIDENCE)
-  related_relatedthreatactor = relationship('RelatedThreatActor', uselist=False, secondary=_REL_RELATEDTHREATACTOR_CONFIDENCE)
-  related_relatedttp = relationship('RelatedTTP', uselist=False, secondary=_REL_RELATEDTTP_CONFIDENCE)
-  statement_description = relationship('Statement', secondary=_REL_STATEMENT_CONFIDENCE, uselist=False)
-  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_CONFIDENCE)
-  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_CONFIDENCE)
-  sighting = relationship('Sighting', uselist=False, secondary=_REL_SIGHTING_CONFIDENCE)
 
 
   _PARENTS = ['campaign',
@@ -80,6 +62,24 @@ class Confidence(Entity, Base):
               'related_relatedttp',
               'related_relatedincident',
               ]
+
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_CONFIDENCE, uselist=False)
+  objective = relationship('Objective', secondary=_REL_OBJECTIVE_CONFIDENCE, uselist=False)
+  related_relatedcoa = relationship('RelatedCOA', uselist=False, secondary=_REL_RELATEDCOA_CONFIDENCE)
+  related_relatedcampaign = relationship('RelatedCampaign', uselist=False, secondary=_REL_RELATEDCAMPAIGN_CONFIDENCE)
+  related_relatedobservable = relationship('RelatedObservable', uselist=False, secondary=_REL_RELATEDOBSERVABLE_CONFIDENCE)
+  related_relatedexplottarget = relationship('RelatedExploitTarget', uselist=False, secondary=_REL_RELATEDEXPLOITTARGET_CONFIDENCE)
+  related_relatedpackageref = relationship('RelatedPackageRef', uselist=False, secondary=_REL_RELATEDPACKAGEREF_CONFIDENCE)
+  related_relatedpackage = relationship('RelatedPackage', uselist=False, secondary=_REL_RELATEDPACKAGE_CONFIDENCE)
+  related_relatedidentity = relationship('RelatedIdentity', uselist=False, secondary=_REL_RELATEDIDENTITY_CONFIDENCE)
+  related_relatedincident = relationship('RelatedIncident', uselist=False, secondary=_REL_RELATEDINCIDENT_CONFIDENCE)
+  related_relatedindicator = relationship('RelatedIndicator', uselist=False, secondary=_REL_RELATEDINDICATOR_CONFIDENCE)
+  related_relatedthreatactor = relationship('RelatedThreatActor', uselist=False, secondary=_REL_RELATEDTHREATACTOR_CONFIDENCE)
+  related_relatedttp = relationship('RelatedTTP', uselist=False, secondary=_REL_RELATEDTTP_CONFIDENCE)
+  statement = relationship('Statement', secondary=_REL_STATEMENT_CONFIDENCE, uselist=False)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_CONFIDENCE)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_CONFIDENCE)
+  sighting = relationship('Sighting', uselist=False, secondary=_REL_SIGHTING_CONFIDENCE)
 
 
   @property

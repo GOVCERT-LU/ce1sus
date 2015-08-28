@@ -39,8 +39,7 @@ class ToolInformation(Entity, Base):
 
   _PARENTS = ['information_source', 'resource']
   information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_TOOL)
-
-
+  resource = relationship('Resource', uselist=False, secondary='rel_resource_toolinformation')
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)

@@ -16,9 +16,10 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.relations import _REL_IDENTITY_RELATED_IDENTITY, _REL_INFORMATIONSOURCE_IDENTITY
 from ce1sus.db.classes.cstix.incident.relations import _REL_INCIDENT_IDENTITY
 from ce1sus.db.classes.cstix.threat_actor.relations import _REL_THREATACTOR_IDENTITY
+from ce1sus.db.classes.cstix.ttp.relations import _REL_VICTIMTARGETING_IDENTITY
+from ce1sus.db.classes.cstix.ttp.resource import _REL_RESOURCE_IDENTITIY
 from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
-from ce1sus.db.classes.cstix.ttp.relations import _REL_VICTIMTARGETING_IDENTITY
 
 
 __author__ = 'Weber Jean-Paul'
@@ -45,15 +46,18 @@ class Identity(Entity, Base):
               'incident',
               'related_identity']
 
+  incident = relationship('Incident', secondary=_REL_INCIDENT_IDENTITY, uselist=False)
+  threat_actor = relationship('ThreatActor', secondary=_REL_THREATACTOR_IDENTITY, uselist=False)
+  victim_targeting = relationship('VictimTargeting', secondary=_REL_VICTIMTARGETING_IDENTITY, uselist=False)
+  information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_IDENTITY)
+  related_identity = relationship('RelatedIdentity', uselist=False, primaryjoin='RelatedIdentity.child_id==Identity.identifier')
+  resource = relationship('Resource', uselist=False, secondary=_REL_RESOURCE_IDENTITIY)
+
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   idref = Column('idref', UnicodeType(45), nullable=True, index=True)
   name = Column('name', UnicodeType(255), index=True, nullable=True)
   related_identities = relationship('RelatedIdentity', secondary=_REL_IDENTITY_RELATED_IDENTITY)
-  information_source = relationship('InformationSource', uselist=False, secondary=_REL_INFORMATIONSOURCE_IDENTITY)
-  related_identity = relationship('RelatedIdentity', uselist=False, primaryjoin='RelatedIdentity.child_id==Identity.identifier')
-  incident = relationship('Incident', secondary=_REL_INCIDENT_IDENTITY, uselist=False)
-  threat_actor = relationship('ThreatActor', secondary=_REL_THREATACTOR_IDENTITY, uselist=False)
-  victim_targeting = relationship('VictimTargeting', secondary=_REL_VICTIMTARGETING_IDENTITY, uselist=False)
+
 
 
   def to_dict(self, cache_object):

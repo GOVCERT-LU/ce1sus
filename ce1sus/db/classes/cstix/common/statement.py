@@ -34,7 +34,6 @@ class Statement(Entity, Base):
   description = relationship('StructuredText', secondary=_REL_STATEMENT_STRUCTUREDTEXT, uselist=False)
   source = relationship('InformationSource', uselist=False, secondary=_REL_STATEMENT_INFORMATIONSOURCE)
   confidence = relationship('Confidence', uselist=False, secondary=_REL_STATEMENT_CONFIDENCE)
-  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STATEMENT)
 
   _PARENTS = ['base_test_mechanism',
               'indicator',
@@ -49,6 +48,7 @@ class Statement(Entity, Base):
   coa_efficacy = relationship('CourseOfAction', secondary=_REL_EFFICACY_STATEMENT, uselist=False)
   simple_marking_structure = relationship('SimpleMarkingStructure', secondary=_REL_MARKINGSTRUCTURE_STATEMENT, uselist=False)
   base_test_mechanism = relationship('BaseTestMechanism', secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STATEMENT)
 
   def to_dict(self, cache_object):
     if cache_object.complete:

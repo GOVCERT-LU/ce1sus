@@ -76,7 +76,7 @@ class HandlerHandler(RestBaseHandler):
             else:
               attribute = None
             # Make the generic call for additional data
-            return handler.get_data(attribute, definition, parameters)
+            return handler.get_data(attribute, parameters)
           else:
             raise RestHandlerException(u'Method {0} is not specified'.format(method))
         else:

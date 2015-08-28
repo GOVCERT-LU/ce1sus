@@ -10,7 +10,6 @@ from sqlalchemy.schema import Column, ForeignKey, Table
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.ttp.infrastructure import Infrastructure
 from ce1sus.db.classes.internal.corebase import BigIntegerType
@@ -60,11 +59,12 @@ _REL_RESOURCE_IDENTITIY = Table('rel_resource_identity', getattr(Base, 'metadata
 
 class Resource(Entity, Base):
 
-  tools = relationship(ToolInformation, secondary=_REL_RESOURCE_TOOLINFORMATION, backref='resource')
+  tools = relationship(ToolInformation, secondary=_REL_RESOURCE_TOOLINFORMATION)
   infrastructure = relationship(Infrastructure, uselist=False, backref='resource')
-  personas = relationship(Identity, secondary=_REL_RESOURCE_IDENTITIY, backref='resource')
+  personas = relationship('Identity', secondary=_REL_RESOURCE_IDENTITIY)
 
   _PARENTS = ['ttp']
+
   ttp = relationship('TTP', uselist=False)
 
   # custom ones related to ce1sus internals

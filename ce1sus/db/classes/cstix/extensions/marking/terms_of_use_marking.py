@@ -20,7 +20,7 @@ __license__ = 'GPL v3+'
 
 class TermsOfUseMarkingStructure(MarkingStructure):
   # override identifier to keep the polymorphics
-  identifier = Column(BigIntegerType, ForeignKey('markingstructures.markingstructure_id'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('markingstructures.markingstructure_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
   terms_of_use = Column('terms_of_use', UnicodeTextType(), nullable=False)
 
   __mapper_args__ = {'polymorphic_identity':'termsofusemarkingstructure'}

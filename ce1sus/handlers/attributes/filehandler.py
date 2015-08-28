@@ -264,18 +264,11 @@ class FileHandler(GenericHandler):
     """
     Returns the original filename
     """
-    if attribtue.children:
-      for child in attribtue.children:
-        if child.definition.chksum == UUID_FILE_NAME:
-          return child.plain_value
-      # ok no filename has been found using the one from the attribute value
-      return basename(attribtue.value)
-    else:
-      # get parent object
-      if attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent:
-        for attribtue in attribtue.object.related_object_parent and attribtue.object.related_object_parent[0].parent.attributes:
-          if attribtue.definition.chksum == UUID_FILE_NAME:
-            return attribtue.value
+    # get parent object
+    if attribtue.object.parent.parent:
+      for attribtue in  attribtue.object.parent.parent.attributes:
+        if attribtue.definition.chksum == UUID_FILE_NAME:
+          return attribtue.value
 
       return None
 

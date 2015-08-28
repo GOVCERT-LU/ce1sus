@@ -11,7 +11,6 @@ from sqlalchemy.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
-from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.indicator.relations import _REL_TESTMECHANISM_STATEMENT, _REL_TESTMECHANISM_INFORMATIONSOURCE
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
 from ce1sus.db.common.session import Base
@@ -36,7 +35,7 @@ class BaseTestMechanism(Entity, Base):
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
-  efficacy = relationship(Statement, secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
+  efficacy = relationship('Statement', secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
   producer = relationship('InformationSource', secondary=_REL_TESTMECHANISM_INFORMATIONSOURCE, uselist=False)
 
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

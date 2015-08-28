@@ -13,7 +13,6 @@ from sqlalchemy.types import DateTime
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.confidence import Confidence
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.indicator.relations import _REL_SIGHTING_STRUCTUREDTEXT, _REL_SIGHTING_CONFIDENCE, _REL_SIGHTING_REL_OBSERVABLE, \
   _REL_SIGHTING_INFORMATIONSOURCE
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType
@@ -30,7 +29,7 @@ __license__ = 'GPL v3+'
 class Sighting(Entity, Base):
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'seconds')
-  description = relationship(StructuredText, secondary=_REL_SIGHTING_STRUCTUREDTEXT, uselist=False)
+  description = relationship('StructuredText', secondary=_REL_SIGHTING_STRUCTUREDTEXT, uselist=False)
   confidence = relationship(Confidence, secondary=_REL_SIGHTING_CONFIDENCE, uselist=False)
   # type reference = anyURI
   reference = Column('reference', UnicodeType(255))

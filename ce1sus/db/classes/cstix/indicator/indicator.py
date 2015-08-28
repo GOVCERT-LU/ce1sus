@@ -15,7 +15,6 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.base import BaseCoreComponent
 from ce1sus.db.classes.cstix.common.confidence import Confidence
 from ce1sus.db.classes.cstix.common.kill_chains import KillChainPhaseReference
-from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
 from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICAOTR_INFORMATIONSOURCE, _REL_INDICATOR_OBSERVABLE, _REL_INDICATOR_CONFIDENCE, \
   _REL_INDICATOR_RELATED_TTPS, _REL_INDICATOR_HANDLING, _REL_INDICATOR_KILLCHAINPHASEREF, _REL_INDICATOR_RELATED_INDICATOR, _REL_INDICATOR_RELATED_CAMPAIGN, \
@@ -113,7 +112,7 @@ class Indicator(BaseCoreComponent, Base):
   def observable_composition_operator(self, value):
     self.operator = value
 
-  likely_impact = relationship(Statement, secondary=_REL_INDICATOR_STATEMENT, uselist=False)
+  likely_impact = relationship('Statement', secondary=_REL_INDICATOR_STATEMENT, uselist=False)
   negate = Column('negate', Boolean, default=None)
   related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
 

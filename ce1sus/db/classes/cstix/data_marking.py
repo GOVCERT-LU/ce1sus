@@ -81,11 +81,7 @@ class MarkingSpecification(Entity, Base):
   def id_(self, value):
     self.set_id(value)
 
-  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_HANDLING, uselist=False)
-  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_HANDLING)
-  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_HANDLING)
-  threat_actor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_HANDLING)
-  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_HANDLING)
+
 
   _PARENTS = ['campaign',
               'stix_header',
@@ -95,13 +91,21 @@ class MarkingSpecification(Entity, Base):
               'threat_actor',
               'incident']
 
+  campaign = relationship('Campaign', secondary=_REL_CAMPAIGN_HANDLING, uselist=False)
+  stix_header = relationship('STIXHeader', secondary=_REL_STIXHEADER_HANDLING, uselist=False)
+  exploit_target = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_HANDLING)
+  indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_HANDLING)
+  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_HANDLING)
+  threat_actor = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_HANDLING)
+  ttp = relationship('TTP', uselist=False, secondary=_REL_TTP_HANDLING)
+
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   version_db = Column('version', UnicodeType(40), nullable=True)
   controlled_structure = Column('controlled_structure', UnicodeType(255))
   marking_structures = relationship(MarkingStructure)
   information_source = relationship(InformationSource, secondary=_REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE, uselist=False)
-  stix_header = relationship('STIXHeader', secondary=_REL_STIXHEADER_HANDLING, uselist=False)
-  incident = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_HANDLING)
+
+
 
   __version = None
   @property

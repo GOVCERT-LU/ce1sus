@@ -97,11 +97,13 @@ class Observable(Entity, Base):
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   sighting_count = Column(u'sighting_count', Integer, nullable=True, index=True)
   keywords = relationship('ObservableKeyword')
-  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False)
+
+  _PARENTS = ['event', 'indicator', 'composedobservable', 'related_observable']
+
+  event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE)
   related_observable = relationship(RelatedObservable, primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_OBSERVABLE)
-  _PARENTS = ['event', 'indicator', 'composedobservable', 'related_observable']
-  event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE)
+  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False)
 
   def validate(self):
     return True
