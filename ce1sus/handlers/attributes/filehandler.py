@@ -6,25 +6,27 @@ module handing the filehandler
 Created: Aug 22, 2013
 """
 import base64
+from ce1sus.helpers.common.config import ConfigException
 import cherrypy
 from cherrypy.lib.static import serve_file
 from datetime import datetime
+import magic
 from os import makedirs
 from os import remove
 from os.path import isfile, getsize, basename, exists, dirname
 from shutil import move, rmtree
 import types
+from uuid import uuid4
 import zipfile
 
 from ce1sus.common.checks import can_user_download
 from ce1sus.db.classes.internal.common import ValueTable
-from ce1sus.handlers.base import HandlerException
+from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.attributes.generichandler import GenericHandler
-from ce1sus.helpers.common.config import ConfigException
+from ce1sus.handlers.base import HandlerException
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
-from ce1sus.db.classes.internal.object import RelatedObject
-import magic
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -115,6 +117,12 @@ class FileHandler(GenericHandler):
     except TypeError as error:
       raise HandlerException(error)
 
+  def create_attribute(self, obj, json, main=False):
+    attribute = super(FileHandler, self).create_attribute(obj, json)
+    if not main:
+      attribute.uuid = uuid4()
+    return attribute
+
   def assemble(self, obj, json):
     value = json.get('value', None)
     filename = value.get('name', None)
@@ -152,7 +160,7 @@ class FileHandler(GenericHandler):
 
       attributes = list()
 
-      main_attribute = self.create_attribute(obj, internal_json)
+      main_attribute = self.create_attribute(obj, internal_json, True)
       # secondary
 
 

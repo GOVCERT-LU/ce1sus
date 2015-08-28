@@ -46,7 +46,7 @@ class TTP(BaseCoreComponent, Base):
 
     result = {
               'behavior': self.attribute_to_dict(self.behavior, cache_object),
-              'related_ttps': self.attributelist_to_dict(self.ttps, cache_object),
+              'related_ttps': self.attributelist_to_dict(self.related_ttps, cache_object),
               'indented_effects': self.attributelist_to_dict(self.intended_effects, cache_object),
               'resources': self.attribute_to_dict(self.resources, cache_object),
               'victim_targeting': self.attribute_to_dict(self.victim_targeting, cache_object),

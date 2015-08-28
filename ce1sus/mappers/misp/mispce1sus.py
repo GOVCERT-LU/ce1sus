@@ -16,9 +16,15 @@ from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
+from ce1sus.db.classes.cstix.common.names import Name
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
-from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.cstix.exploit_target.exploittarget import ExploitTarget
+from ce1sus.db.classes.cstix.exploit_target.vulnerability import Vulnerability
+from ce1sus.db.classes.cstix.ttp.behavior import Behavior
+from ce1sus.db.classes.cstix.ttp.malware_instance import MalwareInstance
+from ce1sus.db.classes.cstix.ttp.ttp import TTP
+from ce1sus.db.classes.internal.attributes.attribute import Attribute, Condition
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.definitions import AttributeDefinition, ObjectDefinition
 from ce1sus.db.classes.internal.event import Event
@@ -127,10 +133,6 @@ class MispConverter(BaseController):
       elif container == 'Observable':
         obs = self.__assemble_observable(obj_def_name, attr_def_name, xml_attribute, event, cache_object)
         event.observables.append(obs)
-
-      elif container == 'TTP':
-        ttp = self.__assemble_ttp()
-        event.ttps.append(ttp)
       elif container == 'Report':
         report = self.__assemble_report(attr_def_name, xml_attribute, cache_object)
         event.reports.append(report)
@@ -143,19 +145,53 @@ class MispConverter(BaseController):
       if container == 'Observable':
         if 'ip' in type_:
           obs = self.__assemble_ip_address(obj_def_name, type_, xml_attribute, event, cache_object)
-        if obj_def_name == 'File/Artifact':
-          obs = self.__assemble_attachment(obj_def_name, type_, xml_attribute, event, cache_object)
         else:
           raise ControllerException('No special case defined for container {0} and object {1}'.format(container, obj_def_name))
+      elif container == 'TTP':
+        ttp = self.__assemble_ttp(type_, xml_attribute, event, cache_object)
+        event.ttps.append(ttp)
       else:
         raise ControllerException('Container {0} cannot be found for special cases'.format(container))
 
     else:
       # log this as error
       self.__assemble_errornous_observable(xml_attribute, event, cache_object)
-  
-  def __assemble_attachment(self, obj_def_name, type_, xml_attribute, event, cache_object):
-    raise
+
+  def __assemble_ttp(self, type_, xml_attribute, event, cache_object):
+    timestamp = MispConverter.__get_value(xml_attribute, 'timestamp')
+    timestamp = datetime.utcfromtimestamp(int(timestamp))
+
+    ttp = TTP()
+    self.set_base(xml_attribute, ttp, cache_object)
+    ttp.timestamp = timestamp
+    if type == 'vulnerability':
+      vulnerability = Vulnerability()
+      self.set_base(xml_attribute, vulnerability, cache_object)
+      vulnerability.uuid = uuid4()
+
+      exploit_target = ExploitTarget()
+      self.set_base(xml_attribute, exploit_target, cache_object)
+      exploit_target.uuid = uuid4()
+      exploit_target.timestamp = timestamp
+      exploit_target.add_vulnerability(vulnerability)
+      ttp.exploit_targets.append(exploit_target)
+    else:
+      value = MispConverter.__get_value(xml_attribute, 'value')
+
+      malware = MalwareInstance()
+      self.set_base(xml_attribute, malware, cache_object)
+      malware.uuid = uuid4()
+      name = Name()
+      self.set_base(xml_attribute, name, cache_object)
+      name.name = value
+
+      malware.names.append(name)
+
+      ttp.behavior = Behavior()
+      self.set_base(xml_attribute, ttp.behavior, cache_object)
+      ttp.behavior.uuid = uuid4()
+      ttp.behavior.malware_instances.append(malware)
+    event.ttps.append(ttp)
 
   def __assemble_ip_address(self, obj_def_name, type_, xml_attribute, parent, cache_object):
     value = MispConverter.__get_value(xml_attribute, 'value')
@@ -384,6 +420,8 @@ class MispConverter(BaseController):
     self.set_base(xml_attribute, attribute, cache_object)
     attribute.definition = attribute_definition
     attribute.object = obj
+    attribute.condition = Condition()
+    attribute.condition.value = 'Equals'
     if data:
       # set for files as this is a data element
       attribute.value = {'name': value, 'data': data}
@@ -457,11 +495,13 @@ class MispConverter(BaseController):
     cache_object_copy = cache_object.make_copy()
     cache_object_copy.complete = True
     cache_object_copy.inflated = True
-    event = self.assembler.assemble(event.to_dict(cache_object_copy), Event, None, cache_object)
-    pump =  json.dumps(event.to_dict(cache_object_copy), sort_keys=True, indent=4, separators=(',', ': '))
+    pump = json.dumps(event.to_dict(cache_object_copy), sort_keys=True, indent=4, separators=(',', ': '))
     f = open('/home/jhemp/dump.json', 'w+')
     f.write(pump)
     f.close()
+    event = self.assembler.assemble(event.to_dict(cache_object_copy), Event, None, cache_object)
+   
+
     return event
     
   def __remove_doublicates(self, event):

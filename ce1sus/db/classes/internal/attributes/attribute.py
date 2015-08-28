@@ -203,6 +203,7 @@ class Attribute(BaseElement, Base):
 
     value = self.convert_value(self.value)
     handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
+    """
     if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
       # serve file
       fh = self.definition.handler
@@ -211,7 +212,7 @@ class Attribute(BaseElement, Base):
       # TODO: Find a way not to do this aways
       # with open(filepath, "rb") as raw_file:
       #    value = b64encode(raw_file.read())
-
+    """
     result = {'identifier': self.convert_value(self.uuid),
             'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.definition.to_dict(cache_object),
