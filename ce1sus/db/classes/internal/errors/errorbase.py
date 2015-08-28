@@ -52,7 +52,7 @@ class ErrorBase(BaseObject, Base):
 
 class ErrorObservable(ErrorBase, Base):
 
-  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
 
   indicator_id = Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   indicator = relationship(Indicator, uselist=False)
@@ -70,7 +70,7 @@ class ErrorObservable(ErrorBase, Base):
 
 class ErrorObject(ErrorBase, Base):
 
-  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
   observable_id = Column('observable_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   observable = relationship(Observable, uselist=False)
 
@@ -87,7 +87,7 @@ class ErrorObject(ErrorBase, Base):
 
 class ErrorAttribute(ErrorBase, Base):
 
-  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
 
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship(Object, uselist=False)
@@ -105,7 +105,7 @@ class ErrorAttribute(ErrorBase, Base):
 
 class ErrorReference(ErrorBase, Base):
 
-  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('errorbases.errorbase_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
 
   report_id = Column('report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   report = relationship(Report, uselist=False)
