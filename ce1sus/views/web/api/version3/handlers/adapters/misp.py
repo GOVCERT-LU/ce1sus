@@ -19,6 +19,7 @@ from ce1sus.handlers.base import HandlerException
 from ce1sus.mappers.misp.mispce1sus import MispConverter
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerNotFoundException, RestHandlerException
 from ce1sus.controllers.admin.group import GroupController
+from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
 
 
 __author__ = 'Weber Jean-Paul'
@@ -32,6 +33,7 @@ class MISPHandler(RestBaseHandler):
   def __init__(self, config):
     super(MISPHandler, self).__init__(config)
     self.misp_converter = MispConverter(config)
+    self.ce1sus_converter = Ce1susMISP(config)
     self.merger = Merger(config)
     try:
       basePath = dirname(abspath(__file__))
@@ -66,19 +68,6 @@ class MISPHandler(RestBaseHandler):
           raise HandlerException('File does not end in xml or XML')
       else:
         raise HandlerException('Provided json does not have a file attribute')
-
-
-      # Additional informations
-      # Download baseurl
-
-      # tag
-      details = json.get('details')
-      tag = None
-      baseurl = None
-      if details:
-        tag = details.get('tag', None)
-        baseurl = details.get('baseurl', None)
-
 
       # start conversion
       xml_string = b64decode(data)
@@ -138,3 +127,29 @@ class MISPHandler(RestBaseHandler):
     f.write(data)
     f.close()
 
+  @rest_method()
+  @methods(allowed=['GET'])
+  def export_xml(self, **args):
+    try:
+      cache_object = self.get_cache_object(args)
+      method = args.get('method', None)
+      path = args.get('path')
+      requested_object = self.parse_path(path, method)
+      event_id = requested_object.get('event_id', None)
+      if event_id:
+        event = self.event_controller.get_event_by_uuid(event_id)
+        xml_str = self.ce1sus_converter.create_event_xml(event, cache_object)
+        return xml_str
+      else:
+        raise RestHandlerException('Cannot be called witout a valid uuid')
+    except ControllerNothingFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except ControllerException as error:
+      raise RestHandlerException(error)
+
+  @rest_method()
+
+  def shadow_attributes(self, *vpath, **params):
+    # this is called from the misp server to see it his know events have new proposals
+    # TODO: Proposal for misp
+    raise RestHandlerNotFoundException('Not supported')

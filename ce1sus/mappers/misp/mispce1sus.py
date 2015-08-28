@@ -319,11 +319,6 @@ class MispConverter(BaseController):
     
     report.references.append(reference)
 
-
-    
-
-
-
     return report
   
   def __assemble_reference(self, xml_attribute, ref_def_name, cache_object):

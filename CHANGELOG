@@ -6,8 +6,12 @@ Release 0.11.1
 * Added STIX elements, Incidents, Threat Actor, Campaign, Course of Action, TTP, exploit Targets to database schema
 * Changed models to be more STIX like
 * New class structure and output
-* New assembler and merger
 * Fixed administration interface bugs
+* Everything is assembled via assembler
+* Complete merging possible
+* Unknown objects/attributes will be logged in the event errors
+* Added Error Tab to event to redress erroneous entries
+* Enhanced MISP support, with better mappings
 * Relations can be found via groupings
 
 Release 0.11.0
