@@ -488,6 +488,7 @@ class MispConverter(BaseController):
     if role_name:
       role = self.__assemble_role(role_name, xml_element, cache_object)
       information_source.roles.append(role)
+    return information_source
     
   def __assemble_role(self, role_name, xml_element, cache_object):
     role = InformationSourceRole()
@@ -518,11 +519,11 @@ class MispConverter(BaseController):
 
     return isref
 
-  def __set_event(self, xml_event, cache_object):
+  def __set_event(self, xml_event, transformer_group, cache_object):
     self.logger.debug('Mapping Event properties')
     misp_id = MispConverter.__get_value(xml_event, 'id')
     org = MispConverter.__get_value(xml_event, 'org')
-
+    setattr(cache_object, 'org', org)
 
     risk = MispConverter.__get_value(xml_event, 'risk')
     if not risk:
@@ -554,12 +555,16 @@ class MispConverter(BaseController):
 
     if orgc:
       information_source = self.__assemble_information_source(orgc, 'Initial Author', xml_event, cache_object)
-      information_source.contributing_sources.append(self.__assemble_information_source(org, None, xml_event, cache_object))
+      if org != orgc:
+        information_source.contributing_sources.append(self.__assemble_information_source(org, None, xml_event, cache_object))
     else:
       information_source = self.__assemble_information_source(org, 'Initial Author', xml_event, cache_object)
-    # add the owner due to the transformations
-    information_source.contributing_sources.append(self.__assemble_information_source('owner', 'Transformer/Translator', xml_event, cache_object))
     
+    if transformer_group:
+      # add the owner due to the transformations
+      information_source.contributing_sources.append(self.__assemble_information_source(transformer_group.name, 'Transformer/Translator', xml_event, cache_object))
+
+
     setattr(cache_object, 'information_source', information_source)
 
     event.stix_header.information_source = information_source
@@ -614,7 +619,7 @@ class MispConverter(BaseController):
     
     pass
     
-  def convert_misp_xml_string(self, xml_string, tag, baseurl, cache_object):
+  def convert_misp_xml_string(self, xml_string, cache_object, transformer_group=None):
     #load xml
     # remove last newlines
 
@@ -623,7 +628,7 @@ class MispConverter(BaseController):
     self.logger.debug('Loaded xml')
     # remove the response around the event
     xml_event = xml[0]
-    return self.__set_event(xml_event, cache_object)
+    return self.__set_event(xml_event, transformer_group, cache_object)
     
     
     

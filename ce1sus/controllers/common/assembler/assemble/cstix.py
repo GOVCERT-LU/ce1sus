@@ -43,6 +43,7 @@ class StixAssembler(BaseAssembler):
       if handling:
         handling = self.assemble_handling(instance, handling, cache_object)
         instance.handling = handling
+
       information_source = json.get('information_source', None)
       if information_source:
         information_source = self.assemble_information_source(instance, information_source, cache_object)

@@ -52,7 +52,7 @@
             <div style="text-align: left;">
               {{event.stix_header.information_source.identity.name}} - {{getRolesName(event.stix_header.information_source.roles)}}
               <div ng-repeat="informationSource in event.stix_header.information_source.contributing_sources">
-                <br>{{information_source.identity.name}} - {{information_source.roles}}
+                {{informationSource.identity.name}} - {{getRolesName(informationSource.roles)}}<br>
               </div>
             </div>
           </div>

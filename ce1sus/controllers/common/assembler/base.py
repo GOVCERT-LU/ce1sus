@@ -51,10 +51,13 @@ class BaseAssembler(BaseChanger):
       identity = json.get('identity', None)
       if identity:
         identity = self.assemble_identity(instance, identity, cache_object)
+        instance.identity = identity
+
       contributing_sources = json.get('contributing_sources', None)
       if contributing_sources:
         for contributing_source in contributing_sources:
           contributing_source = self.assemble_information_source(instance, contributing_source, cache_object)
+          instance.contributing_sources.append(contributing_source)
       time = json.get('time', None)
       if time:
         time = self.assemble_cybox_time(instance, time, cache_object)
@@ -72,7 +75,8 @@ class BaseAssembler(BaseChanger):
           role = self.assemble_information_source_role(instance, role, cache_object)
           if role:
             instance.roles.append(role)
-      return instance
+      if instance.identity:
+        return instance
 
   def assemble_identity(self, parent, json, cache_object):
     instance = Identity()
@@ -200,7 +204,7 @@ class BaseAssembler(BaseChanger):
     instance = InformationSourceRole()
     self.set_base(instance, json, cache_object, parent)
     if json:
-      role = json.get('role', None)
+      role = json.get('name', None)
       if role:
         instance.role = role
         return instance

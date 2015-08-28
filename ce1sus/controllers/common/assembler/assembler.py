@@ -45,10 +45,3 @@ class Assembler(BaseChangeController):
         elif params_count == 4:
           return fct(parent, json, cache_object)
     raise BaseChangeControllerException('Assembling for class {0} is not defined function {1} is missing'.format(classname, fctname))
-
-  def assemble_attribute(self, obj, json, cache_object):
-
-    cache_object.insert = True
-    """ returns an object """
-    return self.cybox_assembler.assemble_attribute(obj, json, cache_object)
-
