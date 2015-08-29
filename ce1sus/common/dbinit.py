@@ -21,10 +21,10 @@ from ce1sus.controllers.admin.objectdefinitions import ObjectDefinitionControlle
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.common.assembler.assembler import Assembler
-from ce1sus.db.brokers.definitions.handlerdefinitionbroker import AttributeHandlerBroker
+from ce1sus.controllers.common.assembler.base import AssemblerException
 from ce1sus.db.classes.cstix.common.vocabstring import VocabString
-from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
 from ce1sus.db.classes.cstix.extensions.marking.simple_markings import SimpleMarkingStructure
+from ce1sus.db.classes.cstix.extensions.test_mechanism.generic_test_mechanism import GenericTestMechanism
 from ce1sus.db.classes.internal.attributes.attribute import Condition
 from ce1sus.db.classes.internal.backend.config import Ce1susConfig
 from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
@@ -34,6 +34,7 @@ from ce1sus.db.classes.internal.report import ReferenceDefinition
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.classes.internal.usrmgt.user import User
 from ce1sus.db.common.session import SessionManager, Base
+from ce1sus.handlers.base import HandlerException
 from ce1sus.helpers.common.hash import hashSHA1
 from maintenance import Maintenance
 
@@ -162,7 +163,6 @@ def dbinit(config, json_location=''):
   session = mysql_session
   user_ctrl = UserController(config, session)
   assembler = Assembler(config, session)
-  handler_broker = AttributeHandlerBroker(session)
   print "Populate users"
   all_users = get_users(config)
   users = list()
@@ -189,7 +189,12 @@ def dbinit(config, json_location=''):
   maintenance.register_handler('filehandler', 'references', 'FileReferenceHandler', True)
   maintenance.register_handler('generichandler', 'references', 'GenericHandler', True)
   maintenance.register_handler('linkhandler', 'references', 'LinkHandler', True)
-  maintenance.register_handler('rthandler', 'references', 'RTHandler', True)
+  try:
+    maintenance.register_handler('rthandler', 'references', 'RTHandler', True)
+  except HandlerException:
+    # RT handler is not configured
+    pass
+
   maintenance.register_handler('texthandler', 'references', 'TextHandler', True)
 
 
@@ -231,7 +236,6 @@ def dbinit(config, json_location=''):
 
 
   # add attributes definitions
-
   with open(json_location + 'attributes.json') as data_file:
     attrs = json.load(data_file)
   print "Populating attribute definitions"
@@ -264,8 +268,12 @@ def dbinit(config, json_location=''):
     references = json.load(data_file)
   print "Populating references definitions"
   for ref_json in references:
-    ref_def = assembler.assemble(ref_json, ReferenceDefinition, None, cache_object)
-    ref_ctrl.insert_reference_definition(ref_def, False)
+    try:
+      ref_def = assembler.assemble(ref_json, ReferenceDefinition, None, cache_object)
+      ref_ctrl.insert_reference_definition(ref_def, False)
+    except AssemblerException:
+      # Ignore when the handler does not exist
+      pass
 
   ref_ctrl.reference_definition_broker.do_commit(True)
 

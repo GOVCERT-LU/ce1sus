@@ -34,7 +34,7 @@ class DefinitionBrokerBase(BrokerBase):
       definition = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(), 'chksum') == chksum).one()
       return definition
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'No {0} not found for CHKSUM {1}'.format(self.get_broker_class().__class__.__name__,
+      raise NothingFoundException(u'No {0} not found for CHKSUM {1}'.format(self.get_broker_class().__name__,
                                                                             chksum))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
@@ -57,7 +57,7 @@ class DefinitionBrokerBase(BrokerBase):
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for name :{0}'.format(name))
     except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'No {0} not found for {1}'.format(self.get_broker_class().__class__.__name__, name))
+      raise NothingFoundException(u'No {0} not found for {1}'.format(self.get_broker_class().__name__, name))
     except sqlalchemy.exc.SQLAlchemyError as error:
       self.session.rollback()
       raise BrokerException(error)

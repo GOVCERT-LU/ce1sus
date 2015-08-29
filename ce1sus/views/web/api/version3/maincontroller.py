@@ -6,6 +6,7 @@
 Created on Aug 26, 2015
 """
 
+from ce1sus.views.web.api.version3.base import AbstractRestController
 from ce1sus.views.web.api.version3.handlers.admin.adminattributehandler import AdminAttributeHandler
 from ce1sus.views.web.api.version3.handlers.admin.admingrouphandler import AdminGroupHandler
 from ce1sus.views.web.api.version3.handlers.admin.adminindicatorhandler import AdminIndicatorTypesHandler
@@ -30,7 +31,7 @@ from ce1sus.views.web.api.version3.handlers.events.searchhandler import SearchHa
 from ce1sus.views.web.api.version3.handlers.loginhandler import LoginHandler, LogoutHandler
 from ce1sus.views.web.api.version3.handlers.mischandler import VersionHandler, HandlerHandler, TablesHandler, ReferenceHandlerHandler, SyncServerTypesHandler, \
   UserGroupsHandler
-from ce1sus.views.web.api.version3.base import AbstractRestController
+
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -69,7 +70,7 @@ class MainController(AbstractRestController):
     self.instances['referencedefinition'] = AdminReferenceDefinitionHandler(config)
     self.instances['report'] = ReportHandler(config)
     self.instances['indicatortypes'] = AdminIndicatorTypesHandler(config)
-    # self.instances['syncservers'] = SyncServerHandler(config)
+    self.instances['syncservers'] = SyncServerHandler(config)
     self.instances['servertypes'] = SyncServerTypesHandler(config)
     self.instances['tlps'] = TLPHanlder(config)
     self.instances['processes'] = ProcessHandler(config)

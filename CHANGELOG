@@ -13,6 +13,7 @@ Release 0.11.1
 * Added Error Tab to event to redress erroneous entries
 * Enhanced MISP support, with better mappings
 * Relations can be found via groupings
+* Revision dumps
 
 Release 0.11.0
 --------------

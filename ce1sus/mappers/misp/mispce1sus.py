@@ -38,6 +38,7 @@ from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.misp.common import get_container_object_attribute, get_tlp, ANALYSIS_MAP, RISK_MAP
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
+from sqlalchemy.orm.session import make_transient
 
 
 __author__ = 'Weber Jean-Paul'
@@ -167,7 +168,8 @@ class MispConverter(BaseController):
 
     else:
       # log this as error
-      self.__assemble_errornous_observable(xml_attribute, event, cache_object)
+      obs = self.__assemble_errornous_observable(xml_attribute, event, cache_object)
+      event.observables.append(obs)
 
   def __assemble_test_mechanism_indicator(self, obj_def_name, xml_attribute, event, cache_object):
     value = MispConverter.__get_value(xml_attribute, 'value')
@@ -377,7 +379,7 @@ class MispConverter(BaseController):
     return None
   
   def __assemble_errornous_observable(self, xml_attribute, parent, cache_object):
-    self.logger.debug('Assembling Observable for a MISP Event')
+    self.logger.debug('Assembling bogus Observable for a MISP Event')
 
     comment = MispConverter.__get_value(xml_attribute, 'comment')
     type_ = MispConverter.__get_value(xml_attribute, 'type')
@@ -396,7 +398,10 @@ class MispConverter(BaseController):
     obj.uuid = uuid4()
     # definition
     obj.definition = ObjectDefinition()
+    self.set_base(xml_attribute, obj.definition, cache_object)
     obj.definition.uuid = uuid4()
+    obj.definition.name = 'Unknown'
+
     observable.object = obj
     obj.observable = observable
 
@@ -413,7 +418,12 @@ class MispConverter(BaseController):
 
     attribute.value = u'[{0}{1}]: {2}'.format(category, type_, value)
     attribute.definition = AttributeDefinition()
+    self.set_base(xml_attribute, attribute.definition, cache_object)
     attribute.definition.uuid = uuid4()
+    attribute.definition.name = 'Unknown'
+    attribute.definition.attribute_handler = attribute_definition.attribute_handler
+    attribute.definition.value_type = attribute_definition.value_type
+    attribute.definition.default_condition = attribute_definition.default_condition
     attribute.is_ioc = ioc == '1'
     obj.attributes.append(attribute)
 

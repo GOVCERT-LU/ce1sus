@@ -131,14 +131,17 @@ class AbstractRestController(BaseView):
         if http_method in method.allowed_http_methods:
           try:
             headers = cherrypy.request.headers
+            cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
             result = method(path=path, json=json, method=http_method, headers=headers, parameters=params)
             # execute method
             # set the correct headers
-            cherrypy.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
             if isinstance(result, file_generator):
               return result
-            else:
+            elif 'application/json' in cherrypy.response.headers['Content-Type']:
               return dumps(result)
+            else:
+              return result
+
           except RestHandlerException as error:
             message = u'{0}'.format(error.message)
             self.logger.error(message)

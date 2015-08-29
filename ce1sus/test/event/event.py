@@ -71,3 +71,4 @@ class TestEvent(LoggedInBase):
         assert False
       else:
         assert False
+

@@ -25,7 +25,7 @@ class SyncServerHandler(RestBaseHandler):
   def __init__(self, config):
     super(SyncServerHandler, self).__init__(config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
-    self.misp_adapter = MISPAdapter(config)
+
     self.ce1sus_adapter = Ce1susAdapter(config)
 
   @rest_method(default=True)

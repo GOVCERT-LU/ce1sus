@@ -7,19 +7,20 @@ Created on Aug 26, 2015
 """
 from base64 import b64decode
 from ce1sus.helpers.common.config import Configuration, ConfigSectionNotFoundException
+import cherrypy
 from datetime import datetime
 from os import makedirs, remove
 from os.path import dirname, abspath, isdir, isfile
 
 from ce1sus.common.classes.cacheobject import MergerCache
+from ce1sus.controllers.admin.group import GroupController
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.common.merger.merger import Merger
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.handlers.base import HandlerException
-from ce1sus.mappers.misp.mispce1sus import MispConverter
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerNotFoundException, RestHandlerException
-from ce1sus.controllers.admin.group import GroupController
 from ce1sus.mappers.misp.ce1susmisp import Ce1susMISP
+from ce1sus.mappers.misp.mispce1sus import MispConverter
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerNotFoundException, RestHandlerException, require
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,6 +48,7 @@ class MISPHandler(RestBaseHandler):
 
   @rest_method(default=True)
   @methods(allowed=['POST'])
+  @require()
   def upload_xml(self, **args):
     try:
       cache_object = self.get_cache_object(args)
@@ -129,6 +131,7 @@ class MISPHandler(RestBaseHandler):
 
   @rest_method()
   @methods(allowed=['GET'])
+  @require()
   def export_xml(self, **args):
     try:
       cache_object = self.get_cache_object(args)
@@ -136,8 +139,20 @@ class MISPHandler(RestBaseHandler):
       path = args.get('path')
       requested_object = self.parse_path(path, method)
       event_id = requested_object.get('event_id', None)
+      parameters = args.get('parameters')
       if event_id:
+
+        make_file = parameters.get('file', None)
+        if make_file == '':
+          cherrypy.response.headers['Content-Type'] = 'application/x-download'
+          cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_MISP.xml'.format(event_id)
+        else:
+          cherrypy.response.headers['Content-Type'] = 'text/xml'
+
         event = self.event_controller.get_event_by_uuid(event_id)
+        self.check_if_event_is_viewable(event)
+        self.set_event_properties_cache_object(cache_object, event)
+
         xml_str = self.ce1sus_converter.create_event_xml(event, cache_object)
         return xml_str
       else:
@@ -153,3 +168,4 @@ class MISPHandler(RestBaseHandler):
     # this is called from the misp server to see it his know events have new proposals
     # TODO: Proposal for misp
     raise RestHandlerNotFoundException('Not supported')
+

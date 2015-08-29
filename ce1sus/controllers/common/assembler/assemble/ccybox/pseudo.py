@@ -8,6 +8,7 @@ Created on Aug 4, 2015
 
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from json import dumps
+from sqlalchemy.inspection import inspect
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject
@@ -60,6 +61,7 @@ class PseudoCyboxAssembler(BaseAssembler):
     return None
 
   def log_object_error(self, observable, json, error_message):
+    self.logger.debug('Object contains errors')
     error_entry = ErrorObject()
     error_entry.uuid = u'{0}'.format(uuid4())
     error_entry.message = error_message
@@ -67,8 +69,10 @@ class PseudoCyboxAssembler(BaseAssembler):
     error_entry.event = observable.event
     error_entry.observable = observable
     observable.root.errors.append(error_entry)
+    self.attr_def_broker.session.add(error_entry)
 
   def log_attribute_error(self, obj, json, error_message):
+    self.logger.debug('Attribute contains errors')
     error_entry = ErrorAttribute()
     error_entry.uuid = u'{0}'.format(uuid4())
     error_entry.message = error_message
@@ -159,6 +163,9 @@ class PseudoCyboxAssembler(BaseAssembler):
             if attr_def.uuid == uuid:
               return definition
           self.log_attribute_error(parent, json, 'Attribute definition is not contained in object definition {0}'.format(parent.definition.name))
+        else:
+          self.logger.debug('Attribute object checks are disables')
+          return definition
     else:
       self.log_attribute_error(parent, json, 'Attribute does not contain an attribute definition')
 

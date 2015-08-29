@@ -117,6 +117,8 @@ class ObservableHandler(RestBaseHandler):
         if obj:
           self.observable_controller.insert_object(obj, cache_object, commit=True)
           return obj.to_dict(cache_object)
+        # save the errors
+        self.event_controller.event_broker.do_commit(True)
         raise RestHandlerException('Error occured during insert see error log')
     else:
       uuid = requested_object['object_uuid']

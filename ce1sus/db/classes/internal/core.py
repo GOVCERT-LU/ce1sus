@@ -51,11 +51,14 @@ class SimpleLoggingInformations(BaseObject):
     return relationship(User, primaryjoin='{0}.modifier_id==User.identifier'.format(self.get_classname()))
 
   def to_dict(self, cache_object):
+    cache_object_copy = cache_object.make_copy()
+    cache_object_copy.inflated = False
+    cache_object_copy.complete = False
     if is_user_priviledged(cache_object.user):
       result = {'creator_id': self.convert_value(self.creator.uuid),
-                 'creator': self.creator.to_dict(cache_object),
+                 'creator': self.creator.to_dict(cache_object_copy),
                  'modifier_id': self.convert_value(self.modifier.uuid),
-                 'modifier': self.modifier.to_dict(cache_object),
+                 'modifier': self.modifier.to_dict(cache_object_copy),
                  'created_at': self.convert_value(self.created_at),
                  'modified_on': self.convert_value(self.modified_on),
                 }
@@ -79,10 +82,13 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
     return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()))
 
   def to_dict(self, cache_object):
+    cache_object_copy = cache_object.make_copy()
+    cache_object_copy.inflated = False
+    cache_object_copy.complete = False
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
     if is_user_priviledged(cache_object.user):
       child_dict = {'creator_group_id': self.convert_value(self.creator_group.uuid),
-                    'creator_group': self.creator_group.to_dict(cache_object),
+                    'creator_group': self.creator_group.to_dict(cache_object_copy),
                     }
     else:
       child_dict = {}

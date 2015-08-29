@@ -35,7 +35,7 @@ class TestObject(LoggedInBase):
     except HTTPError:
       assert False
 
-  """
+
   def testNew(self):
     observable_id = self.__add_observable()
     try:
@@ -93,7 +93,7 @@ class TestObject(LoggedInBase):
 
     except HTTPError as error:
       assert False
-  """
+
   def testRelatedTest(self):
     observable_id = self.__add_observable()
     try:

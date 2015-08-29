@@ -57,11 +57,7 @@ class MISPAdapter(BaseView):
     self.ce1sus_to_misp = Ce1susMISP(config, session)
     self.login_handler = LoginHandler(config)
     self.logout_handler = LogoutHandler(config)
-    self.misp_converter = MispConverter(config, None, None, None, session)
-    dump = config.get('MISPAdapter', 'dump', False)
-    file_loc = config.get('MISPAdapter', 'file', None)
-    self.misp_converter.dump = dump
-    self.misp_converter.file_location = file_loc
+    self.misp_converter = MispConverter(config, session)
     self.merger = Merger(config, session)
     self.process_controller = ProcessController(config, session)
 
@@ -83,8 +79,6 @@ class MISPAdapter(BaseView):
         """
       else:
         raise HTTPError(409, 'File does not end in xml or XML')
-    except MispConverterException as error:
-      self.logger.error(error)
       raise HTTPError(409, 'File is not a MISP XML')
     except ControllerException as error:
       self.logger.error(error)

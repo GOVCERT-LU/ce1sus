@@ -111,6 +111,7 @@ class InformationSource(Entity, Base):
               'incident',
               'threatactor',
               'ttp',
+              'sitx_header'
               'related_relatedcoa',
               'related_relatedcampaign',
               'related_relatedobservable',

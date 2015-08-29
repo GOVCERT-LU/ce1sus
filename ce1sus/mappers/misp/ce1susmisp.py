@@ -8,6 +8,7 @@ Created on Apr 2, 2015
 from lxml import etree
 import time
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.mappers.misp.common import ANALYSIS_MAP, RISK_MAP, DISTRIBUTION_TO_TLP_MAP, MISP_MAP
@@ -35,7 +36,7 @@ class Ce1susMISP(BaseController):
   def create_event_xml(self, event, cache_object):
     # flat_attribtues and references must not contain anything which is not destined to be shared
     xml_event = self.make_event(event, cache_object)
-    result = self.wrapper(etree.tostring(xml_event, pretty_print=True))
+    result = self.wrapper(etree.tostring(xml_event))
     return result
 
   def get_distribution(self, item):
@@ -46,6 +47,7 @@ class Ce1susMISP(BaseController):
     return distribution
 
   def make_event(self, event, cache_object):
+    setattr(cache_object, 'counter', 0)
     self.seen_attributes = list()
     root = etree.Element('Event')
     self.__append_child(root, 'id', event.identifier)
@@ -92,63 +94,67 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'ShadowAttribtue', '')
     self.__append_child(root, 'RelatedEvent', '')
 
-    counter = 0
     # observables
-    counter = self.__make_observables(root, event.observables, event.identifier, counter)
+    self.__make_observables(root, event.observables, event.identifier, cache_object)
     # indicators
-    counter = self.__make_indicators(root, event.indicators, event.identifier, counter)
+    self.__make_indicators(root, event.indicators, event.identifier, cache_object)
     # TTP
 
     # ExploitTarget
     
     #reports
-    counter = self.__make_reports(root, event.reports, event.identifier, counter)
+    self.__make_reports(root, event.reports, event.identifier, cache_object)
 
-    self.__append_child(root, 'attribute_count', counter)
+    self.__append_child(root, 'attribute_count', cache_object.counter)
     return root
   
-  def __make_reports(self, root, reports, event_id, counter):
+  def __make_reports(self, root, reports, event_id, cache_object):
     for report in reports:
-      self.__make_report(root, report, event_id, counter)
+      if is_object_viewable(report, cache_object):
+        self.__make_report(root, report, event_id, cache_object)
   
   def is_reference(self, reference):
     # Remove the comments which are done by the initial misp conversion
-    for key in MISP_MAP.itervalues():
+    for key in MISP_MAP.iterkeys():
       if reference.value in key:
+        self.logger.debug(u'{0} is not a valid reference'.format(reference.value))
         return False
     return True
 
-  def __make_report(self, root, report, event_id, counter):
+  def __make_report(self, root, report, event_id, cache_object):
     comment = report.description
     for reference in report.references:
-      if self.is_reference(reference):
+      if is_object_viewable(reference, cache_object) and self.is_reference(reference):
         category, type_ = self.get_category_type('ce1sus-Report', reference)
         attr = self.__make_attribute(category, type_, reference, comment, event_id)
         root.append(attr)
-        counter = counter + 1
+        cache_object.counter = cache_object.counter + 1
 
     for rel_rep in report.related_reports:
-      counter = self.__make_report(root, rel_rep, event_id, counter)
-    return counter
+      if is_object_viewable(rel_rep, cache_object):
+        self.__make_report(root, rel_rep, event_id, cache_object)
+
   
-  def __make_indicators(self, root, indicators, event_id, counter):
+  def __make_indicators(self, root, indicators, event_id, cache_object):
     #TODO: snort/yara rules
     for indicator in indicators:
-      self.__make_observables(root, indicator.observables, event_id, counter)
-    return counter
-  
-  def __make_observables(self, root, observables, event_id, counter):
-    for observable in observables:
-      counter = self.__make_observable(root, observable, event_id, counter)
-    return counter
+      if is_object_viewable(indicator, cache_object):
+        self.__make_observables(root, indicator.observables, event_id, cache_object)
 
-  def __make_observable(self, root, observable, event_id, counter):
-    if observable.object:
-      counter = self.__make_object(root, observable, observable.object, event_id, counter)
-    if observable.observable_composition:
+  
+  def __make_observables(self, root, observables, event_id, cache_object):
+    for observable in observables:
+      if is_object_viewable(observable, cache_object):
+        self.__make_observable(root, observable, event_id, cache_object)
+
+
+  def __make_observable(self, root, observable, event_id, cache_object):
+    if observable.object and is_object_viewable(observable.object, cache_object):
+      self.__make_object(root, observable, observable.object, event_id, cache_object)
+    if observable.observable_composition and is_object_viewable(observable.observable_composition, cache_object):
       for obs in observable.observable_composition.observables:
-        counter = self.__make_observable(root, obs, event_id, counter)
-    return counter
+        if is_object_viewable(obs, cache_object):
+          self.__make_observable(root, obs, event_id, cache_object)
 
   def get_category_type(self, prefix, attribute):
     if hasattr(attribute, 'object'):
@@ -209,22 +215,22 @@ class Ce1susMISP(BaseController):
     self.__append_child(root, 'timestamp', int(time.mktime(event.last_publish_date.timetuple())))
     return root
 
-  def __make_object(self, root, observable, obj, event_id, counter):
+  def __make_object(self, root, observable, obj, event_id, cache_object):
     if observable.description:
       comment = observable.description.value
     else:
       comment = None
     for attribute in obj.attributes:
-      if attribute.value not in self.seen_attributes:
+      if is_object_viewable(attribute, cache_object) and attribute.value not in self.seen_attributes:
         category, type_ = self.get_category_type('cybox-Observable', attribute)
         attr = self.__make_attribute(category, type_, attribute, comment, event_id)
         root.append(attr)
-        counter = counter + 1
+        cache_object.counter = cache_object.counter + 1
         self.seen_attributes.append(attribute.value)
         
     for rel_obj in obj.related_objects:
-      counter = self.__make_object(root, observable, rel_obj, event_id, counter)
-    return counter
+      if is_object_viewable(rel_obj, cache_object):
+        self.__make_object(root, observable, rel_obj, event_id, cache_object)
 
 
 
