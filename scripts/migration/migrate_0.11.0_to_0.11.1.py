@@ -239,6 +239,8 @@ class Migrator(object):
   
     self.__drop_table('rel_indicator_sightings')
 
+    self.__drop_column(Object, 'observable_id')
+    self.__drop_column(Object, 'parent_id')
 
   @staticmethod
   def __set_old_fields(clazz):
@@ -421,10 +423,15 @@ class Migrator(object):
 
 
 
-    
+    setattr(Object, 'parent_id', Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True))
     all = self.session.get_session().query(Object).all()
     for item in all:
       item.namespace = 'ce1sus'
+      if item.parent_id:
+        observable = self.session.get_session().query(Observable).filter(Observable.identifier == item.parent_id).one()
+        observable.object = item
+        self.session.get_session().merge(observable)
+
       self.session.get_session().merge(item)
       self.session.get_session().flush()
 
@@ -662,8 +669,7 @@ class Migrator(object):
     self.__drop_fk(Object, 'objects_ibfk_7')
     self.__drop_column(Object, 'originating_group_id')
     self.__drop_column(Object, 'owner_group_id')
-    self.__drop_column(Object, 'observable_id')
-    self.__drop_column(Object, 'parent_id')
+
     self.__change_column(Object, 'tlp_level_id')
     # self.__change_column(Object, 'dbcode')
     self.__add_column(Object, 'idref')
@@ -882,8 +888,8 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
-  migros.create_new_tables()
-  migros.altering_tables_phase1()
+  # migros.create_new_tables()
+  # migros.altering_tables_phase1()
   migros.merge_data()
   migros.altering_tables_phase2()
   migros.close()
