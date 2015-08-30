@@ -145,9 +145,14 @@ class EventHandler(RestBaseHandler):
     if method == 'POST':
       comment = self.assembler.assemble(json, Comment, event, cache_object)
       self.event_controller.insert_comment(cache_object.user, comment)
-      return comment.to_dict()
+      return comment.to_dict(cache_object)
     else:
       comment_id = requested_object['object_uuid']
+      if method == 'GET' and not comment_id:
+        # Return all comments
+        cache_object.inflated = True
+        return event.attributelist_to_dict(event.comments, cache_object)
+
       if comment_id:
         comment = self.event_controller.get_comment_by_uuid(comment_id)
       else:
