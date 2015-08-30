@@ -44,20 +44,8 @@
           </thead>
           <tbody>
             <tr ng-repeat="attribute in object.attributes | startFrom: pagination.page * pagination.perPage | limitTo: pagination.perPage" >
-              <td ng-if="attribute.properties.proposal && !attribute.properties.validated" style="background-color: yellow;">
-                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="!attribute.properties.proposal && !attribute.properties.validated" style="background-color: red;">
-                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="attribute.properties.proposal && attribute.properties.validated">
-                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </td>
-              <td ng-if="!attribute.properties.proposal && attribute.properties.validated">
-                <span ng-if="attribute.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+              <td style="{{getColor(attribute)}}">
+                <span ng-if="attribute.properties.shared" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 <span ng-if="!attribute.properties.shared" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
               </td>
               <td>{{attribute.definition.name}}</td>

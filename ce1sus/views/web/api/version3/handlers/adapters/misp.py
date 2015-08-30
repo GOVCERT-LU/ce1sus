@@ -96,7 +96,7 @@ class MISPHandler(RestBaseHandler):
       except ControllerNothingFoundException:
         self.logger.debug('Event {0} is not in db'.format(event.uuid))
         # not present in db add it
-        self.event_controller.insert_event(event, True, True)
+        self.event_controller.insert_event(event, cache_object, True, True)
         return event.to_dict(cache_object)
 
     except ControllerNothingFoundException as error:

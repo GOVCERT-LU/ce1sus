@@ -98,7 +98,7 @@ class EventHandler(RestBaseHandler):
 
           event = self.assembler.assemble(json, Event, None, cache_object)
 
-          self.event_controller.insert_event(event, True, True)
+          self.event_controller.insert_event(event, cache_object, True, True)
 
           return self.__return_event(event, cache_object)
         else:
@@ -144,14 +144,18 @@ class EventHandler(RestBaseHandler):
     self.check_if_owner(event)
     if method == 'POST':
       comment = self.assembler.assemble(json, Comment, event, cache_object)
-      self.event_controller.insert_comment(cache_object.user, comment)
+      self.event_controller.insert_comment(comment, cache_object)
       return comment.to_dict(cache_object)
     else:
       comment_id = requested_object['object_uuid']
       if method == 'GET' and not comment_id:
         # Return all comments
         cache_object.inflated = True
-        return event.attributelist_to_dict(event.comments, cache_object)
+        result = event.attributelist_to_dict(event.comments, cache_object)
+        if result:
+          return result
+        else:
+          return list()
 
       if comment_id:
         comment = self.event_controller.get_comment_by_uuid(comment_id)
@@ -162,11 +166,11 @@ class EventHandler(RestBaseHandler):
       elif method == 'PUT':
         self.check_if_event_is_modifiable(event)
         comment = self.updater.update(comment, json, cache_object)
-        self.event_controller.update_comment(cache_object.user, comment)
+        self.event_controller.update_comment(comment, cache_object)
         return comment.to_dict()
       elif method == 'DELETE':
         self.check_if_event_is_deletable(event)
-        self.event_controller.remove_comment(cache_object.user, comment)
+        self.event_controller.remove_comment(comment, cache_object)
         return 'Deleted comment'
       else:
         raise RestHandlerException(u'Invalid request')
@@ -183,7 +187,7 @@ class EventHandler(RestBaseHandler):
       # check if validated / shared as only the owner can do this
       self.check_if_user_can_set_validate_or_shared(event, old_event, cache_object.user, json)
       self.updater.update(event, json, cache_object)
-      self.event_controller.update_event(event, True, True)
+      self.event_controller.update_event(event, cache_object, True, True)
       return self.__return_event(event, cache_object)
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
@@ -274,7 +278,7 @@ class EventHandler(RestBaseHandler):
       raise RestHandlerException('Operation not supported')
     elif method == 'DELETE':
       self.check_if_event_is_deletable(event)
-      self.event_controller.remove_event(cache_object.user, event)
+      self.event_controller.remove_event(event, cache_object)
 
   def __process_composed_observable_get(self, requested_object, cache_object):
     try:
@@ -337,7 +341,7 @@ class EventHandler(RestBaseHandler):
         # get group
         event_group_permission = self.event_controller.get_event_group_by_uuid(uuid)
 
-        self.event_controller.remove_group_permissions(cache_object.user, event_group_permission, True)
+        self.event_controller.remove_group_permissions(event_group_permission, cache_object, True)
         return 'OK'
       else:
         raise RestHandlerException(u'Cannot remove group as no group was provided')

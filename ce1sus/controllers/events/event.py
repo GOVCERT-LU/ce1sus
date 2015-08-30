@@ -64,7 +64,7 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_event(self, event, mkrelations=True, commit=True):
+  def insert_event(self, event, cache_object, mkrelations=True, commit=True):
     """
     inserts an event
 
@@ -99,7 +99,7 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_event(self, event, mkrelations=True, commit=True):
+  def update_event(self, event, cache_object, mkrelations=True, commit=True):
     try:
       # the the creator
 
@@ -323,25 +323,21 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def insert_comment(self, user, comment):
+  def insert_comment(self, comment, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(comment, user, True)
-      self.comment_broker.insert(comment, True)
+      self.comment_broker.insert(comment, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_comment(self, user, comment):
+  def update_comment(self, comment, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(comment, user, False)
-      self.comment_broker.update(comment, True)
+      self.comment_broker.update(comment, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_comment(self, user, comment):
+  def remove_comment(self, comment, cache_object, commit=True):
     try:
-      self.comment_broker.remove_by_id(comment.identifier)
+      self.comment_broker.remove_by_id(comment.identifier, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
@@ -365,10 +361,9 @@ class EventController(BaseController):
     instance.properties.is_validated = True
     self.set_extended_logging(instance, user, False)
 
-  def validate_event(self, event, user):
+  def validate_event(self, event, cache_object):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event, user, False)
+      user = self.user_broker.get_by_id(cache_object.user.identifier)
       self.__validate_instance(event, user)
       for observable in event.observables:
         self.__validate_observable(observable, user)
@@ -428,25 +423,23 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def update_event_group_permissions(self, user, event_group_permission, commit=True):
+  def update_event_group_permissions(self, event_group_permission, cache_object, commit=True):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
-      self.set_extended_logging(event_group_permission, user, False)
       self.event_broker.update_group_permission(event_group_permission, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_group_permissions(self, user, event_group_permission, commit=True):
+  def remove_group_permissions(self, event_group_permission, cache_object, commit=True):
     try:
       self.event_broker.remove_group_permission_by_id(event_group_permission.identifier, commit)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def publish_event(self, event, user):
+  def publish_event(self, event, cache_object):
     try:
       event.properties.is_shareable = True
 
-      self.update_event(user, event, False, True)
+      self.update_event(event, cache_object, False, True)
 
     except BrokerException as error:
       raise ControllerException(error)

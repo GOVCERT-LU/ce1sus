@@ -864,6 +864,17 @@ app.directive("object", function($compile) {
 
       $scope.setModified = setModified;
 
+      $scope.getColor = function(attribute){
+        if (attribute.properties.proposal && !attribute.properties.validated){
+          return 'background-color: yellow;';
+        }else {
+          if (!attribute.properties.proposal && !attribute.properties.validated){
+            return 'background-color: red;';
+          } else {
+            
+          }
+        }
+      };
     },
     templateUrl: "pages/common/directives/objectview.html",
     compile: function(tElement, tAttr, transclude) {

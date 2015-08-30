@@ -23,6 +23,7 @@ from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.common.broker import BrokerException
+from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -74,7 +75,6 @@ class IndicatorController(BaseController):
       # related_indicators
       # related campaigns
 
-
       self.indicator_broker.remove_by_id(indicator.identifier, False)
       self.indicator_broker.do_commit(commit)
       
@@ -82,8 +82,6 @@ class IndicatorController(BaseController):
       raise ControllerException(error)
 
   def get_indicator_type(self, indicator_type_name, merger_cache):
-
-
 
     type_ = IndicatorType()
     type_.type_ = indicator_type_name
@@ -198,7 +196,9 @@ class IndicatorController(BaseController):
   def get_generic_indicators(self, event, cache_object):
     try:
       indicators = list()
+      
       flat_attribtues = self.relation_controller.get_flat_attributes_for_event(event)
+      
       mal_email = list()
       ips = list()
       file_hashes = list()
@@ -207,6 +207,7 @@ class IndicatorController(BaseController):
       artifacts = list()
       c2s = list()
       others = list()
+
       # sort attributes
       for attribute in flat_attribtues:
         attr_def_name = attribute.definition.name
@@ -227,7 +228,7 @@ class IndicatorController(BaseController):
         else:
           others.append(attribute)
 
-      ind = self.map_indicator(artifacts, 'Malware Artifacts', event, cache_object)
+      ind = self.map_indicator(artifacts, 'Malware Artifacts', event)
 
       if ind:
         ind.uuid = uuid4()

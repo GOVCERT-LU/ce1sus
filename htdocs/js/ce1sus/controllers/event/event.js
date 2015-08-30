@@ -95,7 +95,7 @@ app.controller("viewEventController", function($scope, Restangular, messages,
 });
 
 app.controller("eventObservableController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location,observables, $anchorScroll, Pagination) {
+    $log, $routeSegment, $location,observables, $anchorScroll, $filter, ngTableParams) {
   $scope.permissions=$scope.event.userpermissions;
   $scope.getAttributes=function(){
     var attributes = [];
@@ -164,6 +164,7 @@ app.controller("eventObservableController", function($scope, Restangular, messag
   
   $scope.observables = observables;
   $scope.flat=false;
+  /*
   $scope.showFlat=function(){
     $scope.flat=true;
     $scope.flatAttributes = $scope.getAttributes();
@@ -171,6 +172,7 @@ app.controller("eventObservableController", function($scope, Restangular, messag
     $scope.pagination.numPages = Math.ceil($scope.flatAttributes.length/$scope.pagination.perPage);
     $scope.pagination.setPages();
   };
+  */
   $scope.showStructured=function(){
     $scope.flat=false;
   };
@@ -551,17 +553,50 @@ app.controller("editEventController", function($scope, Restangular, messages,
   };
 });
 app.controller("eventOverviewController", function($scope, Restangular, messages,
-    $log, $routeSegment, $location, useradmin, $modal, relations, Pagination) {
+    $log, $routeSegment, $location, useradmin, $modal, relations, ngTableParams, comments, $filter) {
   if (useradmin){
     $scope.isAdmin = true;
   } else {
     $scope.isAdmin = false;
   }
   
-  $scope.relations = relations;
-  $scope.pagination = Pagination.getNew(5,'relations');
-  $scope.pagination.numPages = Math.ceil($scope.relations.length/$scope.pagination.perPage);
-  $scope.pagination.setPages();
+  if (relations.length > 0){
+    $scope.showRelations = true;
+  } else {
+    $scope.showRelations = false;
+  }
+  
+  
+  $scope.tableRelations = new ngTableParams({
+    page: 1,            // show first page
+    count: 10           // count per page
+  }, {
+    total: relations.length, // length of data
+    getData: function ($defer, params) {
+      var orderedData = params.filter() ? $filter('filter')(relations, params.filter()) : relations;
+      orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+      $scope.relations = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+      params.total(orderedData.length); // set total for recalc pagination
+      $defer.resolve($scope.relations);
+    }
+  });
+
+  $scope.tableComments = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,           // count per page
+  }, {
+    total: comments.length, // length of data
+    getData: function ($defer, params) {
+      
+      var orderedData = params.filter() ? $filter('filter')(comments, params.filter()) : comments;
+      orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
+      $scope.comments = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+      params.total(orderedData.length); // set total for recalc pagination
+      $defer.resolve($scope.comments);
+
+    }
+  });
+  
   $scope.validateEvent = function(){
     //validates an event and publishes it as only users who can enter the validate section (lesser admin) can validate
     $scope.event.one('validate').put().then(function (data) {

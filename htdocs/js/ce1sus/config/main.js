@@ -297,6 +297,13 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                                   return false;
                                 });
                               },
+                              comments: function(Restangular,$routeSegment) {
+                                return Restangular.one("event",$routeSegment.$routeParams.id).all("comment").getList({'complete':true}).then(function (data) {
+                                  return data;
+                                }, function(response) {
+                                  return false;
+                                });
+                              },
                             },
                             dependencies: ["id"],
                             untilResolved: {
