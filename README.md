@@ -63,7 +63,8 @@ For any questions feel free to ask
 * Synchronization between ce1sus instances
 * Web-interface sync-server management (MISP and ce1sus)
 * Mail notifications
-* Attributes/Objects/Observables additionally can be shared via TLP level
+* Elements can additionally can be shared via TLP level
+* DB is based on the STIX data model
 
 
 ##Requirements
@@ -90,10 +91,17 @@ For any questions feel free to ask
 
 ##Roadmap
 
-###v0.11.1
+###v0.11.2
+* Support for TTP
+* Support for ExploitTarget
+* Relation of attributes can be done over groups of attributes (types) (delayed from 0.11.1)
 
-* Relation of attributes can be done over groups of attributes (types)
+###v0.11.3
+* Support for Incident
+* Support for ThreatActor
 
+###v0.11.4
+* Support for Campaign
 
 ##Up the road 0.11.x
 
@@ -105,6 +113,9 @@ For any questions feel free to ask
 * Show statistics on Home page
 * Password protection for compressed files
 * TAXII server integration
+* Additional Object/Attribute Definitions
+* Templates
+* Graph Visualization
 
 ##Installation
 

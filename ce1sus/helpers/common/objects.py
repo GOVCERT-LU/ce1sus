@@ -32,7 +32,10 @@ def get_class(modulename, classname):
     module_name = modulename
     package = ''
   module = import_module(module_name, package)
-  clazz = getattr(module, classname)
+  try:
+    clazz = getattr(module, classname)
+  except AttributeError:
+    pass
   return clazz
 
 

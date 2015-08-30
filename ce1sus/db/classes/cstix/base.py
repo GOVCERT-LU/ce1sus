@@ -53,9 +53,9 @@ class BaseCoreComponent(Entity):
 
   version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
 
-  @property
+  @declared_attr
   def information_source(self):
-    return relationship('InformationSource', secondary='rel_{0}_informationssource'.format(self.get_classname().lower()), uselist=False)
+    return relationship('InformationSource', secondary='rel_{0}_informationsource'.format(self.get_classname().lower()), uselist=False)
 
   timestamp = Column(DateTime)
 

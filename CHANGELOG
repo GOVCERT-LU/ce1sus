@@ -14,6 +14,7 @@ Release 0.11.1
 * Enhanced MISP support, with better mappings
 * Relations can be found via groupings
 * Revision dumps
+* Small improvements in GUI 
 
 Release 0.11.0
 --------------

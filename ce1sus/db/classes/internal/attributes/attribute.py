@@ -48,8 +48,6 @@ class Condition(SimpleLoggingInformations, Base):
 
 
 class Attribute(BaseElement, Base):
-  description = Column('description', UnicodeTextType())
-
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('AttributeDefinition',
@@ -57,8 +55,7 @@ class Attribute(BaseElement, Base):
                             lazy='joined')
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object',
-                        primaryjoin='Object.identifier==Attribute.object_id',
-                        lazy='joined')
+                        primaryjoin='Object.identifier==Attribute.object_id')
   # valuerelations
   string_value = relationship(StringValue,
                               primaryjoin='Attribute.identifier==StringValue.attribute_id',

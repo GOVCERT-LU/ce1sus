@@ -39,10 +39,10 @@ class Object(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   # properties
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
   # ce1sus specific
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
-  attributes = relationship('Attribute', lazy='joined')
+  attributes = relationship('Attribute')
 
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)

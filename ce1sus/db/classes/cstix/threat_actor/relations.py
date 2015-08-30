@@ -23,7 +23,7 @@ _REL_THREATACTOR_INFORMATIONSOURCE = Table('rel_threatactor_informationsource', 
                                                          ondelete='cascade',
                                                          onupdate='cascade'),
                                               index=True,
-                                              nullable=False),
+                                              nullable=False, primary_key=True),
                                        Column('informationsource_id',
                                              BigIntegerType,
                                              ForeignKey('informationsources.informationsource_id',
@@ -65,7 +65,7 @@ _REL_THREATACTOR_STRUCTUREDTEXT = Table('rel_threatactor_structuredtext', getatt
                                                          ondelete='cascade',
                                                          onupdate='cascade'),
                                               index=True,
-                                              nullable=False),
+                                              nullable=False, primary_key=True),
                                        Column('structuredtext_id',
                                              BigIntegerType,
                                              ForeignKey('structuredtexts.structuredtext_id',
@@ -83,7 +83,7 @@ _REL_THREATACTOR_STRUCTUREDTEXT_SHORT = Table('rel_threatactor_structuredtext_sh
                                                          ondelete='cascade',
                                                          onupdate='cascade'),
                                               index=True,
-                                              nullable=False),
+                                              nullable=False, primary_key=True),
                                        Column('structuredtext_id',
                                              BigIntegerType,
                                              ForeignKey('structuredtexts.structuredtext_id',
@@ -95,6 +95,6 @@ _REL_THREATACTOR_STRUCTUREDTEXT_SHORT = Table('rel_threatactor_structuredtext_sh
 
 _REL_THREATACTOR_INTENDED_EFFECT = Table('rel_threatactor_intended_effect', getattr(Base, 'metadata'),
 
-                                      Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False),
+                                      Column('threatactor_id', BigIntegerType, ForeignKey('threatactors.threatactor_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False, primary_key=True),
                                       Column('intendedeffect_id', BigIntegerType, ForeignKey('intendedeffects.intendedeffect_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                       )
