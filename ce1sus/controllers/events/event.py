@@ -201,7 +201,6 @@ class EventController(BaseController):
 
   def __change_owner(self, instance, user, group):
     instance.creator_group = group
-    self.set_extended_logging(instance, user, False)
 
   def __change_owner_object(self, obj, user, group):
     self.__change_owner(obj, user, group)

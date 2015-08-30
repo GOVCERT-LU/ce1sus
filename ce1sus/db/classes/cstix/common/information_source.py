@@ -71,8 +71,8 @@ class InformationSourceRole(Entity, Base):
 class InformationSource(Entity, Base):
   """ An information source is a bit tricky as the groups contain half of the needed elements """
 
-  description = relationship('StructuredText', secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False)
-  identity = relationship(Identity, secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False)
+  description = relationship('StructuredText', secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False, lazy='joined')
+  identity = relationship(Identity, secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False, lazy='joined')
 
   contributing_sources = relationship('InformationSource',
                                       secondary=_REL_INFORMATIONSOURCE_INFORMATIONSOURCE,

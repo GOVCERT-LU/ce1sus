@@ -58,10 +58,10 @@ class STIXHeader(Entity, Base):
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   package_intents = relationship(PackageIntent)
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, back_populates="stix_header_description")
-  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="stix_header_short_description")
+  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, back_populates="stix_header_description", lazy='joined')
+  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="stix_header_short_description", lazy='joined')
   handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING, back_populates="stix_header")
-  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, back_populates="stix_header")
+  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, back_populates="stix_header", lazy='joined')
   # TODO: profiles
 
   _PARENTS = ['event']

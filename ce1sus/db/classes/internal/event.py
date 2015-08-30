@@ -86,7 +86,7 @@ class Event(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
-  stix_header = relationship(STIXHeader, uselist=False)
+  stix_header = relationship(STIXHeader, uselist=False, lazy='joined')
   campaigns = relationship(Campaign)
   # TODO: courses_of_action
   courses_of_action = None
