@@ -17,9 +17,10 @@ from ce1sus.test.admin.adminsyncserver import TestAdminSyncServers
 from ce1sus.test.admin.admintypes import TestAdminTypes
 from ce1sus.test.admin.adminuser import TestAdminUsers
 from ce1sus.test.event.event import TestEvent
+from ce1sus.test.event.object import TestObject
 from ce1sus.test.event.observable import TestObservable
 from ce1sus.test.login import TestLogin
-from ce1sus.test.event.object import TestObject
+from ce1sus.test.mappers.misp import TestMisp
 
 
 def suite():
@@ -37,6 +38,7 @@ def suite():
   testSuite.addTest(TestEvent())
   testSuite.addTest(TestObservable())
   testSuite.addTest(TestObject())
+  testSuite.addTest(TestMisp())
   return testSuite
 
 
