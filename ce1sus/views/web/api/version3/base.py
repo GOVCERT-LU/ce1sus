@@ -15,6 +15,7 @@ from uuid import UUID
 from ce1sus.views.web.api.version3.handlers.restbase import RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.base import BaseView
 from ce1sus.views.web.common.decorators import SESSION_KEY
+from ce1sus.handlers.base import HandlerNotFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -145,7 +146,7 @@ class AbstractRestController(BaseView):
           except RestHandlerException as error:
             message = u'{0}'.format(error.message)
             self.logger.error(message)
-            if isinstance(error, RestHandlerNotFoundException):
+            if isinstance(error, (RestHandlerNotFoundException, HandlerNotFoundException)):
               raise cherrypy.HTTPError(status=404, message=message)
             raise cherrypy.HTTPError(status=400, message=message)
         else:

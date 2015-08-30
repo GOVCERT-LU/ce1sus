@@ -23,7 +23,7 @@ from ce1sus.common.checks import can_user_download
 from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.db.classes.internal.object import RelatedObject
 from ce1sus.handlers.attributes.generichandler import GenericHandler
-from ce1sus.handlers.base import HandlerException
+from ce1sus.handlers.base import HandlerException, HandlerNotFoundException
 from ce1sus.helpers.common.hash import hashMD5
 import ce1sus.helpers.common.hash as hasher
 
@@ -231,7 +231,7 @@ class FileHandler(GenericHandler):
             pass
           return result
         else:
-          raise HandlerException('The file was not found in "{0}"'.format(filepath))
+          raise HandlerNotFoundException('The file was not found in "{0}"'.format(filepath))
       else:
         raise HandlerException('There was an error getting the file')
     else:

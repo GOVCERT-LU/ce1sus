@@ -32,6 +32,12 @@ class HandlerException(Exception):
   """
   pass
 
+class HandlerNotFoundException(Exception):
+  """
+  Exception base for handler exceptions
+  """
+  pass
+
 
 class UndefinedException(HandlerException):
   pass

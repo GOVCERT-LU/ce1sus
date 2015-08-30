@@ -7,13 +7,15 @@ Created on Oct 29, 2014
 """
 from ce1sus.common.system import APP_REL, DB_REL, REST_REL
 from ce1sus.controllers.admin.attributedefinitions import AttributeDefinitionController
+from ce1sus.controllers.admin.group import GroupController
 from ce1sus.controllers.admin.references import ReferencesController
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.events.attributecontroller import AttributeController
 from ce1sus.db.classes.internal.common import TLP
-from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid
+from ce1sus.handlers.base import HandlerNotFoundException, HandlerException
+from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid, \
+  RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
-from ce1sus.controllers.admin.group import GroupController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -47,44 +49,49 @@ class HandlerHandler(RestBaseHandler):
   @methods(allowed=['GET'])
   @require()
   def handlers(self, **args):
-    path = args.get('path')
-    parameters = args.get('parameters')
-    cache_object = self.get_cache_object(args)
-    if len(path) == 0:
-      self.check_if_admin()
-      handlers = self.attribute_definition_controller.get_all_handlers()
-      result = list()
-      for handler in handlers:
-        result.append(handler.to_dict(cache_object))
-      return result
-    else:
-      if len(path) > 1:
-        definition_uuid = path.pop(0)
-        if valid_uuid(definition_uuid):
-          definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(definition_uuid)
-          handler = definition.handler
-          handler.user = self.get_user()
-          method = path.pop(0)
-          # has nothing to do with the http method which is in capital
-          if method == 'get':
-            if len(path) > 0:
-              attr_uuid = path.pop(0)
-              if valid_uuid(attr_uuid):
-                attribute = self.attribute_controller.get_attribute_by_uuid(attr_uuid)
-              else:
-                raise RestHandlerException(u'Specified second uuid is invalid')
-            else:
-              attribute = None
-            # Make the generic call for additional data
-            return handler.get_data(attribute, parameters)
-          else:
-            raise RestHandlerException(u'Method {0} is not specified'.format(method))
-        else:
-          raise RestHandlerException(u'Specified uuid is invalid')
+    try:
+      path = args.get('path')
+      parameters = args.get('parameters')
+      cache_object = self.get_cache_object(args)
+      if len(path) == 0:
+        self.check_if_admin()
+        handlers = self.attribute_definition_controller.get_all_handlers()
+        result = list()
+        for handler in handlers:
+          result.append(handler.to_dict(cache_object))
+        return result
       else:
-        raise RestHandlerException(u'Invalid request')
-
-
+        if len(path) > 1:
+          definition_uuid = path.pop(0)
+          if valid_uuid(definition_uuid):
+            definition = self.attribute_definition_controller.get_attribute_definitions_by_uuid(definition_uuid)
+            handler = definition.handler
+            handler.user = self.get_user()
+            method = path.pop(0)
+            # has nothing to do with the http method which is in capital
+            if method == 'get':
+              if len(path) > 0:
+                attr_uuid = path.pop(0)
+                if valid_uuid(attr_uuid):
+                  attribute = self.attribute_controller.get_attribute_by_uuid(attr_uuid)
+                else:
+                  raise RestHandlerException(u'Specified second uuid is invalid')
+              else:
+                attribute = None
+              # Make the generic call for additional data
+              return handler.get_data(attribute, parameters)
+            else:
+              raise RestHandlerException(u'Method {0} is not specified'.format(method))
+          else:
+            raise RestHandlerException(u'Specified uuid is invalid')
+        else:
+          raise RestHandlerException(u'Invalid request')
+    except HandlerNotFoundException as error:
+      raise RestHandlerNotFoundException(error)
+    except HandlerException as error:
+      raise RestHandlerException(error)
+    
+          
 class ReferenceHandlerHandler(RestBaseHandler):
 
   def __init__(self, config):

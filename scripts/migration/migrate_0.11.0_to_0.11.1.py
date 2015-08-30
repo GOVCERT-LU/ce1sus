@@ -428,7 +428,7 @@ class Migrator(object):
     for item in all:
       item.namespace = 'ce1sus'
       if item.parent_id:
-        observable = self.session.get_session().query(Observable).filter(Observable.identifier == item.parent_id).one()
+        observable = self.session.get_session().qsiguery(Observable).filter(Observable.identifier == item.parent_id).one()
         observable.object = item
         self.session.get_session().merge(observable)
 
