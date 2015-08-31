@@ -6,7 +6,30 @@
         <h4 class="modal-title">Report Details - {{report.identifier}}</h4>
       </div>
       <div class="modal-body">
-        <event-report-form type="'view'" report="report" permissions="permissions" child="false"></event-report-form>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Identifier</label>
+          <div class="col-lg-9">
+            {{report.identifier}}
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Title</label>
+          <div class="col-lg-9"">
+            {{report.title}}
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Short Description</label>
+          <div class="col-lg-9">
+            <textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{report.short_description.value}}</textarea>
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-lg-3 control-label text-right">Description</label>
+          <div class="col-lg-9">
+            <textarea class="form-control" rows="3" disabled style="background-color: #FFFFFF">{{report.description.value}}</textarea>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
           <div class="btn-group">

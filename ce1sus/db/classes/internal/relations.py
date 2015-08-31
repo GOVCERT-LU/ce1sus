@@ -33,3 +33,39 @@ _REL_EVENT_INDICATOR = Table('rel_event_indicator', getattr(Base, 'metadata'),
                                     Column('event_id', BigIntegerType, ForeignKey('events.event_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True),
                                     Column('indicator_id', BigIntegerType, ForeignKey('indicators.indicator_id', ondelete='cascade', onupdate='cascade'), nullable=False, primary_key=True, index=True)
                                     )
+
+_REL_REPORT_STRUCTUREDTEXT = Table('rel_report_structuredtext', getattr(Base, 'metadata'),
+
+                                       Column('report_id',
+                                              BigIntegerType,
+                                              ForeignKey('reports.report_id',
+                                                         ondelete='cascade',
+                                                         onupdate='cascade'),
+                                              index=True,
+                                              nullable=False, primary_key=True),
+                                       Column('structuredtext_id',
+                                             BigIntegerType,
+                                             ForeignKey('structuredtexts.structuredtext_id',
+                                                        ondelete='cascade',
+                                                        onupdate='cascade'),
+                                              nullable=False,
+                                              primary_key=True, index=True)
+                                       )
+
+_REL_REPORT_STRUCTUREDTEXT_SHORT = Table('rel_report_structuredtext_short', getattr(Base, 'metadata'),
+
+                                       Column('report_id',
+                                              BigIntegerType,
+                                              ForeignKey('reports.report_id',
+                                                         ondelete='cascade',
+                                                         onupdate='cascade'),
+                                              index=True,
+                                              nullable=False, primary_key=True),
+                                       Column('structuredtext_id',
+                                             BigIntegerType,
+                                             ForeignKey('structuredtexts.structuredtext_id',
+                                                        ondelete='cascade',
+                                                        onupdate='cascade'),
+                                              nullable=False,
+                                              primary_key=True, index=True)
+                                       )

@@ -30,6 +30,7 @@ from ce1sus.db.classes.cstix.ttp.relations import _REL_ATTACKPATTERN_STRUCTUREDT
   _REL_MALWAREINSTANCE_STRUCTUREDTEXT_SHORT, _REL_TTP_STRUCTUREDTEXT, _REL_TTP_STRUCTUREDTEXT_SHORT
 from ce1sus.db.classes.internal.corebase import UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
+from ce1sus.db.classes.internal.relations import _REL_REPORT_STRUCTUREDTEXT
 
 
 __author__ = 'Weber Jean-Paul'
@@ -87,7 +88,9 @@ class StructuredText(Entity, Base):
               'incident',
               'threatactor',
               'ttp',
-              'indicator']
+              'indicator',
+              'report_description',
+              'report_short_description', ]
 
   observable_description = relationship('Observable', secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
   objective_description = relationship('Objective', secondary=_REL_OBJECTIVE_STRUCTUREDTEXT, uselist=False)
@@ -129,6 +132,9 @@ class StructuredText(Entity, Base):
   threatactor_short_description = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_STRUCTUREDTEXT_SHORT)
   ttp_short_description = relationship('TTP', uselist=False, secondary=_REL_TTP_STRUCTUREDTEXT_SHORT)
   indicator_short_description = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STRUCTUREDTEXT_SHORT)
+  report_description = relationship('Report', secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False)
+  report_short_description = relationship('Report', secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False)
+
 
   def to_dict(self, cache_object):
     result = {'id_': self.convert_value(self.id_),

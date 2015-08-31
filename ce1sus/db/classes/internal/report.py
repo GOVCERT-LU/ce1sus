@@ -13,12 +13,14 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Boolean
 
 from ce1sus.common import merge_dictionaries
+from ce1sus.db.classes.common.baseelements import Entity
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.core import SimpleLoggingInformations, BaseElement
 from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, UnicodeTextType, BigIntegerType
+from ce1sus.db.classes.internal.relations import _REL_REPORT_STRUCTUREDTEXT, _REL_REPORT_STRUCTUREDTEXT_SHORT
 from ce1sus.db.common.session import Base
 from ce1sus.handlers.base import HandlerBase, HandlerException
 from ce1sus.helpers.common.hash import fileHashSHA1
-from ce1sus.db.classes.common.baseelements import Entity
 
 
 __author__ = 'Weber Jean-Paul'
@@ -180,8 +182,8 @@ class Reference(Entity, Base):
 class Report(Entity, Base):
 
   title = Column('title', UnicodeType(255), index=True)
-  description = Column('description', UnicodeTextType())
-  short_description = Column('short_description', UnicodeType(255))
+  description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False, back_populates="report_description", lazy='joined')
+  short_description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="report_short_description", lazy='joined')
   parent_report_id = Column('parent_report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
@@ -196,8 +198,8 @@ class Report(Entity, Base):
     if cache_object.complete:
       result = {
               'title': self.convert_value(self.title),
-              'description': self.convert_value(self.description),
-              'short_description': self.convert_value(self.short_description),
+              'description': self.attribute_to_dict(self.description, cache_object),
+              'short_description': self.attribute_to_dict(self.short_description, cache_object),
               # TODO references
               'references': self.attributelist_to_dict(self.references, cache_object),
               # TODO related_reports

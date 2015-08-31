@@ -24,6 +24,10 @@ from types import ListType
 from uuid import uuid4
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
+from sqlalchemy import Table, MetaData
+from sqlalchemy import update
+from uuid import uuid4
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 basePath = dirname(abspath(__file__)) + '/../../'
 sys.path.insert(0, basePath)
@@ -49,7 +53,7 @@ from ce1sus.db.classes.cstix.indicator.sightings import Sighting
 from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.attributes.attribute import Attribute, Condition
-from ce1sus.db.classes.internal.attributes.values import NumberValue, TextValue, TimeStampValue
+from ce1sus.db.classes.internal.attributes.values import NumberValue, TextValue, TimeStampValue, ValueBase
 from ce1sus.db.classes.internal.backend.mailtemplate import MailTemplate
 from ce1sus.db.classes.internal.backend.types import AttributeType
 from ce1sus.db.classes.internal.core import BaseObject
@@ -75,7 +79,8 @@ from datetime import datetime
 from uuid import uuid4
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.cstix.indicator.sightings import Sighting
-from sqlalchemy.orm.exc import NoResultFound
+from ce1sus.db.classes.internal.backend.config import Ce1susConfig
+from ce1sus.helpers.version import Version
 
 _REL_INDICATOR_SIGHTINGS = Table('rel_indicator_sightings', Base.metadata,
                                  Column('ris_id', BigInteger, primary_key=True, nullable=False, index=True),
@@ -319,12 +324,13 @@ class Migrator(object):
 
     all = self.session.get_session().query(Condition).all()
     for item in all:
+      print 'Merging Condition {0}'.format(item.identifier)
       item.created_at = datetime.utcnow()
       item.modified_on = datetime.utcnow()
       item.modifier_id = user.identifier
       item.creator_id = user.identifier
       self.session.get_session().merge(item)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
     setattr(Event, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
     setattr(Event, 'title', Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False))
@@ -334,7 +340,9 @@ class Migrator(object):
     
     all = self.session.get_session().query(Event).all()
     for item in all:
+
       if item.foo:
+        print 'Merging Event {0}'.format(item.identifier)
         item.version = '1.0.0'
         item.namespace = 'ce1sus'
 
@@ -362,7 +370,7 @@ class Migrator(object):
         item.stix_header.description = desription
 
         self.session.get_session().merge(item)
-        self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
 
@@ -374,6 +382,7 @@ class Migrator(object):
 
     all = self.session.get_session().query(Indicator).all()
     for item in all:
+      print 'Merging Indicator {0}'.format(item.identifier)
       item.namespace = 'ce1sus'
       item.version = '1.0.0'
       item.timestamp = item.created_at
@@ -412,6 +421,7 @@ class Migrator(object):
       self.session.get_session().merge(item)
 
       for sig in item.sig:
+        print 'Merging Sighting {0}'.format(item.identifier)
         sighting = self.session.get_session().query(Sighting).filter(Sighting.identifier == sig.identifier).one()
         sighting.indicator_id = item.identifier
         self.session.get_session().merge(sighting)
@@ -419,32 +429,34 @@ class Migrator(object):
 
       event.indicators.append(item)
       self.session.get_session().merge(event)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
 
     setattr(Object, 'parent_id', Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True))
     all = self.session.get_session().query(Object).all()
     for item in all:
+      print 'Merging Object {0}'.format(item.identifier)
       item.namespace = 'ce1sus'
       if item.parent_id:
-        observable = self.session.get_session().qsiguery(Observable).filter(Observable.identifier == item.parent_id).one()
+        observable = self.session.get_session().query(Observable).filter(Observable.identifier == item.parent_id).one()
         observable.object = item
         self.session.get_session().merge(observable)
 
       self.session.get_session().merge(item)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
     all = self.session.get_session().query(ObservableComposition).all()
     for item in all:
+      print 'Merging ObservableComposition {0}'.format(item.identifier)
       item.namespace = 'ce1sus'
       parent = item.parent
       self.__set_extendedlogging(item, parent)
       item.tlp_level_id = parent.tlp_level_id
 
       self.session.get_session().merge(item)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
     setattr(Observable, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
@@ -453,6 +465,7 @@ class Migrator(object):
 
     all = self.session.get_session().query(Observable).all()
     for item in all:
+      print 'Merging Observable {0}'.format(item.identifier)
       if item.foo:
         item.namespace = 'ce1sus'
         item.version = '1.0.0'
@@ -469,19 +482,20 @@ class Migrator(object):
         event.observables.append(item)
         self.session.get_session().merge(event)
 
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
 
 
     all = self.session.get_session().query(RelatedObject).all()
     for item in all:
+      print 'Merging RelatedObject {0}'.format(item.identifier)
       parent = item.object
       self.__set_extendedlogging(item, parent)
       self.__set_tlp_code(item, parent)
 
       self.session.get_session().merge(item)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
 
     setattr(Sighting, 'foo', Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False))
@@ -490,6 +504,7 @@ class Migrator(object):
 
     all = self.session.get_session().query(Sighting).all()
     for item in all:
+      print 'Merging Sighting {0}'.format(item.identifier)
       parent = item.indicator
       item.timestamp = item.modified_on
       item.tlp_level_id = parent.tlp_level_id
@@ -516,7 +531,7 @@ class Migrator(object):
       item.source = is_
 
       self.session.get_session().merge(item)
-      self.session.get_session().flush()
+    self.session.get_session().flush()
 
     self.session.get_session().commit()
 
@@ -862,8 +877,135 @@ class Migrator(object):
     self.__drop_table('killchainphases')
 
 
+  def change_value_tables_phase1(self):
     # relation tables
+    for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
+      try:
+        self.__drop_column(clazz, 'identifier')
+      except Exception:
+        pass
+      self.__add_column(clazz, 'identifier')
+      self.__drop_fk(clazz, '{0}_ibfk_1'.format(clazz.get_table_name()))
+      self.__drop_fk(clazz, '{0}_ibfk_2'.format(clazz.get_table_name()))
+      self.__drop_fk(clazz, '{0}_ibfk_3'.format(clazz.get_table_name()))
+      self.__drop_column(clazz, 'uuid')
+      # drop unique constraint
+      self.op.alter_column(clazz.get_table_name(), 'attribute_id', nullable=True, existing_type=BigInteger)
+      self.op.alter_column(clazz.get_table_name(), 'event_id', nullable=True, existing_type=BigInteger)
+      self.op.alter_column(clazz.get_table_name(), 'attributetype_id', nullable=True, existing_type=BigInteger)
 
+      self.__add_fk(clazz, 'identifier', '{0}_ibfk_1'.format(clazz.get_table_name()))
+
+  def change_value_tables_phase2(self):
+    for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
+      table_name = clazz.get_table_name()
+      self.__drop_add_pk(table_name, ['identifier'])
+      self.__drop_column(clazz, '{0}_id'.format(clazz.get_classname()))
+
+
+    self.__drop_column(Report, 'description')
+    self.__drop_column(Report, 'short_description')
+
+
+  def merge_value_data(self):
+    meta = MetaData(bind=self.engine, reflect=True)
+    for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
+      table = meta.tables[
+                          clazz.get_table_name()
+                          ]
+      all = list(self.engine.execute(table.select(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) > 0)))
+      to_delete = list()
+      for item in all:
+        value = item.value
+        attribute_id = item.attribute_id
+        event_id = item.event_id
+        value_type_id = item.attributetype_id
+        id_ = getattr(item, '{0}_id'.format(clazz.get_classname().lower()))
+        if item.identifier is None:
+          print 'Merging Attribute {1}Value with id {0}'.format(id_, clazz.get_classname())
+          new_value_base = clazz()
+          new_value_base.uuid = uuid4()
+          new_value_base.attribute_id = attribute_id
+          new_value_base.event_id = event_id
+          new_value_base.value_type_id = value_type_id
+          new_value_base.type = clazz.get_classname().lower()
+          new_value_base.value = value
+          self.session.get_session().add(new_value_base)
+          to_delete.append(id_)
+      for id_ in to_delete:
+        d = table.delete(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) == id_).execution_options(autocommit=False)
+        d.execute()
+      self.session.get_session().flush()
+    self.session.get_session().commit()
+        # self.engine.execute(table.update().where(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) == key).values(identifier=value))
+
+        # ex = update(table).where(getattr(item, '{0}_id'.format(clazz.get_classname().lower())) == id_).values(table.c.identifier == new_value_base.identifier)
+        #
+        #
+
+    """
+    setattr(Report, 
+            'description_old', 
+            Column('description', 
+                   UnicodeTextType()
+                   )
+            )
+    setattr(Report, 
+            'short_description_old', 
+            Column('short_description', 
+                   UnicodeTextType()
+                   )
+            )
+
+    all = self.session.get_session().query(Report).all()
+    for item in all:
+      print 'Merging Report with id {0}'.format(item.identifier)
+      if item.description_old:
+        desription = StructuredText()
+        desription.uuid = uuid4()
+        desription.value = item.description_old
+        desription.namespace = 'ce1sus'
+        self.__set_extendedlogging(desription, item)
+        self.__set_tlp_code(desription, item)
+        item.description = desription
+      if item.short_description_old:
+        desription = StructuredText()
+        desription.uuid = uuid4()
+        desription.value = item.short_description_old
+        desription.namespace = 'ce1sus'
+        self.__set_extendedlogging(desription, item)
+        self.__set_tlp_code(desription, item)
+        item.short_description = desription
+        self.session.get_session().merge(item)
+      self.session.get_session().flush()
+    self.session.get_session().commit()
+    """
+
+  def pre_steps(self):
+    # check if db exits in table
+    try:
+      dbversion = self.session.get_session().query(Ce1susConfig).filter(Ce1susConfig.key == 'db_version').one()
+      if dbversion.value:
+        print dbversion.value
+        version = Version(dbversion.value)
+        if version.compare('0.11.1') < 0:
+          raise Exception('Migration already ran')
+    except MultipleResultsFound as error:
+      raise Exception(error)
+    except NoResultFound:
+      dbversion = Ce1susConfig()
+      dbversion.key = 'db_version'
+      dbversion.value = '0.11.0'
+      dbversion.uuid = '08e63b80-4ffb-11e5-b970-0800200c9a66'
+      self.session.get_session().add(dbversion)
+      self.session.get_session().commit()
+
+  def post_steps(self):
+    # insert or update db key
+    dbversion = self.session.get_session().query(Ce1susConfig).filter(Ce1susConfig.key == 'db_version').one()
+    dbversion.value = '0.11.1'
+    self.session.get_session().merge(dbversion)
+    self.session.get_session().commit()
 
   def close(self):
     self.session.close()
@@ -888,9 +1030,14 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
+  migros.pre_steps()
   # migros.create_new_tables()
   # migros.altering_tables_phase1()
-  migros.merge_data()
-  migros.altering_tables_phase2()
+  # migros.change_value_tables_phase1()
+  # migros.merge_data()
+  migros.merge_value_data()
+  # migros.change_value_tables_phase2()
+  # migros.altering_tables_phase2()
+  migros.post_steps()
   migros.close()
 

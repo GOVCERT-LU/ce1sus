@@ -6,7 +6,6 @@
 Created on Oct 17, 2014
 """
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Numeric, Date, DateTime
@@ -23,36 +22,36 @@ __license__ = 'GPL v3+'
 
 
 # TODO: recheck validation of values
-class ValueBase(BaseObject):
+class ValueBase(BaseObject, Base):
 
-  @declared_attr
-  def attribute_id(self):
-    return Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @declared_attr
-  def attribute(self):
-    return relationship('Attribute', uselist=False)
 
-  @declared_attr
-  def event_id(self):
-    return Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
+  type = Column(UnicodeType(20), nullable=False)
 
-  @declared_attr
-  def event(self):
-    return relationship(Event, uselist=False)
+  attribute_id = Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  @declared_attr
-  def value_type_id(self):
-    return Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
+  attribute = relationship('Attribute', uselist=False)
 
-  @declared_attr
-  def value_type(self):
-    return relationship('AttributeType', uselist=False)
+  event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
+  event = relationship(Event, uselist=False)
+
+  value_type_id = Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
+
+  value_type = relationship('AttributeType', uselist=False)
+
+  __mapper_args__ = {
+      'polymorphic_on': type,
+      'polymorphic_identity': 'valuebases',
+      'with_polymorphic':'*'
+  }
 
 # pylint: disable=R0903,W0232
 class StringValue(ValueBase, Base):
   """This is a container class for the STRINGVALUES table."""
+
+  __mapper_args__ = {'polymorphic_identity':'stringvalue'}
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
 
   value = Column('value', UnicodeType(255), nullable=False, index=True)
 
@@ -73,6 +72,9 @@ class StringValue(ValueBase, Base):
 class DateValue(ValueBase, Base):
   """This is a container class for the DATEVALES table."""
   value = Column('value', Date, nullable=False, index=True)
+  __mapper_args__ = {'polymorphic_identity':'datevalue'}
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+
 
   def validate(self):
     """
@@ -87,6 +89,8 @@ class DateValue(ValueBase, Base):
 class TimeStampValue(ValueBase, Base):
   """This is a container class for the DATEVALES table."""
   value = Column('value', DateTime, nullable=False, index=True)
+  __mapper_args__ = {'polymorphic_identity':'timestampvalue'}
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
 
   def validate(self):
     """
@@ -100,6 +104,9 @@ class TimeStampValue(ValueBase, Base):
 # pylint: disable=R0903
 class TextValue(ValueBase, Base):
   """This is a container class for the TEXTVALUES table."""
+  __mapper_args__ = {'polymorphic_identity':'textvalue'}
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+
   value = Column('value', UnicodeTextType(), nullable=False)
 
   def validate(self):
@@ -120,6 +127,8 @@ class TextValue(ValueBase, Base):
 class NumberValue(ValueBase, Base):
   """This is a container class for the NUMBERVALUES table."""
   value = Column('value', Numeric, nullable=False, index=True)
+  __mapper_args__ = {'polymorphic_identity':'numbervalue'}
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
 
   def validate(self):
     """

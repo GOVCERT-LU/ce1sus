@@ -12,13 +12,15 @@ from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBr
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.brokers.event.searchbroker import SearchBroker
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.object import Object
-from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.internal.report import Report, Reference
-from ce1sus.db.common.broker import BrokerException
-from ce1sus.views.web.api.version3.handlers.restbase import valid_uuid
+from ce1sus.db.common.broker import BrokerException, NothingFoundException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -37,94 +39,111 @@ class SearchController(BaseController):
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
 
+  SEARCHABLE_CLASSES = [Object,
+                        Attribute,
+                        Event,
+                        Observable,
+                        ObservableComposition,
+                        Report,
+                        Reference,
+                        Indicator,
+                        STIXHeader,
+                        StructuredText
+                        ]
+  
+  SEARCHABLE_PROPERIES = ['title',
+                          'uuid',
+                          ]
+  
   def get_all_attributes(self):
-    """
-    Returns all the attribute definitions formated for the combobox
-    """
     try:
-      attributes = self.attribute_definition_broker.get_all()
-      return attributes
+      return self.attribute_definition_broker.get_all()
     except BrokerException as error:
       raise ControllerException(error)
 
   def get_all_references(self):
     try:
-      references = self.reference_definition_broker.get_all()
-      return references
+      return self.reference_definition_broker.get_all()
     except BrokerException as error:
       raise ControllerException(error)
 
-  def search(self, needle, operator, definition_id):
+
+
+  def search(self, needle, operator, property_name):
 
     needle = needle.strip()
     found_values = list()
 
     if len(needle) < 2:
       raise ControllerException('Needle has to be larger than 2')
-    if definition_id is None:
-      found_values = self.__look_for_any_value(needle, operator)
-    elif definition_id == 'uuid':
-      found_values = self.__look_for_uuids(needle, operator)
-    elif definition_id == 'title':
-      found_values = self.__look_for_title(needle, operator)
-    elif definition_id == 'description':
-      found_values = self.__look_for_description(needle, operator)
+
+    if property_name is None or property_name == 'Any':
+      found_values = self.serach_for_any_value(needle, operator)
+    elif property_name == 'description':
+      found_values = self.__look_for_descriptions(needle, operator)
     else:
-      if 'attribute' in definition_id:
-        uuid = definition_id.replace('attribute:', '')
-        if valid_uuid(uuid):
-          definition = self.attribute_definition_broker.get_by_uuid(uuid)
-          found_values = self.attribute_broker.look_for_attribute_value(definition,
-                                                                        needle,
-                                                                        operator)
-        else:
-          raise ControllerException(u'{0} is not a valid uuid'.format(uuid))
-      elif 'reference' in definition_id:
-        uuid = definition_id.replace('reference:', '')
-        if valid_uuid(uuid):
-          definition = self.reference_definition_broker.get_by_uuid(uuid)
-          found_values = self.reference_broker.look_for_reference_value(definition,
-                                                                        needle,
-                                                                        operator)
-        else:
-          raise ControllerException(u'{0} is not a valid uuid'.format(uuid))
-      else:
-        raise ControllerException(u'{0} is not a valid definition identifier'.format(definition_id))
+      found_values = list()
+      found = False
+      try:
+        definition = self.attribute_definition_broker.get_defintion_by_name(property_name)
+        res = self.search_broker.look_for_attribute_value(definition,
+                                                          needle,
+                                                          operator)
+        if res:
+          found_values.extend(res)
+        found = True
+      except NothingFoundException:
+        #the definition is not defined here
+        pass
+      
+      try:
+        res = self.search_broker.look_for_reference_value(property_name,
+                                                             needle,
+                                                             operator)
+        if res:
+          found_values.extend(res)
+        found = True
+      except NothingFoundException:
+        #the definition is not defined here
+        pass
+
+      if not found:
+        # try looking for the corresponding property
+        res = self.search_by_property(property_name, needle, operator)
+        if res:
+          found_values.extend(res)
 
     return found_values
+  
+  def search_by_property(self, property_name, needle, operator):
+    found_values = list()
+    if property_name in SearchController.SEARCHABLE_PROPERIES:
+      for clazz in SearchController.SEARCHABLE_CLASSES:
+        if hasattr(clazz, property_name):
+          result = self.search_broker.look_for_value_by_property_name(clazz, property_name, needle, operator)
+          found_values = found_values + result
+      return found_values
+    else:
+      raise ControllerException('The value {0} is not searchable'.format(property_name))
 
-  def __look_for_any_value(self, needle, operator):
-    found_values = self.attribute_broker.look_for_attribute_value(None, needle, operator)
+  def serach_for_any_value(self, needle, operator):
+    found_values = self.search_broker.look_for_attribute_value(None, needle, operator)
     # Also look inside uuids
-    found_values = found_values + self.__look_for_uuids(needle, operator)
 
-    found_values = found_values + self.__look_for_title(needle, operator)
+    found_values = found_values + self.__look_for_descriptions(needle, operator)
 
-    found_values = found_values + self.__look_for_description(needle, operator)
+    for s_pro in SearchController.SEARCHABLE_PROPERIES:
+      found_values = found_values + self.search_by_property(s_pro, needle, operator)
 
-    found_values = found_values + self.reference_broker.look_for_reference_value(None,
-                                                                                 needle,
-                                                                                 operator)
+    found_values = found_values + self.search_broker.look_for_reference_value(None,
+                                                                              needle,
+                                                                              operator)
 
     return found_values
 
-  def __look_for_uuids(self, value, operand):
+  def __look_for_descriptions(self, value, operand):
     found_values = list()
-    for clazz in [Object, Attribute, Event, Observable, ObservableComposition, Report, Reference]:
-      result = self.search_broker.look_for_uuid_by_class(clazz, value, operand)
-      found_values = found_values + result
-    return found_values
-
-  def __look_for_title(self, value, operand):
-    found_values = list()
-    for clazz in [Event, Observable, Report]:
-      result = self.search_broker.look_for_title_by_class(clazz, value, operand)
-      found_values = found_values + result
-    return found_values
-
-  def __look_for_description(self, value, operand):
-    found_values = list()
-    for clazz in [Event, Observable, Report]:
-      result = self.search_broker.look_for_description_by_class(clazz, value, operand)
+    for clazz in SearchController.SEARCHABLE_CLASSES:
+      result = self.search_broker.look_for_descriptions(clazz, value, operand)
       found_values = found_values + result
     return found_values

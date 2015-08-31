@@ -9,7 +9,6 @@ from datetime import datetime
 from sqlalchemy.orm.relationships import RelationshipProperty
 from uuid import uuid4
 
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.common import CommonController

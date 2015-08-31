@@ -46,7 +46,7 @@ class Object(Entity, Base):
 
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship('ObjectDefinition', lazy='joined')
+  definition = relationship('ObjectDefinition')
   observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
 
   related_object = relationship('RelatedObject', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)

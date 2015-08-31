@@ -193,8 +193,12 @@ class EventAssembler(BaseAssembler):
 
     self.set_base(report, json, cache_object, event)
     report.title = json.get('title', None)
-    report.description = json.get('description', None)
-    report.short_description = json.get('short_description', None)
+    description = json.get('description', None)
+    if description:
+      report.description = self.assemble_structured_text(report, description, cache_object)
+    short_description = json.get('short_description', None)
+    if short_description:
+      report.short_description = self.assemble_structured_text(report, short_description, cache_object)
     # link event
     report.event = event
     references = json.get('references', None)

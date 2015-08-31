@@ -171,6 +171,14 @@ def dbinit(config, json_location=''):
     users.append(user)
   user_ctrl.user_broker.do_commit(True)
 
+  # Add DB version informations
+  dbversion = Ce1susConfig()
+  dbversion.key = 'db_version'
+  dbversion.value = '0.11.1'
+  dbversion.uuid = '08e63b80-4ffb-11e5-b970-0800200c9a66'
+  user_ctrl.user_broker.session.add(dbversion)
+  user_ctrl.user_broker.session.commit()
+
   # Add handlers
   maintenance = Maintenance(config)
 

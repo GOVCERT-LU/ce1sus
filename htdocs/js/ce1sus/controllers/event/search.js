@@ -45,20 +45,9 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
         
       }
     }
-    var attrType = '';
-    var value = '';
-    if (entry.attribute){
-      attrType = entry.attribute.definition.name;
-      value = entry.attribute.value;
-    } else {
-      if (entry.reference){
-        attrType = entry.reference.definition.name;
-        value = entry.reference.value;
-      }
-    }
+    var attribute =  entry.attribute;
     
-    
-    return {'event':entry.event,'eventTitle':entry.event.title,'observable':observable,'objectType':objType,'attributeType':attrType,'attributeValue':value};
+    return {'event':entry.event,'eventTitle':entry.event.stix_header.title,'observable':observable,'objectType':objType,'attribute':attribute};
     
   };
 

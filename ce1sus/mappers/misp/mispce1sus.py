@@ -38,7 +38,6 @@ from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerException
 from ce1sus.mappers.misp.common import get_container_object_attribute, get_tlp, ANALYSIS_MAP, RISK_MAP
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
-from sqlalchemy.orm.session import make_transient
 
 
 __author__ = 'Weber Jean-Paul'

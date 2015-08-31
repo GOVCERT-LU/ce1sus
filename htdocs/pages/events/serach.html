@@ -6,7 +6,7 @@
     <div class="col-xs-12 col-sm-12">
       Search for:
       <select class="form-control"
-        ng-options="attribute.identifier as attribute.name for attribute in attributes"
+        ng-options="attribute.name as attribute.name for attribute in attributes"
         ng-model="search.field">
         <option style="display: none" value="">Select an attribute</option>
       </select>
@@ -49,11 +49,11 @@
       <td data-title="'Object Type'" filter="{ 'objectType': 'text' }" sortable="'objectType'">
         {{item.objectType}}
       </td>
-      <td data-title="'Attribute Type'" filter="{ 'attributeType': 'text' }" sortable="'attributeType'">
-        {{item.attributeType}}
+      <td data-title="'Attribute Type'" filter="{ 'attribute.definition.name': 'text' }" sortable="'attribute.definition.name'">
+        {{item.attribute.definition.name}}
       </td>
-      <td data-title="'Attribute Value'" filter="{ 'attributeValue': 'text' }" sortable="'attributeValue'">
-        {{item.attributeValue}}
+      <td data-title="'Attribute Value'" filter="{ 'attribute.value': 'text' }" sortable="'attribute.value'">
+        <attribute-handler attribute="item.attribute" definition="item.attribute.definition" type="'view'"></attribute-handler>
       </td>
       <td data-title="'Options'">
         <a href="" ng-click="pushItem(item.event, true)"><span class="glyphicon glyphicon-eye-open" title="View event" ></span></a>

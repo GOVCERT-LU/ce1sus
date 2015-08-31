@@ -72,14 +72,16 @@ class EventMerger(BaseMerger):
       merge_cache.result = self.is_mergeable(old_value, new_value, merge_cache)
       if merge_cache.result == 1:
         self.update_instance_value(old_value, new_value, 'title', merge_cache)
-        self.update_instance_value(old_value, new_value, 'description', merge_cache)
-        self.update_instance_value(old_value, new_value, 'short_description', merge_cache)
         # TODO: related reports
         
       elif merge_cache.result == 0:
         self.set_value(old_instance, new_value, attr_name, merge_cache)
         
-      self.merge_references(old_value, new_instance, new_value, 'references')
+      self.merge_references(old_value, new_value, merge_cache, 'references')
+
+      self.merge_structured_text(old_value, new_value, merge_cache, 'description')
+      self.merge_structured_text(old_value, new_value, merge_cache, 'short_description')
+
 
       self.set_base(old_instance, new_instance, merge_cache)
     return merge_cache.version

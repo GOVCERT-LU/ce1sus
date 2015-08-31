@@ -9,6 +9,7 @@ from ce1sus.controllers.base import BaseController, ControllerException, Control
 from ce1sus.db.brokers.definitions.referencesbroker import ReferenceDefintionsBroker
 from ce1sus.db.brokers.event.reportbroker import ReportBroker, ReferenceBroker
 from ce1sus.db.common.broker import BrokerException, NothingFoundException, IntegrityException
+from ce1sus.controllers.common.common import CommonController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -25,6 +26,7 @@ class ReportController(BaseController):
     self.report_broker = self.broker_factory(ReportBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
+    self.common_controller = CommonController(config, session)
 
   def get_report_by_id(self, identifier):
     try:
@@ -70,7 +72,11 @@ class ReportController(BaseController):
 
   def remove_report(self, report, cache_object, commit=True):
     try:
-      self.report_broker.remove_by_id(report.identifier)
+      if report.description:
+        self.common_controller.remove_structured_text(report.description, cache_object, False)
+      if report.short_description:
+        self.common_controller.remove_structured_text(report.short_description, cache_object, False)
+      self.report_broker.remove_by_id(report.identifier, commit)
     except BrokerException as error:
       raise ControllerException(error)
 

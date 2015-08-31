@@ -14,7 +14,7 @@ from sqlalchemy.types import Boolean
 from uuid import uuid4
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue
+from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue, ValueBase
 from ce1sus.db.classes.internal.core import BaseElement, SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
@@ -57,18 +57,10 @@ class Attribute(BaseElement, Base):
   object = relationship('Object',
                         primaryjoin='Object.identifier==Attribute.object_id')
   # valuerelations
-  string_value = relationship(StringValue,
-                              primaryjoin='Attribute.identifier==StringValue.attribute_id',
-                              lazy='joined', uselist=False)
-  date_value = relationship(DateValue,
-                            primaryjoin='Attribute.identifier==DateValue.attribute_id',
-                            uselist=False, lazy='joined')
-  text_value = relationship(TextValue,
-                            primaryjoin='Attribute.identifier==TextValue.attribute_id',
-                            uselist=False, lazy='joined')
-  number_value = relationship(NumberValue,
-                              primaryjoin='Attribute.identifier==NumberValue.attribute_id',
-                              uselist=False, lazy='joined')
+  value_base = relationship(ValueBase,
+                            primaryjoin='Attribute.identifier==ValueBase.attribute_id',
+                            lazy='joined', uselist=False)
+
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
   condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
@@ -83,30 +75,14 @@ class Attribute(BaseElement, Base):
 
   def delink_parent(self):
     self.object = None
-    self.__get_value_instance().event = None
-    self.__get_value_instance().attribute = None
-
-  def __get_value_instance(self):
-    """
-    Returns the value object of an attibute
-    """
-    if self.string_value:
-      value = self.string_value
-    elif self.date_value:
-      value = self.date_value
-    elif self.text_value:
-      value = self.text_value
-    elif self.number_value:
-      value = self.number_value
-    else:
-      value = None
-    return value
+    self.value_base.event = None
+    self.value_base.attribute = None
 
   def __get_value(self):
     """
     Returns the actual value of an attribute
     """
-    value_instance = self.__get_value_instance()
+    value_instance = self.value_base
     # check if the value instance is set
     if value_instance:
       # if the value is not valid
@@ -127,10 +103,9 @@ class Attribute(BaseElement, Base):
       except AttributeError as error:
         raise error
       classname = '{0}Value'.format(value_table)
-      attribute = '{0}_value'.format(value_table.lower())
 
       # check if not a value has been assigned
-      value_instance = self.__get_value_instance()
+      value_instance = self.value_base
       if value_instance:
         # update only
         value_instance.value = new_value
@@ -152,7 +127,7 @@ class Attribute(BaseElement, Base):
       else:
         raise ValueError(u'Cannot set the attribute value as the parent object is not yet set.')
 
-      setattr(self, attribute, value_instance)
+      self.value_base = value_instance
 
     else:
       raise ValueError(u'Cannot set the attribute value as the definition is not yet set.')
@@ -163,7 +138,7 @@ class Attribute(BaseElement, Base):
 
   @property
   def value_instance(self):
-    return self.__get_value_instance()
+    return self.value_base
 
   @value.setter
   def value(self, value):
@@ -176,7 +151,7 @@ class Attribute(BaseElement, Base):
     :returns: Boolean
     """
     # validate attribute value
-    value_instance = self.__get_value_instance()
+    value_instance = self.value_base
     # TODO: encoding error
     ObjectValidator.validateRegex(value_instance,
                                   'value',

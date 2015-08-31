@@ -89,9 +89,9 @@ class Observable(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, lazy='joined')
+  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
 
-  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, lazy='joined')
+  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT)
   # TODO: observable event (Note: different than the event used here)
   observable_composition = relationship('ObservableComposition', uselist=False)
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
@@ -103,7 +103,7 @@ class Observable(Entity, Base):
   event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE)
   related_observable = relationship(RelatedObservable, primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_OBSERVABLE)
-  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False, lazy='joined')
+  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False)
 
   def validate(self):
     return True

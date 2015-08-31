@@ -19,6 +19,7 @@ from ce1sus.db.brokers.event.reportbroker import ReferenceBroker
 from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
 from ce1sus.db.common.broker import ValidationException, IntegrityException, BrokerException, NothingFoundException
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
+from ce1sus.controllers.events.reports import ReportController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -41,6 +42,7 @@ class EventController(BaseController):
     self.common_controller = CommonController(config, session)
     self.stix_header_broker = self.broker_factory(STIXHeaderBroker)
     self.indicator_controller = IndicatorController(config, session)
+    self.report_controller = ReportController(config, session)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -80,7 +82,7 @@ class EventController(BaseController):
       # the the creator
       # generate relations if needed!
 
-      flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event)
+      flat_attribtues = self.relations_controller.get_flat_attributes_for_event(event, cache_object)
 
       if (mkrelations == 'True' or mkrelations is True) and flat_attribtues:
         self.relations_controller.generate_bulk_attributes_relations(event, flat_attribtues, False)
@@ -131,6 +133,9 @@ class EventController(BaseController):
       # TODO: the remaining removals
       for indicator in event.indicators:
         self.indicator_controller.remove_indicator(indicator, cache_object, False)
+
+      for report in event.reports:
+        self.report_controller.remove_report(report, cache_object, False)
 
       self.event_broker.remove_by_id(event.identifier, False)
       self.event_broker.do_commit(True)
