@@ -131,7 +131,7 @@ class ReferenceHandlerHandler(RestBaseHandler):
             else:
               reference = None
             # Make the generic call for additional data
-            return handler.get_data(reference, definition, parameters)
+            return handler.get_data(reference, parameters)
           else:
             raise RestHandlerException(u'Method {0} is not specified'.format(method))
         else:

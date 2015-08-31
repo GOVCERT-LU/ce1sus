@@ -132,7 +132,7 @@ class FileReferenceHandler(GenericHandler):
     else:
       raise HandlerException('Value is invalid format has to be {"filename": <filename>,"data": <base 64 encoded data> } but was ' + '{0}'.format(value))
 
-  def get_data(self, reference, definition, parameters):
+  def get_data(self, reference, parameters):
     if reference:
       splitted = reference.value.split('|')
 
