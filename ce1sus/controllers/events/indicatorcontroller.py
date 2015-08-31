@@ -9,6 +9,7 @@ from datetime import datetime
 from sqlalchemy.orm.relationships import RelationshipProperty
 from uuid import uuid4
 
+from ce1sus.common.checks import is_object_viewable
 from ce1sus.common.classes.cacheobject import MergerCache
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.common import CommonController
@@ -20,10 +21,10 @@ from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
 from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
 from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.common.broker import BrokerException
-from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -104,100 +105,94 @@ class IndicatorController(BaseController):
 
   def map_indicator(self, attributes, indicator_type, event, cache_object):
     # TODO review This
-    indicator = Indicator()
-    indicator.uuid = uuid4()
+
     merger_cache = MergerCache(cache_object)
     merger_cache.insert = True
 
-    indicator.creator = merger_cache.user
-    indicator.modifier = merger_cache.user
-    indicator.creator_group = merger_cache.user.group
-    indicator.crated_on = datetime.utcnow()
-    indicator.modified_on = datetime.utcnow()
-    indicator.tlp = 'Amber'
+    if len(attributes) > 0:
+      indicator = Indicator()
+      indicator.uuid = uuid4()
+      self.set_base(indicator, attributes[0])
 
-    # indicator.event = event
-    indicator.event_id = event.identifier
-    indicator.event = event
-    indicator.description = None
-    indicator.dbcode = event.dbcode
-    indicator.tlp_level_id = event.tlp_level_id
-    indicator.title = 'Indicators for "{0}"'.format(indicator_type)
-    indicator.operator = 'OR'
-    valid_time_position = ValidTime()
-    valid_time_position.start_time = datetime.utcnow()
-    # self.set_extended_logging(indicator, user, True)
+      # indicator.event = event
+      indicator.event_id = event.identifier
+      indicator.event = event
+      indicator.description = None
+      indicator.dbcode = event.dbcode
+      indicator.tlp_level_id = event.tlp_level_id
+      indicator.title = 'Indicators for "{0}"'.format(indicator_type)
+      indicator.operator = 'OR'
+      valid_time_position = ValidTime()
+      self.set_base(valid_time_position, attributes[0])
+      valid_time_position.start_time = event.modified_on
 
-    if indicator_type and indicator_type != 'Others':
-      indicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
 
-    for attribute in attributes:
-      if attribute.is_ioc:
-        attribute.uuid = uuid4()
-        attribute.creator = merger_cache.user
-        attribute.modifier = merger_cache.user
-        attribute.creator_group = merger_cache.user.group
-        attribute.crated_on = datetime.utcnow()
-        attribute.modified_on = datetime.utcnow()
-        attribute.tlp = 'Amber'
-                # create object
-        obj = Object()
+      if indicator_type and indicator_type != 'Others':
+        indicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
 
-        obj.creator = merger_cache.user
-        obj.modifier = merger_cache.user
-        obj.creator_group = merger_cache.user.group
-        obj.crated_on = datetime.utcnow()
-        obj.modified_on = datetime.utcnow()
-        obj.tlp = 'Amber'
+      for attribute in attributes:
+        if attribute.is_ioc:
 
-        obj.uuid = uuid4()
-        obj.dbcode = attribute.object.dbcode
-        obj.tlp_level_id = attribute.object.tlp_level_id
-        obj.definition = ObjectDefinition()
-        obj.definition.name = attribute.object.definition.name
-        obj.definition.identifier = attribute.object.definition.identifier
-        obj.definition_id = attribute.object.definition.identifier
-        obj.attributes.append(attribute)
-        obj.definition.creator = merger_cache.user
-        obj.definition.modifier = merger_cache.user
+                  # create object
+          obj = Object()
+          self.set_base(obj, attribute)
+          obj.uuid = uuid4()
 
-        # self.set_extended_logging(obj, user, True)
-        # create observable
-        obs = Observable()
+          obj.definition = ObjectDefinition()
+          self.set_base(obj.definition, attribute)
+          obj.definition.name = attribute.object.definition.name
+          obj.definition.identifier = attribute.object.definition.identifier
 
-        obs.uuid = uuid4()
-        obs.creator = merger_cache.user
-        obs.modifier = merger_cache.user
-        obs.creator_group = merger_cache.user.group
-        obs.crated_on = datetime.utcnow()
-        obs.modified_on = datetime.utcnow()
-        obs.tlp = 'Amber'
 
-        if attribute.object.parent:
-          obs.dbcode = attribute.object.parent.dbcode
-          obs.tile = attribute.object.parent.title
-          obs.description = attribute.object.parent.description
-          obs.tlp_level_id = attribute.object.parent.tlp_level_id
-        else:
-          obs.dbcode = attribute.object.dbcode
-          obs.tlp_level_id = attribute.object.tlp_level_id
-        obs.object = obj
+          # create observable
+          obs = Observable()
+          obs.indicator = indicator
+          obs.uuid = uuid4()
+          self.set_base(obs, attribute)
 
-        obs.event = event
-        # self.set_extended_logging(obs, user, True)
+          if attribute.object.parent:
+            obs.dbcode = attribute.object.parent.dbcode
+            obs.tile = attribute.object.parent.title
+            obs.description = attribute.object.parent.description
+            obs.tlp_level_id = attribute.object.parent.tlp_level_id
+          else:
+            obs.dbcode = attribute.object.dbcode
+            obs.tlp_level_id = attribute.object.tlp_level_id
+          obs.object = obj
 
-        indicator.observables.append(obs)
+          obj.observable = obs
 
-    if indicator.observables:
-      return indicator
-    else:
-      return None
+
+          new_attribute = Attribute()
+          new_attribute.uuid = uuid4()
+          new_attribute.definition = attribute.definition
+          new_attribute.object = obj
+          new_attribute.value = attribute.value
+
+          self.set_base(new_attribute, attribute)
+          obj.attributes.append(new_attribute)
+
+          indicator.observables.append(obs)
+
+      if indicator.observables:
+        return indicator
+
+    return None
+
+  def set_base(self, instance, attribute):
+    instance.creator = attribute.creator
+    instance.modifier = attribute.modifier
+    instance.creator_group = attribute.creator_group
+    instance.created_at = attribute.created_at
+    instance.modified_on = attribute.modified_on
+    instance.tlp = attribute.tlp
+    instance.dbcode = attribute.dbcode
 
   def get_generic_indicators(self, event, cache_object):
     try:
       indicators = list()
       
-      flat_attribtues = self.relation_controller.get_flat_attributes_for_event(event)
+      flat_attribtues = self.relation_controller.get_flat_attributes_for_event(event, cache_object)
       
       mal_email = list()
       ips = list()
@@ -228,7 +223,7 @@ class IndicatorController(BaseController):
         else:
           others.append(attribute)
 
-      ind = self.map_indicator(artifacts, 'Malware Artifacts', event)
+      ind = self.map_indicator(artifacts, 'Malware Artifacts', event, cache_object)
 
       if ind:
         ind.uuid = uuid4()

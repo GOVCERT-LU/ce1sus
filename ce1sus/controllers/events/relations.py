@@ -12,6 +12,7 @@ from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
+from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -141,40 +142,46 @@ class RelationController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def make_object_attributes_flat(self, obj):
+  def make_object_attributes_flat(self, obj, cache_object):
     result = list()
     if obj:
       for attribute in obj.attributes:
-        result.append(attribute)
+        if is_object_viewable(attribute, cache_object):
+          result.append(attribute)
       for related_object in obj.related_objects:
-        result.extend(self.make_object_attributes_flat(related_object.object))
+        if is_object_viewable(related_object, cache_object):
+          result.extend(self.make_object_attributes_flat(related_object.object, cache_object))
     return result
 
-  def __process_observable(self, observable):
+  def __process_observable(self, observable, cache_object):
     result = list()
-    if observable.observable_composition:
+    if observable.observable_composition and is_object_viewable(observable.observable_composition, cache_object):
       for child_observable in observable.observable_composition.observables:
-        result.extend(self.__process_observable(child_observable))
+        if is_object_viewable(child_observable, cache_object):
+          result.extend(self.__process_observable(child_observable, cache_object))
     else:
-      result.extend(self.make_object_attributes_flat(observable.object))
+      if is_object_viewable(observable.object, cache_object):
+        result.extend(self.make_object_attributes_flat(observable.object, cache_object))
     return result
 
-  def get_flat_attributes_for_event(self, event):
+  def get_flat_attributes_for_event(self, event, cache_object):
     # Make attributes flat
     flat_attriutes = list()
 
     if event.observables:
       for observable in event.observables:
-        if observable.observable_composition:
+        if observable.observable_composition and is_object_viewable(observable.observable_composition,cache_object):
           for obs in observable.observable_composition.observables:
-            flat_attriutes.extend(self.__process_observable(obs))
+            if is_object_viewable(observable.observable_composition, cache_object):
+              flat_attriutes.extend(self.__process_observable(obs, cache_object))
         else:
-          flat_attriutes.extend(self.__process_observable(observable))
+          flat_attriutes.extend(self.__process_observable(observable, cache_object))
     if event.indicators:
       for indicator in event.indicators:
-        if indicator.observables:
+        if indicator.observables and is_object_viewable(indicator, cache_object):
           for observable in indicator.observables:
-            flat_attriutes.extend(self.__process_observable(observable))
+            if is_object_viewable(observable, cache_object):
+              flat_attriutes.extend(self.__process_observable(observable, cache_object))
     return flat_attriutes
 
   def remove_all_relations_by_definition_ids(self, id_list, commit=True):

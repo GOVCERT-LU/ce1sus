@@ -17,6 +17,7 @@ from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
+from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -314,24 +315,25 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
     
-  def get_flat_object(self, obj):
+  def get_flat_object(self, obj, cache_object):
     result = list()
     result.append(obj)
     for rel_obj in obj.related_objects:
-      rel_res = self.get_flat_object(rel_obj)
-      if rel_res:
-        result = result + rel_res
+      if is_object_viewable(rel_obj, cache_object):
+        rel_res = self.get_flat_object(rel_obj, cache_object)
+        if rel_res:
+          result = result + rel_res
     return result
 
-  def get_flat_observable_objects(self, observable):
+  def get_flat_observable_objects(self, observable, cache_object):
     result = list()
-    if observable.object:
-      res = self.get_flat_object(observable.object)
+    if observable.object and is_object_viewable(observable.object, cache_object):
+      res = self.get_flat_object(observable.object, cache_object)
       if res:
         result = result + res
-    elif observable.observable_composition:
+    elif observable.observable_composition and is_object_viewable(observable.object, cache_object):
       for obs in observable.observable_composition.observables:
-        res = self.get_flat_observable_objects(obs)
+        res = self.get_flat_observable_objects(obs, cache_object)
         if res:
           result = result + res
     return result
