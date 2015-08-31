@@ -27,18 +27,18 @@ class ValueBase(BaseObject, Base):
 
 
   type = Column(UnicodeType(20), nullable=False)
+  # only one attribute value can be in
+  attribute_id = Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True, unique=True)
 
-  attribute_id = Column('attribute_id', BigIntegerType, ForeignKey('attributes.attribute_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-
-  attribute = relationship('Attribute', uselist=False)
+  attribute = relationship('Attribute', uselist=False, lazy='joined')
 
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
 
-  event = relationship(Event, uselist=False)
+  event = relationship(Event, uselist=False, lazy='joined')
 
   value_type_id = Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'), nullable=False, index=True)
 
-  value_type = relationship('AttributeType', uselist=False)
+  value_type = relationship('AttributeType', uselist=False, lazy='joined')
 
   __mapper_args__ = {
       'polymorphic_on': type,

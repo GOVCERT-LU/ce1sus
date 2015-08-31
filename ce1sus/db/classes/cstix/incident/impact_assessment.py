@@ -89,7 +89,7 @@ class ImpactAssessment(Entity, Base):
               'indirect_impact_summary': self.attribute_to_dict(self.indirect_impact_summary, cache_object),
               'total_loss_estimation': self.attribute_to_dict(self.total_loss_estimation, cache_object),
               'impact_qualification': self.convert_value(self.impact_qualification),
-              'effects': self.attributelist_to_dict(self.effects, cache_object)
+              'effects': self.attributelist_to_dict('effects', cache_object)
               }
 
     parent_dict = Entity.to_dict(self, cache_object)

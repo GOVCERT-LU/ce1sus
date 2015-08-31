@@ -35,9 +35,9 @@ class Behavior(Entity, Base):
   def to_dict(self, cache_object):
 
     result = {
-              'malware_instances': self.attributelist_to_dict(self.malware_instances, cache_object),
-              'attack_patterns': self.attributelist_to_dict(self.attack_patterns, cache_object),
-              'exploits': self.attributelist_to_dict(self.exploits, cache_object)
+              'malware_instances': self.attributelist_to_dict('malware_instances', cache_object),
+              'attack_patterns': self.attributelist_to_dict('attack_patterns', cache_object),
+              'exploits': self.attributelist_to_dict('exploits', cache_object)
               }
 
     parent_dict = Entity.to_dict(self, cache_object)

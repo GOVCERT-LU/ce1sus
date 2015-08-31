@@ -70,8 +70,8 @@ class Object(Entity, Base):
     result = {
             'definition_id': self.convert_value(self.definition.uuid),
             'definition': self.attribute_to_dict(self.definition, cache_object_defs),
-            'attributes': self.attributelist_to_dict(self.attributes, cache_object),
-            'related_objects': self.attributelist_to_dict(self.related_objects, cache_object),
+            'attributes': self.attributelist_to_dict('attributes', cache_object),
+            'related_objects': self.attributelist_to_dict('related_objects', cache_object),
             }
 
     parent_dict = Entity.to_dict(self, cache_object)

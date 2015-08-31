@@ -105,8 +105,8 @@ class VictimTargeting(BaseElement, Base):
 
     result = {
               'identity': self.attribute_to_dict(self.identity, cache_object),
-              'targeted_systems': self.attributelist_to_dict(self.targeted_systems, cache_object),
-              'targeted_information': self.attributelist_to_dict(self.targeted_information, cache_object),
+              'targeted_systems': self.attributelist_to_dict('targeted_systems', cache_object),
+              'targeted_information': self.attributelist_to_dict('targeted_information', cache_object),
               }
 
     parent_dict = BaseElement.to_dict(self, cache_object)

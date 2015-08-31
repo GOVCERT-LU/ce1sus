@@ -125,7 +125,7 @@ class MarkingSpecification(Entity, Base):
               'id_': self.convert_value(self.id_),
               'version': self.convert_value(self.version_db),
               'controlled_structure': self.convert_value(self.controlled_structure),
-              'marking_structures': self.attributelist_to_dict(self.marking_structures, cache_object),
+              'marking_structures': self.attributelist_to_dict('marking_structures', cache_object),
               'information_source': self.attribute_to_dict(self.information_source, cache_object),
               }
 

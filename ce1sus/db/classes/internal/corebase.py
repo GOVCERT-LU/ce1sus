@@ -87,8 +87,9 @@ class BaseObject(object):
 
   def attributelist_to_dict(self, attribute, cache_object):
     result = list()
-    if attribute:
-      if cache_object.inflated:
+    if cache_object.inflated:
+      attribute = getattr(self, attribute)
+      if attribute:
         for item in attribute:
           if is_object_viewable(item, cache_object):
             result.append(self.attribute_to_dict(item, cache_object))

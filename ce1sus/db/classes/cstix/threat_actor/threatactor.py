@@ -171,15 +171,15 @@ class ThreatActor(BaseCoreComponent, Base):
 
     result = {
               'identity': self.attribute_to_dict(self.identity, cache_object),
-              'types': self.attributelist_to_dict(self.types, cache_object),
-              'moditvations': self.attributelist_to_dict(self.motivations, cache_object),
-              'sophistications': self.attributelist_to_dict(self.sophistications, cache_object),
-              'intended_effects': self.attributelist_to_dict(self.intended_effects, cache_object),
-              'planning_and_operational_supports': self.attributelist_to_dict(self.planning_and_operational_supports, cache_object),
+              'types': self.attributelist_to_dict('types', cache_object),
+              'moditvations': self.attributelist_to_dict('motivations', cache_object),
+              'sophistications': self.attributelist_to_dict('sophistications', cache_object),
+              'intended_effects': self.attributelist_to_dict('intended_effects', cache_object),
+              'planning_and_operational_supports': self.attributelist_to_dict('planning_and_operational_supports', cache_object),
               'confidence': self.attribute_to_dict(self.confidence, cache_object),
-              'handling': self.attributelist_to_dict(self.handling, cache_object),
-              'associated_actors': self.attributelist_to_dict(self.associated_actors, cache_object),
-              'related_packages': self.attributelist_to_dict(self.associated_actors, cache_object)
+              'handling': self.attributelist_to_dict('handling', cache_object),
+              'associated_actors': self.attributelist_to_dict('associated_actors', cache_object),
+              'related_packages': self.attributelist_to_dict('associated_actors', cache_object)
               }
 
     parent_dict = BaseCoreComponent.to_dict(self, cache_object)

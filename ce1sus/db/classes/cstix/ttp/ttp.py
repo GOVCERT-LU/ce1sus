@@ -46,13 +46,13 @@ class TTP(BaseCoreComponent, Base):
 
     result = {
               'behavior': self.attribute_to_dict(self.behavior, cache_object),
-              'related_ttps': self.attributelist_to_dict(self.related_ttps, cache_object),
-              'indented_effects': self.attributelist_to_dict(self.intended_effects, cache_object),
+              'related_ttps': self.attributelist_to_dict('related_ttps', cache_object),
+              'indented_effects': self.attributelist_to_dict('intended_effects', cache_object),
               'resources': self.attribute_to_dict(self.resources, cache_object),
               'victim_targeting': self.attribute_to_dict(self.victim_targeting, cache_object),
-              'exploit_targets': self.attributelist_to_dict(self.exploit_targets, cache_object),
+              'exploit_targets': self.attributelist_to_dict('exploit_targets', cache_object),
               'kill_chain_phases': self.attribute_to_dict(self.kill_chain_phases, cache_object),
-              'related_packages': self.attributelist_to_dict(self.related_packages, cache_object),
+              'related_packages': self.attributelist_to_dict('related_packages', cache_object),
               }
 
     parent_dict = BaseCoreComponent.to_dict(self, cache_object)

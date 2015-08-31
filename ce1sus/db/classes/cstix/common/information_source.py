@@ -80,10 +80,10 @@ class InformationSource(Entity, Base):
                                       secondaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id'
                                       )
   
-  time = relationship(CyboxTime, uselist=False)
+  time = relationship(CyboxTime, uselist=False, lazy='joined')
   tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL)
 
-  roles = relationship(InformationSourceRole)
+  roles = relationship(InformationSourceRole, lazy='joined')
   # TODO: references -> relation
 
   confidence = relationship('Confidence', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
@@ -159,15 +159,15 @@ class InformationSource(Entity, Base):
                 'description':self.attribute_to_dict(self.description, cache_object),
                 'identity': self.attribute_to_dict(self.identity, copy),
                 'time': self.attribute_to_dict(self.time, cache_object),
-                'tools': self.attributelist_to_dict(self.tools, cache_object),
-                'roles': self.attributelist_to_dict(self.roles, copy),
-                'contributing_sources': self.attributelist_to_dict(self.contributing_sources, copy)
+                'tools': self.attributelist_to_dict('tools', cache_object),
+                'roles': self.attributelist_to_dict('roles', copy),
+                'contributing_sources': self.attributelist_to_dict('contributing_sources', copy)
               }
     else:
       result = {
                 'identity': self.attribute_to_dict(self.identity, cache_object),
                 'time': self.attribute_to_dict(self.identity, cache_object),
-                'roles': self.attributelist_to_dict(self.roles, cache_object),
+                'roles': self.attributelist_to_dict('roles', cache_object),
               }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

@@ -74,9 +74,9 @@ class Resource(Entity, Base):
   def to_dict(self, cache_object):
 
     result = {
-              'tools': self.attributelist_to_dict(self.tools, cache_object),
+              'tools': self.attributelist_to_dict('tools', cache_object),
               'infrastructure': self.attribute_to_dict(self.infrastructure, cache_object),
-              'personas': self.attributelist_to_dict(self.personas, cache_object),
+              'personas': self.attributelist_to_dict('personas', cache_object),
               }
 
     parent_dict = Entity.to_dict(self, cache_object)

@@ -117,33 +117,33 @@ class Indicator(BaseCoreComponent, Base):
   related_packages = relationship('RelatedPackageRef', secondary=_REL_INDICATOR_RELATED_PACKAGES)
 
   def to_dict(self, cache_object):
-    observables = self.attributelist_to_dict(self.observables, cache_object)
+    observables = self.attributelist_to_dict('observables', cache_object)
     observables_count = len(observables)
     if cache_object.complete:
       result = {'observables': observables,
                 'observables_count': observables_count,
-                'types': self.attributelist_to_dict(self.types, cache_object),
+                'types': self.attributelist_to_dict('types', cache_object),
                 'confidence': self.attribute_to_dict(self.confidence, cache_object),
-                'indicated_ttps': self.attributelist_to_dict(self.indicated_ttps, cache_object),
+                'indicated_ttps': self.attributelist_to_dict('indicated_ttps', cache_object),
                 'alternative_id': self.convert_value(self.alternative_id),
-                'sightings': self.attributelist_to_dict(self.sightings, cache_object),
-                'killchains': self.attributelist_to_dict(self.kill_chain_phases, cache_object),
-                'valid_time_positions': self.attributelist_to_dict(self.valid_time_positions, cache_object),
-                'related_indicators': self.attributelist_to_dict(self.related_indicators, cache_object),
-                'related_campaigns': self.attributelist_to_dict(self.related_campaigns, cache_object),
+                'sightings': self.attributelist_to_dict('sightings', cache_object),
+                'killchains': self.attributelist_to_dict('kill_chain_phases', cache_object),
+                'valid_time_positions': self.attributelist_to_dict('valid_time_positions', cache_object),
+                'related_indicators': self.attributelist_to_dict('related_indicators', cache_object),
+                'related_campaigns': self.attributelist_to_dict('related_campaigns', cache_object),
                 'operator': self.convert_value(self.operator),
                 'observable_composition_operator': self.convert_value(self.observable_composition_operator),
                 'producer': self.attribute_to_dict(self.producer, cache_object),
                 'likely_impact': self.attribute_to_dict(self.likely_impact, cache_object),
                 'negate': self.convert_value(self.negate),
-                'related_packages': self.attributelist_to_dict(self.related_packages, cache_object)
+                'related_packages': self.attributelist_to_dict('related_packages', cache_object)
                 }
     else:
       result = {'observables': observables,
                 'observables_count': observables_count,
-                'types': self.attributelist_to_dict(self.types, cache_object),
+                'types': self.attributelist_to_dict('types', cache_object),
                 'confidence': self.attribute_to_dict(self.confidence, cache_object),
-                'valid_time_positions': self.attributelist_to_dict(self.valid_time_positions, cache_object),
+                'valid_time_positions': self.attributelist_to_dict('valid_time_positions', cache_object),
                 'operator': self.convert_value(self.operator),
                 'observable_composition_operator': self.convert_value(self.observable_composition_operator),
                 'producer': self.attribute_to_dict(self.producer, cache_object),

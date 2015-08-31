@@ -52,7 +52,7 @@ class LeveragedTTP(Entity, Base):
 
     result = {
               'scope': self.convert_value(self.scope),
-              'leveraged_ttp': self.attributelist_to_dict(self.leveraged_ttp, cache_object)
+              'leveraged_ttp': self.attributelist_to_dict('leveraged_ttp', cache_object)
               }
 
     parent_dict = Entity.to_dict(self, cache_object)
@@ -188,33 +188,33 @@ class Incident(BaseCoreComponent, Base):
       result = {
                 'status': self.convert_value(self.status),
                 'time': self.attribute_to_dict(self.time, cache_object),
-                'victims': self.attributelist_to_dict(self.victims, cache_object),
-                'attributed_threat_actors': self.attributelist_to_dict(self.attributed_threat_actors, cache_object),
-                'related_indicators': self.attributelist_to_dict(self.related_indicators, cache_object),
-                'related_observables': self.attributelist_to_dict(self.related_observables, cache_object),
-                'related_incidents': self.attributelist_to_dict(self.related_incidents, cache_object),
-                'affected_assets': self.attributelist_to_dict(self.affected_assets, cache_object),
-                'categories': self.attributelist_to_dict(self.categories, cache_object),
-                'intended_effects': self.attributelist_to_dict(self.intended_effects, cache_object),
+                'victims': self.attributelist_to_dict('victims', cache_object),
+                'attributed_threat_actors': self.attributelist_to_dict('attributed_threat_actors', cache_object),
+                'related_indicators': self.attributelist_to_dict('related_indicators', cache_object),
+                'related_observables': self.attributelist_to_dict('related_observables', cache_object),
+                'related_incidents': self.attributelist_to_dict('related_incidents', cache_object),
+                'affected_assets': self.attributelist_to_dict('affected_assets', cache_object),
+                'categories': self.attributelist_to_dict('categories', cache_object),
+                'intended_effects': self.attributelist_to_dict('intended_effects', cache_object),
                 'leveraged_ttps': self.attribute_to_dict(self.leveraged_ttps, cache_object),
-                'discovery_methods': self.attributelist_to_dict(self.discovery_methods, cache_object),
+                'discovery_methods': self.attributelist_to_dict('discovery_methods', cache_object),
                 'reporter': self.attribute_to_dict(self.reporter, cache_object),
-                'responders': self.attributelist_to_dict(self.responders, cache_object),
-                'coordinators': self.attributelist_to_dict(self.coordinators, cache_object),
-                'external_ids': self.attributelist_to_dict(self.external_ids, cache_object),
+                'responders': self.attributelist_to_dict('responders', cache_object),
+                'coordinators': self.attributelist_to_dict('coordinators', cache_object),
+                'external_ids': self.attributelist_to_dict('external_ids', cache_object),
                 'impact_assessment': self.attribute_to_dict(self.impact_assessment, cache_object),
-                'handling': self.attributelist_to_dict(self.handling, cache_object),
+                'handling': self.attributelist_to_dict('handling', cache_object),
                 'security_compromise': self.convert_value(self.security_compromise),
                 'confidence': self.attribute_to_dict(self.confidence, cache_object),
-                'coa_taken': self.attributelist_to_dict(self.coa_taken, cache_object),
-                'coa_requested': self.attributelist_to_dict(self.coa_requested, cache_object),
-                'history': self.attributelist_to_dict(self.history, cache_object),
+                'coa_taken': self.attributelist_to_dict('coa_taken', cache_object),
+                'coa_requested': self.attributelist_to_dict('coa_requested', cache_object),
+                'history': self.attributelist_to_dict('history', cache_object),
                 }
     else:
       result = {
                 'status': self.convert_value(self.status),
                 'time': self.attribute_to_dict(self.time, cache_object),
-                'victims': self.attributelist_to_dict(self.victims, cache_object),
+                'victims': self.attributelist_to_dict('victims', cache_object),
                 'reporter': self.attribute_to_dict(self.reporter, cache_object),
                 }
 

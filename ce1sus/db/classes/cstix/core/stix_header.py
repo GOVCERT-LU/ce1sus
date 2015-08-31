@@ -69,17 +69,17 @@ class STIXHeader(Entity, Base):
 
   def to_dict(self, cache_object):
     if cache_object.complete:
-      result = {'package_intents': self.attributelist_to_dict(self.package_intents, cache_object),
+      result = {'package_intents': self.attributelist_to_dict('package_intents', cache_object),
                 'title': self.convert_value(self.title),
                 'description': self.attribute_to_dict(self.description, cache_object),
                 'short_description': self.attribute_to_dict(self.short_description, cache_object),
                 'information_source': self.attribute_to_dict(self.information_source, cache_object),
-                'handling': self.attributelist_to_dict(self.handling, cache_object),
+                'handling': self.attributelist_to_dict('handling', cache_object),
                 }
     else:
       result = {'title': self.convert_value(self.title),
                 'information_source': self.attribute_to_dict(self.information_source, cache_object),
-                'handling': self.attributelist_to_dict(self.handling, cache_object),
+                'handling': self.attributelist_to_dict('handling', cache_object),
                 }
 
     parent_dict = Entity.to_dict(self, cache_object)

@@ -201,9 +201,9 @@ class Report(Entity, Base):
               'description': self.attribute_to_dict(self.description, cache_object),
               'short_description': self.attribute_to_dict(self.short_description, cache_object),
               # TODO references
-              'references': self.attributelist_to_dict(self.references, cache_object),
+              'references': self.attributelist_to_dict('references', cache_object),
               # TODO related_reports
-              'related_reports': self.attributelist_to_dict(self.related_reports, cache_object),
+              'related_reports': self.attributelist_to_dict('related_reports', cache_object),
               }
     else:
       result = {

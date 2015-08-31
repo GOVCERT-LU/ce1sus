@@ -70,16 +70,16 @@ class Campaign(BaseCoreComponent, Base):
 
   def to_dict(self, cache_object):
     confidence = self.attribute_to_dict(self.confidence, cache_object)
-    handling = self.attributelist_to_dict(self.handling, cache_object)
-    names = self.attributelist_to_dict(self.names, cache_object)
+    handling = self.attributelist_to_dict('handling', cache_object)
+    names = self.attributelist_to_dict('names', cache_object)
     if cache_object.complete:
-      activity = self.attributelist_to_dict(self.activity, cache_object)
-      associated_campaigns = self.attributelist_to_dict(self.associated_campaigns, cache_object)
-      attribution = self.attributelist_to_dict(self.attribution, cache_object)
-      intended_effects_instances = self.attributelist_to_dict(self.intended_effects_instances, cache_object)
-      related_indicators = self.attributelist_to_dict(self.related_indicators, cache_object)
-      related_packages = self.attributelist_to_dict(self.related_packages, cache_object)
-      related_ttps = self.attributelist_to_dict(self.related_ttps, cache_object)
+      activity = self.attributelist_to_dict('activity', cache_object)
+      associated_campaigns = self.attributelist_to_dict('associated_campaigns', cache_object)
+      attribution = self.attributelist_to_dict('attribution', cache_object)
+      intended_effects_instances = self.attributelist_to_dict('intended_effects_instances', cache_object)
+      related_indicators = self.attributelist_to_dict('related_indicators', cache_object)
+      related_packages = self.attributelist_to_dict('related_packages', cache_object)
+      related_ttps = self.attributelist_to_dict('related_ttps', cache_object)
       result = {'confidence': confidence,
                 'handling': handling,
                 'names': names,

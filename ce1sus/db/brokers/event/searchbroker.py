@@ -11,8 +11,7 @@ import sqlalchemy
 
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
-from ce1sus.db.classes.internal.attributes.values import StringValue, TextValue, NumberValue, TimeStampValue, DateValue, ValueBase
-from ce1sus.db.classes.internal.definitions import AttributeDefinition
+from ce1sus.db.classes.internal.attributes.values import NumberValue
 from ce1sus.db.classes.internal.report import Reference, ReferenceDefinition
 from ce1sus.db.common.broker import BrokerBase, BrokerException
 
@@ -42,28 +41,28 @@ class SearchBroker(BrokerBase):
 
     if operator == '==':
       return query.filter(getattr(clazz, attribute_name) == needle,
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
     if operator == '<':
       return query.filter(getattr(clazz, attribute_name) < needle,
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
     if operator == '>':
       return query.filter(getattr(clazz, attribute_name) > needle,
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
     if operator == '<=':
       return query.filter(getattr(clazz, attribute_name) <= needle,
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
     if operator == '>=':
       return query.filter(getattr(clazz, attribute_name) >= needle,
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
     if operator == 'like':
       return query.filter(getattr(clazz, attribute_name).like('%{0}%'.format(needle)),
-                                              condition_class.dbcode.op('&')(code) == code
-                                              )
+                          condition_class.dbcode.op('&')(code) == code
+                          )
 
   def look_for_value_by_property_name(self, clazz, property_name, needle, operator, bypass_validation=False):
     try:
@@ -99,12 +98,12 @@ class SearchBroker(BrokerBase):
       query = self.session.query(Attribute).join(Attribute.value_base)
       if definition:
         clazz = get_class('ce1sus.db.classes.internal.attributes.values', '{0}Value'.format(definition.value_table))
-        self.set_operator(query, clazz, 'value', needle, operator, condition_class=Attribute)
+        query = self.set_operator(query, clazz, 'value', needle, operator, condition_class=Attribute)
 
       else:
 
         # As all poymorphic classes have a value property therefore only one is needed !?
-        self.set_operator(query, NumberValue, 'value', needle, operator, condition_class=Attribute)
+        query = self.set_operator(query, NumberValue, 'value', needle, operator, condition_class=Attribute)
       
       return query.all()
     except sqlalchemy.exc.SQLAlchemyError as error:

@@ -191,7 +191,7 @@ class Event(Entity, Base):
 
   def to_dict(self, cache_object):
     if is_event_owner(self, cache_object.user):
-      comments = self.attributelist_to_dict(self.comments, cache_object)
+      comments = self.attributelist_to_dict('comments', cache_object)
     else:
       comments = list()
     
@@ -199,28 +199,28 @@ class Event(Entity, Base):
       result = {'id_':self.convert_value(self.id_),
                 'int_id': self.convert_value(self.identifier),
                 'analysis': self.convert_value(self.analysis),
-                'campaigns':self.attributelist_to_dict(self.campaigns, cache_object),
+                'campaigns':self.attributelist_to_dict('campaigns', cache_object),
                 'comments':comments,
-                'courses_of_action':self.attributelist_to_dict(self.courses_of_action, cache_object),
-                'exploit_targets':self.attributelist_to_dict(self.exploit_targets, cache_object),
+                'courses_of_action':self.attributelist_to_dict('courses_of_action', cache_object),
+                'exploit_targets':self.attributelist_to_dict('exploit_targets', cache_object),
                 'last_seen': self.convert_value(self.last_seen),
                 'first_seen': self.convert_value(self.first_seen),
-                'groups': self.attributelist_to_dict(self.groups, cache_object),
+                'groups': self.attributelist_to_dict('groups', cache_object),
                 'idref':self.convert_value(self.idref),
-                'incidents':self.attributelist_to_dict(self.incidents, cache_object),
-                'indicators':self.attributelist_to_dict(self.indicators, cache_object),
+                'incidents':self.attributelist_to_dict('incidents', cache_object),
+                'indicators':self.attributelist_to_dict('indicators', cache_object),
                 'last_publish_date': self.convert_value(self.last_publish_date),
-                'observables':self.attributelist_to_dict(self.observables, cache_object),
-                'related_packages':self.attributelist_to_dict(self.related_packages, cache_object),
-                'reports':self.attributelist_to_dict(self.reports, cache_object),
+                'observables':self.attributelist_to_dict('observables', cache_object),
+                'related_packages':self.attributelist_to_dict('related_packages', cache_object),
+                'reports':self.attributelist_to_dict('reports', cache_object),
                 'risk': self.convert_value(self.risk),
                 'status': self.convert_value(self.status),
                 'stix_header': self.attribute_to_dict(self.stix_header, cache_object),
                 'published': self.convert_value(self.properties.is_shareable),
-                'threat_actors':self.attributelist_to_dict(self.threat_actors, cache_object),
-                'ttps':self.attributelist_to_dict(self.ttps, cache_object),
+                'threat_actors':self.attributelist_to_dict('threat_actors', cache_object),
+                'ttps':self.attributelist_to_dict('ttps', cache_object),
                 'version':self.convert_value(self.version_db),
-                'errors':self.attributelist_to_dict(self.errors, cache_object)
+                'errors':self.attributelist_to_dict('errors', cache_object)
                 }
     else:
       result = {'id_':self.convert_value(self.id_),
@@ -236,7 +236,7 @@ class Event(Entity, Base):
                 'stix_header': self.attribute_to_dict(self.stix_header, cache_object),
                 'published': self.convert_value(self.properties.is_shareable),
                 'version':self.convert_value(self.version_db),
-                'errors':self.attributelist_to_dict(self.errors, cache_object)
+                'errors':self.attributelist_to_dict('errors', cache_object)
                 }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

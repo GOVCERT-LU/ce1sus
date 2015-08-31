@@ -6,15 +6,17 @@
 Created on Dec 31, 2014
 """
 
+import json
+
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.search import SearchController
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.object import Object
-from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.internal.report import Report, Reference
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, RestHandlerException, RestHandlerNotFoundException, require
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 
 
 __author__ = 'Weber Jean-Paul'
@@ -57,6 +59,7 @@ class SearchHandler(RestBaseHandler):
       raise RestHandlerException(error)
 
   def __check_permissions(self, event, item):
+    return True
     if item:
       return self.is_item_viewable(event, item)
     else:
@@ -66,10 +69,14 @@ class SearchHandler(RestBaseHandler):
     """ Note returns only the events which can be viewed """
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
+    cache_object = cache_object.make_copy()
+    cache_object.user.privileged = False
+    cache_object.details = False
+    cache_object.inflated = False
     for found_value in results:
       if isinstance(found_value, Event):
         if self.__check_permissions(found_value, None):
-          eventpermissions = self.event_controller.get_event_user_permissions(found_value, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(found_value, cache_object.user)
           result.append({'event': found_value.to_dict(cache_object),
                          'object': None,
                          'observable': None,
@@ -78,47 +85,39 @@ class SearchHandler(RestBaseHandler):
       elif isinstance(found_value, Object):
         event = found_value.event
         if self.__check_permissions(event, found_value):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'object': found_value.to_dict(cache_object),
-                         'observable': found_value.observable.to_dict(cache_object),
                          'attribute': None,
                          })
       elif isinstance(found_value, Attribute):
-        obj = found_value.object
-        event = obj.event
+        event = found_value.value_base.event
         if self.__check_permissions(event, found_value):
-          cache_object_copy = cache_object.make_copy()
-          cache_object_copy.inflated = True
-          cache_object_copy.complete = True
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
-                         'object': obj.to_dict(cache_object),
-                         'observable': obj.observable.to_dict(cache_object),
-                         'attribute': found_value.to_dict(cache_object_copy),
+                         'attribute': found_value.to_dict(cache_object),
                          })
       elif isinstance(found_value, Observable):
-        event = found_value.parent
+        event = found_value.root
         if self.__check_permissions(event, found_value):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'object': None,
-                         'observable': found_value.to_dict(cache_object),
                          'attribute': None,
                          })
       elif isinstance(found_value, ObservableComposition):
-        event = found_value.parent.parent
+        event = found_value.root
         if self.__check_permissions(event, found_value):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'object': None,
-                         'observable': found_value.to_dict(cache_object),
                          'attribute': None,
                          })
       elif isinstance(found_value, Report):
         event = found_value.event
         if self.__check_permissions(event, found_value):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'report': found_value.to_dict(cache_object),
                          'reference': None,
@@ -126,7 +125,7 @@ class SearchHandler(RestBaseHandler):
       elif isinstance(found_value, Reference):
         event = found_value.report.event
         if self.__check_permissions(event, found_value):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'report': found_value.report.to_dict(cache_object),
                          'reference': found_value.to_dict(cache_object),
@@ -138,7 +137,7 @@ class SearchHandler(RestBaseHandler):
         obj = attribute.object
         event = obj.event
         if self.__check_permissions(event, attribute):
-          eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
+          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
           result.append({'event': event.to_dict(cache_object),
                          'observable': obj.observable.to_dict(cache_object),
                          'object': obj.to_dict(cache_object),

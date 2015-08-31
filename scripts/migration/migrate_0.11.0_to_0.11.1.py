@@ -796,8 +796,7 @@ class Migrator(object):
     self.__drop_column(Report, 'originating_group_id')
     self.__drop_column(Report, 'owner_group_id')
     self.__change_column(Report, 'tlp_level_id')
-    self.__change_column(Report, 'description')
-    self.__change_column(Report, 'short_description')
+
     self.__add_fk(Report, 'creator_group_id', 'reports_ibfk_3')
     self.__add_fk(Report, 'creator_id', 'reports_ibfk_4')
     self.__add_fk(Report, 'modifier_id', 'reports_ibfk_5')
@@ -894,14 +893,16 @@ class Migrator(object):
       self.op.alter_column(clazz.get_table_name(), 'event_id', nullable=True, existing_type=BigInteger)
       self.op.alter_column(clazz.get_table_name(), 'attributetype_id', nullable=True, existing_type=BigInteger)
 
-      self.__add_fk(clazz, 'identifier', '{0}_ibfk_1'.format(clazz.get_table_name()))
+
 
   def change_value_tables_phase2(self):
     for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
       table_name = clazz.get_table_name()
       self.__drop_add_pk(table_name, ['identifier'])
-      self.__drop_column(clazz, '{0}_id'.format(clazz.get_classname()))
-
+      self.__drop_column(clazz, '{0}_id'.format(clazz.get_classname().lower()))
+      self.__drop_column(clazz, 'attribute_id')
+      self.__drop_column(clazz, 'event_id')
+      self.__drop_column(clazz, 'attributetype_id')
 
     self.__drop_column(Report, 'description')
     self.__drop_column(Report, 'short_description')
@@ -910,40 +911,32 @@ class Migrator(object):
   def merge_value_data(self):
     meta = MetaData(bind=self.engine, reflect=True)
     for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
+
       table = meta.tables[
                           clazz.get_table_name()
                           ]
-      all = list(self.engine.execute(table.select(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) > 0)))
-      to_delete = list()
+      
+      all = list(self.engine.execute(table.select(table.c.identifier == None)))
+
       for item in all:
         value = item.value
         attribute_id = item.attribute_id
         event_id = item.event_id
         value_type_id = item.attributetype_id
         id_ = getattr(item, '{0}_id'.format(clazz.get_classname().lower()))
-        if item.identifier is None:
-          print 'Merging Attribute {1}Value with id {0}'.format(id_, clazz.get_classname())
-          new_value_base = clazz()
-          new_value_base.uuid = uuid4()
-          new_value_base.attribute_id = attribute_id
-          new_value_base.event_id = event_id
-          new_value_base.value_type_id = value_type_id
-          new_value_base.type = clazz.get_classname().lower()
-          new_value_base.value = value
-          self.session.get_session().add(new_value_base)
-          to_delete.append(id_)
-      for id_ in to_delete:
-        d = table.delete(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) == id_).execution_options(autocommit=False)
-        d.execute()
+        print 'Merging Attribute {1}Value with id {0}'.format(id_, clazz.get_classname())
+        new_value_base = clazz()
+        new_value_base.uuid = uuid4()
+        new_value_base.attribute_id = attribute_id
+        new_value_base.event_id = event_id
+        new_value_base.value_type_id = value_type_id
+        new_value_base.type = clazz.get_classname().lower()
+        new_value_base.value = value
+        self.session.get_session().add(new_value_base)
+
+      self.session.get_session().query(clazz).filter(clazz.identifier == None).delete(synchronize_session='fetch')
       self.session.get_session().flush()
-    self.session.get_session().commit()
-        # self.engine.execute(table.update().where(getattr(table.c, '{0}_id'.format(clazz.get_classname().lower())) == key).values(identifier=value))
 
-        # ex = update(table).where(getattr(item, '{0}_id'.format(clazz.get_classname().lower())) == id_).values(table.c.identifier == new_value_base.identifier)
-        #
-        #
-
-    """
     setattr(Report, 
             'description_old', 
             Column('description', 
@@ -977,9 +970,9 @@ class Migrator(object):
         self.__set_tlp_code(desription, item)
         item.short_description = desription
         self.session.get_session().merge(item)
-      self.session.get_session().flush()
+
     self.session.get_session().commit()
-    """
+
 
   def pre_steps(self):
     # check if db exits in table
@@ -1030,14 +1023,14 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
+  migros.create_new_tables()
   migros.pre_steps()
-  # migros.create_new_tables()
-  # migros.altering_tables_phase1()
-  # migros.change_value_tables_phase1()
-  # migros.merge_data()
+  migros.altering_tables_phase1()
+  migros.change_value_tables_phase1()
+  migros.merge_data()
   migros.merge_value_data()
-  # migros.change_value_tables_phase2()
-  # migros.altering_tables_phase2()
+  migros.change_value_tables_phase2()
+  migros.altering_tables_phase2()
   migros.post_steps()
   migros.close()
 

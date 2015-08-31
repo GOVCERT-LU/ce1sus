@@ -50,7 +50,7 @@ class Sighting(Entity, Base):
                 'description': self.attribute_to_dict(self.description, cache_object),
                 'confidence': self.attribute_to_dict(self.confidence, cache_object),
                 'reference': self.convert_value(self.reference),
-                'related_observables': self.attributelist_to_dict(self.related_observables, cache_object),
+                'related_observables': self.attributelist_to_dict('related_observables', cache_object),
                 'source': self.attribute_to_dict(self.source, cache_object)
                 }
     else:

@@ -66,7 +66,7 @@ class Identity(Entity, Base):
               'id_': self.convert_value(self.id_),
               'idref': self.convert_value(self.idref),
               'name': self.convert_value(self.name),
-              'related_identities': self.attributelist_to_dict(self.related_identities, cache_object)
+              'related_identities': self.attributelist_to_dict('related_identities', cache_object)
             }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

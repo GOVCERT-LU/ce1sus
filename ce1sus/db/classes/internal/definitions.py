@@ -84,7 +84,7 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
               'description': self.convert_value(self.description),
               'chksum': self.convert_value(self.chksum),
               'default_share': self.convert_value(self.default_share),
-              'attributes': self.attributelist_to_dict(self.attributes, cache_object),
+              'attributes': self.attributelist_to_dict('attributes', cache_object),
               'cybox_std': self.convert_value(self.cybox_std)
               }
     else:
@@ -109,17 +109,18 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
   attributehandler_id = Column('attributehandler_id', BigIntegerType, ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   attribute_handler = relationship('AttributeHandler',
                                    primaryjoin='AttributeHandler.identifier==AttributeDefinition.attributehandler_id',
-                                   cascade='all')
+                                   cascade='all',
+                                   lazy='joined')
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
   value_type_id = Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'))
-  value_type = relationship(AttributeType, uselist=False)
+  value_type = relationship(AttributeType, uselist=False, lazy='joined')
   objects = relationship('ObjectDefinition',
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name')
   default_condition_id = Column('default_condition_id', BigIntegerType, ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
-  default_condition = relationship(Condition, uselist=False)
+  default_condition = relationship(Condition, uselist=False, lazy='joined')
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
 

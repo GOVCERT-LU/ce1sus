@@ -79,7 +79,7 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
 
   @declared_attr
   def creator_group(self):
-    return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()))
+    return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()), lazy='joined')
 
   def to_dict(self, cache_object):
     cache_object_copy = cache_object.make_copy()

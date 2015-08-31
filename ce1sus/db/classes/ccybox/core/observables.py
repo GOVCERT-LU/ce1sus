@@ -62,7 +62,7 @@ class ObservableComposition(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-    observables = self.attributelist_to_dict(self.observables, cache_object)
+    observables = self.attributelist_to_dict('observables', cache_object)
     if observables:
       observables_count = len(observables)
     else:
@@ -117,7 +117,7 @@ class Observable(Entity, Base):
       composed = None
 
     if cache_object.complete:
-      keywords = self.attributelist_to_dict(self.keywords, cache_object)
+      keywords = self.attributelist_to_dict('keywords', cache_object)
 
       description = self.attribute_to_dict(self.description, cache_object)
 

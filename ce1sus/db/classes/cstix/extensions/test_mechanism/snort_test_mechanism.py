@@ -66,7 +66,7 @@ class SnortTestMechanism(BaseTestMechanism):
   def to_dict(self, cache_object):
 
     result = {
-              'rules': self.attributelist_to_dict(self.rules, cache_object),
+              'rules': self.attributelist_to_dict('rules', cache_object),
               'version': self.convert_value(self.version_db)
               }
 
