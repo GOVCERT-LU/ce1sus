@@ -264,7 +264,7 @@ class Group(BaseObject, Base):
               'gpg_key': self.convert_value(self.gpg_key),
               'tlp_lvl': self.convert_value(self.tlp_lvl),
               'tlp': self.convert_value(self.tlp),
-              'children': self.attributelist_to_dict(self.children, cache_object),
+              'children': self.attributelist_to_dict('children', cache_object),
               'notifications': self.convert_value(self.notifications)
               }
     else:

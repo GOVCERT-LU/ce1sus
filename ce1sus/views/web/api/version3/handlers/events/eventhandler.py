@@ -122,7 +122,7 @@ class EventHandler(RestBaseHandler):
           raise ControllerNothingFoundException(u'Cannot find error with uuid {0}'.format(uuid))
       else:
         #list all
-        result = event.attributelist_to_dict(event.errors, cache_object)
+        result = event.attributelist_to_dict('errors', cache_object)
         if result is None:
           return list()
         else:
@@ -151,7 +151,7 @@ class EventHandler(RestBaseHandler):
       if method == 'GET' and not comment_id:
         # Return all comments
         cache_object.inflated = True
-        result = event.attributelist_to_dict(event.comments, cache_object)
+        result = event.attributelist_to_dict('comments', cache_object)
         if result:
           return result
         else:
@@ -201,7 +201,7 @@ class EventHandler(RestBaseHandler):
       if observable_id:
         raise RestHandlerException('Not implemented')
       else:
-        result = event.attributelist_to_dict(event.indicators, cache_object)
+        result = event.attributelist_to_dict('indicators', cache_object)
         if result:
           return result
         else:
@@ -261,7 +261,7 @@ class EventHandler(RestBaseHandler):
 
       else:
         # return all observables from the event
-        result = event.attributelist_to_dict(event.observables, cache_object)
+        result = event.attributelist_to_dict('observables', cache_object)
         if result is None:
           return list()
         else:
@@ -314,7 +314,7 @@ class EventHandler(RestBaseHandler):
           self.check_item_is_viewable(event, event_permission)
           return event_permission.to_dict(cache_object)
         else:
-          result = event.attributelist_to_dict(event.groups, cache_object)
+          result = event.attributelist_to_dict('groups', cache_object)
           if result:
             return result
           else:
@@ -397,7 +397,7 @@ class EventHandler(RestBaseHandler):
       else:
         # return all observables from the event
         cache_object.inflated = True
-        result = event.attributelist_to_dict(event.reports, cache_object)
+        result = event.attributelist_to_dict('reports', cache_object)
         if result is None:
           return list()
         else:

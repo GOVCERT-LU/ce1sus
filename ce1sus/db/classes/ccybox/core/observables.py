@@ -42,7 +42,7 @@ class ObservableKeyword(Entity, Base):
 class ObservableComposition(Entity, Base):
 
   operator = Column('operator', UnicodeType(3), default=u'OR')
-  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION)
+  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION, lazy='joined')
 
   # ce1sus specific
   observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
@@ -89,14 +89,14 @@ class Observable(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
+  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, lazy='joined')
 
-  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT)
+  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, lazy='joined')
   # TODO: observable event (Note: different than the event used here)
-  observable_composition = relationship('ObservableComposition', uselist=False)
+  observable_composition = relationship('ObservableComposition', uselist=False, lazy='joined')
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   sighting_count = Column(u'sighting_count', Integer, nullable=True, index=True)
-  keywords = relationship('ObservableKeyword')
+  keywords = relationship('ObservableKeyword', lazy='joined')
 
   _PARENTS = ['event', 'indicator', 'composedobservable', 'related_observable']
 

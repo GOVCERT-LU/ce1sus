@@ -12,6 +12,7 @@ from ce1sus.controllers.base import ControllerNothingFoundException, ControllerE
 from ce1sus.controllers.events.search import SearchController
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.object import Object
@@ -130,6 +131,8 @@ class SearchHandler(RestBaseHandler):
                          'report': found_value.report.to_dict(cache_object),
                          'reference': found_value.to_dict(cache_object),
                          })
+      elif isinstance(found_value, STIXHeader):
+        pass
       elif isinstance(found_value, StructuredText):
         pass
       else:

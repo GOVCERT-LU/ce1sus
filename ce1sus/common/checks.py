@@ -54,6 +54,7 @@ def is_event_viewable_user(event, user):
 
 
 def is_object_viewable(instance, cache_object):
+  return True
   if cache_object.owner:
     return True
 

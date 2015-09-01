@@ -16,6 +16,7 @@ from ce1sus.handlers.base import HandlerNotFoundException, HandlerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, valid_uuid, \
   RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
+from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -200,5 +201,7 @@ class UserGroupsHandler(RestBaseHandler):
     result = list()
     cache_object = self.get_cache_object(args)
     if groups:
-      result = groups[0].attributelist_to_dict(groups, cache_object)
+      for group in groups:
+        if is_object_viewable(group, cache_object):
+          result.append(group.to_dict(cache_object))
     return result
