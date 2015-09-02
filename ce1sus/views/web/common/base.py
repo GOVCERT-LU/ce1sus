@@ -5,18 +5,18 @@
 
 Created on Oct 26, 2014
 """
+from ce1sus.helpers.common.objects import GenObject
 import cherrypy
+from cherrypy._cperror import CherryPyException
 from json import loads
 
 from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, get_max_tlp
 from ce1sus.controllers.admin.user import UserController
 from ce1sus.controllers.events.event import EventController
-from ce1sus.db.classes.internal.usrmgt.group import EventPermissions
+from ce1sus.db.classes.internal.usrmgt.group import EventPermissions, GroupRights
 from ce1sus.db.classes.internal.usrmgt.user import UserRights
 from ce1sus.helpers.common.debug import Log
-from ce1sus.helpers.common.objects import GenObject
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
-from cherrypy._cperror import CherryPyException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -447,5 +447,5 @@ class BaseView(object):
     obj.group = GenObject()
     obj.group.name = user.group.name
     obj.group.identifier = user.group.identifier
-
+    obj.group.permissions = GroupRights(user.group.dbcode)
     return obj
