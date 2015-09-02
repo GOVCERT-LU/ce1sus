@@ -5,7 +5,6 @@
 
 Created on Jan 23, 2015
 """
-from datetime import datetime
 from sqlalchemy.orm.relationships import RelationshipProperty
 from uuid import uuid4
 
@@ -81,23 +80,12 @@ class IndicatorController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def get_indicator_type(self, indicator_type_name, merger_cache):
+  def get_indicator_type(self, indicator_type_name, attribute):
 
     type_ = IndicatorType()
     type_.type_ = indicator_type_name
     type_.uuid = uuid4()
-    type_.creator = merger_cache.user
-    type_.modifier = merger_cache.user
-    type_.creator_group = merger_cache.user.group
-    type_.crated_on = datetime.utcnow()
-    type_.modified_on = datetime.utcnow()
-    type_.tlp = 'Amber'
-
-    type_.creator = merger_cache.user
-    type_.modifier = merger_cache.user
-    type_.creator_group = merger_cache.user.group
-    type_.crated_on = datetime.utcnow()
-    type_.modified_on = datetime.utcnow()
+    self.set_base(type_, attribute)
 
     return type_
 
@@ -117,7 +105,7 @@ class IndicatorController(BaseController):
       indicator.event_id = event.identifier
       indicator.event = event
       indicator.description = None
-      indicator.dbcode = event.dbcode
+      indicator.dbcode = attributes[0].dbcode
       indicator.tlp_level_id = event.tlp_level_id
       indicator.title = 'Indicators for "{0}"'.format(indicator_type)
       indicator.operator = 'OR'
@@ -127,7 +115,7 @@ class IndicatorController(BaseController):
 
 
       if indicator_type and indicator_type != 'Others':
-        indicator.types.append(self.get_indicator_type(indicator_type, merger_cache))
+        indicator.types.append(self.get_indicator_type(indicator_type, attributes[0]))
 
       for attribute in attributes:
         if attribute.is_ioc:

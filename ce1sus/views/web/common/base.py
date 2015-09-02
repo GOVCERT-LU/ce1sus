@@ -436,6 +436,7 @@ class BaseView(object):
   def __make_user_object(self, user):
     # TODO: make user offline
     obj = GenObject()
+    obj.uuid = user.uuid
     obj.name = user.name
     obj.username = user.username
     obj.identifier = user.identifier
@@ -445,6 +446,7 @@ class BaseView(object):
     obj.sirname = user.sirname
     obj.permissions = UserRights(user.dbcode)
     obj.group = GenObject()
+    obj.group.uuid = user.group.uuid
     obj.group.name = user.group.name
     obj.group.identifier = user.group.identifier
     obj.group.permissions = GroupRights(user.group.dbcode)
