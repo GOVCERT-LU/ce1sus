@@ -8,8 +8,8 @@ Created: Aug 28, 2013
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.db.brokers.event.eventbroker import EventBroker
 from ce1sus.db.common.broker import BrokerException
-from ce1sus.common.checks import is_user_priviledged
 from ce1sus.controllers.events.relations import RelationController
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -24,7 +24,8 @@ class EventsController(BaseController):
   def __init__(self, config, session=None):
     super(EventsController, self).__init__(config, session)
     self.event_broker = self.broker_factory(EventBroker)
-    self.relation_controller = RelationController(config, session)
+    self.relation_controller = self.controller_factory(RelationController)
+    self.permission_controller = self.controller_factory(PermissionController)
 
   def get_events(self, offset, limit, user, parameters=None):
     try:
@@ -34,7 +35,7 @@ class EventsController(BaseController):
       if limit:
         int_lim = int(limit)
 
-      isadmin = is_user_priviledged(user)
+      isadmin = self.permission_controller.is_user_priviledged(user)
       if isadmin:
         if offset and limit:
           events = self.event_broker.get_all_limited(int_lim, int_off, parameters)

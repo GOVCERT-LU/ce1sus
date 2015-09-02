@@ -5,8 +5,6 @@
 
 Created on Dec 22, 2014
 """
-
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import ControllerNothingFoundException, ControllerException
 from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.db.classes.ccybox.core.observables import Observable
@@ -42,8 +40,9 @@ class ObservableHandler(RestBaseHandler):
         observable = self.observable_controller.get_observable_by_uuid(observable_id)
         event = self.observable_controller.get_event_for_observable(observable)
         # check if event is viewable by the current user
-        self.check_if_event_is_viewable(event)
         self.set_event_properties_cache_object(cache_object, event)
+        self.check_if_instance_is_viewable(event, cache_object)
+        self.check_if_instance_is_viewable(observable, cache_object)
 
         if requested_object['object_type'] is None:
           return self.__process_observable(method, event, observable, json, cache_object)
@@ -51,10 +50,8 @@ class ObservableHandler(RestBaseHandler):
           return self.__process_object(method, event, observable, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'observable':
           return self.__process_observablecomposition(method, event, observable, requested_object, json, cache_object)
-
         else:
           raise PathParsingException(u'{0} is not defined'.format(requested_object['object_type']))
-
       else:
         raise RestHandlerException(u'Invalid request - Observable cannot be called without ID')
     except ControllerNothingFoundException as error:
@@ -75,37 +72,24 @@ class ObservableHandler(RestBaseHandler):
 
   def __process_observable(self, method, event, observable, json, cache_object):
     if method == 'POST':
-      raise RestHandlerException('Recurive observables are currently not supported')
+      raise RestHandlerException('Please use event/{uuid}/observable instead')
     else:
       self.check_item_is_viewable(event, observable)
       if method == 'GET':
-
         return observable.to_dict(cache_object)
       elif method == 'PUT':
-        self.check_if_event_is_modifiable(event)
-        self.check_if_user_can_set_validate_or_shared(event, observable, cache_object.user, json)
+        self.check_if_is_modifiable(event)
+        self.check_allowed_set_validate_or_shared(event, observable, cache_object, json)
         self.updater.update(observable, json, cache_object)
         self.observable_controller.update_observable(observable, cache_object, True)
         return observable.to_dict(cache_object)
       elif method == 'DELETE':
-        self.check_if_event_is_deletable(event)
+        self.check_if_is_deletable(event)
         self.observable_controller.remove_observable(observable, cache_object, True)
         return 'Deleted observable'
 
-  def __set_properties(self, obj, cache_object, parent):
-    obj.properties.is_rest_instert = cache_object.rest_insert
-    obj.properties.is_web_insert = not cache_object.rest_insert
-    if cache_object.owner:
-      obj.properties.is_validated = True
-      obj.properties.is_proposal = False
-    else:
-      obj.properties.is_validated = False
-      obj.properties.is_proposal = True
-    obj.properties.is_shareable = parent.properties.is_shareable
-
   def __process_object(self, method, event, observable, requested_object, json, cache_object):
     if method == 'POST':
-      self.check_if_user_can_add(event)
       if observable.object:
         # check if observable has already an object
         obj = self.assembler.assemble(json, Object, observable, cache_object)
@@ -124,10 +108,11 @@ class ObservableHandler(RestBaseHandler):
       uuid = requested_object['object_uuid']
       if uuid:
         obj = self.observable_controller.get_object_by_uuid(uuid)
-        self.check_item_is_viewable(event, obj)
+        self.check_if_instance_is_viewable(obj, cache_object)
       else:
         if not cache_object.flat:
           raise PathParsingException(u'object cannot be called without an ID')
+
       if method == 'GET':
         if cache_object.flat:
           result = list()
@@ -137,21 +122,18 @@ class ObservableHandler(RestBaseHandler):
             result.append(flat_object.to_dict(cache_object))
           return result
         else:
-          if uuid is None:
-            obj = observable.object
-            
-          if is_object_viewable(obj, cache_object):
-            return obj.to_dict(cache_object)
+          if self.is_instance_viewable(observable.object, cache_object):
+            return observable.object.to_dict(cache_object)
           else:
             raise ControllerNothingFoundException(u'Cannot find object with uuid {0}'.format(uuid)) 
 
       elif method == 'PUT':
-        self.check_if_event_is_modifiable(event)
-        self.check_if_user_can_set_validate_or_shared(event, obj, cache_object.user, json)
+        self.check_if_is_modifiable(event)
+        self.check_allowed_set_validate_or_shared(event, obj, cache_object, json)
         self.updater.update(obj, json, cache_object)
         self.observable_controller.update_object(obj, cache_object, True)
         return obj.to_dict(cache_object)
       elif method == 'DELETE':
-        self.check_if_event_is_deletable(event)
+        self.check_if_is_deletable(event)
         self.observable_controller.remove_object(obj, cache_object, True)
-        return 'Deleted observable'
+        return 'Deleted object'

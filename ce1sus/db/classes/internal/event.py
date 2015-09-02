@@ -12,7 +12,6 @@ from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, DateTime
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.common.checks import is_event_owner
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.campaign.campaign import Campaign
@@ -190,7 +189,7 @@ class Event(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       comments = self.attributelist_to_dict('comments', cache_object)
     else:
       comments = list()

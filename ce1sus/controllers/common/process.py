@@ -24,7 +24,7 @@ class ProcessController(BaseController):
   def __init__(self, config, session=None):
     super(ProcessController, self).__init__(config, session)
     self.process_broker = self.broker_factory(ProcessBroker)
-    self.user_controller = UserController(config, session)
+    self.user_controller = self.controller_factory(UserController)
 
   def get_all_process_items(self):
     try:

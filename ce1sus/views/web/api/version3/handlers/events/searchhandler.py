@@ -13,6 +13,7 @@ from ce1sus.controllers.events.search import SearchController
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.object import Object
@@ -59,93 +60,104 @@ class SearchHandler(RestBaseHandler):
     except ControllerException as error:
       raise RestHandlerException(error)
 
-  def __check_permissions(self, event, item):
-    return True
-    if item:
-      return self.is_item_viewable(event, item)
-    else:
-      return self.is_event_viewable(event)
+  def __check_permission(self, item, cache_object):
+    result = self.permission_controller.is_instance_viewable(item, cache_object)
+    if result:
+      if not isinstance(item, Event):
+        parent = item.parent
+        if parent:
+          return self.__check_permission(parent, cache_object)
+    return result
 
+  def __check_permissions(self, event, item, cache_object):
+    if self.permission_controller.is_instance_viewable(event, cache_object):
+      if item:
+        return self.__check_permission(item, cache_object)
+    else:
+      return False
+    
+  def __make_search_result(self, instance, cache_object):
+
+    if isinstance(instance, Event):
+      if self.__check_permissions(instance, None, cache_object):
+        return {'event': instance.to_dict(cache_object)}
+
+    elif isinstance(instance, Object):
+      event = instance.event
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'object': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, Attribute):
+      event = instance.value_base.event
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'attribute': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, Observable):
+      event = instance.root
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'observable': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, Indicator):
+      event = instance.root
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'indicator': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, ObservableComposition):
+      event = instance.root
+      if self.__check_permissions(event, instance, cache_object):
+        return {'event': event.to_dict(cache_object),
+                'composed_observable': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, Report):
+      event = instance.event
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'report': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, Reference):
+      event = instance.report.event
+      if self.__check_permissions(event, instance, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'reference': instance.to_dict(cache_object),
+                }
+    elif isinstance(instance, STIXHeader):
+      event = instance.parent
+      if self.__check_permissions(instance, event, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'stix_header': instance.to_dict(cache_object)}
+    elif isinstance(instance, StructuredText):
+      parent = instance.parent
+      return self.__make_search_result(parent, cache_object)
+    else:
+      attribute = instance.attribute
+      event = attribute.object.event
+      if self.__check_permissions(event, attribute, cache_object):
+
+        return {'event': event.to_dict(cache_object),
+                'attribute': attribute.to_dict(cache_object)
+               }
+      
   def __prossess_search(self, needle, operator, definition_id, cache_object):
     """ Note returns only the events which can be viewed """
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
-    cache_object = cache_object.make_copy()
-    cache_object.user.privileged = False
-    cache_object.details = False
-    cache_object.inflated = False
+    cache_object_copy = cache_object.make_copy()
+    cache_object_copy.details = False
+    cache_object_copy.inflated = False
     for found_value in results:
-      if isinstance(found_value, Event):
-        if self.__check_permissions(found_value, None):
-          # eventpermissions = self.event_controller.get_event_user_permissions(found_value, cache_object.user)
-          result.append({'event': found_value.to_dict(cache_object),
-                         'object': None,
-                         'observable': None,
-                         'attribute': None,
-                         })
-      elif isinstance(found_value, Object):
-        event = found_value.event
-        if self.__check_permissions(event, found_value):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'object': found_value.to_dict(cache_object),
-                         'attribute': None,
-                         })
-      elif isinstance(found_value, Attribute):
-        event = found_value.value_base.event
-        if self.__check_permissions(event, found_value):
-
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'attribute': found_value.to_dict(cache_object),
-                         })
-      elif isinstance(found_value, Observable):
-        event = found_value.root
-        if self.__check_permissions(event, found_value):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'object': None,
-                         'attribute': None,
-                         })
-      elif isinstance(found_value, ObservableComposition):
-        event = found_value.root
-        if self.__check_permissions(event, found_value):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'object': None,
-                         'attribute': None,
-                         })
-      elif isinstance(found_value, Report):
-        event = found_value.event
-        if self.__check_permissions(event, found_value):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'report': found_value.to_dict(cache_object),
-                         'reference': None,
-                         })
-      elif isinstance(found_value, Reference):
-        event = found_value.report.event
-        if self.__check_permissions(event, found_value):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'report': found_value.report.to_dict(cache_object),
-                         'reference': found_value.to_dict(cache_object),
-                         })
-      elif isinstance(found_value, STIXHeader):
-        pass
-      elif isinstance(found_value, StructuredText):
-        pass
-      else:
-        attribute = found_value.attribute
-        obj = attribute.object
-        event = obj.event
-        if self.__check_permissions(event, attribute):
-          # eventpermissions = self.event_controller.get_event_user_permissions(event, cache_object.user)
-          result.append({'event': event.to_dict(cache_object),
-                         'observable': obj.observable.to_dict(cache_object),
-                         'object': obj.to_dict(cache_object),
-                         'attribute': attribute.to_dict(cache_object),
-                         })
+      result.append(self.__make_search_result(found_value, cache_object_copy))
+      
     return result
 
   @rest_method(default=False)

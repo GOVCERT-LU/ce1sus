@@ -20,7 +20,7 @@ class CyboxAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(CyboxAssembler, self).__init__(config, session)
-    self.pseudo_assembler = PseudoCyboxAssembler(config, session)
+    self.pseudo_assembler = self.controller_factory(PseudoCyboxAssembler)
     
   def assemble_observable(self, parent, json, cache_object):
     observable = Observable()

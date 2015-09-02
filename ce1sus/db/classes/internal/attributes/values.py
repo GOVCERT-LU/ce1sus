@@ -20,7 +20,6 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
 # TODO: recheck validation of values
 class ValueBase(BaseObject, Base):
 
@@ -137,3 +136,5 @@ class NumberValue(ValueBase, Base):
     :returns: Boolean
     """
     return ObjectValidator.validateDigits(self, 'value')
+
+VALUE_TABLES = [StringValue, TextValue, NumberValue, DateValue, TimeStampValue]

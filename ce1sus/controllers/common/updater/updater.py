@@ -22,8 +22,8 @@ class Updater(BaseController):
 
   def __init__(self, config, session=None):
     super(Updater, self).__init__(config, session)
-    self.assembler = Assembler(config, session)
-    self.merger = Merger(config, session)
+    self.assembler = self.controller_factory(Assembler)
+    self.merger = self.controller_factory(Merger)
 
   def update(self, instance, json, cache_object):
     cache_object.insert = False

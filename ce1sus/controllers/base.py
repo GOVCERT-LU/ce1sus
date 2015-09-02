@@ -59,11 +59,13 @@ class BaseController(object):
   class"""
 
   brokers = dict()
+  controllers = dict()
 
   def __init__(self, config, session=None):
     self.config = config
     self.__logger = Log(self.config)
-    self.session_manager = SessionManager(config, session)
+    self.session = session
+    self.session_manager = SessionManager(self.config, self.session)
     self.changelogger = ChangeLogger(config)
 
     self.user_broker = self.broker_factory(UserBroker)
@@ -137,6 +139,19 @@ class BaseController(object):
           if hasattr(parent, 'version'):
             self.set_version(parent, merge_cache)
           self.update_modified(parent, merge_cache)
+
+  def controller_factory(self, clazz):
+    if issubclass(clazz, BaseController):
+      classname = clazz.__name__
+      if classname in BaseController.controllers:
+        return BaseController.controllers[classname]
+      # need to create the broker
+      self.logger.debug('Create controller for {0}'.format(clazz))
+      instance = clazz(self.config, self.session)
+      BaseController.controllers[classname] = instance
+      return instance
+    else:
+      raise ControllerException('Class does not implement BaseController')
 
   def broker_factory(self, clazz):
     """

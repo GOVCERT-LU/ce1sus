@@ -19,13 +19,13 @@ __license__ = 'GPL v3+'
 
 class CacheObject(object):
 
-  def __init__(self, user=None, rest_insert=True, owner=False, insert=False, event_permissions=None, details=False, inflated=False, flat=None):
+  def __init__(self, user=None, rest_insert=True, event_owner=False, insert=False, event_permissions=None, details=False, inflated=False, flat=None, authorized_cache=None):
     self.event_permissions = event_permissions
     self.flat = flat
     self.details = details
     self.inflated = inflated
     self.insert = insert
-    self.owner = owner
+    self.event_owner = event_owner
     self.user = user
     self.rest_insert = True
     self.seen_groups = dict()
@@ -36,6 +36,11 @@ class CacheObject(object):
     self.__created_at = None
     self.__modified_on = None
     self.modified_set = False
+    if authorized_cache:
+      self.authorized_cache = authorized_cache
+    else:
+      self.authorized_cache = dict()
+    self.__permission_controller = None
 
   @property
   def created_at(self):
@@ -43,6 +48,16 @@ class CacheObject(object):
       self.__created_at = datetime.utcnow()
     return self.__created_at
 
+  @property
+  def permission_controller(self):
+    if self.__permission_controller:
+      return self.__permission_controller
+    else:
+      raise Exception('CacheObject initialized incorrectly')
+
+  @permission_controller.setter
+  def permission_controller(self, permission_controller):
+    self.__permission_controller = permission_controller
 
   @property
   def complete(self):
@@ -59,10 +74,11 @@ class CacheObject(object):
     cache_object.details = self.details
     cache_object.inflated = self.inflated
     cache_object.insert = self.insert
-    cache_object.owner = self.owner
+    cache_object.event_owner = self.event_owner
     cache_object.user = self.user
     cache_object.rest_insert = self.rest_insert
     cache_object.seen_groups = self.seen_groups
+    cache_object.permission_controller = self.permission_controller
     return cache_object
 
   def set_default(self):
@@ -80,7 +96,7 @@ class CacheObject(object):
 class MergerCache(CacheObject):
 
   def __init__(self, cache_object):
-    super(MergerCache, self).__init__(cache_object.user, cache_object.rest_insert, cache_object.owner, cache_object.insert, cache_object.event_permissions, cache_object.details, cache_object.inflated, cache_object.flat)
+    super(MergerCache, self).__init__(cache_object.user, cache_object.rest_insert, cache_object.event_owner, cache_object.insert, cache_object.event_permissions, cache_object.details, cache_object.inflated, cache_object.flat)
     # result: -1: Do nothing 0: Add items (major update) 1: merge version inside 2:minor update
     self.result = -1
     self.version = Version()

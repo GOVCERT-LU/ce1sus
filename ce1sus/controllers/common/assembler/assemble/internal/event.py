@@ -35,9 +35,9 @@ class EventAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(EventAssembler, self).__init__(config, session)
-    self.stix_assembler = StixAssembler(config, session)
-    self.cybox_assembler = CyboxAssembler(config, session)
-    self.ce1sus_assembler = Ce1susAssembler(config, session)
+    self.stix_assembler = self.controller_factory(StixAssembler)
+    self.cybox_assembler = self.controller_factory(CyboxAssembler)
+    self.ce1sus_assembler = self.controller_factory(Ce1susAssembler)
     self.reference_definiton_broker = self.broker_factory(ReferenceDefintionsBroker)
 
 

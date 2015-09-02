@@ -24,8 +24,11 @@ class Assembler(BaseChangeController):
 
   def __init__(self, config, session=None):
     super(Assembler, self).__init__(config, session)
-    self.cybox_assembler = CyboxAssembler(config, session)
-    self.mergers = [StixAssembler(config, session), self.cybox_assembler, Ce1susAssembler(config, session), EventAssembler(config, session)]
+    self.mergers = [self.controller_factory(StixAssembler),
+                    self.controller_factory(CyboxAssembler),
+                    self.controller_factory(Ce1susAssembler),
+                    self.controller_factory(EventAssembler)
+                    ]
 
   def assemble(self, json, clazz, parent, cache_object):
     cache_object.insert = True

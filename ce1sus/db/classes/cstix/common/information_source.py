@@ -152,16 +152,14 @@ class InformationSource(Entity, Base):
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   def to_dict(self, cache_object):
-    copy = cache_object.make_copy()
-    copy.inflated = True
     if cache_object.complete:
       result = {
                 'description':self.attribute_to_dict(self.description, cache_object),
-                'identity': self.attribute_to_dict(self.identity, copy),
+                'identity': self.attribute_to_dict(self.identity, cache_object),
                 'time': self.attribute_to_dict(self.time, cache_object),
                 'tools': self.attributelist_to_dict('tools', cache_object),
-                'roles': self.attributelist_to_dict('roles', copy),
-                'contributing_sources': self.attributelist_to_dict('contributing_sources', copy)
+                'roles': self.attributelist_to_dict('roles', cache_object),
+                'contributing_sources': self.attributelist_to_dict('contributing_sources', cache_object)
               }
     else:
       result = {

@@ -9,7 +9,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import Column, ForeignKey
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.common.checks import is_event_owner
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.indicator.indicator import Indicator
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeType, UnicodeTextType
@@ -40,7 +39,7 @@ class ErrorBase(BaseObject, Base):
   }
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       result = {'event_id': self.convert_value(self.event.uuid),
                 'message': self.convert_value(self.message),
                 'dump': self.convert_value(self.dump)
@@ -60,7 +59,7 @@ class ErrorObservable(ErrorBase, Base):
   __mapper_args__ = {'polymorphic_identity':'errorobservable'}
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       result = {'indicator_id': self.convert_value(self.indicator_id)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
@@ -77,7 +76,7 @@ class ErrorObject(ErrorBase, Base):
   __mapper_args__ = {'polymorphic_identity':'errorobject'}
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       result = {'observable_id': self.convert_value(self.observable_id)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
@@ -95,7 +94,7 @@ class ErrorAttribute(ErrorBase, Base):
   __mapper_args__ = {'polymorphic_identity':'errorattribute'}
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       result = {'object_id': self.convert_value(self.object_id)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)
@@ -113,7 +112,7 @@ class ErrorReference(ErrorBase, Base):
   __mapper_args__ = {'polymorphic_identity':'errorattribute'}
 
   def to_dict(self, cache_object):
-    if is_event_owner(self, cache_object.user):
+    if cache_object.permission_controller.is_instance_owner(self, cache_object):
       result = {'report_id': self.convert_value(self.report_id)
                 }
       parent_dict = ErrorBase.to_dict(self, cache_object)

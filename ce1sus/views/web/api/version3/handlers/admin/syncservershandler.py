@@ -8,7 +8,7 @@ Created on Apr 2, 2015
 from ce1sus.controllers.admin.syncserver import SyncServerController
 from ce1sus.controllers.base import ControllerException, ControllerNothingFoundException
 from ce1sus.db.classes.internal.backend.servers import SyncServer
-from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, Ce1susAdapterException
+# from ce1sus.views.web.adapters.ce1susadapter import Ce1susAdapter, Ce1susAdapterException
 from ce1sus.views.web.adapters.misp.misp import MISPAdapter, MISPAdapterException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException, RestHandlerNotFoundException
 from ce1sus.views.web.common.decorators import privileged
@@ -26,7 +26,7 @@ class SyncServerHandler(RestBaseHandler):
     super(SyncServerHandler, self).__init__(config)
     self.sync_server_controller = self.controller_factory(SyncServerController)
 
-    self.ce1sus_adapter = Ce1susAdapter(config)
+    # self.ce1sus_adapter = Ce1susAdapter(config)
 
   @rest_method(default=True)
   @methods(allowed=['GET', 'POST', 'PUT', 'DELETE'])

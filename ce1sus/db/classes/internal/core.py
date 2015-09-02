@@ -12,11 +12,11 @@ Created on Jul 3, 2015
 from datetime import datetime
 from sqlalchemy.ext.declarative.api import declared_attr
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import  DateTime, Integer
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.common.checks import is_user_priviledged
 from ce1sus.db.classes.internal.common import TLP, Properties
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType
 from ce1sus.db.classes.internal.usrmgt.user import User
@@ -54,7 +54,8 @@ class SimpleLoggingInformations(BaseObject):
     cache_object_copy = cache_object.make_copy()
     cache_object_copy.inflated = False
     cache_object_copy.complete = False
-    if is_user_priviledged(cache_object.user):
+    """
+    if cache_object.permission_controller.is_user_priviledged(cache_object.user):
       result = {'creator_id': self.convert_value(self.creator.uuid),
                  'creator': self.creator.to_dict(cache_object_copy),
                  'modifier_id': self.convert_value(self.modifier.uuid),
@@ -67,6 +68,12 @@ class SimpleLoggingInformations(BaseObject):
                 'created_at': self.convert_value(self.created_at),
                 'modified_on': self.convert_value(self.modified_on)
                 }
+    """
+    result = {
+              'created_at': self.convert_value(self.created_at),
+              'modified_on': self.convert_value(self.modified_on)
+              }
+
     parent_dict = BaseObject.to_dict(self, cache_object)
     return merge_dictionaries(parent_dict, result)
 
@@ -86,13 +93,15 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
     cache_object_copy.inflated = False
     cache_object_copy.complete = False
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
-    if is_user_priviledged(cache_object.user):
+    """
+    if cache_object.permission_controller.is_user_priviledged(cache_object.user):
       child_dict = {'creator_group_id': self.convert_value(self.creator_group.uuid),
                     'creator_group': self.creator_group.to_dict(cache_object_copy),
                     }
     else:
       child_dict = {}
-    
+    """
+    child_dict = {}
     return merge_dictionaries(parent_dict, child_dict)
 
 
@@ -148,3 +157,20 @@ class BaseElement(ExtendedLogingInformations):
               }
     parent_dict = ExtendedLogingInformations.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
+
+  def attribute_to_dict(self, attribute, cache_object):
+    if attribute and not isinstance(attribute, RelationshipProperty):
+      # TODO: Check attribute type
+      if cache_object.permission_controller.is_instance_viewable(attribute, cache_object):
+        return attribute.to_dict(cache_object)
+
+  def attributelist_to_dict(self, attribute, cache_object):
+    result = list()
+    if cache_object.inflated:
+      attribute = getattr(self, attribute)
+      if attribute:
+        for item in attribute:
+          if cache_object.permission_controller.is_instance_viewable(item, cache_object):
+            result.append(self.attribute_to_dict(item, cache_object))
+      return result
+    return None

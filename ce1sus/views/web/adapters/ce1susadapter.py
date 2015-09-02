@@ -11,7 +11,6 @@ import json
 import requests
 from uuid import UUID
 
-from ce1sus.common.checks import is_event_owner
 from ce1sus.common.system import APP_REL
 from ce1sus.controllers.base import BaseController, ControllerNothingFoundException
 from ce1sus.controllers.common.assembler.assembler import Assembler
@@ -27,7 +26,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
+"""
 class Ce1susAdapterException(Exception):
   pass
 
@@ -310,3 +309,5 @@ class Ce1susViewAdapter(BaseView):
         raise  HTTPError(404, '{0}'.format(error.message))
     else:
       raise HTTPError(400, 'Cannot be called without a uuid')
+
+"""

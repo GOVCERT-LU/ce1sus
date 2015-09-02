@@ -114,17 +114,6 @@ class SearchController(BaseController):
           found_values.extend(res)
 
     return found_values
-  
-  def search_by_property(self, property_name, needle, operator):
-    found_values = list()
-    if property_name in SearchController.SEARCHABLE_PROPERIES:
-      for clazz in SearchController.SEARCHABLE_CLASSES:
-        if hasattr(clazz, property_name):
-          result = self.search_broker.look_for_value_by_property_name(clazz, property_name, needle, operator)
-          found_values = found_values + result
-      return found_values
-    else:
-      raise ControllerException('The value {0} is not searchable'.format(property_name))
 
   def serach_for_any_value(self, needle, operator):
     found_values = self.search_broker.look_for_attribute_value(None, needle, operator)
@@ -132,8 +121,8 @@ class SearchController(BaseController):
 
     found_values = found_values + self.__look_for_descriptions(needle, operator)
 
-    for s_pro in SearchController.SEARCHABLE_PROPERIES:
-      found_values = found_values + self.search_by_property(s_pro, needle, operator)
+    for clazz in SearchController.SEARCHABLE_CLASSES:
+      found_values = found_values + self.search_broker.look_for_value_by_properties(clazz, SearchController.SEARCHABLE_PROPERIES, needle, operator)
 
     found_values = found_values + self.search_broker.look_for_reference_value(None,
                                                                               needle,

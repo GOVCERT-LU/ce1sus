@@ -20,8 +20,8 @@ class EventMerger(BaseMerger):
 
   def __init__(self, config, session=None):
     super(EventMerger, self).__init__(config, session)
-    self.cybox_merger = CyboxMerger(config, session)
-    self.stix_merger = STIXMerger(config, session)
+    self.cybox_merger = self.controller_factory(CyboxMerger)
+    self.stix_merger = self.controller_factory(STIXMerger)
 
   def merge_event_group_permission(self, old_instance, new_instance, merge_cache, attr_name=None):
     old_value, new_value = self.get_values(old_instance, new_instance, attr_name)

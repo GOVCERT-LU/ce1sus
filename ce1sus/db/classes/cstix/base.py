@@ -12,7 +12,6 @@ from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.internal.core import BaseElement
 from ce1sus.db.classes.internal.corebase import UnicodeType
@@ -77,12 +76,9 @@ class BaseCoreComponent(Entity):
     short_description = None
     information_source = None
     if cache_object.inflated:
-      if is_object_viewable(self.description, cache_object):
-        description = self.attribute_to_dict(self.description, cache_object)
-      if is_object_viewable(self.short_description, cache_object):
-        short_description = self.attribute_to_dict(self.short_description, cache_object)
-      if is_object_viewable(self.information_source, cache_object):
-        information_source = self.attribute_to_dict(self.information_source, cache_object)
+      description = self.attribute_to_dict(self.description, cache_object)
+      short_description = self.attribute_to_dict(self.short_description, cache_object)
+      information_source = self.attribute_to_dict(self.information_source, cache_object)
     if cache_object.complete:
       result = {'id_':self.convert_value(self.id_),
                 'idref':self.convert_value(self.idref),

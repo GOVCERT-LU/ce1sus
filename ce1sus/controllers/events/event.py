@@ -7,7 +7,6 @@ Created: Aug 28, 2013
 """
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 
-from ce1sus.common.checks import is_event_owner
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException, ControllerIntegrityException
 from ce1sus.controllers.common.common import CommonController
 from ce1sus.controllers.events.observable import ObservableController
@@ -36,13 +35,13 @@ class EventController(BaseController):
     self.event_broker = self.broker_factory(EventBroker)
     self.comment_broker = self.broker_factory(CommentBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
-    self.relations_controller = RelationController(config, session)
+    self.relations_controller = self.controller_factory(RelationController)
     self.event_permission_broker = self.broker_factory(EventPermissionBroker)
-    self.observable_controller = ObservableController(config, session)
-    self.common_controller = CommonController(config, session)
+    self.observable_controller = self.controller_factory(ObservableController)
+    self.common_controller = self.controller_factory(CommonController)
     self.stix_header_broker = self.broker_factory(STIXHeaderBroker)
-    self.indicator_controller = IndicatorController(config, session)
-    self.report_controller = ReportController(config, session)
+    self.indicator_controller = self.controller_factory(IndicatorController)
+    self.report_controller = self.controller_factory(ReportController)
   
   def get_event_permission_by_uuid(self, uuid):
     try:
@@ -222,10 +221,10 @@ class EventController(BaseController):
       for obs in observable.observable_composition.observables:
         self.__change_owner_observable(obs, user, group)
 
-  def change_owner(self, event, group_id, user, commit=True):
+  def change_owner(self, event, group_id, cache_object, commit=True):
     try:
       group = self.group_broker.get_by_uuid(group_id)
-      user = self.user_broker.getUserByUserName(user.username)
+      user = self.user_broker.getUserByUserName(cache_object.user.username)
       self.__change_owner(event, user, group)
       # TODO make change owner ship recursive
       for observable in event.observables:
@@ -240,34 +239,17 @@ class EventController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def get_event_user_permissions(self, event, user):
-    try:
-      user = self.user_broker.getUserByUserName(user.username)
-      # If is admin => give all rights the same is valid for the owenr
-      isowner = is_event_owner(event, user)
-      if isowner:
-        permissions = EventPermissions('0')
-        permissions.set_all()
-        return permissions
-      else:
-        permissions = self.event_broker.get_event_user_permissions(event, user)
-        if hasattr(permissions, 'permissions'):
-          permissions = permissions.permissions
-          return permissions
-        else:
-          return None
-
     except NothingFoundException as error:
       # The group was not associated to the event
       self.logger.debug(error)
 
       # if the event is still not visible the event has to have a lower or equal tlp level
-      user_tlp = user.group.tlp_lvl
+      user_tlp = cache_object.user.group.tlp_lvl
       result = event.tlp_level_id >= user_tlp
 
       if result:
         # Get the defaults for this group
-        usr_grp = user.group
+        usr_grp = cache_object.user.group
         permissions = usr_grp.default_permissions
 
       else:

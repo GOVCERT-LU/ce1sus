@@ -10,11 +10,10 @@ import re
 from sqlalchemy.orm.session import make_transient
 
 from ce1sus.common.classes.cacheobject import CacheObject
-from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.controllers.common.updater.updater import Updater
-from ce1sus.handlers.base import HandlerException
 from ce1sus.views.web.common.base import BaseView
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -96,8 +95,9 @@ class RestBaseHandler(BaseView):
 
   def __init__(self, config):
     super(RestBaseHandler, self).__init__(config)
-    self.assembler = Assembler(config)
-    self.updater = Updater(config)
+    self.assembler = self.controller_factory(Assembler)
+    self.updater = self.controller_factory(Updater)
+    self.permission_controller = self.controller_factory(PermissionController)
 
   def get_cache_object(self, args):
     headers = args.get('headers')
@@ -106,7 +106,9 @@ class RestBaseHandler(BaseView):
                                details=self.get_detail_value(args),
                                inflated=self.get_inflated_value(args),
                                flat=self.get_flat_value(args),
+                               authorized_cache=self.get_authorized_cache()
                                )
+    cache_object.permission_controller = self.permission_controller
     return cache_object
 
   def make_copy(self, instance):
@@ -114,21 +116,8 @@ class RestBaseHandler(BaseView):
     return instance
 
   def set_event_properties_cache_object(self, cache_object, event):
-    cache_object.event_permissions = self.get_event_user_permissions(event, cache_object.user)
-    cache_object.owner = self.is_event_owner(event, cache_object.user)
-
-  def controller_factory(self, clazz):
-    if issubclass(clazz, BaseController):
-      classname = clazz.__name__
-      if classname in RestBaseHandler.controllers:
-        return RestBaseHandler.controllers[classname]
-      # need to create the broker
-      self.logger.debug('Create controller for {0}'.format(clazz))
-      instance = clazz(self.config)
-      RestBaseHandler.controllers[classname] = instance
-      return instance
-    else:
-      raise HandlerException('Class does not implement BaseController')
+    cache_object.event_permissions = self.permission_controller.get_event_permissions(event, cache_object)
+    cache_object.event_owner = self.permission_controller.is_instance_owner(event, cache_object)
 
   @property
   def name(self):

@@ -17,39 +17,70 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
   $scope.searchChanged = function (){
     return !angular.equals($scope.search, original_search);
   };
-   
   
-  var makeFlat = function(entry) {
-    var observable = '';
+  function find_value(item){
+    var needle = $scope.search.value;
+    item_list = _.values(item);
+    return _.find(item_list, function(value){ 
+         if ((value+'').indexOf(needle) >=0){
+           return value;
+         }
+       });
+  }
+  
+  function make_search_entry(entry) {
+    var event = '';
+    var item = '';
+    var type = '';
+    var value = '';
+    var title = '';
+    
+    if (entry.event){
+      event = entry.event;
+      value = find_value(entry.event);
+      if (entry.event.stix_header){
+        title = event.stix_header.title;
+      }
+    }
     if (entry.observable){
-      if (entry.observable.title) {
-        observable = entry.observable.title;
-      } else {
-        observable = 'Observable';
-      }
-    } else {
-      if (entry.report){
-        observable = 'Report';
-      }
+      item = 'Observable';
+      value = find_value(entry.observable);
     }
-    var objType = '';
+    if (entry.indicator){
+      item = 'Indicator';
+      value = find_value(entry.indicator);
+    }
+    if (entry.report){
+      item = 'Report';
+      value = find_value(entry.report);
+    }
+    if (entry.reference){
+      item = 'Refernece';
+      type = entry.reference.definition.name;
+      value = find_value(entry.reference);
+    }
+    if (entry.attribute){
+      item = 'Attribute';
+      type = entry.attribute.definition.name;
+      value = find_value(entry.attribute);
+    }
     if (entry.object){
-      objType = entry.object.definition.name;
-    } else {
-      if (entry.report){
-        if (entry.report.title) {
-          objType = entry.report.title;
-        } else {
-          objType = entry.identifier;
-        }
-        
-      }
+      item = 'Object';
+      type = entry.object.definition.name;
+      value = find_value(entry.object);
     }
-    var attribute =  entry.attribute;
+    if (entry.composed_observable){
+      item = 'Composed Observable';
+      value = find_value(entry.composed_observable);
+    }
+    if (entry.stix_header){
+      item = 'Stix Header';
+      value = find_value(entry.stix_header);
+    }
+
+    return {'event': event,'eventTitle': title,'type':type,'item':item,'value':value};
     
-    return {'event':entry.event,'eventTitle':entry.event.stix_header.title,'observable':observable,'objectType':objType,'attribute':attribute};
-    
-  };
+  }
 
   $scope.submitSearch = function(){
     results = [];
@@ -59,7 +90,7 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
     Restangular.all("search").post($scope.search).then(function (data) {
       if (data) {
         for (var i = 0; i < data.length; i++) {
-          results.push(makeFlat(data[i]));
+          results.push(make_search_entry(data[i]));
         }
         $scope.results = results.length;
         $scope.resultItems = results;
@@ -72,13 +103,9 @@ app.controller("doSerachController", function($scope, Restangular,messages, $log
         $scope.resultTable.reload();
       }
     }, function (response) {
-      results = [];
-      $scope.results = results.length;
-      $scope.resultItems = results;
-      $scope.resultTable.reload();
       handleError(response, messages);
     });
-    //$scope.search = angular.copy(original_search);
+
   };
 
   $scope.resultTable = new ngTableParams({

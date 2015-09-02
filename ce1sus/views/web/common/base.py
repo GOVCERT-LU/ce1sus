@@ -5,18 +5,17 @@
 
 Created on Oct 26, 2014
 """
-from ce1sus.helpers.common.objects import GenObject
 import cherrypy
 from cherrypy._cperror import CherryPyException
 from json import loads
-
-from ce1sus.common.checks import get_view_message, is_user_priviledged, is_event_owner, is_object_viewable, get_item_view_message, get_max_tlp
+from sqlalchemy.orm.session import make_transient
 from ce1sus.controllers.admin.user import UserController
+from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
-from ce1sus.db.classes.internal.usrmgt.group import EventPermissions, GroupRights
-from ce1sus.db.classes.internal.usrmgt.user import UserRights
+from ce1sus.db.common.session import SessionManager
 from ce1sus.helpers.common.debug import Log
 from ce1sus.views.web.common.decorators import SESSION_KEY, SESSION_USER
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -41,6 +40,8 @@ class SessionNotFoundException(BaseViewException):
 
 class BaseView(object):
 
+  controllers = dict()
+
   def __init__(self, config):
     """
     Creator
@@ -51,9 +52,25 @@ class BaseView(object):
     :returns: BaseView
     """
     self.config = config
-    self.__logger = Log(config)
-    self.event_controller = EventController(config)
-    self.user_controller = UserController(config)
+    self.__logger = Log(self.config)
+    self.session_manager = SessionManager(self.config)
+    self.event_controller = self.controller_factory(EventController)
+    self.user_controller = self.controller_factory(UserController)
+    self.permission_controller = self.controller_factory(PermissionController)
+
+  def controller_factory(self, clazz):
+    if issubclass(clazz, BaseController):
+      classname = clazz.__name__
+      if classname in BaseView.controllers:
+        return BaseView.controllers[classname]
+      # need to create the broker
+      self.logger.debug('Create controller for {0}'.format(clazz))
+      instance = clazz(self.config)
+      BaseView.controllers[classname] = instance
+      return instance
+    else:
+      raise BaseViewException('Class does not implement BaseController')
+
 
   def get_json(self):
     json = {}
@@ -184,7 +201,7 @@ class BaseView(object):
     user = self._get_from_session(SESSION_USER)
     return user
 
-  def get_authorized_events_cache(self):
+  def get_authorized_cache(self):
     """
     Returns the authorized cached events
     """
@@ -193,148 +210,11 @@ class BaseView(object):
     except AttributeError:
       return dict()
 
-  def set_authorized_events_cache(self, cache):
+  def set_authorized_cache(self, cache):
     try:
       self._put_to_session('_cp_events_cache', cache)
     except AttributeError:
       pass
-
-  def check_if_admin(self, cache_object):
-    user = self.get_user()
-    isadmin = is_user_priviledged(user)
-    if not isadmin:
-      raise cherrypy.HTTPError(403, 'User {0} is not privileged'.format(user.username))
-
-  def check_if_admin_validate(self):
-    user = self.get_user()
-    if not user.permissions.validate:
-      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
-
-  def is_event_viewable(self, event, user=None):
-    # The same is in the mailer
-    if not user:
-      user = self.get_user()
-    if self.is_event_owner(event, user):
-      return True
-    else:
-      if user:
-        if user.group_id:
-          user_group = self.event_controller.group_broker.get_by_id(user.group_id)
-          tlp_lvl = get_max_tlp(user_group)
-          if event.tlp_level_id >= tlp_lvl:
-            return True
-          else:
-            grp_ids = list()
-            for group in user_group.children:
-              grp_ids.append(group.identifier)
-            grp_ids.append(user.group_id)
-
-            for eventgroup in event.groups:
-              group = eventgroup.group
-              if group.identifier in grp_ids:
-                return True
-            return False
-        else:
-          return False
-      else:
-        return False
-
-  def check_if_event_is_viewable(self, event):
-    user = self.get_user()
-    if not self.is_event_viewable(event, user):
-      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot view this event'.format(user.username, user.group.name))
-
-  def is_item_viewable(self, event, item, user=None):
-    if not user:
-      user = self.get_user()
-    if self.is_event_owner(event, user):
-      return True
-    else:
-      # check is the event is viewable then process to the iem
-      if self.is_event_viewable(event, user):
-        permissions = self.get_event_user_permissions(event, user)
-        if is_object_viewable(item, permissions, user):
-          return True
-        else:
-          return False
-      else:
-        return False
-
-  def check_item_is_viewable(self, event, item):
-    user = self.get_user()
-    result = self.is_item_viewable(event, item)
-    # if the result is still not set throw an error
-    log_msg = get_item_view_message(result, event.identifier, item.identifier, user.username, 'can_view')
-    # update cache
-    self.logger.info(log_msg)
-    if result is None:
-      raise Exception(u'Unknown error occurred during event checks')
-    else:
-      return result
-
-  def check_if_event_is_modifiable(self, event):
-    self.check_permission(event, 'can_modify')
-
-  def check_if_event_is_deletable(self, event):
-    self.check_permission(event, 'can_delete')
-
-  def check_if_event_group_can_change(self, event):
-    self.check_permission(event, 'set_groups')
-
-  def check_permission(self, event, permission):
-    user = self.get_user()
-    result = self.is_user_allowed_to_perform(event, permission, user)
-    if not result:
-      raise cherrypy.HTTPError(403, 'User/group {0}/{1} is not authorized perform action "{3}" on event {2}'.format(user.username, user.group.name, event.identifier, permission))
-
-  def check_if_owner(self, event):
-    user = self.get_user()
-    owner = is_event_owner(event, user)
-    if not owner:
-      raise cherrypy.HTTPError(403, 'User/group {0}/{1} does not own event {2}'.format(user.username, user.group.name, event.identifier))
-
-  def check_if_user_can_add(self, event):
-    user = self.get_user()
-    result = is_event_owner(event, user)
-    if not result:
-      result = self.is_user_allowed_to_perform(event, 'can_add', user)
-      if not result:
-        result = self.is_user_allowed_to_perform(event, 'can_propose', user)
-    if not result:
-      raise cherrypy.HTTPError(403, 'User {0}/{1} can not add contents to event {2}'.format(user.username, user.group.name, event.identifier))
-
-  def is_user_allowed_to_perform(self, event, permission, user):
-    permissions = self.get_event_user_permissions(event, user)
-    if permissions:
-      result = getattr(permissions, permission)
-      # if the result is still not set throw an error
-      log_msg = get_view_message(result, event.identifier, user.username, permission)
-      # update cache
-      self.logger.info(log_msg)
-      if result is None:
-        raise Exception(u'Unknown error occurred during event checks')
-      else:
-        return result
-    else:
-      return False
-
-  def is_user_priviledged(self, user):
-    self.logger.debug(u'Checking if user {0} is privileged'.format(user.username))
-    result = is_user_priviledged(user)
-    if result:
-      self.logger.info(u'User {0} is privileged'.format(user.username))
-    else:
-      self.logger.info(u'User {0} is not privileged'.format(user.username))
-    return result
-
-  def is_event_owner(self, event, user):
-    self.logger.debug(u'Checking if user/group {0}/{1} owns event {2}'.format(user.username, user.group.name, event.identifier))
-    result = is_event_owner(event, user)
-    if result:
-      self.logger.info(u'User/group {0}/{1} owns of event {2}'.format(user.username, user.group.name, event.identifier))
-    else:
-      self.logger.info(u'User/group {0}/{1} does not own of event {2}'.format(user.username, user.group.name, event.identifier))
-    return result
 
   def is_rest_insert(self, headers):
     webinsert = headers.get('frontend', None)
@@ -343,89 +223,66 @@ class BaseView(object):
     else:
       return True
 
-  def is_user_allowed_set_validate(self, event, old_instance, user, json):
-    properties = json.get('properties', None)
-    if properties:
-      permissions = self.get_event_user_permissions(event, user)
-      validated = properties.get('validated', None)
-      if validated is not None:
-        # validate is perhaps going to change
-        if permissions.can_validate:
-          return True
-        else:
-          # if there are changes deny them
-          if old_instance.properties.is_validated == validated:
-          # no change
-            return True
-          else:
-            self.logger.info(u'User {0} has no right to validate elements of event {1}'.format(user.username, event.identifier))
-            return False
-    return True
+  def is_admin(self):
+    user = self.get_user()
+    isadmin = self.permission_controller.is_user_priviledged(user)
+    return isadmin
 
-  def is_user_allowed_set_share(self, event, old_instance, user, json):
-    properties = json.get('properties', None)
-    if properties:
-      shared = properties.get('shared', None)
-      if shared is not None:
-        if is_event_owner(event, user):
-          return True
-        else:
-          if old_instance.originating_group.identifier == user.group_id:
-            # User owns instance
-            return True
-          else:
-            if old_instance.properties.is_shareable == shared:
-              return True
-            else:
-              self.logger.info(u'User/group {0}/{1} has no right to share elements of event {2}'.format(user.username, user.group.name, event.identifier))
-              return False
-    return True
+  def check_if_admin(self):
+    user = self.get_user()
+    if not self.is_admin():
+      raise cherrypy.HTTPError(403, 'User {0} is not privileged'.format(user.username))
 
-  def check_user_allowed_set_share(self, event, old_instance, user, json):
-    shared = self.is_user_allowed_set_share(event, old_instance, user, json)
-    if not shared:
-      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot make this change'.format(user.username, user.group.name))
+  def check_if_admin_validate(self):
+    user = self.get_user()
+    if not user.permissions.validate:
+      raise cherrypy.HTTPError(403, 'User {0} cannot validate events'.format(user.username))
 
-  def check_user_allowed_set_validate(self, event, old_instance, user, json):
-    validate = self.is_user_allowed_set_validate(event, old_instance, user, json)
-    if not validate:
-      raise cherrypy.HTTPError(403, 'User/group {0}/{1} can not validate elements of event {2}'.format(user.username, user.group.name, event.identifier))
+  def is_instance_viewable(self, instance, cache_object):
+    result = self.permission_controller.is_instance_viewable(instance, cache_object)
+    self.set_authorized_cache(cache_object.authorized_cache)
+    return result
 
-  def is_if_user_can_set_validate_and_shared(self, event, old_instance, user, json):
-    # TODO: Involve if user == partof the originator
-    validate = self.is_user_allowed_set_validate(event, old_instance, user, json)
-    shared = self.is_user_allowed_set_validate(event, old_instance, user, json)
-    return validate and shared
+  def check_if_instance_is_viewable(self, instance, cache_object):
+    if not self.is_instance_viewable(instance, cache_object):
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot view this event'.format(cache_object.user.username, cache_object.user.group.name))
 
-  def check_if_user_can_set_validate_or_shared(self, event, old_instance, user, json):
-    self.check_user_allowed_set_share(event, old_instance, user, json)
-    self.check_user_allowed_set_validate(event, old_instance, user, json)
+  def check_allowed_to_perform(self, event, action, cache_object):
+    result = self.permission_controller.is_allowed_to_perform(event, action, cache_object)
+    self.set_authorized_cache(cache_object.authorized_cache)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} is not authorized perform action "{3}" on event {2}'.format(cache_object.user.username, cache_object.user.group.name, event.uuid, action))
 
-  def get_event_user_permissions(self, event, user):
-    cache = self.get_authorized_events_cache()
-    permissions = None
-    if event:
-      # check if cache
-      if cache:
-        permissions = cache.get(event.identifier, None)
-        # if None the event is not available inside the cache
-        if permissions:
-          return permissions
+  def check_if_instance_owner(self, instance, cache_object):
+    result = self.permission_controller.is_instance_owner(instance, cache_object)
+    self.set_authorized_cache(cache_object.authorized_cache)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} does not own event {2}'.format(cache_object.user.username, cache_object.user.group.name, instance.uuid))
 
-      if permissions is None:
-        if self.is_event_owner(event, user):
-          permissions = EventPermissions('0')
-          permissions.set_all()
-        else:
-          # either there was no cache or the event was not inside the cache perform checks
-          permissions = self.event_controller.get_event_user_permissions(event, user)
-          # put result in the cache if there is one
-        cache[event.identifier] = permissions
-        # perform checks
-    else:
-      permissions = EventPermissions('0')
-    self.set_authorized_events_cache(cache)
-    return permissions
+  def check_allowed_set_share(self, event, old_instance, cache_object, json):
+    result = self.permission_controller.is_allowed_set_share(event, old_instance, cache_object, json)
+    self.set_authorized_cache(cache_object.authorized_cache)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} cannot make this change'.format(cache_object.user.username, cache_object.user.group.name))
+
+  def check_allowed_set_validate(self, event, old_instance, cache_object, json):
+    result = self.permission_controller.is_user_allowed_set_validate(event, old_instance, cache_object, json)
+    self.set_authorized_cache(cache_object.authorized_cache)
+    if not result:
+      raise cherrypy.HTTPError(403, 'User/group {0}/{1} can not validate elements of event {2}'.format(cache_object.user.username, cache_object.user.group.name, event.identifier))
+
+  def check_if_is_modifiable(self, event):
+    self.check_allowed_to_perform(event, 'can_modify')
+
+  def check_if_is_deletable(self, event):
+    self.check_allowed_to_perform(event, 'can_delete')
+
+  def check_if_can_change_groups(self, event):
+    self.check_allowed_to_perform(event, 'set_groups')
+
+  def check_allowed_set_validate_or_shared(self, event, old_instance, cache_object, json):
+    self.check_allowed_set_share(event, old_instance, cache_object, json)
+    self.check_allowed_set_validate(event, old_instance, cache_object, json)
 
   def put_user_to_session(self, user):
     cherrypy.request.login = user.username
@@ -435,19 +292,9 @@ class BaseView(object):
 
   def __make_user_object(self, user):
     # TODO: make user offline
-    obj = GenObject()
-    obj.uuid = user.uuid
-    obj.name = user.name
-    obj.username = user.username
-    obj.identifier = user.identifier
-    obj.email = user.email
-    obj.group_id = user.group_id
-    obj.activated = user.activated
-    obj.sirname = user.sirname
-    obj.permissions = UserRights(user.dbcode)
-    obj.group = GenObject()
-    obj.group.uuid = user.group.uuid
-    obj.group.name = user.group.name
-    obj.group.identifier = user.group.identifier
-    obj.group.permissions = GroupRights(user.group.dbcode)
-    return obj
+    for item in user.group.children:
+      make_transient(item)
+    make_transient(user.group)
+    make_transient(user)
+
+    return user

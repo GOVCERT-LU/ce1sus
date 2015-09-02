@@ -17,7 +17,7 @@ from shutil import move, rmtree
 import types
 import zipfile
 
-from ce1sus.common.checks import can_user_download
+from ce1sus.common.utils import can_user_download
 from ce1sus.db.classes.internal.common import ValueTable
 from ce1sus.handlers.base import HandlerException
 from ce1sus.handlers.references.generichandler import GenericHandler

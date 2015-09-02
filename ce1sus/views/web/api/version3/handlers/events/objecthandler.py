@@ -67,16 +67,12 @@ class ObjectHandler(RestBaseHandler):
       if object_id:
         obj = self.observable_controller.get_object_by_uuid(object_id)
         event = obj.event
-        self.check_if_event_is_viewable(event)
         self.set_event_properties_cache_object(cache_object, event)
+        self.check_if_instance_is_viewable(event, cache_object)
+        self.check_if_instance_is_viewable(obj, cache_object)
 
         if requested_object['object_type'] is None:
-                    # return the event
-
-                    # check if event is viewable by the current user
-
           return self.__process_object(method, event, obj, json, cache_object)
-
         elif requested_object['object_type'] == 'related_object':
           return self.__process_related_object(method, event, obj, requested_object, json, cache_object)
         elif requested_object['object_type'] == 'attribute':
@@ -94,19 +90,17 @@ class ObjectHandler(RestBaseHandler):
   def __process_object(self, method, event, obj, json, cache_object):
     try:
       if method == 'POST':
-        raise RestHandlerException('Please use observable/{uuid}/instead')
+        raise RestHandlerException('Please use observable/{uuid}/object instead')
       else:
         if method == 'GET':
-          self.check_item_is_viewable(event, obj)
+          self.check_if_instance_is_viewable(obj, cache_object)
           return obj.to_dict(cache_object)
         elif method == 'PUT':
-          old_obj = obj
-          self.check_if_event_is_modifiable(event)
-          self.check_item_is_viewable(event, obj)
-          self.check_if_user_can_set_validate_or_shared(event, old_obj, cache_object.user, json)
+          self.check_if_is_modifiable(event)
+          self.check_allowed_set_validate_or_shared(event, obj, cache_object, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
-          # TODO Review the relations as they have to be removed at some point if they were existing
+          # TODO: Review the relations as they have to be removed at some point if they were existing
           if parent_id:
                         # get related object
             related_object = self.observable_controller.get_related_object_by_child(obj)
@@ -120,8 +114,7 @@ class ObjectHandler(RestBaseHandler):
           self.observable_controller.update_object(obj, cache_object, True)
           return obj.to_dict(cache_object)
         elif method == 'DELETE':
-          self.check_if_event_is_deletable(event)
-          self.check_item_is_viewable(event, obj)
+          self.check_if_is_deletable(event)
           self.observable_controller.remove_object(obj, cache_object, True)
           return 'Deleted object'
     except ValueException as error:
@@ -132,20 +125,20 @@ class ObjectHandler(RestBaseHandler):
 
       # workaround
       # TODO find out why the parent gets deleted
-      self.check_if_user_can_add(event)
       related_object = self.assembler.assemble(json, RelatedObject, obj, cache_object)
       self.observable_controller.update_object(obj, cache_object, True)
       return related_object.to_dict(cache_object)
     elif method == 'DELETE':
-      self.check_if_event_is_modifiable(event)
-      self.check_item_is_viewable(event, obj)
+      self.check_if_is_deletable(event)
       uuid = requested_object['object_uuid']
       if uuid:
+        # TODO: review the following
         try:
           related_object = self.observable_controller.get_related_object_by_uuid(uuid)
         except ControllerNothingFoundException:
           related_object = self.observable_controller.get_related_object_by_child(obj)
 
+        self.check_if_instance_is_viewable(related_object, cache_object)
         self.observable_controller.remove_related_object(related_object, cache_object)
         return 'OK'
       else:
@@ -172,41 +165,10 @@ class ObjectHandler(RestBaseHandler):
 
       return {'attributes': result_attriutes, 'related_objects': result_objects}
 
-  def __get_attribtues_for_object(self, obj):
-    result = obj.attributes
-    if obj.related_objects:
-      for rel_obj in obj.related_objects:
-        result = result + self.__get_attribtues_for_object(rel_obj.object)
-    return result
-
-  def __get_attribtues_for_observable(self, obs):
-    result = list()
-    if obs.object:
-      result = result + self.__get_attribtues_for_object(obs.object)
-    return result
-
-  def __get_all_attribtues(self, param_1, related_objects, is_observable):
-    result = list()
-    if is_observable and param_1:
-      # then param 1 is an wrapped composed observable
-      if param_1.observable_composition:
-        for obs in param_1.observable_composition.observables:
-          result = result + self.__get_attribtues_for_observable(obs)
-      else:
-        result = result + self.__get_attribtues_for_observable(param_1)
-    else:
-      if param_1:
-        result = result + param_1
-      if related_objects:
-        for rel_obj in related_objects:
-          result = result + self.__get_attribtues_for_object(rel_obj.object)
-    return result
-
   def __process_attribute(self, method, event, obj, requested_object, json, cache_object):
     try:
-
       if method == 'POST':
-        self.check_if_user_can_add(event)
+
         cache_object_copy = cache_object.make_copy()
         cache_object_copy.complete = True
         cache_object_copy.inflated = True
@@ -222,10 +184,12 @@ class ObjectHandler(RestBaseHandler):
           return returnvalues.to_dict(cache_object_copy)
       else:
         uuid = requested_object['object_uuid']
+        if uuid:
+          attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
+          self.check_if_instance_is_viewable(attribute, cache_object)
+
         if method == 'GET':
           if uuid:
-            attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
-            self.check_item_is_viewable(event, attribute)
             return attribute.to_dict(cache_object)
           else:
             result = list()
@@ -236,15 +200,14 @@ class ObjectHandler(RestBaseHandler):
         else:
           attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
           if method == 'PUT':
-            self.check_if_event_is_modifiable(event)
-            self.check_if_user_can_set_validate_or_shared(event, attribute, cache_object.user, json)
+            self.check_if_is_modifiable(event)
+            self.check_allowed_set_validate_or_shared(event, attribute, cache_object, json)
             self.updater.update(attribute, json, cache_object)
             self.attribute_controller.update_attribute(attribute, cache_object)
             return attribute.to_dict(cache_object)
 
           elif method == 'DELETE':
             self.check_if_event_is_deletable(event)
-            self.check_item_is_viewable(event, attribute)
             self.attribute_controller.remove_attribute(attribute, cache_object, True)
             return 'Deleted object'
 

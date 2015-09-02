@@ -8,10 +8,10 @@ Created on Apr 2, 2015
 from lxml import etree
 import time
 
-from ce1sus.common.checks import is_object_viewable
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.events.event import EventController
 from ce1sus.mappers.misp.common import ANALYSIS_MAP, RISK_MAP, DISTRIBUTION_TO_TLP_MAP, MISP_MAP
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -25,8 +25,9 @@ class Ce1susMISP(BaseController):
 
   def __init__(self, config, session=None):
     super(Ce1susMISP, self).__init__(config, session)
-    self.event_controller = EventController(config, session)
+    self.event_controller = self.controller_factory(EventController)
     self.seen_attributes = list()
+    self.permission_controller = self.controller_factory(PermissionController)
 
   def __append_child(self, node, id_, value):
     child = etree.Element(id_)
@@ -110,7 +111,7 @@ class Ce1susMISP(BaseController):
   
   def __make_reports(self, root, reports, event_id, cache_object):
     for report in reports:
-      if is_object_viewable(report, cache_object):
+      if self.permission_controller.is_instance_viewable(report, cache_object):
         self.__make_report(root, report, event_id, cache_object)
   
   def is_reference(self, reference):
@@ -124,36 +125,36 @@ class Ce1susMISP(BaseController):
   def __make_report(self, root, report, event_id, cache_object):
     comment = report.description
     for reference in report.references:
-      if is_object_viewable(reference, cache_object) and self.is_reference(reference):
+      if self.permission_controller.is_instance_viewable(reference, cache_object) and self.is_reference(reference):
         category, type_ = self.get_category_type('ce1sus-Report', reference)
         attr = self.__make_attribute(category, type_, reference, comment, event_id)
         root.append(attr)
         cache_object.counter = cache_object.counter + 1
 
     for rel_rep in report.related_reports:
-      if is_object_viewable(rel_rep, cache_object):
+      if self.permission_controller.is_instance_viewable(rel_rep, cache_object):
         self.__make_report(root, rel_rep, event_id, cache_object)
 
   
   def __make_indicators(self, root, indicators, event_id, cache_object):
     #TODO: snort/yara rules
     for indicator in indicators:
-      if is_object_viewable(indicator, cache_object):
+      if self.permission_controller.is_instance_viewable(indicator, cache_object):
         self.__make_observables(root, indicator.observables, event_id, cache_object)
 
   
   def __make_observables(self, root, observables, event_id, cache_object):
     for observable in observables:
-      if is_object_viewable(observable, cache_object):
+      if self.permission_controller.is_instance_viewable(observable, cache_object):
         self.__make_observable(root, observable, event_id, cache_object)
 
 
   def __make_observable(self, root, observable, event_id, cache_object):
-    if observable.object and is_object_viewable(observable.object, cache_object):
+    if observable.object and self.permission_controller.is_instance_viewable(observable.object, cache_object):
       self.__make_object(root, observable, observable.object, event_id, cache_object)
-    if observable.observable_composition and is_object_viewable(observable.observable_composition, cache_object):
+    if observable.observable_composition and self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
       for obs in observable.observable_composition.observables:
-        if is_object_viewable(obs, cache_object):
+        if self.permission_controller.is_instance_viewable(obs, cache_object):
           self.__make_observable(root, obs, event_id, cache_object)
 
   def get_category_type(self, prefix, attribute):
@@ -221,7 +222,7 @@ class Ce1susMISP(BaseController):
     else:
       comment = None
     for attribute in obj.attributes:
-      if is_object_viewable(attribute, cache_object) and attribute.value not in self.seen_attributes:
+      if self.permission_controller.is_instance_viewable(attribute, cache_object) and attribute.value not in self.seen_attributes:
         category, type_ = self.get_category_type('cybox-Observable', attribute)
         attr = self.__make_attribute(category, type_, attribute, comment, event_id)
         root.append(attr)
@@ -229,7 +230,7 @@ class Ce1susMISP(BaseController):
         self.seen_attributes.append(attribute.value)
         
     for rel_obj in obj.related_objects:
-      if is_object_viewable(rel_obj, cache_object):
+      if self.permission_controller.is_instance_viewable(rel_obj, cache_object):
         self.__make_object(root, observable, rel_obj, event_id, cache_object)
 
 

@@ -10,7 +10,6 @@ from ce1sus.helpers.common.objects import GenObject
 from uuid import uuid4
 import uuid
 
-from ce1sus.common.checks import set_properties_according_to_permisssions
 from ce1sus.common.system import get_set_group
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.classes.common.baseelements import Entity
@@ -119,7 +118,7 @@ class BaseChanger(BaseController):
 
       instance.properties.is_shareable = json.get('shared', False)
     # Set it as proposal if the user is not the event owner
-    set_properties_according_to_permisssions(instance.properties, cache_object)
+    cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, cache_object)
 
   def __set_baseelement(self, instance, json, cache_object, parent, change_base_element=True):
     self.__set_extended_logging(instance, json, cache_object)
@@ -137,7 +136,7 @@ class BaseChanger(BaseController):
     else:
       instance.properties = Properties('0', instance)
 
-      set_properties_according_to_permisssions(instance.properties, cache_object)
+      cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, cache_object)
 
       if parent:
         instance.tlp = parent.tlp

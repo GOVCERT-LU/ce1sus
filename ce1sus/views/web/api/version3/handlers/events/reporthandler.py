@@ -40,8 +40,10 @@ class ReportHandler(RestBaseHandler):
       if report_id:
         report = self.report_controller.get_report_by_uuid(report_id)
         event = report.event
-        self.check_if_event_is_viewable(event)
         self.set_event_properties_cache_object(cache_object, event)
+        self.check_if_instance_is_viewable(event, cache_object)
+        self.check_if_instance_is_viewable(report, cache_object)
+
         if requested_object['object_type'] is None:
                     # return the report
           return self.__process_report(method, event, report, json, cache_object)
@@ -68,21 +70,20 @@ class ReportHandler(RestBaseHandler):
           self.check_item_is_viewable(event, report)
           return report.to_dict(cache_object)
         elif method == 'PUT':
-          self.check_if_event_is_modifiable(event)
-          self.check_if_user_can_set_validate_or_shared(event, report, cache_object.user, json)
+          self.check_if_is_modifiable(event)
+          self.check_allowed_set_validate_or_shared(event, report, cache_object, json)
           self.updater.update(report, json, cache_object)
-          self.report_controller.update_report(report, cache_object.user, True)
+          self.report_controller.update_report(report, cache_object, True)
           return report.to_dict(cache_object)
         elif method == 'DELETE':
-          self.check_if_event_is_deletable(event)
-          self.report_controller.remove_report(report, cache_object.user, True)
+          self.check_if_is_deletable(event)
+          self.report_controller.remove_report(report, cache_object, True)
           return 'Deleted report'
     except ValueException as error:
       raise RestHandlerException(error)
 
   def __process_child_report(self, method, event, report, requested_object, json, cache_object):
     if method == 'POST':
-      self.check_if_user_can_add(event)
       child_obj = self.assembler.assemble(json, Report, event, cache_object)
       # TODO place this in a controller or so
       child_obj.parent_report_id = report.identifier
@@ -94,9 +95,7 @@ class ReportHandler(RestBaseHandler):
 
   def __process_reference(self, method, event, report, requested_object, json, cache_object):
     try:
-      user = self.get_user()
       if method == 'POST':
-        self.check_if_user_can_add(event)
 
         cache_object_copy = cache_object.make_copy()
         cache_object_copy.complete = True
@@ -115,10 +114,12 @@ class ReportHandler(RestBaseHandler):
 
       else:
         uuid = requested_object['object_uuid']
+        if uuid:
+          reference = self.report_controller.get_reference_by_uuid(uuid)
+          self.check_if_instance_is_viewable(reference, cache_object)
+          
         if method == 'GET':
           if uuid:
-            reference = self.report_controller.get_reference_by_uuid(uuid)
-            self.check_item_is_viewable(event, reference)
             return reference.to_dict(cache_object)
           else:
             result = list()
@@ -127,17 +128,16 @@ class ReportHandler(RestBaseHandler):
                 result.append(reference.to_dict(cache_object))
             return result
         else:
-          reference = self.report_controller.get_reference_by_uuid(uuid)
           if method == 'PUT':
-            self.check_if_event_is_modifiable(event)
-            self.check_if_user_can_set_validate_or_shared(event, reference, cache_object.user, json)
+            self.check_if_is_modifiable(event)
+            self.check_allowed_set_validate_or_shared(event, reference, cache_object, json)
             self.updater.update(reference, json, cache_object)
             self.report_controller.update_reference(reference, cache_object)
             return reference.to_dict(cache_object)
           elif method == 'DELETE':
-            self.check_if_event_is_deletable(event)
+            self.check_if_is_deletable(event)
             self.check_item_is_viewable(event, reference)
-            self.report_controller.remove_reference(reference, user, True)
+            self.report_controller.remove_reference(reference, cache_object, True)
             return 'Deleted object'
 
     except ValueException as error:

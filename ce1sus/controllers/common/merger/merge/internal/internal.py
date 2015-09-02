@@ -5,7 +5,7 @@
 
 Created on Aug 11, 2015
 """
-from ce1sus.controllers.common.merger.base import BaseMerger, MergerException
+from ce1sus.controllers.common.merger.base import BaseMerger
 
 
 __author__ = 'Weber Jean-Paul'

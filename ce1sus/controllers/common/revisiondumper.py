@@ -11,6 +11,7 @@ from os.path import exists
 import time
 
 from ce1sus.common.classes.cacheobject import CacheObject
+from ce1sus.controllers.base import BaseController
 from ce1sus.db.classes.internal.usrmgt.user import User
 
 
@@ -20,9 +21,10 @@ __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
 
-class RevisionDumper(object):
+class RevisionDumper(BaseController):
 
-  def __init__(self, config):
+  def __init__(self, config, session=None):
+    super(RevisionDumper, self).__init__(config, session)
     self.config = config
     self.destination = self.config.get('ce1sus', 'revdir', None)
     if self.destination:

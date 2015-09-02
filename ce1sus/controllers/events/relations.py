@@ -12,7 +12,6 @@ from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
-from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'

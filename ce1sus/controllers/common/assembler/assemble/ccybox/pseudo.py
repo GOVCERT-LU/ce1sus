@@ -8,7 +8,6 @@ Created on Aug 4, 2015
 
 from ce1sus.helpers.common.validator.objectvalidator import ObjectValidator
 from json import dumps
-from sqlalchemy.inspection import inspect
 from uuid import uuid4
 
 from ce1sus.common.classes.cacheobject import CacheObject

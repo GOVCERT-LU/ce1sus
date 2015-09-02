@@ -13,7 +13,6 @@ from ce1sus.helpers.common.objects import get_class
 from os.path import dirname, abspath
 import uuid
 
-from ce1sus.common.checks import set_properties_according_to_permisssions
 from ce1sus.common.system import get_set_group
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
@@ -113,13 +112,6 @@ class HandlerBase(object):
   def get_view_type():
     raise HandlerException('get_view_type is not defined')
 
-  def __set_properties(self, instance, json, cache_object):
-    if json:
-      instance.properties.is_validated = json.get('validated', False)
-      instance.properties.is_shareable = json.get('shared', False)
-    # Set it as proposal if the user is not the event owner
-    set_properties_according_to_permisssions(instance.properties, cache_object)
-
   def set_base(self, instance, json, parent, change_base_element=True):
     if json:
       # do not overwrite the uuid
@@ -129,7 +121,9 @@ class HandlerBase(object):
 
     if json and change_base_element:
       # populate properties
-      self.__set_properties(instance, json.get('properties', None), self.cache_object)
+      instance.properties.is_validated = json.get('validated', False)
+      instance.properties.is_shareable = json.get('shared', False)
+      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, self.cache_object)
 
       # populate tlp
       tlp = json.get('tlp', None)
@@ -140,7 +134,7 @@ class HandlerBase(object):
     else:
       instance.properties = Properties('0', instance)
 
-      set_properties_according_to_permisssions(instance.properties, self.cache_object)
+      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, self.cache_object)
 
       if parent:
         instance.tlp = parent.tlp

@@ -22,7 +22,7 @@ class StixAssembler(BaseAssembler):
 
   def __init__(self, config, session=None):
     super(StixAssembler, self).__init__(config, session)
-    self.cybox_assembler = CyboxAssembler(config, session)
+    self.cybox_assembler = self.controller_factory(CyboxAssembler)
 
   def assemble_stix_header(self, event, json, cache_object):
     instance = STIXHeader()

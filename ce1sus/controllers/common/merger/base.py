@@ -7,11 +7,11 @@ Created on Aug 7, 2015
 """
 from difflib import SequenceMatcher
 
-from ce1sus.common.checks import can_user_update, is_instance_owner, set_properties_according_to_permisssions
 from ce1sus.controllers.base import BaseController
 from ce1sus.db.classes.cstix.base import BaseCoreComponent
 from ce1sus.db.classes.internal.core import SimpleLoggingInformations, BaseElement
 from ce1sus.helpers.version import Version
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -24,6 +24,10 @@ class MergerException(Exception):
 
 class BaseMerger(BaseController):
   
+  def __init__(self, config, session=None):
+    super(BaseMerger, self).__init__(config, session)
+    self.permission_controller = self.controller_factory(PermissionController)
+
   def __merge_properties(self, old_instance, new_instance, merger_cache):
     old_version = merger_cache.version.version
     self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache)
@@ -34,7 +38,7 @@ class BaseMerger(BaseController):
 
     # If items are visible or unvisible increase version
     self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache)
-    set_properties_according_to_permisssions(old_instance, merger_cache)
+    self.permission_controller.set_properties_according_to_permisssions(old_instance, merger_cache)
 
   def set_base(self, old_instance, new_instance, merge_cache):
     if isinstance(old_instance, SimpleLoggingInformations):
@@ -105,7 +109,7 @@ class BaseMerger(BaseController):
   def update_instance_value(self, old_instance, new_instance, attr_name, merger_cache):
 
     if old_instance and new_instance:
-      if can_user_update(old_instance, merger_cache):
+      if self.permission_controller.can_user_update(old_instance, merger_cache):
         if self.is_updatable(old_instance, new_instance):
           old_value = getattr(old_instance, attr_name)
           new_value = getattr(new_instance, attr_name)
@@ -138,7 +142,7 @@ class BaseMerger(BaseController):
     if owner:
       return True
     else:
-      return is_instance_owner(instance, user)
+      return self.permission_controller.is_instance_owner(instance, user)
 
   def is_mergeable(self, old_instance, new_instance, merge_cache):
     """

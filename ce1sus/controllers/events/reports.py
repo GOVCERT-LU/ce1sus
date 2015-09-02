@@ -26,7 +26,7 @@ class ReportController(BaseController):
     self.report_broker = self.broker_factory(ReportBroker)
     self.reference_broker = self.broker_factory(ReferenceBroker)
     self.reference_definition_broker = self.broker_factory(ReferenceDefintionsBroker)
-    self.common_controller = CommonController(config, session)
+    self.common_controller = self.controller_factory(CommonController)
 
   def get_report_by_id(self, identifier):
     try:
@@ -120,7 +120,7 @@ class ReportController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_reference(self, reference, user, commit=True):
+  def remove_reference(self, reference, cache_object, commit=True):
     # TODO: include handler
     try:
       self.reference_broker.remove_by_id(reference.identifier)

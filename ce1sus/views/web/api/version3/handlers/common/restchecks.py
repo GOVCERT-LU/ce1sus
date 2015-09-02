@@ -5,7 +5,6 @@
 
 Created on Dec 19, 2014
 """
-from ce1sus.common.checks import is_user_priviledged
 from ce1sus.controllers.base import ControllerException
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
 
@@ -29,4 +28,4 @@ class ChecksHandler(RestBaseHandler):
   @rest_method(default=True)
   @methods(allowed=['GET'])
   def isuseradmin(self, **args):
-    return is_user_priviledged(self.get_user())
+    return self.check_if_admin()

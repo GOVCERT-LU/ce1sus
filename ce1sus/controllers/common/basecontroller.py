@@ -32,8 +32,8 @@ class BaseChangeController(BaseController):
 
   def __init__(self, config, session):
     super(BaseChangeController, self).__init__(config, session)
-    self.event_controller = EventController(config, session)
-    self.dumper = RevisionDumper(config)
+    self.event_controller = self.controller_factory(EventController)
+    self.dumper = self.controller_factory(RevisionDumper)
 
   def __get_event(self, instance):
     if isinstance(instance, Event):

@@ -13,7 +13,6 @@ from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 import uuid
 
 from ce1sus.common import convert_value
-from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'
@@ -82,8 +81,8 @@ class BaseObject(object):
   def attribute_to_dict(self, attribute, cache_object):
     if attribute and not isinstance(attribute, RelationshipProperty):
       # TODO: Check attribute type
-      if is_object_viewable(attribute, cache_object):
-        return attribute.to_dict(cache_object)
+
+      return attribute.to_dict(cache_object)
 
   def attributelist_to_dict(self, attribute, cache_object):
     result = list()
@@ -91,7 +90,6 @@ class BaseObject(object):
       attribute = getattr(self, attribute)
       if attribute:
         for item in attribute:
-          if is_object_viewable(item, cache_object):
-            result.append(self.attribute_to_dict(item, cache_object))
+          result.append(self.attribute_to_dict(item, cache_object))
       return result
     return None

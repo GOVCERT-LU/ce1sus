@@ -20,7 +20,7 @@ class CyboxMerger(BaseMerger):
 
   def __init__(self, config, session=None):
     super(CyboxMerger, self).__init__(config, session)
-    self.pseudo_cybox_merger = PseudoCyboxMerger(config, session)
+    self.pseudo_cybox_merger = self.controller_factory(PseudoCyboxMerger)
 
   def merge_object(self, old_instance, new_instance, merge_cache, attr_name=None):
     return self.pseudo_cybox_merger.merge_object(old_instance, new_instance, merge_cache, attr_name)

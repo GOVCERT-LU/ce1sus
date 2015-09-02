@@ -8,12 +8,12 @@ Created on Jul 9, 2013
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_, or_
 
-from ce1sus.common.checks import get_max_tlp
+from ce1sus.common.utils import get_max_tlp
+from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 from ce1sus.db.classes.internal.common import Analysis, Status, TLP
 from ce1sus.db.classes.internal.event import Event, EventGroupPermission
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
-from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 
 
 __author__ = 'Weber Jean-Paul'
@@ -39,10 +39,6 @@ class EventBroker(BrokerBase):
     overrides BrokerBase.get_broker_class
     """
     return Event
-
-  def get_event_user_permissions(self, event, user):
-    group = user.group
-    return self.get_event_group_permissions(event, group)
 
   def get_event_group_permissions(self, event, group):
     try:

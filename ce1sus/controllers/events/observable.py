@@ -17,7 +17,6 @@ from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
-from ce1sus.common.checks import is_object_viewable
 
 
 __author__ = 'Weber Jean-Paul'

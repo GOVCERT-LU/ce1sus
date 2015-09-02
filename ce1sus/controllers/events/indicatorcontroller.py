@@ -37,10 +37,10 @@ class IndicatorController(BaseController):
   def __init__(self, config, session=None):
     super(IndicatorController, self).__init__(config, session)
     self.indicator_type_broker = self.broker_factory(IndicatorTypeBroker)
-    self.relation_controller = RelationController(config, session)
+    self.relation_controller = self.controller_factory(RelationController)
     self.indicator_broker = self.broker_factory(IndicatorBroker)
-    self.observable_controller = ObservableController(config, session)
-    self.common_controller = CommonController(config, session)
+    self.observable_controller = self.controller_factory(ObservableController)
+    self.common_controller = self.controller_factory(CommonController)
 
   def get_all(self):
     try:
