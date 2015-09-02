@@ -6,6 +6,7 @@
 Created on Aug 5, 2015
 """
 from ce1sus.helpers.common import strings
+from ce1sus.helpers.common.objects import GenObject
 from uuid import uuid4
 import uuid
 
@@ -18,6 +19,7 @@ from ce1sus.db.classes.cstix.common.identity import Identity
 from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.core import BaseElement, ExtendedLogingInformations, SimpleLoggingInformations, BaseObject
+from ce1sus.db.common.broker import BrokerException
 from ce1sus.helpers.version import Version
 
 
@@ -47,12 +49,26 @@ class BaseChanger(BaseController):
     if instance.uuid is None:
       instance.uuid = '{0}'.format(uuid.uuid4())
 
+  def __get_user(self, cache_object):
+    if isinstance(cache_object.user, GenObject):
+      try:
+        user = self.user_broker.getUserByUserName(cache_object.user.username)
+        cache_object.user = user
+        return user
+      except BrokerException as error:
+        raise BaseChangerException(error)
+
+    else:
+      return cache_object.user
+
+
+
   def __set_simple_logging(self, instance, json, cache_object):
     self.__set_baseobject(instance, json)
     if json:
       if cache_object.insert:
         # the creator is always the user who inserted it into the DB
-        instance.creator = cache_object.user
+        instance.creator = self.__get_user(cache_object)
 
         created_at = json.get('created_at', None)
         if created_at:
@@ -78,6 +94,10 @@ class BaseChanger(BaseController):
       instance.modifier = cache_object.user
       instance.modified_on = instance.created_at
 
+  def __get_user_group(self, cache_object):
+    user = self.__get_user(cache_object)
+    return user.group
+
   def __set_extended_logging(self, instance, json, cache_object):
     self.__set_simple_logging(instance, json, cache_object)
     if cache_object.insert:
@@ -89,9 +109,9 @@ class BaseChanger(BaseController):
         if creat_grp:
           instance.creator_group = self.get_set_group(creat_grp, cache_object)
         else:
-          instance.creator_group = cache_object.user.group
+          instance.creator_group = self.__get_user_group(cache_object)
       else:
-        instance.creator_group = cache_object.user.group
+        instance.creator_group = self.__get_user_group(cache_object)
 
   def __set_properties(self, instance, json, cache_object):
     if json:

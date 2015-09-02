@@ -182,8 +182,6 @@ class BaseView(object):
     :returns: User
     """
     user = self._get_from_session(SESSION_USER)
-    if user:
-      user = self.user_controller.get_user_by_username(user.username)
     return user
 
   def get_authorized_events_cache(self):
@@ -201,7 +199,7 @@ class BaseView(object):
     except AttributeError:
       pass
 
-  def check_if_admin(self):
+  def check_if_admin(self, cache_object):
     user = self.get_user()
     isadmin = is_user_priviledged(user)
     if not isadmin:
@@ -446,5 +444,8 @@ class BaseView(object):
     obj.activated = user.activated
     obj.sirname = user.sirname
     obj.permissions = UserRights(user.dbcode)
+    obj.group = GenObject()
+    obj.group.name = user.group.name
+    obj.group.identifier = user.group.identifier
 
     return obj
