@@ -79,19 +79,24 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
 
   def to_dict(self, cache_object):
     if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      instance = self
+
+    if cache_object.complete:
       result = {
-              'name': self.convert_value(self.name),
-              'description': self.convert_value(self.description),
-              'chksum': self.convert_value(self.chksum),
-              'default_share': self.convert_value(self.default_share),
-              'attributes': self.attributelist_to_dict('attributes', cache_object),
-              'cybox_std': self.convert_value(self.cybox_std)
+              'name': instance.convert_value(instance.name),
+              'description': instance.convert_value(instance.description),
+              'chksum': instance.convert_value(instance.chksum),
+              'default_share': instance.convert_value(instance.default_share),
+              'attributes': instance.attributelist_to_dict('attributes', cache_object),
+              'cybox_std': instance.convert_value(instance.cybox_std)
               }
     else:
       result = {
-              'name': self.convert_value(self.name),
-              'chksum': self.convert_value(self.chksum),
-              'cybox_std': self.convert_value(self.cybox_std)
+              'name': instance.convert_value(instance.name),
+              'chksum': instance.convert_value(instance.chksum),
+              'cybox_std': instance.convert_value(instance.cybox_std)
               }
 
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)
@@ -182,7 +187,10 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
 
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(True)
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      instance = self
     if cache_object.complete:
       result = {
               'name': instance.convert_value(instance.name),

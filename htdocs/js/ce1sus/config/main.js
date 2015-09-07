@@ -457,7 +457,7 @@ app.config(function($routeSegmentProvider, $routeProvider, RestangularProvider, 
                           controller : "serachController",
                           resolve: {
                             attributes: function(Restangular,$routeSegment) {
-                              return Restangular.one("search").all('attributes').getList({"complete": true}).then(function (data) {
+                              return Restangular.one("search").all('attributes').getList({"complete": false}).then(function (data) {
                                 return data;
                               }, function(response) {
                                   throw generateErrorMessage(response);
