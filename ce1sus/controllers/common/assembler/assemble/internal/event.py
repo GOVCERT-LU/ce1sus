@@ -74,6 +74,7 @@ class EventAssembler(BaseAssembler):
           group.dbcode = 0
           group.uuid = init_author_name.uuid
           self.group_broker.insert(group, False)
+          self.group_broker.session.flush()
         
         # add the group to the event permissions
         event_permissions = EventGroupPermission()
@@ -82,7 +83,6 @@ class EventAssembler(BaseAssembler):
         event_permissions.event = event
         event_permissions.group = group
         event.groups.append(event_permissions)
-        
 
       first_seen = json.get('first_seen', None)
       if first_seen:

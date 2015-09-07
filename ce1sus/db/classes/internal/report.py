@@ -182,15 +182,15 @@ class Reference(Entity, Base):
 class Report(Entity, Base):
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False, back_populates="report_description", lazy='joined')
-  short_description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="report_short_description", lazy='joined')
+  description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT, uselist=False, back_populates="report_description",)
+  short_description = relationship(StructuredText, secondary=_REL_REPORT_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="report_short_description",)
   parent_report_id = Column('parent_report_id', BigIntegerType, ForeignKey('reports.report_id', onupdate='cascade', ondelete='cascade'), index=True)
   report = relationship('Report', uselist=False, primaryjoin='Report.parent_report_id==Report.identifier')
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), index=True, nullable=False)
   event = relationship('Event', uselist=False)
 
   references = relationship('Reference')
-  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier', lazy='dynamic')
+  related_reports = relationship('Report', primaryjoin='Report.parent_report_id==Report.identifier')
 
   _PARENTS = ['event', 'report']
 

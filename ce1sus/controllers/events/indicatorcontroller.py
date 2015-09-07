@@ -15,6 +15,7 @@ from ce1sus.controllers.events.observable import ObservableController
 from ce1sus.controllers.events.relations import RelationController
 from ce1sus.db.brokers.definitions.typebrokers import IndicatorTypeBroker
 from ce1sus.db.brokers.event.indicatorbroker import IndicatorBroker
+from ce1sus.db.brokers.stix.sigthingbroker import SightingBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable
 from ce1sus.db.classes.cstix.common.vocabs import IndicatorType as VocabIndicatorType
 from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
@@ -41,6 +42,7 @@ class IndicatorController(BaseController):
     self.indicator_broker = self.broker_factory(IndicatorBroker)
     self.observable_controller = self.controller_factory(ObservableController)
     self.common_controller = self.controller_factory(CommonController)
+    self.sigthing_broker = self.broker_factory(SightingBroker)
 
   def get_all(self):
     try:
@@ -55,6 +57,21 @@ class IndicatorController(BaseController):
       it.type = key
       result.append(it)
     return result
+  
+  def remove_sighting(self, sighting, cache_object, commit=True):
+    try:
+      if sighting.source and not isinstance(sighting.source, RelationshipProperty):
+        self.common_controller.remove_information_source(sighting.source, cache_object, False)
+      if sighting.description and not isinstance(sighting.description, RelationshipProperty):
+        self.common_controller.remove_structured_text(sighting.description, cache_object, False)
+      if sighting.confidence:
+        self.common_controller.remove_confidence(sighting.confidence, cache_object, False)
+      if sighting.related_observables:
+        raise NotImplemented()
+      self.sigthing_broker.remove_by_id(sighting.identifier, False)
+      self.sigthing_broker.do_commit(commit)
+    except BrokerException as error:
+      raise ControllerException(error)
   
   def remove_indicator(self, indicator, cache_object, commit=True):
     try:
@@ -73,7 +90,9 @@ class IndicatorController(BaseController):
       # valid time positions
       # related_indicators
       # related campaigns
-
+      if indicator.sigthings:
+        for sighting in indicator.sightings:
+          self.remove_sighting(sighting, cache_object, commit)
       self.indicator_broker.remove_by_id(indicator.identifier, False)
       self.indicator_broker.do_commit(commit)
       

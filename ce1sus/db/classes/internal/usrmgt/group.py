@@ -186,7 +186,7 @@ class Group(BaseObject, Base):
                           primaryjoin='Group.identifier == group_has_groups.c.group_id',
                           secondaryjoin='Group.identifier == group_has_groups.c.rel_group_id',
                           order_by='Group.name',
-                          lazy='joined'
+
                           )
   notifications = Column('notifications', Boolean, default=False, nullable=False)
 

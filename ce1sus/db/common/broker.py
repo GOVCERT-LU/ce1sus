@@ -205,8 +205,7 @@ class BrokerBase(object):
     try:
       if commit:
         self.session.commit()
-      else:
-        self.session.flush()
+
     except sqlalchemy.exc.IntegrityError as error:
       self.session.rollback()
       raise IntegrityException(error)

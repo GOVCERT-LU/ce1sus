@@ -59,7 +59,6 @@ class BaseController(object):
   class"""
 
   brokers = dict()
-  controllers = dict()
 
   def __init__(self, config, session=None):
     self.config = config
@@ -101,13 +100,15 @@ class BaseController(object):
       if new_instance and new_instance.modified_on:
         if old_instance.modified_on:
           if old_instance.modified_on < new_instance.modified_on:
-            old_instance.modifier = merger_cache.user
+            if merger_cache.user:
+              old_instance.modifier = merger_cache.user
             old_instance.modified_on = new_instance.modified_on
             self.logger.debug('using the one from new instance {1} - {0}'.format(new_instance.modified_on, new_instance.get_classname()))
           else:
             self.logger.debug('TS is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
         else:
-          old_instance.modifier = merger_cache.user
+          if merger_cache.user:
+            old_instance.modifier = merger_cache.user
           old_instance.modified_on = new_instance.modified_on
       else:
         self.logger.debug('Cannot make changes on  is more up to date {1}{0}'.format(old_instance.modified_on, old_instance.get_classname()))
@@ -142,13 +143,9 @@ class BaseController(object):
 
   def controller_factory(self, clazz):
     if issubclass(clazz, BaseController):
-      classname = clazz.__name__
-      if classname in BaseController.controllers:
-        return BaseController.controllers[classname]
       # need to create the broker
       self.logger.debug('Create controller for {0}'.format(clazz))
       instance = clazz(self.config, self.session)
-      BaseController.controllers[classname] = instance
       return instance
     else:
       raise ControllerException('Class does not implement BaseController')

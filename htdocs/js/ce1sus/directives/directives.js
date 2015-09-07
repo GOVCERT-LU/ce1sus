@@ -1373,7 +1373,7 @@ app.directive("attributeHandler", function() {
         }
         
         
-        var baseUrl = 'pages/handlers';
+        var baseUrl = '/pages/handlers';
         
         var templateUrl = baseUrl + '/attribtues/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();
@@ -1480,7 +1480,7 @@ app.directive("referenceHandler", function() {
         } else {
           viewType = scope.definition.reference_handler.view_type;
         }
-        var baseUrl = 'pages/handlers';
+        var baseUrl = '/pages/handlers';
         
         var templateUrl = baseUrl + '/references/'+ contentType + '/'+viewType+'.html';
         templateUrl = templateUrl.toLowerCase();

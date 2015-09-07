@@ -5,7 +5,7 @@
 
 Created on Jul 3, 2015
 """
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload, lazyload
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
@@ -14,12 +14,12 @@ from ce1sus.db.classes.ccybox.common.time import CyboxTime
 from ce1sus.db.classes.ccybox.core.relations import _REL_CAMPAIGN_INFORMATIONSOURCE
 from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.common.identity import Identity
+from ce1sus.db.classes.cstix.common.relations import _REL_CONFIDENCE_INFORMATIONSOURCE, _REL_INFORMATIONSOURCE_STRUCTUREDTEXT, _REL_INFORMATIONSOURCE_IDENTITY, \
+  _REL_INFORMATIONSOURCE_INFORMATIONSOURCE, _REL_INFORMATIONSOURCE_TOOL, _REL_STATEMENT_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.common.relations import _REL_RELATEDCOA_INFORMATIONSOURCE, _REL_RELATEDCAMPAIGN_INFORMATIONSOURCE, \
   _REL_RELATEDOBSERVABLE_INFORMATIONSOURCE, _REL_RELATEDEXPLOITTARGET_INFORMATIONSOURCE, _REL_RELATEDPACKAGEREF_INFORMATIONSOURCE, \
   _REL_RELATEDPACKAGE_INFORMATIONSOURCE, _REL_RELATEDIDENTITY_INFORMATIONSOURCE, _REL_RELATEDINDICATOR_INFORMATIONSOURCE, \
   _REL_RELATEDTHREATACTOR_INFORMATIONSOURCE, _REL_RELATEDTTP_INFORMATIONSOURCE, _REL_RELATEDINCIDENT_INFORMATIONSOURCE
-from ce1sus.db.classes.cstix.common.relations import _REL_CONFIDENCE_INFORMATIONSOURCE, _REL_INFORMATIONSOURCE_STRUCTUREDTEXT, _REL_INFORMATIONSOURCE_IDENTITY, \
-  _REL_INFORMATIONSOURCE_INFORMATIONSOURCE, _REL_INFORMATIONSOURCE_TOOL, _REL_STATEMENT_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.common.vocabs import InformationSourceRole as VocabInformationSourceRole
 from ce1sus.db.classes.cstix.core.relations import _REL_STIXHEADER_INFORMATIONSOURCE
@@ -28,10 +28,10 @@ from ce1sus.db.classes.cstix.incident.relations import _REL_INCIDENT_INFORMATION
   _REL_INCIDENT_INFORMATIONSOURCE_COO, _REL_INCIDENT_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICAOTR_INFORMATIONSOURCE, _REL_SIGHTING_INFORMATIONSOURCE, _REL_TESTMECHANISM_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.relations import _REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE
-from ce1sus.db.classes.internal.corebase import BigIntegerType
-from ce1sus.db.common.session import Base
 from ce1sus.db.classes.cstix.threat_actor.relations import _REL_THREATACTOR_INFORMATIONSOURCE
 from ce1sus.db.classes.cstix.ttp.relations import _REL_TTP_INFORMATIONSOURCE
+from ce1sus.db.classes.internal.corebase import BigIntegerType
+from ce1sus.db.common.session import Base
 
 
 __author__ = 'Weber Jean-Paul'
@@ -71,8 +71,8 @@ class InformationSourceRole(Entity, Base):
 class InformationSource(Entity, Base):
   """ An information source is a bit tricky as the groups contain half of the needed elements """
 
-  description = relationship('StructuredText', secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False, lazy='joined')
-  identity = relationship(Identity, secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False, lazy='joined')
+  description = relationship('StructuredText', secondary=_REL_INFORMATIONSOURCE_STRUCTUREDTEXT, uselist=False,)
+  identity = relationship(Identity, secondary=_REL_INFORMATIONSOURCE_IDENTITY, uselist=False, back_populates='information_source')
 
   contributing_sources = relationship('InformationSource',
                                       secondary=_REL_INFORMATIONSOURCE_INFORMATIONSOURCE,
@@ -80,13 +80,13 @@ class InformationSource(Entity, Base):
                                       secondaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id'
                                       )
   
-  time = relationship(CyboxTime, uselist=False, lazy='joined')
+  time = relationship(CyboxTime, uselist=False,)
   tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL)
 
-  roles = relationship(InformationSourceRole, lazy='joined')
+  roles = relationship(InformationSourceRole, )
   # TODO: references -> relation
 
-  confidence = relationship('Confidence', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
+  confidence = relationship('Confidence', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False,)
 
 
   information_source = relationship('InformationSource',
@@ -96,13 +96,14 @@ class InformationSource(Entity, Base):
                                     primaryjoin='InformationSource.identifier == rel_informationsource_contributing_sources.c.child_id'
                                     )
 
-  _PARENTS = ['information_source',
+  _PARENTS = ['stix_header',
+              'indicator_producer',
+              'sighting',
+              'information_source',
               'exploit_target',
               'confidence',
-              'statement',
+              'statement_description',
               'base_test_mechanism',
-              'sighting',
-              'indicator',
               'incident_reporter',
               'incident_responder',
               'incident_coordinators',
@@ -111,7 +112,6 @@ class InformationSource(Entity, Base):
               'incident',
               'threatactor',
               'ttp',
-              'sitx_header'
               'related_relatedcoa',
               'related_relatedcampaign',
               'related_relatedobservable',
@@ -152,20 +152,22 @@ class InformationSource(Entity, Base):
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(cache_object.complete)
+
     if cache_object.complete:
       result = {
-                'description':self.attribute_to_dict(self.description, cache_object),
-                'identity': self.attribute_to_dict(self.identity, cache_object),
-                'time': self.attribute_to_dict(self.time, cache_object),
-                'tools': self.attributelist_to_dict('tools', cache_object),
-                'roles': self.attributelist_to_dict('roles', cache_object),
-                'contributing_sources': self.attributelist_to_dict('contributing_sources', cache_object)
+                'description':instance.attribute_to_dict(instance.description, cache_object),
+                'identity': instance.attribute_to_dict(instance.identity, cache_object),
+                'time': instance.attribute_to_dict(instance.time, cache_object),
+                'tools': instance.attributelist_to_dict('tools', cache_object),
+                'roles': instance.attributelist_to_dict('roles', cache_object),
+                'contributing_sources': instance.attributelist_to_dict('contributing_sources', cache_object)
               }
     else:
       result = {
-                'identity': self.attribute_to_dict(self.identity, cache_object),
-                'time': self.attribute_to_dict(self.identity, cache_object),
-                'roles': self.attributelist_to_dict('roles', cache_object),
+                'identity': instance.attribute_to_dict(instance.identity, cache_object),
+                'time': instance.attribute_to_dict(instance.time, cache_object),
+                'roles': instance.attributelist_to_dict('roles', cache_object),
               }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

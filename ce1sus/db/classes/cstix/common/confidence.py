@@ -37,7 +37,7 @@ class Confidence(Entity, Base):
   timestamp_precision = Column('timestamp_precision', UnicodeType(10), default=u'second')
   value_db = Column('confidence', Integer, default=3, nullable=False)
 
-  description = relationship('StructuredText', secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False, lazy='joined')
+  description = relationship('StructuredText', secondary=_REL_CONFIDENCE_STRUCTUREDTEXT, uselist=False,)
   source = relationship('InformationSource', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False)
   # TODO: support confidence_assertion_chain
   timestamp = Column('timestamp', DateTime, default=datetime.utcnow())

@@ -47,8 +47,9 @@ class SearchHandler(RestBaseHandler):
           if operator in ['<', '<=', '==', '>=', '>', 'like']:
             definition_id = json.get('field', None)
 
-            return self.__prossess_search(needle, operator, definition_id, cache_object)
-
+            results = self.__prossess_search(needle, operator, definition_id, cache_object)
+            self.set_authorized_cache(cache_object.authorized_cache)
+            return results
           else:
             raise RestHandlerException(u'Operator "{0}" is unsupported'.format(operator))
         else:

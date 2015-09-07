@@ -123,7 +123,7 @@ class HandlerBase(object):
       # populate properties
       instance.properties.is_validated = json.get('validated', False)
       instance.properties.is_shareable = json.get('shared', False)
-      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, self.cache_object)
+      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance, self.cache_object)
 
       # populate tlp
       tlp = json.get('tlp', None)
@@ -134,7 +134,7 @@ class HandlerBase(object):
     else:
       instance.properties = Properties('0', instance)
 
-      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, self.cache_object)
+      self.cache_object.permission_controller.set_properties_according_to_permisssions(instance, self.cache_object)
 
       if parent:
         instance.tlp = parent.tlp

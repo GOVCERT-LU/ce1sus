@@ -42,7 +42,7 @@ class ObservableKeyword(Entity, Base):
 class ObservableComposition(Entity, Base):
 
   operator = Column('operator', UnicodeType(3), default=u'OR')
-  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION)
+  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION, back_populates='composedobservable')
 
   # ce1sus specific
   observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
@@ -89,21 +89,21 @@ class Observable(Entity, Base):
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
 
   title = Column('title', UnicodeType(255), index=True)
-  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, lazy='joined')
+  description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, back_populates='observable_description')
 
-  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT)
+  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, back_populates='observable', single_parent=True)
   # TODO: observable event (Note: different than the event used here)
-  observable_composition = relationship('ObservableComposition', uselist=False)
+  observable_composition = relationship('ObservableComposition', uselist=False, back_populates='observable')
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   sighting_count = Column(u'sighting_count', Integer, nullable=True, index=True)
-  keywords = relationship('ObservableKeyword', lazy='joined')
+  keywords = relationship('ObservableKeyword', back_populates='observable')
 
   _PARENTS = ['event', 'indicator', 'composedobservable', 'related_observable']
 
-  event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE)
+  event = relationship('Event', uselist=False, secondary=_REL_EVENT_OBSERVABLE, back_populates='observables')
   related_observable = relationship(RelatedObservable, primaryjoin='RelatedObservable.child_id==Observable.identifier', uselist=False)
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_OBSERVABLE)
-  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False)
+  composedobservable = relationship('ObservableComposition', secondary=_REL_OBSERVABLE_COMPOSITION, uselist=False , back_populates='observable')
 
   def validate(self):
     return True

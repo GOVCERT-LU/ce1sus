@@ -9,16 +9,20 @@ Created on Jul 3, 2015
 
 
 
+from ce1sus.helpers.common.objects import get_fields
 from datetime import datetime
-from sqlalchemy.ext.declarative.api import declared_attr
-from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative.api import declared_attr, DeclarativeMeta
+from sqlalchemy.orm import relationship, joinedload, lazyload
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import  DateTime, Integer
+from sqlalchemy.types import  DateTime
+from types import NoneType
 
 from ce1sus.common import merge_dictionaries
+from ce1sus.common.utils import instance_code
 from ce1sus.db.classes.internal.common import TLP, Properties
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType
+from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.classes.internal.usrmgt.user import User
 
 
@@ -86,7 +90,7 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
 
   @declared_attr
   def creator_group(self):
-    return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()), lazy='joined')
+    return relationship('Group', primaryjoin='{0}.creator_group_id==Group.identifier'.format(self.get_classname()))
 
   def to_dict(self, cache_object):
     cache_object_copy = cache_object.make_copy()
@@ -107,10 +111,110 @@ class ExtendedLogingInformations(SimpleLoggingInformations):
 
 class BaseElement(ExtendedLogingInformations):
 
-  tlp_level_id = Column('tlp_level_id', Integer, default=3, nullable=False)
-  dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   __bit_code = None
   __tlp_obj = None
+
+  @property
+  def tlp_level_id(self):
+    return self.path.item_tlp_level_id
+
+  @tlp_level_id.setter
+  def tlp_level_id(self, value):
+    self.path.item_tlp_level_id = value
+
+  @property
+  def dbcode(self):
+    return self.path.item_dbcode
+
+  @dbcode.setter
+  def dbcode(self, value):
+    self.path.item_dbcode = value
+
+  @declared_attr
+  def path(self):
+    return relationship(Path, secondary='rel_{0}_path'.format(self.get_classname().lower()), uselist=False, lazy='joined')
+
+  _PARENTS = list()
+
+  def __load_pared_by_join(self):
+    session = self.session
+    joined_loads = list()
+    for attr_name in self._PARENTS:
+      if hasattr(self.__class__, attr_name):
+        joined_loads.append(joinedload(attr_name))
+      else:
+        raise ValueError('Attribute {0} is not mapped for {1}'.format(attr_name, self.get_classname()))
+    if joined_loads is None:
+      if self.get_classname() != 'Event':
+        raise ValueError('Parent for {0} {1} cannot be found'.format(self.get_classname(), self.uuid))
+      else:
+        return None
+    else:
+      instance = session.query(self.__class__).options(*joined_loads).filter(self.__class__.identifier == self.identifier).one()
+      for attr_name in self._PARENTS:
+        item = getattr(instance, attr_name)
+        if item:
+          return item
+
+  @property
+  def parent(self):
+    if self.path and self.path.path:
+      parent_table = self.path.parent_table
+      for attr_name in self._PARENTS:
+        table_name = getattr(self.__class__, attr_name).property.mapper.mapped_table.name
+        if table_name == parent_table:
+          return getattr(self, attr_name)
+
+    else:
+      for attr_name in self._PARENTS:
+        if hasattr(self.__class__, attr_name):
+          item = getattr(self, attr_name)
+          if item:
+            return item
+        else:
+          raise ValueError('Attribute {0} is not mapped for {1}'.format(attr_name, self.get_classname()))
+
+    if self.get_classname() != 'Event':
+      raise ValueError('Parent for {0} {1} cannot be found'.format(self.get_classname(), self.uuid))
+    else:
+      return None
+  @parent.setter
+  def parent(self, instance):
+    # TODO: verify if this is feasible for long term (note as there can be more parents)
+    instance_classname = instance.get_classname()
+    parent_set = False
+    for attr_name in self._PARENTS:
+      if hasattr(self, attr_name):
+        attribute_class_name = getattr(self.__class__, attr_name).mapper.class_.get_classname()
+        if instance_classname == attribute_class_name:
+          setattr(self, attr_name, instance)
+          parent_set = True
+          break
+    if not parent_set:
+      raise ValueError('Cannot set instance of class {0} as parent for it in class {1}'.format(instance_classname, self.get_classname()))
+
+  def delink_parent(self):
+    for attr_name in self._PARENTS:
+      if hasattr(self, attr_name):
+        item = getattr(self, attr_name)
+        if isinstance(item, BaseElement) or isinstance(item, NoneType):
+          setattr(self, attr_name, None)
+        else:
+          setattr(self, attr_name, list())
+
+  @property
+  def root(self):
+    if self.path:
+      return self.path.event
+    else:
+      return None
+
+  def set_id(self, id_):
+    namespace, uuid = self.parse_id(id_)
+    if namespace and not self.namespace:
+      self.namespace = namespace
+    if uuid and not self.uuid:
+      self.uuid = uuid
 
   @property
   def properties(self):
@@ -161,7 +265,10 @@ class BaseElement(ExtendedLogingInformations):
   def attribute_to_dict(self, attribute, cache_object):
     if attribute and not isinstance(attribute, RelationshipProperty):
       # TODO: Check attribute type
-      if cache_object.permission_controller.is_instance_viewable(attribute, cache_object):
+      if isinstance(attribute, BaseElement):
+        if cache_object.permission_controller.is_instance_viewable(attribute, cache_object):
+          return attribute.to_dict(cache_object)
+      else:
         return attribute.to_dict(cache_object)
 
   def attributelist_to_dict(self, attribute, cache_object):

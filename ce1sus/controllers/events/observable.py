@@ -17,6 +17,7 @@ from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
 from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
+from ce1sus.controllers.common.common import CommonController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -35,6 +36,7 @@ class ObservableController(BaseController):
     self.object_broker = self.broker_factory(ObjectBroker)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.related_object_broker = self.broker_factory(RelatedObjectBroker)
+    self.common_controller = self.controller_factory(CommonController)
 
   def insert_observable(self, observable, cache_object, commit=True):
     """
@@ -193,15 +195,17 @@ class ObservableController(BaseController):
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable(self, observable, cache_object, commit=True):
+  def remove_observable(self, observable, cache_object, commit=True, setbase=True):
     try:
-      self.remove_set_base(observable, cache_object)
+      if setbase:
+        self.remove_set_base(observable, cache_object)
 
       if observable.object:
         self.remove_object(observable.object, cache_object, False)
       if observable.observable_composition:
         self.remove_observable_composition(observable.observable_composition, cache_object, False)
-
+      if observable.description:
+        self.common_controller.remove_structured_text(observable.description, cache_object, False)
       self.observable_broker.remove_by_id(observable.identifier, False)
       self.observable_broker.do_commit(commit)
     except NothingFoundException as error:
@@ -214,16 +218,17 @@ class ObservableController(BaseController):
       self.remove_set_base(related_object, cache_object)
       if related_object.object:
         self.remove_object(related_object.object, cache_object, False)
-      self.related_object_broker.remove_by_id(related_object.identifier)
+      self.related_object_broker.remove_by_id(related_object.identifier, False)
       self.related_object_broker.do_commit(commit)
     except NothingFoundException as error:
       raise ControllerNothingFoundException(error)
     except BrokerException as error:
       raise ControllerException(error)
 
-  def remove_observable_composition(self, compoed_observable, cache_object, commit=True):
+  def remove_observable_composition(self, compoed_observable, cache_object, commit=True, setbase=True):
     try:
-      self.remove_set_base(compoed_observable, cache_object)
+      if setbase:
+        self.remove_set_base(compoed_observable, cache_object)
 
       for observable in compoed_observable.observables:
         self.remove_observable(observable, cache_object, False)

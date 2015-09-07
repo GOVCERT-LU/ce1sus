@@ -203,7 +203,7 @@ class EventHandler(RestBaseHandler):
           indicators = self.indicator_controller.get_generic_indicators(event, cache_object)
           result = list()
           for indicator in indicators:
-            if self.is_item_viewable(event, indicator):
+            if self.permission_controller.is_instance_viewable(indicator, cache_object):
               result.append(indicator.to_dict(cache_object))
           return result
     else:

@@ -24,15 +24,15 @@ __license__ = 'GPL v3+'
 
 class CyboxTime(Entity, Base):
 
-  start_time = relationship(DateTimeWithPrecision, secondary=_REL_STARTTIME_DATETIMEWITHPRECISION, uselist=False)
-  end_time = relationship(DateTimeWithPrecision, secondary=_REL_ENDTIME_DATETIMEWITHPRECISION, uselist=False)
-  produced_time = relationship(DateTimeWithPrecision, secondary=_REL_PRODUCEDTIME_DATETIMEWITHPRECISION, uselist=False)
-  received_time = relationship(DateTimeWithPrecision, secondary=_REL_RECEIVEDTIME_DATETIMEWITHPRECISION, uselist=False)
+  start_time = relationship(DateTimeWithPrecision, secondary=_REL_STARTTIME_DATETIMEWITHPRECISION, uselist=False, back_populates='cyboxtime_start')
+  end_time = relationship(DateTimeWithPrecision, secondary=_REL_ENDTIME_DATETIMEWITHPRECISION, uselist=False, back_populates='cyboxtime_end')
+  produced_time = relationship(DateTimeWithPrecision, secondary=_REL_PRODUCEDTIME_DATETIMEWITHPRECISION, uselist=False, back_populates='cyboxtime_produced')
+  received_time = relationship(DateTimeWithPrecision, secondary=_REL_RECEIVEDTIME_DATETIMEWITHPRECISION, uselist=False, back_populates='cyboxtime_received')
+
+  _PARENTS = ['information_source']
 
   informationsource_id = Column(BigIntegerType, ForeignKey('informationsources.informationsource_id', ondelete='cascade', onupdate='cascade'), index=True, nullable=False)
   information_source = relationship('InformationSource', uselist=False)
-
-  _PARENTS = ['information_source']
 
   def to_dict(self, cache_object):
     result = {'start_time': self.attribute_to_dict(self.start_time, cache_object),

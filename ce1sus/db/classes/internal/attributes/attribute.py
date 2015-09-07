@@ -14,7 +14,7 @@ from sqlalchemy.types import Boolean
 from uuid import uuid4
 
 from ce1sus.common import merge_dictionaries
-from ce1sus.db.classes.internal.attributes.values import StringValue, DateValue, TextValue, NumberValue, ValueBase
+from ce1sus.db.classes.internal.attributes.values import ValueBase
 from ce1sus.db.classes.internal.core import BaseElement, SimpleLoggingInformations
 from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeType, UnicodeTextType
 from ce1sus.db.common.session import Base
@@ -51,23 +51,21 @@ class Attribute(BaseElement, Base):
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('AttributeDefinition',
-                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id',
-                            lazy='joined')
+                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id'
+                            )
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  object = relationship('Object',
-                        primaryjoin='Object.identifier==Attribute.object_id')
+  object = relationship('Object', single_parent=True)
   # valuerelations
   value_base = relationship(ValueBase,
                             primaryjoin='Attribute.identifier==ValueBase.attribute_id',
-                            lazy='joined', uselist=False)
+                            uselist=False, single_parent=True)
 
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
   condition_id = Column('condition_id', BigIntegerType, ForeignKey('conditions.condition_id', ondelete='restrict', onupdate='restrict'), index=True, default=None)
-  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS, lazy='joined')
+  condition = relationship(Condition, uselist=False, secondary=_REL_ATTRIBUTE_CONDITIONS, single_parent=True)
 
   _PARENTS = ['object']
-  object = relationship('Object', uselist=False)
 
   @property
   def parent(self):
@@ -167,11 +165,12 @@ class Attribute(BaseElement, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(True)
     condition = None
     condition_id = None
-    if self.condition:
-      condition = self.condition.to_dict(cache_object)
-      condition_id = self.convert_value(self.condition.uuid)
+    if instance.condition:
+      condition = instance.condition.to_dict(cache_object)
+      condition_id = instance.convert_value(instance.condition.uuid)
 
     value = self.convert_value(self.value)
     handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
@@ -185,10 +184,10 @@ class Attribute(BaseElement, Base):
       # with open(filepath, "rb") as raw_file:
       #    value = b64encode(raw_file.read())
     """
-    result = {'identifier': self.convert_value(self.uuid),
-            'definition_id': self.convert_value(self.definition.uuid),
-            'definition': self.definition.to_dict(cache_object),
-            'ioc': self.is_ioc,
+    result = {'identifier': instance.convert_value(instance.uuid),
+            'definition_id': instance.convert_value(instance.definition.uuid),
+            'definition': instance.definition.to_dict(cache_object),
+            'ioc': instance.is_ioc,
             'value': value,
             'condition_id': condition_id,
             'condition': condition,

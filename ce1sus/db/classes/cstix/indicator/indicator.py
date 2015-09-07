@@ -75,7 +75,7 @@ class Indicator(BaseCoreComponent, Base):
   alternative_id = Column('alternative_id', UnicodeType(255))
   # TODO: suggested_coas
   # suggested_coas = relationship('RelatedCOA', secondary='rel_indicator_related_coas')
-  sightings = relationship(Sighting)
+  sightings = relationship(Sighting, back_populates='indicator')
   operator = Column('operator', UnicodeType(3))
   handling = relationship('MarkingSpecification', secondary=_REL_INDICATOR_HANDLING)
   kill_chain_phases = relationship(KillChainPhaseReference, secondary=_REL_INDICATOR_KILLCHAINPHASEREF)

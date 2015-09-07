@@ -22,7 +22,6 @@ from ce1sus.common.bootstrap import bootstrap
 from ce1sus.common.dbinit import dbinit
 from ce1sus.controllers.common.assembler.assembler import Assembler
 from ce1sus.db.common.session import SessionManager
-from ce1sus.views.web.adapters.ce1susadapter import UnkownMethodException
 
 
 __author__ = 'Weber Jean-Paul'
@@ -146,7 +145,7 @@ class BaseTest(unittest.TestCase):
                                     headers=headers,
                                     cookies=self.session.cookies)
       else:
-        raise UnkownMethodException(u'Mehtod {0} is not specified can only be GET,POST,PUT or DELETE')
+        raise Exception(u'Mehtod {0} is not specified can only be GET,POST,PUT or DELETE')
 
       if request.status_code == getattr(requests.codes, 'ok'):
         if clazz:

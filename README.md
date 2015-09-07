@@ -2,7 +2,7 @@
 
 ce1sus is a threat information database.
 
-When the development of ce1sus started there were not many tools available to store Indicators of compromise (IOCs) available.
+When the development of ce1sus started there were not many tools available to store Indicators of compromise (IOCs).
 Moreover the shared IOCs were received in many different formats, and often there was no real context given.  
 
 ce1sus has the goal to facilitate:

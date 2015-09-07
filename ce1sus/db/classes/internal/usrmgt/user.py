@@ -106,7 +106,7 @@ class User(BaseObject, Base):
   __bit_code = None
 
   group_id = Column('group_id', BigIntegerType, ForeignKey('groups.group_id', onupdate='restrict', ondelete='restrict'), index=True)
-  group = relationship(Group, lazy='joined')
+  group = relationship(Group,)
   plain_password = None
   notifications = Column('notifications', Boolean, default=True, nullable=False)
 

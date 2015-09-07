@@ -6,7 +6,6 @@
 Created on Aug 5, 2015
 """
 from ce1sus.helpers.common import strings
-from ce1sus.helpers.common.objects import GenObject
 from uuid import uuid4
 import uuid
 
@@ -49,18 +48,12 @@ class BaseChanger(BaseController):
       instance.uuid = '{0}'.format(uuid.uuid4())
 
   def __get_user(self, cache_object):
-    if isinstance(cache_object.user, GenObject):
-      try:
-        user = self.user_broker.getUserByUserName(cache_object.user.username)
-        cache_object.user = user
-        return user
-      except BrokerException as error:
-        raise BaseChangerException(error)
-
-    else:
-      return cache_object.user
-
-
+    try:
+      user = self.user_broker.getUserByUserName(cache_object.user.username)
+      cache_object.user = user
+      return user
+    except BrokerException as error:
+      raise BaseChangerException(error)
 
   def __set_simple_logging(self, instance, json, cache_object):
     self.__set_baseobject(instance, json)
@@ -118,7 +111,7 @@ class BaseChanger(BaseController):
 
       instance.properties.is_shareable = json.get('shared', False)
     # Set it as proposal if the user is not the event owner
-    cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, cache_object)
+    cache_object.permission_controller.set_properties_according_to_permisssions(instance, cache_object)
 
   def __set_baseelement(self, instance, json, cache_object, parent, change_base_element=True):
     self.__set_extended_logging(instance, json, cache_object)
@@ -136,7 +129,7 @@ class BaseChanger(BaseController):
     else:
       instance.properties = Properties('0', instance)
 
-      cache_object.permission_controller.set_properties_according_to_permisssions(instance.properties, cache_object)
+      cache_object.permission_controller.set_properties_according_to_permisssions(instance, cache_object)
 
       if parent:
         instance.tlp = parent.tlp

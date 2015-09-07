@@ -7,7 +7,7 @@ Created on Oct 16, 2014
 """
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, lazyload, joinedload, lazyload_all
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, DateTime
 
@@ -85,7 +85,7 @@ class Event(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   version_db = Column('version', UnicodeType(40), default=u'0.0.0', nullable=False)
-  stix_header = relationship(STIXHeader, uselist=False, lazy='joined')
+  stix_header = relationship(STIXHeader, uselist=False)
   campaigns = relationship(Campaign)
   # TODO: courses_of_action
   courses_of_action = None
@@ -189,53 +189,55 @@ class Event(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(cache_object.inflated)
+    
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
-      comments = self.attributelist_to_dict('comments', cache_object)
+      comments = instance.attributelist_to_dict('comments', cache_object)
     else:
       comments = list()
     
     if cache_object.complete:
-      result = {'id_':self.convert_value(self.id_),
-                'int_id': self.convert_value(self.identifier),
-                'analysis': self.convert_value(self.analysis),
-                'campaigns':self.attributelist_to_dict('campaigns', cache_object),
+      result = {'id_':instance.convert_value(instance.id_),
+                'int_id': instance.convert_value(instance.identifier),
+                'analysis': instance.convert_value(instance.analysis),
+                'campaigns':instance.attributelist_to_dict('campaigns', cache_object),
                 'comments':comments,
-                'courses_of_action':self.attributelist_to_dict('courses_of_action', cache_object),
-                'exploit_targets':self.attributelist_to_dict('exploit_targets', cache_object),
-                'last_seen': self.convert_value(self.last_seen),
-                'first_seen': self.convert_value(self.first_seen),
-                'groups': self.attributelist_to_dict('groups', cache_object),
-                'idref':self.convert_value(self.idref),
-                'incidents':self.attributelist_to_dict('incidents', cache_object),
-                'indicators':self.attributelist_to_dict('indicators', cache_object),
-                'last_publish_date': self.convert_value(self.last_publish_date),
-                'observables':self.attributelist_to_dict('observables', cache_object),
-                'related_packages':self.attributelist_to_dict('related_packages', cache_object),
-                'reports':self.attributelist_to_dict('reports', cache_object),
-                'risk': self.convert_value(self.risk),
-                'status': self.convert_value(self.status),
-                'stix_header': self.attribute_to_dict(self.stix_header, cache_object),
-                'published': self.convert_value(self.properties.is_shareable),
-                'threat_actors':self.attributelist_to_dict('threat_actors', cache_object),
-                'ttps':self.attributelist_to_dict('ttps', cache_object),
-                'version':self.convert_value(self.version_db),
-                'errors':self.attributelist_to_dict('errors', cache_object)
+                'courses_of_action':instance.attributelist_to_dict('courses_of_action', cache_object),
+                'exploit_targets':instance.attributelist_to_dict('exploit_targets', cache_object),
+                'last_seen': instance.convert_value(instance.last_seen),
+                'first_seen': instance.convert_value(instance.first_seen),
+                'groups': instance.attributelist_to_dict('groups', cache_object),
+                'idref':instance.convert_value(instance.idref),
+                'incidents':instance.attributelist_to_dict('incidents', cache_object),
+                'indicators':instance.attributelist_to_dict('indicators', cache_object),
+                'last_publish_date': instance.convert_value(instance.last_publish_date),
+                'observables':instance.attributelist_to_dict('observables', cache_object),
+                'related_packages':instance.attributelist_to_dict('related_packages', cache_object),
+                'reports':instance.attributelist_to_dict('reports', cache_object),
+                'risk': instance.convert_value(instance.risk),
+                'status': instance.convert_value(instance.status),
+                'stix_header': instance.attribute_to_dict(instance.stix_header, cache_object),
+                'published': instance.convert_value(instance.properties.is_shareable),
+                'threat_actors':instance.attributelist_to_dict('threat_actors', cache_object),
+                'ttps':instance.attributelist_to_dict('ttps', cache_object),
+                'version':instance.convert_value(instance.version_db),
+                'errors':instance.attributelist_to_dict('errors', cache_object)
                 }
     else:
-      result = {'id_':self.convert_value(self.id_),
-                'int_id': self.convert_value(self.identifier),
-                'analysis': self.convert_value(self.analysis),
+      result = {'id_':instance.convert_value(instance.id_),
+                'int_id': instance.convert_value(instance.identifier),
+                'analysis': instance.convert_value(instance.analysis),
                 'comments':comments,
-                'last_seen': self.convert_value(self.last_seen),
-                'first_seen': self.convert_value(self.first_seen),
-                'idref':self.convert_value(self.idref),
-                'last_publish_date': self.convert_value(self.last_publish_date),
-                'risk': self.convert_value(self.risk),
-                'status': self.convert_value(self.status),
-                'stix_header': self.attribute_to_dict(self.stix_header, cache_object),
-                'published': self.convert_value(self.properties.is_shareable),
-                'version':self.convert_value(self.version_db),
-                'errors':self.attributelist_to_dict('errors', cache_object)
+                'last_seen': instance.convert_value(instance.last_seen),
+                'first_seen': instance.convert_value(instance.first_seen),
+                'idref':instance.convert_value(instance.idref),
+                'last_publish_date': instance.convert_value(instance.last_publish_date),
+                'risk': instance.convert_value(instance.risk),
+                'status': instance.convert_value(instance.status),
+                'stix_header': instance.attribute_to_dict(instance.stix_header, cache_object),
+                'published': instance.convert_value(instance.properties.is_shareable),
+                'version':instance.convert_value(instance.version_db),
+                'errors':instance.attributelist_to_dict('errors', cache_object)
                 }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

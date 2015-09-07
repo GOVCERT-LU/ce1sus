@@ -12,6 +12,7 @@ from ce1sus.db.brokers.relationbroker import RelationBroker
 from ce1sus.db.brokers.values import ValueBroker
 from ce1sus.db.classes.internal.backend.relation import Relation
 from ce1sus.db.common.broker import IntegrityException, BrokerException
+from ce1sus.controllers.common.permissions import PermissionController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -27,6 +28,7 @@ class RelationController(BaseController):
     super(RelationController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.relation_broker = self.broker_factory(RelationBroker)
+    self.permission_controller = self.controller_factory(PermissionController)
 
   def generate_attribute_relations(self, attribute, commit=False):
     try:
@@ -145,21 +147,21 @@ class RelationController(BaseController):
     result = list()
     if obj:
       for attribute in obj.attributes:
-        if is_object_viewable(attribute, cache_object):
+        if self.permission_controller.is_instance_viewable(attribute, cache_object):
           result.append(attribute)
       for related_object in obj.related_objects:
-        if is_object_viewable(related_object, cache_object):
+        if self.permission_controller.is_instance_viewable(related_object, cache_object):
           result.extend(self.make_object_attributes_flat(related_object.object, cache_object))
     return result
 
   def __process_observable(self, observable, cache_object):
     result = list()
-    if observable.observable_composition and is_object_viewable(observable.observable_composition, cache_object):
+    if observable.observable_composition and self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
       for child_observable in observable.observable_composition.observables:
-        if is_object_viewable(child_observable, cache_object):
+        if self.permission_controller.is_instance_viewable(child_observable, cache_object):
           result.extend(self.__process_observable(child_observable, cache_object))
     else:
-      if is_object_viewable(observable.object, cache_object):
+      if self.permission_controller.is_instance_viewable(observable.object, cache_object):
         result.extend(self.make_object_attributes_flat(observable.object, cache_object))
     return result
 
@@ -169,17 +171,17 @@ class RelationController(BaseController):
 
     if event.observables:
       for observable in event.observables:
-        if observable.observable_composition and is_object_viewable(observable.observable_composition,cache_object):
+        if observable.observable_composition and self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
           for obs in observable.observable_composition.observables:
-            if is_object_viewable(observable.observable_composition, cache_object):
+            if self.permission_controller.is_instance_viewable(observable.observable_composition, cache_object):
               flat_attriutes.extend(self.__process_observable(obs, cache_object))
         else:
           flat_attriutes.extend(self.__process_observable(observable, cache_object))
     if event.indicators:
       for indicator in event.indicators:
-        if indicator.observables and is_object_viewable(indicator, cache_object):
+        if indicator.observables and self.permission_controller.is_instance_viewable(indicator, cache_object):
           for observable in indicator.observables:
-            if is_object_viewable(observable, cache_object):
+            if self.permission_controller.is_instance_viewable(observable, cache_object):
               flat_attriutes.extend(self.__process_observable(observable, cache_object))
     return flat_attriutes
 

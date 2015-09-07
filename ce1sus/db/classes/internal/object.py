@@ -39,7 +39,7 @@ class Object(Entity, Base):
 
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)
   # properties
-  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id', lazy='joined')
+  related_objects = relationship('RelatedObject', primaryjoin='Object.identifier==RelatedObject.parent_id')
   # ce1sus specific
   namespace = Column('namespace', UnicodeType(255), index=True, nullable=False, default=u'ce1sus')
   attributes = relationship('Attribute')
@@ -47,7 +47,7 @@ class Object(Entity, Base):
   # if the composition is one the return the object (property)
   definition_id = Column('definition_id', BigIntegerType, ForeignKey('objectdefinitions.objectdefinition_id', onupdate='restrict', ondelete='restrict'), nullable=False, index=True)
   definition = relationship('ObjectDefinition')
-  observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False)
+  observable = relationship('Observable', secondary=_REL_OBSERVABLE_OBJECT, uselist=False, back_populates='object', single_parent=True)
 
   related_object = relationship('RelatedObject', primaryjoin='RelatedObject.child_id==Object.identifier', uselist=False)
   @property
@@ -61,7 +61,7 @@ class Object(Entity, Base):
   def validate(self):
     return True
   
-  _PARENTS = ['related_object', 'observable']
+  _PARENTS = ['observable', 'related_object']
 
 
   def to_dict(self, cache_object):

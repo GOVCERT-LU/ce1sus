@@ -58,6 +58,12 @@ class StructuredText(Entity, Base):
   _PARENTS = ['stix_header_description',
               'stix_header_short_description',
               'information_source_description',
+              'indicator_description',
+              'indicator_short_description',
+              'report_description',
+              'report_short_description',
+              'observable_description',
+              'sighting_description',
               'tool_information_description',
               'tool_information_short_description',
               'malware_instance_description',
@@ -75,22 +81,23 @@ class StructuredText(Entity, Base):
               'confidence_description',
               'statement_description',
               'generic_test_meachanism_description',
-              'sighting_description',
               'activity_description',
               'affected_asset_description',
               'affected_asset_short_description',
-              'observable_description',
               'property_affacted_description',
               'objective_description',
               'objective_short_description',
-              'campaign',
-              'exploit_target',
-              'incident',
-              'threatactor',
-              'ttp',
-              'indicator',
-              'report_description',
-              'report_short_description', ]
+              'campaign_description',
+              'campaign_short_description',
+              'exploit_target_description',
+              'exploit_target_short_description',
+              'threatactor_description',
+              'threatactor_short_description',
+              'ttp_description',
+              'ttp_short_description',
+              'incident_description',
+              'incident_short_description',
+               ]
 
   observable_description = relationship('Observable', secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False)
   objective_description = relationship('Objective', secondary=_REL_OBJECTIVE_STRUCTUREDTEXT, uselist=False)
@@ -101,8 +108,8 @@ class StructuredText(Entity, Base):
   statement_description = relationship('Statement', secondary=_REL_STATEMENT_STRUCTUREDTEXT, uselist=False)
   tool_information_description = relationship('ToolInformation', secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT, uselist=False)
   tool_information_short_description = relationship('ToolInformation', secondary=_REL_TOOLINFORMATION_STRUCTUREDTEXT_SHORT, uselist=False)
-  stix_header_description = relationship('STIXHeader', secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False)
-  stix_header_short_description = relationship('STIXHeader', secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False)
+  stix_header_description = relationship('STIXHeader', secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, back_populates='description')
+  stix_header_short_description = relationship('STIXHeader', secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, back_populates='short_description')
   configuration_description = relationship('Configuration', uselist=False, secondary=_REL_CONFIGURATION_STRUCTUREDTEXT)
   configuration_short_description = relationship('Configuration', uselist=False, secondary=_REL_CONFIGURATION_STRUCTUREDTEXT_SHORT)
   vulnerability_description = relationship('Vulnerability', uselist=False, secondary=_REL_VULNERABILITY_STRUCTUREDTEXT)
@@ -125,10 +132,10 @@ class StructuredText(Entity, Base):
   incident_description = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_STRUCTUREDTEXT)
   threatactor_description = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_STRUCTUREDTEXT)
   ttp_description = relationship('TTP', uselist=False, secondary=_REL_TTP_STRUCTUREDTEXT)
-  indicator_description = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STRUCTUREDTEXT)
+  indicator_description = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STRUCTUREDTEXT, back_populates='description')
   campaign_short_description = relationship('Campaign', uselist=False, secondary=_REL_CAMPAIGN_STRUCTUREDTEXT_SHORT)
   exploit_target_short_description = relationship('ExploitTarget', uselist=False, secondary=_REL_EXPLOITTARGET_STRUCTUREDTEXT_SHORT)
-  incident_short_description = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_STRUCTUREDTEXT_SHORT)
+  incident_short_description = relationship('Incident', uselist=False, secondary=_REL_INCIDENT_STRUCTUREDTEXT_SHORT, back_populates='short_description')
   threatactor_short_description = relationship('ThreatActor', uselist=False, secondary=_REL_THREATACTOR_STRUCTUREDTEXT_SHORT)
   ttp_short_description = relationship('TTP', uselist=False, secondary=_REL_TTP_STRUCTUREDTEXT_SHORT)
   indicator_short_description = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STRUCTUREDTEXT_SHORT)

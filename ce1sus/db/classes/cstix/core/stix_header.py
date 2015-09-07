@@ -5,7 +5,7 @@
 
 Created on Jul 29, 2015
 """
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, lazyload, joinedload
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
 
@@ -58,28 +58,29 @@ class STIXHeader(Entity, Base):
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   package_intents = relationship(PackageIntent)
   title = Column('title', UnicodeType(255), index=True, nullable=False)
-  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, back_populates="stix_header_description", lazy='joined')
-  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="stix_header_short_description", lazy='joined')
+  description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT, uselist=False, back_populates='stix_header_description',)
+  short_description = relationship(StructuredText, secondary=_REL_STIXHEADER_STRUCTUREDTEXT_SHORT, uselist=False, back_populates="stix_header_short_description",)
   handling = relationship(MarkingSpecification, secondary=_REL_STIXHEADER_HANDLING, back_populates="stix_header")
-  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, back_populates="stix_header", lazy='joined')
+  information_source = relationship(InformationSource, secondary=_REL_STIXHEADER_INFORMATIONSOURCE, uselist=False, back_populates="stix_header")
   # TODO: profiles
 
   _PARENTS = ['event']
   event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(cache_object.complete)
     if cache_object.complete:
-      result = {'package_intents': self.attributelist_to_dict('package_intents', cache_object),
-                'title': self.convert_value(self.title),
-                'description': self.attribute_to_dict(self.description, cache_object),
-                'short_description': self.attribute_to_dict(self.short_description, cache_object),
-                'information_source': self.attribute_to_dict(self.information_source, cache_object),
-                'handling': self.attributelist_to_dict('handling', cache_object),
+      result = {'package_intents': instance.attributelist_to_dict('package_intents', cache_object),
+                'title': instance.convert_value(instance.title),
+                'description': instance.attribute_to_dict(instance.description, cache_object),
+                'short_description': instance.attribute_to_dict(instance.short_description, cache_object),
+                'information_source': instance.attribute_to_dict(instance.information_source, cache_object),
+                'handling': instance.attributelist_to_dict('handling', cache_object),
                 }
     else:
-      result = {'title': self.convert_value(self.title),
-                'information_source': self.attribute_to_dict(self.information_source, cache_object),
-                'handling': self.attributelist_to_dict('handling', cache_object),
+      result = {'title': instance.convert_value(instance.title),
+                'information_source': instance.attribute_to_dict(instance.information_source, cache_object),
+                'handling': instance.attributelist_to_dict('handling', cache_object),
                 }
 
     parent_dict = Entity.to_dict(self, cache_object)

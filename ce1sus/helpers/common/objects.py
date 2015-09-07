@@ -18,10 +18,6 @@ from inspect import isfunction, ismethod
 from importlib import import_module
 
 
-class GenObject(object):
-  pass
-
-
 def get_class(modulename, classname):
   """returns the class name from a string"""
   splited_modulename = modulename.rsplit('.', 1)

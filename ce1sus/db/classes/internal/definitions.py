@@ -109,18 +109,18 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
   attributehandler_id = Column('attributehandler_id', BigIntegerType, ForeignKey('attributehandlers.attributehandler_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
   attribute_handler = relationship('AttributeHandler',
                                    primaryjoin='AttributeHandler.identifier==AttributeDefinition.attributehandler_id',
-                                   cascade='all',
-                                   lazy='joined')
+                                   cascade='all'
+                                   )
   share = Column('sharable', Boolean, default=False, nullable=False)
   # TODO: make an event on relationable to recreate and remove the relations on change
   relation = Column('relationable', Boolean, default=False, nullable=False)
   value_type_id = Column('attributetype_id', BigIntegerType, ForeignKey('attributetypes.attributetype_id'))
-  value_type = relationship(AttributeType, uselist=False, lazy='joined')
+  value_type = relationship(AttributeType, uselist=False)
   objects = relationship('ObjectDefinition',
                          secondary='objectdefinition_has_attributedefinitions',
                          order_by='ObjectDefinition.name')
   default_condition_id = Column('default_condition_id', BigIntegerType, ForeignKey('conditions.condition_id', onupdate='restrict', ondelete='restrict'), index=True, nullable=False)
-  default_condition = relationship(Condition, uselist=False, lazy='joined')
+  default_condition = relationship(Condition, uselist=False,)
   __handler = None
   cybox_std = Column('cybox_std', Boolean, default=False)
 
@@ -182,27 +182,28 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
 
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(True)
     if cache_object.complete:
       result = {
-              'name': self.convert_value(self.name),
-              'description': self.convert_value(self.description),
-              'attributehandler_id': self.convert_value(self.attribute_handler.uuid),
-              'attributehandler': self.handler.to_dict(),
-              'table_id': self.convert_value(self.table_id),
-              'relation': self.convert_value(self.relation),
-              'share': self.convert_value(self.share),
-              'regex': self.convert_value(self.regex),
-              'type_id': self.convert_value(self.value_type.uuid),
-              'default_condition_id': self.convert_value(self.default_condition.uuid),
-              'chksum': self.convert_value(self.chksum),
-              'cybox_std': self.convert_value(self.cybox_std)
+              'name': instance.convert_value(instance.name),
+              'description': instance.convert_value(instance.description),
+              'attributehandler_id': instance.convert_value(instance.attribute_handler.uuid),
+              'attributehandler': instance.handler.to_dict(),
+              'table_id': instance.convert_value(instance.table_id),
+              'relation': instance.convert_value(instance.relation),
+              'share': instance.convert_value(instance.share),
+              'regex': instance.convert_value(instance.regex),
+              'type_id': instance.convert_value(instance.value_type.uuid),
+              'default_condition_id': instance.convert_value(instance.default_condition.uuid),
+              'chksum': instance.convert_value(instance.chksum),
+              'cybox_std': instance.convert_value(instance.cybox_std)
               }
     else:
       result = {
-              'name': self.name,
-              'default_condition_id': self.convert_value(self.default_condition.uuid),
-              'chksum': self.convert_value(self.chksum),
-              'cybox_std': self.convert_value(self.cybox_std)
+              'name': instance.convert_value(instance.name),
+              'default_condition_id': instance.convert_value(instance.default_condition.uuid),
+              'chksum': instance.convert_value(instance.chksum),
+              'cybox_std': instance.convert_value(instance.cybox_std)
               }
 
     parent_dict = SimpleLoggingInformations.to_dict(self, cache_object)

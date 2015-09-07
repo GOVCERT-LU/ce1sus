@@ -5,8 +5,10 @@
 
 Created on Aug 18, 2015
 """
+from ce1sus.helpers.common.objects import get_fields
 from sqlalchemy.dialects import postgresql, mysql, sqlite
 from sqlalchemy.ext.declarative.api import declared_attr
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.sql.schema import Column
 from sqlalchemy.types import BigInteger, Unicode, UnicodeText
@@ -93,3 +95,32 @@ class BaseObject(object):
           result.append(self.attribute_to_dict(item, cache_object))
       return result
     return None
+
+  @property
+  def session(self):
+    if hasattr(self, '_sa_instance_state') and hasattr(self._sa_instance_state, 'session'):
+      return self._sa_instance_state.session
+    else:
+      return None
+
+  def get_instance(self, attributes=None, all_attributes=False):
+    joined_loads = list()
+    if self.session:
+      if all:
+        fields = get_fields(self.__class__)
+        for field in fields:
+          attr = getattr(self.__class__, field)
+          if hasattr(attr, 'property') and isinstance(attr.property, RelationshipProperty):
+            if hasattr(self, '_PARENTS') and self._PARENTS:
+              if field not in self._PARENTS:
+                joined_loads.append(joinedload(attr))
+            else:
+              joined_loads.append(joinedload(attr))
+      elif fields:
+        for attr in attributes:
+          joined_loads.append(joinedload(attr))
+    if joined_loads:
+      instance = self.session.query(self.__class__).options(*joined_loads).filter(self.__class__.identifier == self.identifier).one()
+    else:
+      instance = self
+    return instance

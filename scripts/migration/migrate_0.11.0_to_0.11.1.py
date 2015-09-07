@@ -16,7 +16,7 @@ from os.path import dirname, abspath, exists, isdir
 from sqlalchemy import Column
 from sqlalchemy import Unicode
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy.schema import Table, ForeignKeyConstraint, ForeignKey
 from sqlalchemy.types import UnicodeText, Unicode, Integer, BigInteger
 import sys
@@ -28,10 +28,13 @@ from sqlalchemy import Table, MetaData
 from sqlalchemy import update
 from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.session import make_transient
 
 basePath = dirname(abspath(__file__)) + '/../../'
 sys.path.insert(0, basePath)
 
+from ce1sus.db.classes.internal.path import Path
+from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from ce1sus.helpers.common.config import Configuration
 from ce1sus.helpers.common.objects import get_class
 from ce1sus.db.common.session import Base
@@ -81,6 +84,13 @@ from ce1sus.controllers.base import ControllerException, ControllerNothingFoundE
 from ce1sus.db.classes.cstix.indicator.sightings import Sighting
 from ce1sus.db.classes.internal.backend.config import Ce1susConfig
 from ce1sus.helpers.version import Version
+from ce1sus.controllers.common.path import PathController
+from ce1sus.db.classes.cstix.common.vocabstring import VocabString
+from ce1sus.db.classes.cstix.extensions.test_mechanism.snort_test_mechanism import SnortTestMechanism, SnortRule
+from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
+from ce1sus.controllers.events.observable import ObservableController
+from ce1sus.controllers.events.attributecontroller import AttributeController
+from ce1sus.common.classes.cacheobject import CacheObject
 
 _REL_INDICATOR_SIGHTINGS = Table('rel_indicator_sightings', Base.metadata,
                                  Column('ris_id', BigInteger, primary_key=True, nullable=False, index=True),
@@ -104,6 +114,10 @@ class Migrator(object):
     )
     self.op = Operations(ctx)
     self.user_controller = UserController(config, directconnection)
+    self.path_controller = PathController(config, directconnection)
+    self.observable_controller = ObservableController(config, directconnection)
+    self.attribute_controller = AttributeController(config, directconnection)
+    self.indicator_controller = IndicatorController(config, directconnection)
 
   def create_new_tables(self):
     engine = self.engine
@@ -219,10 +233,19 @@ class Migrator(object):
 
   # drop cols
   def altering_tables_phase2(self):
+
+    for clazz in [Attribute, Indicator, Observable, Object, Reference, Report, Event]:
+      self.__drop_column(clazz, 'code')
+      self.__drop_column(clazz, 'tlp_level_id')
+
+    self.__drop_column(ObservableComposition, 'code')
+    self.__drop_column(Sighting, 'code')
+
     self.__drop_column(Event, 'originating_group_id')
     self.__drop_column(Event, 'owner_group_id')
     self.__drop_column(Event, 'description')
     self.__drop_column(Event, 'title')
+
     self.__drop_column(Indicator, 'originating_group_id')
     self.__drop_column(Indicator, 'owner_group_id')
     self.__drop_column(Indicator, 'event_id')
@@ -268,48 +291,166 @@ class Migrator(object):
     self.__set_simplelogging(instance, parent)
     instance.creator_group_id = parent.creator_group_id
 
-  def __create_information_source(self, group_id, role, instance):
+  def __set_old_tlp_new_instance(self, instance):
+    setattr(instance, 'tlp_level_id_old', instance.tlp_level_id)
+    setattr(instance, 'dbcode_old', instance.dbcode)
+
+  def __create_information_source(self, group_id, role, instance, parent_attr='parent'):
     informationsource = InformationSource()
     informationsource.uuid = uuid4()
     informationsource.namespace = 'ce1sus'
+    setattr(informationsource, parent_attr, instance)
     self.__set_extendedlogging(informationsource, instance)
-    self.__set_tlp_code(informationsource, instance)
+    self.session.get_session().add(informationsource)
+    self.session.get_session().flush()
+    self.__set_path(informationsource, parent_tlp=instance, parent=instance)
+    self.__set_old_tlp_new_instance(informationsource)
+
     informationsource.identity = Identity()
     informationsource.identity.uuid = uuid4()
+    informationsource.identity.parent = informationsource
     self.__set_extendedlogging(informationsource.identity, instance)
-    self.__set_tlp_code(informationsource.identity, instance)
+    self.session.get_session().add(informationsource.identity)
+    self.session.get_session().flush()
+    self.__set_path(informationsource.identity, parent=informationsource, parent_tlp=informationsource)
     
+
     group = self.session.get_session().query(Group).filter(Group.identifier == group_id).one()
     
     informationsource.identity.name = group.name
     informationsource.identity.namespace = 'ce1sus'
+
     isrole = InformationSourceRole()
     isrole.uuid = uuid4()
-    self.__set_extendedlogging(isrole, informationsource)
-    self.__set_tlp_code(isrole, informationsource)
+    isrole.parent = informationsource
     isrole.role = role
+    self.__set_extendedlogging(isrole, informationsource)
+    self.session.get_session().add(isrole)
+    self.session.get_session().flush()
+    self.__set_path(isrole, parent=informationsource, parent_tlp=informationsource)
     informationsource.roles.append(isrole)
 
     time = CyboxTime()
     time.uuid = uuid4()
+    time.parent = informationsource
     self.__set_extendedlogging(time, instance)
-    self.__set_tlp_code(time, instance)
+    self.session.get_session().add(time)
+    self.session.get_session().flush()
+    self.__set_path(time, parent=informationsource, parent_tlp=informationsource)
+    self.__set_old_tlp_new_instance(time)
+
     time.produced_time = DateTimeWithPrecision()
     time.produced_time.uuid = uuid4()
-    self.__set_extendedlogging(time.produced_time, instance)
-    self.__set_tlp_code(time.produced_time, instance)
     time.produced_time.value = instance.created_at
+    time.produced_time.cyboxtime_produced = time
     informationsource.time = time
-
+    self.__set_extendedlogging(time.produced_time, instance)
+    self.session.get_session().add(time)
+    self.session.get_session().flush()
+    self.__set_path(time.produced_time, parent=time, parent_tlp=time)
     return informationsource
+  
+  def __create_description(self, value, parent, parent_attr):
+    desription = StructuredText()
+    desription.uuid = uuid4()
+    desription.value = value
+    desription.namespace = 'ce1sus'
+    setattr(desription, parent_attr, parent)
+    self.__set_extendedlogging(desription, parent)
+    self.session.get_session().add(desription)
+    self.session.get_session().flush()
+    self.__set_path(desription, parent=parent, parent_tlp=parent)
 
-  def __is_misp(self, event):
-    for report in event.reports:
-      for reference in report.references:
-        if 'misp' in reference.value:
-          return True
-    return False
+  def __merge_observables(self, all, observables, events):
+    for item in all:
+      self.__merge_observable(item, observables, events)
+    self.session.get_session().flush()
 
+  def __merge_observable(self, item, observables, events):
+    print 'Merging Observable {0}'.format(item.identifier)
+    item.namespace = 'ce1sus'
+    if item.event_id:
+      event = events[item.event_id]
+      item.event = event
+
+    if item.path is None:
+
+      self.__set_path(item)
+      self.session.get_session().merge(item)
+      self.session.get_session().flush()
+
+      if item.foo:
+        description = self.__create_description(item.foo, item, 'observable_description')
+
+      if item.observable_composition:
+        print 'Merging ObservableComposition {0}'.format(item.observable_composition.identifier)
+        item.namespace = 'ce1sus'
+        self.__set_extendedlogging(item.observable_composition, item)
+        self.__set_path(item.observable_composition, parent=item, parent_tlp=item)
+        self.session.get_session().merge(item.observable_composition)
+        self.session.get_session().flush()
+        self.__merge_observables(item.observable_composition.observables, observables, events)
+    else:
+      print 'Merging Observable {0} was seen'.format(item.identifier)
+      item.parent.observables.remove(item)
+
+    self.session.get_session().flush()
+    observables[item.identifier] = item
+
+  def __merge_object_recursive(self, obj, observables):
+    self.__merge_object(obj, observables)
+    # merge RelatedObject
+    for rel_obj in obj.related_objects:
+      print 'Merging ReleatedObject {0}'.format(rel_obj.identifier)
+      self.__set_extendedlogging(rel_obj, obj)
+      self.__set_path(rel_obj, parent=obj, parent_tlp=obj)
+      self.session.get_session().merge(rel_obj)
+      self.session.get_session().flush()
+      self.__merge_object_recursive(rel_obj.object, observables)
+
+  def __merge_object(self, obj, observables):
+    try:
+      print 'Merging Object {0}'.format(obj.identifier)
+      obj.namespace = 'ce1sus'
+
+      if obj.parent_id:
+        if observables:
+          observable = observables[obj.parent_id]
+        else:
+          observable = self.session.get_session().query(Observable).filter(Observable.identifier == obj.parent_id).one()
+        obj.observable = observable
+
+      self.__set_path(obj)
+      self.session.get_session().merge(obj)
+      self.session.get_session().flush()
+      for attribute in obj.attributes:
+        print 'Merging Attribute {0}'.format(attribute.identifier)
+        self.__set_path(attribute, parent=obj)
+        try:
+          self.session.get_session().flush()
+        except OperationalError as error:
+          print 'Error on attribute {0} error: {1}'.format(attribute.uuid, error)
+
+      self.session.get_session().merge(obj)
+      self.session.get_session().flush()
+    except ValueError:
+      pass
+
+  def __merge_report(self, item):
+    self.__set_path(item, recursive=True)
+    print 'Merging Report with id {0}'.format(item.identifier)
+    if item.description_old:
+      description = self.__create_description(item.description_old, item, 'report_description')
+    if item.short_description_old:
+      description = self.__create_description(item.short_description_old, item, 'report_short_description')
+
+    self.session.get_session().merge(item)
+    
+  def __merge_report_recursive(self, item):
+    self.__merge_report(item)
+    for rel_rep in item.related_reports:
+      self.__merge_report_recursive(rel_rep)
+  
   def merge_data(self):
     
     user_uuid = config.get('ce1sus', 'maintenaceuseruuid', None)
@@ -322,6 +463,8 @@ class Migrator(object):
     except ControllerException as error:
       raise Exception(error)
 
+
+
     all = self.session.get_session().query(Condition).all()
     for item in all:
       print 'Merging Condition {0}'.format(item.identifier)
@@ -331,16 +474,20 @@ class Migrator(object):
       item.creator_id = user.identifier
       self.session.get_session().merge(item)
     self.session.get_session().flush()
-
+    setattr(StructuredText, '_PARENTS', ['stix_header_description', 'stix_header_short_description', 'information_source_description', 'indicator_description', 'indicator_short_description', 'report_description', 'report_short_description', 'observable_description', 'sighting_description'])
+    setattr(InformationSource, '_PARENTS', ['stix_header', 'indicator_producer', 'sighting', 'information_source'])
     setattr(Event, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
     setattr(Event, 'title', Column('title', Unicode(255, collation='utf8_unicode_ci'), index=True, nullable=False))
-    setattr(Event, 'tlp_level_id2', Column('tlp_level_id', Integer, default=3, nullable=False))
-    setattr(Event, 'dbcode2', Column('code', Integer, nullable=False, default=0))
     Migrator.__set_old_fields(Event)
+    self.__set_dbcode_tlp(Event)
     
+    events = dict()
+    observables = dict()
+
     all = self.session.get_session().query(Event).all()
     for item in all:
 
+      self.__set_path(item)
       if item.foo:
         print 'Merging Event {0}'.format(item.identifier)
         item.version = '1.0.0'
@@ -349,193 +496,170 @@ class Migrator(object):
         item.stix_header = STIXHeader()
         item.stix_header.uuid = uuid4()
         item.stix_header.title = item.title
-        self.__set_tlp_code(item.stix_header, item)
+        item.stix_header.event = item
         self.__set_extendedlogging(item.stix_header, item)
-        is_ = self.__create_information_source(item.originating_group_id, 'Initial Author', item)
+        self.session.get_session().add(item.stix_header)
+        self.session.get_session().flush()
+        self.__set_path(item.stix_header, parent=item)
+        self.__set_old_tlp_new_instance(item.stix_header)
+
+
+        is_ = self.__create_information_source(item.originating_group_id, 'Initial Author', item.stix_header)
         item.stix_header.information_source = is_
-        if self.__is_misp(item):
-          is_ = self.__create_information_source(item.creator_group_id, 'Transformer/Translator', item)
-          item.stix_header.information_source.contributing_sources.append(is_)
-
-
 
         # handling not used yet
+        description = self.__create_description(item.foo, item.stix_header, 'stix_header_description')
 
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.foo
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(desription, item)
-        item.stix_header.description = desription
+      self.session.get_session().merge(item)
+      self.session.get_session().flush()
+      events[item.identifier] = item
 
-        self.session.get_session().merge(item)
     self.session.get_session().flush()
+    
+    setattr(InformationSource, '_PARENTS', ['indicator_producer', 'sighting', 'information_source'])
 
-
-
+    setattr(Indicator, '_PARENTS', ['event'])
     Migrator.__set_old_fields(Indicator)
     setattr(Indicator, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
     setattr(Indicator, 'bar', Column('short_description', Unicode(255, collation='utf8_unicode_ci')))
     setattr(Indicator, 'event_id', Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True))
     setattr(Indicator, 'sig', relationship('Sighting', secondary='rel_indicator_sightings'))
-
-    all = self.session.get_session().query(Indicator).all()
-    for item in all:
-      print 'Merging Indicator {0}'.format(item.identifier)
-      item.namespace = 'ce1sus'
-      item.version = '1.0.0'
-      item.timestamp = item.created_at
-      desription = None
-
-      if item.foo:
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.foo
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(description, item)
-        item.description = desription
-
-      short_description = None
-      if item.bar:
-        short_description = StructuredText()
-        short_description.uuid = uuid4()
-        short_description.value = item.bar
-        short_description.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(description, item)
-        item.short_description = short_description
-
-      is_ = self.__create_information_source(item.originating_group_id, 'Initial Author', item)
-      item.information_source = is_
-      is_ = self.__create_information_source(item.originating_group_id, 'Initial Author', item)
-      item.producer = is_
-
-      event = self.session.get_session().query(Event).filter(Event.identifier == item.event_id).one()
-
-      if self.__is_misp(event):
-        is_ = self.__create_information_source(item.creator_group_id, 'Transformer/Translator', item)
-        item.producer.contributing_sources.append(is_)
-
-      self.session.get_session().merge(item)
-
-      for sig in item.sig:
-        print 'Merging Sighting {0}'.format(item.identifier)
-        sighting = self.session.get_session().query(Sighting).filter(Sighting.identifier == sig.identifier).one()
-        sighting.indicator_id = item.identifier
-        self.session.get_session().merge(sighting)
-
-
-      event.indicators.append(item)
-      self.session.get_session().merge(event)
-    self.session.get_session().flush()
-
-
-
-    setattr(Object, 'parent_id', Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True))
-    all = self.session.get_session().query(Object).all()
-    for item in all:
-      print 'Merging Object {0}'.format(item.identifier)
-      item.namespace = 'ce1sus'
-      if item.parent_id:
-        observable = self.session.get_session().query(Observable).filter(Observable.identifier == item.parent_id).one()
-        observable.object = item
-        self.session.get_session().merge(observable)
-
-      self.session.get_session().merge(item)
-    self.session.get_session().flush()
-
-
-    all = self.session.get_session().query(ObservableComposition).all()
-    for item in all:
-      print 'Merging ObservableComposition {0}'.format(item.identifier)
-      item.namespace = 'ce1sus'
-      parent = item.parent
-      self.__set_extendedlogging(item, parent)
-      item.tlp_level_id = parent.tlp_level_id
-
-      self.session.get_session().merge(item)
-    self.session.get_session().flush()
-
-
-    setattr(Observable, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
-    setattr(Observable, 'event_id', Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True))
-    self.__set_old_fields(Observable)
-
-    all = self.session.get_session().query(Observable).all()
-    for item in all:
-      print 'Merging Observable {0}'.format(item.identifier)
-      if item.foo:
-        item.namespace = 'ce1sus'
-        item.version = '1.0.0'
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.foo
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, parent)
-        self.__set_tlp_code(desription, parent)
-        item.description = desription
-        self.session.get_session().merge(item)
-      if item.event_id:
-        event = self.session.get_session().query(Event).filter(Event.identifier == item.event_id).one()
-        event.observables.append(item)
-        self.session.get_session().merge(event)
-
-    self.session.get_session().flush()
-
-
-
-
-    all = self.session.get_session().query(RelatedObject).all()
-    for item in all:
-      print 'Merging RelatedObject {0}'.format(item.identifier)
-      parent = item.object
-      self.__set_extendedlogging(item, parent)
-      self.__set_tlp_code(item, parent)
-
-      self.session.get_session().merge(item)
-    self.session.get_session().flush()
-
+    self.__set_dbcode_tlp(Indicator)
 
     setattr(Sighting, 'foo', Column('confidence', Unicode(5, collation='utf8_unicode_ci'), default=u'HIGH', nullable=False))
     setattr(Sighting, 'bar', Column('description', UnicodeText(collation='utf8_unicode_ci')))
     self.__set_old_fields(Sighting)
+    setattr(Sighting, 'dbcode_old', Column('code', Integer, nullable=False, default=0, index=True))
 
-    all = self.session.get_session().query(Sighting).all()
+    setattr(Observable, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
+    setattr(Observable, 'event_id', Column('event_id', BigInteger, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True))
+    self.__set_old_fields(Observable)
+    self.__set_dbcode_tlp(Observable)
+
+
+    all = self.session.get_session().query(Observable).options(joinedload(Observable.observable_composition), joinedload(Observable.object)).filter(Observable.event_id != None).all()
+    self.__merge_observables(all, observables, events)
+
+    setattr(Confidence, '_PARENTS', ['sighting'])
+    all = self.session.get_session().query(Indicator).options(joinedload(Indicator.sightings), joinedload(Indicator.sightings), joinedload(Indicator.observables)).all()
     for item in all:
-      print 'Merging Sighting {0}'.format(item.identifier)
-      parent = item.indicator
-      item.timestamp = item.modified_on
-      item.tlp_level_id = parent.tlp_level_id
+      setattr(StructuredText, '_PARENTS', [ 'indicator_description', 'indicator_short_description', 'sighting_description', 'information_source_description', 'report_description', 'report_short_description', 'observable_description'])
+
+      event = events[item.event_id]
+      item.event = event
+      print 'Merging Indicator {0}'.format(item.identifier)
+      item.namespace = 'ce1sus'
+      item.version = '1.0.0'
+      item.timestamp = item.created_at
+      self.__set_path(item)
+
       if item.foo:
-        confidence = Confidence()
-        confidence.uuid = uuid4()
-        confidence.value = item.foo
-        self.__set_extendedlogging(confidence, item)
-        self.__set_tlp_code(confidence, item)
-        item.confidence = confidence
-        is_ = self.__create_information_source(item.creator_group_id, 'Initial Author', item)
-        item.source = is_
+        description = self.__create_description(item.foo, item, 'indicator_description')
 
+      short_description = None
       if item.bar:
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.bar
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(desription, item)
-        item.description = desription
+        short_description = self.__create_description(item.bar, item, 'indicator_short_description')
 
-      is_ = self.__create_information_source(item.creator_group_id, 'Initial Author', item)
-      item.source = is_
+      is_ = self.__create_information_source(item.originating_group_id, 'Initial Author', item, 'indicator_producer')
+      item.producer = is_
 
+      setattr(StructuredText, '_PARENTS', ['sighting_description', 'information_source_description', 'report_description', 'report_short_description', 'observable_description'])
+      for sig in item.sig:
+        sig.indicator = item
+        print 'Merging Sighting {0}'.format(item.identifier)
+        sighting = self.session.get_session().query(Sighting).filter(Sighting.identifier == sig.identifier).one()
+        sig.timestamp = sig.modified_on
+        setattr(sig, 'tlp_level_id_old', item.tlp_level_id_old)
+        self.__set_path(sig, parent=item, parent_tlp=item)
+
+        is_ = self.__create_information_source(sig.originating_group_id, 'Initial Author', sig, 'sighting')
+        sig.source = is_
+
+        if sig.foo:
+          confidence = Confidence()
+          confidence.uuid = uuid4()
+          confidence.value = sig.foo
+          confidence.sighting = sig
+          self.__set_extendedlogging(confidence, sig)
+          self.session.get_session().add(confidence)
+          self.session.get_session().flush()
+          self.__set_path(confidence, parent=sig, parent_tlp=sig)
+
+          sig.confidence = confidence
+
+        if sig.bar:
+          description = self.__create_description(sig.bar, item, 'sighting_description')
+
+        is_ = self.__create_information_source(item.creator_group_id, 'Initial Author', sig)
+
+        self.session.get_session().merge(sig)
+      self.session.get_session().merge(item)
+      self.session.get_session().flush()
+      self.__merge_observables(item.observables, observables, events)
+    self.session.get_session().flush()
+
+
+    self.session.get_session().commit()
+    return observables, events
+
+  def merge_remaining(self, observables, events):
+
+    # remove observable orphans
+
+    all = self.session.get_session().query(Observable).options(joinedload(Observable.observable_composition), joinedload(Observable.description), joinedload(Observable.object)).filter(Observable.path == None).all()
+    for item in all:
+      self.observable_controller.remove_observable(item, CacheObject(), False, False)
+    self.session.get_session().flush()
+    # remove composition orphans
+    all = self.session.get_session().query(ObservableComposition).options(joinedload(ObservableComposition.observables)).filter(ObservableComposition.path == None).all()
+    for item in all:
+      self.observable_controller.remove_observable_composition(item, CacheObject(), False, False)
+    self.session.get_session().flush()
+
+    self.__set_dbcode_tlp(Object)
+
+    self.__set_dbcode_tlp(Attribute)
+    setattr(Object, 'parent_id', Column('parent_id', BigInteger, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), index=True))
+
+
+    all = self.session.get_session().query(Object).options(joinedload(Object.observable), joinedload(Object.attributes)).filter(Object.parent_id != None).all()
+    for item in all:
+      self.__merge_object_recursive(item, observables)
+
+    setattr(Report,
+            'description_old',
+            Column('description',
+                   UnicodeTextType()
+                   )
+            )
+    setattr(Report,
+            'short_description_old',
+            Column('short_description',
+                   UnicodeTextType()
+                   )
+            )
+    setattr(StructuredText, '_PARENTS', [ 'report_description', 'report_short_description', 'observable_description'])
+    self.__set_dbcode_tlp(Report)
+    all = self.session.get_session().query(Report).options(joinedload(Report.event)).filter(Report.parent_report_id == None).all()
+    for item in all:
+      self.__merge_report_recursive(item)
+    self.session.get_session().flush()
+
+    self.__set_dbcode_tlp(Reference)
+    all = self.session.get_session().query(Reference).options(joinedload(Reference.report)).all()
+    for item in all:
+      self.__set_path(item)
       self.session.get_session().merge(item)
     self.session.get_session().flush()
 
-    self.session.get_session().commit()
 
-  # TODO: Valid time positions
+    """
+    all = self.session.get_session().query(Object).filter(Object.path == None).all()
+    for item in all:
+      self.observable_controller.remove_object(item, CacheObject(), False)
+    self.session.get_session().flush()
+    """
+    self.session.get_session().commit()
 
   def altering_tables_phase1(self):
 
@@ -604,7 +728,6 @@ class Migrator(object):
     self.__add_fk(Event, 'creator_group_id', 'events_ibfk_1')
     self.__add_fk(Event, 'creator_id', 'events_ibfk_2')
     self.__add_fk(Event, 'modifier_id', 'events_ibfk_3')
-    self.__add_index(Event, 'ix_events_code', 'dbcode')
 
 
     self.__change_column(Group, 'name')
@@ -620,7 +743,6 @@ class Migrator(object):
     self.__drop_fk(Indicator, 'indicators_ibfk_6')
     self.__drop_fk(Indicator, 'indicators_ibfk_5')
 
-    self.__change_column(Indicator, 'tlp_level_id')
     self.__change_column(Indicator, 'version_db')
     self.__change_column(Indicator, 'operator')
     self.__add_column(Indicator, 'namespace')
@@ -636,8 +758,6 @@ class Migrator(object):
     self.__change_column(IndicatorType, 'type_id')
     self.__add_column(IndicatorType, 'created_at')
     self.__add_column(IndicatorType, 'modified_on')
-    self.__add_column(IndicatorType, 'tlp_level_id')
-    self.__add_column(IndicatorType, 'dbcode')
     self.__add_column(IndicatorType, 'creator_group_id')
     self.__add_column(IndicatorType, 'creator_id')
     self.__add_column(IndicatorType, 'modifier_id')
@@ -663,8 +783,6 @@ class Migrator(object):
     self.__drop_column(MarkingStructure, 'marking_id')
     self.__change_column(MarkingStructure, 'marking_model_name')
     self.__change_column(MarkingStructure, 'marking_model_ref')
-    self.__add_column(MarkingStructure, 'dbcode')
-    self.__add_column(MarkingStructure, 'tlp_level_id')
     self.__add_column(MarkingStructure, 'namespace')
     self.__add_column(MarkingStructure, 'type')
     self.__add_column(MarkingStructure, 'markingspecification_id')
@@ -685,8 +803,6 @@ class Migrator(object):
     self.__drop_column(Object, 'originating_group_id')
     self.__drop_column(Object, 'owner_group_id')
 
-    self.__change_column(Object, 'tlp_level_id')
-    # self.__change_column(Object, 'dbcode')
     self.__add_column(Object, 'idref')
     self.__add_column(Object, 'namespace')
     self.__add_fk(Object, 'creator_group_id', 'objects_ibfk_2')
@@ -699,7 +815,6 @@ class Migrator(object):
     self.__add_column(ObservableComposition, 'creator_group_id')
     self.__add_column(ObservableComposition, 'creator_id')
     self.__add_column(ObservableComposition, 'modifier_id')
-    self.__add_column(ObservableComposition, 'tlp_level_id')
     self.__add_fk(ObservableComposition, 'creator_group_id', 'observablecompositions_ibfk_2')
     self.__add_fk(ObservableComposition, 'creator_id', 'observablecompositions_ibfk_3')
     self.__add_fk(ObservableComposition, 'modifier_id', 'observablecompositions_ibfk_4')
@@ -707,11 +822,9 @@ class Migrator(object):
     # self.__change_column(ObservableKeyword, 'uuid')
     self.__add_column(ObservableKeyword, 'created_at')
     self.__add_column(ObservableKeyword, 'modified_on')
-    self.__add_column(ObservableKeyword, 'dbcode')
     self.__add_column(ObservableKeyword, 'creator_group_id')
     self.__add_column(ObservableKeyword, 'creator_id')
     self.__add_column(ObservableKeyword, 'modifier_id')
-    self.__add_column(ObservableKeyword, 'tlp_level_id')
     self.__add_fk(ObservableKeyword, 'creator_group_id', 'observablekeywords_ibfk_2')
     self.__add_fk(ObservableKeyword, 'creator_id', 'observablekeywords_ibfk_3')
     self.__add_fk(ObservableKeyword, 'modifier_id', 'observablekeywords_ibfk_4')
@@ -725,7 +838,6 @@ class Migrator(object):
     self.__drop_fk(Observable, 'observables_ibfk_6')
     self.__drop_fk(Observable, 'observables_ibfk_1')
 
-    self.__change_column(Observable, 'tlp_level_id')
     self.__add_column(Observable, 'namespace')
     self.__add_column(Observable, 'idref')
     self.__add_column(Observable, 'sighting_count')
@@ -745,18 +857,14 @@ class Migrator(object):
     self.__drop_fk(Reference, 'references_ibfk_7')
     self.__drop_column(Reference, 'originating_group_id')
     self.__drop_column(Reference, 'owner_group_id')
-    self.__change_column(Reference, 'tlp_level_id')
     self.__change_column(Reference, 'value')
     self.__add_fk(Reference, 'creator_group_id', 'references_ibfk_4')
     self.__add_fk(Reference, 'creator_id', 'references_ibfk_5')
     self.__add_fk(Reference, 'modifier_id', 'references_ibfk_6')
-    self.__add_index(Reference, 'ix_references_code', 'dbcode')
 
     self.__drop_column(RelatedObject, 'relation')
     self.__add_column(RelatedObject, 'created_at')
     self.__add_column(RelatedObject, 'modified_on')
-    self.__add_column(RelatedObject, 'tlp_level_id')
-    self.__add_column(RelatedObject, 'dbcode')
     self.__add_column(RelatedObject, 'relationship_id')
     self.__add_column(RelatedObject, 'idref')
     self.__add_column(RelatedObject, 'creator_group_id')
@@ -779,8 +887,6 @@ class Migrator(object):
     self.__drop_column(RelatedObservable, 'confidence')
     self.__drop_column(RelatedObservable, 'relation')
     self.__drop_column(RelatedObservable, 'parent_id')
-    self.__add_column(RelatedObservable, 'tlp_level_id')
-    self.__add_column(RelatedObservable, 'dbcode')
     self.__add_column(RelatedObservable, 'relationship')
     self.__add_fk(RelatedObservable, 'creator_group_id', 'relatedobservables_ibfk_2')
     self.__add_fk(RelatedObservable, 'creator_id', 'relatedobservables_ibfk_3')
@@ -795,12 +901,10 @@ class Migrator(object):
     self.__drop_fk(Report, 'reports_ibfk_6')
     self.__drop_column(Report, 'originating_group_id')
     self.__drop_column(Report, 'owner_group_id')
-    self.__change_column(Report, 'tlp_level_id')
 
     self.__add_fk(Report, 'creator_group_id', 'reports_ibfk_3')
     self.__add_fk(Report, 'creator_id', 'reports_ibfk_4')
     self.__add_fk(Report, 'modifier_id', 'reports_ibfk_5')
-    self.__add_index(Report, 'ix_reports_code', 'dbcode')
 
 
     self.__drop_fk(Sighting, 'sightings_ibfk_1')
@@ -809,7 +913,6 @@ class Migrator(object):
     self.__drop_fk(Sighting, 'sightings_ibfk_4')
 
     self.__change_column(Sighting, 'timestamp_precision')
-    self.__add_column(Sighting, 'tlp_level_id')
     self.__add_column(Sighting, 'timestamp')
     self.__add_column(Sighting, 'reference')
     self.__add_column(Sighting, 'indicator_id')
@@ -839,8 +942,6 @@ class Migrator(object):
     self.__drop_fk(ValidTime, 'validtimepositions_ibfk_5')
     self.__drop_column(ValidTime, 'originating_group_id')
     self.__drop_column(ValidTime, 'owner_group_id')
-    self.__add_column(ValidTime, 'tlp_level_id')
-    self.__add_index(ValidTime, 'ix_validtimepositions_code', 'dbcode')
     self.__add_fk(ValidTime, 'creator_group_id', 'validtimepositions_ibfk_2')
     self.__add_fk(ValidTime, 'creator_id', 'validtimepositions_ibfk_3')
     self.__add_fk(ValidTime, 'modifier_id', 'validtimepositions_ibfk_4')
@@ -907,6 +1008,26 @@ class Migrator(object):
     self.__drop_column(Report, 'description')
     self.__drop_column(Report, 'short_description')
 
+  def __set_dbcode_tlp(self, clazz):
+    setattr(clazz, 'tlp_level_id_old', Column('tlp_level_id', Integer, default=3, nullable=False))
+    setattr(clazz, 'dbcode_old', Column('code', Integer, nullable=False, default=0, index=True))
+
+  def __set_path(self, instance, parent=None, parent_tlp=None, recursive=False):
+    instance.path = Path()
+    instance.path.path = ''
+    if parent_tlp:
+      instance.path.item_tlp_level_id = parent_tlp.tlp_level_id_old
+      instance.path.item_dbcode = parent_tlp.dbcode_old
+    else:
+      instance.path.item_tlp_level_id = instance.tlp_level_id_old
+      instance.path.item_dbcode = instance.dbcode_old
+
+    path = self.path_controller.make_path(instance, parent=parent, recursive=recursive)
+    instance.path.path = path.path
+    instance.path.dbcode = path.dbcode
+    instance.path.tlp_level_id = path.tlp_level_id
+    instance.path.event = path.event
+    instance.path.event_id = path.event_id
 
   def merge_value_data(self):
     meta = MetaData(bind=self.engine, reflect=True)
@@ -937,41 +1058,9 @@ class Migrator(object):
       self.session.get_session().query(clazz).filter(clazz.identifier == None).delete(synchronize_session='fetch')
       self.session.get_session().flush()
 
-    setattr(Report, 
-            'description_old', 
-            Column('description', 
-                   UnicodeTextType()
-                   )
-            )
-    setattr(Report, 
-            'short_description_old', 
-            Column('short_description', 
-                   UnicodeTextType()
-                   )
-            )
 
-    all = self.session.get_session().query(Report).all()
-    for item in all:
-      print 'Merging Report with id {0}'.format(item.identifier)
-      if item.description_old:
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.description_old
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(desription, item)
-        item.description = desription
-      if item.short_description_old:
-        desription = StructuredText()
-        desription.uuid = uuid4()
-        desription.value = item.short_description_old
-        desription.namespace = 'ce1sus'
-        self.__set_extendedlogging(desription, item)
-        self.__set_tlp_code(desription, item)
-        item.short_description = desription
-        self.session.get_session().merge(item)
 
-    self.session.get_session().commit()
+
 
 
   def pre_steps(self):
@@ -1023,11 +1112,13 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
-  migros.create_new_tables()
-  migros.pre_steps()
-  migros.altering_tables_phase1()
-  migros.change_value_tables_phase1()
-  migros.merge_data()
+  # migros.create_new_tables()
+  # migros.pre_steps()
+  # migros.altering_tables_phase1()
+  # migros.change_value_tables_phase1()
+  observables, events = None, None
+  # observables, events = migros.merge_data()
+  migros.merge_remaining(observables, events)
   migros.merge_value_data()
   migros.change_value_tables_phase2()
   migros.altering_tables_phase2()

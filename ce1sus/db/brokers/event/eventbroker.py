@@ -5,6 +5,7 @@ for inserting data into the database.
 
 Created on Jul 9, 2013
 """
+from sqlalchemy.orm import joinedload
 import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_, or_
 
@@ -12,6 +13,7 @@ from ce1sus.common.utils import get_max_tlp
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
 from ce1sus.db.classes.internal.common import Analysis, Status, TLP
 from ce1sus.db.classes.internal.event import Event, EventGroupPermission
+from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.common.broker import BrokerBase, NothingFoundException, BrokerException, TooManyResultsFoundException
 
@@ -150,7 +152,8 @@ class EventBroker(BrokerBase):
     try:
       # TODO add validation and published checks
       # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) == 4)
+      result = self.session.query(Event).join(STIXHeader)
+      # result = self.session.query(Event).join(STIXHeader).filter(Path.dbcode.op('&')(4) == 4)
       result = self.__set_parameters(result, parameters)
       result = result.limit(limit).offset(offset).all()
     except sqlalchemy.orm.exc.NoResultFound:

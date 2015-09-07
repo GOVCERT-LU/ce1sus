@@ -86,6 +86,8 @@ class PermissionController(BaseController):
     if self.is_instance_owner(instance, cache_object):
       return True
     
+    # TODO: insert here new table
+
     if hasattr(instance, 'properties') and hasattr(instance, 'tlp_level_id'):
       if instance.properties.is_validated and instance.properties.is_shareable:
         # only the items are shown which are supposed to be shown
@@ -272,7 +274,6 @@ class PermissionController(BaseController):
   
   def __get_cache_identifier(self, instance, user, suffix=None):
     key = '{0}{1}{2}{3}'.format(user.username, instance.get_classname(), instance.uuid, suffix)
-    self.logger.debug(key)
     key = hashSHA1(key)
     return key
   

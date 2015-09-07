@@ -48,3 +48,26 @@ def can_user_download(event, user):
     return result
   else:
     return False
+
+ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+def baseencode(number):
+    base = ''
+    while number != 0:
+        number, i = divmod(number, len(ALPHABET))
+        base = ALPHABET[i] + base
+    return base
+
+def basedecode(number):
+    return int(number, len(ALPHABET))
+
+def instance_code(instance):
+  result = table_code(instance.get_table_name())
+  result = result + '-' + baseencode(instance.identifier)
+  return result
+
+def table_code(value):
+  result = 0
+  for c in value:
+    result = result + ord(c)
+  return baseencode(result)
