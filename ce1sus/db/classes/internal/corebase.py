@@ -106,7 +106,7 @@ class BaseObject(object):
   def get_instance(self, attributes=None, all_attributes=False):
     joined_loads = list()
     if self.session:
-      if all:
+      if all_attributes:
         fields = get_fields(self.__class__)
         for field in fields:
           attr = getattr(self.__class__, field)
@@ -116,7 +116,7 @@ class BaseObject(object):
                 joined_loads.append(joinedload(attr))
             else:
               joined_loads.append(joinedload(attr))
-      elif fields:
+      elif attributes:
         for attr in attributes:
           joined_loads.append(joinedload(attr))
     if joined_loads:

@@ -71,57 +71,65 @@ class PermissionController(BaseController):
       cache_object.authorized_cache[key] = False
       return False
 
+  def __check_properties(self, properties, cache_object, key):
+    if properties.is_validated and properties.is_shareable:
+      # only the items are shown which are supposed to be shown
+      result = not properties.marked_for_deletion
+      cache_object.authorized_cache[key] = result
+      return result
+    elif cache_object.event_permissions:
+      # check if user can validate the object
+      if not properties.is_validated and cache_object.event_permissions.can_validate:
+        cache_object.authorized_cache[key] = True
+        return True
+    return False
+
   def is_instance_viewable(self, instance, cache_object):
+
+    # check if the element is in the session's cache
     key = self.__get_cache_identifier(instance, cache_object.user, 'owner')
-    viewable = cache_object.authorized_cache.get(key, False)
-    if viewable:
-      return viewable
+    owner = cache_object.authorized_cache.get(key, False)
+    if owner:
+      return owner
 
     key = self.__get_cache_identifier(instance, cache_object.user, 'view')
-    viewable = cache_object.authorized_cache.get(key, False)
-    if viewable:
-      return viewable
+    view = cache_object.authorized_cache.get(key, False)
+    if view:
+      return view
+
+    # begin new checks
 
     self.logger.debug('Checking if instance {2} {0} is viewable by {1}'.format(instance.uuid, cache_object.user.group.name, instance.get_classname()))
     if self.is_instance_owner(instance, cache_object):
       return True
     
     # TODO: insert here new table
-
-    if hasattr(instance, 'properties') and hasattr(instance, 'tlp_level_id'):
-      if instance.properties.is_validated and instance.properties.is_shareable:
-        # only the items are shown which are supposed to be shown
-        result = not instance.properties.marked_for_deletion
-        cache_object.authorized_cache[key] = result
+    if hasattr(instance, 'path'):
+      path = instance.path
+      result = self.__check_properties(path.merged_properties, cache_object, key)
+      if result:
+        cache_object.authorized_cache[key] = True
         return result
-      elif cache_object.event_permissions:
-        # check if user can validate the object
-        if not instance.properties.is_validated and cache_object.event_permissions.can_validate:
-          cache_object.authorized_cache[key] = True
-          return True
   
-    #still no result checking as last the tlp lvls
-    user_tlp = self.get_max_tlp(cache_object.user.group)
-    if instance.tlp_level_id >= user_tlp:
-      cache_object.authorized_cache[key] = True
-      return True
-      #if the user group is in some way associated to the event
-    else:
-      
-      event = instance.root
-      if event is None:
-        event = instance
+      # still no result checking as last the tlp lvls
+      user_tlp = self.get_max_tlp(cache_object.user.group)
+      if path.tlp_level_id >= user_tlp:
+        cache_object.authorized_cache[key] = True
+        return True
+        # if the user group is in some way associated to the event
+      else:
+        event = path.event
 
-      grp_ids = list()
-      for group in cache_object.user.group.children:
-        grp_ids.append(group.identifier)
-      grp_ids.append(cache_object.user.group_id)
-      
-      for eventgroup in event.groups:
-        group = eventgroup.group
-        if group.identifier in grp_ids:
-          cache_object.authorized_cache[key] = True
-          return True
+        grp_ids = list()
+        for group in cache_object.user.group.children:
+          grp_ids.append(group.identifier)
+        grp_ids.append(cache_object.user.group_id)
+
+        for eventgroup in event.groups:
+          group = eventgroup.group
+          if group.identifier in grp_ids:
+            cache_object.authorized_cache[key] = True
+            return True
 
     cache_object.authorized_cache[key] = False
     return False
@@ -185,7 +193,7 @@ class PermissionController(BaseController):
 
   def is_allowed_to_perform(self, event, action, cache_object):
     self.logger.debug('Checking is user {0} is allowed to perfrom {1} on event {2}'.format(cache_object.user.username, action, event.uuid))
-    permissions = self.get_event_user_permissions(event, cache_object)
+    permissions = self.get_event_permissions(event, cache_object)
     if permissions:
       result = getattr(permissions, action)
       # if the result is still not set throw an error

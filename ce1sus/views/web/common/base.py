@@ -271,14 +271,14 @@ class BaseView(object):
     if not result:
       raise cherrypy.HTTPError(403, 'User/group {0}/{1} can not validate elements of event {2}'.format(cache_object.user.username, cache_object.user.group.name, event.identifier))
 
-  def check_if_is_modifiable(self, event):
-    self.check_allowed_to_perform(event, 'can_modify')
+  def check_if_is_modifiable(self, event, cache_object):
+    self.check_allowed_to_perform(event, 'can_modify', cache_object)
 
-  def check_if_is_deletable(self, event):
-    self.check_allowed_to_perform(event, 'can_delete')
+  def check_if_is_deletable(self, event, cache_object):
+    self.check_allowed_to_perform(event, 'can_delete', cache_object)
 
-  def check_if_can_change_groups(self, event):
-    self.check_allowed_to_perform(event, 'set_groups')
+  def check_if_can_change_groups(self, event, cache_object):
+    self.check_allowed_to_perform(event, 'set_groups', cache_object)
 
   def check_allowed_set_validate_or_shared(self, event, old_instance, cache_object, json):
     self.check_allowed_set_share(event, old_instance, cache_object, json)

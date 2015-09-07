@@ -62,13 +62,15 @@ class ObservableComposition(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-    observables = self.attributelist_to_dict('observables', cache_object)
+    instance = self.get_instance(all_attributes=True)
+
+    observables = instance.attributelist_to_dict('observables', cache_object)
     if observables:
       observables_count = len(observables)
     else:
       observables_count = -1
 
-    result = {'operator': self.convert_value(self.operator),
+    result = {'operator': instance.convert_value(instance.operator),
               'observables': observables,
               'observables_count': observables_count,
               }
@@ -109,31 +111,38 @@ class Observable(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
+
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      instance = self.get_instance()
+
+
     if cache_object.inflated:
-      obj = self.attribute_to_dict(self.object, cache_object)
-      composed = self.attribute_to_dict(self.observable_composition, cache_object)
+      obj = instance.attribute_to_dict(instance.object, cache_object)
+      composed = instance.attribute_to_dict(instance.observable_composition, cache_object)
     else:
       obj = None
       composed = None
 
     if cache_object.complete:
-      keywords = self.attributelist_to_dict('keywords', cache_object)
+      keywords = instance.attributelist_to_dict('keywords', cache_object)
 
-      description = self.attribute_to_dict(self.description, cache_object)
+      description = instance.attribute_to_dict(instance.description, cache_object)
 
-      result = {'id_': self.convert_value(self.id_),
-                'idref': self.convert_value(self.idref),
-                'title': self.convert_value(self.title),
-                'sighting_count': self.convert_value(self.sighting_count),
+      result = {'id_': instance.convert_value(instance.id_),
+                'idref': instance.convert_value(instance.idref),
+                'title': instance.convert_value(instance.title),
+                'sighting_count': instance.convert_value(instance.sighting_count),
                 'description': description,
                 'object': obj,
                 'observable_composition': composed,
                 'keywords': keywords
                 }
     else:
-      result = {'id_': self.convert_value(self.id_),
-                'idref': self.convert_value(self.idref),
-                'title': self.convert_value(self.title),
+      result = {'id_': instance.convert_value(instance.id_),
+                'idref': instance.convert_value(instance.idref),
+                'title': instance.convert_value(instance.title),
                 'object': obj,
                 'observable_composition': composed,
                 }

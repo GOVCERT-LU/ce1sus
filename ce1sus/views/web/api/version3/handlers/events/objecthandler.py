@@ -96,7 +96,7 @@ class ObjectHandler(RestBaseHandler):
           self.check_if_instance_is_viewable(obj, cache_object)
           return obj.to_dict(cache_object)
         elif method == 'PUT':
-          self.check_if_is_modifiable(event)
+          self.check_if_is_modifiable(event, cache_object)
           self.check_allowed_set_validate_or_shared(event, obj, cache_object, json)
           # check if there was not a parent set
           parent_id = json.get('parent_object_id', None)
@@ -114,7 +114,7 @@ class ObjectHandler(RestBaseHandler):
           self.observable_controller.update_object(obj, cache_object, True)
           return obj.to_dict(cache_object)
         elif method == 'DELETE':
-          self.check_if_is_deletable(event)
+          self.check_if_is_deletable(event, cache_object)
           self.observable_controller.remove_object(obj, cache_object, True)
           return 'Deleted object'
     except ValueException as error:
@@ -129,7 +129,7 @@ class ObjectHandler(RestBaseHandler):
       self.observable_controller.update_object(obj, cache_object, True)
       return related_object.to_dict(cache_object)
     elif method == 'DELETE':
-      self.check_if_is_deletable(event)
+      self.check_if_is_deletable(event, cache_object)
       uuid = requested_object['object_uuid']
       if uuid:
         # TODO: review the following
@@ -200,14 +200,14 @@ class ObjectHandler(RestBaseHandler):
         else:
           attribute = self.attribute_controller.get_attribute_by_uuid(uuid)
           if method == 'PUT':
-            self.check_if_is_modifiable(event)
+            self.check_if_is_modifiable(event, cache_object)
             self.check_allowed_set_validate_or_shared(event, attribute, cache_object, json)
             self.updater.update(attribute, json, cache_object)
             self.attribute_controller.update_attribute(attribute, cache_object)
             return attribute.to_dict(cache_object)
 
           elif method == 'DELETE':
-            self.check_if_event_is_deletable(event)
+            self.check_if_event_is_deletable(event, cache_object)
             self.attribute_controller.remove_attribute(attribute, cache_object, True)
             return 'Deleted object'
 

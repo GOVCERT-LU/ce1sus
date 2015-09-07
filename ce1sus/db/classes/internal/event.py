@@ -189,14 +189,19 @@ class Event(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(cache_object.inflated)
-    
+
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      instance = self.get_instance(attributes=[Event.stix_header])
+
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
       comments = instance.attributelist_to_dict('comments', cache_object)
     else:
       comments = list()
-    
+
     if cache_object.complete:
+
       result = {'id_':instance.convert_value(instance.id_),
                 'int_id': instance.convert_value(instance.identifier),
                 'analysis': instance.convert_value(instance.analysis),

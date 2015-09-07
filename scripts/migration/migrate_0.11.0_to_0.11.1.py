@@ -397,8 +397,8 @@ class Migrator(object):
     self.session.get_session().flush()
     observables[item.identifier] = item
 
-  def __merge_object_recursive(self, obj, observables):
-    self.__merge_object(obj, observables)
+  def __merge_object_recursive(self, obj, observables, parent=None):
+    self.__merge_object(obj, observables, parent=parent)
     # merge RelatedObject
     for rel_obj in obj.related_objects:
       print 'Merging ReleatedObject {0}'.format(rel_obj.identifier)
@@ -406,9 +406,9 @@ class Migrator(object):
       self.__set_path(rel_obj, parent=obj, parent_tlp=obj)
       self.session.get_session().merge(rel_obj)
       self.session.get_session().flush()
-      self.__merge_object_recursive(rel_obj.object, observables)
+      self.__merge_object_recursive(rel_obj.object, observables, parent=obj)
 
-  def __merge_object(self, obj, observables):
+  def __merge_object(self, obj, observables, parent=None):
     try:
       print 'Merging Object {0}'.format(obj.identifier)
       obj.namespace = 'ce1sus'
@@ -419,8 +419,11 @@ class Migrator(object):
         else:
           observable = self.session.get_session().query(Observable).filter(Observable.identifier == obj.parent_id).one()
         obj.observable = observable
+        parent_inst = observable
+      else:
+        parent_inst = parent
 
-      self.__set_path(obj)
+      self.__set_path(obj, parent=parent_inst)
       self.session.get_session().merge(obj)
       self.session.get_session().flush()
       for attribute in obj.attributes:
@@ -433,7 +436,8 @@ class Migrator(object):
 
       self.session.get_session().merge(obj)
       self.session.get_session().flush()
-    except ValueError:
+    except NoResultFound:
+      # in existing observable
       pass
 
   def __merge_report(self, item):

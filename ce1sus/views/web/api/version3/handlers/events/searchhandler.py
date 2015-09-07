@@ -154,7 +154,7 @@ class SearchHandler(RestBaseHandler):
     results = self.search_controller.search(needle, operator, definition_id)
     result = list()
     cache_object_copy = cache_object.make_copy()
-    cache_object_copy.details = False
+    cache_object_copy.details = True
     cache_object_copy.inflated = False
     for found_value in results:
       result.append(self.__make_search_result(found_value, cache_object_copy))

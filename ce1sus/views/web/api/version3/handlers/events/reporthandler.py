@@ -70,13 +70,13 @@ class ReportHandler(RestBaseHandler):
           self.check_item_is_viewable(event, report)
           return report.to_dict(cache_object)
         elif method == 'PUT':
-          self.check_if_is_modifiable(event)
+          self.check_if_is_modifiable(event, cache_object)
           self.check_allowed_set_validate_or_shared(event, report, cache_object, json)
           self.updater.update(report, json, cache_object)
           self.report_controller.update_report(report, cache_object, True)
           return report.to_dict(cache_object)
         elif method == 'DELETE':
-          self.check_if_is_deletable(event)
+          self.check_if_is_deletable(event, cache_object)
           self.report_controller.remove_report(report, cache_object, True)
           return 'Deleted report'
     except ValueException as error:
@@ -129,13 +129,13 @@ class ReportHandler(RestBaseHandler):
             return result
         else:
           if method == 'PUT':
-            self.check_if_is_modifiable(event)
+            self.check_if_is_modifiable(event, cache_object)
             self.check_allowed_set_validate_or_shared(event, reference, cache_object, json)
             self.updater.update(reference, json, cache_object)
             self.report_controller.update_reference(reference, cache_object)
             return reference.to_dict(cache_object)
           elif method == 'DELETE':
-            self.check_if_is_deletable(event)
+            self.check_if_is_deletable(event, cache_object)
             self.check_item_is_viewable(event, reference)
             self.report_controller.remove_reference(reference, cache_object, True)
             return 'Deleted object'

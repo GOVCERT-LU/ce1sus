@@ -78,13 +78,13 @@ class ObservableHandler(RestBaseHandler):
       if method == 'GET':
         return observable.to_dict(cache_object)
       elif method == 'PUT':
-        self.check_if_is_modifiable(event)
+        self.check_if_is_modifiable(event, cache_object)
         self.check_allowed_set_validate_or_shared(event, observable, cache_object, json)
         self.updater.update(observable, json, cache_object)
         self.observable_controller.update_observable(observable, cache_object, True)
         return observable.to_dict(cache_object)
       elif method == 'DELETE':
-        self.check_if_is_deletable(event)
+        self.check_if_is_deletable(event, cache_object)
         self.observable_controller.remove_observable(observable, cache_object, True)
         return 'Deleted observable'
 
@@ -128,12 +128,12 @@ class ObservableHandler(RestBaseHandler):
             raise ControllerNothingFoundException(u'Cannot find object with uuid {0}'.format(uuid)) 
 
       elif method == 'PUT':
-        self.check_if_is_modifiable(event)
+        self.check_if_is_modifiable(event, cache_object)
         self.check_allowed_set_validate_or_shared(event, obj, cache_object, json)
         self.updater.update(obj, json, cache_object)
         self.observable_controller.update_object(obj, cache_object, True)
         return obj.to_dict(cache_object)
       elif method == 'DELETE':
-        self.check_if_is_deletable(event)
+        self.check_if_is_deletable(event, cache_object)
         self.observable_controller.remove_object(obj, cache_object, True)
         return 'Deleted object'

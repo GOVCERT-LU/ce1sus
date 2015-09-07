@@ -265,7 +265,7 @@ class EventHandler(RestBaseHandler):
     return 'Event validated'
 
   def __process_event_group(self, method, event, requested_object, json, cache_object):
-    self.check_if_can_change_groups(event)
+    self.check_if_can_change_groups(event, cache_object)
     if method == 'GET':
         uuid = requested_object['object_uuid']
         if uuid:
@@ -327,7 +327,7 @@ class EventHandler(RestBaseHandler):
 
         return result
     elif method == 'DELETE':
-      self.check_if_is_deletable(event)
+      self.check_if_is_deletable(event, cache_object)
       uuid = requested_object.get('object_uuid', None)
       if uuid:
         # TODO delete relation
@@ -359,7 +359,7 @@ class EventHandler(RestBaseHandler):
         else:
           return result
     if method == 'POST':
-      self.check_if_is_modifiable(event)
+      self.check_if_is_modifiable(event, cache_object)
       report = self.assembler.assemble(json, Report, event, cache_object)
       self.report_controller.insert_report(report, cache_object)
       return report.to_dict(cache_object)

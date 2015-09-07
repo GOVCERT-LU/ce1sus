@@ -30,7 +30,7 @@ class EventsHandler(RestBaseHandler):
     count = parameters.get('count', None)
     cache_object = self.get_cache_object(args)
     cache_object.inflated = False
-
+    cache_object.details = False
     if count:
       count = int(count)
     else:

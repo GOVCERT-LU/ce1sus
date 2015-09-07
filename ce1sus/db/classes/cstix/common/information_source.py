@@ -152,22 +152,28 @@ class InformationSource(Entity, Base):
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(cache_object.complete)
 
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=cache_object.complete)
+    else:
+      instance = self.get_instance(attributes=[InformationSource.roles, InformationSource.identity, InformationSource.time])
+
+    copy = cache_object.make_copy()
+    copy.inflated = True
     if cache_object.complete:
       result = {
                 'description':instance.attribute_to_dict(instance.description, cache_object),
                 'identity': instance.attribute_to_dict(instance.identity, cache_object),
                 'time': instance.attribute_to_dict(instance.time, cache_object),
                 'tools': instance.attributelist_to_dict('tools', cache_object),
-                'roles': instance.attributelist_to_dict('roles', cache_object),
+                'roles': instance.attributelist_to_dict('roles', copy),
                 'contributing_sources': instance.attributelist_to_dict('contributing_sources', cache_object)
               }
     else:
       result = {
                 'identity': instance.attribute_to_dict(instance.identity, cache_object),
                 'time': instance.attribute_to_dict(instance.time, cache_object),
-                'roles': instance.attributelist_to_dict('roles', cache_object),
+                'roles': instance.attributelist_to_dict('roles', copy),
               }
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

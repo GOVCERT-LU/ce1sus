@@ -481,6 +481,34 @@ class Path(BaseObject, Base):
   event = relationship('Event', uselist=False)
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   item_dbcode = Column('item_code', Integer, nullable=False, default=0, index=True)
+  __item_bit_code = None
+  __merged_bit_code = None
+
+
+  @property
+  def merged_properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__merged_bit_code is None:
+      if self.dbcode is None:
+        self.__merged_bit_code = Properties('0', self)
+      else:
+        self.__merged_bit_code = Properties(self.dbcode, self)
+    return self.__merged_bit_code
+
+  @property
+  def item_properties(self):
+    """
+    Property for the bit_value
+    """
+    if self.__item_bit_code is None:
+      if self.dbcode is None:
+        self.__item_bit_code = Properties('0', self)
+      else:
+        self.__item_bit_code = Properties(self.dbcode, self)
+    return self.__item_bit_code
+
 
   @property
   def parent_table(self):

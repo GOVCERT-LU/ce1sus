@@ -35,10 +35,12 @@ class CyboxTime(Entity, Base):
   information_source = relationship('InformationSource', uselist=False)
 
   def to_dict(self, cache_object):
-    result = {'start_time': self.attribute_to_dict(self.start_time, cache_object),
-              'end_time':self.attribute_to_dict(self.end_time, cache_object),
-              'produced_time':self.attribute_to_dict(self.produced_time, cache_object),
-              'received_time':self.attribute_to_dict(self.received_time, cache_object),
+    instance = self.get_instance(all_attributes=True)
+
+    result = {'start_time': instance.attribute_to_dict(instance.start_time, cache_object),
+              'end_time':instance.attribute_to_dict(instance.end_time, cache_object),
+              'produced_time':instance.attribute_to_dict(instance.produced_time, cache_object),
+              'received_time':instance.attribute_to_dict(instance.received_time, cache_object),
               }
 
     parent_dict = Entity.to_dict(self, cache_object)
