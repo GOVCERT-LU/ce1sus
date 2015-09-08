@@ -50,7 +50,7 @@ class StringValue(ValueBase, Base):
   """This is a container class for the STRINGVALUES table."""
 
   __mapper_args__ = {'polymorphic_identity':'stringvalue'}
-  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False)
 
   value = Column('value', UnicodeType(255), nullable=False, index=True)
 
@@ -72,7 +72,7 @@ class DateValue(ValueBase, Base):
   """This is a container class for the DATEVALES table."""
   value = Column('value', Date, nullable=False, index=True)
   __mapper_args__ = {'polymorphic_identity':'datevalue'}
-  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False)
 
 
   def validate(self):
@@ -89,7 +89,7 @@ class TimeStampValue(ValueBase, Base):
   """This is a container class for the DATEVALES table."""
   value = Column('value', DateTime, nullable=False, index=True)
   __mapper_args__ = {'polymorphic_identity':'timestampvalue'}
-  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False)
 
   def validate(self):
     """
@@ -104,7 +104,7 @@ class TimeStampValue(ValueBase, Base):
 class TextValue(ValueBase, Base):
   """This is a container class for the TEXTVALUES table."""
   __mapper_args__ = {'polymorphic_identity':'textvalue'}
-  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False)
 
   value = Column('value', UnicodeTextType(), nullable=False)
 
@@ -127,7 +127,7 @@ class NumberValue(ValueBase, Base):
   """This is a container class for the NUMBERVALUES table."""
   value = Column('value', Numeric, nullable=False, index=True)
   __mapper_args__ = {'polymorphic_identity':'numbervalue'}
-  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
+  identifier = Column(BigIntegerType, ForeignKey('valuebases.valuebase_id', ondelete='cascade', onupdate='cascade'), primary_key=True, nullable=False)
 
   def validate(self):
     """

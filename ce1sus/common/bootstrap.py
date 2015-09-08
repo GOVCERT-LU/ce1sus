@@ -12,8 +12,6 @@ import cherrypy
 import logging
 import os
 
-from ce1sus.views.web.adapters.openiocadapter import OpenIOCAdapter
-from ce1sus.views.web.adapters.stixadapter import STIXAdapter
 from ce1sus.views.web.api.version2.depricated import DepricatedView
 from ce1sus.views.web.api.version3.maincontroller import MainController
 from ce1sus.views.web.api.version3.mispcontroller import MISPController
@@ -21,6 +19,7 @@ from ce1sus.views.web.common.decorators import check_auth
 from ce1sus.views.web.frontend.index import IndexView
 from ce1sus.views.web.frontend.menus import GuiMenus
 from ce1sus.views.web.frontend.plugin import GuiPlugins
+from ce1sus.views.web.api.version3.stixcontroller import STIXController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -54,8 +53,9 @@ def bootstrap(config, cherrypy_cfg='/../../config/cherrypy.conf'):
   cherrypy.tree.mount(GuiPlugins(config), '/plugins')
 
   cherrypy.tree.mount(MISPController(config), '/MISP')
-  cherrypy.tree.mount(STIXAdapter(config), '/STIX/0.1')
-  cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
+  cherrypy.tree.mount(STIXController(config), '/STIX')
+
+  # cherrypy.tree.mount(OpenIOCAdapter(config), '/OpenIOC/0.1')
   # cherrypy.tree.mount(Ce1susViewAdapter(config), '/ce1sus/0.1')
   # instantiate auth module
   cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)

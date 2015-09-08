@@ -415,7 +415,9 @@ class Migrator(object):
 
       if obj.parent_id:
         if observables:
-          observable = observables[obj.parent_id]
+          observable = observables.get(obj.parent_id, None)
+          if observable is None:
+            raise NoResultFound()
         else:
           observable = self.session.get_session().query(Observable).filter(Observable.identifier == obj.parent_id).one()
         obj.observable = observable
@@ -478,6 +480,8 @@ class Migrator(object):
       item.creator_id = user.identifier
       self.session.get_session().merge(item)
     self.session.get_session().flush()
+
+
     setattr(StructuredText, '_PARENTS', ['stix_header_description', 'stix_header_short_description', 'information_source_description', 'indicator_description', 'indicator_short_description', 'report_description', 'report_short_description', 'observable_description', 'sighting_description'])
     setattr(InformationSource, '_PARENTS', ['stix_header', 'indicator_producer', 'sighting', 'information_source'])
     setattr(Event, 'foo', Column('description', UnicodeText(collation='utf8_unicode_ci')))
@@ -504,7 +508,7 @@ class Migrator(object):
         self.__set_extendedlogging(item.stix_header, item)
         self.session.get_session().add(item.stix_header)
         self.session.get_session().flush()
-        self.__set_path(item.stix_header, parent=item)
+        self.__set_path(item.stix_header, parent=item, parent_tlp=item)
         self.__set_old_tlp_new_instance(item.stix_header)
 
 
@@ -656,13 +660,6 @@ class Migrator(object):
       self.session.get_session().merge(item)
     self.session.get_session().flush()
 
-
-    """
-    all = self.session.get_session().query(Object).filter(Object.path == None).all()
-    for item in all:
-      self.observable_controller.remove_object(item, CacheObject(), False)
-    self.session.get_session().flush()
-    """
     self.session.get_session().commit()
 
   def altering_tables_phase1(self):
@@ -989,9 +986,13 @@ class Migrator(object):
       except Exception:
         pass
       self.__add_column(clazz, 'identifier')
+
       self.__drop_fk(clazz, '{0}_ibfk_1'.format(clazz.get_table_name()))
       self.__drop_fk(clazz, '{0}_ibfk_2'.format(clazz.get_table_name()))
       self.__drop_fk(clazz, '{0}_ibfk_3'.format(clazz.get_table_name()))
+
+      self.__add_fk(clazz, 'identifier', '{0}_ibfk_1'.format(clazz.get_table_name()))
+
       self.__drop_column(clazz, 'uuid')
       # drop unique constraint
       self.op.alter_column(clazz.get_table_name(), 'attribute_id', nullable=True, existing_type=BigInteger)
@@ -1034,6 +1035,12 @@ class Migrator(object):
     instance.path.event_id = path.event_id
 
   def merge_value_data(self):
+
+    all = self.session.get_session().query(Object).filter(Object.path == None).all()
+    for item in all:
+      self.observable_controller.remove_object(item, CacheObject(), False)
+    self.session.get_session().flush()
+
     meta = MetaData(bind=self.engine, reflect=True)
     for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
 
@@ -1050,20 +1057,22 @@ class Migrator(object):
         value_type_id = item.attributetype_id
         id_ = getattr(item, '{0}_id'.format(clazz.get_classname().lower()))
         print 'Merging Attribute {1}Value with id {0}'.format(id_, clazz.get_classname())
-        new_value_base = clazz()
-        new_value_base.uuid = uuid4()
-        new_value_base.attribute_id = attribute_id
-        new_value_base.event_id = event_id
-        new_value_base.value_type_id = value_type_id
-        new_value_base.type = clazz.get_classname().lower()
-        new_value_base.value = value
-        self.session.get_session().add(new_value_base)
+        # check if attribute still exists
+        if self.session.get_session().query(Attribute).filter(Attribute.identifier == attribute_id).count() == 1:
+          new_value_base = clazz()
+          new_value_base.uuid = uuid4()
+          new_value_base.attribute_id = attribute_id
+          new_value_base.event_id = event_id
+          new_value_base.value_type_id = value_type_id
+          new_value_base.type = clazz.get_classname().lower()
+          new_value_base.value = value
+          self.session.get_session().add(new_value_base)
 
+      self.session.get_session().flush()
       self.session.get_session().query(clazz).filter(clazz.identifier == None).delete(synchronize_session='fetch')
       self.session.get_session().flush()
 
-
-
+    self.session.get_session().commit()
 
 
 
@@ -1116,12 +1125,12 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
-  # migros.create_new_tables()
-  # migros.pre_steps()
-  # migros.altering_tables_phase1()
-  # migros.change_value_tables_phase1()
+  migros.create_new_tables()
+  migros.pre_steps()
+  migros.altering_tables_phase1()
+  migros.change_value_tables_phase1()
   observables, events = None, None
-  # observables, events = migros.merge_data()
+  observables, events = migros.merge_data()
   migros.merge_remaining(observables, events)
   migros.merge_value_data()
   migros.change_value_tables_phase2()

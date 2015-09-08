@@ -54,6 +54,14 @@ class IndicatorType(Entity, Base):
       self.__type_ = VocabIndicatorType(self, 'type_id')
     self.type_.name = type_
 
+  @property
+  def value(self):
+    return self.type_.name
+
+  @value.setter
+  def value(self, value):
+    self.type_ = value
+
   def to_dict(self, cache_object):
 
     result = {

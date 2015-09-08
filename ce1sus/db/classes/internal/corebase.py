@@ -14,6 +14,7 @@ from sqlalchemy.sql.schema import Column
 from sqlalchemy.types import BigInteger, Unicode, UnicodeText
 import uuid
 
+
 from ce1sus.common import convert_value
 
 

@@ -42,7 +42,7 @@ class ObservableKeyword(Entity, Base):
 class ObservableComposition(Entity, Base):
 
   operator = Column('operator', UnicodeType(3), default=u'OR')
-  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION, back_populates='composedobservable')
+  observables = relationship('Observable', secondary=_REL_OBSERVABLE_COMPOSITION)
 
   # ce1sus specific
   observable_id = Column('parent_id', BigIntegerType, ForeignKey('observables.observable_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)

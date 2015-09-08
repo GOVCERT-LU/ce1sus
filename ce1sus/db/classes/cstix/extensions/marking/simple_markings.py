@@ -11,8 +11,8 @@ from sqlalchemy.schema import Column, ForeignKey
 from ce1sus.common import merge_dictionaries
 from ce1sus.db.classes.cstix.common.statement import Statement
 from ce1sus.db.classes.cstix.data_marking import MarkingStructure
-from ce1sus.db.classes.cstix.relations import _REL_MARKINGSTRUCTURE_STATEMENT
-from ce1sus.db.classes.internal.corebase import BigIntegerType
+# from ce1sus.db.classes.cstix.relations import _REL_MARKINGSTRUCTURE_STATEMENT
+from ce1sus.db.classes.internal.corebase import BigIntegerType, UnicodeTextType
 
 
 __author__ = 'Weber Jean-Paul'
@@ -24,7 +24,7 @@ __license__ = 'GPL v3+'
 class SimpleMarkingStructure(MarkingStructure):
   # override identifier to keep the polymorphics
   identifier = Column(BigIntegerType, ForeignKey('markingstructures.markingstructure_id', ondelete='cascade', onupdate='cascade'), primary_key=True)
-  statement = relationship(Statement, secondary=_REL_MARKINGSTRUCTURE_STATEMENT)
+  statement = Column('statement', UnicodeTextType())  # relationship(Statement, secondary=_REL_MARKINGSTRUCTURE_STATEMENT)
 
   __mapper_args__ = {'polymorphic_identity':'simplemarkingstructure'}
 

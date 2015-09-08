@@ -15,7 +15,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
+"""
 _REL_MARKINGSTRUCTURE_STATEMENT = Table('rel_markingstructure_statement', getattr(Base, 'metadata'),
 
                                        Column('markingstructure_id',
@@ -33,7 +33,7 @@ _REL_MARKINGSTRUCTURE_STATEMENT = Table('rel_markingstructure_statement', getatt
                                               nullable=False,
                                               primary_key=True, index=True)
                                        )
-
+"""
 
 _REL_MARKINGSPECIFICATIONS_INFORMATIONSOURCE = Table('rel_markingspecification_informationsource', getattr(Base, 'metadata'),
 

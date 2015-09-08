@@ -15,7 +15,7 @@ from ce1sus.db.classes.common.baseelements import Entity
 from ce1sus.db.classes.cstix.coa.relations import _REL_COA_IMPACT_STATEMENT, _REL_COA_COST_STATEMENT, _REL_EFFICACY_STATEMENT
 from ce1sus.db.classes.cstix.common.relations import _REL_STATEMENT_STRUCTUREDTEXT, _REL_STATEMENT_INFORMATIONSOURCE, _REL_STATEMENT_CONFIDENCE
 from ce1sus.db.classes.cstix.indicator.relations import _REL_INDICATOR_STATEMENT, _REL_TESTMECHANISM_STATEMENT
-from ce1sus.db.classes.cstix.relations import _REL_MARKINGSTRUCTURE_STATEMENT
+# from ce1sus.db.classes.cstix.relations import _REL_MARKINGSTRUCTURE_STATEMENT
 from ce1sus.db.classes.internal.corebase import UnicodeType
 from ce1sus.db.common.session import Base
 
@@ -46,7 +46,7 @@ class Statement(Entity, Base):
   coa_impact = relationship('CourseOfAction', secondary=_REL_COA_IMPACT_STATEMENT, uselist=False)
   coa_cost = relationship('CourseOfAction', secondary=_REL_COA_COST_STATEMENT, uselist=False)
   coa_efficacy = relationship('CourseOfAction', secondary=_REL_EFFICACY_STATEMENT, uselist=False)
-  simple_marking_structure = relationship('SimpleMarkingStructure', secondary=_REL_MARKINGSTRUCTURE_STATEMENT, uselist=False)
+  # simple_marking_structure = relationship('SimpleMarkingStructure', secondary=_REL_MARKINGSTRUCTURE_STATEMENT, uselist=False)
   base_test_mechanism = relationship('BaseTestMechanism', secondary=_REL_TESTMECHANISM_STATEMENT, uselist=False)
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICATOR_STATEMENT)
 

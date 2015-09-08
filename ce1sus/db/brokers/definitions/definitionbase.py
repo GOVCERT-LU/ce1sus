@@ -40,7 +40,7 @@ class DefinitionBrokerBase(BrokerBase):
       self.session.rollback()
       raise BrokerException(error)
 
-  def get_defintion_by_name(self, name):
+  def get_defintion_by_name(self, name, lower=False):
     """
     Returns the attribute definition object with the given name
 
@@ -52,7 +52,12 @@ class DefinitionBrokerBase(BrokerBase):
     :returns: Object
     """
     try:
-      definition = self.session.query(self.get_broker_class()).filter(getattr(self.get_broker_class(), 'name') == name).one()
+      query = self.session.query(self.get_broker_class())
+      if lower:
+        query = query.filter(getattr(self.get_broker_class(), 'name').ilike(name))
+      else:
+        query = query.filter(getattr(self.get_broker_class(), 'name') == name)
+      definition = query.one()
       return definition
     except sqlalchemy.orm.exc.MultipleResultsFound:
       raise TooManyResultsFoundException('Too many results found for name :{0}'.format(name))

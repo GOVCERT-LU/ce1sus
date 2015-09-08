@@ -47,16 +47,26 @@ class Version(object):
 
   @version.setter
   def version(self, version):
-    if isinstance(version, Version):
-      version_str = version.version
+    if version:
+      if isinstance(version, Version):
+        version_str = version.version
+      else:
+        version_str = version
+      if len(version_str.split('.')) == 3:
+        if self.__parent_object:
+          setattr(self.__parent_object, self.__attr_name, version_str)
+        self.__version = version_str
+      else:
+        if len(version_str.split('.')) == 2:
+          version_str = '{0}.0'.format(version)
+          if self.__parent_object:
+            setattr(self.__parent_object, self.__attr_name, version_str)
+          self.__version = version_str
+        else:
+          raise VersionException('Version error for {0}'.format(version))
     else:
-      version_str = version
-    if len(version_str.split('.')) == 3:
-      if self.__parent_object:
-        setattr(self.__parent_object, self.__attr_name, version_str)
-      self.__version = version_str
-    else:
-      raise VersionException()
+      setattr(self.__parent_object, self.__attr_name, '0.0.0')
+      self.__version = '0.0.0'
 
   def compare(self, version):
     """

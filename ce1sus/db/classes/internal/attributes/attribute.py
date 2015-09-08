@@ -54,7 +54,7 @@ class Attribute(BaseElement, Base):
                             primaryjoin='AttributeDefinition.identifier==Attribute.definition_id'
                             )
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
-  object = relationship('Object', single_parent=True)
+  object = relationship('Object', uselist=False)
   # valuerelations
   value_base = relationship(ValueBase,
                             primaryjoin='Attribute.identifier==ValueBase.attribute_id',
@@ -165,7 +165,7 @@ class Attribute(BaseElement, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(True)
+    instance = self.get_instance(all_attributes=True)
     condition = None
     condition_id = None
     if instance.condition:

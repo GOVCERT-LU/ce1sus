@@ -63,7 +63,7 @@ def basedecode(number):
 
 def instance_code(instance):
   result = table_code(instance.get_table_name())
-  result = result + '-' + baseencode(instance.identifier)
+  result = '{0}-{1}'.format(result, instance.uuid)
   return result
 
 def table_code(value):
