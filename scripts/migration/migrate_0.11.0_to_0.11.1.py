@@ -1004,7 +1004,13 @@ class Migrator(object):
   def change_value_tables_phase2(self):
     for clazz in [StringValue, TextValue, DateValue, TimeStampValue, NumberValue]:
       table_name = clazz.get_table_name()
-      self.__drop_add_pk(table_name, ['identifier'])
+      self.__drop_fk(clazz, '{0}_ibfk_1'.format(clazz.get_table_name()))
+      try:
+        self.__drop_add_pk(table_name, ['identifier'])
+      except OperationalError:
+        self.op.create_primary_key(None, table_name, ['identifier'])
+
+      self.__add_fk(clazz, 'identifier', '{0}_ibfk_1'.format(clazz.get_table_name()))
       self.__drop_column(clazz, '{0}_id'.format(clazz.get_classname().lower()))
       self.__drop_column(clazz, 'attribute_id')
       self.__drop_column(clazz, 'event_id')
