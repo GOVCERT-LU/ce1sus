@@ -71,9 +71,11 @@ class PathController(BaseController):
       if isinstance(instance, Event):
         path_instance.event = None
       else:
-        if parent:
-          path_instance.event = parent.path.event
-        else:
-          path_instance.event = instance.parent.path.event
+        if parent is None:
+          parent = instance.parent
+          if isinstance(parent, Event):
+            path_instance.event = parent
+          else:
+            path_instance.event = parent.path.root
 
     return path_instance

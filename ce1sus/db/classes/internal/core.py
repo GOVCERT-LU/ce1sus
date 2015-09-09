@@ -22,7 +22,6 @@ from ce1sus.common import merge_dictionaries
 from ce1sus.common.utils import instance_code
 from ce1sus.db.classes.internal.common import TLP, Properties
 from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType
-from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.classes.internal.usrmgt.user import User
 
 
@@ -132,7 +131,7 @@ class BaseElement(ExtendedLogingInformations):
 
   @declared_attr
   def path(self):
-    return relationship(Path, secondary='rel_{0}_path'.format(self.get_classname().lower()), uselist=False, lazy='joined')
+    return relationship('Path', secondary='rel_{0}_path'.format(self.get_classname().lower()), uselist=False, lazy='joined')
 
   _PARENTS = list()
 
@@ -205,7 +204,7 @@ class BaseElement(ExtendedLogingInformations):
   @property
   def root(self):
     if self.path:
-      return self.path.event
+      return self.path.root
     else:
       return None
 

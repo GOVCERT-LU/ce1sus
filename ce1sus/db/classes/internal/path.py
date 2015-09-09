@@ -12,6 +12,7 @@ from sqlalchemy.sql.sqltypes import Integer
 from ce1sus.common.utils import table_code
 from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, BigIntegerType, UnicodeTextType
+from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.common.session import Base
 
 
@@ -478,7 +479,7 @@ class Path(BaseObject, Base):
   item_tlp_level_id = Column('item_tlp_level_id', Integer, default=3, nullable=False, index=True)
   path = Column('path', UnicodeTextType, nullable=False)
   event_id = Column('event_id', BigIntegerType, ForeignKey('events.event_id', onupdate='cascade', ondelete='cascade'), nullable=True, index=True)
-  event = relationship('Event', uselist=False)
+  event = relationship(Event, uselist=False)
   dbcode = Column('code', Integer, nullable=False, default=0, index=True)
   item_dbcode = Column('item_code', Integer, nullable=False, default=0, index=True)
   __item_bit_code = None
@@ -509,7 +510,6 @@ class Path(BaseObject, Base):
         self.__item_bit_code = Properties(self.dbcode, self)
     return self.__item_bit_code
 
-
   @property
   def parent_table(self):
     splitted = self.path.rsplit('/', 2)
@@ -523,6 +523,7 @@ class Path(BaseObject, Base):
     else:
       return None
 
-
-
+  @property
+  def root(self):
+    return self.event
 

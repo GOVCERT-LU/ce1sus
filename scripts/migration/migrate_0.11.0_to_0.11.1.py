@@ -1102,10 +1102,20 @@ class Migrator(object):
       self.session.get_session().commit()
 
   def post_steps(self):
+    paths = self.session.get_session().query(Path).all()
+
+    for path in paths:
+      path.event = path.root
+      self.session.get_session().merge(path)
+    self.session.get_session().flush()
+
+    """
     # insert or update db key
     dbversion = self.session.get_session().query(Ce1susConfig).filter(Ce1susConfig.key == 'db_version').one()
     dbversion.value = '0.11.1'
     self.session.get_session().merge(dbversion)
+
+    """
     self.session.get_session().commit()
 
   def close(self):
@@ -1131,16 +1141,16 @@ if __name__ == '__main__':
 
 
   migros = Migrator(config)
-  migros.create_new_tables()
-  migros.pre_steps()
-  migros.altering_tables_phase1()
-  migros.change_value_tables_phase1()
-  observables, events = None, None
-  observables, events = migros.merge_data()
-  migros.merge_remaining(observables, events)
-  migros.merge_value_data()
-  migros.change_value_tables_phase2()
-  migros.altering_tables_phase2()
+  # migros.create_new_tables()
+  # migros.pre_steps()
+  # migros.altering_tables_phase1()
+  # migros.change_value_tables_phase1()
+  # observables, events = None, None
+  # observables, events = migros.merge_data()
+  # migros.merge_remaining(observables, events)
+  # migros.merge_value_data()
+  # migros.change_value_tables_phase2()
+  # migros.altering_tables_phase2()
   migros.post_steps()
   migros.close()
 

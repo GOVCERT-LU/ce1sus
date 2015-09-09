@@ -36,6 +36,7 @@ class CacheObject(object):
     self.__created_at = None
     self.__modified_on = None
     self.modified_set = False
+    self.small = False
     if authorized_cache:
       self.authorized_cache = authorized_cache
     else:
@@ -79,6 +80,7 @@ class CacheObject(object):
     cache_object.rest_insert = self.rest_insert
     cache_object.seen_groups = self.seen_groups
     cache_object.permission_controller = self.permission_controller
+    cache_object.small = self.small
     return cache_object
 
   def set_default(self):

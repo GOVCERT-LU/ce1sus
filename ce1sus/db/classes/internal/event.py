@@ -193,7 +193,10 @@ class Event(Entity, Base):
     if cache_object.complete:
       instance = self.get_instance(all_attributes=True)
     else:
-      instance = self.get_instance(attributes=[Event.stix_header])
+      if cache_object.small:
+        instance = self.get_instance()
+      else:
+        instance = self.get_instance(attributes=[Event.stix_header])
 
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
       comments = instance.attributelist_to_dict('comments', cache_object)

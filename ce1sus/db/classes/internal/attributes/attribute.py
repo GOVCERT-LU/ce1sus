@@ -50,15 +50,13 @@ class Condition(SimpleLoggingInformations, Base):
 class Attribute(BaseElement, Base):
   definition_id = Column('definition_id', BigIntegerType,
                          ForeignKey('attributedefinitions.attributedefinition_id', onupdate='cascade', ondelete='restrict'), nullable=False, index=True)
-  definition = relationship('AttributeDefinition',
-                            primaryjoin='AttributeDefinition.identifier==Attribute.definition_id'
-                            )
+  definition = relationship('AttributeDefinition')
   object_id = Column('object_id', BigIntegerType, ForeignKey('objects.object_id', onupdate='cascade', ondelete='cascade'), nullable=False, index=True)
   object = relationship('Object', uselist=False)
   # valuerelations
   value_base = relationship(ValueBase,
-                            primaryjoin='Attribute.identifier==ValueBase.attribute_id',
-                            uselist=False, single_parent=True)
+                            uselist=False,
+                            single_parent=True)
 
   is_ioc = Column('is_ioc', Boolean)
   # TODO make relation table
@@ -165,15 +163,22 @@ class Attribute(BaseElement, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(all_attributes=True)
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      if cache_object.small:
+        instance = self.get_instance()
+      else:
+        instance = self.get_instance(attributes=[Attribute.definition])
+    
     condition = None
     condition_id = None
-    if instance.condition:
+    if cache_object.complete and instance.condition:
       condition = instance.condition.to_dict(cache_object)
       condition_id = instance.convert_value(instance.condition.uuid)
 
     value = self.convert_value(self.value)
-    handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
+    # handler_uuid = '{0}'.format(self.definition.attribute_handler.uuid)
     """
     if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66', 'e8b47b60-8deb-11e3-baa8-0800200c9a66']:
       # serve file
@@ -184,13 +189,20 @@ class Attribute(BaseElement, Base):
       # with open(filepath, "rb") as raw_file:
       #    value = b64encode(raw_file.read())
     """
-    result = {'identifier': instance.convert_value(instance.uuid),
-            'definition_id': instance.convert_value(instance.definition.uuid),
-            'definition': instance.definition.to_dict(cache_object),
-            'ioc': instance.is_ioc,
-            'value': value,
-            'condition_id': condition_id,
-            'condition': condition,
-            }
+    if cache_object.complete:
+      result = {'identifier': instance.convert_value(instance.uuid),
+              'definition_id': instance.convert_value(instance.definition.uuid),
+              'definition': instance.definition.to_dict(cache_object),
+              'ioc': instance.is_ioc,
+              'value': value,
+              'condition_id': condition_id,
+              'condition': condition,
+              }
+    else:
+      result = {'identifier': instance.convert_value(instance.uuid),
+              'definition_id': instance.convert_value(instance.definition.uuid),
+              'definition': instance.definition.to_dict(cache_object),
+              'value': value
+              }
     parent_dict = BaseElement.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

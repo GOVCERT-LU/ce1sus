@@ -47,8 +47,7 @@ class SearchController(BaseController):
                         Report,
                         Reference,
                         Indicator,
-                        STIXHeader,
-                        StructuredText
+                        STIXHeader
                         ]
   
   SEARCHABLE_PROPERIES = ['title',
@@ -113,6 +112,12 @@ class SearchController(BaseController):
         if res:
           found_values.extend(res)
 
+    return found_values
+
+  def search_by_property(self, property_name, needle, operator):
+    found_values = list()
+    for clazz in SearchController.SEARCHABLE_CLASSES:
+      found_values.extend(self.search_broker.look_for_value_by_property_name(clazz, property_name, needle, operator))
     return found_values
 
   def serach_for_any_value(self, needle, operator):

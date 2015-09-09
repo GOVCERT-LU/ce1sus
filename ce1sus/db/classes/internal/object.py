@@ -65,14 +65,25 @@ class Object(Entity, Base):
 
 
   def to_dict(self, cache_object):
+    if cache_object.complete:
+      instance = self.get_instance(all_attributes=True)
+    else:
+      instance = self.get_instance(attribtues=[Object.definition])
+
     cache_object_defs = cache_object.make_copy()
     cache_object_defs.inflated = False
-    result = {
-            'definition_id': self.convert_value(self.definition.uuid),
-            'definition': self.attribute_to_dict(self.definition, cache_object_defs),
-            'attributes': self.attributelist_to_dict('attributes', cache_object),
-            'related_objects': self.attributelist_to_dict('related_objects', cache_object),
-            }
+    if cache_object.complete:
+      result = {
+              'definition_id': instance.convert_value(instance.definition.uuid),
+              'definition': instance.attribute_to_dict(instance.definition, cache_object_defs),
+              'attributes': instance.attributelist_to_dict('attributes', cache_object),
+              'related_objects': instance.attributelist_to_dict('related_objects', cache_object),
+              }
+    else:
+      result = {
+              'definition_id': instance.convert_value(instance.definition.uuid),
+              'definition': instance.attribute_to_dict(instance.definition, cache_object_defs),
+              }
 
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
@@ -105,11 +116,12 @@ class RelatedObject(Entity, Base):
       self.relationship_id = None
 
   def to_dict(self, cache_object):
+    instance = self.get_instance(all_attributes=True)
     obj = self.attribute_to_dict(self.object, cache_object)
     result = {
             'object': obj,
-            'relationship': self.convert_value(self.relationship.name),
-            'parent_id': self.convert_value(self.parent_id)
+            'relationship': instance.convert_value(instance.relationship.name),
+            'parent_id': instance.convert_value(instance.parent_id)
             }
     parent_dict = BaseElement.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)

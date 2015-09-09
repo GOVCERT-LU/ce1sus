@@ -20,14 +20,18 @@ Ce1susRestException.prototype.constructor = Ce1susRestException;
 
 function extractBodyFromHTML(text){
   var message = text;
-  var bodyStart = message.indexOf('<body') + 5;
-  var bodyEnd = message.indexOf('</body>');
-  message = message.substring(bodyStart,bodyEnd); 
-  bodyStart = message.indexOf('>')+1;
-  message = message.substring(bodyStart); 
-  //Remove powered tag
-  bodyEnd = message.indexOf('<div id="');
-  message = message.substring(0,bodyEnd);
+  if (message) {
+    var bodyStart = message.indexOf('<body') + 5;
+    var bodyEnd = message.indexOf('</body>');
+    message = message.substring(bodyStart,bodyEnd); 
+    bodyStart = message.indexOf('>')+1;
+    message = message.substring(bodyStart); 
+    //Remove powered tag
+    bodyEnd = message.indexOf('<div id="');
+    message = message.substring(0,bodyEnd);
+  } else {
+    message = '';
+  }
   return message;
 }
 

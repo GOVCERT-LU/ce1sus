@@ -72,7 +72,10 @@ class STIXHeader(Entity, Base):
     if cache_object.complete:
       instance = self.get_instance(all_attributes=True)
     else:
-      instance = self.get_instance(attributes=[STIXHeader.handling, STIXHeader.information_source])
+      if cache_object.small:
+        instance = self.get_instance()
+      else:
+        instance = self.get_instance(attributes=[STIXHeader.handling, STIXHeader.information_source])
 
     if cache_object.complete:
       result = {'package_intents': instance.attributelist_to_dict('package_intents', cache_object),
@@ -83,10 +86,13 @@ class STIXHeader(Entity, Base):
                 'handling': instance.attributelist_to_dict('handling', cache_object),
                 }
     else:
-      result = {'title': instance.convert_value(instance.title),
-                'information_source': instance.attribute_to_dict(instance.information_source, cache_object),
-                'handling': instance.attributelist_to_dict('handling', cache_object),
-                }
+      if cache_object.small:
+        result = {'title': instance.convert_value(instance.title)}
+      else:
+        result = {'title': instance.convert_value(instance.title),
+                  'information_source': instance.attribute_to_dict(instance.information_source, cache_object),
+                  'handling': instance.attributelist_to_dict('handling', cache_object),
+                  }
 
     parent_dict = Entity.to_dict(self, cache_object)
     return merge_dictionaries(result, parent_dict)
