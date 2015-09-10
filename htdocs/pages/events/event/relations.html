@@ -7,9 +7,9 @@
       <td data-title="'Attribute value'" sortable="'rel_attribute.value'" filter="{ 'rel_attribute.value': 'text' }">
                 {{relation.rel_attribute.value}}
       </td> 
-      <td data-title="'Event Title'" sortable="'rel_event.title'" filter="{ 'rel_event.title': 'text' }">
-                {{relation.rel_event.title}}
+      <td data-title="'Event Title'" sortable="'rel_event.stix_header.title'" filter="{ 'rel_event.stix_header.title': 'text' }">
+                {{relation.rel_event.stix_header.title}}
       </td> 
-      <td data-title="'Options'"><a href="" ng-click="pushItem(relation.rel_event, true)"><span class="glyphicon glyphicon-eye-open" title="View event" ></span></a></td>
+      <td data-title="'Options'"><a href="#/events/event/{{relation.rel_event.identifier}}"><span class="glyphicon glyphicon-eye-open" title="View event" ></span></a></td>
     </tr>
 </table>

@@ -65,10 +65,7 @@ class Object(Entity, Base):
 
 
   def to_dict(self, cache_object):
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      instance = self.get_instance(attribtues=[Object.definition])
+    instance = self.get_instance([Object.definition], cache_object)
 
     cache_object_defs = cache_object.make_copy()
     cache_object_defs.inflated = False
@@ -116,7 +113,7 @@ class RelatedObject(Entity, Base):
       self.relationship_id = None
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(all_attributes=True)
+    instance = self.get_instance([], cache_object)
     obj = self.attribute_to_dict(self.object, cache_object)
     result = {
             'object': obj,

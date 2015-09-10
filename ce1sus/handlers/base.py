@@ -113,6 +113,8 @@ class HandlerBase(object):
     raise HandlerException('get_view_type is not defined')
 
   def set_base(self, instance, json, parent, change_base_element=True):
+    
+    instance.path = Path()
     if json:
       # do not overwrite the uuid
       proposed_uuid = json.get('identifier', None)
@@ -177,6 +179,12 @@ class HandlerBase(object):
 
     if instance.uuid is None:
       instance.uuid = '{0}'.format(uuid.uuid4())
+
+    path_instance = self.path_controller.make_path(instance, parent=parent)
+    instance.path.event = path_instance.event
+    instance.path.path = path_instance.path
+    instance.path.dbcode = path_instance.dbcode
+    instance.path.tlp_level_id = path_instance.tlp_level_id
 
   def to_dict(self):
     return {'name': self.__class__.__name__,

@@ -146,12 +146,14 @@ class Reference(Entity, Base):
   report = relationship('Report', uselist=False)
 
   def to_dict(self, cache_object):
-    value = self.convert_value(self.value)
+    instance = self.get_instance([Reference.definition], cache_object)
 
-    handler_uuid = '{0}'.format(self.definition.reference_handler.uuid)
+    value = instance.convert_value(instance.value)
+
+    handler_uuid = '{0}'.format(instance.definition.reference_handler.uuid)
     if handler_uuid in ['0be5e1a0-8dec-11e3-baa8-0800200c9a66']:
       split = value.split('|')
-      fh = self.definition.handler
+      fh = instance.definition.handler
       filepath = fh.get_base_path() + '/' + split[0]
       data = 'File is MIA'
       if isfile(filepath):
@@ -166,8 +168,8 @@ class Reference(Entity, Base):
         else:
           value = {'filename': None, 'data': b64encode(data)}
 
-    result = {'definition_id': self.convert_value(self.definition.uuid),
-            'definition': self.definition.to_dict(cache_object),
+    result = {'definition_id': instance.convert_value(instance.definition.uuid),
+            'definition': instance.definition.to_dict(cache_object),
             'value': value,
             }
 
@@ -195,19 +197,20 @@ class Report(Entity, Base):
   _PARENTS = ['event', 'report']
 
   def to_dict(self, cache_object):
+    instance = self.get_instance([Report.description, Report.short_description], cache_object)
     if cache_object.complete:
       result = {
-              'title': self.convert_value(self.title),
-              'description': self.attribute_to_dict(self.description, cache_object),
-              'short_description': self.attribute_to_dict(self.short_description, cache_object),
+              'title': instance.convert_value(instance.title),
+              'description': instance.attribute_to_dict(instance.description, cache_object),
+              'short_description': instance.attribute_to_dict(instance.short_description, cache_object),
               # TODO references
-              'references': self.attributelist_to_dict('references', cache_object),
+              'references': instance.attributelist_to_dict('references', cache_object),
               # TODO related_reports
-              'related_reports': self.attributelist_to_dict('related_reports', cache_object),
+              'related_reports': instance.attributelist_to_dict('related_reports', cache_object),
               }
     else:
       result = {
-              'title': self.title,
+              'title': instance.title,
               }
 
     parent_dict = BaseElement.to_dict(self, cache_object)

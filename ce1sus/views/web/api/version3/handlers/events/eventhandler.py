@@ -240,7 +240,7 @@ class EventHandler(RestBaseHandler):
           self.observable_controller.update_observable(observable, cache_object, True)
           return observable.to_dict(cache_object)
         elif method == 'DELETE':
-          self.check_if_is_deletable(event)
+          self.check_if_is_deletable(event, cache_object)
           # TODO: unify the following
           if observable.observable_composition:
             self.check_if_instance_is_viewable(observable.observable_composition, cache_object)

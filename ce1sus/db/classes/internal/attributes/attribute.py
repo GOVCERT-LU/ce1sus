@@ -163,13 +163,7 @@ class Attribute(BaseElement, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      if cache_object.small:
-        instance = self.get_instance()
-      else:
-        instance = self.get_instance(attributes=[Attribute.definition])
+    instance = self.get_instance([Attribute.definition], cache_object)
     
     condition = None
     condition_id = None

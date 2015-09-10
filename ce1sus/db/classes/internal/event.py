@@ -189,14 +189,7 @@ class Event(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      if cache_object.small:
-        instance = self.get_instance()
-      else:
-        instance = self.get_instance(attributes=[Event.stix_header])
+    instance = self.get_instance([Event.stix_header], cache_object)
 
     if cache_object.permission_controller.is_instance_owner(self, cache_object):
       comments = instance.attributelist_to_dict('comments', cache_object)

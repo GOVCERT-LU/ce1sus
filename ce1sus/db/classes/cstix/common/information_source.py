@@ -152,11 +152,7 @@ class InformationSource(Entity, Base):
   indicator = relationship('Indicator', uselist=False, secondary=_REL_INDICAOTR_INFORMATIONSOURCE)
 
   def to_dict(self, cache_object):
-
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=cache_object.complete)
-    else:
-      instance = self.get_instance(attributes=[InformationSource.roles, InformationSource.identity, InformationSource.time])
+    instance = self.get_instance([InformationSource.roles, InformationSource.identity, InformationSource.time], cache_object)
 
     copy = cache_object.make_copy()
     copy.inflated = True

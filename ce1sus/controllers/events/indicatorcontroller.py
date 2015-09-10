@@ -23,6 +23,7 @@ from ce1sus.db.classes.cstix.indicator.valid_time import ValidTime
 from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.definitions import ObjectDefinition
 from ce1sus.db.classes.internal.object import Object
+from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import BrokerException
 
 
@@ -60,6 +61,7 @@ class IndicatorController(BaseController):
   
   def remove_sighting(self, sighting, cache_object, commit=True):
     try:
+      self.common_controller.remove_path(sighting.path, cache_object, False)
       if sighting.source and not isinstance(sighting.source, RelationshipProperty):
         self.common_controller.remove_information_source(sighting.source, cache_object, False)
       if sighting.description and not isinstance(sighting.description, RelationshipProperty):
@@ -76,6 +78,7 @@ class IndicatorController(BaseController):
   def remove_indicator(self, indicator, cache_object, commit=True):
     try:
       self.remove_set_base(indicator, cache_object)
+      self.common_controller.remove_path(indicator.path, cache_object, False)
       if indicator.information_source and not isinstance(indicator.information_source, RelationshipProperty):
         self.common_controller.remove_information_source(indicator.information_source, cache_object, False)
       if indicator.description and not isinstance(indicator.description, RelationshipProperty):
@@ -155,15 +158,16 @@ class IndicatorController(BaseController):
           obs.indicator = indicator
           obs.uuid = uuid4()
           self.set_base(obs, attribute)
-
+          """
           if attribute.object.parent:
             obs.dbcode = attribute.object.parent.dbcode
             obs.tile = attribute.object.parent.title
             obs.description = attribute.object.parent.description
             obs.tlp_level_id = attribute.object.parent.tlp_level_id
           else:
-            obs.dbcode = attribute.object.dbcode
-            obs.tlp_level_id = attribute.object.tlp_level_id
+          """
+          obs.dbcode = attribute.object.dbcode
+          obs.tlp_level_id = attribute.object.tlp_level_id
           obs.object = obj
 
           obj.observable = obs
@@ -186,6 +190,8 @@ class IndicatorController(BaseController):
     return None
 
   def set_base(self, instance, attribute):
+    instance.path = Path()
+    instance.path.event = attribute.path.event
     instance.creator = attribute.creator
     instance.modifier = attribute.modifier
     instance.creator_group = attribute.creator_group

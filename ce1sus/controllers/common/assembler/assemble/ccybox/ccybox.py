@@ -40,7 +40,10 @@ class CyboxAssembler(BaseAssembler):
           observable.description = description
 
         obj = json.get('object', None)
-        if obj:
+        obj_def = obj.get('definition', None)
+        if obj_def is None:
+          obj_def = obj.get('definition_id', None)
+        if obj and obj_def:
           obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
           if obj:
             # must be done to prevent multiple entries in the relations table

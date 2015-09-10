@@ -29,30 +29,19 @@ class EventsController(BaseController):
 
   def get_events(self, offset, limit, user, parameters=None):
     try:
-      user = self.user_broker.get_by_id(user.identifier)
       if offset:
         int_off = int(offset) - 1
       if limit:
         int_lim = int(limit)
 
-      isadmin = self.permission_controller.is_user_priviledged(user)
-      if isadmin:
-        if offset and limit:
-          events = self.event_broker.get_all_limited(int_lim, int_off, parameters)
-          nbr_total_events = self.event_broker.get_total_events(parameters)
-        else:
-          events = self.event_broker.get_all()
-          nbr_total_events = len(events)
-        return (events, nbr_total_events)
+      if offset and limit:
+        events = self.event_broker.get_all_for_user(user, limit=int_lim, offset=int_off, parameters=parameters)
+        nbr_total_events = self.event_broker.get_total_events(user, parameters)
       else:
-        if offset and limit:
-          events = self.event_broker.get_all_limited_for_user(int_lim, int_off, user, parameters)
-          nbr_total_events = self.event_broker.get_total_events_for_user(user, parameters)
-        else:
-          events = self.event_broker.get_all_for_user(user)
-          nbr_total_events = len(events)
+        events = self.event_broker.get_all_for_user(user)
+        nbr_total_events = len(events)
 
-        return (events, nbr_total_events)
+      return (events, nbr_total_events)
     except (BrokerException, ValueError) as error:
       raise ControllerException(error)
 

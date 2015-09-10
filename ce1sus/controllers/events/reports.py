@@ -72,6 +72,8 @@ class ReportController(BaseController):
 
   def remove_report(self, report, cache_object, commit=True):
     try:
+      self.remove_set_base(report, cache_object)
+      self.common_controller.remove_path(report.path, cache_object, False)
       if report.description:
         self.common_controller.remove_structured_text(report.description, cache_object, False)
       if report.short_description:
@@ -123,6 +125,8 @@ class ReportController(BaseController):
   def remove_reference(self, reference, cache_object, commit=True):
     # TODO: include handler
     try:
+      self.remove_set_base(reference, cache_object)
+      self.common_controller.remove_path(reference.path, cache_object, False)
       self.reference_broker.remove_by_id(reference.identifier)
     except BrokerException as error:
       raise ControllerException(error)

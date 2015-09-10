@@ -199,7 +199,7 @@ class ObservableController(BaseController):
     try:
       if setbase:
         self.remove_set_base(observable, cache_object)
-
+      self.common_controller.remove_path(observable.path, cache_object, False)
       if observable.object:
         self.remove_object(observable.object, cache_object, False)
       if observable.observable_composition:
@@ -216,6 +216,7 @@ class ObservableController(BaseController):
   def remove_related_object(self, related_object, cache_object, commit=True):
     try:
       self.remove_set_base(related_object, cache_object)
+      self.common_controller.remove_path(related_object.path, cache_object, False)
       if related_object.object:
         self.remove_object(related_object.object, cache_object, False)
       self.related_object_broker.remove_by_id(related_object.identifier, False)
@@ -229,7 +230,7 @@ class ObservableController(BaseController):
     try:
       if setbase:
         self.remove_set_base(compoed_observable, cache_object)
-
+      self.common_controller.remove_path(compoed_observable.path, cache_object, False)
       for observable in compoed_observable.observables:
         self.remove_observable(observable, cache_object, False)
 
@@ -311,6 +312,7 @@ class ObservableController(BaseController):
   def remove_object(self, obj, cache_object, commit=True):
     try:
       self.remove_set_base(obj, cache_object)
+      self.common_controller.remove_path(obj.path, cache_object, False)
       for rel_object in obj.related_objects:
         self.remove_related_object(rel_object, cache_object, False)
 

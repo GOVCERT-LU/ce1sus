@@ -104,10 +104,12 @@ class BaseObject(object):
     else:
       return None
 
-  def get_instance(self, attributes=None, all_attributes=False):
+  def get_instance(self, attributes, cache_object):
+    if cache_object.small or cache_object.loaded:
+      return self
     joined_loads = list()
     if self.session:
-      if all_attributes:
+      if cache_object.complete:
         fields = get_fields(self.__class__)
         for field in fields:
           attr = getattr(self.__class__, field)

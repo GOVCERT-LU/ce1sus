@@ -126,7 +126,7 @@ class EventController(BaseController):
     self.logger.debug('User {0} deleted a event {1}'.format(cache_object.user.username, event.identifier))
     try:
       self.remove_stix_header(event.stix_header, cache_object, False)
-
+      self.common_controller.remove_path(event.path, cache_object, False)
       for obs in event.observables:
         self.observable_controller.remove_observable(obs, cache_object, False)
       # TODO: the remaining removals
@@ -135,7 +135,7 @@ class EventController(BaseController):
 
       for report in event.reports:
         self.report_controller.remove_report(report, cache_object, False)
-
+      self.common_controller.remove_path(event)
       self.event_broker.remove_by_id(event.identifier, False)
       self.event_broker.do_commit(True)
     except BrokerException as error:
@@ -143,6 +143,7 @@ class EventController(BaseController):
 
   def remove_stix_header(self, stix_header, cache_object, commit=True):
     try:
+      self.common_controller.remove_path(stix_header.path, cache_object, False)
       if stix_header.description:
         self.common_controller.remove_structured_text(stix_header.description, cache_object, False)
       if stix_header.short_description:

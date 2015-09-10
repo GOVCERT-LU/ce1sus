@@ -78,10 +78,7 @@ class ObjectDefinition(SimpleLoggingInformations, Base):
     return ObjectValidator.isObjectValid(self)
 
   def to_dict(self, cache_object):
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      instance = self
+    instance = self.get_instance([], cache_object)
 
     if cache_object.complete:
       result = {
@@ -187,10 +184,7 @@ class AttributeDefinition(SimpleLoggingInformations, Base):
 
 
   def to_dict(self, cache_object):
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      instance = self
+    instance = self.get_instance([], cache_object)
     if cache_object.complete:
       result = {
               'name': instance.convert_value(instance.name),

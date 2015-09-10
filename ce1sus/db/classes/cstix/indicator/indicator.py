@@ -126,10 +126,7 @@ class Indicator(BaseCoreComponent, Base):
 
   def to_dict(self, cache_object):
 
-    if cache_object.complete:
-      instance = self.get_instance()
-    else:
-      instance = self.get_instance(attributes=[Indicator.producer, Indicator.confidence])
+    instance = self.get_instance([Indicator.producer, Indicator.confidence], cache_object)
 
     observables = instance.attributelist_to_dict('observables', cache_object)
     observables_count = len(observables)

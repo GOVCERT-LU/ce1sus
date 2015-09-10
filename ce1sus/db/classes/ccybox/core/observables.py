@@ -62,7 +62,7 @@ class ObservableComposition(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(all_attributes=True)
+    instance = self.get_instance([], cache_object)
 
     observables = instance.attributelist_to_dict('observables', cache_object)
     if observables:
@@ -111,11 +111,7 @@ class Observable(Entity, Base):
     return True
 
   def to_dict(self, cache_object):
-
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      instance = self.get_instance()
+    instance = self.get_instance([], cache_object)
 
 
     if cache_object.inflated:

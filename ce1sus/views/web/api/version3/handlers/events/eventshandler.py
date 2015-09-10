@@ -44,12 +44,12 @@ class EventsHandler(RestBaseHandler):
         offset = 1
     else:
       offset = None
-
-    events, total_events = self.events_controller.get_events(offset, count, cache_object.user, parameters)
+    cache_object_copy = cache_object.make_copy()
+    cache_object_copy.loaded = True
+    events, total_events = self.events_controller.get_events(offset, count, cache_object_copy.user, parameters)
     result = list()
     for event in events:
-      cache_object.event_permissions = self.permission_controller.get_event_permissions(event, cache_object)
-      event = event.attribute_to_dict(event, cache_object)
+      event = event.to_dict(cache_object_copy)
       if event:
         result.append(event)
     return {'total': total_events, 'data': result}

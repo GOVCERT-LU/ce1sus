@@ -10,7 +10,11 @@ import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import and_, or_
 
 from ce1sus.common.utils import get_max_tlp
+from ce1sus.db.classes.ccybox.common.time import CyboxTime
+from ce1sus.db.classes.cstix.common.identity import Identity
+from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
 from ce1sus.db.classes.cstix.core.stix_header import STIXHeader
+from ce1sus.db.classes.cstix.incident.time import Time
 from ce1sus.db.classes.internal.common import Analysis, Status, TLP
 from ce1sus.db.classes.internal.event import Event, EventGroupPermission
 from ce1sus.db.classes.internal.path import Path
@@ -78,9 +82,9 @@ class EventBroker(BrokerBase):
       if anal:
         matching_ids = self.__find_id(Analysis.get_dictionary(), anal)
         result = result.filter(Event.analysis_id.in_(matching_ids))
-      anal = parameters.get('filter[creator_group_name]', None)
+      anal = parameters.get('filter[initial_author]', None)
       if anal:
-        result = result.join(Event.creator_group).filter(Group.name.like('%{0}%'.format(anal)))
+        result = result.join(Event.stix_header).join(STIXHeader.information_source).join(InformationSource.identity).filter(Identity.name.like('%{0}%'.format(anal)))
       anal = parameters.get('filter[created_at]', None)
       if anal:
         result = result.filter(Event.created_at.like('%{0}%'.format(anal)))
@@ -94,7 +98,7 @@ class EventBroker(BrokerBase):
       anal = parameters.get('filter[tlp]', None)
       if anal:
         matching_ids = self.__find_id(TLP.get_dictionary(), anal)
-        result = result.filter(Event.tlp_level_id.in_(matching_ids))
+        result = result.join(Event.path).filter(Path.item_tlp_level_id.in_(matching_ids))
 
       # do a similar stuff for sorting
       anal = parameters.get('sorting[analysis]', None)
@@ -104,12 +108,12 @@ class EventBroker(BrokerBase):
         else:
           result = result.order_by(Event.analysis_id.asc())
 
-      anal = parameters.get('sorting[creator_group_name]', None)
+      anal = parameters.get('sorting[initial_author]', None)
       if anal:
         if anal == 'desc':
-          result = result.join(Event.creator_group).order_by(Group.name.desc())
+          result = result.join(Event.stix_header).join(STIXHeader.information_source).join(InformationSource.identity).order_by(Identity.name.desc())
         else:
-          result = result.join(Event.creator_group).order_by(Group.name.asc())
+          result = result.join(Event.stix_header).join(STIXHeader.information_source).join(InformationSource.identity).order_by(Identity.name.asc())
 
       anal = parameters.get('sorting[created_at]', None)
       if anal:
@@ -135,9 +139,9 @@ class EventBroker(BrokerBase):
       anal = parameters.get('sorting[tlp]', None)
       if anal:
         if anal == 'desc':
-          result = result.order_by(Event.tlp_level_id.desc())
+          result = result.join(Event.path).order_by(Path.item_tlp_level_id.desc())
         else:
-          result = result.order_by(Event.tlp_level_id.asc())
+          result = result.join(Event.path).order_by(Path.item_tlp_level_id.asc())
 
       anal = parameters.get('sorting[id]', None)
       if anal:
@@ -145,23 +149,6 @@ class EventBroker(BrokerBase):
           result = result.order_by(Event.identifier.desc())
         else:
           result = result.order_by(Event.identifier.asc())
-    return result
-
-  def get_all_limited(self, limit, offset, parameters=None):
-    """Returns only a subset of entries"""
-    try:
-      # TODO add validation and published checks
-      # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).join(STIXHeader)
-      # result = self.session.query(Event).join(STIXHeader).filter(Path.dbcode.op('&')(4) == 4)
-      result = self.__set_parameters(result, parameters)
-      result = result.limit(limit).offset(offset).all()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
-
     return result
 
   def __get_group_ids_of_group(self, group):
@@ -176,83 +163,83 @@ class EventBroker(BrokerBase):
     result = self.__get_group_ids_of_group(user.group)
     return result
 
-  def get_all_limited_for_user(self, limit, offset, user, parameters=None):
+  def __get_events_query(self, user, parameters):
+    group_ids = self.__get_all_group_ids_of_user(user)
+    tlp = get_max_tlp(user.group)
+
+    query = self.session.query(Event.identifier).join(Event.path, Event.groups)
+    query = query.filter(or_(and_(Event.creator_group_id == user.group.identifier,
+                                  Event.groups == None
+                                  ),
+                             and_(Path.dbcode.op('&')(12) == 12,
+                                  or_(Path.tlp_level_id >= tlp,
+                                      EventGroupPermission.group_id.in_(group_ids),
+                                      )
+                                  )
+                             )
+                         )
+    if parameters:
+      query = self.__set_parameters(query, parameters)
+    ids = list()
+    for value in query.all():
+      ids.append(value[0])
+
+    query = self.session.query(Event)
+    query = query.options(joinedload(Event.path),
+                          joinedload(Event.groups),
+                          joinedload(Event.stix_header),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.path),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles).joinedload(InformationSourceRole.path),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.path),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity).joinedload(Identity.path),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.path),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.start_time),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.end_time),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.produced_time),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.received_time),
+                          joinedload(Event.stix_header).joinedload(STIXHeader.path)
+                          )
+    query = query.filter(Event.identifier.in_(ids))
+    query = self.__set_parameters(query, parameters)
+    return query
+
+  def get_all_for_user(self, user, limit=None, offset=None, parameters=None):
     """Returns only a subset of entries"""
     try:
-      group_ids = self.__get_all_group_ids_of_user(user)
+      query = self.__get_events_query(user, parameters)
+      if limit is None and offset is None:
+        result = query.all()
+      else:
+        result = query.limit(limit).offset(offset).all()
+      return result
 
-      tlp = get_max_tlp(user.group)
-      # TODO: events for user
-      # TODO add validation and published checks
-      # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      # , Event.tlp_level_id >= tlp
-      result = self.session.query(Event).join(STIXHeader).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
-      result = self.__set_parameters(result, parameters)
-
-      result = result.limit(limit).offset(offset).all()
-      # remove all the no viewable
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
 
-    return result
-
-  def get_all_for_user(self, user):
-    """Returns only a subset of entries"""
+  def get_all_from(self, user, from_datetime):
     try:
-      group_ids = self.__get_all_group_ids_of_user(user)
-      tlp = get_max_tlp(user.group)
-      # TODO: events for user
-      # TODO add validation and published checks
-      # result = self.session.query(self.get_broker_class()).filter(Event.dbcode.op('&')(4) == 4).order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
-      result = self.session.query(Event).distinct().join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids)))).all()
-    except sqlalchemy.orm.exc.NoResultFound:
-      raise NothingFoundException(u'Nothing found')
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
-
-    return result
-
-  def get_all_from(self, from_datetime):
-    try:
-      result = self.session.query(Event).filter(Event.created_at >= from_datetime).all()
+      query = self.__get_events_query(user, None)
+      result = query.filter(Event.created_at >= from_datetime).all()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
       raise BrokerException(error)
 
-  def get_total_events(self, parameters=None):
+  def get_total_events(self, user, parameters=None):
     try:
-      # TODO add validation and published checks
-      result = self.session.query(Event).join(STIXHeader)
-      result = self.__set_parameters(result, parameters)
-
-      result = result.count()
-      # result = self.session.query(self.get_broker_class()).count()
+      query = self.__get_events_query(user, parameters)
+      result = query.count()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
       raise BrokerException(error)
 
-  def get_total_events_for_user(self, user, parameters=None):
-    try:
-      group_ids = self.__get_all_group_ids_of_user(user)
-      tlp = get_max_tlp(user.group)
-      # TODO add validation and published checks
-      # TODO: total events for user
-      result = self.session.query(Event).join(STIXHeader).join(EventGroupPermission).filter(and_(Event.dbcode.op('&')(4) == 4, or_(Event.tlp_level_id >= tlp, EventGroupPermission.group_id.in_(group_ids))))
-      result = self.__set_parameters(result, parameters)
-
-      result = result.count()
-      return result
-    except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
-      raise BrokerException(error)
-
-  def get_all_unvalidated_total(self, parameters=None):
+  def get_all_unvalidated_total(self, user, parameters=None):
     try:
       result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) != 4)
       result = self.__set_parameters(result, parameters)
@@ -260,7 +247,7 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
     return result
 
@@ -275,7 +262,7 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
     return result
 
@@ -285,7 +272,7 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
     return result
 
@@ -294,7 +281,7 @@ class EventBroker(BrokerBase):
       result = self.session.query(Event).filter(Event.uuid.in_(ids)).all()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
     return result
 
@@ -304,7 +291,7 @@ class EventBroker(BrokerBase):
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
     return result
 
@@ -312,14 +299,14 @@ class EventBroker(BrokerBase):
     try:
       self.update(event_group_permission, commit)
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
 
   def insert_group_permission(self, event_group_permission, commit=True):
     try:
       self.insert(event_group_permission, commit)
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)
 
   def remove_group_permission_by_id(self, identifier, commit=True):
@@ -327,5 +314,5 @@ class EventBroker(BrokerBase):
       self.session.query(EventGroupPermission).filter(EventGroupPermission.identifier == identifier).delete(synchronize_session='fetch')
       self.do_commit(commit)
     except sqlalchemy.exc.SQLAlchemyError as error:
-      self.session.rollback()
+
       raise BrokerException(error)

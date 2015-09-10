@@ -68,14 +68,7 @@ class STIXHeader(Entity, Base):
   event = relationship('Event', uselist=False)
 
   def to_dict(self, cache_object):
-
-    if cache_object.complete:
-      instance = self.get_instance(all_attributes=True)
-    else:
-      if cache_object.small:
-        instance = self.get_instance()
-      else:
-        instance = self.get_instance(attributes=[STIXHeader.handling, STIXHeader.information_source])
+    instance = self.get_instance([STIXHeader.handling, STIXHeader.information_source], cache_object)
 
     if cache_object.complete:
       result = {'package_intents': instance.attributelist_to_dict('package_intents', cache_object),

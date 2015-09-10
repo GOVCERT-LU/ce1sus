@@ -35,7 +35,7 @@ class CyboxTime(Entity, Base):
   information_source = relationship('InformationSource', uselist=False)
 
   def to_dict(self, cache_object):
-    instance = self.get_instance(all_attributes=True)
+    instance = self.get_instance([], cache_object)
 
     result = {'start_time': instance.attribute_to_dict(instance.start_time, cache_object),
               'end_time':instance.attribute_to_dict(instance.end_time, cache_object),

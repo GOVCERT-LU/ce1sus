@@ -6,6 +6,7 @@ module handing the event pages
 Created: Aug 28, 2013
 """
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.common.common import CommonController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
 
@@ -22,6 +23,7 @@ class AttributeController(BaseController):
   def __init__(self, config, session=None):
     super(AttributeController, self).__init__(config, session)
     self.attribute_broker = self.broker_factory(AttributeBroker)
+    self.common_controller = self.controller_factory(CommonController)
 
   def get_attribute_by_id(self, identifier):
     try:
@@ -52,6 +54,7 @@ class AttributeController(BaseController):
     # TODO: include handler
     try:
       self.insert_set_base(attribute, cache_object)
+      self.common_controller.remove_path(attribute.path, cache_object, False)
       self.attribute_broker.remove_by_id(attribute.identifier)
     except BrokerException as error:
       raise ControllerException(error)

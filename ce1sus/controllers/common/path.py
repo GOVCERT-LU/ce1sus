@@ -32,13 +32,15 @@ class PathController(BaseController):
       path, event = self.instance_to_path_recursive(instance.parent)
       return '{0}/{1}'.format(path, instance_code(instance)), event
 
-  def instance_to_path(self, instance):
+  def instance_to_path(self, instance, parent):
     if isinstance(instance, Event):
       return '/{0}'.format(instance_code(instance))
     else:
-      if instance.parent:
-        if instance.parent.path:
-          parent_path = instance.parent.path.path
+      if parent is None:
+        parent = instance.parent
+      if parent:
+        parent_path = parent.path
+        if parent.path:
           result = '{0}/{1}'.format(parent_path, instance_code(instance))
           return result
         else:
@@ -52,7 +54,7 @@ class PathController(BaseController):
     if recursive:
       path, event = self.instance_to_path_recursive(instance)
     else:
-      path = self.instance_to_path(instance)
+      path = self.instance_to_path(instance, parent)
 
     path_instance = Path()
 
@@ -62,8 +64,11 @@ class PathController(BaseController):
       path_instance.tlp_level_id = instance.tlp_level_id
       path_instance.dbcode = instance.dbcode
     else:
-      path_instance.tlp_level_id = min(instance.tlp_level_id, instance.parent.tlp_level_id)
-      path_instance.dbcode = instance.parent.dbcode & instance.dbcode
+      if parent is None:
+        parent = instance.parent
+
+      path_instance.tlp_level_id = min(instance.tlp_level_id, parent.tlp_level_id)
+      path_instance.dbcode = parent.dbcode & instance.dbcode
 
     if recursive:
       path_instance.event = event
