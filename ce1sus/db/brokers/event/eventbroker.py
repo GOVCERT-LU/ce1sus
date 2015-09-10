@@ -163,21 +163,25 @@ class EventBroker(BrokerBase):
     result = self.__get_group_ids_of_group(user.group)
     return result
 
-  def __get_events_query(self, user, parameters):
-    group_ids = self.__get_all_group_ids_of_user(user)
-    tlp = get_max_tlp(user.group)
+  def __get_events_query(self, user, parameters, unvalidated_only=False, loadalong=True):
+    if user:
+      group_ids = self.__get_all_group_ids_of_user(user)
+      tlp = get_max_tlp(user.group)
 
     query = self.session.query(Event.identifier).join(Event.path, Event.groups)
-    query = query.filter(or_(and_(Event.creator_group_id == user.group.identifier,
-                                  Event.groups == None
-                                  ),
-                             and_(Path.dbcode.op('&')(12) == 12,
-                                  or_(Path.tlp_level_id >= tlp,
-                                      EventGroupPermission.group_id.in_(group_ids),
-                                      )
-                                  )
-                             )
-                         )
+    if unvalidated_only:
+      query = query.filter(Path.dbcode.op('&')(4) != 4)
+    else:
+      query = query.filter(or_(and_(Event.creator_group_id == user.group.identifier,
+                                    Event.groups == None
+                                    ),
+                               and_(Path.dbcode.op('&')(12) == 12,
+                                    or_(Path.tlp_level_id >= tlp,
+                                        EventGroupPermission.group_id.in_(group_ids),
+                                        )
+                                    )
+                               )
+                           )
     if parameters:
       query = self.__set_parameters(query, parameters)
     ids = list()
@@ -185,24 +189,25 @@ class EventBroker(BrokerBase):
       ids.append(value[0])
 
     query = self.session.query(Event)
-    query = query.options(joinedload(Event.path),
-                          joinedload(Event.groups),
-                          joinedload(Event.stix_header),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.path),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles).joinedload(InformationSourceRole.path),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.path),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity).joinedload(Identity.path),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.path),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.start_time),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.end_time),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.produced_time),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.received_time),
-                          joinedload(Event.stix_header).joinedload(STIXHeader.path)
-                          )
+    if loadalong:
+      query = query.options(joinedload(Event.path),
+                            joinedload(Event.groups),
+                            joinedload(Event.stix_header),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.path),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.roles).joinedload(InformationSourceRole.path),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.path),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.identity).joinedload(Identity.path),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.path),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.start_time),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.end_time),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.produced_time),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.information_source).joinedload(InformationSource.time).joinedload(CyboxTime.received_time),
+                            joinedload(Event.stix_header).joinedload(STIXHeader.path)
+                            )
     query = query.filter(Event.identifier.in_(ids))
     query = self.__set_parameters(query, parameters)
     return query
@@ -233,7 +238,7 @@ class EventBroker(BrokerBase):
 
   def get_total_events(self, user, parameters=None):
     try:
-      query = self.__get_events_query(user, parameters)
+      query = self.__get_events_query(user, parameters, loadalong=False)
       result = query.count()
       return result
     except sqlalchemy.exc.SQLAlchemyError as error:
@@ -241,30 +246,30 @@ class EventBroker(BrokerBase):
 
   def get_all_unvalidated_total(self, user, parameters=None):
     try:
-      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) != 4)
-      result = self.__set_parameters(result, parameters)
-      result = result.count()
+      query = self.__get_events_query(None, parameters, unvalidated_only=True, loadalong=False)
+      result = query.count()
+      return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
 
       raise BrokerException(error)
-    return result
+
 
   def get_all_unvalidated(self, limit=None, offset=None, parameters=None):
     """
     Returns all unvalidated events
     """
     try:
-      result = self.session.query(Event).join(STIXHeader).filter(Event.dbcode.op('&')(4) != 4)
-      result = self.__set_parameters(result, parameters)
-      result = result.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      query = self.__get_events_query(None, parameters, unvalidated_only=True)
+      result = query.order_by(Event.created_at.desc()).limit(limit).offset(offset).all()
+      return result
     except sqlalchemy.orm.exc.NoResultFound:
       raise NothingFoundException(u'Nothing found')
     except sqlalchemy.exc.SQLAlchemyError as error:
 
       raise BrokerException(error)
-    return result
+
 
   def get_group_by_id(self, identifier):
     try:
