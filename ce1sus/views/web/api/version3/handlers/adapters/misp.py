@@ -95,7 +95,7 @@ class MISPHandler(AdapterHandlerBase):
   @rest_method()
   @methods(allowed=['GET'])
   @require()
-  def export_xml(self, **args):
+  def event(self, **args):
     try:
       cache_object = self.get_cache_object(args)
       method = args.get('method', None)
@@ -113,7 +113,7 @@ class MISPHandler(AdapterHandlerBase):
           cherrypy.response.headers['Content-Type'] = 'text/xml'
 
         event = self.event_controller.get_event_by_uuid(event_id)
-        self.check_if_event_is_viewable(event)
+        self.is_instance_viewable(event, cache_object)
         self.set_event_properties_cache_object(cache_object, event)
 
         xml_str = self.ce1sus_converter.create_event_xml(event, cache_object)
@@ -122,9 +122,10 @@ class MISPHandler(AdapterHandlerBase):
         raise RestHandlerException('Cannot be called witout a valid uuid')
     except ControllerNothingFoundException as error:
       raise RestHandlerNotFoundException(error)
+    """
     except ControllerException as error:
       raise RestHandlerException(error)
-
+    """
   @rest_method()
 
   def shadow_attributes(self, *vpath, **params):

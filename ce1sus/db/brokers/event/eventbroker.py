@@ -85,9 +85,9 @@ class EventBroker(BrokerBase):
       anal = parameters.get('filter[initial_author]', None)
       if anal:
         result = result.join(Event.stix_header).join(STIXHeader.information_source).join(InformationSource.identity).filter(Identity.name.like('%{0}%'.format(anal)))
-      anal = parameters.get('filter[created_at]', None)
+      anal = parameters.get('filter[modified_on]', None)
       if anal:
-        result = result.filter(Event.created_at.like('%{0}%'.format(anal)))
+        result = result.filter(Event.modified_on.like('%{0}%'.format(anal)))
       anal = parameters.get('filter[title]', None)
       if anal:
         result = result.filter(STIXHeader.title.like('%{0}%'.format(anal)))
@@ -115,12 +115,12 @@ class EventBroker(BrokerBase):
         else:
           result = result.join(Event.stix_header).join(STIXHeader.information_source).join(InformationSource.identity).order_by(Identity.name.asc())
 
-      anal = parameters.get('sorting[created_at]', None)
+      anal = parameters.get('sorting[modified_on]', None)
       if anal:
         if anal == 'desc':
-          result = result.order_by(Event.created_at.desc())
+          result = result.order_by(Event.modified_on.desc())
         else:
-          result = result.order_by(Event.created_at.asc())
+          result = result.order_by(Event.modified_on.asc())
 
       anal = parameters.get('sorting[title]', None)
       if anal:

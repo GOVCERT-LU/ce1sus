@@ -31,6 +31,9 @@ ANALYSIS_MAP = {'0': 'Opened',
                 '2': 'Completed',
                 }
 
+NOT_MAPPED = ['ce1sus-Report-Reference-reference_external_identifier',
+              'ce1sus-Report-Reference-reference_internal_identifier']
+
 MISP_MAP = {            
             'Internal reference/link': 'ce1sus-Report-Reference-link',
             'Internal reference/comment': 'ce1sus-Report-Reference-comment',
@@ -133,7 +136,7 @@ MISP_MAP = {
             'Network activity/ip-src':'cybox-Observable-Address',
             'Network activity/ip-dst':'cybox-Observable-Address',
             'Network activity/hostname':'cybox-Observable-Hostname-Hostname_Value',
-            'Network activity/domain':'cybox-Observable-Domain-DomainName_Value',
+            'Network activity/domain':'cybox-Observable-DomainName-DomainName_Value',
             'Network activity/email-dst':'cybox-Observable-EmailMessage-email_to',
             'Network activity/url':'cybox-Observable-URI-url',
             'Network activity/user-agent':'cybox-Observable-HTTPSession-User_Agent',
@@ -165,7 +168,7 @@ MISP_MAP = {
             'External analysis/ip-src':'cybox-Observable-Address',
             'External analysis/ip-dst':'cybox-Observable-Address',
             'External analysis/hostname':'cybox-Observable-Hostname-Hostname_Value',
-            'External analysis/domain':'cybox-Observable-Domain-DomainName_Value',
+            'External analysis/domain':'cybox-Observable-DomainName-DomainName_Value',
             #ATTENTION: CAN BE AN URL TO A REFERENCE SITE i.e. virustotal
             'External analysis/url':'cybox-Observable-URI-url',
             'External analysis/user-agent':'cybox-Observable-HTTPSession-User_Agent',

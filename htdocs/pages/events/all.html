@@ -15,8 +15,8 @@
         {{item.tlp}}</td>
       <td data-title="'Initial Author'" filter="{ 'initial_author': 'text' }"
         sortable="'initial_author'">{{item.stix_header.information_source.identity.name}}</td>
-      <td data-title="'Created'" filter="{ 'created_at': 'text' }"
-        sortable="'created_at'">{{item.created_at}}</td>
+      <td data-title="'Modified on'" filter="{ 'modified_on': 'text' }"
+        sortable="'modified_on'">{{item.created_at}}</td>
       <td data-title="'Options'">
         <a href="#/events/event/{{item.identifier}}"><span class="glyphicon glyphicon-eye-open" title="View event" ></span></a>
       </td>

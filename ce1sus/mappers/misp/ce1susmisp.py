@@ -9,9 +9,9 @@ from lxml import etree
 import time
 
 from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.controllers.events.event import EventController
-from ce1sus.mappers.misp.common import ANALYSIS_MAP, RISK_MAP, DISTRIBUTION_TO_TLP_MAP, MISP_MAP
 from ce1sus.controllers.common.permissions import PermissionController
+from ce1sus.controllers.events.event import EventController
+from ce1sus.mappers.misp.common import ANALYSIS_MAP, RISK_MAP, DISTRIBUTION_TO_TLP_MAP, MISP_MAP, NOT_MAPPED
 
 
 __author__ = 'Weber Jean-Paul'
@@ -127,9 +127,10 @@ class Ce1susMISP(BaseController):
     for reference in report.references:
       if self.permission_controller.is_instance_viewable(reference, cache_object) and self.is_reference(reference):
         category, type_ = self.get_category_type('ce1sus-Report', reference)
-        attr = self.__make_attribute(category, type_, reference, comment, event_id)
-        root.append(attr)
-        cache_object.counter = cache_object.counter + 1
+        if category and type_:
+          attr = self.__make_attribute(category, type_, reference, comment, event_id)
+          root.append(attr)
+          cache_object.counter = cache_object.counter + 1
 
     for rel_rep in report.related_reports:
       if self.permission_controller.is_instance_viewable(rel_rep, cache_object):
@@ -156,7 +157,23 @@ class Ce1susMISP(BaseController):
       for obs in observable.observable_composition.observables:
         if self.permission_controller.is_instance_viewable(obs, cache_object):
           self.__make_observable(root, obs, event_id, cache_object)
-
+  
+  def __map_address(self,attribute):
+    attributes = attribute.parent.attributes
+    #look for destination or source
+    type_ = None
+    for attr in attributes:
+      if attr.definition.name == 'is_type':
+        if attr.value == 'Destination':
+          type_ = 'ip-dst'
+        else:
+          type_ = 'ip-src'
+        if type_:
+          break
+    if type_ is None:
+      type_ = 'ip-dst'
+    return 'Network activity', type_
+  
   def get_category_type(self, prefix, attribute):
     if hasattr(attribute, 'object'):
       objclass = attribute.object.definition.name
@@ -165,6 +182,9 @@ class Ce1susMISP(BaseController):
     attr_definition = attribute.definition.name
 
     search_str = '{2}-{0}-{1}'.format(objclass, attr_definition, prefix)
+    if 'Address' in search_str:
+      return self.__map_address(attribute)
+    
     for key, value in MISP_MAP.iteritems():
       if value == search_str:
         splitted = key.split('/')
@@ -173,7 +193,8 @@ class Ce1susMISP(BaseController):
           type_ = 'url'
 
         return splitted[0], type_
-
+    if search_str in NOT_MAPPED:
+      return None, None
     raise ControllerException(search_str)
   
   def __make_attribute(self, category, type_, attribute, comment, event_id):
@@ -224,24 +245,15 @@ class Ce1susMISP(BaseController):
     for attribute in obj.attributes:
       if self.permission_controller.is_instance_viewable(attribute, cache_object) and attribute.value not in self.seen_attributes:
         category, type_ = self.get_category_type('cybox-Observable', attribute)
-        attr = self.__make_attribute(category, type_, attribute, comment, event_id)
-        root.append(attr)
-        cache_object.counter = cache_object.counter + 1
-        self.seen_attributes.append(attribute.value)
+        if category and type_:
+          attr = self.__make_attribute(category, type_, attribute, comment, event_id)
+          root.append(attr)
+          cache_object.counter = cache_object.counter + 1
+          self.seen_attributes.append(attribute.value)
         
     for rel_obj in obj.related_objects:
       if self.permission_controller.is_instance_viewable(rel_obj, cache_object):
         self.__make_object(root, observable, rel_obj, event_id, cache_object)
-
-
-
-
-
-
-
-
-
-
 
   def get_reference_category_and_type(self, reference):
     if reference.definition:
