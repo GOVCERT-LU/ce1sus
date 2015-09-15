@@ -10,14 +10,16 @@ from datetime import datetime
 from uuid import uuid4
 
 from ce1sus.controllers.base import BaseController, ControllerException, ControllerNothingFoundException
+from ce1sus.controllers.common.common import CommonController
 from ce1sus.db.brokers.event.attributebroker import AttributeBroker
 from ce1sus.db.brokers.event.composedobservablebroker import ComposedObservableBroker
 from ce1sus.db.brokers.event.objectbroker import ObjectBroker
 from ce1sus.db.brokers.event.observablebroker import ObservableBroker
 from ce1sus.db.brokers.event.relatedobjects import RelatedObjectBroker
 from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import ValidationException, BrokerException, NothingFoundException
-from ce1sus.controllers.common.common import CommonController
+from ce1sus.controllers.common.path import PathController
 
 
 __author__ = 'Weber Jean-Paul'
@@ -37,6 +39,7 @@ class ObservableController(BaseController):
     self.attribute_broker = self.broker_factory(AttributeBroker)
     self.related_object_broker = self.broker_factory(RelatedObjectBroker)
     self.common_controller = self.controller_factory(CommonController)
+    self.path_controller = self.controller_factory(PathController)
 
   def insert_observable(self, observable, cache_object, commit=True):
     """
@@ -243,7 +246,7 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def get_event_for_observable(self, observable):
-    return observable.root
+    return observable.path.event
 
   def get_event_for_obj(self, obj):
     try:
@@ -262,6 +265,8 @@ class ObservableController(BaseController):
       raise ControllerException(error)
 
   def __set_logging(self, instance1, instance2, user):
+    instance1.path = Path()
+
     instance1.tlp_level_id = instance2.tlp_level_id
     instance1.dbcode = instance2.dbcode
 
@@ -273,9 +278,17 @@ class ObservableController(BaseController):
 
     instance1.creator_group_id = user.group.identifier
 
+    path_instance = self.path_controller.make_path(instance1, parent=instance2)
+    instance1.path.event = path_instance.event
+    instance1.path.path = path_instance.path
+    instance1.path.dbcode = path_instance.dbcode
+    instance1.path.tlp_level_id = path_instance.tlp_level_id
+
+
   def insert_composed_observable_object(self, obj, observable, cache_object, commit=True):
 
     comp_obs = ObservableComposition()
+    comp_obs.uuid = u'{0}'.format(uuid4())
     self.__set_logging(comp_obs, observable, cache_object.user)
     comp_obs.observable = observable
     observable.observable_composition = comp_obs

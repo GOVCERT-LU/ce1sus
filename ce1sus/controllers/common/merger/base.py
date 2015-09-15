@@ -48,12 +48,16 @@ class BaseMerger(BaseController):
       # merge properties
       if new_instance:
         # on
-        self.__merge_properties(old_instance.properties, new_instance.properties, merge_cache)
+        self.__merge_properties(old_instance, new_instance, merge_cache)
 
     if isinstance(old_instance, BaseCoreComponent):
       self.set_version(old_instance, new_instance, merge_cache)
     # update parent informations
     self.update_modified(old_instance, new_instance, merge_cache)
+    self.__merge_path(old_instance, new_instance, merge_cache)
+
+  def __merge_path(self, old_instance, new_instance, merge_cache):
+    pass
 
   def update_modified(self, old_instance, new_instance, merge_cache):
     if old_instance:
@@ -242,12 +246,9 @@ class BaseMerger(BaseController):
       dict1 = self.__make_dict(old_value)
       dict2 = self.__make_dict(new_value)
 
-      parent = None
       for key, old_item in dict1.iteritems():
         new_item = dict2.get(key, None)
-        if parent is None:
-          # it can only be one :P
-          parent = old_item.parent
+
         if new_item:
           merge_fct(old_item, new_item, merge_cache)
 
@@ -260,7 +261,7 @@ class BaseMerger(BaseController):
           setattr(old_instance, attr_name, list())
         old_value.append(item)
         merge_cache.inc_version_major()
-        self.set_base(parent, None, merge_cache)
+        self.set_base(old_instance, None, merge_cache)
 
     return merge_cache.version
 

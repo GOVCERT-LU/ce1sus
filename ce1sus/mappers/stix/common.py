@@ -3,57 +3,72 @@
 """
 (Description)
 
-Created on Nov 12, 2014
+Created on 10 Sep 2015
 """
-from datetime import datetime
-from uuid import uuid4
+
+from ce1sus.db.classes.ccybox.common.time import CyboxTime
+from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComposition
+from ce1sus.db.classes.cstix.common.confidence import Confidence
+from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
+from ce1sus.db.classes.cstix.common.identity import Identity
+from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
+from ce1sus.db.classes.cstix.common.kill_chains import KillChainPhaseReference
+from ce1sus.db.classes.cstix.common.structured_text import StructuredText
+from ce1sus.db.classes.cstix.common.tools import ToolInformation
+from ce1sus.db.classes.cstix.core.stix_header import STIXHeader, PackageIntent
+from ce1sus.db.classes.cstix.data_marking import MarkingSpecification
+from ce1sus.db.classes.cstix.extensions.marking.simple_markings import SimpleMarkingStructure
+from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
+from ce1sus.db.classes.cstix.indicator.indicator import Indicator, IndicatorType
+from ce1sus.db.classes.cstix.indicator.sightings import Sighting
+from ce1sus.db.classes.internal.event import Event
 
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
-__copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
+__copyright__ = 'Copyright 2013-2015, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
+# the map maps stix classes to ce1sus classes
+CLASS_MAP = {'stix.core.stix_package.STIXPackage': Event,
+             'stix.core.stix_header.STIXHeader': STIXHeader,
+             'stix.data_marking.Marking': 'handle_markings',
+             'stix.common.structured_text.StructuredText': StructuredText,
+             'stix.core.stix_package.Indicators': 'handle_list',
+             'stix.core.ttps.TTPs': 'handle_list',
+             'stix.data_marking._MarkingStructures': 'handle_list',
+             'stix.data_marking.MarkingSpecification': MarkingSpecification,
+             'stix.extensions.marking.tlp.TLPMarkingStructure': 'set_tlp',
+             'stix.extensions.marking.simple_marking.SimpleMarkingStructure': SimpleMarkingStructure,
+             'stix.indicator.indicator.Indicator': Indicator,
+             'stix.common.information_source.InformationSource': InformationSource,
+             'stix.common.identity.Identity': Identity,
+             'cybox.common.time.Time': CyboxTime,
+             'cybox.common.datetimewithprecision.DateTimeWithPrecision': DateTimeWithPrecision,
+             'stix.common.confidence.Confidence': Confidence,
+             'stix.common.kill_chains.KillChainPhasesReference': 'handle_list',
+             'cybox.core.observable.Observable': Observable,
+             'cybox.core.observable.ObservableComposition': ObservableComposition,
+             'stix.indicator.indicator.IndicatorTypes': 'handle_vocab_list',
+             'stix.indicator.indicator._Observables': 'handle_list',
+             'stix.common.vocabs.IndicatorType': IndicatorType,
+             'stix.common.vocabs.HighMediumLow': 'direct_vocab',
+             'stix.common.kill_chains.KillChainPhaseReference': KillChainPhaseReference,
+             'cybox.core.object.Object': 'map_object',
+             'stix.indicator.sightings.Sightings': 'handle_list',
+             'stix.indicator.sightings.Sighting': Sighting,
+             'stix.indicator.test_mechanism.TestMechanisms': 'handle_list',
+             'stix.extensions.test_mechanism.yara_test_mechanism.YaraTestMechanism': YaraTestMechanism,
+             'stix.common.EncodedCDATA': 'handle_encodedCDATA',
+             'stix.core.stix_header._PackageIntents': 'handle_list',
+             'stix.common.vocabs.PackageIntent': PackageIntent,
+             'cybox.common.tools.ToolInformationList': 'handle_list',
+             'cybox.common.tools.ToolInformation': ToolInformation
+             }
 
-def set_properties(instance):
-  instance.properties.is_rest_instert = True
-  instance.properties.is_proposal = False
-  instance.properties.is_web_insert = False
-  instance.properties.is_validated = False
-  instance.properties.is_shareable = True
-
-
-def set_extended_logging(instance, user, group):
-  if not instance.originating_group:
-    instance.originating_group = group
-  instance.creator_group = group
-  instance.owner_group = user.group
-
-  set_simple_logging(instance, user)
-
-
-def set_simple_logging(instance, user):
-  if not instance.created_at:
-    instance.created_at = datetime.utcnow()
-  instance.modified_on = datetime.utcnow()
-  instance.creator = user
-  instance.modifier = user
-
-
-def extract_uuid(stix_identifier):
-  if stix_identifier:
-    uuid = stix_identifier[-36:]
-  else:
-    uuid = uuid4()
-  return uuid
-
-
-def make_dict_definitions(definitions):
-  result = dict()
-  for definition in definitions:
-    result[definition.name] = definition
-  return result
-
+def get_fqcn(instance):
+  if instance:
+    return '{0}.{1}'.format(instance.__module__, instance.__class__.__name__)
 
 def relation_definitions():
   return {'Created': 'Specifies that this object created the related object.',

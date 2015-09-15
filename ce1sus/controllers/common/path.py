@@ -41,7 +41,7 @@ class PathController(BaseController):
       if parent:
         parent_path = parent.path
         if parent.path:
-          result = '{0}/{1}'.format(parent_path, instance_code(instance))
+          result = '{0}/{1}'.format(parent_path.path, instance_code(instance))
           return result
         else:
           raise ValueError('error {0} {1} has no path'.format(instance.parent.get_classname(), instance.parent.uuid))
@@ -78,9 +78,9 @@ class PathController(BaseController):
       else:
         if parent is None:
           parent = instance.parent
-          if isinstance(parent, Event):
-            path_instance.event = parent
-          else:
-            path_instance.event = parent.path.root
+        if isinstance(parent, Event):
+          path_instance.event = parent
+        else:
+          path_instance.event = parent.path.root
 
     return path_instance

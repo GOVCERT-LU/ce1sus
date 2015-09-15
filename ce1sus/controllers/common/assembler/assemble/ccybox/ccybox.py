@@ -40,15 +40,16 @@ class CyboxAssembler(BaseAssembler):
           observable.description = description
 
         obj = json.get('object', None)
-        obj_def = obj.get('definition', None)
-        if obj_def is None:
-          obj_def = obj.get('definition_id', None)
-        if obj and obj_def:
-          obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
-          if obj:
-            # must be done to prevent multiple entries in the relations table
-            obj.observable = None
-            observable.object = obj
+        if obj:
+          obj_def = obj.get('definition', None)
+          if obj_def is None:
+            obj_def = obj.get('definition_id', None)
+          if obj_def:
+            obj = self.pseudo_assembler.assemble_object(observable, obj, cache_object)
+            if obj:
+              # must be done to prevent multiple entries in the relations table
+              obj.observable = None
+              observable.object = obj
 
         if not observable.object:
           observable_composition = json.get('observable_composition', None)

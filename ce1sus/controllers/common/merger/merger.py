@@ -37,9 +37,10 @@ class Merger(BaseChangeController):
   
   def __init__(self, config, session=None):
     super(Merger, self).__init__(config, session)
+    self.cybox_merger = self.controller_factory(CyboxMerger)
     self.mergers = [self.controller_factory(Ce1susMerger),
                     self.controller_factory(EventMerger),
-                    self.controller_factory(CyboxMerger)
+                    self.cybox_merger
                     ]
   
   def merge(self, old_instance, new_instance, cache_object):

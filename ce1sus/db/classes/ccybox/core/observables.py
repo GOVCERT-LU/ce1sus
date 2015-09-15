@@ -93,7 +93,7 @@ class Observable(Entity, Base):
   title = Column('title', UnicodeType(255), index=True)
   description = relationship(StructuredText, secondary=_REL_OBSERVABLE_STRUCTUREDTEXT, uselist=False, back_populates='observable_description')
 
-  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, back_populates='observable', single_parent=True)
+  object = relationship(Object, uselist=False, secondary=_REL_OBSERVABLE_OBJECT, back_populates='observable')
   # TODO: observable event (Note: different than the event used here)
   observable_composition = relationship('ObservableComposition', uselist=False, back_populates='observable')
   idref = Column(u'idref', UnicodeType(255), nullable=True, index=True)

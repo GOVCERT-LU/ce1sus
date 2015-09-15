@@ -20,7 +20,7 @@ from ce1sus.test.event.event import TestEvent
 from ce1sus.test.event.object import TestObject
 from ce1sus.test.event.observable import TestObservable
 from ce1sus.test.login import TestLogin
-from ce1sus.test.mappers.misp import TestMisp
+# from ce1sus.test.mappers.misp import TestMisp
 
 
 def suite():
@@ -38,7 +38,7 @@ def suite():
   testSuite.addTest(TestEvent())
   testSuite.addTest(TestObservable())
   testSuite.addTest(TestObject())
-  testSuite.addTest(TestMisp())
+  # testSuite.addTest(TestMisp())
   return testSuite
 
 

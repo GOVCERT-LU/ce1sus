@@ -82,13 +82,14 @@ class PseudoCyboxAssembler(BaseAssembler):
 
   def assemble_object(self, parent, json, cache_object, set_observable=True):
     if json:
-      obj = Object()
-      obj.parent = parent
-      self.set_base(obj, json, cache_object, parent)
+
 
       # set definition
       definition = self.get_object_definition(parent, json, cache_object)
       if definition:
+        obj = Object()
+        obj.parent = parent
+        self.set_base(obj, json, cache_object, parent)
         # obj.definition = definition
         obj.definition = definition
 

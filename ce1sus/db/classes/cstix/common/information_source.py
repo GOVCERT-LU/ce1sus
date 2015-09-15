@@ -83,7 +83,7 @@ class InformationSource(Entity, Base):
   time = relationship(CyboxTime, uselist=False,)
   tools = relationship(ToolInformation, secondary=_REL_INFORMATIONSOURCE_TOOL)
 
-  roles = relationship(InformationSourceRole, )
+  roles = relationship(InformationSourceRole)
   # TODO: references -> relation
 
   confidence = relationship('Confidence', secondary=_REL_CONFIDENCE_INFORMATIONSOURCE, uselist=False,)

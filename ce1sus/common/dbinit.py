@@ -255,7 +255,7 @@ def dbinit(config, json_location=''):
     attr_def = assembler.assemble(attr_json, AttributeDefinition, None, cache_object)
     attr_def.cybox_std = attr_json.get('cybox_std', False)
     attr_ctrl.insert_attribute_definition(attr_def, False)
-
+    attr_ctrl.attr_def_broker.session.flush()
     attr_dict[attr_def.uuid] = attr_def
 
   attr_ctrl.attr_def_broker.do_commit(False)

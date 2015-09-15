@@ -178,9 +178,9 @@ class EventHandler(RestBaseHandler):
       # this cannot happen here
       raise RestHandlerException(u'Invalid request')
     elif method == 'PUT':
-      self.check_if_is_modifiable(event)
+      self.check_if_is_modifiable(event, cache_object)
       # check if validated / shared as only the owner can do this
-      self.check_if_user_can_set_validate_or_shared(event, event, cache_object, json)
+      self.check_allowed_set_validate_or_shared(event, event, cache_object, json)
       self.updater.update(event, json, cache_object)
       self.event_controller.update_event(event, cache_object, True, True)
       return self.__return_event(event, cache_object)
@@ -234,7 +234,7 @@ class EventHandler(RestBaseHandler):
         if uuid is None:
           raise PathParsingException(u'observale cannot be called without an ID')
         if method == 'PUT':
-          self.check_if_is_modifiable(event)
+          self.check_if_is_modifiable(event, cache_object)
           self.check_allowed_set_validate_or_shared(event, observable, cache_object, json)
           self.updater.update(observable, json, cache_object)
           self.observable_controller.update_observable(observable, cache_object, True)

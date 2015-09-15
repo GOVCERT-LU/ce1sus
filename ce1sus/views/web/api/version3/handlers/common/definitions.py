@@ -7,7 +7,7 @@ Created on Dec 19, 2014
 """
 from ce1sus.controllers.base import ControllerException
 from ce1sus.db.classes.internal.common import Status, Analysis, Risk, TLP
-from ce1sus.mappers.stix.helpers.common import relation_definitions
+from ce1sus.mappers.stix.common import relation_definitions
 from ce1sus.views.web.api.version3.handlers.restbase import RestBaseHandler, rest_method, methods, require, RestHandlerException
 
 
