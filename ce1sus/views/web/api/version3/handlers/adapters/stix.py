@@ -99,7 +99,7 @@ class STIXHandler(AdapterHandlerBase):
         make_file = parameters.get('file', None)
         if make_file == '':
           cherrypy.response.headers['Content-Type'] = 'application/x-download'
-          cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_MISP.xml'.format(event_id)
+          cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_STIX.xml'.format(event_id)
         else:
           cherrypy.response.headers['Content-Type'] = 'text/xml'
 

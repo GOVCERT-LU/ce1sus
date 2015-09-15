@@ -26,7 +26,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-"""
+
 class Ce1susAdapterException(Exception):
   pass
 
@@ -277,37 +277,3 @@ class Ce1susAdapter(BaseController):
     except Ce1susAdapterException as error:
       self.logout()
       raise Ce1susAdapterException(error)
-
-
-class Ce1susViewAdapter(BaseView):
-
-  @cherrypy.expose
-  @cherrypy.tools.allow(methods=['GET'])
-  @require()
-  def event(self, *vpath, **params):
-    if len(vpath) > 0:
-      uuid_string = vpath[0]
-      # check if it is a uuid
-      # check the mode
-      make_file = params.get('file', None)
-      if make_file == '':
-        cherrypy.response.headers['Content-Type'] = 'application/x-download'
-        cherrypy.response.headers["Content-Disposition"] = 'attachment; filename=Event_{0}_ce1sus.json'.format(uuid_string)
-      complete = params.get('complete', False)
-      inflated = params.get('inflated', False)
-      try:
-        UUID(uuid_string, version=4)
-      except ValueError as error:
-        print error
-        raise HTTPError(400, 'The provided uuid "{0}" is not valid'.format(uuid_string))
-      try:
-        user = self.get_user()
-        event = self.event_controller.get_event_by_uuid(uuid_string)
-        event_permissions = self.event_controller.get_event_group_permissions(event, user)
-        return json.dumps(event.to_dict(complete, inflated, event_permissions, user),)
-      except ControllerNothingFoundException as error:
-        raise  HTTPError(404, '{0}'.format(error.message))
-    else:
-      raise HTTPError(400, 'Cannot be called without a uuid')
-
-"""
