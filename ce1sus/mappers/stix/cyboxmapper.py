@@ -8,7 +8,7 @@ Created on 7 Sep 2015
 from ce1sus.helpers.common.objects import get_fields
 
 from ce1sus.controllers.base import BaseController, ControllerException
-from ce1sus.db.classes.internal.attributes.attribute import Attribute
+from ce1sus.db.classes.internal.attributes.attribute import Attribute, Condition
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import BrokerException, NothingFoundException
@@ -135,7 +135,7 @@ class CyboxConverter(BaseController):
       name = properties.__class__.__name__
 
     for field in get_fields(properties):
-      if not field.isupper():
+      if not field.isupper() and field != 'condition':
         value = getattr(properties, field)
         if value:
           if isinstance(value, cybox.common.properties.String):
@@ -158,6 +158,9 @@ class CyboxConverter(BaseController):
     attribute.object = parent
     attribute.definition = definition
     attribute.value = value
+    if hasattr(value, 'condition'):
+      attribute.condition = Condition()
+      attribute.condition.value = value.condition
     return attribute
 
   def map_object(self, instance, cache_object, parent):
