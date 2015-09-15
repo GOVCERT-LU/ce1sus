@@ -42,7 +42,7 @@ class AdapterHandlerBase(RestBaseHandler):
                                     datetime.now().month,
                                     datetime.now().day)
     if self.dump_location:
-      path = '{0}/{1}/{2}'.format(self.dump_location, sub_path, dirname)
+      path = '{0}/{1}/{2}'.format(self.dump_location, sub_path, self.dump_location)
       if not isdir(path):
         makedirs(path)
       return path
