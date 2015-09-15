@@ -19,6 +19,8 @@ from cybox.core.object import Object as CyboxObject
 from cybox.common.object_properties import CustomProperties, Property
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
 from cybox.objects.custom_object import Custom
+from stix.data_marking import Marking, MarkingSpecification
+from stix.extensions.marking.tlp import TLPMarkingStructure
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -72,6 +74,15 @@ class Ce1susSTIX(BaseController):
 
     raise Ce1susSTIXException('Could not map {0}'.format(get_fqcn(instance)))
 
+  def map_handling(self, instance):
+    handling = Marking()
+    marking_specification = MarkingSpecification()
+    marking_specification.controlled_structure = "//node() | //@*"
+    tlp = TLPMarkingStructure()
+    tlp.color = instance.tlp.upper()
+    marking_specification.marking_structures.append(tlp)
+    handling.add_marking(marking_specification)
+    return handling
 
 
   def map_instance(self, instance, cache_object, parent=None):
@@ -82,6 +93,8 @@ class Ce1susSTIX(BaseController):
           getattr(self, clazz)(instance, parent, cache_object)
         else:
           stix_instance = clazz()
+          if hasattr(stix_instance, 'handling'):
+            stix_instance.handling = self.map_handling(instance)
           fields = get_fields(instance)
           for field in fields:
             if field not in instance._PARENTS and field not in UNMAPPABLE_FIELDS:
@@ -99,6 +112,7 @@ class Ce1susSTIX(BaseController):
                   new_value = value
   
                 setattr(stix_instance, field, new_value)
+          # workaround
           if hasattr(stix_instance, 'composite_indicator_expression'):
             stix_instance.composite_indicator_expression = None
           return stix_instance
@@ -150,6 +164,8 @@ class Ce1susSTIX(BaseController):
               cybox_object.condition = attribute.condition.value
             else:
               cybox_object.condition = 'Equals'
+
+
 
       else:
         cybox_object = Custom()

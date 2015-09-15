@@ -142,6 +142,7 @@ class CyboxConverter(BaseController):
             definition = self.get_attribute_definition(field, name, cache_object)
             if definition:
               attribute = self.map_attribute(definition, value, parent)
+              # TODO: Map attribute condition
               parent.attributes.append(attribute)
           elif isinstance(value, cybox.Entity):
             self.map_attribtues(value, cache_object, parent, name_prefix=name)

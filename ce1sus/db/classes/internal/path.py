@@ -11,7 +11,7 @@ from sqlalchemy.sql.sqltypes import Integer
 
 from ce1sus.common.utils import table_code
 from ce1sus.db.classes.internal.common import Properties
-from ce1sus.db.classes.internal.corebase import BaseObject, UnicodeType, BigIntegerType, UnicodeTextType
+from ce1sus.db.classes.internal.corebase import BaseObject, BigIntegerType, UnicodeTextType
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.common.session import Base
 
