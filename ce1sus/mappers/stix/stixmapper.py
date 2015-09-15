@@ -12,6 +12,7 @@ from types import StringType
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.events.event import EventController
 from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
+from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.path import Path
 from ce1sus.mappers.stix.common import get_fqcn, CLASS_MAP
@@ -30,7 +31,7 @@ __email__ = 'jean-paul.weber@govcert.etat.lu'
 __copyright__ = 'Copyright 2013-2014, GOVCERT Luxembourg'
 __license__ = 'GPL v3+'
 
-
+LIST_TYPES = {'cybox.core.observable.Observables': 'observables'}
 
 class StixConverterException(Exception):
   pass
@@ -66,9 +67,16 @@ class STIXConverter(BaseController):
     xml = etree.fromstring(xml_string)
     stix_package = STIXPackage.from_xml(xml)
     event = self.map_instance(stix_package, cache_object)
+
+
+    event.analysis = 'None'
+    event.status = 'Confirmed'
+    event.risk = 'Unknown'
+    event.last_seen = event.modified_on
+    event.first_seen = event.created_at
     return event
 
-  def set_base(self, instance, cache_object, parent=None):
+  def set_base(self, instance, stix_instance, cache_object, parent=None):
     instance.path = Path()
     if parent:
       instance.tlp_level_id = parent.tlp_level_id
@@ -78,6 +86,16 @@ class STIXConverter(BaseController):
         instance.path.event = parent
       else:
         instance.path.event = parent.path.event
+    if hasattr(stix_instance, 'timestamp'):
+      instance.modified_on = stix_instance.timestamp.replace(tzinfo=None)
+      instance.created_on = stix_instance.timestamp.replace(tzinfo=None)
+    else:
+      instance.modified_on = parent.modified_on
+      instance.created_on = parent.created_on
+    instance.creator_group = cache_object.user.group
+    instance.creator = cache_object.user
+    instance.modifier = cache_object.user
+
 
   def handle_markings(self, instance, cache_object, parent):
     result = list()
@@ -130,7 +148,7 @@ class STIXConverter(BaseController):
             return getattr(self, clazz)(instance, cache_object, parent)
           else:
             ce1sus_instance = clazz()
-            self.set_base(ce1sus_instance, cache_object, parent)
+            self.set_base(ce1sus_instance, instance, cache_object, parent)
             fields = get_fields(instance)
             for field in fields:
               value = getattr(instance, field)
@@ -141,9 +159,15 @@ class STIXConverter(BaseController):
                     new_value.append(self.map_instance(item, cache_object, ce1sus_instance))
                 else:
                   new_value = self.map_instance(value, cache_object, ce1sus_instance)
-                setattr(ce1sus_instance, field, new_value)
+                if new_value:
+                  setattr(ce1sus_instance, field, new_value)
             return ce1sus_instance
         else:
-          raise StixConverterException('Cannot find map for class {0}'.format(fqcn))
+          attr_name = LIST_TYPES.get(fqcn, None)
+          if attr_name:
+            for item in getattr(instance, attr_name):
+              getattr(parent, attr_name).append(self.map_instance(item, cache_object, parent))
+          else:
+            raise StixConverterException('Cannot find map for class {0}'.format(fqcn))
     else:
       return instance

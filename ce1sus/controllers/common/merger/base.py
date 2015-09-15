@@ -30,14 +30,16 @@ class BaseMerger(BaseController):
 
   def __merge_properties(self, old_instance, new_instance, merger_cache):
     old_version = merger_cache.version.version
-    self.update_instance_value(old_instance, new_instance, 'is_validated', merger_cache)
-    self.update_instance_value(old_instance, new_instance, 'is_proposal', merger_cache)
-    self.update_instance_value(old_instance, new_instance, 'marked_for_deletion', merger_cache)
+    old_value = getattr(old_instance, 'properties')
+    new_value = getattr(new_instance, 'properties')
+    self.update_instance_value(old_value, new_value, 'is_validated', merger_cache)
+    self.update_instance_value(old_value, new_value, 'is_proposal', merger_cache)
+    self.update_instance_value(old_value, new_value, 'marked_for_deletion', merger_cache)
 
     merger_cache.version.version = old_version
 
     # If items are visible or unvisible increase version
-    self.update_instance_value(old_instance, new_instance, 'is_shareable', merger_cache)
+    self.update_instance_value(old_value, new_value, 'is_shareable', merger_cache)
     self.permission_controller.set_properties_according_to_permisssions(old_instance, merger_cache)
 
   def set_base(self, old_instance, new_instance, merge_cache):
@@ -202,7 +204,6 @@ class BaseMerger(BaseController):
     if old_value or new_value:
       result = self.is_mergeable(old_value, new_value, merge_cache)
       if result == 1:
-        self.update_instance_value(old_value, new_value, 'id_', merge_cache)
         self.set_base(old_value, new_value, merge_cache)
       elif result == 0:
         self.logger.info('Adding new information source')
@@ -224,7 +225,7 @@ class BaseMerger(BaseController):
 
   def mark_for_deletion(self, old_item, cache_object):
     # TODO: mark for deletion
-    if not cache_object.owner:
+    if not cache_object.permission_controller.is_instance_owner(old_item, cache_object):
       old_item.properties.marked_for_deletion
 
   def mark_for_proposal(self, new_item, cache_object):

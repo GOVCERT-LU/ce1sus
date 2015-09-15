@@ -12,6 +12,8 @@ import time
 
 from ce1sus.common.classes.cacheobject import CacheObject
 from ce1sus.controllers.base import BaseController
+from ce1sus.controllers.common.permissions import PermissionController
+from ce1sus.db.classes.internal.usrmgt.group import Group
 from ce1sus.db.classes.internal.usrmgt.user import User
 
 
@@ -27,6 +29,7 @@ class RevisionDumper(BaseController):
     super(RevisionDumper, self).__init__(config, session)
     self.config = config
     self.destination = self.config.get('ce1sus', 'revdir', None)
+    self.permission_controller = self.controller_factory(PermissionController)
     if self.destination:
       if not exists(self.destination):
           makedirs(self.destination)
@@ -42,8 +45,11 @@ class RevisionDumper(BaseController):
       cache_object = CacheObject()
       cache_object.user = User()
       cache_object.user.permissions.privileged = True
+      cache_object.user.group = Group()
+      cache_object.user.group.name = 'DUMPER'
       cache_object.inflated = True
       cache_object.complete = True
+      cache_object.permission_controller = self.permission_controller
 
       f = open('{0}/{1}'.format(self.destination, filename), 'w+')
       f.write(json.dumps(old_instance.to_dict(cache_object), indent=4, sort_keys=True))

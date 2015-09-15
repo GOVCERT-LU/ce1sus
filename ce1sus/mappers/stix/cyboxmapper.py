@@ -25,6 +25,8 @@ NOT_MAPPED = [
               'File_HashList_md5',
               'File_HashList_sha1',
               'File_HashList_sha256',
+              'File_HashList_sha384',
+              'File_HashList_sha512'
               ]
 
 #Don't know how to map these yet
@@ -56,6 +58,11 @@ class CyboxConverter(BaseController):
       instance.tlp_level_id = parent.tlp_level_id
       instance.dbcode = parent.dbcode
       instance.path.event = parent.path.event
+      instance.modified_on = parent.modified_on
+      instance.created_on = parent.created_on
+      instance.creator_group = parent.creator_group
+      instance.creator = parent.creator
+      instance.modifier = parent.modifier
 
   def get_object_definition(self, instance, cache_object):
     try:

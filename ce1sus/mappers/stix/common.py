@@ -11,7 +11,7 @@ from ce1sus.db.classes.ccybox.core.observables import Observable, ObservableComp
 from ce1sus.db.classes.cstix.common.confidence import Confidence
 from ce1sus.db.classes.cstix.common.datetimewithprecision import DateTimeWithPrecision
 from ce1sus.db.classes.cstix.common.identity import Identity
-from ce1sus.db.classes.cstix.common.information_source import InformationSource, InformationSourceRole
+from ce1sus.db.classes.cstix.common.information_source import InformationSource
 from ce1sus.db.classes.cstix.common.kill_chains import KillChainPhaseReference
 from ce1sus.db.classes.cstix.common.structured_text import StructuredText
 from ce1sus.db.classes.cstix.common.tools import ToolInformation

@@ -63,7 +63,6 @@ class STIXHandler(AdapterHandlerBase):
         self.dump_file(filename, data)
       
       event = self.stix_converter.convert_stix_xml_string(xml_string, cache_object)
-      raise Exception()
       try:
         db_event = self.event_controller.get_event_by_uuid(event.uuid)
         self.logger.debug('Event {0} is in db merging'.format(event.uuid))
@@ -71,7 +70,7 @@ class STIXHandler(AdapterHandlerBase):
         cache_object.reset()
         merger_cache = MergerCache(cache_object)
         self.merger.merge(db_event, event, merger_cache)
-        return db_event.to_dict(cache_object)
+        return db_event.to_dict(merger_cache)
 
       except ControllerNothingFoundException:
         self.logger.debug('Event {0} is not in db inserting'.format(event.uuid))

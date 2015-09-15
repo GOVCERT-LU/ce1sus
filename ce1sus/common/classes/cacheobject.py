@@ -19,7 +19,16 @@ __license__ = 'GPL v3+'
 
 class CacheObject(object):
 
-  def __init__(self, user=None, rest_insert=True, event_owner=False, insert=False, event_permissions=None, details=False, inflated=False, flat=None, authorized_cache=None):
+  def __init__(self,
+               user=None,
+               rest_insert=True,
+               event_owner=False,
+               insert=False,
+               event_permissions=None,
+               details=False,
+               inflated=False,
+               flat=None,
+               authorized_cache=None):
     self.event_permissions = event_permissions
     self.flat = flat
     self.details = details
@@ -106,6 +115,7 @@ class MergerCache(CacheObject):
     self.version = Version()
     self.__inc_lvl = 0
     self.changed_versions = dict()
+    self.permission_controller = cache_object.permission_controller
 
   def make_copy(self):
     cache_object = super(MergerCache, self).make_copy()

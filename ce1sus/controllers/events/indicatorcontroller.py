@@ -199,6 +199,8 @@ class IndicatorController(BaseController):
     instance.modified_on = attribute.modified_on
     instance.tlp = attribute.tlp
     instance.dbcode = attribute.dbcode
+    if hasattr(instance, 'namespace'):
+      instance.namespace = 'ce1sus'
 
   def get_generic_indicators(self, event, cache_object):
     try:

@@ -16,8 +16,9 @@ from ce1sus.db.classes.cstix.common.information_source import InformationSourceR
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.mappers.stix.common import get_fqcn, CLASS_MAP
 from cybox.core.object import Object as CyboxObject
+from cybox.common.object_properties import CustomProperties, Property
 from ce1sus.controllers.events.indicatorcontroller import IndicatorController
-
+from cybox.objects.custom_object import Custom
 
 __author__ = 'Weber Jean-Paul'
 __email__ = 'jean-paul.weber@govcert.etat.lu'
@@ -98,6 +99,8 @@ class Ce1susSTIX(BaseController):
                   new_value = value
   
                 setattr(stix_instance, field, new_value)
+          if hasattr(stix_instance, 'composite_indicator_expression'):
+            stix_instance.composite_indicator_expression = None
           return stix_instance
     else:
       return None
@@ -113,22 +116,49 @@ class Ce1susSTIX(BaseController):
       return SPECIAL_ATTR_PROP_MAPPINGS[name]
     else:
       return name.lower()
+    
+  def create_custom_property(self,attribute):
+    prop = Property()
+    prop.name = attribute.definition.name
+    prop.description = attribute.definition.description
+    prop.value = attribute.value
+    return prop
 
   def map_object(self, instance, stix_object, cache_object):
     if self.permission_controller.is_instance_viewable(instance, cache_object):
       # create cybox object
-      def_name = instance.definition.name
-      clazz = get_class('cybox.objects.{0}_object'.format(self.get_modulename(def_name)), def_name)
-      cybox_object = clazz()
-      for attribute in instance.attributes:
-        if self.permission_controller.is_instance_viewable(attribute, cache_object):
-          attr_def_name = attribute.definition.name
-          if attr_def_name in SPECIAL_ATTR_MAPPINGS.keys():
-            getattr(self, SPECIAL_ATTR_MAPPINGS[attr_def_name])(attribute, cybox_object, cache_object)
-          elif hasattr(cybox_object, self.get_property_name(attr_def_name)):
-            setattr(cybox_object, self.get_property_name(attr_def_name), attribute.value)
-          else:
-            raise Ce1susSTIXException('{0} has not property {1}'.format(def_name, attr_def_name))
+      if instance.definition.cybox_std:
+        def_name = instance.definition.name
+        clazz = get_class('cybox.objects.{0}_object'.format(self.get_modulename(def_name)), def_name)
+        cybox_object = clazz()
+        for attribute in instance.attributes:
+          if self.permission_controller.is_instance_viewable(attribute, cache_object):
+            if attribute.definition.cybox_std:
+              attr_def_name = attribute.definition.name
+              if attr_def_name in SPECIAL_ATTR_MAPPINGS.keys():
+                getattr(self, SPECIAL_ATTR_MAPPINGS[attr_def_name])(attribute, cybox_object, cache_object)
+              elif hasattr(cybox_object, self.get_property_name(attr_def_name)):
+                setattr(cybox_object, self.get_property_name(attr_def_name), attribute.value)
+              else:
+                raise Ce1susSTIXException('{0} has not property {1}'.format(def_name, attr_def_name))
+            else:
+              if not cybox_object.custom_properties:
+                cybox_object.custom_properties = CustomProperties()
+              cybox_object.custom_properties.append(self.create_custom_property(attribute))
+  
+            if attribute.condition:
+              cybox_object.condition = attribute.condition.value
+            else:
+              cybox_object.condition = 'Equals'
+
+      else:
+        cybox_object = Custom()
+        cybox_object.custom_name = 'ce1sus:{0}'.format(instance.definition.name)
+        cybox_object.description = instance.definition.description
+        cybox_object.custom_properties = CustomProperties()
+        for attribute in instance.attributes:
+          if self.permission_controller.is_instance_viewable(attribute, cache_object):
+            cybox_object.custom_properties.append(self.create_custom_property(attribute))
       stix_object.object_ = CyboxObject(cybox_object)
 
   def map_ip_address(self, instance, stix_object, cache_object):
