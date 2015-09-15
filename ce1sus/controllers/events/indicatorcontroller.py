@@ -151,7 +151,7 @@ class IndicatorController(BaseController):
           self.set_base(obj.definition, attribute)
           obj.definition.name = attribute.object.definition.name
           obj.definition.identifier = attribute.object.definition.identifier
-
+          obj.definition.cybox_std = attribute.object.definition.cybox_std
 
           # create observable
           obs = Observable()
@@ -226,7 +226,7 @@ class IndicatorController(BaseController):
           c2s.append(attribute)
         elif 'ip' in attr_def_name:
           ips.append(attribute)
-        elif 'hash' in attr_def_name:
+        elif attr_def_name in ['md5', 'sha1', 'sha256', 'sha384', 'sha512']:
           file_hashes.append(attribute)
         elif 'email' in attr_def_name:
           mal_email.append(attribute)

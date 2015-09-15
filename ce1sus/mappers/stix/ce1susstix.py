@@ -138,6 +138,22 @@ class Ce1susSTIX(BaseController):
     prop.value = attribute.value
     return prop
 
+  def map_condition(self, instance, attribute):
+      if attribute.condition:
+        value = attribute.condition.value
+      else:
+        value = 'Equals'
+      
+      if hasattr(instance, 'condition'):
+        instance.condition = value
+      else:
+        if hasattr(instance, 'hashes') and instance.hashes:
+          for h in instance.hashes:
+            if h.type_.value.lower() == attribute.definition.name.lower():
+              h.simple_hash_value.condition = value
+              h.type_.condition = 'Equals'
+              break
+
   def map_object(self, instance, stix_object, cache_object):
     if self.permission_controller.is_instance_viewable(instance, cache_object):
       # create cybox object
@@ -153,6 +169,7 @@ class Ce1susSTIX(BaseController):
                 getattr(self, SPECIAL_ATTR_MAPPINGS[attr_def_name])(attribute, cybox_object, cache_object)
               elif hasattr(cybox_object, self.get_property_name(attr_def_name)):
                 setattr(cybox_object, self.get_property_name(attr_def_name), attribute.value)
+                self.map_condition(getattr(cybox_object, self.get_property_name(attr_def_name)), attribute)
               else:
                 raise Ce1susSTIXException('{0} has not property {1}'.format(def_name, attr_def_name))
             else:
@@ -160,13 +177,7 @@ class Ce1susSTIX(BaseController):
                 cybox_object.custom_properties = CustomProperties()
               cybox_object.custom_properties.append(self.create_custom_property(attribute))
   
-            if attribute.condition:
-              cybox_object.condition = attribute.condition.value
-            else:
-              cybox_object.condition = 'Equals'
-
-
-
+            self.map_condition(cybox_object, attribute)
       else:
         cybox_object = Custom()
         cybox_object.custom_name = 'ce1sus:{0}'.format(instance.definition.name)
