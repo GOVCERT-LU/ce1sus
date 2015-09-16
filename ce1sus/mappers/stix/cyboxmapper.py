@@ -10,7 +10,7 @@ from ce1sus.helpers.common.objects import get_fields
 from ce1sus.controllers.base import BaseController, ControllerException
 from ce1sus.controllers.common.path import PathController
 from ce1sus.db.brokers.definitions.conditionbroker import ConditionBroker
-from ce1sus.db.classes.internal.attributes.attribute import Attribute, Condition
+from ce1sus.db.classes.internal.attributes.attribute import Attribute
 from ce1sus.db.classes.internal.object import Object
 from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import BrokerException, NothingFoundException

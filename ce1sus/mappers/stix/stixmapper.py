@@ -8,20 +8,13 @@ Created on Nov 12, 2014
 from ce1sus.helpers.common.objects import get_fields
 from datetime import datetime
 from lxml import etree
-import random
 from sqlalchemy.inspection import inspect
 from types import StringType
 import uuid
 
 from ce1sus.controllers.base import BaseController
 from ce1sus.controllers.common.path import PathController
-from ce1sus.controllers.events.event import EventController
-from ce1sus.db.classes.ccybox.core.observables import ObservableComposition, Observable
-from ce1sus.db.classes.cstix.common.information_source import InformationSource
-from ce1sus.db.classes.cstix.common.structured_text import StructuredText
-from ce1sus.db.classes.cstix.common.tools import ToolInformation
 from ce1sus.db.classes.cstix.extensions.test_mechanism.yara_test_mechanism import YaraTestMechanism
-from ce1sus.db.classes.internal.common import Properties
 from ce1sus.db.classes.internal.event import Event
 from ce1sus.db.classes.internal.path import Path
 from ce1sus.db.common.broker import BrokerException
@@ -106,7 +99,7 @@ class STIXConverter(BaseController):
 
     else:
       instance.tlp = 'Amber'
-      instance.properties.is_shareable = True
+    instance.properties.is_shareable = True
 
 
     if hasattr(stix_instance, 'timestamp'):
